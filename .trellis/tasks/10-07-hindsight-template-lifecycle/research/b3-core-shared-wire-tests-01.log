@@ -1,0 +1,13 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mH:/TakiAgent/packages/shared[39m
+
+ [32m✓[39m src/hindsight-template-backup-schema.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 104[2mms[22m[39m
+ [32m✓[39m src/hindsight-backup-schema.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 45[2mms[22m[39m
+ [32m✓[39m src/hindsight-template-validation.test.ts [2m([22m[2m36 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [32m✓[39m src/hindsight-template-schema.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[32m66 passed[39m[22m[90m (66)[39m
+[2m   Start at [22m 18:11:31
+[2m   Duration [22m 1.77s[2m (transform 886ms, setup 0ms, import 1.82s, tests 202ms, environment 0ms)[22m
+

@@ -1,0 +1,19 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/python.exe",
+    "-m",
+    "pytest",
+    "tests",
+    "--ignore=tests/test_main_operations.py",
+    "-n",
+    "0",
+    "-p",
+    "g1_fixture_network_guard",
+    "-q",
+    "--tb=short"
+  ],
+  "cwd": "H:/hindsight/hindsight-clients/python",
+  "exitCode": 0,
+  "durationSeconds": 20.032,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b1-sdk-python-01.log"
+}

@@ -1,0 +1,295 @@
+{
+  "version": 1,
+  "recordedAt": "2026-10-15T20:25:22.003468+08:00",
+  "caseId": "20d996bf-64b6-47c7-908d-730ebdb371c4",
+  "runtimeOutcome": "FAIL",
+  "sourceStage": "G:/TakiAgent-c2a-database/persistence-20d996bf-64b6-47c7-908d-730ebdb371c4",
+  "archive": "H:/TakiAgent/.trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-persistence-first-attempt-evidence.zip",
+  "archiveSha256": "049a9a614ddf2f109698afbd73296ee28c0e4a780361514223fe26f1732bfcd9",
+  "archiveBytes": 531237,
+  "fileCount": 55,
+  "logicalStagingBytes": 2009021,
+  "allEntriesVerified": true,
+  "runtimeResourcesRemoved": true,
+  "originalSevenContainersUnchanged": true,
+  "stagingRemoved": true,
+  "files": [
+    {
+      "path": ".c2a-docker-owner",
+      "bytes": 36,
+      "sha256": "7cd4b5df7a083b11f37e70065fb9eb019e808e0d6a8bde7dc70fe797529fb413"
+    },
+    {
+      "path": "adapter-build.json",
+      "bytes": 1371,
+      "sha256": "17be469ea3a0c1cdaa039682755f154fc9f5ea04401f5d77012cbc95216a7164"
+    },
+    {
+      "path": "base-probe.json",
+      "bytes": 316,
+      "sha256": "819eca37907fa96577bcafca977d41304c16e1a14a782205b8170f874d944d5a"
+    },
+    {
+      "path": "baseline.json",
+      "bytes": 104,
+      "sha256": "016b8dd8c55054dcd9bed6225cf13b05b85e12fad4ca01eba2033cd2bbe433d7"
+    },
+    {
+      "path": "build-command.json",
+      "bytes": 3238,
+      "sha256": "3d3f8803c09dc67ae8c8cf5e52f92bcf9b5d0ff65d329f8cb6e86a742097220d"
+    },
+    {
+      "path": "build-config/buildx/.buildNodeID",
+      "bytes": 16,
+      "sha256": "8d44d44f1b2a74d9e49620aa83469073bc31f3c0196f0a012286542898b262e0"
+    },
+    {
+      "path": "build-config/buildx/.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build-config/buildx/activity/default",
+      "bytes": 20,
+      "sha256": "27b62bd2f79ba17a45b6c28b7d001e00f20140bc37058d8ab67242c9ab3ab661"
+    },
+    {
+      "path": "build-config/buildx/current",
+      "bytes": 76,
+      "sha256": "ad4436223bfadf60e9921a9be166da1d9c454921db007f16b8f21e5553cde791"
+    },
+    {
+      "path": "build-config/buildx/refs/default/default/ld27rw0omk7kh6alub6booltq",
+      "bytes": 266,
+      "sha256": "16aee02d7f46b85402400d441454b75d4631135978004b2e1dfccf32416f02a3"
+    },
+    {
+      "path": "build-config/config.json",
+      "bytes": 81,
+      "sha256": "c61bdfa290e9f2f08d80543aae256794d0e8bf61333cf7a3479b3ef52add6b1d"
+    },
+    {
+      "path": "build.started",
+      "bytes": 24,
+      "sha256": "f856d7f3bfd6e995a0350e914af27f3fa8eb0d573c6c3f202989f21c20a8eeeb"
+    },
+    {
+      "path": "built-image.json",
+      "bytes": 379,
+      "sha256": "89949871d66d9d657f2c254078feaba15763eb01e201845dc9ee3c8960a0aa4d"
+    },
+    {
+      "path": "c2a-database-persistence-first-attempt-diagnosis.json",
+      "bytes": 5044,
+      "sha256": "507ba4e486f37b0609efee5f1c7e09c82388fce23e3f2d7e14da46daa79cecdb"
+    },
+    {
+      "path": "c2a-database-persistence-first-attempt-diagnosis.md",
+      "bytes": 9567,
+      "sha256": "dff5c47fb35994e1758917b8fed93ab1b3b02111901ca56915d61f61cc0be076"
+    },
+    {
+      "path": "command-runner.mjs",
+      "bytes": 3022,
+      "sha256": "ce85bcd8f7159e557a8d1a1bcca43fd0266f64c0500b9733f8a2317123cbd9e6"
+    },
+    {
+      "path": "commands.jsonl",
+      "bytes": 21109,
+      "sha256": "d6447f7bf5d1701f8549c5d1c2b744852378c47ddcddba2bd027d927014ffa01"
+    },
+    {
+      "path": "context/docker/standalone/Dockerfile.c2a-fake",
+      "bytes": 555,
+      "sha256": "2be1279ef4621f5d42397879fab2e436d780224eb3c02d591180faf9e9a9fcff"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/__init__.py",
+      "bytes": 80,
+      "sha256": "cbf487cffc9c62b5c6fe61f32d80070b5843f70f966c5fca163c675e21ddbf1d"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/bootstrap.py",
+      "bytes": 6323,
+      "sha256": "b8331bd8c9645d265578ed65f9f77402f170813f20d1d2683b5aa0a7d0768101"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/control.py",
+      "bytes": 5593,
+      "sha256": "c75dcdf2285df614c4836dab4898a2980a2a1e8e4572862861596ab244f39d5e"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/fake_child.py",
+      "bytes": 44233,
+      "sha256": "4c1f401e9d1e43a8dcdc3c241cb74a05b892a53e57be958bd3096725a16c171c"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/fake_consumer.py",
+      "bytes": 4302,
+      "sha256": "52b3d0664b06ef82dca4765d2c08e820c16c2af5e2814a02f98fe08f8e220eb3"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/owner.py",
+      "bytes": 2460,
+      "sha256": "5b10f9f09def8ff985c96fed56c31f4ec4976f684d7e3b044fdc8a66afb38acc"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/owner_protocol.py",
+      "bytes": 3199,
+      "sha256": "cd9cdbea572354dbbc1200098d9edfe9280679c2b346a67c1326a795b01c1804"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/protocol.py",
+      "bytes": 13320,
+      "sha256": "074247650a31cfc47a1931ef6c7b258aa6f1d3a649bbb792ff2878257f6f8b88"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/submitter.py",
+      "bytes": 4913,
+      "sha256": "5a6ad60266066d1cff2559d46c6b2b15d4a93cf882de1e487790ad0fb6863c4a"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/supervision.py",
+      "bytes": 4552,
+      "sha256": "ff768434e0cef9eb2b6996351ba31e1dedede95211809d2ab8e8d09b5d9a5064"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/unix_socket.py",
+      "bytes": 9434,
+      "sha256": "08b6e604211d19e31ad61782c96b91a004277b37c31d6e9a0bdfdda681cd7725"
+    },
+    {
+      "path": "fake-key-adapter.exe",
+      "bytes": 155648,
+      "sha256": "a9a14a48389cc983792b54af06096d3cc1d20f4d642c322ed44095ebf567a620"
+    },
+    {
+      "path": "fake-key-adapter.pdb",
+      "bytes": 1314816,
+      "sha256": "1084d2550916abffca966295efb76134f9c0a37be6bf5c3a8f4d65a28e5c5cb1"
+    },
+    {
+      "path": "image-id.txt",
+      "bytes": 71,
+      "sha256": "ec89bb5e307a1a1d4c485a3646ddd2cbf8e1c0be9ed4b4bf1b41009f141fbd20"
+    },
+    {
+      "path": "launch-persistence.mjs",
+      "bytes": 1039,
+      "sha256": "d6ea53b60e632844360d3ec372f76fbe152a68404451b072c035b5c868192110"
+    },
+    {
+      "path": "launcher-command.json",
+      "bytes": 761,
+      "sha256": "b7eedd6e25cc1891b58b3f3da7addafe131c9cdd5478266ff40b20f1cac43b0c"
+    },
+    {
+      "path": "original-before-containers.json",
+      "bytes": 1546,
+      "sha256": "c4667b5486b3ab64f761f6393845248518f4178026d162173d4e4d269d8fc079"
+    },
+    {
+      "path": "persistence.json",
+      "bytes": 30385,
+      "sha256": "50e1eaff879108199ba3b069d7b5e7406cf7ef0742984aa12d99aec2f0bc8c41"
+    },
+    {
+      "path": "persistence.started",
+      "bytes": 24,
+      "sha256": "059996ed8e7e68dc3c7be72834576146b1245f184fcd5d4b58c85cfc09035c3c"
+    },
+    {
+      "path": "prepare-persistence.mjs",
+      "bytes": 6068,
+      "sha256": "42e030f64a51ea27d456ccda3ee7673db7ec1ec633b88dd13baa187d9711943a"
+    },
+    {
+      "path": "prepared-inputs.json",
+      "bytes": 15637,
+      "sha256": "e4d3e2106498ee3f7ae64dc76044a3979a9180866c18f2b45b879a66e560dad3"
+    },
+    {
+      "path": "readback-persistence.mjs",
+      "bytes": 4218,
+      "sha256": "580099516b8a8bca3f976501eb233612f012cd347bcef662d1ce7f449e358d8b"
+    },
+    {
+      "path": "reused-base-probe.json",
+      "bytes": 458,
+      "sha256": "74fccf8ad8edc8c36d9434565f586fb4cbd2952de73775430232a36dc4c54fdf"
+    },
+    {
+      "path": "reviewed-fixture/c2a-database-persistence-design-review.md",
+      "bytes": 4868,
+      "sha256": "bade2cab57318c88d19b5f66684f3a708fee2e3349f2c543874db3b2f1be628a"
+    },
+    {
+      "path": "reviewed-fixture/c2a-database-persistence-implementation-review.json",
+      "bytes": 24407,
+      "sha256": "d38864ecc589fbcac4c7e6e7cc32a22fd2587f477a7716f20e8b1064f724204b"
+    },
+    {
+      "path": "reviewed-fixture/c2a-database-persistence-implementation-review.md",
+      "bytes": 9123,
+      "sha256": "ae772d8c874cbb0e31043f7aceadc22e2e64e356857483f93b5555fd45032180"
+    },
+    {
+      "path": "reviewed-fixture/c2a-database-persistence-plan.md",
+      "bytes": 26961,
+      "sha256": "186f60061a4ecd7ac26443f90c079225c3bc9efb782f27227b50763ff0088e4c"
+    },
+    {
+      "path": "reviewed-fixture/c2a-database-persistence-self-check.json",
+      "bytes": 25243,
+      "sha256": "13706e83e2c733114a66e1246df20752acb42adffdc3376bbaf702c81598c72d"
+    },
+    {
+      "path": "reviewed-fixture/c2a-database-persistence-self-check.md",
+      "bytes": 6693,
+      "sha256": "7591e5f503dffa5226350a2423f950ff02bbc74ba873202048e40ad36e405a36"
+    },
+    {
+      "path": "reviewed-fixture/c2a-implementation-source-manifest.json",
+      "bytes": 108542,
+      "sha256": "f27379be3b4b5e61e1b2821c2eda2d87bf54e5c2983b034bdb637ee789961ae2"
+    },
+    {
+      "path": "reviewed-fixture/docker-database/database-read.py",
+      "bytes": 6084,
+      "sha256": "b3dd31c1c527850d188a1f09213756cefef8cd511266275fb0c47d342b322c3f"
+    },
+    {
+      "path": "reviewed-fixture/docker-database/fake_child.py",
+      "bytes": 44233,
+      "sha256": "4c1f401e9d1e43a8dcdc3c241cb74a05b892a53e57be958bd3096725a16c171c"
+    },
+    {
+      "path": "reviewed-fixture/docker-database/README.md",
+      "bytes": 21343,
+      "sha256": "e2ef5c3b316e15226fb56f091e06c728511a251824a5ad23420ff5d7ebe1b12f"
+    },
+    {
+      "path": "reviewed-fixture/docker-database/run-persistence.ts",
+      "bytes": 51340,
+      "sha256": "46a1b0b3f13816bbd56b46b1c279724ef7e52bdf75453d7addd8eda6cb01f7b0"
+    },
+    {
+      "path": "root-post-run-readback.json",
+      "bytes": 2672,
+      "sha256": "9ebb8255099cbbb3ec10fb8fe05f59422295cdfbc2fe2fd458088aef38810778"
+    },
+    {
+      "path": "root-preparation-check.json",
+      "bytes": 821,
+      "sha256": "94b0433f6d2a8ca36fd8acf62216be55681db28469c271abf482ebd23b787fe3"
+    },
+    {
+      "path": "runtime-prerequisites.json",
+      "bytes": 2387,
+      "sha256": "2b0aebfb104624594b23449d95a5583dd99d1bb4346e7cf20a16b7593d5fb002"
+    }
+  ],
+  "boundary": "Source-established fixture phase assertion failure before SQL acceptance; raw failed registry/exception unavailable. No database persistence acceptance.",
+  "stagingRemovedAt": "2026-10-15T12:25:50.3753029Z"
+}

@@ -1,0 +1,78 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ ✓ src/memory/hindsight/template-lifecycle/template-executor-store.test.ts (15 tests) 18567ms
+     ✓ claims only an actual running admission with the same operation and boot  1211ms
+     ✓ rejects another live same-boot claim and renews only the current checkpoint  1086ms
+     ✓ cannot renew an owner at its deadline plus 0 milliseconds  961ms
+     ✓ cannot renew an owner at its deadline plus 1 milliseconds  902ms
+     ✓ takes over an expired plan while retaining its generic failed outcome  978ms
+     ✓ takes over an expired plan while retaining its generic outcome_unknown outcome  902ms
+     ✓ retains a possible-effect hold on physical reopen and claims only explicit same-plan recovery on the new boot  1068ms
+     ✓ cannot claim a plan cancelled through the real operation owner  1010ms
+     ✓ cannot reclaim or checkpoint a plan quarantined by the actual W6 store  907ms
+     ✓ a stale token cannot checkpoint, write evidence or release the hold  1952ms
+     ✓ a stale revision cannot checkpoint, write evidence or release the hold  1678ms
+     ✓ rolls back operation claim and executor acquisition on real SQLite statement failure  888ms
+     ✓ rolls back operation claim and executor acquisition on real SQLite commit failure  926ms
+     ✓ rolls back all executor evidence and hold publication on real SQLite statement failure  2077ms
+     ✓ rolls back all executor evidence and hold publication on real SQLite commit failure  2015ms
+ ✓ src/memory/hindsight/template-lifecycle/template-selection.test.ts (2 tests) 24388ms
+     ✓ keeps Character customization local and preserves equal values and suppression across the next scope default  12111ms
+     ✓ removes Taki while preserving complete user resources, labels and authority until an explicit user reset  12272ms
+ ✓ src/memory/hindsight/template-lifecycle/template-rollout.test.ts (7 tests) 18064ms
+     ✓ recovers a partial two-Bank rollout after physical SQLite reopen using the original requests  3587ms
+     ✓ recovers a committed Apply whose reply was lost without repeating either Native mutation  2771ms
+     ✓ uses binding-only recovery after selection COMMIT and keeps the original failed operation unchanged  2778ms
+     ✓ rolls back every Core publication row on deferred COMMIT failure then recovers from original Native receipts  3449ms
+     ✓ checks the live deadline after final publication readback and rolls back a now-expired executor  1949ms
+     ✓ retains the hold when configuration changes after readback but before publication  1749ms
+     ✓ retains the hold when secret changes after readback but before publication  1777ms
+ ✓ src/memory/hindsight/template-lifecycle/template-emergency.test.ts (4 tests) 12061ms
+     ✓ takes over a unknown Apply without remote work and rejects its late completion  2967ms
+     ✓ takes over a hung Apply without remote work and rejects its late completion  2468ms
+     ✓ preserves a failed Bank's reservation-only in the sealed incident  3110ms
+     ✓ preserves a failed Bank's unpublished-plan in the sealed incident  3511ms
+ ✓ src/memory/hindsight/template-lifecycle/template-revalidate.test.ts (3 tests) 7311ms
+     ✓ verifies taki-bank-v2 using its exact receipt/current snapshot without new Native writes  2989ms
+     ✓ verifies none using its exact receipt/current snapshot without new Native writes  2021ms
+     ✓ refuses an external managed definition edit before publishing a new reviewed connection  2296ms
+ ✓ src/memory/hindsight/template-lifecycle/template-runtime-control.test.ts (4 tests) 5761ms
+     ✓ closes old tool/live reads and new captures while keeping the old immutable Run and primary witnesses  1636ms
+     ✓ retires the complete published scheduler and keeps unbound captures/status explicitly held  1067ms
+     ✓ refuses a newly constructed ordinary runtime from the persistent hold after physical reopen  990ms
+     ✓ keeps ordinary admission closed during real private synchronization without Pending replay or early runtime admission  2063ms
+ ✓ src/memory/hindsight/template-lifecycle/template-overlay-store.test.ts (13 tests) 5898ms
+     ✓ selects exact Native evidence with CAS and keeps independent desired user revisions  583ms
+     ✓ keeps customized then removed selections and exact before-images across physical reopen  806ms
+     ✓ rolls back selection/history on receipt failure  378ms
+     ✓ rolls back selection/history on readback failure  417ms
+     ✓ rolls back selection/history on request failure  421ms
+     ✓ rolls back selection/history on final-guard failure  427ms
+     ✓ rolls back selection/history on async-guard failure  391ms
+     ✓ rejects mutation/replace of every original evidence row and rejects rehashed forged creation ownership  383ms
+     ✓ rolls back nested publication with the existing outer Core transaction  413ms
+     ✓ rolls back selected/default history together when a deferred constraint rejects the outer COMMIT  519ms
+     ✓ refuses publishing an old desired user revision even when applied-selection CAS still matches  384ms
+     ✓ publishes lineage-wide defaults only against exact selected references and final current guard  467ms
+ ✓ src/memory/hindsight/template-lifecycle/template-composition.test.ts (15 tests) 633ms
+ ✓ src/memory/hindsight/template-lifecycle/template-provision.test.ts (10 tests) 27477ms
+     ✓ keeps a published but unbound Bank operation unknown at actual persisted-copy boot  3868ms
+     ✓ inherits the admitted Character scope default undefined with an exact initialization receipt  3340ms
+     ✓ inherits the admitted Character scope default none with an exact initialization receipt  2910ms
+     ✓ reprobes after a lost create reply and physical restart, preserving the original reservation  3137ms
+     ✓ refuses content arriving after reservation and before the post-create occupancy probe  2260ms
+     ✓ refuses a reused reservation if the Bank was written externally while Core was offline  2321ms
+     ✓ does not adopt a pristine-looking same-ID Bank with an existing managed-field override  2265ms
+     ✓ retains the original initialized request and hold when Native rejects a late ever-used race  2668ms
+     ✓ refuses a rehashed receipt missing the required pristine initialization proof  2447ms
+     ✓ rejects a create response for another Bank before requesting its generation or snapshot  2255ms
+ ✓ src/memory/hindsight/template-lifecycle/template-receipt-guards.test.ts (10 tests) 450ms
+ ✓ src/memory/hindsight/template-lifecycle/template-integrity.test.ts (7 tests) 242ms
+
+ Test Files  11 passed (11)
+      Tests  90 passed (90)
+   Start at  21:54:07
+   Duration  90.89s (transform 25.25s, setup 0ms, import 52.26s, tests 120.85s, environment 3ms)
+
+JSON report written to H:/TakiAgent/.trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-core-lifecycle-final-01-vitest.json

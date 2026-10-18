@@ -1,0 +1,39 @@
+{
+  "recordedAt": "2026-10-14T14:37:23.7895967Z",
+  "stagingRemoved": "G:\\TakiAgent-c2a-docker-acceptance\\2026-10-14-r1",
+  "logicalBytesRemoved": 43397.0,
+  "desktopProcesses": [
+    {
+      "Id": 34676,
+      "ProcessName": "Docker Desktop"
+    },
+    {
+      "Id": 36936,
+      "ProcessName": "Docker Desktop"
+    },
+    {
+      "Id": 41952,
+      "ProcessName": "Docker Desktop"
+    },
+    {
+      "Id": 42240,
+      "ProcessName": "Docker Desktop"
+    }
+  ],
+  "capacity": [
+    {
+      "Name": "C",
+      "Free": 27460304896
+    },
+    {
+      "Name": "G",
+      "Free": 144982904832
+    },
+    {
+      "Name": "H",
+      "Free": 13104541696
+    }
+  ],
+  "daemonInterrupted": false,
+  "activeContainerMutations": 0
+}

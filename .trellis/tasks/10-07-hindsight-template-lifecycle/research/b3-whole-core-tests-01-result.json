@@ -1,0 +1,29 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "--filter",
+    "@taki/core",
+    "exec",
+    "vitest",
+    "run",
+    "--maxWorkers=2"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "startedAt": "2026-10-12T16:45:24.463557+00:00",
+  "finishedAt": "2026-10-12T17:48:06.081358+00:00",
+  "exitCode": 1,
+  "durationSeconds": 3761.61,
+  "inputCount": 2417,
+  "changedInputs": [],
+  "inputManifest": "b3-whole-core-tests-01-inputs.json",
+  "afterManifest": "b3-whole-core-tests-01-inputs-after.json",
+  "log": "b3-whole-core-tests-01.log",
+  "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-whole-checks\\core-tests-01-78638aea306d4d6e8634637615cb8262",
+  "temporaryRootRemoved": false,
+  "remainingFixtureEntries": [
+    "node-compile-cache",
+    "taki-boot-362tUb",
+    "taki-w3-MpbyUi",
+    "w3-source-upload-k4QNL4"
+  ]
+}

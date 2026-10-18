@@ -1,0 +1,15 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/python.exe",
+    "-c",
+    "import inspect\nimport json\nfrom fastapi.openapi.models import Schema\nfrom hindsight_api import MemoryEngine\nfrom hindsight_api.api import create_app\nfrom hindsight_api.api import taki_template_schema as hook\n\nmemory = MemoryEngine(db_url=\"mock\", memory_llm_provider=\"ollama\", memory_llm_api_key=\"mock\", memory_llm_model=\"mock\")\napp = create_app(memory, initialize_memory=False)\nlive = inspect.getclosurevars(app.openapi).nonlocals[\"original\"]()[\"components\"][\"schemas\"]\nnames = [\"TemplateBackupEvidence\", \"TemplateLabelEvidence\", \"TemplateLabelEvidenceRequest\", \"TemplateLabelEvidenceResult\", \"TakiBackupRequestV2\", \"TakiBackupProofV2\", \"TakiBackupResponseV2\", \"TakiBackupArchiveV2\", \"TemplateBackupBankProofV2\", \"TemplateBackupObservationRequest\", \"TemplateBackupObservationResponse\"]\n_, evidence = hook.models_json_schema([(getattr(hook, name), \"validation\") for name in names], ref_template=\"#/components/schemas/{model}\")\ndef different(left, right, path=\"\"):\n    if isinstance(left, dict) and isinstance(right, dict):\n        output = []\n        for key in sorted(left.keys() | right.keys()):\n            if key not in left or key not in right:\n                output.append({\"path\": path + \"/\" + key, \"live\": left.get(key, \"<absent>\"), \"raw\": right.get(key, \"<absent>\")})\n            else:\n                output.extend(different(left[key], right[key], path + \"/\" + key))\n        return output\n    if isinstance(left, list) and isinstance(right, list) and len(left) == len(right):\n        return [item for index, pair in enumerate(zip(left, right)) for item in different(*pair, path + \"/\" + str(index))]\n    return [] if left == right else [{\"path\": path, \"live\": left, \"raw\": right}]\ncollisions = []\nfor name, raw in evidence[\"$defs\"].items():\n    if name in live and live[name] != raw:\n        normalized = Schema.model_validate(raw).model_dump(mode=\"json\", by_alias=True, exclude_none=True)\n        collisions.append({\"component\": name, \"normalizedEqual\": normalized == live[name], \"differences\": different(live[name], raw)})\nprint(json.dumps({\"rawCollisions\": collisions}, indent=2))\nassert collisions, \"Original raw comparison failure did not reproduce\"\nassert all(row[\"normalizedEqual\"] for row in collisions), \"A substantive collision remains\""
+  ],
+  "cwd": "H:/hindsight",
+  "exitCode": 1,
+  "durationSeconds": 58.721,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-schema-diagnostic-01.log",
+  "sources": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-schema-diagnostic-01-sources.json",
+  "changedInputs": [],
+  "ownedTemp": "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\schema-diagnostic-01-chl80s7q",
+  "ownedTempRemoved": true
+}

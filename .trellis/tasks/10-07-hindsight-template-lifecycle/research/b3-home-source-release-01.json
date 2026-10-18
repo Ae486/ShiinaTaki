@@ -1,0 +1,152 @@
+{
+  "activeTask": ".trellis/tasks/10-07-hindsight-template-lifecycle",
+  "cwd": "H:\\TakiAgent",
+  "capturedAt": "2026-10-09T11:21:43.1482600Z",
+  "status": "Home source ready for independent review; final type closure pending",
+  "inputManifests": [
+    "b3-home-inputs-01.json",
+    "b3-home-inputs-02.json"
+  ],
+  "postCheckChanges": [
+    "Three closed backup error labels in memory-hindsight-backup-state.ts",
+    "Three no-export-bypass assertions in memory-hindsight-backup-state.test.ts",
+    "Navigation indexes and frontend template contract"
+  ],
+  "pendingChecks": [
+    "Affected backup state suite and lint",
+    "Final Desktop types after Core backup consumer corrections",
+    "Independent Home review"
+  ],
+  "files": [
+    {
+      "path": ".trellis/spec/frontend/home-window.md",
+      "bytes": 35544,
+      "sha256": "086078fc1ae251db65a51e216443510178e4f02ce387be6cdf2616a1844727c7"
+    },
+    {
+      "path": "apps/desktop/src/lib/index.md",
+      "bytes": 4884,
+      "sha256": "34dc6b07e9e5d7c4e402165374305553c3f2d9bae136c70aac0c0c85ee5249c7"
+    },
+    {
+      "path": "apps/desktop/src/lib/rpc-deadline.ts",
+      "bytes": 7224,
+      "sha256": "71dbc96893aeeef9768d0e37591a98328a8d2c7a5563716780bbe2e27cec0a2c"
+    },
+    {
+      "path": "apps/desktop/src/lib/ws-client-hindsight-templates.test.ts",
+      "bytes": 7287,
+      "sha256": "285bd53ad1739a3bc8ca091d8a6b0f6cc3ae9171b48fdb51b89b11dc8db00b81"
+    },
+    {
+      "path": "apps/desktop/src/lib/ws-client-hindsight-templates.ts",
+      "bytes": 2252,
+      "sha256": "7d0810809f10b7e7d49ea902a5794c0cae449cd7c9101992bc30daf893e18049"
+    },
+    {
+      "path": "apps/desktop/src/lib/ws-client-methods.ts",
+      "bytes": 12788,
+      "sha256": "e7ec53cda329229a8206954c9f38b764efb437a204c02a32889c27472ad550b2"
+    },
+    {
+      "path": "apps/desktop/src/lib/ws-client.ts",
+      "bytes": 15653,
+      "sha256": "ad463993493ede9d352e4fff7945e77491f8799d8eb0b65c24e988e620cfb291"
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/index.md",
+      "bytes": 9681,
+      "sha256": "29537a3fb6e28f38b8bcf6d905da2a24679c879b86c78ce40c16d5aab2cab890"
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/hindsight-template-browser.test.ts",
+      "bytes": 14587,
+      "sha256": "3e4ba5882ebba9fcad9ee8352850196f2907c45fd1cd653cfea97e86392b37a3"
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/hindsight-template-card.tsx",
+      "bytes": 5150,
+      "sha256": "593306b617ba89d0a5ecaab35e60be23183f77006a28bb3af8fb52c9ff69dfb4"
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/hindsight-template-controller.test.ts",
+      "bytes": 14403,
+      "sha256": "921af5c7ccdff9e1ad813407b180304039285e8397dbedcd557e397136c85169"
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/hindsight-template-controller.ts",
+      "bytes": 11115,
+      "sha256": "5d503c212790df649a29a368cb69c87412a1359d115682212383dcfeda31c799"
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/hindsight-template-editor.tsx",
+      "bytes": 6447,
+      "sha256": "7f9d5e7bdcc8381ca9b093083fb3bf464a874d81946b9b5fc5e35b5550e6842a"
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/hindsight-template-plan.tsx",
+      "bytes": 5128,
+      "sha256": "36804dcda3d5461cb126e25f100266674a7569fb2a0d888f72efd6e4e13d9fae"
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/hindsight-template-preview.tsx",
+      "bytes": 13043,
+      "sha256": "04185eace791d53d384ca05f7f8b88116cfa19e0dbaf82f75df2d3f7aa2022d8"
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/hindsight-template-resource-editor.tsx",
+      "bytes": 4500,
+      "sha256": "0b3a77e39a0d65a1bd9da321472365ee88d60314a96ebb28a51addb5fd6e21b1"
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/hindsight-template-resource-form.test.ts",
+      "bytes": 4826,
+      "sha256": "d8a9b374d21f29aa2669b5eb615b5185573ddf5621ceb98564117bd2b0aee0de"
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/hindsight-template-resource-form.tsx",
+      "bytes": 8802,
+      "sha256": "3031ba58d0e5fb7bd050792acda8e15ad44877febbfc5104c4968e4a4cf35e78"
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/hindsight-template-state.ts",
+      "bytes": 5335,
+      "sha256": "7073f8b470908cfdaa1b02c3ebab2288052633143a9537e59570fb24d543c831"
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/hindsight-template-test-fixture.ts",
+      "bytes": 6936,
+      "sha256": "6e9358d0f8be4bc3f33c546255ea3bffd9ae2c2ef902bcbab8f4e25b861bd910"
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/memory-hindsight-backup-state.test.ts",
+      "bytes": 11900,
+      "sha256": "8b2f94d0b9d7e55f97f68d4992afac46541ee0d3d5f8a35d5484d3006d8f5699"
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/memory-hindsight-backup-state.ts",
+      "bytes": 10915,
+      "sha256": "e85d7ec99cc1a0cc008c096fe980e0a972dc371a6e4c6a595c30aeacab6e295d"
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/memory-operations-controller.test.ts",
+      "bytes": 6092,
+      "sha256": "8e9c8fff10d183c175cb4aaf8766711f4ec0abd7fef1d76d03b99a9bb25d2d5f"
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/memory-operations-controller.ts",
+      "bytes": 8109,
+      "sha256": "aeea1783e575299342bf17687e82a2df7bcce20ed7b1005192836be76a3ce95f"
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/operations-page.tsx",
+      "bytes": 3786,
+      "sha256": "a8026c635364bdb0392eddb19e1f598e84c271b0e6208ee22ab3e40d36d53bb3"
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/use-hindsight-templates.ts",
+      "bytes": 1459,
+      "sha256": "e044f261fdc612958542df65e32171e1d636feb79c8575cf87834556c023f654"
+    }
+  ]
+}

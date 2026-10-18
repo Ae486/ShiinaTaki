@@ -1,0 +1,18 @@
+{
+  "cwd": "H:\\TakiAgent",
+  "command": "pnpm",
+  "argv": [
+    "--filter",
+    "@taki/desktop",
+    "exec",
+    "vitest",
+    "run",
+    "src/windows/home/pages/operations/hindsight-template-browser.test.ts",
+    "--maxWorkers=1"
+  ],
+  "startedAt": "2026-10-09T10:48:54.3086712Z",
+  "finishedAt": "2026-10-09T10:50:31.3375057Z",
+  "exitCode": 1,
+  "inputManifest": "b3-home-inputs-01.json",
+  "updatedTestSha256": "3e4ba5882ebba9fcad9ee8352850196f2907c45fd1cd653cfea97e86392b37a3"
+}

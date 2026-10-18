@@ -1,0 +1,35 @@
+I001 [*] Import block is un-sorted or un-formatted
+  --> tests\native_results\test_template_backup_restore.py:3:1
+   |
+ 1 |   """Real v2 binary COPY preserves customized/removed definitions and all Native evidence."""
+ 2 |
+ 3 | / from __future__ import annotations
+ 4 | |
+ 5 | | import copy
+ 6 | | import uuid
+ 7 | | from unittest.mock import AsyncMock
+ 8 | |
+ 9 | | import pytest
+10 | |
+11 | | from hindsight_api.admin.cli import _backup, _restore
+12 | | from hindsight_api.engine.schema import fq_table
+13 | |
+14 | | from .maintenance_helpers import maintenance_schema as maintenance_schema
+15 | | from .template_backup_helpers import (
+16 | |     apply_bank,
+17 | |     backup_request,
+18 | |     backup_resolver as backup_resolver,
+19 | |     observe,
+20 | |     selected_bank,
+21 | | )
+22 | | from .template_label_helpers import current_units, label_bank, read_evidence, retain_labels
+23 | | from .test_template_independent_refresh import done_result
+24 | | from .test_template_lifecycle import ROOT, plan
+   | |_______________________________________________^
+25 |
+26 |   pytestmark = [pytest.mark.asyncio, pytest.mark.usefixtures("backup_resolver")]
+   |
+help: Organize imports
+
+Found 1 error.
+[*] 1 fixable with the `--fix` option.

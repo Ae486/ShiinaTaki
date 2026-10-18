@@ -1,0 +1,16 @@
+{
+  "command": [
+    "git",
+    "diff",
+    "--check",
+    "--",
+    "packages/shared/src",
+    "eslint.config.js",
+    "CLAUDE.md",
+    ".trellis/spec/backend/quality-guidelines.md"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "durationSeconds": 0.11,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-shared-diff-01.log"
+}

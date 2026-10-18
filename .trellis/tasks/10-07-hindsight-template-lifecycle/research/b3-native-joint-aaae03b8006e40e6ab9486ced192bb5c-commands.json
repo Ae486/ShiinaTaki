@@ -1,0 +1,307 @@
+{
+  "commands": [
+    {
+      "mode": "seed",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "--experimental-transform-types",
+        "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-joint-entry.mjs",
+        "seed"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "exitCode": 0,
+      "timedOut": false,
+      "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-joint-aaae03b8006e40e6ab9486ced192bb5c-1-seed.log",
+      "stdoutSha256": "19290359104ff2be5466fb5d8cf3176fee3e7bd0dacf6fe2b4e1887a1c82e4e6",
+      "stderrSha256": "baab19d90f733ceb22dbf6a6c99106491a32165bad82c2488f2d00a66790cc7e"
+    },
+    {
+      "mode": "prepare",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "--experimental-transform-types",
+        "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-joint-entry.mjs",
+        "prepare",
+        "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\joint-06-brotbpbk\\pytest-of-unknown\\pytest-0\\test_actual_core_native_pair_r0\\2-prepare.json",
+        "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\joint-06-brotbpbk\\pytest-of-unknown\\pytest-0\\test_actual_core_native_pair_r0\\prepared"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "exitCode": 0,
+      "timedOut": false,
+      "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-joint-aaae03b8006e40e6ab9486ced192bb5c-2-prepare.log",
+      "stdoutSha256": "5c69bbfbd530c15af6469fd2b919487fdceedcfbffca14439630698b6a20b507",
+      "stderrSha256": "ac19b4e29d6d9d29564b1462abcd1f8863b035e3eeee66b263e30126734174f1"
+    },
+    {
+      "mode": "native-cli-managed",
+      "invocation": "typer.testing.CliRunner",
+      "argv": [
+        "hindsight-admin",
+        "backup",
+        "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\joint-06-brotbpbk\\pytest-of-unknown\\pytest-0\\test_actual_core_native_pair_r0\\managed.zip",
+        "--schema",
+        "d78_maintenance_63265d4ceacc4b1fbf1af3311874d3ad",
+        "--taki-request",
+        "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\joint-06-brotbpbk\\pytest-of-unknown\\pytest-0\\test_actual_core_native_pair_r0\\managed-request.json",
+        "--taki-service-url",
+        "http://127.0.0.1:12321",
+        "--taki-api-key-env",
+        "TAKI_B3_JOINT_API_KEY"
+      ],
+      "cwd": "H:\\hindsight\\hindsight-api-slim",
+      "exitCode": 0,
+      "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-joint-aaae03b8006e40e6ab9486ced192bb5c-cli-managed.log"
+    },
+    {
+      "mode": "native-cli-mismatched",
+      "invocation": "typer.testing.CliRunner",
+      "argv": [
+        "hindsight-admin",
+        "backup",
+        "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\joint-06-brotbpbk\\pytest-of-unknown\\pytest-0\\test_actual_core_native_pair_r0\\mismatched.zip",
+        "--schema",
+        "d78_maintenance_63265d4ceacc4b1fbf1af3311874d3ad",
+        "--taki-request",
+        "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\joint-06-brotbpbk\\pytest-of-unknown\\pytest-0\\test_actual_core_native_pair_r0\\mismatched-request.json",
+        "--taki-service-url",
+        "http://127.0.0.1:12321",
+        "--taki-api-key-env",
+        "TAKI_B3_JOINT_API_KEY"
+      ],
+      "cwd": "H:\\hindsight\\hindsight-api-slim",
+      "exitCode": 0,
+      "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-joint-aaae03b8006e40e6ab9486ced192bb5c-cli-mismatched.log"
+    },
+    {
+      "mode": "admit",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "--experimental-transform-types",
+        "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-joint-entry.mjs",
+        "admit",
+        "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\joint-06-brotbpbk\\pytest-of-unknown\\pytest-0\\test_actual_core_native_pair_r0\\5-admit.json",
+        "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\joint-06-brotbpbk\\pytest-of-unknown\\pytest-0\\test_actual_core_native_pair_r0\\rejected"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "exitCode": 2,
+      "timedOut": false,
+      "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-joint-aaae03b8006e40e6ab9486ced192bb5c-5-admit.log",
+      "stdoutSha256": "32206b5d5a26a8b175aa0663b7fcbcbbc5fcd85b6a74c4c21c4c67b0e5eba426",
+      "stderrSha256": "00da31482b3c288c6166b58e519806e0f2e14b46beea1017fb75299dbccedcaf"
+    },
+    {
+      "mode": "admit",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "--experimental-transform-types",
+        "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-joint-entry.mjs",
+        "admit",
+        "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\joint-06-brotbpbk\\pytest-of-unknown\\pytest-0\\test_actual_core_native_pair_r0\\6-admit.json",
+        "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\joint-06-brotbpbk\\pytest-of-unknown\\pytest-0\\test_actual_core_native_pair_r0\\admitted"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "exitCode": 0,
+      "timedOut": false,
+      "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-joint-aaae03b8006e40e6ab9486ced192bb5c-6-admit.log",
+      "stdoutSha256": "e1ee88cb180502078cdea29953eae65257b6700179315bccdc9741e9ebac2c39",
+      "stderrSha256": "05d9e0ab42a60fff2d56555621e1197a115d4be139f6ea7885275f863361932d"
+    },
+    {
+      "mode": "preflight",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "--experimental-transform-types",
+        "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-joint-entry.mjs",
+        "preflight",
+        "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\joint-06-brotbpbk\\pytest-of-unknown\\pytest-0\\test_actual_core_native_pair_r0\\7-preflight.json"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "exitCode": 0,
+      "timedOut": false,
+      "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-joint-aaae03b8006e40e6ab9486ced192bb5c-7-preflight.log",
+      "stdoutSha256": "4b9f28d250dd67c53b53bcb8ca96c5fad8707669258a35cc799b000f121e96d2",
+      "stderrSha256": "7057f220af7ff7e3059bce81579ba994b578c97c8144e1a88ec85e45cdc042c9"
+    },
+    {
+      "mode": "preflight",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "--experimental-transform-types",
+        "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-joint-entry.mjs",
+        "preflight",
+        "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\joint-06-brotbpbk\\pytest-of-unknown\\pytest-0\\test_actual_core_native_pair_r0\\8-preflight.json"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "exitCode": 2,
+      "timedOut": false,
+      "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-joint-aaae03b8006e40e6ab9486ced192bb5c-8-preflight.log",
+      "stdoutSha256": "40fb4a431a685d24cdd5d466498f6e143b36aa117fa1958cfa197fe05a4f48ed",
+      "stderrSha256": "9e595dc69470583ff9344f12e7fbf04ea0be901c889f9c6f32f6ab0b4dbb75ff"
+    },
+    {
+      "mode": "verify",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "--experimental-transform-types",
+        "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-joint-entry.mjs",
+        "verify",
+        "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\joint-06-brotbpbk\\pytest-of-unknown\\pytest-0\\test_actual_core_native_pair_r0\\9-verify.json"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "exitCode": 0,
+      "timedOut": false,
+      "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-joint-aaae03b8006e40e6ab9486ced192bb5c-9-verify.log",
+      "stdoutSha256": "a3b4aa49c7df3e0e7b3907669d0eb565b10f3f7d59dd19adedc8197e3a5093a2",
+      "stderrSha256": "89a67ff8ed42a4b4d44af4f6a4c7d695f15df0d7d4cc8ec5916a0f036b6dd51a"
+    },
+    {
+      "mode": "preflight",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "--experimental-transform-types",
+        "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-joint-entry.mjs",
+        "preflight",
+        "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\joint-06-brotbpbk\\pytest-of-unknown\\pytest-0\\test_actual_core_native_pair_r0\\10-preflight.json"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "exitCode": 0,
+      "timedOut": false,
+      "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-joint-aaae03b8006e40e6ab9486ced192bb5c-10-preflight.log",
+      "stdoutSha256": "f3d934d32e0a8611a36dbd7d216b18617330e4e80d342ccca202b0f10c67e585",
+      "stderrSha256": "57f1b91776eac6c16930da1504f0fd11e8343591717ff30fc31b19e366c332bc"
+    },
+    {
+      "mode": "preflight",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "--experimental-transform-types",
+        "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-joint-entry.mjs",
+        "preflight",
+        "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\joint-06-brotbpbk\\pytest-of-unknown\\pytest-0\\test_actual_core_native_pair_r0\\11-preflight.json"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "exitCode": 2,
+      "timedOut": false,
+      "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-joint-aaae03b8006e40e6ab9486ced192bb5c-11-preflight.log",
+      "stdoutSha256": "40fb4a431a685d24cdd5d466498f6e143b36aa117fa1958cfa197fe05a4f48ed",
+      "stderrSha256": "e9af133852dcecd201d189058dcd7db47a90a6814d87546f7f479e0ff23999f1"
+    },
+    {
+      "mode": "verify",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "--experimental-transform-types",
+        "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-joint-entry.mjs",
+        "verify",
+        "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\joint-06-brotbpbk\\pytest-of-unknown\\pytest-0\\test_actual_core_native_pair_r0\\12-verify.json"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "exitCode": 0,
+      "timedOut": false,
+      "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-joint-aaae03b8006e40e6ab9486ced192bb5c-12-verify.log",
+      "stdoutSha256": "617fe91dbe0cef48060b019328cb51864e4fd202b93aa490132b0f1f00ef4aa2",
+      "stderrSha256": "c22b61585caadeeeb44d0ed4ef4c99abe5459dd05e82e1e05f40f4ea2f057bec"
+    }
+  ],
+  "restoredDatabase": "b3_restore_d420cf70d36e4172a3b44434d3438932",
+  "restoredDatabaseDropped": true,
+  "scenario": "customized",
+  "backupId": "274dd996-d802-485b-ac57-b789fbfe838e",
+  "coreSha256": "ecbe0727b5a8aa5c5a682db4b35f213c80886d3959d8246d0ceb16ad8974e197",
+  "nativeSha256": "16f07524f96de4266cd47a13b129425067d79ec55a16ad21c4e63572e124efaf",
+  "sourceExchanges": 32,
+  "restoredExchanges": 11,
+  "nativeTablesCompared": [
+    "replication_provider_lineage",
+    "replication_bank_state",
+    "replication_logical_changes",
+    "replication_logical_snapshots",
+    "replication_logical_snapshot_pages",
+    "memory_native_operation_receipts",
+    "memory_retain_part_receipts",
+    "banks",
+    "documents",
+    "entities",
+    "chunks",
+    "memory_units",
+    "invalidated_memory_units",
+    "memory_mutation_receipts",
+    "unit_entities",
+    "entity_cooccurrences",
+    "memory_links",
+    "observation_history",
+    "mental_models",
+    "mental_model_history",
+    "knowledge_pages",
+    "directives",
+    "async_operations",
+    "webhooks",
+    "file_storage",
+    "audit_log",
+    "llm_requests",
+    "graph_maintenance_queue",
+    "memory_current_state_transfers",
+    "memory_current_state_transfer_mappings",
+    "memory_bank_maintenance",
+    "memory_cutover_verifications",
+    "memory_cutover_steps",
+    "memory_cutover_actions",
+    "memory_cutover_evidence_pages",
+    "memory_application_banks",
+    "memory_application_bodies",
+    "memory_application_body_parts",
+    "memory_application_native_heads",
+    "memory_application_artifacts",
+    "memory_application_changes",
+    "memory_application_operations",
+    "memory_application_snapshots",
+    "memory_transition_requests",
+    "memory_transition_bank_origins",
+    "memory_transition_initializations",
+    "memory_transition_fences",
+    "memory_transition_writers",
+    "memory_transition_work",
+    "memory_transition_history",
+    "memory_transition_maintenance",
+    "memory_transition_steps",
+    "memory_transition_actions",
+    "memory_transition_evidence_pages",
+    "memory_transition_auxiliary_pages",
+    "memory_transition_deltas",
+    "memory_template_receipts",
+    "memory_template_children",
+    "memory_template_refresh_results",
+    "memory_template_label_proofs",
+    "memory_template_label_heads"
+  ],
+  "selectedRevision": "taki-bank-v2",
+  "receiptCounts": [
+    2,
+    1
+  ],
+  "physicalRowsEqual": true,
+  "refreshRequestId": "d1e04da9-59d7-4615-b516-9e6e0067806d",
+  "refreshRequestHash": "a2cff2f71d306be897793dfe2c5922f571880dbe815ff4a0605c8dca29fdd07f",
+  "refreshReceiptHash": "688aa907e15792e77bf850d2805ee127c2fed1c4b7b57fa5a67b0e2886704dc3",
+  "refreshResult": {
+    "contract_version": "1.0.0",
+    "target": {
+      "provider_lineage": "1fe727d9-3870-4c02-a8ad-c58b0b4041db",
+      "bank_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+      "bank_generation": "977409d0-ae05-41aa-8c96-950ca69ff44b"
+    },
+    "request_id": "d1e04da9-59d7-4615-b516-9e6e0067806d",
+    "child_id": "fe8d5cef-0c8d-4034-beae-eca4b43326fc",
+    "model_id": "user-travel-notes",
+    "state": "completed",
+    "definition_hash": "30df5757fa298c294e7b5ea6d46fd7260db952747a503764afbcc46f6f916351",
+    "result_revision": 10,
+    "result_payload_hash": "4a63410d62806b732cdd9539fff4ebbea40683230362b9518f04bbd2dc7d588f"
+  },
+  "fakeRefreshProviderCalls": 5,
+  "fakeRefreshToolCalls": 4,
+  "fakeRefreshFinalTextCalls": 1,
+  "refreshChildRows": 1,
+  "refreshResultRows": 1,
+  "boundary": "actual Core lifecycle/copy and Native HTTP/CLI/COPY; initial Core authority/replica/runtime and writer counter are fixtures"
+}

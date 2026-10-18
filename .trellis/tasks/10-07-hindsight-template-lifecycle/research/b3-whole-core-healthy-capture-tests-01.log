@@ -1,0 +1,47 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mH:/TakiAgent/packages/core[39m
+
+ [32m✓[39m src/memory/transitions/transition-template-healthy.test.ts [2m([22m[2m26 tests[22m[2m)[22m[33m 1491288[2mms[22m[39m
+     [33m[2m✓[22m[39m preserves full template history across RETURN and REENTRY (removed=false) [33m 41319[2mms[22m[39m
+     [33m[2m✓[22m[39m preserves full template history across RETURN and REENTRY (removed=true) [33m 134734[2mms[22m[39m
+     [33m[2m✓[22m[39m rolls back all selected-history publication state at final lease expiry ('transition.return-local', removed=false) [33m 15769[2mms[22m[39m
+     [33m[2m✓[22m[39m rolls back all selected-history publication state at final lease expiry ('transition.reenter-hindsight', removed=false) [33m 35735[2mms[22m[39m
+     [33m[2m✓[22m[39m rolls back all selected-history publication state at final lease expiry ('transition.return-local', removed=true) [33m 48940[2mms[22m[39m
+     [33m[2m✓[22m[39m rolls back all selected-history publication state at final lease expiry ('transition.reenter-hindsight', removed=true) [33m 137551[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'selection' drift after complete 'transition.return-local' readback (removed=false) with atomic rollback [33m 31425[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'default' drift after complete 'transition.return-local' readback (removed=false) with atomic rollback [33m 28026[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'hold' drift after complete 'transition.return-local' readback (removed=false) with atomic rollback [33m 18371[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'incarnation' drift after complete 'transition.return-local' readback (removed=false) with atomic rollback [33m 18286[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'scope' drift after complete 'transition.return-local' readback (removed=false) with atomic rollback [33m 17636[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'selection' drift after complete 'transition.reenter-hindsight' readback (removed=false) with atomic rollback [33m 37809[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'default' drift after complete 'transition.reenter-hindsight' readback (removed=false) with atomic rollback [33m 36109[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'hold' drift after complete 'transition.reenter-hindsight' readback (removed=false) with atomic rollback [33m 35026[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'incarnation' drift after complete 'transition.reenter-hindsight' readback (removed=false) with atomic rollback [33m 34077[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'scope' drift after complete 'transition.reenter-hindsight' readback (removed=false) with atomic rollback [33m 36309[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'selection' drift after complete 'transition.return-local' readback (removed=true) with atomic rollback [33m 52298[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'default' drift after complete 'transition.return-local' readback (removed=true) with atomic rollback [33m 50941[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'hold' drift after complete 'transition.return-local' readback (removed=true) with atomic rollback [33m 53319[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'incarnation' drift after complete 'transition.return-local' readback (removed=true) with atomic rollback [33m 54157[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'scope' drift after complete 'transition.return-local' readback (removed=true) with atomic rollback [33m 52170[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'selection' drift after complete 'transition.reenter-hindsight' readback (removed=true) with atomic rollback [33m 104697[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'default' drift after complete 'transition.reenter-hindsight' readback (removed=true) with atomic rollback [33m 101011[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'hold' drift after complete 'transition.reenter-hindsight' readback (removed=true) with atomic rollback [33m 101642[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'incarnation' drift after complete 'transition.reenter-hindsight' readback (removed=true) with atomic rollback [33m 107204[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'scope' drift after complete 'transition.reenter-hindsight' readback (removed=true) with atomic rollback [33m 106724[2mms[22m[39m
+ [32m✓[39m src/memory/hindsight/hindsight-capture-sync.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 10404[2mms[22m[39m
+     [33m[2m✓[22m[39m re-pulls and rebinds when native consolidation races the foreground binding commit (D1) [33m 1249[2mms[22m[39m
+     [33m[2m✓[22m[39m degrades the Run to its readable replica after bounded conflict retries, then converges later without a duplicate commit [33m 1621[2mms[22m[39m
+     [33m[2m✓[22m[39m admits a partial Run for any non-integrity sync failure and logs only a closed code [33m 546[2mms[22m[39m
+     [33m[2m✓[22m[39m degrades to a memory-unavailable Run when the connection changes during the admission sync [33m 580[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps refusing an integrity failure, as a logged structured refusal [33m 478[2mms[22m[39m
+     [33m[2m✓[22m[39m bounds admission by its budget with many pending units; binding finishes in the background exactly once (D2) [33m 2802[2mms[22m[39m
+     [33m[2m✓[22m[39m bounds admission by min(request timeout 60000, half the chat ack deadline undefined) = 7500 [33m 710[2mms[22m[39m
+     [33m[2m✓[22m[39m bounds admission by min(request timeout 5000, half the chat ack deadline undefined) = 5000 [33m 674[2mms[22m[39m
+     [33m[2m✓[22m[39m bounds admission by min(request timeout 60000, half the chat ack deadline 9000) = 4500 [33m 684[2mms[22m[39m
+     [33m[2m✓[22m[39m reads the chat ack deadline at each capture, so a live change applies without a restart [33m 1057[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[32m36 passed[39m[22m[90m (36)[39m
+[2m   Start at [22m 13:48:34
+[2m   Duration [22m 1512.59s[2m (transform 7.08s, setup 0ms, import 10.22s, tests 1501.69s, environment 0ms)[22m
+

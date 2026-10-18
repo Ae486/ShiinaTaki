@@ -1,0 +1,15 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "--filter",
+    "@taki/shared",
+    "exec",
+    "vitest",
+    "run",
+    "--maxWorkers=2"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "durationSeconds": 45.394,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b1-shared-suite-01.log"
+}

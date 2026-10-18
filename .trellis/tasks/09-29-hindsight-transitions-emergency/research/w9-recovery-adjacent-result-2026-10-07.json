@@ -1,0 +1,6 @@
+{
+  "exitCode": 0,
+  "command": "pnpm --filter @taki/core test --maxWorkers=2 src/db/memory-transition-publication.test.ts src/db/memory-transition-publication-order.test.ts src/db/memory-transition-emergency-publication.test.ts src/memory/transitions/transition-evidence-context.test.ts src/memory/transitions/transition-healthy-publication-lease.test.ts src/memory/transitions/transition-healthy-boundaries.test.ts src/memory/transitions/transition-healthy-terminal-boundary.test.ts src/memory/transitions/transition-healthy-reconstruction.test.ts src/memory/transitions/transition-emergency-lease.test.ts src/memory/transitions/transition-emergency-recovery.test.ts src/memory/transitions/transition-runtime-recovery.test.ts",
+  "startedAt": "2026-10-07T10:22:08.5375323Z",
+  "finishedAt": "2026-10-07T10:23:40.4004122Z"
+}

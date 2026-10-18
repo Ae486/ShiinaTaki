@@ -1,0 +1,1708 @@
+{
+  "log": "b3-core-healthy-phase-diagnostic-01.log",
+  "logSha256": "da8a73ad7a970cf2053ad61921de97635d9b36101660fa0037b39b4a56b8c04d",
+  "recordCount": 2,
+  "records": [
+    {
+      "line": 4,
+      "diagnostic": {
+        "tag": "B3_HEALTHY_PHASE_DIAGNOSTIC",
+        "case": "selected-return-selection-drift",
+        "marks": [
+          {
+            "phase": "setup:start",
+            "elapsedMs": 0.08280000000377186
+          },
+          {
+            "phase": "setup:end",
+            "elapsedMs": 3689.3318
+          },
+          {
+            "phase": "preview:start",
+            "elapsedMs": 3689.8068000000058
+          },
+          {
+            "phase": "preview:end",
+            "elapsedMs": 4351.8266
+          },
+          {
+            "phase": "submit:start",
+            "elapsedMs": 4351.834499999997
+          },
+          {
+            "phase": "submit:end",
+            "elapsedMs": 5367.042300000001
+          },
+          {
+            "phase": "proof:start",
+            "elapsedMs": 35344.8763
+          },
+          {
+            "phase": "proof:end",
+            "elapsedMs": 36226.92390000001
+          },
+          {
+            "phase": "publication:before-state:start",
+            "elapsedMs": 36237.6455
+          },
+          {
+            "phase": "publication:before-state:end",
+            "elapsedMs": 36281.60220000001
+          },
+          {
+            "phase": "publication:start",
+            "elapsedMs": 36282.0242
+          },
+          {
+            "phase": "publication:end",
+            "elapsedMs": 37329.56670000001
+          },
+          {
+            "phase": "publication:after-state:end",
+            "elapsedMs": 37369.3924
+          },
+          {
+            "phase": "owner:settled",
+            "elapsedMs": 39406.894199999995
+          },
+          {
+            "phase": "diagnostic-state:end",
+            "elapsedMs": 39408.0413
+          },
+          {
+            "phase": "close:start",
+            "elapsedMs": 39414.1719
+          },
+          {
+            "phase": "close:end",
+            "elapsedMs": 39431.894000000015
+          }
+        ],
+        "results": [
+          {
+            "operation": {
+              "operationId": "92080a85-8afa-4723-926d-3cbf2f9613cd",
+              "kind": "transition.return-local",
+              "state": "failed",
+              "reason": "producer_failed",
+              "authorityEpochId": "epoch",
+              "request": {
+                "kind": "transition.return-local",
+                "requestId": "f4968e8d-4319-4329-8d22-e0b5899ed385",
+                "previewId": "24d46fac-43dc-431a-8b1b-9622c487ec00",
+                "previewHash": "614078d2bcf27bd13b98207a115a8a8e03d9b51fa15ff376588c1649d13b0681",
+                "expected": {
+                  "predecessorEpochId": "epoch",
+                  "sourceProvider": "hindsight",
+                  "sourceLineageId": "11111111-1111-4111-8111-111111111111",
+                  "targetProvider": "local",
+                  "targetLineageId": "fixture-local-lineage",
+                  "configRevision": 3,
+                  "configFingerprint": "a958dbb706b1f9ade36cdf0237c4ce715b76c62de0e7c5004d11659e48d407d7",
+                  "inventoryRevision": 3,
+                  "inventoryHash": "885f257eb5e4550b2f9e11c62440501891efd9948bfe5ed3fec4ec58fcb71ee4",
+                  "banks": [
+                    {
+                      "scope": {
+                        "kind": "character",
+                        "characterId": "taki"
+                      },
+                      "sourceBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                      "targetBankId": null,
+                      "sourceRevision": 4,
+                      "nativeBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                      "nativeGeneration": "22222222-2222-4222-8222-222222222222",
+                      "manifestHash": "f1fb3288dea756c04805f807d3471636ae8403c317bbc2f642d1b87a9656e5fb",
+                      "mappingHash": "c7fda956412ef5d550acfaabf2b70a7c3ceb48fb766180065978b6db2544603e",
+                      "policyRevision": 0,
+                      "blockRevision": 0
+                    },
+                    {
+                      "scope": {
+                        "kind": "global",
+                        "characterId": null
+                      },
+                      "sourceBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                      "targetBankId": null,
+                      "sourceRevision": 4,
+                      "nativeBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                      "nativeGeneration": "22222222-2222-4222-8222-222222222222",
+                      "manifestHash": "e52188a49bf62182e8f68abdb45366eb17503b6f19ed03b19bbc9b10ef513e56",
+                      "mappingHash": "8d2b51a6fd4a558b373320acaee346da056e37ccfea20bf0a66f2190f24e7aae",
+                      "policyRevision": 0,
+                      "blockRevision": 0
+                    }
+                  ],
+                  "baselineReceiptId": null,
+                  "baselineHash": null,
+                  "custodyBoundaryHash": "8802b6eb4bb3a571b8c4c50d181b434e4bb3741a2413394b2a26a1d2e153cbdd",
+                  "templates": {
+                    "version": 1,
+                    "hash": "bcfe9bdc46c1eaada1e76384d23bce87db022ef7d7ec196c5010d26a0fdcc57c"
+                  }
+                },
+                "confirmation": "healthy-switch"
+              },
+              "producer": {
+                "kind": "transition",
+                "transitionId": "80119516-eaa0-41f8-ad25-09a268ac9052",
+                "requestId": "f4968e8d-4319-4329-8d22-e0b5899ed385"
+              },
+              "result": {
+                "kind": "transition",
+                "transitionId": "80119516-eaa0-41f8-ad25-09a268ac9052",
+                "receiptId": null,
+                "authorityCommitted": false,
+                "runtime": "source",
+                "queue": "settled",
+                "outcome": "failed",
+                "errorCode": "MEMORY_TRANSITION_UNAVAILABLE"
+              },
+              "errorCode": "MEMORY_TRANSITION_UNAVAILABLE",
+              "createdAt": "2026-10-01T00:00:00.000Z",
+              "updatedAt": "2026-10-01T00:00:00.000Z",
+              "terminalAt": "2026-10-01T00:00:00.000Z"
+            },
+            "transitionId": "80119516-eaa0-41f8-ad25-09a268ac9052",
+            "attempt": {
+              "transitionId": "80119516-eaa0-41f8-ad25-09a268ac9052",
+              "operationId": "92080a85-8afa-4723-926d-3cbf2f9613cd",
+              "attemptId": "a998a01a-0355-4c4b-9409-fde55c818f5f",
+              "ownerId": "healthy-owner",
+              "generation": 1,
+              "revision": 7,
+              "leaseUntil": "2026-10-01T00:05:00.000Z",
+              "phase": "terminal",
+              "admissionOpenedAt": "2026-10-01T00:00:00.000Z",
+              "cutoffAt": "2026-10-01T00:00:00.000Z",
+              "cutoffSequence": 0,
+              "lastEvidenceId": "ebefc84c1431bbee0a8deaa46abc1678dc04c3c8f9799b270cbd6397e8886189",
+              "cancellationRequested": false
+            },
+            "receipt": null,
+            "resolution": {
+              "version": 1,
+              "resolutionId": "27ddfdc9b8f2be8ef107d2c091e83380dc1fb866173a6c53b3dd043992e13262",
+              "operationId": "92080a85-8afa-4723-926d-3cbf2f9613cd",
+              "transitionId": "80119516-eaa0-41f8-ad25-09a268ac9052",
+              "result": {
+                "kind": "transition",
+                "transitionId": "80119516-eaa0-41f8-ad25-09a268ac9052",
+                "receiptId": null,
+                "authorityCommitted": false,
+                "runtime": "source",
+                "queue": "settled",
+                "outcome": "failed",
+                "errorCode": "MEMORY_TRANSITION_UNAVAILABLE"
+              },
+              "release": {
+                "protocol": "taki-transition-v1",
+                "attemptId": "a998a01a-0355-4c4b-9409-fde55c818f5f",
+                "generation": 1,
+                "disposition": "source-aborted",
+                "proofHash": "252e72f7edb47d209499e23c97d56cb4271cb705d1358aaf7f7f9de7ed81f091",
+                "banks": [
+                  {
+                    "sourceBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                    "nativeGeneration": "22222222-2222-4222-8222-222222222222",
+                    "fenceId": "0ff7a970-3b9e-4b4e-a6bd-76940450d112",
+                    "outcomeReceiptId": "02545931de8af93eb742ea816fb199656942eb4086c83519c90cd688044d6fa1",
+                    "proofHash": "5f2939eaf96bba1836245d6b2341fa5a32dc7bf221f07c4bb2515f708041017c"
+                  },
+                  {
+                    "sourceBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                    "nativeGeneration": "22222222-2222-4222-8222-222222222222",
+                    "fenceId": "dc8c7e17-5072-4829-ab41-24f907e68bbc",
+                    "outcomeReceiptId": "85576bb0de2f4e0dd39305447997374863732ef6e9c626a72a771440f3cd953c",
+                    "proofHash": "f13b7ebc0ca85a050d49eb75f169efd4f22d5d5d3a6b4f33e04e0140d56bbc01"
+                  }
+                ],
+                "incidentId": null,
+                "recordedAt": "2026-10-01T00:00:00.000Z"
+              }
+            },
+            "selectionRow": {
+              "singleton": 1,
+              "mode": "hindsight",
+              "active_epoch_id": "epoch",
+              "verified_snapshot_id": null,
+              "activation_transaction_id": "fixture-hindsight",
+              "provider_lineage_id": "11111111-1111-4111-8111-111111111111",
+              "replica_checkpoint_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "updated_at": "1970-01-01T00:00:00.000Z",
+              "transition_receipt_id": null
+            },
+            "bindings": {
+              "local": {
+                "binding": {
+                  "kind": "none"
+                },
+                "lifetime": "running",
+                "revision": 1
+              },
+              "hindsight": {
+                "binding": {
+                  "kind": "published",
+                  "epochId": "epoch"
+                },
+                "lifetime": "running",
+                "revision": 1
+              }
+            },
+            "nativeCalls": {
+              "acquire": 2,
+              "verify": 2,
+              "resolve": 2,
+              "claim": 0,
+              "delta": 0
+            },
+            "nativeOutcomes": [
+              {
+                "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                "executor": {
+                  "transition_id": "80119516-eaa0-41f8-ad25-09a268ac9052",
+                  "attempt_id": "76c9d33b-064e-4b7d-9dd3-36c3abed32da",
+                  "generation": 1,
+                  "fence_token": "0ff7a970-3b9e-4b4e-a6bd-76940450d112"
+                },
+                "phase": "aborted",
+                "outcome": {
+                  "request": {
+                    "executor": {
+                      "transition_id": "80119516-eaa0-41f8-ad25-09a268ac9052",
+                      "attempt_id": "76c9d33b-064e-4b7d-9dd3-36c3abed32da",
+                      "generation": 1,
+                      "fence_token": "0ff7a970-3b9e-4b4e-a6bd-76940450d112"
+                    },
+                    "disposition": "abort",
+                    "decision_id": "8eee0dbe-54da-4416-9c3d-8737a3fddb46",
+                    "decision_hash": "84d0007777350436efae6d45a766ad487ceeef7e0a9411a0f9dab1a321017599",
+                    "core_receipt_id": null,
+                    "proof_hash": "5f2939eaf96bba1836245d6b2341fa5a32dc7bf221f07c4bb2515f708041017c"
+                  },
+                  "bank_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                  "provider_lineage": "11111111-1111-4111-8111-111111111111",
+                  "bank_generation": "22222222-2222-4222-8222-222222222222",
+                  "phase": "aborted",
+                  "resolution": "source_resumed",
+                  "restored_baseline_hash": null,
+                  "recorded_at": "2026-10-01T00:00:00.000Z",
+                  "outcome_hash": "02545931de8af93eb742ea816fb199656942eb4086c83519c90cd688044d6fa1"
+                }
+              },
+              {
+                "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                "executor": {
+                  "transition_id": "80119516-eaa0-41f8-ad25-09a268ac9052",
+                  "attempt_id": "27f0d689-94bc-4d48-a157-ddea0152d066",
+                  "generation": 1,
+                  "fence_token": "dc8c7e17-5072-4829-ab41-24f907e68bbc"
+                },
+                "phase": "aborted",
+                "outcome": {
+                  "request": {
+                    "executor": {
+                      "transition_id": "80119516-eaa0-41f8-ad25-09a268ac9052",
+                      "attempt_id": "27f0d689-94bc-4d48-a157-ddea0152d066",
+                      "generation": 1,
+                      "fence_token": "dc8c7e17-5072-4829-ab41-24f907e68bbc"
+                    },
+                    "disposition": "abort",
+                    "decision_id": "0db99330-cf78-4eb8-b3b4-1eff8e3520bc",
+                    "decision_hash": "25673506b1dfdcbbbd31826a253f90e4809fb195f414af2e95dcc4419bd8ffe0",
+                    "core_receipt_id": null,
+                    "proof_hash": "f13b7ebc0ca85a050d49eb75f169efd4f22d5d5d3a6b4f33e04e0140d56bbc01"
+                  },
+                  "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                  "provider_lineage": "11111111-1111-4111-8111-111111111111",
+                  "bank_generation": "22222222-2222-4222-8222-222222222222",
+                  "phase": "aborted",
+                  "resolution": "source_resumed",
+                  "restored_baseline_hash": null,
+                  "recorded_at": "2026-10-01T00:00:00.000Z",
+                  "outcome_hash": "85576bb0de2f4e0dd39305447997374863732ef6e9c626a72a771440f3cd953c"
+                }
+              }
+            ]
+          }
+        ],
+        "logs": [
+          {
+            "level": "warn",
+            "obj": {
+              "code": "MEMORY_TRANSITION_STALE",
+              "stage": "publication"
+            },
+            "msg": "healthy transition execution failed"
+          }
+        ]
+      }
+    },
+    {
+      "line": 32,
+      "diagnostic": {
+        "tag": "B3_HEALTHY_PHASE_DIAGNOSTIC",
+        "case": "selected-positive",
+        "marks": [
+          {
+            "phase": "setup:start",
+            "elapsedMs": 0.08460000000013679
+          },
+          {
+            "phase": "setup:end",
+            "elapsedMs": 2606.9148000000023
+          },
+          {
+            "phase": "transition.return-local:preview:start",
+            "elapsedMs": 2608.7646999999997
+          },
+          {
+            "phase": "transition.return-local:preview:end",
+            "elapsedMs": 3173.8286000000007
+          },
+          {
+            "phase": "transition.return-local:submit:start",
+            "elapsedMs": 3173.8377
+          },
+          {
+            "phase": "transition.return-local:submit:end",
+            "elapsedMs": 4439.154999999999
+          },
+          {
+            "phase": "transition.return-local:proof:start",
+            "elapsedMs": 33762.40059999999
+          },
+          {
+            "phase": "transition.return-local:proof:end",
+            "elapsedMs": 34635.7032
+          },
+          {
+            "phase": "transition.return-local:publication:start",
+            "elapsedMs": 34646.5138
+          },
+          {
+            "phase": "transition.return-local:publication:end",
+            "elapsedMs": 36150.014899999995
+          },
+          {
+            "phase": "transition.return-local:owner:settled",
+            "elapsedMs": 40436.9155
+          },
+          {
+            "phase": "transition.return-local:diagnostic-state:end",
+            "elapsedMs": 40439.542700000005
+          },
+          {
+            "phase": "transition.return-local:assertions:end",
+            "elapsedMs": 40513.878
+          },
+          {
+            "phase": "transition.reenter-hindsight:preview:start",
+            "elapsedMs": 40513.9253
+          },
+          {
+            "phase": "transition.reenter-hindsight:preview:end",
+            "elapsedMs": 41468.068100000004
+          },
+          {
+            "phase": "transition.reenter-hindsight:submit:start",
+            "elapsedMs": 41468.0714
+          },
+          {
+            "phase": "transition.reenter-hindsight:submit:end",
+            "elapsedMs": 42781.914099999995
+          },
+          {
+            "phase": "transition.reenter-hindsight:proof:start",
+            "elapsedMs": 76098.27070000001
+          },
+          {
+            "phase": "transition.reenter-hindsight:proof:end",
+            "elapsedMs": 77121.66530000001
+          },
+          {
+            "phase": "transition.reenter-hindsight:publication:start",
+            "elapsedMs": 77132.39760000001
+          },
+          {
+            "phase": "transition.reenter-hindsight:publication:end",
+            "elapsedMs": 79136.8922
+          },
+          {
+            "phase": "transition.reenter-hindsight:owner:settled",
+            "elapsedMs": 125834.3983
+          },
+          {
+            "phase": "transition.reenter-hindsight:diagnostic-state:end",
+            "elapsedMs": 125836.40720000002
+          },
+          {
+            "phase": "close:start",
+            "elapsedMs": 125838.80189999999
+          },
+          {
+            "phase": "close:end",
+            "elapsedMs": 125857.6686
+          }
+        ],
+        "results": [
+          {
+            "operation": {
+              "operationId": "a1779a54-344c-4cf7-b582-196059ae0f5f",
+              "kind": "transition.return-local",
+              "state": "completed",
+              "reason": null,
+              "authorityEpochId": "epoch",
+              "request": {
+                "kind": "transition.return-local",
+                "requestId": "360c7f45-1ae6-43ab-be22-212d73454c3a",
+                "previewId": "8349c252-9c90-4817-a705-dc8f4800b4e6",
+                "previewHash": "893c338a905b8686366920695b15ce63a347787e4723c0c56ea82bbb77646b46",
+                "expected": {
+                  "predecessorEpochId": "epoch",
+                  "sourceProvider": "hindsight",
+                  "sourceLineageId": "11111111-1111-4111-8111-111111111111",
+                  "targetProvider": "local",
+                  "targetLineageId": "fixture-local-lineage",
+                  "configRevision": 3,
+                  "configFingerprint": "a958dbb706b1f9ade36cdf0237c4ce715b76c62de0e7c5004d11659e48d407d7",
+                  "inventoryRevision": 3,
+                  "inventoryHash": "a03b5d7f83200da93221ebfc25251f74b1bcf2263b97c404474743448625baec",
+                  "banks": [
+                    {
+                      "scope": {
+                        "kind": "character",
+                        "characterId": "taki"
+                      },
+                      "sourceBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                      "targetBankId": null,
+                      "sourceRevision": 4,
+                      "nativeBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                      "nativeGeneration": "22222222-2222-4222-8222-222222222222",
+                      "manifestHash": "bf1e9b7dc2eea86d62570611c22fcb7b8391a606add02bfc796f64e9ef851db5",
+                      "mappingHash": "5f75b59bf4b2d021c3aed60deb59d105d5974fc64fd19f8265f9596d30ce7c4f",
+                      "policyRevision": 0,
+                      "blockRevision": 0
+                    },
+                    {
+                      "scope": {
+                        "kind": "global",
+                        "characterId": null
+                      },
+                      "sourceBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                      "targetBankId": null,
+                      "sourceRevision": 4,
+                      "nativeBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                      "nativeGeneration": "22222222-2222-4222-8222-222222222222",
+                      "manifestHash": "364993abb2a3793a7512df122512e74f4c733be9f4297ac487e1ef995a324ac7",
+                      "mappingHash": "bdd04a11a13a8446a98c612caa9e47a2cd1f7575c554fd3baf0d31336455f7ec",
+                      "policyRevision": 0,
+                      "blockRevision": 0
+                    }
+                  ],
+                  "baselineReceiptId": null,
+                  "baselineHash": null,
+                  "custodyBoundaryHash": "8802b6eb4bb3a571b8c4c50d181b434e4bb3741a2413394b2a26a1d2e153cbdd",
+                  "templates": {
+                    "version": 1,
+                    "hash": "d18fe8d8d8a93075f3e97211d550cc0c04326d4f1d8c92e27e5c91073f5ca818"
+                  }
+                },
+                "confirmation": "healthy-switch"
+              },
+              "producer": {
+                "kind": "transition",
+                "transitionId": "b66c9fba-95fb-4645-8e7e-211939f846d0",
+                "requestId": "360c7f45-1ae6-43ab-be22-212d73454c3a"
+              },
+              "result": {
+                "kind": "transition",
+                "transitionId": "b66c9fba-95fb-4645-8e7e-211939f846d0",
+                "receiptId": "e874f70b54f7dac56ecbc24ce55f8831be11aa686cbe6f38a7c915ec2e11fd3d",
+                "authorityCommitted": true,
+                "runtime": "ready",
+                "queue": "settled",
+                "outcome": "completed",
+                "errorCode": null
+              },
+              "errorCode": null,
+              "createdAt": "2026-10-01T00:00:00.000Z",
+              "updatedAt": "2026-10-01T00:00:00.000Z",
+              "terminalAt": "2026-10-01T00:00:00.000Z"
+            },
+            "transitionId": "b66c9fba-95fb-4645-8e7e-211939f846d0",
+            "attempt": {
+              "transitionId": "b66c9fba-95fb-4645-8e7e-211939f846d0",
+              "operationId": "a1779a54-344c-4cf7-b582-196059ae0f5f",
+              "attemptId": "9fbd0a79-1f56-4616-8ef6-b5ee987317a1",
+              "ownerId": "healthy-owner",
+              "generation": 1,
+              "revision": 10,
+              "leaseUntil": "2026-10-01T00:05:00.000Z",
+              "phase": "terminal",
+              "admissionOpenedAt": "2026-10-01T00:00:00.000Z",
+              "cutoffAt": "2026-10-01T00:00:00.000Z",
+              "cutoffSequence": 0,
+              "lastEvidenceId": "549441f3448f68ca7f3ad0ca13cdc1f579cee1bd4251bd8dba9b9a13a4a5d339",
+              "cancellationRequested": false
+            },
+            "receipt": {
+              "version": 1,
+              "receiptId": "e874f70b54f7dac56ecbc24ce55f8831be11aa686cbe6f38a7c915ec2e11fd3d",
+              "transitionId": "b66c9fba-95fb-4645-8e7e-211939f846d0",
+              "operationId": "a1779a54-344c-4cf7-b582-196059ae0f5f",
+              "requestId": "360c7f45-1ae6-43ab-be22-212d73454c3a",
+              "kind": "transition.return-local",
+              "identity": {
+                "predecessorEpochId": "epoch",
+                "sourceProvider": "hindsight",
+                "sourceLineageId": "11111111-1111-4111-8111-111111111111",
+                "targetProvider": "local",
+                "targetLineageId": "fixture-local-lineage",
+                "configRevision": 3,
+                "configFingerprint": "a958dbb706b1f9ade36cdf0237c4ce715b76c62de0e7c5004d11659e48d407d7",
+                "inventoryRevision": 3,
+                "inventoryHash": "a03b5d7f83200da93221ebfc25251f74b1bcf2263b97c404474743448625baec",
+                "banks": [
+                  {
+                    "scope": {
+                      "kind": "character",
+                      "characterId": "taki"
+                    },
+                    "sourceBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                    "targetBankId": null,
+                    "sourceRevision": 4,
+                    "nativeBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                    "nativeGeneration": "22222222-2222-4222-8222-222222222222",
+                    "manifestHash": "bf1e9b7dc2eea86d62570611c22fcb7b8391a606add02bfc796f64e9ef851db5",
+                    "mappingHash": "5f75b59bf4b2d021c3aed60deb59d105d5974fc64fd19f8265f9596d30ce7c4f",
+                    "policyRevision": 0,
+                    "blockRevision": 0
+                  },
+                  {
+                    "scope": {
+                      "kind": "global",
+                      "characterId": null
+                    },
+                    "sourceBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                    "targetBankId": null,
+                    "sourceRevision": 4,
+                    "nativeBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                    "nativeGeneration": "22222222-2222-4222-8222-222222222222",
+                    "manifestHash": "364993abb2a3793a7512df122512e74f4c733be9f4297ac487e1ef995a324ac7",
+                    "mappingHash": "bdd04a11a13a8446a98c612caa9e47a2cd1f7575c554fd3baf0d31336455f7ec",
+                    "policyRevision": 0,
+                    "blockRevision": 0
+                  }
+                ],
+                "baselineReceiptId": null,
+                "baselineHash": null,
+                "custodyBoundaryHash": "8802b6eb4bb3a571b8c4c50d181b434e4bb3741a2413394b2a26a1d2e153cbdd",
+                "templates": {
+                  "version": 1,
+                  "hash": "d18fe8d8d8a93075f3e97211d550cc0c04326d4f1d8c92e27e5c91073f5ca818"
+                }
+              },
+              "newEpochId": "4bddb43e-c984-4333-af67-36222722f6c5",
+              "proofId": "549441f3448f68ca7f3ad0ca13cdc1f579cee1bd4251bd8dba9b9a13a4a5d339",
+              "mappingHash": "2c707000a23083a7f459de99100f4a9e5f4769671feb61eb655f3bc6e6ebb3e6",
+              "custodyAssignmentHash": "9de944ac01d1e46b7acf47da45bd639d5cac4990ea7beda232d1307365c64f18",
+              "cutoffSequence": 0,
+              "committedAt": "2026-10-01T00:00:00.000Z"
+            },
+            "resolution": {
+              "version": 1,
+              "resolutionId": "07ff27f686c9ba6ee7422331975d7c59e5763dd4c3a1f484b4f570976adecb83",
+              "operationId": "a1779a54-344c-4cf7-b582-196059ae0f5f",
+              "transitionId": "b66c9fba-95fb-4645-8e7e-211939f846d0",
+              "result": {
+                "kind": "transition",
+                "transitionId": "b66c9fba-95fb-4645-8e7e-211939f846d0",
+                "receiptId": "e874f70b54f7dac56ecbc24ce55f8831be11aa686cbe6f38a7c915ec2e11fd3d",
+                "authorityCommitted": true,
+                "runtime": "ready",
+                "queue": "settled",
+                "outcome": "completed",
+                "errorCode": null
+              },
+              "release": {
+                "protocol": "taki-transition-v1",
+                "attemptId": "9fbd0a79-1f56-4616-8ef6-b5ee987317a1",
+                "generation": 1,
+                "disposition": "source-retired",
+                "proofHash": "4de2d6b617f676b97aff61aaf2ee9592ea26ff83c81aa2bdc95ccf4e079b3281",
+                "banks": [
+                  {
+                    "sourceBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                    "nativeGeneration": "22222222-2222-4222-8222-222222222222",
+                    "fenceId": "6e7e2805-dea3-4c7e-b71c-ef35f9c1d038",
+                    "outcomeReceiptId": "69e48e19f4af1f8338667eea69b964538efe42f063b4fe49d815bb603ea003c8",
+                    "proofHash": "c6fd243c0f02a8607f5234b18f872114d9f69c8bb2817332d342b0f18c0603e2"
+                  },
+                  {
+                    "sourceBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                    "nativeGeneration": "22222222-2222-4222-8222-222222222222",
+                    "fenceId": "2ddb54df-af90-43be-a700-4e12014df7b1",
+                    "outcomeReceiptId": "611e994b17a4d59b7a8b7d7ba524c5b19ebb8f8e164b095617f36e847aac78a4",
+                    "proofHash": "b2455a7d2e1112cd925d4f624c357b201b1d9ef577993aee586580e5b5653f58"
+                  }
+                ],
+                "incidentId": null,
+                "recordedAt": "2026-10-01T00:00:00.000Z"
+              }
+            },
+            "selectionRow": {
+              "singleton": 1,
+              "mode": "canonical-local",
+              "active_epoch_id": "4bddb43e-c984-4333-af67-36222722f6c5",
+              "verified_snapshot_id": null,
+              "activation_transaction_id": null,
+              "provider_lineage_id": "fixture-local-lineage",
+              "replica_checkpoint_digest": "4e0c632ae742607c7061627da0a557dc93e42515d2ba21996410d64833507da4",
+              "updated_at": "2026-10-01T00:00:00.000Z",
+              "transition_receipt_id": "e874f70b54f7dac56ecbc24ce55f8831be11aa686cbe6f38a7c915ec2e11fd3d"
+            },
+            "bindings": {
+              "local": {
+                "binding": {
+                  "kind": "published",
+                  "epochId": "4bddb43e-c984-4333-af67-36222722f6c5"
+                },
+                "lifetime": "running",
+                "revision": 1
+              },
+              "hindsight": {
+                "binding": {
+                  "kind": "none"
+                },
+                "lifetime": "running",
+                "revision": 1
+              }
+            },
+            "nativeCalls": {
+              "acquire": 2,
+              "verify": 2,
+              "resolve": 2,
+              "claim": 0,
+              "delta": 0
+            },
+            "nativeOutcomes": [
+              {
+                "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                "executor": {
+                  "transition_id": "b66c9fba-95fb-4645-8e7e-211939f846d0",
+                  "attempt_id": "41492873-5ae1-4c2a-b9fe-fb20e2136e51",
+                  "generation": 1,
+                  "fence_token": "6e7e2805-dea3-4c7e-b71c-ef35f9c1d038"
+                },
+                "phase": "retired",
+                "outcome": {
+                  "request": {
+                    "executor": {
+                      "transition_id": "b66c9fba-95fb-4645-8e7e-211939f846d0",
+                      "attempt_id": "41492873-5ae1-4c2a-b9fe-fb20e2136e51",
+                      "generation": 1,
+                      "fence_token": "6e7e2805-dea3-4c7e-b71c-ef35f9c1d038"
+                    },
+                    "disposition": "retire",
+                    "decision_id": "3e069844-6f44-40fc-9cb3-eaa57a2a661d",
+                    "decision_hash": "2b47b0bc24d74f2eac4c18a7f63b084e1309709881cc23d29b277c3bbb843bde",
+                    "core_receipt_id": "e874f70b54f7dac56ecbc24ce55f8831be11aa686cbe6f38a7c915ec2e11fd3d",
+                    "proof_hash": "c6fd243c0f02a8607f5234b18f872114d9f69c8bb2817332d342b0f18c0603e2"
+                  },
+                  "bank_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                  "provider_lineage": "11111111-1111-4111-8111-111111111111",
+                  "bank_generation": "22222222-2222-4222-8222-222222222222",
+                  "phase": "retired",
+                  "resolution": "committed",
+                  "restored_baseline_hash": null,
+                  "recorded_at": "2026-10-01T00:00:00.000Z",
+                  "outcome_hash": "69e48e19f4af1f8338667eea69b964538efe42f063b4fe49d815bb603ea003c8"
+                }
+              },
+              {
+                "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                "executor": {
+                  "transition_id": "b66c9fba-95fb-4645-8e7e-211939f846d0",
+                  "attempt_id": "269cc9c2-6a21-4a29-96d0-a26bc6b7969b",
+                  "generation": 1,
+                  "fence_token": "2ddb54df-af90-43be-a700-4e12014df7b1"
+                },
+                "phase": "retired",
+                "outcome": {
+                  "request": {
+                    "executor": {
+                      "transition_id": "b66c9fba-95fb-4645-8e7e-211939f846d0",
+                      "attempt_id": "269cc9c2-6a21-4a29-96d0-a26bc6b7969b",
+                      "generation": 1,
+                      "fence_token": "2ddb54df-af90-43be-a700-4e12014df7b1"
+                    },
+                    "disposition": "retire",
+                    "decision_id": "11dd3ecb-71c4-4877-8299-9ae20a8d375f",
+                    "decision_hash": "4f4199b46cf46fa4cec7e85617849b8d84fd1c1065dec06f694cc1c716f9f781",
+                    "core_receipt_id": "e874f70b54f7dac56ecbc24ce55f8831be11aa686cbe6f38a7c915ec2e11fd3d",
+                    "proof_hash": "b2455a7d2e1112cd925d4f624c357b201b1d9ef577993aee586580e5b5653f58"
+                  },
+                  "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                  "provider_lineage": "11111111-1111-4111-8111-111111111111",
+                  "bank_generation": "22222222-2222-4222-8222-222222222222",
+                  "phase": "retired",
+                  "resolution": "committed",
+                  "restored_baseline_hash": null,
+                  "recorded_at": "2026-10-01T00:00:00.000Z",
+                  "outcome_hash": "611e994b17a4d59b7a8b7d7ba524c5b19ebb8f8e164b095617f36e847aac78a4"
+                }
+              }
+            ]
+          },
+          {
+            "operation": {
+              "operationId": "d648b915-7ae6-4cba-8aef-21502867b976",
+              "kind": "transition.reenter-hindsight",
+              "state": "outcome_unknown",
+              "reason": "commitment_unknown",
+              "authorityEpochId": "4bddb43e-c984-4333-af67-36222722f6c5",
+              "request": {
+                "kind": "transition.reenter-hindsight",
+                "requestId": "3793c936-abd3-4ba8-8e1a-fc632002e3d2",
+                "previewId": "66d10a8c-99f8-4a47-85ff-f8c41aa23490",
+                "previewHash": "c14d14b6252965eeeabd1b04fe02b17ecd5057eb6cc889f6144509da256fdb75",
+                "expected": {
+                  "predecessorEpochId": "4bddb43e-c984-4333-af67-36222722f6c5",
+                  "sourceProvider": "local",
+                  "sourceLineageId": "fixture-local-lineage",
+                  "targetProvider": "hindsight",
+                  "targetLineageId": "11111111-1111-4111-8111-111111111111",
+                  "configRevision": 3,
+                  "configFingerprint": "a958dbb706b1f9ade36cdf0237c4ce715b76c62de0e7c5004d11659e48d407d7",
+                  "inventoryRevision": 3,
+                  "inventoryHash": "a03b5d7f83200da93221ebfc25251f74b1bcf2263b97c404474743448625baec",
+                  "banks": [
+                    {
+                      "scope": {
+                        "kind": "character",
+                        "characterId": "taki"
+                      },
+                      "sourceBankId": "861fd28a-740c-4e6d-8149-66b1836069b7",
+                      "targetBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                      "sourceRevision": 0,
+                      "nativeBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                      "nativeGeneration": "22222222-2222-4222-8222-222222222222",
+                      "manifestHash": "4883918ed5494146585568fd4629ced950f5499a25df92d659d23f5244d6b146",
+                      "mappingHash": "bef623d0899d7d656678ec7ead654da9bbb31d302074f2a68b6e3e35eec7497d",
+                      "policyRevision": 0,
+                      "blockRevision": 0
+                    },
+                    {
+                      "scope": {
+                        "kind": "global",
+                        "characterId": null
+                      },
+                      "sourceBankId": "bb809c28-b21c-4c76-ade0-2c1c82acdd52",
+                      "targetBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                      "sourceRevision": 0,
+                      "nativeBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                      "nativeGeneration": "22222222-2222-4222-8222-222222222222",
+                      "manifestHash": "4883918ed5494146585568fd4629ced950f5499a25df92d659d23f5244d6b146",
+                      "mappingHash": "bba54bf78e22b16b27549a7a93692d96e030770e63e5d509283562ce4a3a93a7",
+                      "policyRevision": 0,
+                      "blockRevision": 0
+                    }
+                  ],
+                  "baselineReceiptId": "e874f70b54f7dac56ecbc24ce55f8831be11aa686cbe6f38a7c915ec2e11fd3d",
+                  "baselineHash": "c19a18b61ef09c989851932f9a0b85defed38b6aceaf8b4e68ce34488e17b221",
+                  "custodyBoundaryHash": "524490c7e346d140e1927e9d24d7f3d3d315a14f67059ce07b99ee1163b93ee2",
+                  "templates": {
+                    "version": 1,
+                    "hash": "e137bce4ae382954161219405630a18932edafa528662d29e9a5f80087761f6c"
+                  }
+                },
+                "confirmation": "healthy-switch"
+              },
+              "producer": {
+                "kind": "transition",
+                "transitionId": "48db526c-2c75-451c-823f-e42597b81ede",
+                "requestId": "3793c936-abd3-4ba8-8e1a-fc632002e3d2"
+              },
+              "result": {
+                "kind": "transition",
+                "transitionId": "48db526c-2c75-451c-823f-e42597b81ede",
+                "receiptId": "6ff6a1dfc114c1bb835ea5bd5137b30a13c2cf430084365fbbf4221156e38d4e",
+                "authorityCommitted": true,
+                "runtime": "ready",
+                "queue": "settled",
+                "outcome": "outcome_unknown",
+                "errorCode": "MEMORY_TRANSITION_OUTCOME_UNKNOWN"
+              },
+              "errorCode": "MEMORY_TRANSITION_OUTCOME_UNKNOWN",
+              "createdAt": "2026-10-01T00:00:00.000Z",
+              "updatedAt": "2026-10-01T00:00:00.000Z",
+              "terminalAt": "2026-10-01T00:00:00.000Z"
+            },
+            "transitionId": "48db526c-2c75-451c-823f-e42597b81ede",
+            "attempt": {
+              "transitionId": "48db526c-2c75-451c-823f-e42597b81ede",
+              "operationId": "d648b915-7ae6-4cba-8aef-21502867b976",
+              "attemptId": "359d4f8c-f158-4aae-8934-2032ef8a28aa",
+              "ownerId": "healthy-owner",
+              "generation": 1,
+              "revision": 9,
+              "leaseUntil": "2026-10-01T00:05:00.000Z",
+              "phase": "settling",
+              "admissionOpenedAt": "2026-10-01T00:00:00.000Z",
+              "cutoffAt": "2026-10-01T00:00:00.000Z",
+              "cutoffSequence": 0,
+              "lastEvidenceId": "effa263195dc61800f27652c241e513a1c2c32e4fcdb3d334938a251834ec6ed",
+              "cancellationRequested": false
+            },
+            "receipt": {
+              "version": 1,
+              "receiptId": "6ff6a1dfc114c1bb835ea5bd5137b30a13c2cf430084365fbbf4221156e38d4e",
+              "transitionId": "48db526c-2c75-451c-823f-e42597b81ede",
+              "operationId": "d648b915-7ae6-4cba-8aef-21502867b976",
+              "requestId": "3793c936-abd3-4ba8-8e1a-fc632002e3d2",
+              "kind": "transition.reenter-hindsight",
+              "identity": {
+                "predecessorEpochId": "4bddb43e-c984-4333-af67-36222722f6c5",
+                "sourceProvider": "local",
+                "sourceLineageId": "fixture-local-lineage",
+                "targetProvider": "hindsight",
+                "targetLineageId": "11111111-1111-4111-8111-111111111111",
+                "configRevision": 3,
+                "configFingerprint": "a958dbb706b1f9ade36cdf0237c4ce715b76c62de0e7c5004d11659e48d407d7",
+                "inventoryRevision": 3,
+                "inventoryHash": "a03b5d7f83200da93221ebfc25251f74b1bcf2263b97c404474743448625baec",
+                "banks": [
+                  {
+                    "scope": {
+                      "kind": "character",
+                      "characterId": "taki"
+                    },
+                    "sourceBankId": "861fd28a-740c-4e6d-8149-66b1836069b7",
+                    "targetBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                    "sourceRevision": 0,
+                    "nativeBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                    "nativeGeneration": "22222222-2222-4222-8222-222222222222",
+                    "manifestHash": "4883918ed5494146585568fd4629ced950f5499a25df92d659d23f5244d6b146",
+                    "mappingHash": "bef623d0899d7d656678ec7ead654da9bbb31d302074f2a68b6e3e35eec7497d",
+                    "policyRevision": 0,
+                    "blockRevision": 0
+                  },
+                  {
+                    "scope": {
+                      "kind": "global",
+                      "characterId": null
+                    },
+                    "sourceBankId": "bb809c28-b21c-4c76-ade0-2c1c82acdd52",
+                    "targetBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                    "sourceRevision": 0,
+                    "nativeBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                    "nativeGeneration": "22222222-2222-4222-8222-222222222222",
+                    "manifestHash": "4883918ed5494146585568fd4629ced950f5499a25df92d659d23f5244d6b146",
+                    "mappingHash": "bba54bf78e22b16b27549a7a93692d96e030770e63e5d509283562ce4a3a93a7",
+                    "policyRevision": 0,
+                    "blockRevision": 0
+                  }
+                ],
+                "baselineReceiptId": "e874f70b54f7dac56ecbc24ce55f8831be11aa686cbe6f38a7c915ec2e11fd3d",
+                "baselineHash": "c19a18b61ef09c989851932f9a0b85defed38b6aceaf8b4e68ce34488e17b221",
+                "custodyBoundaryHash": "524490c7e346d140e1927e9d24d7f3d3d315a14f67059ce07b99ee1163b93ee2",
+                "templates": {
+                  "version": 1,
+                  "hash": "e137bce4ae382954161219405630a18932edafa528662d29e9a5f80087761f6c"
+                }
+              },
+              "newEpochId": "34278a3a-71db-4146-85ff-7cf830f94c57",
+              "proofId": "effa263195dc61800f27652c241e513a1c2c32e4fcdb3d334938a251834ec6ed",
+              "mappingHash": "be0bb95475be8e92e0c8b50315b82221b32c0c822a912631df55826d81a10ff3",
+              "custodyAssignmentHash": "6e76c462259ba501ca00f6b38ababc8fb104a25068c7dcf735f288913aa12e7a",
+              "cutoffSequence": 0,
+              "committedAt": "2026-10-01T00:00:00.000Z"
+            },
+            "resolution": null,
+            "selectionRow": {
+              "singleton": 1,
+              "mode": "hindsight",
+              "active_epoch_id": "34278a3a-71db-4146-85ff-7cf830f94c57",
+              "verified_snapshot_id": null,
+              "activation_transaction_id": null,
+              "provider_lineage_id": "11111111-1111-4111-8111-111111111111",
+              "replica_checkpoint_digest": "e87b8959012fa7fbe1bcd99476ef8938379ab81e4e9e06dfb2449b4bb595b090",
+              "updated_at": "2026-10-01T00:00:00.000Z",
+              "transition_receipt_id": "6ff6a1dfc114c1bb835ea5bd5137b30a13c2cf430084365fbbf4221156e38d4e"
+            },
+            "bindings": {
+              "local": {
+                "binding": {
+                  "kind": "none"
+                },
+                "lifetime": "running",
+                "revision": 2
+              },
+              "hindsight": {
+                "binding": {
+                  "kind": "published",
+                  "epochId": "34278a3a-71db-4146-85ff-7cf830f94c57"
+                },
+                "lifetime": "running",
+                "revision": 2
+              }
+            },
+            "nativeCalls": {
+              "acquire": 4,
+              "verify": 4,
+              "resolve": 4,
+              "claim": 0,
+              "delta": 2
+            },
+            "nativeOutcomes": [
+              {
+                "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                "executor": {
+                  "transition_id": "48db526c-2c75-451c-823f-e42597b81ede",
+                  "attempt_id": "b121aad7-fc0a-4303-9893-b6b5c80514bf",
+                  "generation": 1,
+                  "fence_token": "6966860f-f9a3-4a1c-9ec9-758201c1484c"
+                },
+                "phase": "active",
+                "outcome": {
+                  "request": {
+                    "executor": {
+                      "transition_id": "48db526c-2c75-451c-823f-e42597b81ede",
+                      "attempt_id": "b121aad7-fc0a-4303-9893-b6b5c80514bf",
+                      "generation": 1,
+                      "fence_token": "6966860f-f9a3-4a1c-9ec9-758201c1484c"
+                    },
+                    "disposition": "activate",
+                    "decision_id": "bea45f9a-8582-4660-a80c-db75380aacf9",
+                    "decision_hash": "a9929d19543bcff30fc6879461c50d1d6deea7dfc110fe6ef4c1d5b5b5ea9b04",
+                    "core_receipt_id": "6ff6a1dfc114c1bb835ea5bd5137b30a13c2cf430084365fbbf4221156e38d4e",
+                    "proof_hash": "7ce578ccaf4ac1ae2a88995bcee9abeafe99d319877af2445afc434cffc5a8f0"
+                  },
+                  "bank_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                  "provider_lineage": "11111111-1111-4111-8111-111111111111",
+                  "bank_generation": "22222222-2222-4222-8222-222222222222",
+                  "phase": "active",
+                  "resolution": "committed",
+                  "restored_baseline_hash": null,
+                  "recorded_at": "2026-10-01T00:00:00.000Z",
+                  "outcome_hash": "16d74fc86acc3e62ca74c5bb9ab64c4b770ccce3bfd51dd81ced5c20f0767c01"
+                }
+              },
+              {
+                "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                "executor": {
+                  "transition_id": "48db526c-2c75-451c-823f-e42597b81ede",
+                  "attempt_id": "ebfe8b73-e247-462d-b977-fb24480e1ffa",
+                  "generation": 1,
+                  "fence_token": "2ffbc648-cf26-416e-9b83-4aba9b1016de"
+                },
+                "phase": "active",
+                "outcome": {
+                  "request": {
+                    "executor": {
+                      "transition_id": "48db526c-2c75-451c-823f-e42597b81ede",
+                      "attempt_id": "ebfe8b73-e247-462d-b977-fb24480e1ffa",
+                      "generation": 1,
+                      "fence_token": "2ffbc648-cf26-416e-9b83-4aba9b1016de"
+                    },
+                    "disposition": "activate",
+                    "decision_id": "1e527c46-4ac6-4c36-acaf-223c4c4606b4",
+                    "decision_hash": "89a90494572db107365cd289f1ea8a1378ff5e673624735b7d83c9636227e8dd",
+                    "core_receipt_id": "6ff6a1dfc114c1bb835ea5bd5137b30a13c2cf430084365fbbf4221156e38d4e",
+                    "proof_hash": "cc28190a0806f5f6b9b9f99d6e53d086cc1cd221b1a99c9c4115870647965e40"
+                  },
+                  "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                  "provider_lineage": "11111111-1111-4111-8111-111111111111",
+                  "bank_generation": "22222222-2222-4222-8222-222222222222",
+                  "phase": "active",
+                  "resolution": "committed",
+                  "restored_baseline_hash": null,
+                  "recorded_at": "2026-10-01T00:00:00.000Z",
+                  "outcome_hash": "b5e8cdc027d0c715c758fa434daa965c2f7045389348e9d46d9a21c5fc09e499"
+                }
+              }
+            ]
+          }
+        ],
+        "logs": [
+          {
+            "level": "warn",
+            "obj": {
+              "code": "MEMORY_TRANSITION_LEASE_LOST",
+              "stage": "settling"
+            },
+            "msg": "healthy transition execution failed"
+          }
+        ]
+      }
+    }
+  ],
+  "summary": [
+    {
+      "case": "selected-return-selection-drift",
+      "line": 4,
+      "totalMs": 39431.894000000015,
+      "setupMs": 3689.249,
+      "closeMs": 17.722,
+      "marks": [
+        {
+          "phase": "setup:start",
+          "elapsedMs": 0.08280000000377186
+        },
+        {
+          "phase": "setup:end",
+          "elapsedMs": 3689.3318
+        },
+        {
+          "phase": "preview:start",
+          "elapsedMs": 3689.8068000000058
+        },
+        {
+          "phase": "preview:end",
+          "elapsedMs": 4351.8266
+        },
+        {
+          "phase": "submit:start",
+          "elapsedMs": 4351.834499999997
+        },
+        {
+          "phase": "submit:end",
+          "elapsedMs": 5367.042300000001
+        },
+        {
+          "phase": "proof:start",
+          "elapsedMs": 35344.8763
+        },
+        {
+          "phase": "proof:end",
+          "elapsedMs": 36226.92390000001
+        },
+        {
+          "phase": "publication:before-state:start",
+          "elapsedMs": 36237.6455
+        },
+        {
+          "phase": "publication:before-state:end",
+          "elapsedMs": 36281.60220000001
+        },
+        {
+          "phase": "publication:start",
+          "elapsedMs": 36282.0242
+        },
+        {
+          "phase": "publication:end",
+          "elapsedMs": 37329.56670000001
+        },
+        {
+          "phase": "publication:after-state:end",
+          "elapsedMs": 37369.3924
+        },
+        {
+          "phase": "owner:settled",
+          "elapsedMs": 39406.894199999995
+        },
+        {
+          "phase": "diagnostic-state:end",
+          "elapsedMs": 39408.0413
+        },
+        {
+          "phase": "close:start",
+          "elapsedMs": 39414.1719
+        },
+        {
+          "phase": "close:end",
+          "elapsedMs": 39431.894000000015
+        }
+      ],
+      "results": [
+        {
+          "operationId": "92080a85-8afa-4723-926d-3cbf2f9613cd",
+          "kind": "transition.return-local",
+          "state": "failed",
+          "result": {
+            "kind": "transition",
+            "transitionId": "80119516-eaa0-41f8-ad25-09a268ac9052",
+            "receiptId": null,
+            "authorityCommitted": false,
+            "runtime": "source",
+            "queue": "settled",
+            "outcome": "failed",
+            "errorCode": "MEMORY_TRANSITION_UNAVAILABLE"
+          },
+          "reason": "producer_failed",
+          "errorCode": "MEMORY_TRANSITION_UNAVAILABLE",
+          "attempt": {
+            "transitionId": "80119516-eaa0-41f8-ad25-09a268ac9052",
+            "operationId": "92080a85-8afa-4723-926d-3cbf2f9613cd",
+            "attemptId": "a998a01a-0355-4c4b-9409-fde55c818f5f",
+            "ownerId": "healthy-owner",
+            "generation": 1,
+            "revision": 7,
+            "leaseUntil": "2026-10-01T00:05:00.000Z",
+            "phase": "terminal",
+            "admissionOpenedAt": "2026-10-01T00:00:00.000Z",
+            "cutoffAt": "2026-10-01T00:00:00.000Z",
+            "cutoffSequence": 0,
+            "lastEvidenceId": "ebefc84c1431bbee0a8deaa46abc1678dc04c3c8f9799b270cbd6397e8886189",
+            "cancellationRequested": false
+          },
+          "resolution": {
+            "version": 1,
+            "resolutionId": "27ddfdc9b8f2be8ef107d2c091e83380dc1fb866173a6c53b3dd043992e13262",
+            "operationId": "92080a85-8afa-4723-926d-3cbf2f9613cd",
+            "transitionId": "80119516-eaa0-41f8-ad25-09a268ac9052",
+            "result": {
+              "kind": "transition",
+              "transitionId": "80119516-eaa0-41f8-ad25-09a268ac9052",
+              "receiptId": null,
+              "authorityCommitted": false,
+              "runtime": "source",
+              "queue": "settled",
+              "outcome": "failed",
+              "errorCode": "MEMORY_TRANSITION_UNAVAILABLE"
+            },
+            "release": {
+              "protocol": "taki-transition-v1",
+              "attemptId": "a998a01a-0355-4c4b-9409-fde55c818f5f",
+              "generation": 1,
+              "disposition": "source-aborted",
+              "proofHash": "252e72f7edb47d209499e23c97d56cb4271cb705d1358aaf7f7f9de7ed81f091",
+              "banks": [
+                {
+                  "sourceBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                  "nativeGeneration": "22222222-2222-4222-8222-222222222222",
+                  "fenceId": "0ff7a970-3b9e-4b4e-a6bd-76940450d112",
+                  "outcomeReceiptId": "02545931de8af93eb742ea816fb199656942eb4086c83519c90cd688044d6fa1",
+                  "proofHash": "5f2939eaf96bba1836245d6b2341fa5a32dc7bf221f07c4bb2515f708041017c"
+                },
+                {
+                  "sourceBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                  "nativeGeneration": "22222222-2222-4222-8222-222222222222",
+                  "fenceId": "dc8c7e17-5072-4829-ab41-24f907e68bbc",
+                  "outcomeReceiptId": "85576bb0de2f4e0dd39305447997374863732ef6e9c626a72a771440f3cd953c",
+                  "proofHash": "f13b7ebc0ca85a050d49eb75f169efd4f22d5d5d3a6b4f33e04e0140d56bbc01"
+                }
+              ],
+              "incidentId": null,
+              "recordedAt": "2026-10-01T00:00:00.000Z"
+            }
+          },
+          "hasReceipt": false,
+          "selectionRow": {
+            "singleton": 1,
+            "mode": "hindsight",
+            "active_epoch_id": "epoch",
+            "verified_snapshot_id": null,
+            "activation_transaction_id": "fixture-hindsight",
+            "provider_lineage_id": "11111111-1111-4111-8111-111111111111",
+            "replica_checkpoint_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "updated_at": "1970-01-01T00:00:00.000Z",
+            "transition_receipt_id": null
+          },
+          "bindings": {
+            "local": {
+              "binding": {
+                "kind": "none"
+              },
+              "lifetime": "running",
+              "revision": 1
+            },
+            "hindsight": {
+              "binding": {
+                "kind": "published",
+                "epochId": "epoch"
+              },
+              "lifetime": "running",
+              "revision": 1
+            }
+          },
+          "nativeCalls": {
+            "acquire": 2,
+            "verify": 2,
+            "resolve": 2,
+            "claim": 0,
+            "delta": 0
+          },
+          "nativeOutcomes": [
+            {
+              "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+              "phase": "aborted",
+              "outcome": {
+                "request": {
+                  "executor": {
+                    "transition_id": "80119516-eaa0-41f8-ad25-09a268ac9052",
+                    "attempt_id": "76c9d33b-064e-4b7d-9dd3-36c3abed32da",
+                    "generation": 1,
+                    "fence_token": "0ff7a970-3b9e-4b4e-a6bd-76940450d112"
+                  },
+                  "disposition": "abort",
+                  "decision_id": "8eee0dbe-54da-4416-9c3d-8737a3fddb46",
+                  "decision_hash": "84d0007777350436efae6d45a766ad487ceeef7e0a9411a0f9dab1a321017599",
+                  "core_receipt_id": null,
+                  "proof_hash": "5f2939eaf96bba1836245d6b2341fa5a32dc7bf221f07c4bb2515f708041017c"
+                },
+                "bank_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                "provider_lineage": "11111111-1111-4111-8111-111111111111",
+                "bank_generation": "22222222-2222-4222-8222-222222222222",
+                "phase": "aborted",
+                "resolution": "source_resumed",
+                "restored_baseline_hash": null,
+                "recorded_at": "2026-10-01T00:00:00.000Z",
+                "outcome_hash": "02545931de8af93eb742ea816fb199656942eb4086c83519c90cd688044d6fa1"
+              }
+            },
+            {
+              "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "phase": "aborted",
+              "outcome": {
+                "request": {
+                  "executor": {
+                    "transition_id": "80119516-eaa0-41f8-ad25-09a268ac9052",
+                    "attempt_id": "27f0d689-94bc-4d48-a157-ddea0152d066",
+                    "generation": 1,
+                    "fence_token": "dc8c7e17-5072-4829-ab41-24f907e68bbc"
+                  },
+                  "disposition": "abort",
+                  "decision_id": "0db99330-cf78-4eb8-b3b4-1eff8e3520bc",
+                  "decision_hash": "25673506b1dfdcbbbd31826a253f90e4809fb195f414af2e95dcc4419bd8ffe0",
+                  "core_receipt_id": null,
+                  "proof_hash": "f13b7ebc0ca85a050d49eb75f169efd4f22d5d5d3a6b4f33e04e0140d56bbc01"
+                },
+                "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                "provider_lineage": "11111111-1111-4111-8111-111111111111",
+                "bank_generation": "22222222-2222-4222-8222-222222222222",
+                "phase": "aborted",
+                "resolution": "source_resumed",
+                "restored_baseline_hash": null,
+                "recorded_at": "2026-10-01T00:00:00.000Z",
+                "outcome_hash": "85576bb0de2f4e0dd39305447997374863732ef6e9c626a72a771440f3cd953c"
+              }
+            }
+          ]
+        }
+      ],
+      "logs": [
+        {
+          "level": "warn",
+          "obj": {
+            "code": "MEMORY_TRANSITION_STALE",
+            "stage": "publication"
+          },
+          "msg": "healthy transition execution failed"
+        }
+      ]
+    },
+    {
+      "case": "selected-positive",
+      "line": 32,
+      "totalMs": 125857.6686,
+      "setupMs": 2606.83,
+      "closeMs": 18.867,
+      "marks": [
+        {
+          "phase": "setup:start",
+          "elapsedMs": 0.08460000000013679
+        },
+        {
+          "phase": "setup:end",
+          "elapsedMs": 2606.9148000000023
+        },
+        {
+          "phase": "transition.return-local:preview:start",
+          "elapsedMs": 2608.7646999999997
+        },
+        {
+          "phase": "transition.return-local:preview:end",
+          "elapsedMs": 3173.8286000000007
+        },
+        {
+          "phase": "transition.return-local:submit:start",
+          "elapsedMs": 3173.8377
+        },
+        {
+          "phase": "transition.return-local:submit:end",
+          "elapsedMs": 4439.154999999999
+        },
+        {
+          "phase": "transition.return-local:proof:start",
+          "elapsedMs": 33762.40059999999
+        },
+        {
+          "phase": "transition.return-local:proof:end",
+          "elapsedMs": 34635.7032
+        },
+        {
+          "phase": "transition.return-local:publication:start",
+          "elapsedMs": 34646.5138
+        },
+        {
+          "phase": "transition.return-local:publication:end",
+          "elapsedMs": 36150.014899999995
+        },
+        {
+          "phase": "transition.return-local:owner:settled",
+          "elapsedMs": 40436.9155
+        },
+        {
+          "phase": "transition.return-local:diagnostic-state:end",
+          "elapsedMs": 40439.542700000005
+        },
+        {
+          "phase": "transition.return-local:assertions:end",
+          "elapsedMs": 40513.878
+        },
+        {
+          "phase": "transition.reenter-hindsight:preview:start",
+          "elapsedMs": 40513.9253
+        },
+        {
+          "phase": "transition.reenter-hindsight:preview:end",
+          "elapsedMs": 41468.068100000004
+        },
+        {
+          "phase": "transition.reenter-hindsight:submit:start",
+          "elapsedMs": 41468.0714
+        },
+        {
+          "phase": "transition.reenter-hindsight:submit:end",
+          "elapsedMs": 42781.914099999995
+        },
+        {
+          "phase": "transition.reenter-hindsight:proof:start",
+          "elapsedMs": 76098.27070000001
+        },
+        {
+          "phase": "transition.reenter-hindsight:proof:end",
+          "elapsedMs": 77121.66530000001
+        },
+        {
+          "phase": "transition.reenter-hindsight:publication:start",
+          "elapsedMs": 77132.39760000001
+        },
+        {
+          "phase": "transition.reenter-hindsight:publication:end",
+          "elapsedMs": 79136.8922
+        },
+        {
+          "phase": "transition.reenter-hindsight:owner:settled",
+          "elapsedMs": 125834.3983
+        },
+        {
+          "phase": "transition.reenter-hindsight:diagnostic-state:end",
+          "elapsedMs": 125836.40720000002
+        },
+        {
+          "phase": "close:start",
+          "elapsedMs": 125838.80189999999
+        },
+        {
+          "phase": "close:end",
+          "elapsedMs": 125857.6686
+        }
+      ],
+      "results": [
+        {
+          "operationId": "a1779a54-344c-4cf7-b582-196059ae0f5f",
+          "kind": "transition.return-local",
+          "state": "completed",
+          "result": {
+            "kind": "transition",
+            "transitionId": "b66c9fba-95fb-4645-8e7e-211939f846d0",
+            "receiptId": "e874f70b54f7dac56ecbc24ce55f8831be11aa686cbe6f38a7c915ec2e11fd3d",
+            "authorityCommitted": true,
+            "runtime": "ready",
+            "queue": "settled",
+            "outcome": "completed",
+            "errorCode": null
+          },
+          "reason": null,
+          "errorCode": null,
+          "attempt": {
+            "transitionId": "b66c9fba-95fb-4645-8e7e-211939f846d0",
+            "operationId": "a1779a54-344c-4cf7-b582-196059ae0f5f",
+            "attemptId": "9fbd0a79-1f56-4616-8ef6-b5ee987317a1",
+            "ownerId": "healthy-owner",
+            "generation": 1,
+            "revision": 10,
+            "leaseUntil": "2026-10-01T00:05:00.000Z",
+            "phase": "terminal",
+            "admissionOpenedAt": "2026-10-01T00:00:00.000Z",
+            "cutoffAt": "2026-10-01T00:00:00.000Z",
+            "cutoffSequence": 0,
+            "lastEvidenceId": "549441f3448f68ca7f3ad0ca13cdc1f579cee1bd4251bd8dba9b9a13a4a5d339",
+            "cancellationRequested": false
+          },
+          "resolution": {
+            "version": 1,
+            "resolutionId": "07ff27f686c9ba6ee7422331975d7c59e5763dd4c3a1f484b4f570976adecb83",
+            "operationId": "a1779a54-344c-4cf7-b582-196059ae0f5f",
+            "transitionId": "b66c9fba-95fb-4645-8e7e-211939f846d0",
+            "result": {
+              "kind": "transition",
+              "transitionId": "b66c9fba-95fb-4645-8e7e-211939f846d0",
+              "receiptId": "e874f70b54f7dac56ecbc24ce55f8831be11aa686cbe6f38a7c915ec2e11fd3d",
+              "authorityCommitted": true,
+              "runtime": "ready",
+              "queue": "settled",
+              "outcome": "completed",
+              "errorCode": null
+            },
+            "release": {
+              "protocol": "taki-transition-v1",
+              "attemptId": "9fbd0a79-1f56-4616-8ef6-b5ee987317a1",
+              "generation": 1,
+              "disposition": "source-retired",
+              "proofHash": "4de2d6b617f676b97aff61aaf2ee9592ea26ff83c81aa2bdc95ccf4e079b3281",
+              "banks": [
+                {
+                  "sourceBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                  "nativeGeneration": "22222222-2222-4222-8222-222222222222",
+                  "fenceId": "6e7e2805-dea3-4c7e-b71c-ef35f9c1d038",
+                  "outcomeReceiptId": "69e48e19f4af1f8338667eea69b964538efe42f063b4fe49d815bb603ea003c8",
+                  "proofHash": "c6fd243c0f02a8607f5234b18f872114d9f69c8bb2817332d342b0f18c0603e2"
+                },
+                {
+                  "sourceBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                  "nativeGeneration": "22222222-2222-4222-8222-222222222222",
+                  "fenceId": "2ddb54df-af90-43be-a700-4e12014df7b1",
+                  "outcomeReceiptId": "611e994b17a4d59b7a8b7d7ba524c5b19ebb8f8e164b095617f36e847aac78a4",
+                  "proofHash": "b2455a7d2e1112cd925d4f624c357b201b1d9ef577993aee586580e5b5653f58"
+                }
+              ],
+              "incidentId": null,
+              "recordedAt": "2026-10-01T00:00:00.000Z"
+            }
+          },
+          "hasReceipt": true,
+          "selectionRow": {
+            "singleton": 1,
+            "mode": "canonical-local",
+            "active_epoch_id": "4bddb43e-c984-4333-af67-36222722f6c5",
+            "verified_snapshot_id": null,
+            "activation_transaction_id": null,
+            "provider_lineage_id": "fixture-local-lineage",
+            "replica_checkpoint_digest": "4e0c632ae742607c7061627da0a557dc93e42515d2ba21996410d64833507da4",
+            "updated_at": "2026-10-01T00:00:00.000Z",
+            "transition_receipt_id": "e874f70b54f7dac56ecbc24ce55f8831be11aa686cbe6f38a7c915ec2e11fd3d"
+          },
+          "bindings": {
+            "local": {
+              "binding": {
+                "kind": "published",
+                "epochId": "4bddb43e-c984-4333-af67-36222722f6c5"
+              },
+              "lifetime": "running",
+              "revision": 1
+            },
+            "hindsight": {
+              "binding": {
+                "kind": "none"
+              },
+              "lifetime": "running",
+              "revision": 1
+            }
+          },
+          "nativeCalls": {
+            "acquire": 2,
+            "verify": 2,
+            "resolve": 2,
+            "claim": 0,
+            "delta": 0
+          },
+          "nativeOutcomes": [
+            {
+              "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+              "phase": "retired",
+              "outcome": {
+                "request": {
+                  "executor": {
+                    "transition_id": "b66c9fba-95fb-4645-8e7e-211939f846d0",
+                    "attempt_id": "41492873-5ae1-4c2a-b9fe-fb20e2136e51",
+                    "generation": 1,
+                    "fence_token": "6e7e2805-dea3-4c7e-b71c-ef35f9c1d038"
+                  },
+                  "disposition": "retire",
+                  "decision_id": "3e069844-6f44-40fc-9cb3-eaa57a2a661d",
+                  "decision_hash": "2b47b0bc24d74f2eac4c18a7f63b084e1309709881cc23d29b277c3bbb843bde",
+                  "core_receipt_id": "e874f70b54f7dac56ecbc24ce55f8831be11aa686cbe6f38a7c915ec2e11fd3d",
+                  "proof_hash": "c6fd243c0f02a8607f5234b18f872114d9f69c8bb2817332d342b0f18c0603e2"
+                },
+                "bank_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                "provider_lineage": "11111111-1111-4111-8111-111111111111",
+                "bank_generation": "22222222-2222-4222-8222-222222222222",
+                "phase": "retired",
+                "resolution": "committed",
+                "restored_baseline_hash": null,
+                "recorded_at": "2026-10-01T00:00:00.000Z",
+                "outcome_hash": "69e48e19f4af1f8338667eea69b964538efe42f063b4fe49d815bb603ea003c8"
+              }
+            },
+            {
+              "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "phase": "retired",
+              "outcome": {
+                "request": {
+                  "executor": {
+                    "transition_id": "b66c9fba-95fb-4645-8e7e-211939f846d0",
+                    "attempt_id": "269cc9c2-6a21-4a29-96d0-a26bc6b7969b",
+                    "generation": 1,
+                    "fence_token": "2ddb54df-af90-43be-a700-4e12014df7b1"
+                  },
+                  "disposition": "retire",
+                  "decision_id": "11dd3ecb-71c4-4877-8299-9ae20a8d375f",
+                  "decision_hash": "4f4199b46cf46fa4cec7e85617849b8d84fd1c1065dec06f694cc1c716f9f781",
+                  "core_receipt_id": "e874f70b54f7dac56ecbc24ce55f8831be11aa686cbe6f38a7c915ec2e11fd3d",
+                  "proof_hash": "b2455a7d2e1112cd925d4f624c357b201b1d9ef577993aee586580e5b5653f58"
+                },
+                "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                "provider_lineage": "11111111-1111-4111-8111-111111111111",
+                "bank_generation": "22222222-2222-4222-8222-222222222222",
+                "phase": "retired",
+                "resolution": "committed",
+                "restored_baseline_hash": null,
+                "recorded_at": "2026-10-01T00:00:00.000Z",
+                "outcome_hash": "611e994b17a4d59b7a8b7d7ba524c5b19ebb8f8e164b095617f36e847aac78a4"
+              }
+            }
+          ]
+        },
+        {
+          "operationId": "d648b915-7ae6-4cba-8aef-21502867b976",
+          "kind": "transition.reenter-hindsight",
+          "state": "outcome_unknown",
+          "result": {
+            "kind": "transition",
+            "transitionId": "48db526c-2c75-451c-823f-e42597b81ede",
+            "receiptId": "6ff6a1dfc114c1bb835ea5bd5137b30a13c2cf430084365fbbf4221156e38d4e",
+            "authorityCommitted": true,
+            "runtime": "ready",
+            "queue": "settled",
+            "outcome": "outcome_unknown",
+            "errorCode": "MEMORY_TRANSITION_OUTCOME_UNKNOWN"
+          },
+          "reason": "commitment_unknown",
+          "errorCode": "MEMORY_TRANSITION_OUTCOME_UNKNOWN",
+          "attempt": {
+            "transitionId": "48db526c-2c75-451c-823f-e42597b81ede",
+            "operationId": "d648b915-7ae6-4cba-8aef-21502867b976",
+            "attemptId": "359d4f8c-f158-4aae-8934-2032ef8a28aa",
+            "ownerId": "healthy-owner",
+            "generation": 1,
+            "revision": 9,
+            "leaseUntil": "2026-10-01T00:05:00.000Z",
+            "phase": "settling",
+            "admissionOpenedAt": "2026-10-01T00:00:00.000Z",
+            "cutoffAt": "2026-10-01T00:00:00.000Z",
+            "cutoffSequence": 0,
+            "lastEvidenceId": "effa263195dc61800f27652c241e513a1c2c32e4fcdb3d334938a251834ec6ed",
+            "cancellationRequested": false
+          },
+          "resolution": null,
+          "hasReceipt": true,
+          "selectionRow": {
+            "singleton": 1,
+            "mode": "hindsight",
+            "active_epoch_id": "34278a3a-71db-4146-85ff-7cf830f94c57",
+            "verified_snapshot_id": null,
+            "activation_transaction_id": null,
+            "provider_lineage_id": "11111111-1111-4111-8111-111111111111",
+            "replica_checkpoint_digest": "e87b8959012fa7fbe1bcd99476ef8938379ab81e4e9e06dfb2449b4bb595b090",
+            "updated_at": "2026-10-01T00:00:00.000Z",
+            "transition_receipt_id": "6ff6a1dfc114c1bb835ea5bd5137b30a13c2cf430084365fbbf4221156e38d4e"
+          },
+          "bindings": {
+            "local": {
+              "binding": {
+                "kind": "none"
+              },
+              "lifetime": "running",
+              "revision": 2
+            },
+            "hindsight": {
+              "binding": {
+                "kind": "published",
+                "epochId": "34278a3a-71db-4146-85ff-7cf830f94c57"
+              },
+              "lifetime": "running",
+              "revision": 2
+            }
+          },
+          "nativeCalls": {
+            "acquire": 4,
+            "verify": 4,
+            "resolve": 4,
+            "claim": 0,
+            "delta": 2
+          },
+          "nativeOutcomes": [
+            {
+              "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+              "phase": "active",
+              "outcome": {
+                "request": {
+                  "executor": {
+                    "transition_id": "48db526c-2c75-451c-823f-e42597b81ede",
+                    "attempt_id": "b121aad7-fc0a-4303-9893-b6b5c80514bf",
+                    "generation": 1,
+                    "fence_token": "6966860f-f9a3-4a1c-9ec9-758201c1484c"
+                  },
+                  "disposition": "activate",
+                  "decision_id": "bea45f9a-8582-4660-a80c-db75380aacf9",
+                  "decision_hash": "a9929d19543bcff30fc6879461c50d1d6deea7dfc110fe6ef4c1d5b5b5ea9b04",
+                  "core_receipt_id": "6ff6a1dfc114c1bb835ea5bd5137b30a13c2cf430084365fbbf4221156e38d4e",
+                  "proof_hash": "7ce578ccaf4ac1ae2a88995bcee9abeafe99d319877af2445afc434cffc5a8f0"
+                },
+                "bank_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                "provider_lineage": "11111111-1111-4111-8111-111111111111",
+                "bank_generation": "22222222-2222-4222-8222-222222222222",
+                "phase": "active",
+                "resolution": "committed",
+                "restored_baseline_hash": null,
+                "recorded_at": "2026-10-01T00:00:00.000Z",
+                "outcome_hash": "16d74fc86acc3e62ca74c5bb9ab64c4b770ccce3bfd51dd81ced5c20f0767c01"
+              }
+            },
+            {
+              "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "phase": "active",
+              "outcome": {
+                "request": {
+                  "executor": {
+                    "transition_id": "48db526c-2c75-451c-823f-e42597b81ede",
+                    "attempt_id": "ebfe8b73-e247-462d-b977-fb24480e1ffa",
+                    "generation": 1,
+                    "fence_token": "2ffbc648-cf26-416e-9b83-4aba9b1016de"
+                  },
+                  "disposition": "activate",
+                  "decision_id": "1e527c46-4ac6-4c36-acaf-223c4c4606b4",
+                  "decision_hash": "89a90494572db107365cd289f1ea8a1378ff5e673624735b7d83c9636227e8dd",
+                  "core_receipt_id": "6ff6a1dfc114c1bb835ea5bd5137b30a13c2cf430084365fbbf4221156e38d4e",
+                  "proof_hash": "cc28190a0806f5f6b9b9f99d6e53d086cc1cd221b1a99c9c4115870647965e40"
+                },
+                "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                "provider_lineage": "11111111-1111-4111-8111-111111111111",
+                "bank_generation": "22222222-2222-4222-8222-222222222222",
+                "phase": "active",
+                "resolution": "committed",
+                "restored_baseline_hash": null,
+                "recorded_at": "2026-10-01T00:00:00.000Z",
+                "outcome_hash": "b5e8cdc027d0c715c758fa434daa965c2f7045389348e9d46d9a21c5fc09e499"
+              }
+            }
+          ]
+        }
+      ],
+      "logs": [
+        {
+          "level": "warn",
+          "obj": {
+            "code": "MEMORY_TRANSITION_LEASE_LOST",
+            "stage": "settling"
+          },
+          "msg": "healthy transition execution failed"
+        }
+      ]
+    }
+  ]
+}

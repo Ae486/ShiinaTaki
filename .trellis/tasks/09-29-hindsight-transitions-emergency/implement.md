@@ -19,6 +19,12 @@ Follow [PRD](prd.md), [design](design.md), [source mapping](research/stage-4-pre
 
 ## 1. Recovery and planning checklist
 
+2026-10-07 current next step: W9 implementation and [independent review](research/w9-independent-check.md) are complete
+and accepted. The [W9 amendment](research/stage4-w9-lease-plan-2026-10-07.md) records the correction and accurately
+disclosed complete-Core/scoped-timeout-recovery gate. Lease duration is unchanged. Continue the existing B7 Stage 5
+planning with its current-source report, then review concrete first-slice artifacts before activation/dispatch.
+W0-W8 below remain historical completed work; original/manual acceptance and Git/lifecycle boundaries remain.
+
 - [x] Restore source-session direction, current workspace/HEAD, task identity and planning-only scope.
 - [x] Read related Stage 1/2/3 archives and the two independent current-HEAD acceptance reports.
 - [x] Recover original typecheck/lint command exit codes; distinguish preserved evidence from new execution.

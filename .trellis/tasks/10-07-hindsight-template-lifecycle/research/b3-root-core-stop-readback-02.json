@@ -1,0 +1,334 @@
+{
+  "checkedAtUtc": "2026-10-09T16:26:48.843519+00:00",
+  "ownedManifest": "b3-core-healthy-owned-files-02-files.json",
+  "ownedManifestSha256": "8b565d8555cbfc0793ea4c54d7def7bbde80af8e04735f08b15fbf794cef9a43",
+  "inputManifest": "b3-core-healthy-owned-files-02-source-after.json",
+  "inputManifestSha256": "aaa09e5636784ca9472ad07356889ec943687fe75723b7bdb0b82af1b2b2856f",
+  "verifiedOwnedFiles": 85,
+  "verifiedCurrentInputs": 1592,
+  "verifiedUniquePaths": 1604,
+  "mismatches": [],
+  "checks": [
+    {
+      "name": "b3-core-healthy-template-red-01",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "durationSeconds": 374.008,
+      "inputCount": 1592,
+      "sourceMismatches": []
+    },
+    {
+      "name": "b3-core-healthy-template-green-01",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "durationSeconds": 69.828,
+      "inputCount": 1592,
+      "sourceMismatches": []
+    },
+    {
+      "name": "b3-core-healthy-legacy-reuse-01",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "durationSeconds": 29.932,
+      "inputCount": 1592,
+      "sourceMismatches": []
+    },
+    {
+      "name": "b3-core-healthy-offline-w6-01",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "durationSeconds": 30.121,
+      "inputCount": 1592,
+      "sourceMismatches": []
+    },
+    {
+      "name": "b3-core-healthy-template-types-01",
+      "exitCode": 2,
+      "expectedExitCode": 2,
+      "durationSeconds": 58.852,
+      "inputCount": 1592,
+      "sourceMismatches": []
+    },
+    {
+      "name": "b3-core-healthy-template-types-02",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "durationSeconds": 56.514,
+      "inputCount": 1592,
+      "sourceMismatches": []
+    },
+    {
+      "name": "b3-core-healthy-owned-lint-01",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "durationSeconds": 10.369,
+      "inputCount": 1592,
+      "sourceMismatches": []
+    },
+    {
+      "name": "b3-core-healthy-observer-final-01",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "durationSeconds": 70.271,
+      "inputCount": 1592,
+      "sourceMismatches": []
+    },
+    {
+      "name": "b3-core-healthy-owned-diff-02",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "durationSeconds": 0.163,
+      "inputCount": 1592,
+      "sourceMismatches": []
+    },
+    {
+      "name": "b3-core-healthy-owned-files-02",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "durationSeconds": 0.623,
+      "inputCount": 1592,
+      "sourceMismatches": []
+    }
+  ],
+  "declaredReuseDifferences": {
+    "healthy-template-green-01": [
+      "packages/core/src/testing/hindsight-template-observation-fixtures.ts",
+      "packages/shared/src/hindsight-backup-v1-schema.ts"
+    ],
+    "healthy-legacy-reuse-01": [
+      "packages/core/src/testing/hindsight-template-observation-fixtures.ts",
+      "packages/shared/src/hindsight-backup-v1-schema.ts"
+    ],
+    "healthy-offline-w6-01": [
+      "packages/core/src/testing/hindsight-template-observation-fixtures.ts",
+      "packages/shared/src/hindsight-backup-v1-schema.ts"
+    ],
+    "healthy-template-types-02": [
+      "packages/shared/src/hindsight-backup-v1-schema.ts"
+    ],
+    "healthy-owned-lint-01": [
+      "packages/shared/src/hindsight-backup-v1-schema.ts"
+    ],
+    "healthy-observer-final-01": [
+      "packages/shared/src/hindsight-backup-v1-schema.ts"
+    ]
+  },
+  "schemaEofOnly": {
+    "healthy-template-green-01": true,
+    "healthy-legacy-reuse-01": true,
+    "healthy-offline-w6-01": true,
+    "healthy-template-types-02": true,
+    "healthy-owned-lint-01": true,
+    "healthy-observer-final-01": true
+  },
+  "evidence": [
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-template-red-01.log",
+      "bytes": 126478,
+      "sha256": "64affb8aa553ee79787830127c1f2d657303a65ac96ed233bad39df4092a0909"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-template-red-01-result.json",
+      "bytes": 772,
+      "sha256": "e9fb029e1f5106eb6ab4ac5e302db633e937c9650ab0fff0f5e6d25c5b5b45c3"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-template-red-01-source.json",
+      "bytes": 266157,
+      "sha256": "a394577b40b0a183cf1827ba124afc20cb6a1a1cb458842798d14d84750d70e3"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-template-red-01-source-after.json",
+      "bytes": 266157,
+      "sha256": "a394577b40b0a183cf1827ba124afc20cb6a1a1cb458842798d14d84750d70e3"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-template-green-01.log",
+      "bytes": 3836,
+      "sha256": "0b9381404d96ffd125604a807e9b738cb1735c8af00a4786ddf04a5ae00e69bf"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-template-green-01-result.json",
+      "bytes": 853,
+      "sha256": "8d29f75aec9fe1a5b462a7ccb87d32839f467492c8cac53f1e1dfc40300e18c7"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-template-green-01-source.json",
+      "bytes": 266157,
+      "sha256": "6418809242a194cec18a39c4bd018ca719274525e92e5570f742ba9051cfc406"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-template-green-01-source-after.json",
+      "bytes": 266157,
+      "sha256": "6418809242a194cec18a39c4bd018ca719274525e92e5570f742ba9051cfc406"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-legacy-reuse-01.log",
+      "bytes": 732,
+      "sha256": "ee8df9245158aea1fe2396d172eb8ea215d20028415d8db989ad09d5337d800a"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-legacy-reuse-01-result.json",
+      "bytes": 858,
+      "sha256": "ae7783010a37138b575c0a1c9e089acb7ab92e9fa1289f4ff418a5d7b1425a9e"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-legacy-reuse-01-source.json",
+      "bytes": 266157,
+      "sha256": "6418809242a194cec18a39c4bd018ca719274525e92e5570f742ba9051cfc406"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-legacy-reuse-01-source-after.json",
+      "bytes": 266157,
+      "sha256": "6418809242a194cec18a39c4bd018ca719274525e92e5570f742ba9051cfc406"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-offline-w6-01.log",
+      "bytes": 719,
+      "sha256": "a0d761c09c39fd646aa6ee4fb40a55b72b826288e9fec8bc450f0aa54cece439"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-offline-w6-01-result.json",
+      "bytes": 875,
+      "sha256": "14ca87671d6878cdc2f153792e968b723b1641594278873c7386dae087805df5"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-offline-w6-01-source.json",
+      "bytes": 266157,
+      "sha256": "6418809242a194cec18a39c4bd018ca719274525e92e5570f742ba9051cfc406"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-offline-w6-01-source-after.json",
+      "bytes": 266157,
+      "sha256": "6418809242a194cec18a39c4bd018ca719274525e92e5570f742ba9051cfc406"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-template-types-01.log",
+      "bytes": 1229,
+      "sha256": "e7c7f92bc50b53508a9f65e3e7b66f811665d92b3f5cb02d2aa6cecec08246a1"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-template-types-01-result.json",
+      "bytes": 642,
+      "sha256": "cc1c503df22c53f0444a28dfb03e7562a21a550b882e2cda6643612b448f3637"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-template-types-01-source.json",
+      "bytes": 266157,
+      "sha256": "6418809242a194cec18a39c4bd018ca719274525e92e5570f742ba9051cfc406"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-template-types-01-source-after.json",
+      "bytes": 266157,
+      "sha256": "6418809242a194cec18a39c4bd018ca719274525e92e5570f742ba9051cfc406"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-template-types-02.log",
+      "bytes": 73,
+      "sha256": "aae97e3dd3aeb050b304bac2de12cbd29514c2bd4abc4accde3ffc477df3a0db"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-template-types-02-result.json",
+      "bytes": 642,
+      "sha256": "daba835815feb8bb0e6609884925cb1972696e5859463d5367f7665dbd1f6ef3"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-template-types-02-source.json",
+      "bytes": 266157,
+      "sha256": "d4211f50f5fa2fb673ec62fe8045d7fc1c1b984b19a7e90e887e5ea87112753f"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-template-types-02-source-after.json",
+      "bytes": 266157,
+      "sha256": "d4211f50f5fa2fb673ec62fe8045d7fc1c1b984b19a7e90e887e5ea87112753f"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-owned-lint-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-owned-lint-01-result.json",
+      "bytes": 3798,
+      "sha256": "71e3b4f3685cd99b51405a2532d0794844aeb4e926eebce363baaa34d4540c4c"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-owned-lint-01-source.json",
+      "bytes": 266157,
+      "sha256": "d4211f50f5fa2fb673ec62fe8045d7fc1c1b984b19a7e90e887e5ea87112753f"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-owned-lint-01-source-after.json",
+      "bytes": 266157,
+      "sha256": "d4211f50f5fa2fb673ec62fe8045d7fc1c1b984b19a7e90e887e5ea87112753f"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-observer-final-01.log",
+      "bytes": 1657,
+      "sha256": "161ed41269104224d3dd8b8182bab2f404c67d14d8860ae078e1824b20cfd039"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-observer-final-01-result.json",
+      "bytes": 777,
+      "sha256": "f0d23d8cc8faddc309164d24b028659bfde4d3dc348a115424309956f56f8271"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-observer-final-01-source.json",
+      "bytes": 266157,
+      "sha256": "d4211f50f5fa2fb673ec62fe8045d7fc1c1b984b19a7e90e887e5ea87112753f"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-observer-final-01-source-after.json",
+      "bytes": 266157,
+      "sha256": "d4211f50f5fa2fb673ec62fe8045d7fc1c1b984b19a7e90e887e5ea87112753f"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-owned-diff-02.log",
+      "bytes": 651,
+      "sha256": "545f280382f0f0f1526c4b69286f6b25081c297e39616bb068866e52c2885862"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-owned-diff-02-result.json",
+      "bytes": 4440,
+      "sha256": "bfe681e16c7a70c4da6543a52077df3c6cab1201fb5eb772bad8c983b218628c"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-owned-diff-02-source.json",
+      "bytes": 266157,
+      "sha256": "aaa09e5636784ca9472ad07356889ec943687fe75723b7bdb0b82af1b2b2856f"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-owned-diff-02-source-after.json",
+      "bytes": 266157,
+      "sha256": "aaa09e5636784ca9472ad07356889ec943687fe75723b7bdb0b82af1b2b2856f"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-owned-files-02.log",
+      "bytes": 1377,
+      "sha256": "d632c862117ff56c98ad55fbcf29c7109d740354be8b8f4edfa2e790c6683402"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-owned-files-02-result.json",
+      "bytes": 4595,
+      "sha256": "cee6706d1631145b0dc5febd7f7b3b2568dd3c8b6f603315645fb7bca1d039ff"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-owned-files-02-source.json",
+      "bytes": 266157,
+      "sha256": "aaa09e5636784ca9472ad07356889ec943687fe75723b7bdb0b82af1b2b2856f"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-healthy-owned-files-02-source-after.json",
+      "bytes": 266157,
+      "sha256": "aaa09e5636784ca9472ad07356889ec943687fe75723b7bdb0b82af1b2b2856f"
+    }
+  ],
+  "scope": "Current Healthy/W2/W9 corrections and necessary self-check handoff; not Core/B3/whole-5B acceptance",
+  "wholeStage5BAccepted": false,
+  "verifiedUniquePathsIncludingRetainedEvidence": 1644,
+  "priorRootAttempt": {
+    "path": "b3-root-core-stop-readback-01.json",
+    "sha256": "d22c26c6972b2bc51fad27a0dbe70040064a6e8680b188ccbe722db501a5c79e",
+    "correction": "The retained TypeScript compiler failure exits 2, while the Vitest red exits 1. The first root verifier incorrectly expected both historical failures to exit 1; no source or historical result was modified."
+  }
+}

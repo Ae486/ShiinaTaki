@@ -1,0 +1,258 @@
+{
+  "capturedAtUtc": "2026-10-08T13:58:18.964240+00:00",
+  "scope": "B2 Native and seven-file trusted-label independent review",
+  "verdict": "PASS_SCOPED",
+  "combinedB2Gate": "Core independent review and root reconciliation still required",
+  "sourceUnchangedSincePostFormatValidationInput": true,
+  "noActiveChecks": true,
+  "heavyCheckSlotReturnedToRoot": true,
+  "checks": [
+    {
+      "name": "independent-native-lint-03",
+      "result": {
+        "file": "b2-independent-native-lint-03-result.json",
+        "bytes": 2117,
+        "sha256": "0851d111bd447d0aae74ddcff31674339df3c9fcd0ec93c9339fa6a713699f89"
+      },
+      "log": {
+        "file": "b2-independent-native-lint-03.log",
+        "bytes": 19,
+        "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+      },
+      "exitCode": 0,
+      "passed": null,
+      "durationSeconds": 0.076
+    },
+    {
+      "name": "independent-native-format-check-01",
+      "result": {
+        "file": "b2-independent-native-format-check-01-result.json",
+        "bytes": 2142,
+        "sha256": "93b714219c0a2ad161149d005275461fd9c515b51b6d0ac77be033e24f0b880b"
+      },
+      "log": {
+        "file": "b2-independent-native-format-check-01.log",
+        "bytes": 27,
+        "sha256": "bf2b11187dce250142e71b24a0bf021d744fd9eeb4a62e4078b8e5547a29100b"
+      },
+      "exitCode": 0,
+      "passed": null,
+      "durationSeconds": 0.068
+    },
+    {
+      "name": "independent-native-types-02",
+      "result": {
+        "file": "b2-independent-native-types-02-result.json",
+        "bytes": 1695,
+        "sha256": "6bef6190150ae18838e2341e18a8f3f4294772a9b89c993d83ce476047d6f17f"
+      },
+      "log": {
+        "file": "b2-independent-native-types-02.log",
+        "bytes": 19,
+        "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+      },
+      "exitCode": 0,
+      "passed": null,
+      "durationSeconds": 0.8
+    },
+    {
+      "name": "independent-raw-json-green-01",
+      "result": {
+        "file": "b2-independent-raw-json-green-01-result.json",
+        "bytes": 1067,
+        "sha256": "973f147b12b6f8da62927f3376770ba1612f10418244cd09511e27b3aad2afaa"
+      },
+      "log": {
+        "file": "b2-independent-raw-json-green-01.log",
+        "bytes": 9772,
+        "sha256": "32f737a85194ffdb0d7eed88ef4c18fb08c10606596032789fb3b39fde2ddd1b"
+      },
+      "exitCode": 0,
+      "passed": 141,
+      "durationSeconds": 215.147
+    },
+    {
+      "name": "independent-native-labels-green-02",
+      "result": {
+        "file": "b2-independent-native-labels-green-02-result.json",
+        "bytes": 886,
+        "sha256": "5694d21a26774598da95a44cee8801880724465f60290a5a99121d37801e78ac"
+      },
+      "log": {
+        "file": "b2-independent-native-labels-green-02.log",
+        "bytes": 16710,
+        "sha256": "4e4eee0d9a328238a9813b17f13b5166676a7a5039d88c32a88861b945ff8bf2"
+      },
+      "exitCode": 0,
+      "passed": 46,
+      "durationSeconds": 364.643
+    },
+    {
+      "name": "independent-label-lint-01",
+      "result": {
+        "file": "b2-independent-label-lint-01-result.json",
+        "bytes": 846,
+        "sha256": "705063f9b90f5bf7a5ad931ba67000a4643ad1b265d037e5eb3215beecf0f9dd"
+      },
+      "log": {
+        "file": "b2-independent-label-lint-01.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "exitCode": 0,
+      "passed": null,
+      "durationSeconds": 6.241
+    },
+    {
+      "name": "independent-label-consumer-01",
+      "result": {
+        "file": "b2-independent-label-consumer-01-result.json",
+        "bytes": 502,
+        "sha256": "06ee695f4f280feac873def70e2a09dd60dc938839541bed0fc26f040c110528"
+      },
+      "log": {
+        "file": "b2-independent-label-consumer-01.log",
+        "bytes": 1585,
+        "sha256": "e42a1500f75975d9caec6a4c2d90cc8ccccf34c123da704ff8b4ee734a644fee"
+      },
+      "exitCode": 0,
+      "passed": 69,
+      "durationSeconds": 12.699
+    }
+  ],
+  "reusedTypechecks": [
+    {
+      "result": {
+        "file": "b2-core-shared-typecheck-read-01.json",
+        "bytes": 286,
+        "sha256": "456b7c2c38ec96cdeaf978e1d52ba2125d4aee066a10df13567ad99bf1f356a3"
+      },
+      "exitCode": 0,
+      "inputManifest": "b2-core-read-check-input-02.json"
+    },
+    {
+      "result": {
+        "file": "b2-core-typecheck-read-02.json",
+        "bytes": 284,
+        "sha256": "9c179ad3c071cabffaeade5c57f79063ebaf67f72624d4bafcff8d7496c4a91d"
+      },
+      "exitCode": 0,
+      "inputManifest": "b2-core-read-check-input-03.json"
+    }
+  ],
+  "fixtures": [
+    {
+      "run": "independent-bank-fallback-red-01",
+      "Fixture": "taki-hindsight-g1-2e1476d31d4a",
+      "Stopped": true,
+      "DataRemoved": true,
+      "RegistryRemoved": true,
+      "Logs": "H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-2e1476d31d4a"
+    },
+    {
+      "run": "independent-native-labels-green-01",
+      "Fixture": "taki-hindsight-g1-13244e200dfa",
+      "Stopped": true,
+      "DataRemoved": true,
+      "RegistryRemoved": true,
+      "Logs": "H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-13244e200dfa"
+    },
+    {
+      "run": "independent-raw-json-red-01",
+      "Fixture": "taki-hindsight-g1-e57eeee0752a",
+      "Stopped": true,
+      "DataRemoved": true,
+      "RegistryRemoved": true,
+      "Logs": "H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-e57eeee0752a"
+    },
+    {
+      "run": "independent-raw-json-green-01",
+      "Fixture": "taki-hindsight-g1-2b82a8c0127a",
+      "Stopped": true,
+      "DataRemoved": true,
+      "RegistryRemoved": true,
+      "Logs": "H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-2b82a8c0127a"
+    },
+    {
+      "run": "independent-native-labels-green-02",
+      "Fixture": "taki-hindsight-g1-8ce59fbd6436",
+      "Stopped": true,
+      "DataRemoved": true,
+      "RegistryRemoved": true,
+      "Logs": "H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-8ce59fbd6436"
+    }
+  ],
+  "artifacts": [
+    {
+      "file": "b2-independent-native-source-reviewed-final-01.json",
+      "bytes": 58099,
+      "sha256": "96bfcd500d5b29230bb248dbf5ce3996f85a399d3bb131764ed66125127ec284"
+    },
+    {
+      "file": "b2-independent-http-audit-01.json",
+      "bytes": 2882,
+      "sha256": "129bd5a451da68643e0c3ae8a8a0844d42e7002925fef9e11b471743b05f72ee"
+    },
+    {
+      "file": "b2-native-http-4d674d27fd5f4b0e8353a553c56e693f.log",
+      "bytes": 400,
+      "sha256": "aa8295622a229012bfa42a3f6da4cc51a1438a34c3ca97f8b0976117e59bb94d"
+    },
+    {
+      "file": "b2-native-http-4d674d27fd5f4b0e8353a553c56e693f-exchanges.jsonl",
+      "bytes": 351471,
+      "sha256": "d4adccac3adcd0ffe183c6281ec98e21d038f2dab3bf74661d09687b50adac0b"
+    },
+    {
+      "file": "b2-independent-bank-fallback-red-01-source.json",
+      "bytes": 561,
+      "sha256": "8f8cffcc5cd28ffa01995ec69fa79a7554fc6cefa8953cc35c2efbbd8c56bd50"
+    },
+    {
+      "file": "b2-independent-bank-fallback-red-01-result.json",
+      "bytes": 544,
+      "sha256": "6ed9e94807a0c64fd63217a2807e57945f1cd1c4c8442ee5c8cf133846c1071b"
+    },
+    {
+      "file": "b2-independent-raw-json-red-01-source.json",
+      "bytes": 1561,
+      "sha256": "186c5fe9bfc5f35ee34ae1e9c720ad318f580deaf62dae856799f87a0c6d977a"
+    },
+    {
+      "file": "b2-independent-raw-json-red-01-result.json",
+      "bytes": 697,
+      "sha256": "6fca7f0bde87d3ac71d664edc5b7386d76f9537a913dcefa09f5e6f375221bdf"
+    },
+    {
+      "file": "b2-independent-native-lint-02-result.json",
+      "bytes": 2116,
+      "sha256": "8bb223c129359024cd1cfc22a48188763e4fdc68cff355976288ee3f42a7b762"
+    },
+    {
+      "file": "b2-independent-native-lint-02.log",
+      "bytes": 1262,
+      "sha256": "670cde4151bd0b6ddc9bb31a49622042800f706ee344fd89d55449ff15b87b8f"
+    },
+    {
+      "file": "b2-generated-tested.json",
+      "bytes": 167017,
+      "sha256": "26baa58d4473de73a099b5e071fd5b94b5f41ea8e73b1110048a73425751975a"
+    },
+    {
+      "file": "b1-reviewed-source.json",
+      "bytes": 76397,
+      "sha256": "699f75fd416baee73e3223604637379e3b34768d3b24208c6ea845716fc8f10a"
+    },
+    {
+      "file": "record-b2-independent-native-source.py",
+      "bytes": 6687,
+      "sha256": "3a02817aeaa0364e0a79d3f5f44d937fd01dc619b56fd73d8b0e6f2600605808"
+    },
+    {
+      "file": "audit-b2-independent-http.py",
+      "bytes": 4667,
+      "sha256": "34b31e804c95a8efeceac23f40a88e1108c21a92e4656d793f7b980d0720c096"
+    }
+  ],
+  "countNote": "The 141-case parser/provider batch includes the 10 N2 cases repeated in the 46-case Native batch; do not sum them as distinct tests."
+}

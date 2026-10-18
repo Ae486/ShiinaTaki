@@ -1,0 +1,22 @@
+[
+  {
+    "Path": "packages/core/src/db/memory-transition-publication-repo.ts",
+    "Sha256": "31F3E29DE37944D68FCB611428FCE49DEBF1F3BC8206DB4E6C15AEA4362A841E",
+    "Bytes": 9401
+  },
+  {
+    "Path": "packages/core/src/memory/transitions/transition-healthy-execution.ts",
+    "Sha256": "4EAB95EAC941BBD097E00AFFE917F8A3B88EE51E66C5D134F0ED3F81905A321E",
+    "Bytes": 18750
+  },
+  {
+    "Path": "packages/core/src/memory/transitions/transition-healthy-publication-lease.test.ts",
+    "Sha256": "01FBFA7A63A5F3CFF39E6791139AA4208897AE5CD674067001FB5E87838F3E90",
+    "Bytes": 5495
+  },
+  {
+    "Path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-red-final-lease-2026-10-07.log",
+    "Sha256": "C6016437C0C6B5A209C889D4A31FE85840D4790F6BD87234CDF17592A65FA4B9",
+    "Bytes": 2051
+  }
+]

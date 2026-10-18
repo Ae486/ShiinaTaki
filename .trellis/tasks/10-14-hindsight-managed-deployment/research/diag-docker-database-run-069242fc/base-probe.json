@@ -1,0 +1,15 @@
+{
+  "python": "3.11.16",
+  "dotenv": "1.2.2",
+  "uid": 1000,
+  "gid": 1000,
+  "venv": "/app/api/.venv",
+  "purelib": "/app/api/.venv/lib/python3.11/site-packages",
+  "dataUid": 1000,
+  "dataGid": 1000,
+  "dataMode": 493,
+  "dataDirectory": true,
+  "dataEmpty": true,
+  "dotenvDisabled": true,
+  "compatible": true
+}

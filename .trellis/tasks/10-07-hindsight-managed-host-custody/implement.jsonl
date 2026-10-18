@@ -1,0 +1,19 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend checklist and Core/Shell ownership."}
+{"file": ".trellis/spec/backend/secret-catalog.md", "reason": "TSC1, sole writer, get-only adapters and internal revision."}
+{"file": ".trellis/spec/backend/host-operation-lifecycle.md", "reason": "Authenticated Host generation, exact-input execution and outcome ownership."}
+{"file": ".trellis/spec/backend/permission-authorization.md", "reason": "Canonical governance and final Host enforcement."}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Required checks, size limits and change evidence."}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Typed bounded failures and no raw diagnostic leakage."}
+{"file": ".trellis/spec/backend/config-store.md", "reason": "Core config ownership, overlay and generation semantics."}
+{"file": ".trellis/spec/guides/index.md", "reason": "Shared cross-layer thinking guides."}
+{"file": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/source-host-1.md", "reason": "Completed source-grounded Host/custody research without context truncation; proposals remain subject to independent review."}
+{"file": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/source-host-2.md", "reason": "Completed source-grounded Host/custody research without context truncation; proposals remain subject to independent review."}
+{"file": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/source-host-3.md", "reason": "Completed source-grounded Host/custody research without context truncation; proposals remain subject to independent review."}
+{"file": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/source-custody-1.md", "reason": "Completed source-grounded Host/custody research without context truncation; proposals remain subject to independent review."}
+{"file": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/source-custody-2.md", "reason": "Completed source-grounded Host/custody research without context truncation; proposals remain subject to independent review."}
+{"file": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/source-custody-3.md", "reason": "Completed source-grounded Host/custody research without context truncation; proposals remain subject to independent review."}
+{"file": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/source-readiness-1.md", "reason": "Independent current-source corrections, finite contracts and separate C1/C2 evidence gates."}
+{"file": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/source-readiness-2.md", "reason": "Independent current-source corrections, finite contracts and separate C1/C2 evidence gates."}
+{"file": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/source-readiness-3.md", "reason": "Independent current-source corrections, finite contracts and separate C1/C2 evidence gates."}
+{"file": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/design-review-resolution.md", "reason": "Accepted engineering resolutions and exact source/process/platform acceptance boundaries."}
+{"file": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/stage5c-post5b-readiness-2026-10-13.md", "reason": "Post-5B current source, six C1a ownership groups, final-outcome and execute/resume insertion points; no new design blocker."}

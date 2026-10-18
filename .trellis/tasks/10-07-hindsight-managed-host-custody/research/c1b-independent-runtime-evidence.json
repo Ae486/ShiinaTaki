@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "windows": {
+    "executable": "H:\\hindsight\\.venv\\Scripts\\python.exe",
+    "pythonVersion": "3.11.5",
+    "platform": "win32",
+    "pythonDotenvVersion": "1.2.2",
+    "afUnix": false,
+    "tempRoot": "G:\\Temp"
+  },
+  "ubuntu": {
+    "distribution": {
+      "PRETTY_NAME": "Ubuntu 22.04.5 LTS",
+      "VERSION_ID": "22.04",
+      "ID": "ubuntu"
+    },
+    "kernel": "6.6.87.2-microsoft-standard-WSL2",
+    "executable": "/usr/bin/python3",
+    "pythonVersion": "3.10.12",
+    "platform": "linux",
+    "uid": 0,
+    "euid": 0,
+    "dotenvAvailable": false,
+    "afUnix": true,
+    "soPeercred": true,
+    "killpg": true,
+    "procFd": true,
+    "nativeCheckout": true,
+    "linuxProjectVenv": false,
+    "uv": null,
+    "requirementsSatisfied": false,
+    "testsExecuted": false,
+    "missing": [
+      "Python >=3.11",
+      "python-dotenv"
+    ],
+    "authorizedDistro": "Ubuntu-22.04"
+  },
+  "ubuntuAuthorization": "Owner explicitly authorized starting existing Ubuntu-22.04 only for isolated C1b fake-process tests with already installed Python >=3.11 and python-dotenv.",
+  "dependencyInstallationAuthorized": false,
+  "linuxTestCountUnexecuted": 8,
+  "linuxRuntimeTestExecuted": false,
+  "linuxFixtureResourcesCreated": false,
+  "c1aServiceTestExecuted": false,
+  "c2DockerTestExecuted": false,
+  "finalWslState": "  NAME              STATE           VERSION\n\n* Ubuntu-22.04      Stopped         2\n\n  docker-desktop    Stopped         2\n\n\r\n",
+  "forcedDistributionTermination": false
+}

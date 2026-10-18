@@ -1,0 +1,11 @@
+--- before-instrumented
++++ temporary-selected-positive-180s
+@@ -85,7 +85,7 @@
+         mark("close:start"); await h.close(); mark("close:end");
+         if (diagnostic) process.stderr.write(JSON.stringify({ tag: "B3_HEALTHY_PHASE_DIAGNOSTIC", case: "selected-positive", marks, results, logs: h.records }) + "\n");
+       }
+-    }, removed ? 180_000 : 60_000);
++    }, removed ? 180_000 : 180_000);
+   }
+ 
+   for (const { removed, kind } of ([false, true] as const).flatMap((removed) =>

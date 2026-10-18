@@ -1,0 +1,15 @@
+{
+  "removedPaths": [
+    "C:\\taki-c1a-fixture-609ad25fef7f46b6a9c30b4b510b43f8",
+    "H:\\TakiAgent\\apps\\desktop\\src-tauri\\target\\hindsight-resources-LdMCA6",
+    "H:\\TakiAgent\\apps\\desktop\\src-tauri\\target\\debug\\hindsight-host\\payload"
+  ],
+  "remainingPaths": [],
+  "fixtureProcessesAfterCleanup": [],
+  "coreBootPid": 33200,
+  "coreBootProcessesAfterCleanup": [],
+  "cargoTargetRetained": true,
+  "originalPermissionsChanged": false,
+  "originalDataTouched": false,
+  "checkedAt": "2026-10-13T09:56:11.7490982Z"
+}

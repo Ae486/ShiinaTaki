@@ -1,0 +1,19 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/ty.exe",
+    "check",
+    "--python",
+    "H:/hindsight/.venv/Scripts/python.exe",
+    "--python-platform",
+    "linux",
+    "hindsight_api/api/taki_template_schema.py"
+  ],
+  "cwd": "H:/hindsight/hindsight-api-slim",
+  "exitCode": 0,
+  "durationSeconds": 0.48,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-schema-types-01.log",
+  "sources": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-schema-types-01-sources.json",
+  "changedInputs": [],
+  "ownedTemp": "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\schema-types-01-le5hrx6z",
+  "ownedTempRemoved": true
+}

@@ -1,5 +1,34 @@
 # Memory Operations and Setup - Draft Execution Plan
 
+## Current execution order (2026-10-07)
+
+Read the [current execution/review map](research/stage5-execution-map-2026-10-07.md) for live 5A/5B ownership,
+5C risk milestones and the populated-model/candidate dependency refinement. It supersedes older scheduling below.
+
+The old numbered checklist below is historical and must not be dispatched directly. Current order:
+
+1. Complete the [Stage 4 W9 correctness gate](../09-29-hindsight-transitions-emergency/research/stage4-w9-lease-plan-2026-10-07.md)
+   under its existing task and independent review. This is not a performance optimization project.
+2. Refresh this B7 task's remaining Stage 5 requirements/design and configure current spec/research manifests.
+   Treat the Stages 1-4 operation/lifecycle/backup/transition implementations as dependencies already delivered.
+3. Ground a first independently testable vertical slice from actual remaining capabilities; review its artifacts
+   before activation and `trellis-implement` dispatch. Model fields or managed receipt schemas alone are not producers.
+4. Sequence remaining templates/model/deployment, candidate upgrade and full Home/admin work by real dependencies,
+   including D88/D90 safety gates. Keep Core/runtime/migration ownership serial.
+5. Perform Stage 6 integrated/package/environment and owner/manual acceptance separately. Preserve D23/D79-D83
+   deferrals and do not mark original-data/credential acceptance from fixture tests.
+
+W9 passed independent acceptance on 2026-10-07. The owner has now approved the presented Stage 5 plan,
+including the first bounded configuration observation slice, and delegated implementation/check scheduling.
+The 5A child independently passed and released all ownership. The reviewed 5B child is active with one B1
+Native/Shared/Core implementation owner; a separate read-only reviewer prepares the C1 custody boundary.
+Use the [current-source readiness report](../09-29-hindsight-transitions-emergency/research/stage5-readiness-2026-10-07.md)
+for the proposed 5A configuration evidence, 5B overlays, 5C managed/model application, 5D upgrade and 5E full Home
+and administration sequence. Each slice needs its own concrete contract/acceptance review before dispatch.
+The [5A child](../10-07-hindsight-configuration-observation/implement.md) passed permission, disclosure, runtime
+truth, stale-read, compatibility and UI checks. Follow the [5B implementation and review plan](../10-07-hindsight-template-lifecycle/implement.md)
+and its `research/review-plan.md` for B1/B2/B3 boundaries. Later grouping depends on concrete complexity and ownership.
+
 Status: planning. Follow [design.md](design.md) and [prd.md](prd.md); no B7 production code has been changed.
 The owner approved B6 closeout before B7; [bounded B6 verification](../08-09-memory-runtime-integration/research/b6-closeout-validation-2026-09-13.md)
 is now available. The previous R1 premise is withdrawn; [grill.md](grill.md) records the accepted continuation contract,

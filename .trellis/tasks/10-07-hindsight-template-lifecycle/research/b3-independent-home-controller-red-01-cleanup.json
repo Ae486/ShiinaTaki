@@ -1,0 +1,16 @@
+{
+  "recordedAt": "2026-10-09T13:22:24.6753160Z",
+  "originalResult": "b3-independent-home-controller-red-01-result.json",
+  "originalResultSha256": "6b35a36fd045b990615c233e073aedd7682c7f494aca36093c0d4d3f04fa1461",
+  "resolvedTarget": "H:\\TakiAgent\\.trellis\\.runtime\\b3-independent-home\\controller-red-01-4abf7e0c62f14ed081ac06448f76b135",
+  "scope": "Only the exact temporary cache root created by the independent Home controller-red-01 run",
+  "checkedTopEntries": [
+    "node-compile-cache"
+  ],
+  "removedFiles": 1,
+  "removedDirectories": 3,
+  "linkedEntries": 0,
+  "command": "Remove-Item -LiteralPath H:\\TakiAgent\\.trellis\\.runtime\\b3-independent-home\\controller-red-01-4abf7e0c62f14ed081ac06448f76b135 -Recurse -Force",
+  "targetAbsent": true,
+  "originalResultUnchanged": true
+}

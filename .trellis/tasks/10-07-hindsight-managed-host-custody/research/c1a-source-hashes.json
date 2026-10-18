@@ -1,0 +1,495 @@
+{
+  "baseHead": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a",
+  "branch": "main",
+  "changedDuringFinalCheck": [],
+  "files": [
+    {
+      "path": ".trellis/spec/backend/hindsight-host-custody.md",
+      "sha256": "f751b5a5eda191b4fb2d4a60568c368a6d627bb4399aa9d873837d105643e7d0"
+    },
+    {
+      "path": ".trellis/spec/backend/index.md",
+      "sha256": "0aafb9c790a7444f1c58a42dbbb6ef7c908c748623399d2d0193499147b7f150"
+    },
+    {
+      "path": "apps/desktop/scripts/build-installed-host.ts",
+      "sha256": "ccf1ffa75320d24398935f7fa3fe667426fc52e8c15a5638d78264c6abe4526a"
+    },
+    {
+      "path": "apps/desktop/scripts/index.md",
+      "sha256": "431ff703add86c5e3f8e4add008828ec356d14076e091c3f5cd3207431b1abff"
+    },
+    {
+      "path": "apps/desktop/src-tauri/Cargo.toml",
+      "sha256": "31754d3f8bf10f924948b18bc03e1291d2d774dcb642cdc06f9aaa0355bb22b3"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/capabilities_impl.rs",
+      "sha256": "5fbbcee8dfe764a1648ba316b913cf9df36a5a22a9471c06dba2a3c93c7b1912"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/gate/governance.rs",
+      "sha256": "45bc6b4b3f50e138d1a8722e66bb45c121b48b3ebe87efe44235b4a8d515c358"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/gate/index.md",
+      "sha256": "0ae8354d67ba0a483772fcf0a6eb472b7ed36297bf9f6ef1d21a4e740cde2dcb"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/hindsight_custody_protocol.rs",
+      "sha256": "dc3ddd14afcac7278ff8cc23af0209528ecc3a47a2a8c31127ff10fa67261b3c"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/hindsight_host.rs",
+      "sha256": "b603a90d2f3e2f611be7a681d3239b71ce08c64ad15e62a511d85ca54580f694"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/hindsight_installation_protocol.rs",
+      "sha256": "894a1d956c577d4c6fdf1dc70a5260e6c3a9a0bfa6464271f4e673c8a37bd202"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/hindsight_windows.rs",
+      "sha256": "a144c67279a47fd40a7db47d4916cce9009c845a4796321f1b9aa54918079f85"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/hindsight_windows/acl.rs",
+      "sha256": "5c5b5b4d1885dab2071628d4e1a116240bb7e0a1c59c9a143e15b62c436e2447"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/hindsight_windows/index.md",
+      "sha256": "07f4300977b0c23b012641a7d8ac1004e1cb5fe42247acd9020096377ee96a63"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/hindsight_windows/installation.rs",
+      "sha256": "d5e8769693a4916711e82fcd0c26e411918556e0363783a4de36b3e90135f4fd"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/hindsight_windows/invoke.rs",
+      "sha256": "a742a4c1c5c403c9d47e83e420fcf358a8ed2231efa89d42f45dfd152625f9e6"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/hindsight_windows/objects.rs",
+      "sha256": "149e24ea2f00c6031702973383ecb1ddd223244d8ae0e5d3d3e4c4779152a7eb"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/hindsight_windows/process.rs",
+      "sha256": "65475767ab3fa2fc186765e8d765bf1c5dc1ba31de81819601695e9e21cf2cbf"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/hindsight_windows/tests.rs",
+      "sha256": "a20247b0409c6a12e5b08691e55ab12a3fe487d38961c1427b82944f4873ad95"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/host_approval_protocol.rs",
+      "sha256": "db9d4035c636c1b097a2f9d3c0fafc789522daba8a773e7b0b1cfdb0eea5990f"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/host_session.rs",
+      "sha256": "bdc38ccbeb4ab31a966d08265626aba0bfb6e9034843f60b4c39da74941a119a"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/index.md",
+      "sha256": "e2be6aed93f81fb81752a1ab2f692349afaba9d06e2a10b3c195384c70f05089"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/lib.rs",
+      "sha256": "72ef31e56f214cbf8d96d12d502172298a5f88664dc73038af3b44d45babc540"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/node.rs",
+      "sha256": "69e0eb33376ee3d200817cfe24b09a69469545217ce4d8bf545863038397583e"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/protocol.rs",
+      "sha256": "6cdb30d4b22a3e17de8b2de3c3d190a452e46689e4e2ca27ab7af3412bf3325f"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/secrets.rs",
+      "sha256": "7429231d8e90db792ff2270244e198ed64f42996c36fc958aafd7985981d756b"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/ws_challenge.rs",
+      "sha256": "5cb2c1c1d649a83bf7c52ad129b71f6caac63bd64805c9e864d118d52662834e"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/ws_client.rs",
+      "sha256": "f566ec0d8f608e2e70a8b9446115b1689da72512ae359e1b70be1430552e9728"
+    },
+    {
+      "path": "apps/desktop/tsconfig.json",
+      "sha256": "6fe90b4923375b54b9d3fba1b65d9091077c7c53d1249a372260b04c373c0d35"
+    },
+    {
+      "path": "apps/hindsight-host/README.md",
+      "sha256": "5813b01d0e356d244b5414a638c964ef2e20562efc31e863fa1f870de3007367"
+    },
+    {
+      "path": "apps/hindsight-host/package.json",
+      "sha256": "ac174d8d210f9895d94a7f182fbf9b1ee61fe273444a158e502e7610c5be0291"
+    },
+    {
+      "path": "apps/hindsight-host/packaging/launcher.mjs",
+      "sha256": "c7de9730f1af3717e483126c89d3c56477ee7a136fb977103ef2aa1354dcc813"
+    },
+    {
+      "path": "apps/hindsight-host/packaging/taki-hindsight-host.service",
+      "sha256": "52f983a73ee7fa4c8b45ca343f0e15d8fee8886efc70521a98d7c1e937f6ba55"
+    },
+    {
+      "path": "apps/hindsight-host/scripts/build-linux-release.ts",
+      "sha256": "a910b86a85870dc3151f4744339b6ae6ed8e7ba0e3f05b0b17bdabe62d34dd57"
+    },
+    {
+      "path": "apps/hindsight-host/scripts/build.ts",
+      "sha256": "3ba6b9fe68395ac955b79556f799cde6a8e7e8c2ef6c3d65926c34612ddf2083"
+    },
+    {
+      "path": "apps/hindsight-host/scripts/copied-install-fixture.ts",
+      "sha256": "117a0add15e1cf05ecd04ec2bea122167eb084a27bc509aa8c7dc21dbf799710"
+    },
+    {
+      "path": "apps/hindsight-host/scripts/index.md",
+      "sha256": "ee8a691f7bad2200bdd81fba310274d3d355ae7d12b6811535cab9e3f95cf7c5"
+    },
+    {
+      "path": "apps/hindsight-host/src/authenticated-host.integration.test.ts",
+      "sha256": "f1c253f96c28d3a143c62f59e1cc93d0ededd2fae16d01ecbd60297a5e45cb80"
+    },
+    {
+      "path": "apps/hindsight-host/src/credential-source.ts",
+      "sha256": "658bb65aea7c2088d2e7f2e16bc5b6dd2e0a721464e87ce9edabc3abd0db049e"
+    },
+    {
+      "path": "apps/hindsight-host/src/custody-error.ts",
+      "sha256": "b0101fb38776a3a91d078ca1e01f3619b5706c5675bf49b02e91955f72851afb"
+    },
+    {
+      "path": "apps/hindsight-host/src/custody-test-fixtures.ts",
+      "sha256": "cea89ed06803463fb0d6b26661ae808e25828ff7c62f548a857f25e3e22798f4"
+    },
+    {
+      "path": "apps/hindsight-host/src/enroll-node.ts",
+      "sha256": "1ade807dd74123afe5b42997b681d21d19a59d023a7c7d610a11f4cd14600e8c"
+    },
+    {
+      "path": "apps/hindsight-host/src/host-client.ts",
+      "sha256": "68d17bc05165bacc5382ab7f8759944960b1cd76bbaa41f58643607f5c529607"
+    },
+    {
+      "path": "apps/hindsight-host/src/host-gate.ts",
+      "sha256": "51c8df6bf03d18f5f1c6c2e7023ed4fd778a83a3c160de1d37a1230783d814be"
+    },
+    {
+      "path": "apps/hindsight-host/src/host-session.test.ts",
+      "sha256": "eed449c45d2c4fb4dada0a4f3ef0e7a9ad8864822e8eaf43974a46b7c007c2e7"
+    },
+    {
+      "path": "apps/hindsight-host/src/host-session.ts",
+      "sha256": "04ccd9cd9287e2530328be51e46a28e3d63ed43c2db16f01a19a5911c24373dd"
+    },
+    {
+      "path": "apps/hindsight-host/src/index.md",
+      "sha256": "c2938259dc1e7c927b65c7d1d8c6133d83378de6dcbbf5b2d7b57a353bd8a3a0"
+    },
+    {
+      "path": "apps/hindsight-host/src/installation.ts",
+      "sha256": "da8b8308f4a0c0cfa41cd3aa67e1bd0bada15df34a8661a729a930ab5890d14f"
+    },
+    {
+      "path": "apps/hindsight-host/src/installed-files.test.ts",
+      "sha256": "2dda0dec88d2768c31b99455a67165605387c911fae3df211eb4834c1c0bcbba"
+    },
+    {
+      "path": "apps/hindsight-host/src/installed-files.ts",
+      "sha256": "c8b270ed5801fed2369effaf2ef93f1a036f9b50423a0fc61332cff64d553a17"
+    },
+    {
+      "path": "apps/hindsight-host/src/main.ts",
+      "sha256": "c5bd8c3c41dd2bcbef22fe60bc8e968028e3308e926e7eecdd9fd4bc2bc6c2b3"
+    },
+    {
+      "path": "apps/hindsight-host/src/prepare-custody.test.ts",
+      "sha256": "9676ce75f1eb10b1a71901801a116fcce3c13404931b56ba1ae385a49af6d4da"
+    },
+    {
+      "path": "apps/hindsight-host/src/prepare-custody.ts",
+      "sha256": "3ba9073c1e9f6e11d56812e0fde6fe0a00f919c644dd6ad929ebe468099037df"
+    },
+    {
+      "path": "apps/hindsight-host/src/stdio-request.ts",
+      "sha256": "3afab5d7d99dec94de7adea3fc93a9479c2443d7be2302258312a4b542e7332c"
+    },
+    {
+      "path": "apps/hindsight-host/test-fixtures/fake-key-adapter.rs",
+      "sha256": "50f17ba43882725d5e23884ffafd121f03f4e4deec4977a9cea2c25ef76b14be"
+    },
+    {
+      "path": "apps/hindsight-host/tsconfig.json",
+      "sha256": "7fc9d0d5067a3295d1b30552dcb9f56d2a342dd91684bb0c12e9b10e75b26aaf"
+    },
+    {
+      "path": "package.json",
+      "sha256": "b38a0db94d8fc3a1c83e5758317bd998f0ad27bde8cc852ced58bbe04debcd55"
+    },
+    {
+      "path": "packages/core/package.json",
+      "sha256": "16cc4a7e3922330e07598e29b4598581979a768bbd2ddd923ede45954b635471"
+    },
+    {
+      "path": "packages/core/src/boot/hindsight-custody-boot.ts",
+      "sha256": "f806d68a123f9dfd193fc0c83814a1f9386e5329262e649ee8c3a624ca7bf32c"
+    },
+    {
+      "path": "packages/core/src/boot/index.md",
+      "sha256": "b0b348bda6df0a9589dba59a179097f99402086b3190b24cb9c94df8e0c6252c"
+    },
+    {
+      "path": "packages/core/src/capabilities/canonical-input.ts",
+      "sha256": "064c9bb97fbf2019a559e8610acfd056f1ea7c589dbf2f3da7535b0adb3d5e6c"
+    },
+    {
+      "path": "packages/core/src/capabilities/capability-broker-state.ts",
+      "sha256": "68151427a0bb448ac27a86085d38ef5d6a1c19825778859872849414a09f56cd"
+    },
+    {
+      "path": "packages/core/src/capabilities/capability-broker.ts",
+      "sha256": "f1bb1b5fe4eae0611c91a10bf8b300d78745c8330f951fed4c00877171d89f31"
+    },
+    {
+      "path": "packages/core/src/capabilities/capability-challenge.test.ts",
+      "sha256": "3c893567f576f907b4ee3d2d5d82d0b43dcf6c23ce443ae4371c6c7c4b065b43"
+    },
+    {
+      "path": "packages/core/src/capabilities/capability-observers.ts",
+      "sha256": "44ee724f68cc7382e9c05b8e0c24c4eeaa1d94acaca6d52123a6b884f13e019c"
+    },
+    {
+      "path": "packages/core/src/capabilities/index.md",
+      "sha256": "b69e6d74c8df96b017b664fb5a81304a149caf1fb6964628e92dc2864a75a359"
+    },
+    {
+      "path": "packages/core/src/capabilities/route-capability.ts",
+      "sha256": "770dc6bb59fcb1d4f5d1cee7e888feb258f0a590c1c181c36b2f54ae86de6279"
+    },
+    {
+      "path": "packages/core/src/index.md",
+      "sha256": "542307488b2f6ee5f866d0e6289d3d9b02db4c24c2d5acf25ff48a40a3629fd4"
+    },
+    {
+      "path": "packages/core/src/main.ts",
+      "sha256": "9605d537efb96fc1b05846ebabb9aa781e6be66724318e441a27e2a5fe178630"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-custody-owner.test.ts",
+      "sha256": "29470745f4e16f4245680f0acc03dd6706287149fde83b454cc3a3be95ebe183"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-custody-owner.ts",
+      "sha256": "41c47558bbb203dfe7224dc68ed104e8be8397da66cd0e9583cbb045f80c1651"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-setup-service.test.ts",
+      "sha256": "ff1c965c608c9d327d6e5f7be13d4018fffec431ab4f13dd549b626b197fd87e"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-setup-service.ts",
+      "sha256": "77e89a692eee914d7993f04aca5ccb57d3c738288318cafb555ac1c8a7781f0e"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/index.md",
+      "sha256": "3c853d99ffd65e663a4fef26e6bb132ec51674f8b2c38d86e8439ad16c7c4067"
+    },
+    {
+      "path": "packages/core/src/secrets/catalog-custody.test.ts",
+      "sha256": "e9375c071919a255a0d7a8f59540595c2dbfa556319c115f498d89a98eca63b4"
+    },
+    {
+      "path": "packages/core/src/secrets/catalog-custody.ts",
+      "sha256": "796efb696a6b94a437fa7c998f048ba3d36590c67718f721d08212499efe64ed"
+    },
+    {
+      "path": "packages/core/src/secrets/index.md",
+      "sha256": "e5ac852f1df0e4e9dbf44bce8525e69faeb2d916612902f0ee8ba3b6acf34226"
+    },
+    {
+      "path": "packages/core/src/secrets/secret-catalog-envelope.ts",
+      "sha256": "063e53445145e9ba7b41b2f27b38cad60a13d306eebe380c07ec864ee5658567"
+    },
+    {
+      "path": "packages/core/src/secrets/secret-catalog-service.test.ts",
+      "sha256": "11b4eca2564ab9422927a062c2b2b53d6f47a7ea509adb8bb7efc6a25bb8bc2b"
+    },
+    {
+      "path": "packages/core/src/secrets/secret-catalog-service.ts",
+      "sha256": "859f6bf66ca44f39502894af554b7489420676f8c2bef7448832e844bcfad3d8"
+    },
+    {
+      "path": "packages/core/src/testing/hindsight-runtime-composition-fixtures.ts",
+      "sha256": "1ca8229c244fd53e362e2087ecc5b07b260604a6ceb0603ee28bb4e156c95648"
+    },
+    {
+      "path": "packages/core/src/testing/index.md",
+      "sha256": "fa396c8a3346efb2cfcfabe416ccfadb5ca52307dd0565197b3902a0a1f24cea"
+    },
+    {
+      "path": "packages/secret-catalog-codec/package.json",
+      "sha256": "973582bcc7a3fc8104975ebcd5838b56f7ed08e29846e14f3ece435ce204881e"
+    },
+    {
+      "path": "packages/secret-catalog-codec/src/catalog-envelope.ts",
+      "sha256": "9230bd8077995393469040f749dcc1ce15c1babea5fdb20e58d912985f9a5fa9"
+    },
+    {
+      "path": "packages/secret-catalog-codec/src/index.md",
+      "sha256": "1bab843ff181c23f2477112d934d4226c074259cdfd6b560052ecec8c9f20cc5"
+    },
+    {
+      "path": "packages/secret-catalog-codec/tsconfig.json",
+      "sha256": "4c276dea82dad851473fd8d4da52d77cd66fb64e254269eaf1c2070de8e15b12"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-custody-invocation.extra-owner.invalid.json",
+      "sha256": "385289763732f2720fc53a0fa6c767be14443831c0afa0386abeca2328c5b4ac"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-custody-invocation.unix.valid.json",
+      "sha256": "3cb100a0bc97b7892f72cfd27a0729b91b11f525a8f862cfbb8664a65a21537c"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-custody-invocation.unsafe-owner.invalid.json",
+      "sha256": "1141b251c0be0482d68224d8b2d15e482935868bdd0a7b515c38a5e50e3aa1d0"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-custody-invocation.windows.valid.json",
+      "sha256": "46ad77239d296d245f7e665efc59a3a86d19e4c9e7bbfe47d791f99f9f5a4830"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-custody-invocation.wrong-capability.invalid.json",
+      "sha256": "75bb3600dddb830c846867ac03982568249b0fe4581edb592e64fe2589d11977"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-custody-prepare.arbitrary-ref.invalid.json",
+      "sha256": "99f7bd2fc23a26792dabe892ba06554476ea099954a44b72937a7bda7f84b1b7"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-custody-prepare.duplicate-slot.invalid.json",
+      "sha256": "446a6a0f01c699decb2628abc1d9a20c9150dcf90c687a918d604d10f41e939c"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-custody-prepare.extra-secret.invalid.json",
+      "sha256": "bb6e471cc3c33149b9563374008f81d74f13ae4ad8881da1dc79b9f2451448f5"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-custody-prepare.invalid-uuid.invalid.json",
+      "sha256": "c2869f21c95fbadbcefed0b5b7662731805758d4596ff8c988fd56a385a1c46e"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-custody-prepare.missing-inherited-default.invalid.json",
+      "sha256": "250a4f0757b7c6592a5e78fa48347ffe3afbdb0a542614cd3f2a12f1764e6110"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-custody-prepare.required-unused.invalid.json",
+      "sha256": "7922fc80a48e0074ec5523f3abebbb021be6607075f7b2babdffb7efe34a7961"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-custody-prepare.seven-slots.valid.json",
+      "sha256": "5f24e0d1ba266d565b27eb5ab81f729f2ac736bb676e581fb38c9d59ac8c37d4"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-custody-prepare.unsafe-key-version.invalid.json",
+      "sha256": "503720fd60c877673b6ed0a488871f3e43e190d1eed39b0a02603f7bcfbd6168"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-custody-prepare.uppercase-sha.invalid.json",
+      "sha256": "180b8ee8898f3781ac0f28bdb74c90b09b5e6c6be16611ca0ca25d204f592bd6"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-custody-result.deployment-ready.invalid.json",
+      "sha256": "26f835973b189c7db2b548df84e25fb9be992cc63241d000573a3eccc71176be"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-custody-result.prepared.valid.json",
+      "sha256": "0a92e5fa419e5942484ff024f6f7e0bcf159514d5c0f2d649fd305eb08d909c1"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-custody-result.unavailable.valid.json",
+      "sha256": "134a1e6e2ec13f12c1d403b05f583d4515921c269f7d32b6bd01afb829f23a8e"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-custody-result.unknown-reason.invalid.json",
+      "sha256": "1160120b12aeef9fd1939172ecd5244c8ca2e86b5c5da1f6f9044432d024683a"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-host-manifest.compiled.valid.json",
+      "sha256": "f62a49d7bc6f3486bbac57dcfa96ba35743eb92456073bfcc0df9c084ead8df4"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-host-manifest.duplicate.invalid.json",
+      "sha256": "c90b2db8a54fdb676242995ddaa6baa7c9ebd8ba75471ace717f3c864e00491c"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-host-manifest.redirect.invalid.json",
+      "sha256": "6e51bc4fadf026a17dc39023cfc46c6c8718968176663a6b24235b84e9bea22b"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-host-registration.create-account.invalid.json",
+      "sha256": "e261c0f759bd92eeee5b1822e0cda3a5aee7db649959ee5190fbeee542293774"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-host-registration.systemd.valid.json",
+      "sha256": "1fb1b828ef3d205ff361873d3de834ce8bb0d47ac04c7330dc4ea6ea97de86ce"
+    },
+    {
+      "path": "packages/shared/fixtures/protocol/hindsight-host-registration.windows.valid.json",
+      "sha256": "b4beed1b7ae95cf545b923ee65c1c22eb901611215302337dc0b6a9a3391ed32"
+    },
+    {
+      "path": "packages/shared/package.json",
+      "sha256": "e40df88d2ae09ffa1bbba37456531fae10bcd5d025e2dce95d3d7c0b75b6b796"
+    },
+    {
+      "path": "packages/shared/src/governance-evaluator.test.ts",
+      "sha256": "41cc03a99a0b0f62e8202c9bebeb83615646c1179526e34c4c5def5de3305ced"
+    },
+    {
+      "path": "packages/shared/src/governance-registry.test.ts",
+      "sha256": "2a051cc6718fb6ffa2e5b662b7eaedf76ffd2db70820c20c1deea194d5ddb538"
+    },
+    {
+      "path": "packages/shared/src/governance-registry.ts",
+      "sha256": "e0188f572847a7329d3bb479b783cec652e1ae3add994e25df6d3415055e4ff1"
+    },
+    {
+      "path": "packages/shared/src/hindsight-custody-schema.ts",
+      "sha256": "c032dec7bd6c7ad719fc25a34db5dc1ed374c147c7d104602b54ce9e88dfaef0"
+    },
+    {
+      "path": "packages/shared/src/hindsight-installation-schema.ts",
+      "sha256": "d6cf355fb6599fc668cef94fc34c050493f0f233420ef38432cce2e24f971e61"
+    },
+    {
+      "path": "packages/shared/src/hindsight-setup-schema.ts",
+      "sha256": "c42bd723b26cf4f7ec5122906fd6ead9c635ebe6b8c1b34dd0a34000fdb97959"
+    },
+    {
+      "path": "packages/shared/src/host-control-schema.test.ts",
+      "sha256": "5950df26f6245a0afcb8ce941a1c0dbb15f8253e34bab3f844a5475c910adcfe"
+    },
+    {
+      "path": "packages/shared/src/host-input-encoding.ts",
+      "sha256": "f1378ff12354b0e33e5930e36c4b9a830a52c13e89921f0d9593fbd2a9fc4e40"
+    },
+    {
+      "path": "packages/shared/src/index.md",
+      "sha256": "83ee8b1819987f4f71f69a1b645b9ca58cb74b4c6b4d063639b96d26e352af18"
+    },
+    {
+      "path": "packages/shared/src/protocol-fixtures.test.ts",
+      "sha256": "82918774e536b5f959e2e3df7ed9afa441ebfce292e6d8abfe37e5207d7394ec"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "8fd90b14d80bef5e930888519188f255e16cf046a0221df0fedf3b9d441db19d"
+    }
+  ]
+}

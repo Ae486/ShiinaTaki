@@ -1,0 +1,39 @@
+{
+  "checkedAtUtc": "2026-10-12T18:05:09.421874+00:00",
+  "sourceReview": {
+    "path": "b3-independent-native-reviewed-source-01.json",
+    "sha256": "9f2f89243938334cbd675165e1cdf285f984b3c48a0402aaa9f2fe53b5ae7516"
+  },
+  "generationBaseline": {
+    "path": "b3-native-implementation-final-source-01.json",
+    "sha256": "571787e6eded5b2997d00662b859c782a40ae51ddd58f056770979536db2612b"
+  },
+  "supersededAudit": {
+    "path": "b3-root-native-final-readback-01.json",
+    "sha256": "01964fe216de50026491377e522f76b995c5632093d14fc247204ecafeee4594",
+    "reason": "Audit 01 resolved repository-relative and virtual manifest keys as Taki cwd paths. Its null artifact readings were invalid path resolution, not source drift; this audit uses Native root and the baseline actual Rust/manifest paths."
+  },
+  "checks": {
+    "nativeReviewedInputs": {
+      "count": 952,
+      "mismatches": []
+    },
+    "generated": {
+      "count": 958,
+      "mismatches": []
+    },
+    "maintained": {
+      "count": 12,
+      "mismatches": []
+    },
+    "generationManifests": {
+      "count": 4,
+      "mismatches": []
+    },
+    "originalGeneratorSources": {
+      "count": 5,
+      "mismatches": []
+    }
+  },
+  "scope": "Current Native and unchanged generation/SDK bytes only; no test, generation, model or external service invocation."
+}

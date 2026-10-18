@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "recordedAt": "2026-10-14T15:50:41.608039+00:00",
+  "task": ".trellis/tasks/10-14-hindsight-managed-deployment",
+  "verdict": "STATIC_PREPARATION_ACCEPTED_RUNTIME_APPROVAL_PENDING",
+  "caseId": "fa25c42b-1dbc-4f15-bc50-224bca0b03a1",
+  "filesVerified": [
+    {
+      "file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/README.md",
+      "bytes": 12909,
+      "sha256": "a3ada14fe6cb928924b99936a63820a11af96dc3327f16ca0888c4f6d87ca92c"
+    },
+    {
+      "file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/run-first-case.ts",
+      "bytes": 24820,
+      "sha256": "532f800475d8ed9bf14809865e247c805ac8e81dc3109c88b196e04d6bad013e"
+    },
+    {
+      "file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/base-probe.py",
+      "bytes": 1438,
+      "sha256": "a6d0548b53bf557157590cc87edb1f30ff190fa5813edf0a477a3ba399b6c021"
+    },
+    {
+      "file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/container-scan.py",
+      "bytes": 2289,
+      "sha256": "cd5eab55311c699c7ef153c1dac036e18d961021028db2942b4a9b376a03a3c0"
+    },
+    {
+      "file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/preparation-check.json",
+      "bytes": 2976,
+      "sha256": "68f4c32dee404b13c9639f9ef859807048fc0eda47c606d0212c15becca6c09d"
+    }
+  ],
+  "reportsVerified": [
+    {
+      "file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-docker-first-case-review.md",
+      "sha256": "916f9cea25d3a2750de77fe37069894be8dd10812bb7be0c9d3d4741070b20b6"
+    },
+    {
+      "file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-docker-first-case-review.json",
+      "sha256": "fcd5d5113ab12f87fdb2ab0457c06c4820ea570205607908da021f4d271875ec"
+    }
+  ],
+  "metadataVerified": [
+    {
+      "file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/leader-now.md",
+      "sha256": "884f9b8114505f6d1c1f146e51fcdf9471c3654bde747929fcee41aae0432dcb"
+    },
+    {
+      "file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-docker-preflight.md",
+      "sha256": "aaffbfa506d183432741b2e3bb865cffb83b9a49b8759e6c941961b81a26936d"
+    },
+    {
+      "file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-docker-acceptance-plan.md",
+      "sha256": "a70f5981aed5c66205cc705d5624e03f84d89888c4a2f50da55e240a100def99"
+    },
+    {
+      "file": ".trellis/tasks/10-14-hindsight-managed-deployment/implement.md",
+      "sha256": "b62bf1d97786658ee95747319a95e8600a098ae60e099661c3864ad6eb0b4269"
+    },
+    {
+      "file": "docs/HANDOFF.md",
+      "sha256": "99a8417bd41cbfeb8b5fd73e80d3e9566836160a18678682715272aa5ca671ce"
+    }
+  ],
+  "checks": {
+    "fiveFinalFilesMatch": true,
+    "reviewReportsMatch": true,
+    "utf8NoBomAndWhitespace": true,
+    "newLinksExist": true,
+    "runtimeRootsAbsent": true,
+    "staticChecksRerunByRoot": false
+  },
+  "freeBytes": {
+    "C": 26853367808,
+    "G": 144895037440,
+    "H": 13104427008
+  },
+  "runtimeRoots": [
+    {
+      "path": "G:/TakiAgent-c2a-docker-acceptance/first-case-fa25c42b-1dbc-4f15-bc50-224bca0b03a1",
+      "exists": false
+    },
+    {
+      "path": "C:/taki-c2a-docker-fixture-fa25c42b-1dbc-4f15-bc50-224bca0b03a1",
+      "exists": false
+    }
+  ],
+  "runtimeAuthorization": "Desktop startup and read-only preflight approved; first probe/build/container/volume case and its cleanup await separate owner approval.",
+  "remaining": [
+    "First actual Docker fake-consumer case",
+    "Deferred Docker fault and restart matrix",
+    "Disposable database proof",
+    "C1 AC2/6 service environment",
+    "C2b receipts",
+    "Real model and business-data acceptance"
+  ],
+  "deploymentReady": false,
+  "ownership": "Fixture and independent reviewer reports/check slot released; Root owns continuation."
+}

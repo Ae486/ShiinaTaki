@@ -1,0 +1,90 @@
+Owned fixture: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-5a4962484a6d
+PostgreSQL: 18.1 ; vector/pg_trgm ready
+Pytest log: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-5a4962484a6d\pytest.log
+------------------------------- live log setup --------------------------------
+2026-10-08 14:56:36 - INFO - hindsight_api.engine.cross_encoder - Reranker: RRF passthrough provider initialized (neural reranking disabled)
+2026-10-08 14:56:37 - INFO - hindsight_api.engine.memory_engine - Connecting to database at postgresql://***:***@127.0.0.1:5432/taki_fixture
+2026-10-08 14:56:37 - INFO - hindsight_api.engine.db.postgresql - PostgreSQL pool created (min=1, max=15, cmd_timeout=60s, acquire_timeout=30s)
+2026-10-08 14:56:39 - INFO - hindsight_api.engine.memory_engine - Memory system initialized (pool and task backend started)
+PASSED                                                                   [ 54%]
+------------------------------ live log teardown ------------------------------
+2026-10-08 14:56:40 - INFO - hindsight_api.engine.memory_engine - close() started
+2026-10-08 14:56:40 - INFO - hindsight_api.engine.db.postgresql - PostgreSQL pool closed
+
+tests/test_taki_extension_contract.py::test_builtin_surface_coexists_with_custom_extension_and_uses_global_auth 
+------------------------------- live log setup --------------------------------
+2026-10-08 14:56:40 - INFO - hindsight_api.engine.cross_encoder - Reranker: RRF passthrough provider initialized (neural reranking disabled)
+2026-10-08 14:56:40 - INFO - hindsight_api.engine.memory_engine - Connecting to database at postgresql://***:***@127.0.0.1:5432/taki_fixture
+2026-10-08 14:56:41 - INFO - hindsight_api.engine.db.postgresql - PostgreSQL pool created (min=1, max=15, cmd_timeout=60s, acquire_timeout=30s)
+2026-10-08 14:56:42 - INFO - hindsight_api.engine.memory_engine - Memory system initialized (pool and task backend started)
+-------------------------------- live log call --------------------------------
+2026-10-08 14:56:44 - INFO - root - HTTP extension router mounted at /ext/
+PASSED                                                                   [ 63%]
+------------------------------ live log teardown ------------------------------
+2026-10-08 14:56:44 - INFO - hindsight_api.engine.memory_engine - close() started
+2026-10-08 14:56:44 - INFO - hindsight_api.engine.db.postgresql - PostgreSQL pool closed
+
+tests/test_taki_extension_contract.py::test_change_feed_reset_is_typed_and_hard_deleted_bank_remains_readable 
+------------------------------- live log setup --------------------------------
+2026-10-08 14:56:44 - INFO - hindsight_api.engine.cross_encoder - Reranker: RRF passthrough provider initialized (neural reranking disabled)
+2026-10-08 14:56:44 - INFO - hindsight_api.engine.memory_engine - Connecting to database at postgresql://***:***@127.0.0.1:5432/taki_fixture
+2026-10-08 14:56:45 - INFO - hindsight_api.engine.db.postgresql - PostgreSQL pool created (min=1, max=15, cmd_timeout=60s, acquire_timeout=30s)
+2026-10-08 14:56:46 - INFO - hindsight_api.engine.memory_engine - Memory system initialized (pool and task backend started)
+PASSED                                                                   [ 72%]
+------------------------------ live log teardown ------------------------------
+2026-10-08 14:56:49 - INFO - hindsight_api.engine.memory_engine - close() started
+2026-10-08 14:56:49 - INFO - hindsight_api.engine.db.postgresql - PostgreSQL pool closed
+
+tests/test_taki_extension_contract.py::test_snapshot_failure_paths_return_stable_typed_errors 
+------------------------------- live log setup --------------------------------
+2026-10-08 14:56:49 - INFO - hindsight_api.engine.cross_encoder - Reranker: RRF passthrough provider initialized (neural reranking disabled)
+2026-10-08 14:56:50 - INFO - hindsight_api.engine.memory_engine - Connecting to database at postgresql://***:***@127.0.0.1:5432/taki_fixture
+2026-10-08 14:56:50 - INFO - hindsight_api.engine.db.postgresql - PostgreSQL pool created (min=1, max=15, cmd_timeout=60s, acquire_timeout=30s)
+2026-10-08 14:56:52 - INFO - hindsight_api.engine.memory_engine - Memory system initialized (pool and task backend started)
+PASSED                                                                   [ 81%]
+------------------------------ live log teardown ------------------------------
+2026-10-08 14:56:55 - INFO - hindsight_api.engine.memory_engine - close() started
+2026-10-08 14:56:55 - INFO - hindsight_api.engine.db.postgresql - PostgreSQL pool closed
+
+tests/test_taki_extension_contract.py::test_fastapi_validation_failures_use_the_public_taki_error_envelope 
+------------------------------- live log setup --------------------------------
+2026-10-08 14:56:55 - INFO - hindsight_api.engine.cross_encoder - Reranker: RRF passthrough provider initialized (neural reranking disabled)
+2026-10-08 14:56:55 - INFO - hindsight_api.engine.memory_engine - Connecting to database at postgresql://***:***@127.0.0.1:5432/taki_fixture
+2026-10-08 14:56:55 - INFO - hindsight_api.engine.db.postgresql - PostgreSQL pool created (min=1, max=15, cmd_timeout=60s, acquire_timeout=30s)
+2026-10-08 14:56:57 - INFO - hindsight_api.engine.memory_engine - Memory system initialized (pool and task backend started)
+PASSED                                                                   [ 90%]
+------------------------------ live log teardown ------------------------------
+2026-10-08 14:56:59 - INFO - hindsight_api.engine.memory_engine - close() started
+2026-10-08 14:56:59 - INFO - hindsight_api.engine.db.postgresql - PostgreSQL pool closed
+
+tests/test_taki_extension_contract.py::test_canonical_openapi_contains_taki_routes_and_slice_0a_mutation_fields 
+------------------------------- live log setup --------------------------------
+2026-10-08 14:56:59 - INFO - hindsight_api.engine.cross_encoder - Reranker: RRF passthrough provider initialized (neural reranking disabled)
+2026-10-08 14:56:59 - INFO - hindsight_api.engine.memory_engine - Connecting to database at postgresql://***:***@127.0.0.1:5432/taki_fixture
+2026-10-08 14:56:59 - INFO - hindsight_api.engine.db.postgresql - PostgreSQL pool created (min=1, max=15, cmd_timeout=60s, acquire_timeout=30s)
+2026-10-08 14:57:01 - INFO - hindsight_api.engine.memory_engine - Memory system initialized (pool and task backend started)
+PASSED                                                                   [100%]
+------------------------------ live log teardown ------------------------------
+2026-10-08 14:57:07 - INFO - hindsight_api.engine.memory_engine - close() started
+2026-10-08 14:57:07 - INFO - hindsight_api.engine.db.postgresql - PostgreSQL pool closed
+
+
+============================ slowest 10 durations =============================
+13.07s setup    tests/native_results/test_transition_backup.py::test_previous_revision_backup_does_not_invent_bank_creation_proof
+6.00s call     tests/test_taki_extension_contract.py::test_canonical_openapi_contains_taki_routes_and_slice_0a_mutation_fields
+5.63s call     tests/native_results/test_transition_backup.py::test_previous_revision_backup_does_not_invent_bank_creation_proof
+4.54s setup    tests/test_taki_extension_contract.py::test_change_feed_reset_is_typed_and_hard_deleted_bank_remains_readable
+4.44s setup    tests/test_taki_extension_contract.py::test_change_feed_returns_committed_bank_change_with_deterministic_page
+3.93s setup    tests/test_taki_extension_contract.py::test_logical_snapshot_create_manifest_and_page_are_public_and_immutable
+3.86s setup    tests/test_taki_extension_contract.py::test_compatible_postgresql_manifest_reports_independent_contract_identity
+3.77s setup    tests/test_taki_extension_contract.py::test_manifest_fails_closed_for_every_unsupported_runtime_shape
+3.76s setup    tests/test_taki_extension_contract.py::test_fastapi_validation_failures_use_the_public_taki_error_envelope
+3.67s setup    tests/test_taki_extension_contract.py::test_snapshot_failure_paths_return_stable_typed_errors
+======================== 11 passed in 69.59s (0:01:09) ========================
+{
+    "Fixture":  "taki-hindsight-g1-5a4962484a6d",
+    "Stopped":  true,
+    "DataRemoved":  true,
+    "RegistryRemoved":  true,
+    "Logs":  "H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-5a4962484a6d"
+}

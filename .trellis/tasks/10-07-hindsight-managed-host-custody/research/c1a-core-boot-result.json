@@ -1,0 +1,15 @@
+{
+  "exitCode": 0,
+  "verified": true,
+  "pid": 33200,
+  "dataDir": "C:\\taki-c1a-fixture-609ad25fef7f46b6a9c30b4b510b43f8\\core-boot-1Ja51D",
+  "port": 12013,
+  "isolated": true,
+  "dotenvLoaded": false,
+  "authenticatedMethods": [
+    "memory.hindsight.status",
+    "memory.hindsight.custody.prepare"
+  ],
+  "prohibitedCalls": 0,
+  "originalDeploymentTouched": false
+}

@@ -1,0 +1,13 @@
+{
+  "cwd": "H:\\TakiAgent",
+  "command": "pnpm",
+  "argv": [
+    "--filter",
+    "@taki/desktop",
+    "typecheck"
+  ],
+  "startedAt": "2026-10-09T11:07:45.5773176Z",
+  "finishedAt": "2026-10-09T11:08:23.6584429Z",
+  "exitCode": 2,
+  "inputManifest": "b3-home-inputs-02.json"
+}

@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "pnpm",
+    "--filter",
+    "@taki/core",
+    "exec",
+    "vitest",
+    "run",
+    "src/memory/hindsight/template-lifecycle/template-derived-observation.test.ts",
+    "src/server/methods/hindsight-template-methods.test.ts",
+    "src/memory/hindsight/template-lifecycle/template-lifecycle-service.test.ts",
+    "--maxWorkers=2",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile.json=H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-core-reads-01-vitest.json"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "inputManifest": "b2-core-read-check-input-03.json",
+  "startedAt": "2026-10-08T13:02:25.0490410Z",
+  "finishedAt": "2026-10-08T13:03:07.3971190Z",
+  "exit": 0
+}

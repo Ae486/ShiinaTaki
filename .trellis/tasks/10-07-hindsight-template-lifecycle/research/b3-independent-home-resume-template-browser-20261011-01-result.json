@@ -1,0 +1,24 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "--filter",
+    "@taki/desktop",
+    "exec",
+    "vitest",
+    "run",
+    "src/windows/home/pages/operations/hindsight-template-browser.test.ts",
+    "--maxWorkers=1"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "startedAt": "2026-10-11T11:29:06.650003+00:00",
+  "finishedAt": "2026-10-11T11:29:31.527376+00:00",
+  "exitCode": 0,
+  "durationSeconds": 24.875,
+  "inputManifest": "b3-independent-home-resume-template-browser-20261011-01-inputs.json",
+  "sourceCount": 2056,
+  "changedInputs": [],
+  "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-independent-home\\resume-template-browser-20261011-01-2778123fdcba445db01cf04f425d2eb6",
+  "temporaryRootRemoved": true,
+  "remainingFixtureEntries": [],
+  "log": "b3-independent-home-resume-template-browser-20261011-01.log"
+}

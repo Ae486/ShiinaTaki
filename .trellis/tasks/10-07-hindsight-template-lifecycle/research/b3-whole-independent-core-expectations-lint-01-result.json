@@ -1,0 +1,24 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "exec",
+    "eslint",
+    "packages/core/src/db/pending-memory-repo.test.ts",
+    "packages/core/src/db/scheduled-task-repo.test.ts",
+    "packages/core/src/memory/hindsight-backup/hindsight-backup-receipts.test.ts",
+    "packages/core/src/memory/hindsight-backup/hindsight-backup-native-route.test.ts"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "startedAt": "2026-10-13T05:31:45.633507+00:00",
+  "finishedAt": "2026-10-13T05:31:54.166487+00:00",
+  "exitCode": 0,
+  "durationSeconds": 8.532,
+  "inputCount": 2417,
+  "changedInputs": [],
+  "inputManifest": "b3-whole-independent-core-expectations-lint-01-inputs.json",
+  "afterManifest": "b3-whole-independent-core-expectations-lint-01-inputs-after.json",
+  "log": "b3-whole-independent-core-expectations-lint-01.log",
+  "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-whole-checks\\independent-core-expectations-lint-01-36a9691f3c9448d5ae457069d0c2bc28",
+  "temporaryRootRemoved": true,
+  "remainingFixtureEntries": []
+}

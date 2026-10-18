@@ -1,0 +1,17 @@
+file:///H:/TakiAgent/node_modules/.pnpm/vitest@4.1.10_@types+node@2_8d3d795b3d2e0c664bd23981bc00e9a3/node_modules/vitest/dist/chunks/cac.DdICfEr1.js:406
+          throw new CACError(`Unknown option \`${name.length > 1 ? `--${name}` : `-${name}`}\``);
+                ^
+
+CACError: Unknown option `--minWorkers`
+    at Command.checkUnknownOptions (file:///H:/TakiAgent/node_modules/.pnpm/vitest@4.1.10_@types+node@2_8d3d795b3d2e0c664bd23981bc00e9a3/node_modules/vitest/dist/chunks/cac.DdICfEr1.js:406:17)
+    at CAC.runMatchedCommand (file:///H:/TakiAgent/node_modules/.pnpm/vitest@4.1.10_@types+node@2_8d3d795b3d2e0c664bd23981bc00e9a3/node_modules/vitest/dist/chunks/cac.DdICfEr1.js:606:13)
+    at CAC.parse (file:///H:/TakiAgent/node_modules/.pnpm/vitest@4.1.10_@types+node@2_8d3d795b3d2e0c664bd23981bc00e9a3/node_modules/vitest/dist/chunks/cac.DdICfEr1.js:547:12)
+    at file:///H:/TakiAgent/node_modules/.pnpm/vitest@4.1.10_@types+node@2_8d3d795b3d2e0c664bd23981bc00e9a3/node_modules/vitest/dist/cli.js:11:13
+    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+    at async node:internal/modules/esm/loader:643:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.18.0
+undefined
+H:\TakiAgent\apps\desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/windows/home/pages/operations/hindsight-configuration-controller.test.ts src/lib/ws-client-hindsight-configuration.test.ts --maxWorkers=2 --minWorkers=1

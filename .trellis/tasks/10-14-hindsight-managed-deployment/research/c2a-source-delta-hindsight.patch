@@ -1,0 +1,901 @@
+diff --git a/docker/standalone/Dockerfile.c2a-fake b/docker/standalone/Dockerfile.c2a-fake
+new file mode 100644
+index 0000000..6f2fc0b
+--- /dev/null
++++ b/docker/standalone/Dockerfile.c2a-fake
+@@ -0,0 +1,9 @@
++# Build only at the separately authorized Docker checkpoint, with an already
++# available immutable Native base image. No source test builds or pulls it.
++ARG NATIVE_IMAGE
++FROM ${NATIVE_IMAGE}
++USER root
++COPY docker/standalone/managed_bootstrap /app/c2a/managed_bootstrap
++RUN /app/api/.venv/bin/python -I -B -c "import pathlib,shutil,sysconfig; shutil.copytree('/app/c2a/managed_bootstrap', pathlib.Path(sysconfig.get_path('purelib'))/'managed_bootstrap')"
++USER 1000:1000
++ENTRYPOINT ["/app/api/.venv/bin/python", "-I", "-B", "-m", "managed_bootstrap.owner"]
+diff --git a/docker/standalone/managed_bootstrap/README.md b/docker/standalone/managed_bootstrap/README.md
+index 8385e04..b5f3b99 100644
+--- a/docker/standalone/managed_bootstrap/README.md
++++ b/docker/standalone/managed_bootstrap/README.md
+@@ -1,8 +1,9 @@
+-# Managed bootstrap protocol (C1b)
++# Managed bootstrap protocols (C1b and C2a)
+ 
+ This package implements the bounded private bootstrap protocol and owned process
+-supervision for isolated fake-credential experiments. Native release startup,
+-provider configuration, Docker delivery and deployment receipts remain unwired.
++supervision for isolated fake-credential experiments. C2a adds the fixed owner,
++independent control channel and fake consumer described below. Ordinary Native
++startup, provider configuration and trusted deployment receipts remain unchanged.
+ `Bootstrap` has no consumer by default. A private frame cannot install a consumer
+ or authorize itself; a trusted owner must supply an independent `LiveGrant`.
+ 
+@@ -41,12 +42,17 @@ Real embedding/reranker mappings and the six model profiles belong to C3.
+ 
+ ## Local transport and safe status
+ 
+-The sole non-fixture CLI is `python -m managed_bootstrap.submitter`, when this
++The private credential CLI is `python -m managed_bootstrap.submitter`, when this
+ package is on the installed module path. It takes no arguments and connects only
+ to `/run/taki-hindsight/bootstrap.sock` on Linux. It does not install or start the
+ server. No arbitrary path, command, environment map, TCP or Windows pipe fallback
+ is accepted. The anonymous-pipe drivers are confined to `tests/fixtures/`.
+ 
++C2a also exposes the fixed `managed_bootstrap.owner` and
++`managed_bootstrap.control` module entries. These are included only by the
++dedicated `Dockerfile.c2a-fake` recipe; this source checkpoint does not build or
++pull that image. Neither entry accepts caller commands, paths or environment maps.
++
+ Both Unix endpoints verify the actual kernel `SO_PEERCRED` UID. The runtime
+ directory must already be owned by the effective user with mode 0700, and the
+ socket must be owned by that user with mode 0600. Parent checks, an open directory
+@@ -91,6 +97,36 @@ and bounded wait/reaping if necessary. A private I/O deadline cannot shorten tha
+ grace. Windows tests own a real leaf process and verify termination/reaping; they
+ do not establish Linux group or database shutdown behavior.
+ 
++## C2a independent owner and fixed consumer
++
++`C2BootstrapOwner` creates the startup and receives a separately admitted permit
++on `/run/taki-hindsight/control.sock`. The strict u32-LE JSON control protocol is
++bounded at 32 KiB and offers only `status` and `authorize`. It shares the C1 UID,
++protected-directory, socket-identity, EOF and deadline rules. Only this owner
++control path installs `LiveGrant`; a private credential frame cannot grant itself
++authority. Public statuses remain value-free and keep `deploymentReady: false`.
++
++`C2FakeConsumer` independently requires every resolved value to match
++`C2A_FAKE_[0-9a-f]{64}`. It maps the same seven slots to the fixed
++`TAKI_C2A_FAKE_*` names in `fake_consumer.py`, rebuilds the environment, disables
++dotenv and runs only `fake_child.py` with private stdio. The child imports no
++provider, opens no network and writes only bounded PID/startup/state markers in
++the owned data directory. A sleeping fake child or marker is not database health,
++database persistence or a trusted setup receipt.
++
++On Windows, CPython's venv executable is a redirector. The fixture starts the
++base executable with CPython's `__PYVENV_LAUNCHER__` handoff to retain the venv
++while owning the actual leaf PID. The marker must match `Popen.pid`; cleanup
++waits for the actual child. Linux keeps its existing process-group/subreaper and
++independent 30-second graceful shutdown contract.
++
++`tests/test_c2a_bootstrap_owner.py` proves independent authorization, fake-only
++refusal, original running observation after admission expiry and actual owned
++leaf cleanup. `tests/fixtures/c2a_pipe_owner.py` is the marked Windows source
++fixture used by the installed Taki Host chain with a substituted engine. It does
++not establish Linux socket, real Docker, tmpfs or database acceptance. Actual
++Docker delivery/restart and later C2b receipt consumption remain separate gates.
++
+ ## Verification and evidence boundaries
+ 
+ Run from the Native checkout with already installed Python 3.11+ and
+diff --git a/docker/standalone/managed_bootstrap/control.py b/docker/standalone/managed_bootstrap/control.py
+new file mode 100644
+index 0000000..448a383
+--- /dev/null
++++ b/docker/standalone/managed_bootstrap/control.py
+@@ -0,0 +1,166 @@
++"""INPUT: one bounded status/authorize frame on the fixed protected control socket.
++OUTPUT: safe existing bootstrap status, independent of the private credential path.
++POS: C2a Native owner-control server/client; no options, reset or arbitrary commands.
++"""
++
++from __future__ import annotations
++
++import queue
++import socket
++import sys
++import threading
++import time
++from pathlib import Path
++from typing import TYPE_CHECKING, BinaryIO, cast
++
++from .owner_protocol import CONTROL_BYTES, parse_owner_request
++from .protocol import (
++    ADMISSION_SECONDS,
++    STATUS_BYTES,
++    Reason,
++    Refusal,
++    Status,
++    encode_status,
++    packet,
++    parse_status,
++    read_packet,
++)
++from .unix_socket import (
++    RUNTIME_DIRECTORY,
++    SocketDirectory,
++    connect_private,
++    require_linux,
++    require_peer,
++    socket_deadline,
++)
++
++if TYPE_CHECKING:
++    from .owner import C2BootstrapOwner
++
++
++def read_control(stream: BinaryIO, deadline: float) -> bytes:
++    answers: queue.Queue[bytes | Refusal] = queue.Queue(maxsize=1)
++    raw = getattr(stream, "raw", stream)
++
++    def read() -> None:
++        try:
++            payload = read_packet(raw, CONTROL_BYTES, eof=True)
++            parse_owner_request(payload)
++            answers.put(payload)
++        except Refusal as error:
++            answers.put(error)
++        except Exception:
++            answers.put(Refusal(Reason.DENIED))
++
++    threading.Thread(target=read, daemon=True).start()
++    try:
++        answer = answers.get(timeout=max(0.0, deadline - time.monotonic()))
++    except queue.Empty:
++        raise Refusal(Reason.STALE) from None
++    if isinstance(answer, Refusal):
++        raise answer
++    if time.monotonic() >= deadline:
++        raise Refusal(Reason.STALE)
++    return answer
++
++
++def exchange(payload: bytes, deadline: float) -> Status:
++    parse_owner_request(payload)
++    directory = SocketDirectory(kind="control.sock")
++    try:
++        with connect_private(directory, deadline) as connection, socket_deadline(connection, deadline):
++            connection.sendall(packet(payload, CONTROL_BYTES))
++            connection.shutdown(socket.SHUT_WR)
++            with connection.makefile("rb", buffering=0) as stream:
++                return parse_status(read_packet(cast(BinaryIO, stream), STATUS_BYTES, eof=True))
++    finally:
++        directory.close()
++
++
++def serve_control(owner: C2BootstrapOwner, stop: threading.Event, root: Path = RUNTIME_DIRECTORY) -> None:
++    protected: SocketDirectory | None = None
++    listener: socket.socket | None = None
++    active: socket.socket | None = None
++
++    def cancel() -> None:
++        stop.wait()
++        if active is not None:
++            try:
++                active.shutdown(socket.SHUT_RDWR)
++            except OSError:
++                pass  # The exact control exchange may already have finished.
++
++    try:
++        protected = SocketDirectory(root, kind="control.sock")
++        listener = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
++        protected.bind(listener)
++        threading.Thread(target=cancel, daemon=True).start()
++        listener.settimeout(0.1)
++        while not stop.is_set():
++            try:
++                connection, _address = listener.accept()
++            except TimeoutError:
++                continue
++            with connection:
++                active = connection
++                _serve_connection(owner, connection, protected)
++                active = None
++    except Exception:
++        stop.set()  # A failed protected control path must not leave bootstrap usable.
++    finally:
++        if listener is not None:
++            listener.close()
++        if protected is not None:
++            try:
++                protected.close()
++            except Exception:
++                stop.set()
++
++
++def _serve_connection(owner: C2BootstrapOwner, connection: socket.socket, directory: SocketDirectory) -> None:
++    deadline = time.monotonic() + ADMISSION_SECONDS
++    try:
++        directory.verify()
++        require_peer(connection, directory.uid)
++        with socket_deadline(connection, deadline):
++            with connection.makefile("rb", buffering=0) as stream:
++                # The socket timeout preserves blocking byte reads; SocketIO's
++                # broader nonblocking type is not used at this boundary.
++                payload = read_packet(cast(BinaryIO, stream), CONTROL_BYTES, eof=True)
++            directory.verify()
++            status = owner.control(payload)
++    except Refusal as error:
++        status = owner.bootstrap.refusal(error.reason)
++    except Exception:
++        status = owner.bootstrap.refusal(Reason.HOST)
++    try:
++        with socket_deadline(connection, deadline):
++            connection.sendall(packet(encode_status(status), STATUS_BYTES))
++    except (OSError, Refusal):
++        pass  # Lost grant acknowledgement never revokes or reinstalls its grant.
++
++
++def main() -> int:
++    deadline = time.monotonic() + ADMISSION_SECONDS
++    try:
++        if len(sys.argv) != 1:
++            raise Refusal(Reason.DENIED)
++        require_linux()
++        status = exchange(read_control(sys.stdin.buffer, deadline), deadline)
++        code = 0
++    except Refusal as error:
++        status = Status("unavailable", "00000000-0000-0000-0000-000000000000", "0" * 64, reason=error.reason)
++        code = 1
++    except Exception:
++        status = Status("unavailable", "00000000-0000-0000-0000-000000000000", "0" * 64, reason=Reason.UNKNOWN)
++        code = 1
++    try:
++        sys.stdout.buffer.write(encode_status(status) + b"\n")
++        sys.stdout.buffer.flush()
++    except OSError:
++        return 1
++    return code
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/docker/standalone/managed_bootstrap/fake_child.py b/docker/standalone/managed_bootstrap/fake_child.py
+new file mode 100644
+index 0000000..bd9bd0e
+--- /dev/null
++++ b/docker/standalone/managed_bootstrap/fake_child.py
+@@ -0,0 +1,60 @@
++"""INPUT: fixed private fake environment and safe startup identity from its owner.
++OUTPUT: finite leaf-process lifetime and value-free PID/startup/exit markers.
++POS: isolated C2a fake consumer child; imports no provider and opens no network.
++"""
++
++from __future__ import annotations
++
++import json
++import os
++import re
++import signal
++import sys
++import time
++from pathlib import Path
++
++
++def main() -> int:
++    names = {
++        "TAKI_C2A_FAKE_" + suffix
++        for suffix in ("CONNECTION", "DEFAULT", "RETAIN", "REFLECT", "CONSOLIDATION", "EMBEDDING", "RERANKER")
++    }
++    values = [value for name, value in os.environ.items() if name in names]
++    if (
++        len(sys.argv) != 1
++        or not values
++        or any(not re.fullmatch(r"C2A_FAKE_[0-9a-f]{64}", value) for value in values)
++        or os.environ.get("PYTHON_DOTENV_DISABLED") != "true"
++        or any(name in os.environ for name in ("PYTHONPATH", "NODE_OPTIONS", "HINDSIGHT_API_LLM_API_KEY"))
++    ):
++        return 20
++    # Exercise the same pinned dotenv library; disabled dotenv may not introduce
++    # even a harmless fixture variable from the fresh data directory.
++    from dotenv import load_dotenv
++
++    before = dict(os.environ)
++    load_dotenv(Path.cwd() / ".env", override=True)
++    if dict(os.environ) != before:
++        return 21
++    startup_id = os.environ["TAKI_C2A_STARTUP_ID"]
++    stopped = False
++
++    def stop(_signum: int, _frame: object) -> None:
++        nonlocal stopped
++        stopped = True
++
++    signal.signal(signal.SIGTERM, stop)
++    marker = Path("c2a-child.json")
++    staging = Path("c2a-child.staging")
++    staging.write_text(json.dumps({"pid": os.getpid(), "startupId": startup_id, "state": "running"}), encoding="utf-8")
++    staging.replace(marker)
++    deadline = time.monotonic() + 300
++    while not stopped and time.monotonic() < deadline:
++        time.sleep(0.05)
++    staging.write_text(json.dumps({"pid": os.getpid(), "startupId": startup_id, "state": "stopped"}), encoding="utf-8")
++    staging.replace(marker)
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/docker/standalone/managed_bootstrap/fake_consumer.py b/docker/standalone/managed_bootstrap/fake_consumer.py
+new file mode 100644
+index 0000000..80ac0ac
+--- /dev/null
++++ b/docker/standalone/managed_bootstrap/fake_consumer.py
+@@ -0,0 +1,103 @@
++"""INPUT: independently admitted fixed-slot credentials in private memory.
++OUTPUT: one fixed fake child with private environment and safe PID evidence.
++POS: managed_bootstrap C2a fixture consumer; no provider or Native API startup.
++"""
++
++from __future__ import annotations
++
++import re
++import subprocess
++import sys
++import time
++from dataclasses import dataclass
++from pathlib import Path
++
++from .protocol import Reason, Refusal, ResolvedCredentials, Slot, _json, uuid_string
++from .supervision import OwnedChild, clean_environment, enable_linux_reaping
++
++DATA_DIRECTORY = Path("/home/hindsight/.pg0")
++FAKE_VALUE = re.compile(r"C2A_FAKE_[0-9a-f]{64}")
++FAKE_ENVIRONMENT = {
++    Slot.CONNECTION: "TAKI_C2A_FAKE_CONNECTION",
++    Slot.DEFAULT: "TAKI_C2A_FAKE_DEFAULT",
++    Slot.RETAIN: "TAKI_C2A_FAKE_RETAIN",
++    Slot.REFLECT: "TAKI_C2A_FAKE_REFLECT",
++    Slot.CONSOLIDATION: "TAKI_C2A_FAKE_CONSOLIDATION",
++    Slot.EMBEDDING: "TAKI_C2A_FAKE_EMBEDDING",
++    Slot.RERANKER: "TAKI_C2A_FAKE_RERANKER",
++}
++
++
++@dataclass(frozen=True)
++class ChildMarker:
++    pid: int
++    startup_id: str
++    state: str
++
++    @staticmethod
++    def read(path: Path) -> ChildMarker:
++        with path.open("rb") as stream:
++            value = _json(stream.read(1025), 1024)
++        value.keys({"pid", "startupId", "state"})
++        pid = value.member("pid")
++        state = value.member("state")
++        if type(pid) is not int or pid <= 0 or state not in ("running", "stopped"):
++            raise Refusal(Reason.DENIED)
++        return ChildMarker(pid, uuid_string(value.member("startupId")), str(state))
++
++
++class C2FakeConsumer:
++    def __init__(self, startup_id: str, root: Path = DATA_DIRECTORY) -> None:
++        self.startup_id = startup_id
++        self.root = root
++
++    def __call__(self, credentials: ResolvedCredentials) -> OwnedChild:
++        # This check is independent of the Host sender's pre-delivery check.
++        # Never transform a real value into an acceptable fixture credential.
++        if not credentials.entries or any(not FAKE_VALUE.fullmatch(entry.value) for entry in credentials.entries):
++            raise Refusal(Reason.DENIED)
++        environment = clean_environment(self.root)
++        environment["TAKI_C2A_STARTUP_ID"] = self.startup_id
++        for credential in credentials.entries:
++            environment[FAKE_ENVIRONMENT[credential.slot]] = credential.value
++        executable = sys.executable
++        if sys.platform == "win32":
++            # CPython's Windows venv executable is a redirector, so Popen.pid
++            # would own that wrapper while the real leaf survived terminate().
++            # Launch the same base interpreter directly with CPython's venv
++            # handoff; the PID marker below proves the owned process is the leaf.
++            executable = getattr(sys, "_base_executable", "")
++            if not executable:
++                raise Refusal(Reason.UNSUPPORTED)
++            environment["__PYVENV_LAUNCHER__"] = sys.executable
++        if sys.platform == "linux":
++            enable_linux_reaping()
++        try:
++            process = subprocess.Popen(
++                [executable, "-I", "-B", str(Path(__file__).with_name("fake_child.py"))],
++                cwd=self.root,
++                env=environment,
++                stdin=subprocess.DEVNULL,
++                stdout=subprocess.DEVNULL,
++                stderr=subprocess.DEVNULL,
++                start_new_session=sys.platform == "linux",
++                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0,
++            )
++        finally:
++            environment.clear()
++        owned = OwnedChild(process)
++        try:
++            # A successful Popen is not a running consumer. Wait for safe evidence
++            # emitted only after the child's independent environment checks.
++            deadline = time.monotonic() + 5
++            while time.monotonic() < deadline and process.poll() is None:
++                marker = self.root / "c2a-child.json"
++                if marker.exists():
++                    value = ChildMarker.read(marker)
++                    if value == ChildMarker(process.pid, self.startup_id, "running"):
++                        return owned
++                time.sleep(0.02)
++            raise Refusal(Reason.HOST)
++        except BaseException:
++            owned.stop()
++            raise
+diff --git a/docker/standalone/managed_bootstrap/owner.py b/docker/standalone/managed_bootstrap/owner.py
+new file mode 100644
+index 0000000..83651e3
+--- /dev/null
++++ b/docker/standalone/managed_bootstrap/owner.py
+@@ -0,0 +1,67 @@
++"""INPUT: fixed configuration digest and independent protected owner-control requests.
++OUTPUT: one startup, LiveGrant, fixed fake child and original-process observation.
++POS: C2a fixture entrypoint; never starts a provider or treats credentials as authority.
++"""
++
++from __future__ import annotations
++
++import os
++import signal
++import sys
++import threading
++from pathlib import Path
++
++from .bootstrap import Bootstrap, LiveGrant
++from .fake_consumer import DATA_DIRECTORY, C2FakeConsumer
++from .owner_protocol import parse_owner_request
++from .protocol import Reason, Refusal, ResolvedCredentials, Status
++from .supervision import OwnedChild
++from .unix_socket import RUNTIME_DIRECTORY, require_linux, serve
++
++
++class C2BootstrapOwner:
++    def __init__(self, configuration_digest: str, data_directory: Path = DATA_DIRECTORY) -> None:
++        # Bootstrap owns its startup UUID. The consumer captures that UUID only
++        # after construction; caller JSON cannot replace it on authorization.
++        self.bootstrap = Bootstrap(configuration_digest, self._consume)
++        self.consumer = C2FakeConsumer(self.bootstrap.startup_id, data_directory)
++
++    def _consume(self, credentials: ResolvedCredentials) -> OwnedChild:
++        return self.consumer(credentials)
++
++    def control(self, payload: bytes) -> Status:
++        request = parse_owner_request(payload)
++        if request.permit is not None:
++            self.bootstrap.authorize(LiveGrant(request.permit.binding, request.permit.selection))
++        return self.bootstrap.status()
++
++    def close(self) -> Status:
++        return self.bootstrap.close()
++
++
++def main() -> int:
++    from .control import serve_control
++
++    try:
++        if len(sys.argv) != 1:
++            raise Refusal(Reason.DENIED)
++        require_linux()
++        owner = C2BootstrapOwner(os.environ.get("TAKI_C2A_CONFIGURATION_DIGEST", ""))
++        stop = threading.Event()
++        signal.signal(signal.SIGTERM, lambda *_: stop.set())
++        signal.signal(signal.SIGINT, lambda *_: stop.set())
++        control = threading.Thread(target=serve_control, args=(owner, stop, RUNTIME_DIRECTORY), daemon=True)
++        control.start()
++        try:
++            serve(owner.bootstrap, stop)
++        finally:
++            stop.set()
++            control.join(timeout=2)
++            owner.close()
++        return 0
++    except Exception:
++        return 1  # No exception or environment value reaches container logs.
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/docker/standalone/managed_bootstrap/owner_protocol.py b/docker/standalone/managed_bootstrap/owner_protocol.py
+new file mode 100644
+index 0000000..ffa19da
+--- /dev/null
++++ b/docker/standalone/managed_bootstrap/owner_protocol.py
+@@ -0,0 +1,95 @@
++"""INPUT: bounded, non-secret owner-control JSON, separate from credential input.
++OUTPUT: typed status request or exact one-startup permit and fixed selection.
++POS: managed_bootstrap C2a control boundary; parsing alone confers no authority.
++"""
++
++from __future__ import annotations
++
++from dataclasses import dataclass
++
++from .protocol import (
++    _BINDING_KEYS,
++    Binding,
++    FixedSelection,
++    Reason,
++    Refusal,
++    Selection,
++    Slot,
++    _binding,
++    _json,
++    _JsonObject,
++    uuid_string,
++)
++
++CONTROL_BYTES = 32 * 1024
++
++
++@dataclass(frozen=True)
++class StartupPermit:
++    checkpoint_id: str
++    binding: Binding
++    selection: FixedSelection
++
++
++@dataclass(frozen=True)
++class OwnerRequest:
++    permit: StartupPermit | None = None
++
++
++def parse_owner_request(payload: bytes) -> OwnerRequest:
++    value = _json(payload, CONTROL_BYTES)
++    if value.members.get("action") == "status":
++        value.keys({"version", "action"})
++    else:
++        value.keys({"version", "action", "permit"})
++        if value.member("action") != "authorize":
++            raise Refusal(Reason.DENIED)
++    if type(value.member("version")) is not int or value.member("version") != 1:
++        raise Refusal(Reason.DENIED)
++    if value.member("action") == "status":
++        return OwnerRequest()
++    permit = value.member("permit")
++    if not isinstance(permit, _JsonObject):
++        raise Refusal(Reason.DENIED)
++    permit.keys({"version", "checkpointId", "binding", "selection"})
++    if type(permit.member("version")) is not int or permit.member("version") != 1:
++        raise Refusal(Reason.DENIED)
++    binding = permit.member("binding")
++    if not isinstance(binding, _JsonObject):
++        raise Refusal(Reason.DENIED)
++    binding.keys(_BINDING_KEYS)
++    return OwnerRequest(
++        StartupPermit(
++            uuid_string(permit.member("checkpointId")), _binding(binding), _selection(permit.member("selection"))
++        )
++    )
++
++
++def _selection(value: object) -> FixedSelection:
++    if not isinstance(value, list) or not 1 <= len(value) <= len(Slot):
++        raise Refusal(Reason.DENIED)
++    entries: list[Selection] = []
++    inherited = {Slot.RETAIN, Slot.REFLECT, Slot.CONSOLIDATION}
++    for item in value:
++        if not isinstance(item, _JsonObject):
++            raise Refusal(Reason.DENIED)
++        item.keys({"slot", "source"})
++        try:
++            slot = Slot(item.member("slot"))
++        except (TypeError, ValueError):
++            raise Refusal(Reason.DENIED) from None
++        source = item.member("source")
++        if source == "catalog":
++            entries.append(Selection(slot, "catalog"))
++        elif source == "inherit-default" and slot in inherited:
++            entries.append(Selection(slot, "inherit-default"))
++        elif source == "unused" and slot in inherited | {Slot.EMBEDDING, Slot.RERANKER}:
++            entries.append(Selection(slot, "unused"))
++        else:
++            raise Refusal(Reason.DENIED)
++    if len({entry.slot for entry in entries}) != len(entries) or (
++        any(entry.source == "inherit-default" for entry in entries)
++        and Selection(Slot.DEFAULT, "catalog") not in entries
++    ):
++        raise Refusal(Reason.DENIED)
++    return FixedSelection(tuple(entries))
+diff --git a/docker/standalone/managed_bootstrap/unix_socket.py b/docker/standalone/managed_bootstrap/unix_socket.py
+index 681f66c..15ef848 100644
+--- a/docker/standalone/managed_bootstrap/unix_socket.py
++++ b/docker/standalone/managed_bootstrap/unix_socket.py
+@@ -17,6 +17,7 @@ from collections.abc import Iterator
+ from contextlib import contextmanager
+ from dataclasses import dataclass
+ from pathlib import Path
++from typing import BinaryIO, Literal, cast
+ 
+ from .bootstrap import Bootstrap
+ from .protocol import (
+@@ -80,7 +81,12 @@ def require_peer(connection: socket.socket, uid: int) -> None:
+ 
+ 
+ class SocketDirectory:
+-    def __init__(self, directory: Path = RUNTIME_DIRECTORY) -> None:
++    def __init__(
++        self, directory: Path = RUNTIME_DIRECTORY, *, kind: Literal["bootstrap.sock", "control.sock"] = SOCKET_NAME
++    ) -> None:
++        if kind not in ("bootstrap.sock", "control.sock"):
++            raise Refusal(Reason.UNSAFE)
++        self.kind = kind
+         self.uid = require_linux()
+         if not directory.is_absolute():
+             raise Refusal(Reason.UNSAFE)
+@@ -110,7 +116,7 @@ class SocketDirectory:
+     def anchored_path(self) -> str:
+         # Binding/connecting through the retained fd avoids a parent-path swap
+         # between checking the directory and consuming its socket entry.
+-        return f"/proc/self/fd/{self.fd}/{SOCKET_NAME}"
++        return f"/proc/self/fd/{self.fd}/{self.kind}"
+ 
+     def verify(self) -> None:
+         metadata = self.directory.lstat()
+@@ -122,7 +128,7 @@ class SocketDirectory:
+ 
+     def socket_identity(self) -> SocketIdentity:
+         self.verify()
+-        metadata = os.stat(SOCKET_NAME, dir_fd=self.fd, follow_symlinks=False)
++        metadata = os.stat(self.kind, dir_fd=self.fd, follow_symlinks=False)
+         if (
+             not stat.S_ISSOCK(metadata.st_mode)
+             or metadata.st_uid != self.uid
+@@ -136,7 +142,7 @@ class SocketDirectory:
+         # bind refuses a pre-existing leaf. Never remove an unknown old socket,
+         # file or symlink as an implicit restart or permission repair.
+         listener.bind(self.anchored_path)
+-        os.chmod(SOCKET_NAME, 0o600, dir_fd=self.fd, follow_symlinks=False)
++        os.chmod(self.kind, 0o600, dir_fd=self.fd, follow_symlinks=False)
+         self._socket_identity = self.socket_identity()
+         listener.listen(1)
+ 
+@@ -150,7 +156,7 @@ class SocketDirectory:
+                 if current is not None:
+                     if current != self._socket_identity:
+                         raise Refusal(Reason.UNSAFE)
+-                    os.unlink(SOCKET_NAME, dir_fd=self.fd)
++                    os.unlink(self.kind, dir_fd=self.fd)
+         finally:
+             os.close(self.fd)
+ 
+@@ -186,7 +192,7 @@ def _serve_connection(bootstrap: Bootstrap, connection: socket.socket, directory
+         with socket_deadline(connection, deadline):
+             connection.sendall(packet(encode_status(initial), STATUS_BYTES))
+             with connection.makefile("rb", buffering=0) as stream:
+-                payload = read_packet(stream, PRIVATE_BYTES, eof=True)
++                payload = read_packet(cast(BinaryIO, stream), PRIVATE_BYTES, eof=True)
+             directory.verify()
+             status = bootstrap.accept(payload)
+     except Refusal as error:
+@@ -205,7 +211,7 @@ def _serve_connection(bootstrap: Bootstrap, connection: socket.socket, directory
+ 
+ 
+ def serve(bootstrap: Bootstrap, stop: threading.Event, directory: Path = RUNTIME_DIRECTORY) -> None:
+-    """Serve an independently owned Bootstrap; there is no release caller yet."""
++    """Serve an independently owned Bootstrap, including the fixed C2a owner."""
+     protected = SocketDirectory(directory)
+     listener = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+     active: socket.socket | None = None
+diff --git a/docker/standalone/tests/fixtures/c2a_pipe_owner.py b/docker/standalone/tests/fixtures/c2a_pipe_owner.py
+new file mode 100644
+index 0000000..127639a
+--- /dev/null
++++ b/docker/standalone/tests/fixtures/c2a_pipe_owner.py
+@@ -0,0 +1,63 @@
++"""Test-parent-owned finite C2a owner; anonymous pipes are not a release transport.
++
++Control and credential input are distinct operations. This driver never creates
++a grant by itself, and the real fixed consumer remains in managed_bootstrap.
++"""
++
++from __future__ import annotations
++
++import io
++import sys
++import threading
++from pathlib import Path
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
++
++from managed_bootstrap.owner import C2BootstrapOwner
++from managed_bootstrap.protocol import PRIVATE_BYTES, Reason, Refusal, encode_status, packet, read_packet
++
++
++def main() -> int:
++    root = Path(sys.argv[1])
++    if (root / ".c2a-owned-fixture").read_text(encoding="utf-8") != "C2A_FAKE_ONLY":
++        return 2
++    owner = C2BootstrapOwner(sys.argv[2], root)
++    timer = threading.Timer(180, owner.close)
++    timer.daemon = True
++    timer.start()
++    try:
++        write(owner)
++        while True:
++            message = read_packet(sys.stdin.buffer, PRIVATE_BYTES + 5, eof=False)
++            if not message:
++                raise Refusal(Reason.DENIED)
++            try:
++                if message[0] == 1:
++                    owner.control(message[1:])
++                elif message[0] == 2:
++                    payload = read_packet(io.BytesIO(message[1:]), PRIVATE_BYTES, eof=True)
++                    owner.bootstrap.accept(payload)
++                elif message == b"\x03":
++                    owner.close()
++                    write(owner)
++                    return 0
++                else:
++                    raise Refusal(Reason.DENIED)
++                write(owner)
++            except Refusal as error:
++                write(owner, error.reason)
++    except (Refusal, BrokenPipeError):
++        return 1
++    finally:
++        timer.cancel()
++        owner.close()
++
++
++def write(owner: C2BootstrapOwner, reason: Reason | None = None) -> None:
++    status = owner.bootstrap.refusal(reason) if reason is not None else owner.bootstrap.status()
++    sys.stdout.buffer.write(packet(encode_status(status)))
++    sys.stdout.buffer.flush()
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/docker/standalone/tests/test_c2a_bootstrap_owner.py b/docker/standalone/tests/test_c2a_bootstrap_owner.py
+new file mode 100644
+index 0000000..1fc4341
+--- /dev/null
++++ b/docker/standalone/tests/test_c2a_bootstrap_owner.py
+@@ -0,0 +1,137 @@
++from __future__ import annotations
++
++import json
++import secrets
++import sys
++import tempfile
++import time
++import unittest
++import uuid
++from dataclasses import replace
++from pathlib import Path
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
++
++from managed_bootstrap.owner import C2BootstrapOwner
++from managed_bootstrap.owner_protocol import CONTROL_BYTES, parse_owner_request
++from managed_bootstrap.protocol import Credential, PrivateFrame, Refusal, Slot, encode_private, encode_status
++from test_managed_bootstrap_process import pid_alive
++from test_managed_bootstrap_protocol import fixture_binding
++
++
++def fake_frame(owner: C2BootstrapOwner, seconds: float = 30) -> PrivateFrame:
++    return PrivateFrame(
++        fixture_binding(owner.bootstrap.startup_id, seconds),
++        tuple(Credential(slot, "catalog", "C2A_FAKE_" + secrets.token_hex(32)) for slot in Slot),
++    )
++
++
++def permit(frame: PrivateFrame) -> bytes:
++    binding = frame.binding
++    return json.dumps(
++        {
++            "version": 1,
++            "action": "authorize",
++            "permit": {
++                "version": 1,
++                "checkpointId": str(uuid.uuid4()),
++                "binding": {
++                    "startupId": binding.startup_id,
++                    "configurationDigest": binding.configuration_digest,
++                    "operationId": binding.operation_id,
++                    "attemptId": binding.attempt_id,
++                    "authorizationId": binding.authorization_id,
++                    "deadlineAt": binding.deadline_at,
++                },
++                "selection": [{"slot": entry.slot, "source": entry.source} for entry in frame.credentials],
++            },
++        }
++    ).encode()
++
++
++class C2aOwnerTests(unittest.TestCase):
++    def setUp(self) -> None:
++        self.temporary = tempfile.TemporaryDirectory(prefix="taki-c2a-native-")
++        self.root = Path(self.temporary.name)
++        (self.root / ".env").write_text("C2A_DOTENV_POISON=must_not_load\n", encoding="utf-8")
++        self.owner = C2BootstrapOwner("a" * 64, self.root)
++
++    def tearDown(self) -> None:
++        self.owner.close()
++        self.temporary.cleanup()
++
++    def test_real_child_requires_independent_control_and_remains_observable_after_expiry(self) -> None:
++        frame = fake_frame(self.owner, 2)
++        with self.assertRaises(Refusal):
++            self.owner.bootstrap.accept(encode_private(frame))
++        self.assertFalse((self.root / "c2a-child.json").exists())
++        granted = self.owner.control(permit(frame))
++        self.assertEqual(granted.state, "waiting-for-credentials")
++        result = self.owner.bootstrap.accept(encode_private(frame))
++        self.assertEqual(result.state, "running")
++        marker = json.loads((self.root / "c2a-child.json").read_text(encoding="utf-8"))
++        self.assertTrue(pid_alive(marker["pid"]))
++        with self.assertRaises(Refusal):
++            self.owner.control(permit(frame))
++        with self.assertRaises(Refusal):
++            self.owner.bootstrap.accept(encode_private(frame))
++        time.sleep(2.05)
++        observed = self.owner.control(b'{"version":1,"action":"status"}')
++        self.assertEqual(observed.state, "running")
++        self.assertEqual(observed.binding, frame.binding)
++        for entry in frame.credentials:
++            assert entry.value is not None
++            self.assertNotIn(entry.value.encode(), encode_status(observed))
++            for path in self.root.iterdir():
++                self.assertNotIn(entry.value.encode(), path.read_bytes())
++        self.owner.close()
++        self.assertFalse(pid_alive(marker["pid"]))
++
++    def test_native_independently_rejects_every_non_fake_selected_value(self) -> None:
++        for slot in Slot:
++            with self.subTest(slot=slot):
++                self.owner.close()
++                self.owner = C2BootstrapOwner("a" * 64, self.root)
++                frame = fake_frame(self.owner)
++                frame = replace(
++                    frame,
++                    credentials=tuple(
++                        replace(entry, value="GENERATED_NONMATCHING_TEST_VALUE") if entry.slot == slot else entry
++                        for entry in frame.credentials
++                    ),
++                )
++                self.owner.control(permit(frame))
++                with self.assertRaises(Refusal):
++                    self.owner.bootstrap.accept(encode_private(frame))
++                self.assertFalse((self.root / "c2a-child.json").exists())
++
++    def test_wrong_startup_configuration_selection_or_expiry_cannot_start_child(self) -> None:
++        frame = fake_frame(self.owner)
++        for binding in (
++            replace(frame.binding, startup_id=str(uuid.uuid4())),
++            replace(frame.binding, configuration_digest="f" * 64),
++            fixture_binding(self.owner.bootstrap.startup_id, -1),
++        ):
++            with self.assertRaises(Refusal):
++                self.owner.control(permit(replace(frame, binding=binding)))
++        self.owner.control(permit(frame))
++        with self.assertRaises(Refusal):
++            self.owner.bootstrap.accept(encode_private(replace(frame, credentials=frame.credentials[:1])))
++        self.assertFalse((self.root / "c2a-child.json").exists())
++
++    def test_control_is_bounded_strict_and_never_accepts_frame_as_its_own_authority(self) -> None:
++        for payload in (
++            b"null",
++            b"\xff",
++            b'{"version":1,"action":"reset"}',
++            b'{"version":1,"version":1,"action":"status"}',
++            b'{"version":1,"action":"status","permit":null}',
++            encode_private(fake_frame(self.owner)),
++            b" " * (CONTROL_BYTES + 1),
++        ):
++            with self.subTest(size=len(payload)), self.assertRaises(Refusal):
++                parse_owner_request(payload)
++
++
++if __name__ == "__main__":
++    unittest.main()

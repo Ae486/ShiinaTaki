@@ -1,0 +1,173 @@
+[
+  {
+    "name": "strict-null-regression-before-fix",
+    "command": "$env:CARGO_PROFILE_DEV_DEBUG = '0'\n$env:CARGO_PROFILE_TEST_DEBUG = '0'\n$env:CARGO_INCREMENTAL = '0'\ncargo test --manifest-path apps/desktop/src-tauri/Cargo.toml --lib --locked --offline protocol::tests::golden_fixtures_parse_reject_and_round_trip -- --exact",
+    "startedAt": "2026-10-13T10:12:09.516Z",
+    "chunk_id": "cec717",
+    "wall_time_seconds": 10.0130354,
+    "original_token_count": 18,
+    "output": "   Compiling taki-desktop v0.0.0 (H:\\TakiAgent\\apps\\desktop\\src-tauri)\n    Finished `test` profile [unoptimized] target(s) in 10.82s\n     Running unittests src\\lib.rs (apps\\desktop\\src-tauri\\target\\debug\\deps\\taki_desktop_lib-2cb51f446655361e.exe)\n\nrunning 1 test\ntest protocol::tests::golden_fixtures_parse_reject_and_round_trip ... FAILED\n\nfailures:\n\n---- protocol::tests::golden_fixtures_parse_reject_and_round_trip stdout ----\n\nthread 'protocol::tests::golden_fixtures_parse_reject_and_round_trip' (40476) panicked at src\\protocol.rs:375:13:\nassertion `left == right` failed: hindsight-custody-invocation.null-authorization.invalid.json: parse/reject disagreed with its validity tag\n  left: true\n right: false\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    protocol::tests::golden_fixtures_parse_reject_and_round_trip\n\ntest result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 180 filtered out; finished in 0.01s\n\nerror: test failed, to rerun pass `--lib`\n",
+    "exit_code": 1
+  },
+  {
+    "name": "fake-adapter-build",
+    "command": "rustc --edition=2021 -C debuginfo=0 apps/hindsight-host/test-fixtures/fake-key-adapter.rs -o 'C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674/fake-key-adapter.exe'",
+    "chunk_id": "9ac29e",
+    "wall_time_seconds": 0.85507,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "name": "copied-host-build",
+    "command": "& 'C:/Program Files/nodejs/node.exe' apps/hindsight-host/scripts/build.ts --output 'C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674/payload' --platform win32 --architecture x64 --adapter 'C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674/fake-key-adapter.exe'",
+    "chunk_id": "0d80d4",
+    "wall_time_seconds": 2.5134043999999998,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "name": "copied-fixture-initialize",
+    "command": "& 'C:/Program Files/nodejs/node.exe' apps/hindsight-host/scripts/copied-install-fixture.ts --root 'C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674' --token-user-sha256 '8bad9fa96d1016a078262a281e5e87a087305e0966932fc6cdcae8d8326fe383' --payload payload",
+    "chunk_id": "611b55",
+    "wall_time_seconds": 0.8224171,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "name": "unsafe-catalog-regression-before-fix",
+    "command": "& 'C:/Program Files/nodejs/node.exe' apps/hindsight-host/scripts/copied-install-fixture.ts --root 'C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674' --refresh\n$env:TAKI_C1A_FIXTURE_ROOT = 'C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674'\n$env:CARGO_PROFILE_DEV_DEBUG = '0'\n$env:CARGO_PROFILE_TEST_DEBUG = '0'\n$env:CARGO_INCREMENTAL = '0'\ncargo test --manifest-path apps/desktop/src-tauri/Cargo.toml --lib --locked --offline hindsight_windows::tests::copied_installation_refuses_unsafe_catalog_objects -- --ignored --exact --test-threads=1",
+    "chunk_id": "3d1066",
+    "wall_time_seconds": 6.4845879,
+    "exit_code": 1,
+    "original_token_count": 345,
+    "output": "    Finished `test` profile [unoptimized] target(s) in 1.17s\n     Running unittests src\\lib.rs (apps\\desktop\\src-tauri\\target\\debug\\deps\\taki_desktop_lib-2cb51f446655361e.exe)\n\nrunning 1 test\ntest hindsight_windows::tests::copied_installation_refuses_unsafe_catalog_objects ... FAILED\n\nfailures:\n\n---- hindsight_windows::tests::copied_installation_refuses_unsafe_catalog_objects stdout ----\n\nthread 'hindsight_windows::tests::copied_installation_refuses_unsafe_catalog_objects' (33188) panicked at src\\hindsight_windows\\tests.rs:169:9:\nunsafe registered Catalog object must refuse: Ok(Prepared { version: 1, snapshot_id: \"11111111-1111-4111-8111-111111111111\", request_id: \"11111111-1111-4111-8111-111111111111\", host_attempt_id: \"22222222-2222-4222-8222-222222222222\", installation_id: \"07f41331a3e6c275cdf5c3c3e72628abacb6504fc2d300f5cf28f6b6709af575\", sealed_envelope_sha256: \"b823a1d2422bc13f14efafb5e0773ecdd3af9112e4c930bf09ab2f07d6420f6f\", configuration_digest: \"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\", deployment_ready: false })\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    hindsight_windows::tests::copied_installation_refuses_unsafe_catalog_objects\n\ntest result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 180 filtered out; finished in 4.27s\n\nerror: test failed, to rerun pass `--lib`\n"
+  },
+  {
+    "name": "windows-c1-targeted-after-fix",
+    "command": "& 'C:/Program Files/nodejs/node.exe' apps/hindsight-host/scripts/copied-install-fixture.ts --root 'C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674' --refresh\n$env:TAKI_C1A_FIXTURE_ROOT = 'C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674'\n$env:NODE_OPTIONS = '--import=file:///C:/taki-c1a-fixture-86700c396b3348a7addf83ffc8273674/preload.mjs'\n$env:NODE_PATH = 'C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674/untrusted-node-path'\n$env:CARGO_PROFILE_DEV_DEBUG = '0'\n$env:CARGO_PROFILE_TEST_DEBUG = '0'\n$env:CARGO_INCREMENTAL = '0'\ncargo test --manifest-path apps/desktop/src-tauri/Cargo.toml --lib --locked --offline hindsight_ -- --include-ignored --test-threads=1",
+    "chunk_id": "13e1f1",
+    "wall_time_seconds": 10.0131998,
+    "original_token_count": 18,
+    "output": "   Compiling taki-desktop v0.0.0 (H:\\TakiAgent\\apps\\desktop\\src-tauri)\n    Finished `test` profile [unoptimized] target(s) in 10.54s\n     Running unittests src\\lib.rs (apps\\desktop\\src-tauri\\target\\debug\\deps\\taki_desktop_lib-2cb51f446655361e.exe)\n\nrunning 10 tests\ntest hindsight_host::tests::plain_input_cannot_supply_invocation_authority_or_advertise_missing_installation ... ok\ntest hindsight_windows::tests::actual_dacl_rejects_other_writer_and_unsafe_parent_rights ... ok\ntest hindsight_windows::tests::ambiguous_windows_paths_refuse_before_open ... ok\ntest hindsight_windows::tests::copied_installation_keeps_catalog_publication_rename_compatible ... FAILED\ntest hindsight_windows::tests::copied_installation_prepares_fake_catalog_without_checkout_or_preload ... ok\ntest hindsight_windows::tests::copied_installation_refuses_unsafe_catalog_objects ... ok\ntest hindsight_windows::tests::copied_installation_rejects_missing_and_tampered_artifacts ... ok\ntest hindsight_windows::tests::hard_links_and_wrong_real_owner_refuse ... ok\ntest hindsight_windows::tests::parent_handle_blocks_directory_rename ... ok\ntest hindsight_windows::tests::retained_file_denies_write_delete_and_rename_until_released ... ok\n\nfailures:\n\n---- hindsight_windows::tests::copied_installation_keeps_catalog_publication_rename_compatible stdout ----\n\nthread 'hindsight_windows::tests::copied_installation_keeps_catalog_publication_rename_compatible' (36768) panicked at src\\hindsight_windows\\tests.rs:204:33:\nCore-style atomic Catalog replacement stays available: Os { code: 32, kind: Uncategorized, message: \"另一个程序正在使用此文件，进程无法访问。\" }\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    hindsight_windows::tests::copied_installation_keeps_catalog_publication_rename_compatible\n\ntest result: FAILED. 9 passed; 1 failed; 0 ignored; 0 measured; 172 filtered out; finished in 22.00s\n\nerror: test failed, to rerun pass `--lib`\n",
+    "exit_code": 1
+  },
+  {
+    "name": "windows-open-leaf-replacement-probe",
+    "command": "$fixtureRoot = (Resolve-Path -LiteralPath 'C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674').Path\n$probeRoot = Join-Path $fixtureRoot 'rename-probe'\nif (Test-Path -LiteralPath $probeRoot) { throw 'probe must be new' }\nif ([IO.File]::ReadAllText((Join-Path $fixtureRoot '.c1a-owned-fixture')) -ne 'C1A_FAKE_ONLY') { throw 'not owned' }\n[IO.Directory]::CreateDirectory($probeRoot) | Out-Null\n$resolvedProbe = (Resolve-Path -LiteralPath $probeRoot).Path\nif ([IO.Directory]::GetParent($resolvedProbe).FullName -ne $fixtureRoot) { throw 'outside fixture' }\n$leafPath = Join-Path $resolvedProbe 'catalog.bin'\n$stagePath = Join-Path $resolvedProbe 'stage.bin'\n[IO.File]::WriteAllText($leafPath, 'FAKE_A')\n[IO.File]::WriteAllText($stagePath, 'FAKE_B')\n$leafStream = [IO.File]::Open($leafPath, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::ReadWrite -bor [IO.FileShare]::Delete)\n$whileOpen = 'pass'\ntry { [IO.File]::Move($stagePath, $leafPath, $true) } catch { $whileOpen = $_.Exception.InnerException.HResult }\nfinally { $leafStream.Dispose() }\n$afterClose = 'already moved while open'\nif (Test-Path -LiteralPath $stagePath) { [IO.File]::Move($stagePath, $leafPath, $true); $afterClose = 'pass' }\n@{ fixture = $resolvedProbe; readWriteDeleteSharing = $true; whileLeafOpen = $whileOpen; afterLeafClose = $afterClose } | ConvertTo-Json",
+    "chunk_id": "da5081",
+    "wall_time_seconds": 0.6209487,
+    "exit_code": 0,
+    "original_token_count": 47,
+    "output": "{\r\n  \"readWriteDeleteSharing\": true,\r\n  \"whileLeafOpen\": -2147024891,\r\n  \"afterLeafClose\": \"pass\",\r\n  \"fixture\": \"C:\\\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674\\\\rename-probe\"\r\n}\r\n"
+  },
+  {
+    "name": "windows-c1-targeted-after-leaf-close",
+    "command": "$ErrorActionPreference = 'Stop'\n& 'C:/Program Files/nodejs/node.exe' apps/hindsight-host/scripts/copied-install-fixture.ts --root 'C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674' --refresh\nif ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }\n$env:TAKI_C1A_FIXTURE_ROOT = 'C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674'\n$env:NODE_OPTIONS = '--import=file:///C:/taki-c1a-fixture-86700c396b3348a7addf83ffc8273674/preload.mjs'\n$env:NODE_PATH = 'C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674/untrusted-node-path'\n$env:CARGO_PROFILE_DEV_DEBUG = '0'\n$env:CARGO_PROFILE_TEST_DEBUG = '0'\n$env:CARGO_INCREMENTAL = '0'\ncargo test --manifest-path apps/desktop/src-tauri/Cargo.toml --lib --locked --offline hindsight_ -- --include-ignored --test-threads=1",
+    "startedAt": "2026-10-13T10:28:55.205Z",
+    "chunk_id": "ca374f",
+    "wall_time_seconds": 10.0132233,
+    "original_token_count": 18,
+    "output": "   Compiling taki-desktop v0.0.0 (H:\\TakiAgent\\apps\\desktop\\src-tauri)\n    Finished `test` profile [unoptimized] target(s) in 10.31s\n     Running unittests src\\lib.rs (apps\\desktop\\src-tauri\\target\\debug\\deps\\taki_desktop_lib-2cb51f446655361e.exe)\n\nrunning 10 tests\ntest hindsight_host::tests::plain_input_cannot_supply_invocation_authority_or_advertise_missing_installation ... ok\ntest hindsight_windows::tests::actual_dacl_rejects_other_writer_and_unsafe_parent_rights ... ok\ntest hindsight_windows::tests::ambiguous_windows_paths_refuse_before_open ... ok\ntest hindsight_windows::tests::copied_installation_keeps_catalog_publication_rename_compatible ... FAILED\ntest hindsight_windows::tests::copied_installation_prepares_fake_catalog_without_checkout_or_preload ... ok\ntest hindsight_windows::tests::copied_installation_refuses_unsafe_catalog_objects ... ok\ntest hindsight_windows::tests::copied_installation_rejects_missing_and_tampered_artifacts ... ok\ntest hindsight_windows::tests::hard_links_and_wrong_real_owner_refuse ... ok\ntest hindsight_windows::tests::parent_handle_blocks_directory_rename ... ok\ntest hindsight_windows::tests::retained_file_denies_write_delete_and_rename_until_released ... ok\n\nfailures:\n\n---- hindsight_windows::tests::copied_installation_keeps_catalog_publication_rename_compatible stdout ----\n\nthread 'hindsight_windows::tests::copied_installation_keeps_catalog_publication_rename_compatible' (40648) panicked at src\\hindsight_windows\\tests.rs:204:33:\nCore-style atomic Catalog replacement stays available: Os { code: 32, kind: Uncategorized, message: \"另一个程序正在使用此文件，进程无法访问。\" }\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    hindsight_windows::tests::copied_installation_keeps_catalog_publication_rename_compatible\n\ntest result: FAILED. 9 passed; 1 failed; 0 ignored; 0 measured; 172 filtered out; finished in 22.01s\n\nerror: test failed, to rerun pass `--lib`\n",
+    "exit_code": 1
+  },
+  {
+    "name": "windows-directory-share-matrix-probe",
+    "command": "$ErrorActionPreference = 'Stop'\n$fixtureRoot = (Resolve-Path -LiteralPath 'C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674').Path\nif ([IO.File]::ReadAllText((Join-Path $fixtureRoot '.c1a-owned-fixture')) -ne 'C1A_FAKE_ONLY') { throw 'not owned' }\n$probeRoot = Join-Path $fixtureRoot 'directory-share-probe'\nif (Test-Path -LiteralPath $probeRoot) { throw 'probe must be new' }\n[IO.Directory]::CreateDirectory($probeRoot) | Out-Null\nAdd-Type -TypeDefinition @'\nusing System;\nusing System.Runtime.InteropServices;\nusing Microsoft.Win32.SafeHandles;\npublic static class C1aDirectoryProbe {\n    [DllImport(\"kernel32.dll\", CharSet = CharSet.Unicode, SetLastError = true)]\n    public static extern SafeFileHandle CreateFileW(string name, uint access, uint share, IntPtr security, uint creation, uint flags, IntPtr template);\n}\n'@\n$results = foreach ($share in @(1, 3, 5, 7)) {\n    $caseRoot = Join-Path $probeRoot ('share-' + $share)\n    $guardedPath = [IO.Path]::GetFullPath((Join-Path $caseRoot 'guarded'))\n    $renamedPath = [IO.Path]::GetFullPath((Join-Path $caseRoot 'renamed'))\n    foreach ($candidate in @($guardedPath, $renamedPath)) { if (-not $candidate.StartsWith($fixtureRoot + '\\', [StringComparison]::OrdinalIgnoreCase)) { throw 'outside fixture' } }\n    [IO.Directory]::CreateDirectory($guardedPath) | Out-Null\n    $leafPath = Join-Path $guardedPath 'secret-catalog.bin'\n    $stagePath = Join-Path $guardedPath 'stage.bin'\n    [IO.File]::WriteAllText($leafPath, 'FAKE_A')\n    [IO.File]::WriteAllText($stagePath, 'FAKE_B')\n    $handle = [C1aDirectoryProbe]::CreateFileW($guardedPath, 0x20081, $share, [IntPtr]::Zero, 3, 0x2200000, [IntPtr]::Zero)\n    if ($handle.IsInvalid) { throw ('open failed ' + [Runtime.InteropServices.Marshal]::GetLastWin32Error()) }\n    $leafResult = 'pass'\n    $parentResult = 'pass'\n    try {\n        try { [IO.File]::Move($stagePath, $leafPath, $true) } catch { $leafResult = $_.Exception.GetBaseException().HResult -band 0xffff }\n        try { [IO.Directory]::Move($guardedPath, $renamedPath) } catch { $parentResult = $_.Exception.GetBaseException().HResult -band 0xffff }\n    } finally { $handle.Dispose() }\n    [PSCustomObject]@{ share = $share; leafReplacement = $leafResult; parentRename = $parentResult }\n}\n$results | ConvertTo-Json",
+    "chunk_id": "f06700",
+    "wall_time_seconds": 1.5881226000000002,
+    "exit_code": 0,
+    "original_token_count": 86,
+    "output": "[\r\n  {\r\n    \"share\": 1,\r\n    \"leafReplacement\": 32,\r\n    \"parentRename\": 32\r\n  },\r\n  {\r\n    \"share\": 3,\r\n    \"leafReplacement\": \"pass\",\r\n    \"parentRename\": 32\r\n  },\r\n  {\r\n    \"share\": 5,\r\n    \"leafReplacement\": 32,\r\n    \"parentRename\": \"pass\"\r\n  },\r\n  {\r\n    \"share\": 7,\r\n    \"leafReplacement\": \"pass\",\r\n    \"parentRename\": \"pass\"\r\n  }\r\n]\r\n"
+  },
+  {
+    "name": "windows-c1-targeted-after-catalog-directory-sharing-fix",
+    "command": "$ErrorActionPreference = 'Stop'\n& 'C:/Program Files/nodejs/node.exe' apps/hindsight-host/scripts/copied-install-fixture.ts --root 'C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674' --refresh\nif ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }\n$env:TAKI_C1A_FIXTURE_ROOT = 'C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674'\n$env:NODE_OPTIONS = '--import=file:///C:/taki-c1a-fixture-86700c396b3348a7addf83ffc8273674/preload.mjs'\n$env:NODE_PATH = 'C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674/untrusted-node-path'\n$env:CARGO_PROFILE_DEV_DEBUG = '0'\n$env:CARGO_PROFILE_TEST_DEBUG = '0'\n$env:CARGO_INCREMENTAL = '0'\ncargo test --manifest-path apps/desktop/src-tauri/Cargo.toml --lib --locked --offline hindsight_ -- --include-ignored --test-threads=1",
+    "startedAt": "2026-10-13T10:32:33.170Z",
+    "chunk_id": "213f9a",
+    "wall_time_seconds": 10.012914,
+    "original_token_count": 18,
+    "output": "   Compiling taki-desktop v0.0.0 (H:\\TakiAgent\\apps\\desktop\\src-tauri)\n    Finished `test` profile [unoptimized] target(s) in 10.40s\n     Running unittests src\\lib.rs (apps\\desktop\\src-tauri\\target\\debug\\deps\\taki_desktop_lib-2cb51f446655361e.exe)\n\nrunning 10 tests\ntest hindsight_host::tests::plain_input_cannot_supply_invocation_authority_or_advertise_missing_installation ... ok\ntest hindsight_windows::tests::actual_dacl_rejects_other_writer_and_unsafe_parent_rights ... ok\ntest hindsight_windows::tests::ambiguous_windows_paths_refuse_before_open ... ok\ntest hindsight_windows::tests::copied_installation_keeps_catalog_publication_rename_compatible ... ok\ntest hindsight_windows::tests::copied_installation_prepares_fake_catalog_without_checkout_or_preload ... ok\ntest hindsight_windows::tests::copied_installation_refuses_unsafe_catalog_objects ... ok\ntest hindsight_windows::tests::copied_installation_rejects_missing_and_tampered_artifacts ... ok\ntest hindsight_windows::tests::hard_links_and_wrong_real_owner_refuse ... ok\ntest hindsight_windows::tests::parent_handle_blocks_directory_rename ... ok\ntest hindsight_windows::tests::retained_file_denies_write_delete_and_rename_until_released ... ok\n\ntest result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 172 filtered out; finished in 21.74s\n\n",
+    "exit_code": 0
+  },
+  {
+    "name": "rust-protocol-golden-after-fix",
+    "command": "$env:CARGO_PROFILE_DEV_DEBUG = '0'\n$env:CARGO_PROFILE_TEST_DEBUG = '0'\n$env:CARGO_INCREMENTAL = '0'\ncargo test --manifest-path apps/desktop/src-tauri/Cargo.toml --lib --locked --offline protocol::tests::golden_fixtures_parse_reject_and_round_trip -- --exact",
+    "startedAt": "2026-10-13T10:34:52.532Z",
+    "chunk_id": "08b81b",
+    "wall_time_seconds": 1.8976245,
+    "exit_code": 0,
+    "original_token_count": 91,
+    "output": "    Finished `test` profile [unoptimized] target(s) in 1.19s\n     Running unittests src\\lib.rs (apps\\desktop\\src-tauri\\target\\debug\\deps\\taki_desktop_lib-2cb51f446655361e.exe)\n\nrunning 1 test\ntest protocol::tests::golden_fixtures_parse_reject_and_round_trip ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 181 filtered out; finished in 0.02s\n\n"
+  },
+  {
+    "name": "shared-protocol-golden-after-fix",
+    "command": "& 'G:/Roaming/npm/pnpm.cmd' --filter @taki/shared exec vitest run src/protocol-fixtures.test.ts --maxWorkers=1",
+    "startedAt": "2026-10-13T10:35:13.144Z",
+    "chunk_id": "7522c2",
+    "wall_time_seconds": 2.335898,
+    "exit_code": 0,
+    "original_token_count": 54,
+    "output": "\n RUN  v4.1.10 H:/TakiAgent/packages/shared\n\n\n Test Files  1 passed (1)\n      Tests  91 passed (91)\n   Start at  18:35:15\n   Duration  750ms (transform 170ms, setup 0ms, import 352ms, tests 46ms, environment 0ms)\n\n"
+  },
+  {
+    "name": "affected-shared-host-typecheck",
+    "command": "& 'G:/Roaming/npm/pnpm.cmd' --filter @taki/shared --filter @taki/hindsight-host --workspace-concurrency=1 typecheck",
+    "startedAt": "2026-10-13T10:35:33.837Z",
+    "chunk_id": "ace9b8",
+    "wall_time_seconds": 10.007385900000001,
+    "original_token_count": 50,
+    "output": "Scope: 2 of 8 workspace projects\n\n> @taki/shared@0.0.0 typecheck H:\\TakiAgent\\packages\\shared\n> tsc --noEmit\n\n\n> @taki/hindsight-host@0.0.0 typecheck H:\\TakiAgent\\apps\\hindsight-host\n> tsc --noEmit\n\n",
+    "exit_code": 0
+  },
+  {
+    "name": "root-lint-after-fix",
+    "command": "& 'G:/Roaming/npm/pnpm.cmd' lint",
+    "startedAt": "2026-10-13T10:36:26.774Z",
+    "chunk_id": "8fd2f1",
+    "wall_time_seconds": 10.0088217,
+    "original_token_count": 13,
+    "output": "\n> takiagent@0.0.0 lint H:\\TakiAgent\n> eslint .\n\n",
+    "exit_code": 0
+  },
+  {
+    "name": "rust-all-target-clippy-after-fix",
+    "command": "$env:CARGO_PROFILE_DEV_DEBUG = '0'\n$env:CARGO_PROFILE_TEST_DEBUG = '0'\n$env:CARGO_INCREMENTAL = '0'\ncargo clippy --manifest-path apps/desktop/src-tauri/Cargo.toml --all-targets --locked --offline -- -D warnings",
+    "startedAt": "2026-10-13T10:37:38.301Z",
+    "chunk_id": "9662cf",
+    "wall_time_seconds": 10.014013299999998,
+    "original_token_count": 18,
+    "output": "    Checking taki-desktop v0.0.0 (H:\\TakiAgent\\apps\\desktop\\src-tauri)\n    Finished `dev` profile [unoptimized] target(s) in 10.03s\n",
+    "exit_code": 0
+  },
+  {
+    "name": "tracked-diff-whitespace-after-fix",
+    "command": "git -c core.safecrlf=false diff --check",
+    "startedAt": "2026-10-13T10:39:30.155Z",
+    "chunk_id": "1bff52",
+    "wall_time_seconds": 0.7024075,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "name": "final-copied-artifact-and-process-readback",
+    "command": "$ErrorActionPreference = 'Stop'\n$fixtureRoot = (Resolve-Path -LiteralPath 'C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674').Path\nif ([IO.File]::ReadAllText((Join-Path $fixtureRoot '.c1a-owned-fixture')) -ne 'C1A_FAKE_ONLY') { throw 'not owned' }\n$registrationPath = Join-Path $fixtureRoot 'registration.json'\n$registration = Get-Content -LiteralPath $registrationPath -Raw | ConvertFrom-Json\n$invocation = Get-Content -LiteralPath (Join-Path $fixtureRoot 'invocation.json') -Raw | ConvertFrom-Json\n$payloadRoot = (Resolve-Path -LiteralPath $registration.installationRoot).Path\nif (-not $payloadRoot.StartsWith($fixtureRoot + '\\', [StringComparison]::OrdinalIgnoreCase)) { throw 'payload outside owned root' }\n$manifestPath = Join-Path $payloadRoot 'manifest.json'\n$manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json\n$mismatches = @(foreach ($entry in $manifest.files) {\n    $artifactPath = [IO.Path]::GetFullPath((Join-Path $payloadRoot $entry.path))\n    if (-not $artifactPath.StartsWith($payloadRoot + '\\', [StringComparison]::OrdinalIgnoreCase)) { throw 'manifest entry outside payload' }\n    if ((Get-FileHash -LiteralPath $artifactPath -Algorithm SHA256).Hash.ToLowerInvariant() -ne $entry.sha256) { $entry.path }\n})\n$versions = [ordered]@{}\nforeach ($package in @('libsodium', 'libsodium-wrappers', 'json-rpc-2.0', 'ws', 'zod')) {\n    $metadata = Get-Content -LiteralPath (Join-Path $payloadRoot ('node_modules/' + $package + '/package.json')) -Raw | ConvertFrom-Json\n    $versions[$package] = $metadata.version\n}\n$manifestHash = (Get-FileHash -LiteralPath $manifestPath -Algorithm SHA256).Hash.ToLowerInvariant()\n$runtimeHash = (Get-FileHash -LiteralPath $registration.runtime.path -Algorithm SHA256).Hash.ToLowerInvariant()\n$adapterHash = (Get-FileHash -LiteralPath $registration.custody.adapter.path -Algorithm SHA256).Hash.ToLowerInvariant()\n$catalogHash = (Get-FileHash -LiteralPath (Join-Path $registration.coreDataDirectory 'secret-catalog.bin') -Algorithm SHA256).Hash.ToLowerInvariant()\n$fixtureProcesses = @(Get-CimInstance Win32_Process | Where-Object { $_.ExecutablePath -and $_.ExecutablePath.StartsWith($fixtureRoot + '\\', [StringComparison]::OrdinalIgnoreCase) } | Select-Object ProcessId, Name, ExecutablePath)\n$reparsePoints = @(Get-ChildItem -LiteralPath $fixtureRoot -Recurse -Force -Attributes ReparsePoint | Select-Object FullName, LinkType, Target)\n$evidence = [PSCustomObject]@{\n    fixtureRoot = $fixtureRoot\n    checkedAt = [DateTime]::UtcNow.ToString('o')\n    build = $manifest.build\n    platform = $manifest.platform\n    architecture = $manifest.architecture\n    manifestFileCount = $manifest.files.Count\n    actualPayloadFileCount = @(Get-ChildItem -LiteralPath $payloadRoot -Recurse -File -Force).Count\n    manifestSha256 = $manifestHash\n    manifestMatchesRegistration = ($manifestHash -eq $registration.manifestSha256)\n    manifestEntryHashMismatches = $mismatches\n    registrationSha256 = (Get-FileHash -LiteralPath $registrationPath -Algorithm SHA256).Hash.ToLowerInvariant()\n    runtime = @{ path = $registration.runtime.path; sha256 = $runtimeHash; version = $registration.runtime.version; matchesRegistration = ($runtimeHash -eq $registration.runtime.sha256) }\n    fakeAdapter = @{ path = $registration.custody.adapter.path; sha256 = $adapterHash; matchesRegistration = ($adapterHash -eq $registration.custody.adapter.sha256) }\n    dependencyVersions = $versions\n    catalogSha256 = $catalogHash\n    catalogUnchanged = ($catalogHash -eq $invocation.input.sealedEnvelopeSha256)\n    preloadFileAbsent = (-not (Test-Path -LiteralPath (Join-Path $fixtureRoot 'preload-ran')))\n    fixtureProcesses = $fixtureProcesses\n    reparsePoints = $reparsePoints\n    originalPermissionsChanged = $false\n    originalDataTouched = $false\n}\n$evidence | ConvertTo-Json -Depth 8\nif ($mismatches.Count -ne 0 -or -not $evidence.manifestMatchesRegistration -or -not $evidence.runtime.matchesRegistration -or -not $evidence.fakeAdapter.matchesRegistration -or -not $evidence.catalogUnchanged -or -not $evidence.preloadFileAbsent -or $fixtureProcesses.Count -ne 0) { exit 1 }",
+    "chunk_id": "33371d",
+    "wall_time_seconds": 1.8344596,
+    "exit_code": 0,
+    "original_token_count": 427,
+    "output": "{\r\n  \"fixtureRoot\": \"C:\\\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674\",\r\n  \"checkedAt\": \"2026-10-13T10:40:31.9417315Z\",\r\n  \"build\": \"taki-hindsight-host-c1-v1\",\r\n  \"platform\": \"win32\",\r\n  \"architecture\": \"x64\",\r\n  \"manifestFileCount\": 794,\r\n  \"actualPayloadFileCount\": 795,\r\n  \"manifestSha256\": \"6aaba2c416d0038c521c3d6a7d2042d5116dd1787bdf7a957e2473a1333607a4\",\r\n  \"manifestMatchesRegistration\": true,\r\n  \"manifestEntryHashMismatches\": [],\r\n  \"registrationSha256\": \"74ced2e55ec69a3148570f505a25cbcf74d9fae1e6431129ece8e00d05997609\",\r\n  \"runtime\": {\r\n    \"matchesRegistration\": true,\r\n    \"sha256\": \"9a4eb5f1c29c6a2e93852ead46b999e284a6a5ca8bab4d4e241d587d025a52de\",\r\n    \"version\": \"v24.18.0\",\r\n    \"path\": \"C:\\\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674\\\\node.exe\"\r\n  },\r\n  \"fakeAdapter\": {\r\n    \"matchesRegistration\": true,\r\n    \"sha256\": \"f0601fc8b83a6bf7936f680c69ab7a393f7f995773a6a7b2d458eb2b16c1d17a\",\r\n    \"path\": \"C:\\\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674\\\\payload\\\\bin\\\\taki-secret-key.exe\"\r\n  },\r\n  \"dependencyVersions\": {\r\n    \"libsodium\": \"0.8.4\",\r\n    \"libsodium-wrappers\": \"0.8.4\",\r\n    \"json-rpc-2.0\": \"1.7.1\",\r\n    \"ws\": \"8.21.0\",\r\n    \"zod\": \"4.4.3\"\r\n  },\r\n  \"catalogSha256\": \"b823a1d2422bc13f14efafb5e0773ecdd3af9112e4c930bf09ab2f07d6420f6f\",\r\n  \"catalogUnchanged\": true,\r\n  \"preloadFileAbsent\": true,\r\n  \"fixtureProcesses\": [],\r\n  \"reparsePoints\": [\r\n    {\r\n      \"FullName\": \"C:\\\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674\\\\catalog-junction\",\r\n      \"LinkType\": \"Junction\",\r\n      \"Target\": \"C:\\\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674\\\\fake-core-data\"\r\n    }\r\n  ],\r\n  \"originalPermissionsChanged\": false,\r\n  \"originalDataTouched\": false\r\n}\r\n"
+  },
+  {
+    "name": "owned-fixture-cleanup-and-readback",
+    "command": "$ErrorActionPreference = 'Stop'\n$expectedRoot = [IO.Path]::GetFullPath('C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674')\n$fixtureRoot = (Resolve-Path -LiteralPath $expectedRoot).Path\nif (-not $fixtureRoot.Equals($expectedRoot, [StringComparison]::OrdinalIgnoreCase)) { throw 'unexpected resolved root' }\n$rootItem = Get-Item -LiteralPath $fixtureRoot -Force\nif (($rootItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'root cannot be a link' }\nif ([IO.File]::ReadAllText((Join-Path $fixtureRoot '.c1a-owned-fixture')) -ne 'C1A_FAKE_ONLY') { throw 'not an owned fake fixture' }\n$before = @(Get-CimInstance Win32_Process | Where-Object { $_.ExecutablePath -and $_.ExecutablePath.StartsWith($fixtureRoot + '\\', [StringComparison]::OrdinalIgnoreCase) } | Select-Object ProcessId, Name, ExecutablePath)\nif ($before.Count -ne 0) { $before | ConvertTo-Json; throw 'fixture processes remain' }\n$expectedJunction = [IO.Path]::GetFullPath((Join-Path $fixtureRoot 'catalog-junction'))\n$expectedTarget = [IO.Path]::GetFullPath((Join-Path $fixtureRoot 'fake-core-data'))\n$links = @(Get-ChildItem -LiteralPath $fixtureRoot -Recurse -Force -Attributes ReparsePoint)\nif ($links.Count -ne 1) { throw 'unexpected reparse inventory' }\n$link = $links[0]\n$targets = @($link.Target)\nif (-not $link.FullName.Equals($expectedJunction, [StringComparison]::OrdinalIgnoreCase) -or $link.LinkType -ne 'Junction' -or $targets.Count -ne 1) { throw 'unexpected junction' }\n$resolvedTarget = (Resolve-Path -LiteralPath $targets[0]).Path\nif (-not $resolvedTarget.Equals($expectedTarget, [StringComparison]::OrdinalIgnoreCase) -or -not $resolvedTarget.StartsWith($fixtureRoot + '\\', [StringComparison]::OrdinalIgnoreCase)) { throw 'junction target outside fixture' }\nRemove-Item -LiteralPath $expectedJunction -Force\nif (Test-Path -LiteralPath $expectedJunction) { throw 'junction unlink failed' }\nRemove-Item -LiteralPath $fixtureRoot -Recurse -Force\n$after = @(Get-CimInstance Win32_Process | Where-Object { $_.ExecutablePath -and $_.ExecutablePath.StartsWith($fixtureRoot + '\\', [StringComparison]::OrdinalIgnoreCase) } | Select-Object ProcessId, Name, ExecutablePath)\n$remaining = @(if (Test-Path -LiteralPath $fixtureRoot) { $fixtureRoot })\n$evidence = [PSCustomObject]@{\n    removedPaths = @($fixtureRoot)\n    detachedJunction = $expectedJunction\n    verifiedJunctionTarget = $resolvedTarget\n    remainingPaths = $remaining\n    fixtureProcessesBeforeCleanup = $before\n    fixtureProcessesAfterCleanup = $after\n    cargoTargetRetained = (Test-Path -LiteralPath 'apps/desktop/src-tauri/target' -PathType Container)\n    originalPermissionsChanged = $false\n    originalDataTouched = $false\n    hFreeBytes = (Get-PSDrive -Name H).Free\n    checkedAt = [DateTime]::UtcNow.ToString('o')\n}\n$evidence | ConvertTo-Json -Depth 5\nif ($remaining.Count -ne 0 -or $after.Count -ne 0 -or -not $evidence.cargoTargetRetained) { exit 1 }",
+    "chunk_id": "3fcc87",
+    "wall_time_seconds": 2.6613035,
+    "exit_code": 0,
+    "original_token_count": 145,
+    "output": "{\r\n  \"removedPaths\": [\r\n    \"C:\\\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674\"\r\n  ],\r\n  \"detachedJunction\": \"C:\\\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674\\\\catalog-junction\",\r\n  \"verifiedJunctionTarget\": \"C:\\\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674\\\\fake-core-data\",\r\n  \"remainingPaths\": [],\r\n  \"fixtureProcessesBeforeCleanup\": [],\r\n  \"fixtureProcessesAfterCleanup\": [],\r\n  \"cargoTargetRetained\": true,\r\n  \"originalPermissionsChanged\": false,\r\n  \"originalDataTouched\": false,\r\n  \"hFreeBytes\": 14580150272,\r\n  \"checkedAt\": \"2026-10-13T10:42:25.0824939Z\"\r\n}\r\n"
+  }
+]

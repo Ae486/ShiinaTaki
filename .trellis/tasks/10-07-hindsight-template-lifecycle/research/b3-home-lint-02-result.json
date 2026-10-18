@@ -1,0 +1,32 @@
+{
+  "cwd": "H:\\TakiAgent",
+  "command": "pnpm",
+  "argv": [
+    "exec",
+    "eslint",
+    "apps/desktop/src/windows/home/pages/operations\\hindsight-template-browser.test.ts",
+    "apps/desktop/src/lib\\rpc-deadline.ts",
+    "apps/desktop/src/lib\\ws-client.ts",
+    "apps/desktop/src/lib\\ws-client-methods.ts",
+    "apps/desktop/src/lib\\ws-client-hindsight-templates.ts",
+    "apps/desktop/src/lib\\ws-client-hindsight-templates.test.ts",
+    "apps/desktop/src/windows/home/pages/operations\\hindsight-template-editor.tsx",
+    "apps/desktop/src/windows/home/pages/operations\\hindsight-template-controller.ts",
+    "apps/desktop/src/windows/home/pages/operations\\hindsight-template-controller.test.ts",
+    "apps/desktop/src/windows/home/pages/operations\\hindsight-template-card.tsx",
+    "apps/desktop/src/windows/home/pages/operations\\hindsight-template-preview.tsx",
+    "apps/desktop/src/windows/home/pages/operations\\hindsight-template-plan.tsx",
+    "apps/desktop/src/windows/home/pages/operations\\hindsight-template-resource-editor.tsx",
+    "apps/desktop/src/windows/home/pages/operations\\hindsight-template-resource-form.test.ts",
+    "apps/desktop/src/windows/home/pages/operations\\hindsight-template-test-fixture.ts",
+    "apps/desktop/src/windows/home/pages/operations\\hindsight-template-state.ts",
+    "apps/desktop/src/windows/home/pages/operations\\hindsight-template-resource-form.tsx",
+    "apps/desktop/src/windows/home/pages/operations\\use-hindsight-templates.ts",
+    "apps/desktop/src/windows/home/pages/operations\\operations-page.tsx",
+    "apps/desktop/src/windows/home/pages/operations\\memory-operations-controller.ts",
+    "apps/desktop/src/windows/home/pages/operations\\memory-operations-controller.test.ts"
+  ],
+  "startedAt": "2026-10-09T10:46:10.2455771Z",
+  "finishedAt": "2026-10-09T10:46:13.8744298Z",
+  "exitCode": 0
+}

@@ -1,0 +1,22 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/ty.exe",
+    "check",
+    "--python",
+    "H:/hindsight/.venv/Scripts/python.exe",
+    "--python-platform",
+    "linux",
+    "hindsight_api/engine/template_access.py",
+    "hindsight_api/engine/template_apply.py",
+    "hindsight_api/engine/template_snapshot.py",
+    "hindsight_api/engine/template_backup_config.py"
+  ],
+  "cwd": "H:/hindsight/hindsight-api-slim",
+  "exitCode": 0,
+  "durationSeconds": 3.832,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-independent-config-visibility-types-01.log",
+  "sources": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-independent-config-visibility-types-01-sources.json",
+  "changedInputs": [],
+  "ownedTemp": "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\independent-config-visibility-types-01-mrco0qfv",
+  "ownedTempRemoved": true
+}

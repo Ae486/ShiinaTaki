@@ -1,0 +1,30 @@
+{
+  "command": [
+    "C:/Users/55473/.cargo/bin/cargo.exe",
+    "test",
+    "--manifest-path",
+    "apps/desktop/src-tauri/Cargo.toml",
+    "--locked",
+    "--offline",
+    "--",
+    "--skip",
+    "capabilities_impl::clipboard::tests::set_then_get_round_trips",
+    "--skip",
+    "capabilities_impl::foreground_window::tests::run_never_errors_and_shapes_a_valid_output",
+    "--skip",
+    "capabilities_impl::process_list::tests::snapshot_has_processes_with_expected_fields_and_no_cmd"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "startedAt": "2026-10-13T06:33:52.729866+00:00",
+  "finishedAt": "2026-10-13T06:36:22.921564+00:00",
+  "exitCode": 0,
+  "durationSeconds": 150.188,
+  "inputCount": 2417,
+  "changedInputs": [],
+  "inputManifest": "b3-whole-rust-tests-01-inputs.json",
+  "afterManifest": "b3-whole-rust-tests-01-inputs-after.json",
+  "log": "b3-whole-rust-tests-01.log",
+  "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-whole-checks\\rust-tests-01-aad0ddeb0907476495b45df5f933f5a8",
+  "temporaryRootRemoved": true,
+  "remainingFixtureEntries": []
+}

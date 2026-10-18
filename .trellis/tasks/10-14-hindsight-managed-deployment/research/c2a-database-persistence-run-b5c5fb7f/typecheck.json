@@ -1,0 +1,6 @@
+{
+  "output": "",
+  "command": "tsc --noEmit --project tsconfig.noemit.json",
+  "exitCode": 0,
+  "elapsedMs": 6557.6449
+}

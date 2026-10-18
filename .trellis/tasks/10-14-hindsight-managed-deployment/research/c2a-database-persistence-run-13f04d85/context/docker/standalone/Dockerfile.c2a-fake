@@ -1,0 +1,9 @@
+# Build only at the separately authorized Docker checkpoint, with an already
+# available immutable Native base image. No source test builds or pulls it.
+ARG NATIVE_IMAGE
+FROM ${NATIVE_IMAGE}
+USER root
+COPY docker/standalone/managed_bootstrap /app/c2a/managed_bootstrap
+RUN /app/api/.venv/bin/python -I -B -c "import pathlib,shutil,sysconfig; shutil.copytree('/app/c2a/managed_bootstrap', pathlib.Path(sysconfig.get_path('purelib'))/'managed_bootstrap')"
+USER 1000:1000
+ENTRYPOINT ["/app/api/.venv/bin/python", "-I", "-B", "-m", "managed_bootstrap.owner"]

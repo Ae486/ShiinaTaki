@@ -1,0 +1,11 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/python.exe",
+    "-c",
+    "from pathlib import Path; import subprocess,json; path=Path(\"hindsight_api/engine/transfer/export.py\"); before=path.read_text(encoding=\"utf-8\"); subprocess.run([\"H:/hindsight/.venv/Scripts/ruff.exe\",\"format\",str(path)],check=True); assert path.read_text(encoding=\"utf-8\")==before; print(json.dumps({\"normalizedTextUnchanged\":True,\"path\":str(path)}))"
+  ],
+  "cwd": "H:/hindsight/hindsight-api-slim",
+  "exitCode": 0,
+  "durationSeconds": 0.304,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-native-format-fix-01.log"
+}

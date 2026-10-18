@@ -1,0 +1,26 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "exec",
+    "vitest",
+    "run",
+    "H:/TakiAgent/packages/core/src/memory/hindsight/template-lifecycle/template-emergency.test.ts",
+    "H:/TakiAgent/packages/core/src/memory/hindsight/template-lifecycle/template-executor-store.test.ts",
+    "H:/TakiAgent/packages/core/src/memory/hindsight/template-lifecycle/template-provision.test.ts",
+    "H:/TakiAgent/packages/core/src/memory/hindsight/template-lifecycle/template-revalidate.test.ts",
+    "H:/TakiAgent/packages/core/src/memory/hindsight/template-lifecycle/template-rollout.test.ts",
+    "H:/TakiAgent/packages/core/src/memory/hindsight/template-lifecycle/template-runtime-control.test.ts",
+    "H:/TakiAgent/packages/core/src/memory/hindsight/template-lifecycle/template-selection.test.ts",
+    "H:/TakiAgent/packages/core/src/server/methods/hindsight-template-methods.test.ts",
+    "H:/TakiAgent/packages/core/src/memory/hindsight/template-lifecycle/template-derived-observation.test.ts",
+    "H:/TakiAgent/packages/core/src/memory/hindsight/template-lifecycle/template-lifecycle-service.test.ts",
+    "--maxWorkers=2",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile.json=H:/TakiAgent/.trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-core-managed-affected-01-vitest.json"
+  ],
+  "cwd": "H:/TakiAgent/packages/core",
+  "exitCode": 0,
+  "durationSeconds": 83.128,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-core-managed-affected-01.log"
+}

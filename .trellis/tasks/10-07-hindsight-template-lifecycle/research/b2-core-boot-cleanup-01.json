@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-10-08T15:13:48.2202713Z",
+  "pid": 21984,
+  "processStopped": true,
+  "port": 8673,
+  "portReleased": true,
+  "migrationHead": 59,
+  "listeningObserved": true,
+  "shutdownObserved": true,
+  "verified": true,
+  "prohibitedCalls": 0,
+  "dataDir": "H:\\TakiAgent\\.trellis\\.runtime\\stage5b-core-boot\\owned-QQPILD",
+  "dataDirRemoved": true,
+  "removedEntryCount": 5,
+  "scope": "Only this owned boot data directory; stdout and result evidence retained"
+}

@@ -1,0 +1,15 @@
+
+H:\TakiAgent\packages\core\src\memory\hindsight\template-lifecycle\template-integrity.ts
+  43:25  error  '_hash' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+H:\TakiAgent\packages\core\src\memory\hindsight\template-lifecycle\template-projection.ts
+  11:16  error  '_modelProof' is assigned a value but never used      @typescript-eslint/no-unused-vars
+  12:16  error  '_directiveProof' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  13:24  error  '_snapshotHash' is assigned a value but never used    @typescript-eslint/no-unused-vars
+
+H:\TakiAgent\packages\core\src\memory\hindsight\template-lifecycle\template-test-fixtures.ts
+  26:26  error  '_hash' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  58:25  error  '_hash' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+✖ 6 problems (6 errors, 0 warnings)
+

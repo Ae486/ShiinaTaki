@@ -1,0 +1,28 @@
+{
+  "head": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a",
+  "branch": "main",
+  "paths": [
+    {
+      "path": "packages/core/src/db/migrations/index-list.ts",
+      "sha256": "6c024e6cb5f0db8b3758b995d106935911ca1b9db126282c23e47e7bed53a7c3"
+    },
+    {
+      "path": "packages/core/src/db/migrations/index-list.test.ts",
+      "sha256": "b601d8f908ffb467f84369354f69c157b5ad429161b98670cfb9c72ddeed0ffd"
+    },
+    {
+      "path": "packages/core/src/db/migrations/index.md",
+      "sha256": "fdc46e4c91922f4d394940d56db4609be076ae715a75a39c3178df18b9ab70c3"
+    },
+    {
+      "path": "packages/core/src/db/index.md",
+      "sha256": "73a59e78aca908dbab47abffcd21009b984c90eb191638328c8b577a2895b420"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/taki-bank-template-v1.ts",
+      "sha256": "9d1f05100444af6c03f319df98cb04bfcf5bfe2504d0c059f2731ee531346952"
+    }
+  ],
+  "newDirectoryAbsent": true,
+  "migration058Absent": true
+}

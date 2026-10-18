@@ -1,0 +1,19 @@
+{
+  "command": [
+    "git",
+    "diff",
+    "--check",
+    "--",
+    ".trellis/spec/backend/hindsight-template-lifecycle.md",
+    "packages/shared/src/hindsight-template-definition-schema.ts",
+    "packages/shared/src/hindsight-template-schema.ts",
+    "packages/shared/src/hindsight-template-schema.test.ts",
+    "packages/shared/src/hindsight-template-validation.test.ts",
+    "packages/shared/src/fixtures/hindsight-template-validation-cases.json",
+    "packages/shared/src/index.md"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "durationSeconds": 0.118,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b1-independent-native-taki-hygiene-01.log"
+}

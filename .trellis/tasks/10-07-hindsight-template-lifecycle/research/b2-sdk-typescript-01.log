@@ -1,0 +1,22 @@
+
+> @vectorize-io/hindsight-client@0.9.0 test
+> jest --runInBand --testPathIgnorePatterns=main_operations.test.ts
+
+PASS tests/template_lifecycle.test.ts (5.298 s)
+PASS tests/knowledge_base_mapping.test.ts
+PASS tests/reflect_include.test.ts
+PASS tests/native_result_mapping.test.ts
+PASS tests/configuration_observation.test.ts
+PASS tests/current_state_contract.test.ts
+PASS tests/version.test.ts
+PASS tests/mental_model_query_mapping.test.ts
+PASS tests/create_mental_model_mapping.test.ts
+PASS tests/prompt_formatting.test.ts
+PASS tests/transition_contract.test.ts
+PASS tests/client_options.test.ts
+
+Test Suites: 12 passed, 12 total
+Tests:       45 passed, 45 total
+Snapshots:   0 total
+Time:        10.775 s, estimated 12 s
+Ran all test suites.

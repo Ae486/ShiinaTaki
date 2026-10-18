@@ -1,0 +1,569 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ ✓ src/memory/transitions/transition-emergency-context.test.ts (7 tests) 87172ms
+     ✓ deduplicates expensive immutable work within candidate without a verdict cache  14262ms
+     ✓ deduplicates expensive immutable work within proof without a verdict cache  12699ms
+     ✓ deduplicates expensive immutable work within publication without a verdict cache  12481ms
+     ✓ rejects forged objects, cross-database and expired contexts and isolates body bytes and Maps  12124ms
+     ✓ rereads surviving SQL bytes and identity even when a pure projection already exists  12043ms
+     ✓ keys pure projection by full mappings and explicit policy Map entries rather than {}  11423ms
+     ✓ opens a fresh emergency context for each observer read and still checks mutable publication joins  12135ms
+ ✓ src/memory/transitions/transition-emergency-service.test.ts (11 tests) 159184ms
+     ✓ keeps primary finalization during-copy assigned exactly once  16632ms
+     ✓ keeps primary finalization after-commit-before-bind assigned exactly once  15133ms
+     ✓ seals original Pending uncertainty without relabeling or dispatching it under Local  18279ms
+     ✓ accepts complete surviving evidence even when historical setup is no longer verified  13875ms
+     ✓ discloses missing replica state without creating a submit identity  10659ms
+     ✓ discloses partial replica state without creating a submit identity  10509ms
+     ✓ passes a hung replica producer and rejects its later callback  17399ms
+     ✓ passes a hung backup producer and rejects its later callback  15886ms
+     ✓ uses the committed Hindsight receipt to quarantine a reentry whose admission still names Local  9770ms
+     ✓ commits and binds Local with absent credentials and backup without any new Native dispatch  14726ms
+     ✓ quarantines a permanently hung healthy operation without rewriting its attempt or dispatch history  16310ms
+ ✓ src/memory/transitions/transition-emergency-recovery.test.ts (5 tests) 82586ms
+     ✓ recovers seal-before-ack using original incident and receipt identities  17875ms
+     ✓ recovers ack-before-candidate using original incident and receipt identities  16267ms
+     ✓ recovers before-commit using original incident and receipt identities  16528ms
+     ✓ recovers commit-reply using original incident and receipt identities  16509ms
+     ✓ recovers binding using original incident and receipt identities  15404ms
+ ✓ src/memory/hindsight-lifecycle/hindsight-lifecycle-journey.test.ts (22 tests) 25312ms
+     ✓ retirement detaches a hung bank.provision and prevents its late export from publishing or dispatching again  1361ms
+     ✓ retirement detaches a hung connection.revalidate and prevents its late export from publishing or dispatching again  985ms
+     ✓ degrades a new Character, provisions a fresh Bank that binds, recalls Global + Character and ingests the degraded turn once  2359ms
+     ✓ refuses at admission under a Local marker, a drifted connection and an already ready Bank, with no row  1125ms
+     ✓ refuses an occupied Bank with no PUT and no row, and a template conflict with zero native calls  971ms
+     ✓ leaves a failed row on a rejected dry-run while the other Banks keep serving, then provisions idempotently after a first-sync failure  1573ms
+     ✓ degrades on a changed timeout, revalidates without touching Bank rows, stops the old scheduler once and ingests the witnessed turn once  1547ms
+     ✓ replaces the binding under an in-flight Run: the old Run's memory calls fail structured, the next Run is served  1735ms
+     ✓ settles a replacement that fails to build as failed runtime_unavailable, leaves the binding unavailable and offers recoverBinding  1192ms
+     ✓ refuses a disabled connection, a deployment-mode change and a template change with the authority and binding kept  579ms
+     ✓ refuses a deployment-mode change made across a restart, where the runtime was built on the unreviewed settings  913ms
+     ✓ revalidates a benign change made across a restart, advancing the reviewed fingerprint and mode, then a later key rotation  1268ms
+     ✓ keeps a pre-050 row with no reviewed mode fail-closed for a change made across a restart  970ms
+     ✓ refuses a different provider lineage after admission, keeping the old binding and the reviewed fingerprint  682ms
+     ✓ settles a health check the provider fails (503) or an unsupported version as failed with its closed code, writing no reviewed state and no Bank row  533ms
+     ✓ calls verifiedReconnect once after a foreground success following an outage, never from scheduled runs, and on an unchanged revalidate  1817ms
+     ✓ submits one automatic bank.provision per Character and fingerprint, held across restart, and never retries a failed attempt  878ms
+     ✓ automatically revalidates a changed connection once and the next Run is served with memory  1083ms
+     ✓ settles an automatic revalidation against a different lineage as one failed attempt, keeps the binding and never retries it  598ms
+     ✓ settles an automatic revalidation whose health check the provider fails once and never retries it for the same fingerprint  555ms
+     ✓ refuses an automatic submit while another memory family is busy, leaving the Run degraded and nothing queued  880ms
+     ✓ carries a new Character's exact primary witnesses through the fence and provisions its Bank after activation  1705ms
+ ❯ src/memory/transitions/transition-emergency-admission.test.ts (9 tests | 1 failed) 45180ms
+     × accepts a 6ms-old confirmation when both actual synchronous plans cross its 120s window 11922ms
+     ✓ refuses a genuinely expired preview at a new submission before identity work or dispatch  4716ms
+     ✓ keeps the second-plan current configuration check after costly validation, with complete admission rollback  4241ms
+     ✓ keeps the second-plan current inventory check after costly validation, with complete admission rollback  4126ms
+     ✓ keeps the second-plan current epoch check after costly validation, with complete admission rollback  4048ms
+     ✓ keeps the second-plan current replica check after costly validation, with complete admission rollback  4073ms
+     ✓ keeps the second-plan current preview check after costly validation, with complete admission rollback  3992ms
+     ✓ rereads configuration after the first expensive identity read  4272ms
+     ✓ rereads preview after the first expensive identity read  3785ms
+ ❯ src/memory/hindsight-runtime-composition.test.ts (23 tests | 21 failed) 6909ms
+     × exposes the operations() live accessor only for the selected Hindsight subsystem 508ms
+     ✓ keeps local independent of configured Hindsight and preserves its directory layout  401ms
+     ✓ keeps legacy independent of configured Hindsight and preserves its directory layout  368ms
+     × constructs selected Hindsight with seeded=false, then hydrates real policy without a Utility model or Legacy fallback 440ms
+     × constructs selected Hindsight with seeded=true, then hydrates real policy without a Utility model or Legacy fallback 290ms
+     × admits known pins and neutral facts while excluding hidden and other-Character data before consumer delivery 316ms
+     × keeps a captured prompt immutable while a later Run sees the new application policy 253ms
+     × refuses captured execution after endpoint drift without changing provider or consulting Legacy 249ms
+     × refuses captured execution after secret drift without changing provider or consulting Legacy 277ms
+     × refuses captured execution after epoch drift without changing provider or consulting Legacy 256ms
+     × does not retarget an already captured Character route after B3 Bank mapping changes 273ms
+     × keeps Core serving with an observable unavailable Hindsight runtime when B3 configuration is disabled at boot 301ms
+     × keeps Core serving when the selected Hindsight runtime fails to start at boot and republishes it through recover 307ms
+     × uses verified replica data during an outage while retaining Hindsight identity and explicit partial status 245ms
+     × flushes one exact committed source into real durable two-Bank coverage during an outage 250ms
+     × waits for an abort-ignoring active pull, shares repeated-stop completion and blocks queued/late access 256ms
+     × settles an active captured native recall before completing runtime shutdown 259ms
+     × preserves frozen Effect authority metadata through the foreground lifetime wrapper 249ms
+     × rejects held consumers after stop before entering a closed SQLite handle 285ms
+     × rereads both policy knobs through ConfigSource for each actual curator pass 253ms
+     × known required pin in active state must not silently disappear when rebinding is unavailable 276ms
+     × known required pin in invalidated state must not silently disappear when rebinding is unavailable 318ms
+     × known required pin in expired state must not silently disappear when rebinding is unavailable 274ms
+ ✓ src/memory/operations/memory-operation-kind-backup-capture.test.ts (7 tests) 8003ms
+     ✓ refuses under the Local marker, on a stale epoch, without a published runtime and without the producer, leaving no row  698ms
+     ✓ is exclusive with setup, onboarding, activation and lifecycle in both directions  1088ms
+     ✓ cancels only before the deferred claim, with no native call  1033ms
+     ✓ captures a verified pair while chat keeps committing and Run writes refuse retryably, then resumes writers  1736ms
+     ✓ fails ROUTE_UNAVAILABLE on the production route while the native endpoint is off, leaving nothing listed and writers resumed  1206ms
+     ✓ records the pair mismatch in the result when native lacks a Core Bank  1102ms
+     ✓ settles a capture interrupted by a restart as outcome_unknown, quarantining its partial dir without redispatch  1138ms
+ ✓ src/memory/operations/memory-operation-kind-backup-admit.test.ts (6 tests) 7004ms
+     ✓ refuses both under the Local marker and admit on a stale epoch, leaving no row  768ms
+     ✓ shares the exclusive hindsight-backup family in both directions  1256ms
+     ✓ stages a capture, admits the operator ZIP verified, re-verifies it and reports it in status  1407ms
+     ✓ fails an admit whose ZIP lacks the proof and hands the ZIP back  1221ms
+     ✓ returns a ZIP claimed before a restart to the inbox as outcome_unknown  1218ms
+     ✓ settles an admit whose pair was sealed before the restart as completed  1131ms
+ ✓ src/db/memory-transition-emergency-publication.test.ts (3 tests) 20688ms
+     ✓ preserves mixed unknown and unconsumed primary members without re-adopting the unknown member  6778ms
+     ✓ rebuilds original logical state and selects Local with one immutable incident/foreign-branch receipt  7357ms
+     ✓ rolls back the entire authority transaction when immutable receipt insertion fails  6551ms
+ ✓ src/memory/operations/memory-operation-kind-hindsight.test.ts (11 tests) 5234ms
+     ✓ mints every identity in Core, runs the chain once, persists checkpoints and settles from the receipt and binding  589ms
+     ✓ refuses the wrong marker, a stale client view, a drifted or unconfigured setup and recover without a matching receipt  406ms
+     ✓ is mutually single-flight with the setup and local-onboarding families and blocks direct setup RPCs while open  433ms
+     ✓ cancels only before the claim and never starts the producer on a lost claim or a stopping service  518ms
+     ✓ classifies foreign rows at boot: committed from the receipt, incomplete under Local, unknown on a mismatch or unreadable marker  579ms
+     ✓ marks an interrupted pre-COMMIT attempt incomplete with the durable phase and lets resume finish without a second POST  517ms
+     ✓ resumes a recaptured run after a restart mid-verify with the per-preparation ids the interrupted attempt posted  625ms
+     ✓ settles a post-COMMIT bind failure as runtime_unavailable, repairs through recover without re-promoting and keeps history immutable  543ms
+     ✓ settles a refused repair as failed with its closed code instead of completing over a swallowed fault  418ms
+     ✓ rebuilds the committed identity from receipts when no operation row carries it  390ms
+ ✓ src/memory/operations/memory-operation-kind-lifecycle.test.ts (5 tests) 5496ms
+     ✓ refuses under a Local marker, on a stale epoch and without the lifecycle service, leaving no row  715ms
+     ✓ stamps the Core origin and refuses both kinds while any of the four exclusive families holds an open row  996ms
+     ✓ cancels only before the deferred claim, with no native call  1233ms
+     ✓ settles a crashed provision from the B3 row and replica binding, else outcome_unknown without redispatch  1379ms
+     ✓ settles a crashed revalidation only from the recorded fingerprint, its evidence and a runtime built on it  1170ms
+ ❯ src/memory/hindsight/hindsight-runtime-lifetime.test.ts (3 tests | 3 failed) 791ms
+     × owns both Banks after the caller's admission budget expires during a transition drain 315ms
+     × waits for an admitted foreground sync while refusing manual work behind the transition fence 223ms
+     × settles actual foreground synchronization before closing a stopped subsystem 251ms
+ ✓ src/memory/operations/memory-operation-kind-local.test.ts (8 tests) 1526ms
+     ✓ marks an unpublished reservation unknown, offers retry, and retry materializes the same reserved run  301ms
+ ❯ src/memory/operations/memory-hindsight-lifecycle-status.test.ts (4 tests | 1 failed) 1069ms
+     ✓ projects all five readiness states from B3 rows, replica binding, open operations and the Timeline  327ms
+     ✓ separates runtime drift, an unreviewed boot config and a disabled connection without probing the network 255ms
+     ✓ derives actions from drift, runtime availability and an open exclusive family only 241ms
+     × reports the stored admission evidence time for the current epoch and fingerprint only 244ms
+ ❯ src/memory/hindsight-unbound-run.test.ts (4 tests | 2 failed) 1162ms
+     ✓ admits a memory-unavailable chat turn and keeps the witness with 'the connection flag disabled'  394ms
+     × admits a memory-unavailable chat turn and keeps the witness with 'a template-revision conflict' 267ms
+     ✓ keeps refusing an unbound runtime whose construction failed for any other cause 243ms
+     × returns to the full memory Run through the unchanged same-epoch recovery once the setting is repaired 256ms
+ ✓ src/memory/runtime-composition.test.ts (8 tests) 1214ms
+ ✓ src/memory/operations/memory-operation-kind-replica.test.ts (10 tests) 1276ms
+ ✓ src/memory/operations/memory-operation-service.test.ts (9 tests) 1201ms
+ ✓ src/memory/operations/memory-operation-kind-transition.test.ts (5 tests) 770ms
+ ✓ src/memory/operations/memory-authority-status.test.ts (7 tests) 960ms
+ ✓ src/memory/hindsight-runtime-binding.test.ts (1 test) 126ms
+ ✓ src/memory/hindsight/hindsight-runtime-bank-service.test.ts (5 tests) 719ms
+ ✓ src/memory/runtime-selector.test.ts (9 tests) 56ms
+ ✓ src/memory/operations/memory-operation-kind-backup.test.ts (3 tests) 8ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 28 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > exposes the operations() live accessor only for the selected Hindsight subsystem
+AssertionError: expected null not to be null
+ ❯ src/memory/hindsight-runtime-composition.test.ts:43:28
+     41|     const f = fixture(); const runtime = f.compose();
+     42|     const operations = runtime.operations();
+     43|     expect(operations).not.toBeNull();
+       |                            ^
+     44|     expect(operations!.epochId).toBe("epoch");
+     45|     expect(operations!.scheduler.started()).toBe(false);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/28]⎯
+
+ FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > constructs selected Hindsight with seeded=false, then hydrates real policy without a Utility model or Legacy fallback
+ZodError: [
+  {
+    "code": "custom",
+    "path": [],
+    "message": "noncanonical Bank identity"
+  }
+]
+ ❯ readRuntimeTemplateSelection src/memory/hindsight/template-lifecycle/template-runtime-selection.ts:22:47
+     20|   const setup = createHindsightBankSetupRepo(db).list().find((row) => …
+     21|   if (!setup) throw new Error("MEMORY_TEMPLATE_IDENTITY_CHANGED");
+     22|   const identity = TemplateBankIdentitySchema.parse({ scope: setup.sco…
+       |                                               ^
+     23|     target: { bank_id: input.bankId, provider_lineage: input.namespace…
+     24|   if (!readTemplateEnrollment(db, identity)) return null;
+ ❯ readTemplateSelectionIdentity src/memory/hindsight/template-lifecycle/template-runtime-selection.ts:43:22
+ ❯ driftReason src/memory/hindsight/hindsight-runtime-connection.ts:79:9
+ ❯ Object.assertConnection src/memory/hindsight/hindsight-runtime-connection.ts:85:19
+ ❯ assert src/memory/hindsight/hindsight-memory-provider-context.ts:57:10
+ ❯ Object.capabilitiesSnapshot src/memory/hindsight/hindsight-memory-provider-context.ts:81:35
+ ❯ synchronizeHindsightCapture src/memory/hindsight/hindsight-capture-sync.ts:50:22
+ ❯ src/memory/hindsight/hindsight-memory-runtime.ts:62:22
+ ❯ complete src/memory/hindsight/hindsight-runtime-consumers.ts:39:50
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/28]⎯
+
+ FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > constructs selected Hindsight with seeded=true, then hydrates real policy without a Utility model or Legacy fallback
+Error: MEMORY_RUNTIME_UNAVAILABLE
+ ❯ src/memory/hindsight-unbound-run.ts:51:24
+     49|     const held = binding.lifetime === "running" && activeTemplateHold(…
+     50|     const reason = held ? "template_hold" : hindsightUnboundReason(bin…
+     51|     if (!reason) throw new Error("MEMORY_RUNTIME_UNAVAILABLE");
+       |                        ^
+     52|     input.logger.warn({ characterId, code: reason }, "Hindsight Run ad…
+     53|     input.onUnavailable?.({ characterId, reason });
+ ❯ Object.captureRun src/memory/runtime-composition.ts:96:79
+ ❯ src/memory/hindsight-runtime-composition.test.ts:65:31
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/28]⎯
+
+ FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > admits known pins and neutral facts while excluding hidden and other-Character data before consumer delivery
+Error: MEMORY_RUNTIME_UNAVAILABLE
+ ❯ src/memory/hindsight-unbound-run.ts:51:24
+     49|     const held = binding.lifetime === "running" && activeTemplateHold(…
+     50|     const reason = held ? "template_hold" : hindsightUnboundReason(bin…
+     51|     if (!reason) throw new Error("MEMORY_RUNTIME_UNAVAILABLE");
+       |                        ^
+     52|     input.logger.warn({ characterId, code: reason }, "Hindsight Run ad…
+     53|     input.onUnavailable?.({ characterId, reason });
+ ❯ Object.captureRun src/memory/runtime-composition.ts:96:79
+ ❯ src/memory/hindsight-runtime-composition.test.ts:85:72
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/28]⎯
+
+ FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > keeps a captured prompt immutable while a later Run sees the new application policy
+Error: MEMORY_RUNTIME_UNAVAILABLE
+ ❯ src/memory/hindsight-unbound-run.ts:51:24
+     49|     const held = binding.lifetime === "running" && activeTemplateHold(…
+     50|     const reason = held ? "template_hold" : hindsightUnboundReason(bin…
+     51|     if (!reason) throw new Error("MEMORY_RUNTIME_UNAVAILABLE");
+       |                        ^
+     52|     input.logger.warn({ characterId, code: reason }, "Hindsight Run ad…
+     53|     input.onUnavailable?.({ characterId, reason });
+ ❯ Object.captureRun src/memory/runtime-composition.ts:96:79
+ ❯ src/memory/hindsight-runtime-composition.test.ts:97:92
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/28]⎯
+
+ FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > refuses captured execution after endpoint drift without changing provider or consulting Legacy
+ FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > refuses captured execution after secret drift without changing provider or consulting Legacy
+ FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > refuses captured execution after epoch drift without changing provider or consulting Legacy
+Error: MEMORY_RUNTIME_UNAVAILABLE
+ ❯ src/memory/hindsight-unbound-run.ts:51:24
+     49|     const held = binding.lifetime === "running" && activeTemplateHold(…
+     50|     const reason = held ? "template_hold" : hindsightUnboundReason(bin…
+     51|     if (!reason) throw new Error("MEMORY_RUNTIME_UNAVAILABLE");
+       |                        ^
+     52|     input.logger.warn({ characterId, code: reason }, "Hindsight Run ad…
+     53|     input.onUnavailable?.({ characterId, reason });
+ ❯ Object.captureRun src/memory/runtime-composition.ts:96:79
+ ❯ src/memory/hindsight-runtime-composition.test.ts:106:81
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/28]⎯
+
+ FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > does not retarget an already captured Character route after B3 Bank mapping changes
+Error: MEMORY_RUNTIME_UNAVAILABLE
+ ❯ src/memory/hindsight-unbound-run.ts:51:24
+     49|     const held = binding.lifetime === "running" && activeTemplateHold(…
+     50|     const reason = held ? "template_hold" : hindsightUnboundReason(bin…
+     51|     if (!reason) throw new Error("MEMORY_RUNTIME_UNAVAILABLE");
+       |                        ^
+     52|     input.logger.warn({ characterId, code: reason }, "Hindsight Run ad…
+     53|     input.onUnavailable?.({ characterId, reason });
+ ❯ Object.captureRun src/memory/runtime-composition.ts:96:79
+ ❯ src/memory/hindsight-runtime-composition.test.ts:119:81
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/28]⎯
+
+ FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > keeps Core serving with an observable unavailable Hindsight runtime when B3 configuration is disabled at boot
+ FAIL  src/memory/hindsight-unbound-run.test.ts > unbound selected Hindsight runtime at boot > returns to the full memory Run through the unchanged same-epoch recovery once the setting is repaired
+ZodError: [
+  {
+    "code": "custom",
+    "path": [],
+    "message": "noncanonical Bank identity"
+  }
+]
+ ❯ readRuntimeTemplateSelection src/memory/hindsight/template-lifecycle/template-runtime-selection.ts:22:47
+     20|   const setup = createHindsightBankSetupRepo(db).list().find((row) => …
+     21|   if (!setup) throw new Error("MEMORY_TEMPLATE_IDENTITY_CHANGED");
+     22|   const identity = TemplateBankIdentitySchema.parse({ scope: setup.sco…
+       |                                               ^
+     23|     target: { bank_id: input.bankId, provider_lineage: input.namespace…
+     24|   if (!readTemplateEnrollment(db, identity)) return null;
+ ❯ readTemplateSelectionIdentity src/memory/hindsight/template-lifecycle/template-runtime-selection.ts:43:22
+ ❯ createHindsightRuntimeConnection src/memory/hindsight/hindsight-runtime-connection.ts:69:37
+ ❯ createHindsightMemorySubsystem src/memory/hindsight/hindsight-memory-subsystem.ts:52:19
+ ❯ Object.construct src/memory/runtime-composition.ts:195:29
+ ❯ publish src/memory/hindsight-runtime-binding.ts:76:21
+ ❯ Object.publish src/memory/hindsight-runtime-binding.ts:91:14
+ ❯ selected.createHindsight src/memory/runtime-composition.ts:200:63
+ ❯ Object.recoverHindsight src/memory/runtime-selector.ts:92:46
+ ❯ Object.recoverHindsightBinding src/memory/runtime-composition.ts:175:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/28]⎯
+
+ FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > keeps Core serving when the selected Hindsight runtime fails to start at boot and republishes it through recover
+Error: MEMORY_RUNTIME_UNAVAILABLE
+ ❯ src/memory/hindsight-unbound-run.ts:51:24
+     49|     const held = binding.lifetime === "running" && activeTemplateHold(…
+     50|     const reason = held ? "template_hold" : hindsightUnboundReason(bin…
+     51|     if (!reason) throw new Error("MEMORY_RUNTIME_UNAVAILABLE");
+       |                        ^
+     52|     input.logger.warn({ characterId, code: reason }, "Hindsight Run ad…
+     53|     input.onUnavailable?.({ characterId, reason });
+ ❯ Object.captureRun src/memory/runtime-composition.ts:96:79
+ ❯ src/memory/hindsight-runtime-composition.test.ts:149:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/28]⎯
+
+ FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > uses verified replica data during an outage while retaining Hindsight identity and explicit partial status
+Error: MEMORY_RUNTIME_UNAVAILABLE
+ ❯ src/memory/hindsight-unbound-run.ts:51:24
+     49|     const held = binding.lifetime === "running" && activeTemplateHold(…
+     50|     const reason = held ? "template_hold" : hindsightUnboundReason(bin…
+     51|     if (!reason) throw new Error("MEMORY_RUNTIME_UNAVAILABLE");
+       |                        ^
+     52|     input.logger.warn({ characterId, code: reason }, "Hindsight Run ad…
+     53|     input.onUnavailable?.({ characterId, reason });
+ ❯ Object.captureRun src/memory/runtime-composition.ts:96:79
+ ❯ src/memory/hindsight-runtime-composition.test.ts:158:69
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/28]⎯
+
+ FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > flushes one exact committed source into real durable two-Bank coverage during an outage
+ZodError: [
+  {
+    "code": "custom",
+    "path": [],
+    "message": "noncanonical Bank identity"
+  }
+]
+ ❯ readRuntimeTemplateSelection src/memory/hindsight/template-lifecycle/template-runtime-selection.ts:22:47
+     20|   const setup = createHindsightBankSetupRepo(db).list().find((row) => …
+     21|   if (!setup) throw new Error("MEMORY_TEMPLATE_IDENTITY_CHANGED");
+     22|   const identity = TemplateBankIdentitySchema.parse({ scope: setup.sco…
+       |                                               ^
+     23|     target: { bank_id: input.bankId, provider_lineage: input.namespace…
+     24|   if (!readTemplateEnrollment(db, identity)) return null;
+ ❯ readTemplateSelectionIdentity src/memory/hindsight/template-lifecycle/template-runtime-selection.ts:43:22
+ ❯ createHindsightRuntimeConnection src/memory/hindsight/hindsight-runtime-connection.ts:69:37
+ ❯ createHindsightMemorySubsystem src/memory/hindsight/hindsight-memory-subsystem.ts:52:19
+ ❯ Object.subsystem src/testing/hindsight-runtime-composition-fixtures.ts:77:21
+ ❯ src/memory/hindsight-runtime-composition.test.ts:167:55
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/28]⎯
+
+ FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > waits for an abort-ignoring active pull, shares repeated-stop completion and blocks queued/late access
+Error: MEMORY_RUNTIME_UNAVAILABLE
+ ❯ src/memory/hindsight-unbound-run.ts:51:24
+     49|     const held = binding.lifetime === "running" && activeTemplateHold(…
+     50|     const reason = held ? "template_hold" : hindsightUnboundReason(bin…
+     51|     if (!reason) throw new Error("MEMORY_RUNTIME_UNAVAILABLE");
+       |                        ^
+     52|     input.logger.warn({ characterId, code: reason }, "Hindsight Run ad…
+     53|     input.onUnavailable?.({ characterId, reason });
+ ❯ Object.captureRun src/memory/runtime-composition.ts:96:79
+ ❯ src/memory/hindsight-runtime-composition.test.ts:182:69
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/28]⎯
+
+ FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > settles an active captured native recall before completing runtime shutdown
+Error: MEMORY_RUNTIME_UNAVAILABLE
+ ❯ src/memory/hindsight-unbound-run.ts:51:24
+     49|     const held = binding.lifetime === "running" && activeTemplateHold(…
+     50|     const reason = held ? "template_hold" : hindsightUnboundReason(bin…
+     51|     if (!reason) throw new Error("MEMORY_RUNTIME_UNAVAILABLE");
+       |                        ^
+     52|     input.logger.warn({ characterId, code: reason }, "Hindsight Run ad…
+     53|     input.onUnavailable?.({ characterId, reason });
+ ❯ Object.captureRun src/memory/runtime-composition.ts:96:79
+ ❯ src/memory/hindsight-runtime-composition.test.ts:195:81
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/28]⎯
+
+ FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > preserves frozen Effect authority metadata through the foreground lifetime wrapper
+Error: MEMORY_RUNTIME_UNAVAILABLE
+ ❯ src/memory/hindsight-unbound-run.ts:51:24
+     49|     const held = binding.lifetime === "running" && activeTemplateHold(…
+     50|     const reason = held ? "template_hold" : hindsightUnboundReason(bin…
+     51|     if (!reason) throw new Error("MEMORY_RUNTIME_UNAVAILABLE");
+       |                        ^
+     52|     input.logger.warn({ characterId, code: reason }, "Hindsight Run ad…
+     53|     input.onUnavailable?.({ characterId, reason });
+ ❯ Object.captureRun src/memory/runtime-composition.ts:96:79
+ ❯ src/memory/hindsight-runtime-composition.test.ts:209:56
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/28]⎯
+
+ FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > rejects held consumers after stop before entering a closed SQLite handle
+Error: MEMORY_RUNTIME_UNAVAILABLE
+ ❯ src/memory/hindsight-unbound-run.ts:51:24
+     49|     const held = binding.lifetime === "running" && activeTemplateHold(…
+     50|     const reason = held ? "template_hold" : hindsightUnboundReason(bin…
+     51|     if (!reason) throw new Error("MEMORY_RUNTIME_UNAVAILABLE");
+       |                        ^
+     52|     input.logger.warn({ characterId, code: reason }, "Hindsight Run ad…
+     53|     input.onUnavailable?.({ characterId, reason });
+ ❯ Object.captureRun src/memory/runtime-composition.ts:96:79
+ ❯ src/memory/hindsight-runtime-composition.test.ts:221:81
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/28]⎯
+
+ FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > rereads both policy knobs through ConfigSource for each actual curator pass
+ZodError: [
+  {
+    "code": "custom",
+    "path": [],
+    "message": "noncanonical Bank identity"
+  }
+]
+ ❯ readRuntimeTemplateSelection src/memory/hindsight/template-lifecycle/template-runtime-selection.ts:22:47
+     20|   const setup = createHindsightBankSetupRepo(db).list().find((row) => …
+     21|   if (!setup) throw new Error("MEMORY_TEMPLATE_IDENTITY_CHANGED");
+     22|   const identity = TemplateBankIdentitySchema.parse({ scope: setup.sco…
+       |                                               ^
+     23|     target: { bank_id: input.bankId, provider_lineage: input.namespace…
+     24|   if (!readTemplateEnrollment(db, identity)) return null;
+ ❯ readTemplateSelectionIdentity src/memory/hindsight/template-lifecycle/template-runtime-selection.ts:43:22
+ ❯ createHindsightRuntimeConnection src/memory/hindsight/hindsight-runtime-connection.ts:69:37
+ ❯ createHindsightMemorySubsystem src/memory/hindsight/hindsight-memory-subsystem.ts:52:19
+ ❯ Object.subsystem src/testing/hindsight-runtime-composition-fixtures.ts:77:21
+ ❯ src/memory/hindsight-runtime-composition.test.ts:232:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/28]⎯
+
+ FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > known required pin in active state must not silently disappear when rebinding is unavailable
+ FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > known required pin in invalidated state must not silently disappear when rebinding is unavailable
+ FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > known required pin in expired state must not silently disappear when rebinding is unavailable
+Error: MEMORY_RUNTIME_UNAVAILABLE
+ ❯ src/memory/hindsight-unbound-run.ts:51:24
+     49|     const held = binding.lifetime === "running" && activeTemplateHold(…
+     50|     const reason = held ? "template_hold" : hindsightUnboundReason(bin…
+     51|     if (!reason) throw new Error("MEMORY_RUNTIME_UNAVAILABLE");
+       |                        ^
+     52|     input.logger.warn({ characterId, code: reason }, "Hindsight Run ad…
+     53|     input.onUnavailable?.({ characterId, reason });
+ ❯ Object.captureRun src/memory/runtime-composition.ts:96:79
+ ❯ src/memory/hindsight-runtime-composition.test.ts:246:86
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/28]⎯
+
+ FAIL  src/memory/hindsight-unbound-run.test.ts > unbound selected Hindsight runtime at boot > admits a memory-unavailable chat turn and keeps the witness with 'a template-revision conflict'
+AssertionError: expected { kind: 'unavailable', …(2) } to deeply equal { kind: 'unavailable', …(2) }
+
+- Expected
++ Received
+
+  {
+-   "code": "HINDSIGHT_TEMPLATE_CONFLICT",
++   "code": "MEMORY_HINDSIGHT_BINDING_FAILED",
+    "epochId": "epoch",
+    "kind": "unavailable",
+  }
+
+ ❯ src/memory/hindsight-unbound-run.test.ts:19:56
+     17|   ])("admits a memory-unavailable chat turn and keeps the witness with…
+     18|     const f = fixture(); change(f); const runtime = f.compose();
+     19|     expect(runtime.hindsightBindingSnapshot().binding).toEqual({ kind:…
+       |                                                        ^
+     20|     expect(runtime.operations()).toBeNull(); expect(runtime.selected.l…
+     21|     const run = await runtime.captureRun("taki");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/28]⎯
+
+ FAIL  src/memory/hindsight/hindsight-runtime-lifetime.test.ts > started Hindsight owners at drain and shutdown > owns both Banks after the caller's admission budget expires during a transition drain
+ZodError: [
+  {
+    "code": "custom",
+    "path": [],
+    "message": "noncanonical Bank identity"
+  }
+]
+ ❯ readRuntimeTemplateSelection src/memory/hindsight/template-lifecycle/template-runtime-selection.ts:22:47
+     20|   const setup = createHindsightBankSetupRepo(db).list().find((row) => …
+     21|   if (!setup) throw new Error("MEMORY_TEMPLATE_IDENTITY_CHANGED");
+     22|   const identity = TemplateBankIdentitySchema.parse({ scope: setup.sco…
+       |                                               ^
+     23|     target: { bank_id: input.bankId, provider_lineage: input.namespace…
+     24|   if (!readTemplateEnrollment(db, identity)) return null;
+ ❯ readTemplateSelectionIdentity src/memory/hindsight/template-lifecycle/template-runtime-selection.ts:43:22
+ ❯ createHindsightRuntimeConnection src/memory/hindsight/hindsight-runtime-connection.ts:69:37
+ ❯ createHindsightMemorySubsystem src/memory/hindsight/hindsight-memory-subsystem.ts:52:19
+ ❯ Object.subsystem src/testing/hindsight-runtime-composition-fixtures.ts:77:21
+ ❯ src/memory/hindsight/hindsight-runtime-lifetime.test.ts:6:62
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/28]⎯
+
+ FAIL  src/memory/hindsight/hindsight-runtime-lifetime.test.ts > started Hindsight owners at drain and shutdown > waits for an admitted foreground sync while refusing manual work behind the transition fence
+ZodError: [
+  {
+    "code": "custom",
+    "path": [],
+    "message": "noncanonical Bank identity"
+  }
+]
+ ❯ readRuntimeTemplateSelection src/memory/hindsight/template-lifecycle/template-runtime-selection.ts:22:47
+     20|   const setup = createHindsightBankSetupRepo(db).list().find((row) => …
+     21|   if (!setup) throw new Error("MEMORY_TEMPLATE_IDENTITY_CHANGED");
+     22|   const identity = TemplateBankIdentitySchema.parse({ scope: setup.sco…
+       |                                               ^
+     23|     target: { bank_id: input.bankId, provider_lineage: input.namespace…
+     24|   if (!readTemplateEnrollment(db, identity)) return null;
+ ❯ readTemplateSelectionIdentity src/memory/hindsight/template-lifecycle/template-runtime-selection.ts:43:22
+ ❯ createHindsightRuntimeConnection src/memory/hindsight/hindsight-runtime-connection.ts:69:37
+ ❯ createHindsightMemorySubsystem src/memory/hindsight/hindsight-memory-subsystem.ts:52:19
+ ❯ Object.subsystem src/testing/hindsight-runtime-composition-fixtures.ts:77:21
+ ❯ src/memory/hindsight/hindsight-runtime-lifetime.test.ts:35:62
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/28]⎯
+
+ FAIL  src/memory/hindsight/hindsight-runtime-lifetime.test.ts > started Hindsight owners at drain and shutdown > settles actual foreground synchronization before closing a stopped subsystem
+ZodError: [
+  {
+    "code": "custom",
+    "path": [],
+    "message": "noncanonical Bank identity"
+  }
+]
+ ❯ readRuntimeTemplateSelection src/memory/hindsight/template-lifecycle/template-runtime-selection.ts:22:47
+     20|   const setup = createHindsightBankSetupRepo(db).list().find((row) => …
+     21|   if (!setup) throw new Error("MEMORY_TEMPLATE_IDENTITY_CHANGED");
+     22|   const identity = TemplateBankIdentitySchema.parse({ scope: setup.sco…
+       |                                               ^
+     23|     target: { bank_id: input.bankId, provider_lineage: input.namespace…
+     24|   if (!readTemplateEnrollment(db, identity)) return null;
+ ❯ readTemplateSelectionIdentity src/memory/hindsight/template-lifecycle/template-runtime-selection.ts:43:22
+ ❯ createHindsightRuntimeConnection src/memory/hindsight/hindsight-runtime-connection.ts:69:37
+ ❯ createHindsightMemorySubsystem src/memory/hindsight/hindsight-memory-subsystem.ts:52:19
+ ❯ Object.subsystem src/testing/hindsight-runtime-composition-fixtures.ts:77:21
+ ❯ src/memory/hindsight/hindsight-runtime-lifetime.test.ts:55:62
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/28]⎯
+
+ FAIL  src/memory/operations/memory-hindsight-lifecycle-status.test.ts > Hindsight lifecycle status section > reports the stored admission evidence time for the current epoch and fingerprint only
+Error: MEMORY_RUNTIME_UNAVAILABLE
+ ❯ src/memory/hindsight-unbound-run.ts:51:24
+     49|     const held = binding.lifetime === "running" && activeTemplateHold(…
+     50|     const reason = held ? "template_hold" : hindsightUnboundReason(bin…
+     51|     if (!reason) throw new Error("MEMORY_RUNTIME_UNAVAILABLE");
+       |                        ^
+     52|     input.logger.warn({ characterId, code: reason }, "Hindsight Run ad…
+     53|     input.onUnavailable?.({ characterId, reason });
+ ❯ Object.captureRun src/memory/runtime-composition.ts:96:79
+ ❯ src/memory/operations/memory-hindsight-lifecycle-status.test.ts:80:23
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/28]⎯
+
+ FAIL  src/memory/transitions/transition-emergency-admission.test.ts > offline emergency admission confirmation time > accepts a 6ms-old confirmation when both actual synchronous plans cross its 120s window
+AssertionError: expected 4 to be 8 // Object.is equality
+
+- Expected
++ Received
+
+- 8
++ 4
+
+ ❯ src/memory/transitions/transition-emergency-admission.test.ts:68:50
+     66|         .not.toBe(entry); // Real operation/lease clocks continue adva…
+     67|       expect(admissionEvidenceIds.length).toBeGreaterThan(0);
+     68|       expect(new Set(admissionEvidenceIds).size).toBe(admissionEvidenc…
+       |                                                  ^
+     69|       expect(() => context.admissionStartedAt).toThrow("MEMORY_TRANSIT…
+     70|       f.owner.cancel(admitted.operationId); await f.owner.stop();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/28]⎯
+
+
+ Test Files  5 failed | 19 passed (24)
+      Tests  28 failed | 157 passed (185)
+   Start at  21:58:07
+   Duration  269.92s (transform 27.07s, setup 0ms, import 65.62s, tests 463.65s, environment 4ms)
+
+JSON report written to H:/TakiAgent/.trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-core-runtime-adjacent-01-vitest.json
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/hindsight-lifecycle/hindsight-lifecycle-journey.test.ts src/memory/hindsight-runtime-composition.test.ts src/memory/hindsight-runtime-binding.test.ts src/memory/hindsight-unbound-run.test.ts src/memory/runtime-composition.test.ts src/memory/runtime-selector.test.ts src/memory/hindsight/hindsight-runtime-lifetime.test.ts src/memory/hindsight/hindsight-runtime-bank-service.test.ts src/memory/operations src/memory/transitions/transition-emergency-service.test.ts src/memory/transitions/transition-emergency-recovery.test.ts src/memory/transitions/transition-emergency-admission.test.ts src/memory/transitions/transition-emergency-context.test.ts src/db/memory-transition-emergency-publication.test.ts --maxWorkers=2 --reporter=default --reporter=json --outputFile.json=H:\TakiAgent\.trellis\tasks\10-07-hindsight-template-lifecycle\research\b2-core-runtime-adjacent-01-vitest.json

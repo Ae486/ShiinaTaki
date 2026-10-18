@@ -1,0 +1,115 @@
+{
+  "schema": "c2b-image-prerequisite-self-check-v1",
+  "task": ".trellis/tasks/10-14-hindsight-managed-deployment",
+  "date": "2026-10-15",
+  "author": "/root/c2a_recovery_implement",
+  "status": "static_checks_passed_runtime_not_run",
+  "scope": "Fixed cached-base inventory packet and future Root execution manifest only.",
+  "files": [
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/inspect-image.py",
+      "bytes": 16369,
+      "sha256": "f7e962da88188e1afb6bbcba9acb1101839f75d38296c603d776da25f44e1ae7",
+      "utf8_valid": true,
+      "utf8_bom": false,
+      "crlf_pairs": 0
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/README.md",
+      "bytes": 7351,
+      "sha256": "e01f6f96c485817ddbb05c1d9d7129082fb36dc0dec3314f6dea8a45ed8f3dd2",
+      "utf8_valid": true,
+      "utf8_bom": false,
+      "crlf_pairs": 0
+    }
+  ],
+  "source_inputs": [
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-plan.md",
+      "bytes": 41862,
+      "sha256": "0e4bdf03c903d6bbdca4d0bbfc187de14bb6c9fd8119b816bbfa7e69db0cd803"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-design-r2-review.md",
+      "bytes": 5360,
+      "sha256": "19eb8c1c197604edcefbb977e35127a6be9fdef6d0f25b2593d9ff0809d53d1e"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/probe-runtime.py",
+      "bytes": 10310,
+      "sha256": "57d79748edba8100576eaf79f1090fecb6c2e227563d7522dadf22eead0afd13"
+    }
+  ],
+  "tools": {
+    "python": "3.12.7; AST grammar target 3.11",
+    "ruff": "0.15.15",
+    "context_loader_fallback": "python3 resolved to the Windows Store alias; the existing G:/anaconda3/python.exe loaded Trellis package metadata. No installation."
+  },
+  "checks": [
+    {
+      "name": "ast_py311_and_in_memory_compile",
+      "command": "& 'G:/anaconda3/python.exe' -I -B -c 'import ast,pathlib,sys; p=pathlib.Path(\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/inspect-image.py\"); source=p.read_bytes(); tree=ast.parse(source,filename=str(p),feature_version=(3,11)); compile(tree,str(p),\"exec\"); print(\"Python \"+sys.version.split()[0]); print(\"Python 3.11 AST and in-memory compile passed; target not executed; no pycache\")'",
+      "chunk_id": "ea9e3f",
+      "wall_time_seconds": 0.5861322,
+      "exit_code": 0,
+      "original_token_count": 24,
+      "output": "Python 3.12.7\r\nPython 3.11 AST and in-memory compile passed; target not executed; no pycache\r\n"
+    },
+    {
+      "name": "ruff_check",
+      "command": "& 'G:/Roaming/Python/Python312/Scripts/ruff.exe' check --isolated --no-cache --select E,F,I --line-length 100 --target-version py311 '.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/inspect-image.py'",
+      "chunk_id": "68f15f",
+      "wall_time_seconds": 0.5394445,
+      "exit_code": 0,
+      "original_token_count": 5,
+      "output": "All checks passed!\n"
+    },
+    {
+      "name": "ruff_format_check",
+      "command": "& 'G:/Roaming/Python/Python312/Scripts/ruff.exe' format --isolated --no-cache --check --line-length 100 --target-version py311 '.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/inspect-image.py'",
+      "chunk_id": "ccb95a",
+      "wall_time_seconds": 0.5021966,
+      "exit_code": 0,
+      "original_token_count": 7,
+      "output": "1 file already formatted\n"
+    }
+  ],
+  "initial_static_failure": {
+    "name": "ruff_check",
+    "command": "& 'G:/Roaming/Python/Python312/Scripts/ruff.exe' check --isolated --no-cache --select E,F,I --line-length 100 --target-version py311 '.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/inspect-image.py'",
+    "chunk_id": "2baabe",
+    "wall_time_seconds": 0.4182003,
+    "exit_code": 1,
+    "original_token_count": 408,
+    "output": "E501 Line too long (101 > 100)\n   --> .trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-native-api\\inspect-image.py:288:101\n    |\n286 |         \"ambient_temp_directory_evaluated\": False,\n287 |         \"encoding_load_executed\": False,\n288 |         \"interpretation\": \"Pin a verified directory explicitly; default tempfile lookup is not run.\",\n    |                                                                                                     ^\n289 |     }\n    |\n\nE501 Line too long (103 > 100)\n   --> .trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-native-api\\inspect-image.py:384:101\n    |\n382 |     result[\"database_prerequisite\"] = {\n383 |         \"bundled_pg0\": pg0,\n384 |         \"raw_tools_and_extensions\": \"Extraction-only in prior base inventory; not opened or run here.\",\n    |                                                                                                     ^^^\n385 |         \"boundary\": \"Prior DB evidence is separate; final API image must verify its consumed PG assets.\",\n386 |     }\n    |\n\nE501 Line too long (105 > 100)\n   --> .trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-native-api\\inspect-image.py:385:101\n    |\n383 |         \"bundled_pg0\": pg0,\n384 |         \"raw_tools_and_extensions\": \"Extraction-only in prior base inventory; not opened or run here.\",\n385 |         \"boundary\": \"Prior DB evidence is separate; final API image must verify its consumed PG assets.\",\n    |                                                                                                     ^^^^^\n386 |     }\n387 |     require(\n    |\n\nFound 3 errors.\n"
+  },
+  "corrections": [
+    "Shortened three report strings after E501; the first diagnostics are retained.",
+    "Static readback made PathFinder resolve each basename within explicit parent search roots so namespace resolution does not require importing dotted parents.",
+    "Cache AST bindings are read only from the named installed reader/hash/BPE functions; target modules and encoders are never executed."
+  ],
+  "readback": {
+    "readme_links_valid": true,
+    "fixture_directory_entries": [
+      "inspect-image.py",
+      "README.md"
+    ],
+    "target_executed": false,
+    "pycache_created_by_target": false
+  },
+  "boundaries": {
+    "docker_wsl_app_build_install_execution": false,
+    "sql_api_provider_or_network_calls": false,
+    "production_shared_host_consumer_or_task_metadata_edits": false,
+    "original_data_or_keys_read": false,
+    "cached_image_inventory_executed": false,
+    "producer_ready": false
+  },
+  "next_gate": "Independent exact-byte review, then Root freezes fresh token/name/stage and executes only after DB acceptance. Final producer image and API lifecycle still require separate evidence.",
+  "ownership_released": [
+    ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/inspect-image.py",
+    ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/README.md",
+    ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-image-prerequisite-self-check.md",
+    ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-image-prerequisite-self-check.json"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "sourceArchive": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\c2a-database-persistence-first-attempt-evidence.zip",
+  "archiveSha256": "049a9a614ddf2f109698afbd73296ee28c0e4a780361514223fe26f1732bfcd9",
+  "member": "base-probe.json",
+  "memberSha256": "819eca37907fa96577bcafca977d41304c16e1a14a782205b8170f874d944d5a",
+  "sourceManifestSha256": "f27379be3b4b5e61e1b2821c2eda2d87bf54e5c2983b034bdb637ee789961ae2",
+  "acceptedProbeEntries": [],
+  "reason": "Same live verified immutable base and engine; accepted source hashes unchanged. Probe reused without execution.",
+  "runnerOriginalSha256": "ce85bcd8f7159e557a8d1a1bcca43fd0266f64c0500b9733f8a2317123cbd9e6",
+  "runnerTokenReboundSha256": "ce12b29dd098ebf88ea10345313e0eab1c241dba34808151f60cb55f215ef129"
+}

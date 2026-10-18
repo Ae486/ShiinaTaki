@@ -1,0 +1,36 @@
+{
+  "recordedAtUtc": "2026-10-08 11:54:19 UTC",
+  "status": "released_source_readback_verified_independent_review_pending",
+  "scope": "Native and original label implementation release before independent review fixes",
+  "sourceManifest": {
+    "file": "b2-native-source-final-01.json",
+    "sha256": "243a445a7fcabb34b7885c676fb9d0d108b9bf5e1d7925481872cdb3ac8d5bc0"
+  },
+  "generatedManifest": {
+    "file": "b2-generated-tested.json",
+    "sha256": "26baa58d4473de73a099b5e071fd5b94b5f41ea8e73b1110048a73425751975a"
+  },
+  "labelManifest": "b2-label-source.json",
+  "verified": {
+    "native": 235,
+    "coreDependencies": 5,
+    "lifecycleSpec": 1,
+    "label": 7,
+    "generatedAndMaintained": 912
+  },
+  "mismatches": [],
+  "rustLogicalAlias": {
+    "key": "rust-build/hindsight_client_generated.rs",
+    "resolver": "pin-b2-generated.py:58-62",
+    "actualPath": "H:/hindsight/hindsight-clients/rust/target/release/build/hindsight-client-bdb67ae8d29b8761/out/hindsight_client_generated.rs",
+    "bytes": 2752305,
+    "sha256": "ac2ab283055129f43e8685024ea7749c312b14e81cc487597c80f7882a711c0e",
+    "note": "Initial direct repo-root path lookup was inapplicable to this logical alias. The sole actual release-build output matches its recorded bytes and hash."
+  },
+  "notes": [
+    "Counts describe separate inventories and include overlaps; do not add them.",
+    "This is handoff source verification, not an independent review or whole-B2 acceptance.",
+    "Independent Native/label review now owns those files and may produce a superseding reviewed baseline.",
+    "Core lifecycle and the newly released operator test remain separate and are still under implementation/check."
+  ]
+}

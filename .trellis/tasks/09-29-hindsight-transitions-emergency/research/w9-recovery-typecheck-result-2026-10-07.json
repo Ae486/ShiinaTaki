@@ -1,0 +1,6 @@
+{
+  "startedAt": "2026-10-07T10:22:39.3090552Z",
+  "command": "pnpm -r typecheck",
+  "finishedAt": "2026-10-07T10:23:47.1317131Z",
+  "exitCode": 0
+}

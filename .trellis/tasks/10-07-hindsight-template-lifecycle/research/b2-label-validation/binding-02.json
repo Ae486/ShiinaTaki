@@ -1,0 +1,6 @@
+{
+  "startedAt": "2026-10-08T09:13:00.6038331+00:00",
+  "endedAt": "2026-10-08T09:13:12.5689862+00:00",
+  "exitCode": 0,
+  "command": "pnpm --filter @taki/core exec vitest run src/memory/hindsight/hindsight-template-binding.test.ts --maxWorkers 2"
+}

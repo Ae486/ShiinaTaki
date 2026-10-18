@@ -1,0 +1,26 @@
+{
+  "command": [
+    "C:/Users/55473/.cargo/bin/cargo.exe",
+    "clippy",
+    "--manifest-path",
+    "apps/desktop/src-tauri/Cargo.toml",
+    "--locked",
+    "--offline",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "startedAt": "2026-10-13T06:30:03.763238+00:00",
+  "finishedAt": "2026-10-13T06:32:18.058050+00:00",
+  "exitCode": 0,
+  "durationSeconds": 134.297,
+  "inputCount": 2417,
+  "changedInputs": [],
+  "inputManifest": "b3-whole-rust-clippy-01-inputs.json",
+  "afterManifest": "b3-whole-rust-clippy-01-inputs-after.json",
+  "log": "b3-whole-rust-clippy-01.log",
+  "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-whole-checks\\rust-clippy-01-f51e0689457e4ed08e20bea8e148d457",
+  "temporaryRootRemoved": true,
+  "remainingFixtureEntries": []
+}

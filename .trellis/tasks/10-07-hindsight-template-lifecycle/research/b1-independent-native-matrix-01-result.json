@@ -1,0 +1,29 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/python.exe",
+    ".trellis/tasks/09-07-hindsight-recovery-evidence/research/validation/run_isolated_hindsight.py",
+    "--",
+    "tests/native_results/test_template_wire.py",
+    "tests/native_results/test_template_lifecycle.py",
+    "tests/native_results/test_template_deletion.py",
+    "tests/native_results/test_template_publication.py",
+    "tests/native_results/test_template_independent_wire.py",
+    "tests/native_results/test_template_provider_guard.py",
+    "tests/native_results/test_template_independent_refresh.py",
+    "tests/native_results/test_template_independent_routes.py",
+    "tests/native_results/test_template_independent_backup.py",
+    "tests/native_results/test_transition_initialization.py",
+    "tests/native_results/test_transition_backup.py",
+    "tests/native_results/test_configuration_observation_compatibility.py",
+    "tests/test_llm_per_op_concurrency.py",
+    "tests/test_mental_model_trigger_tag_groups.py",
+    "tests/test_response_schema_validation.py",
+    "tests/test_taki_extension_contract.py",
+    "-q",
+    "--tb=short"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 4,
+  "durationSeconds": 24.112,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b1-independent-native-matrix-01.log"
+}

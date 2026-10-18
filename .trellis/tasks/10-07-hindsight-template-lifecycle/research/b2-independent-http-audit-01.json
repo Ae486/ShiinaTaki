@@ -1,0 +1,70 @@
+{
+  "kind": "Independent read-only retained HTTP exchange audit",
+  "exitCode": 0,
+  "artifactId": "4d674d27fd5f4b0e8353a553c56e693f",
+  "suiteResult": "b2-independent-native-labels-green-02-result.json",
+  "exchangeFile": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-native-http-4d674d27fd5f4b0e8353a553c56e693f-exchanges.jsonl",
+  "exchangeSha256": "d4adccac3adcd0ffe183c6281ec98e21d038f2dab3bf74661d09687b50adac0b",
+  "nodeLogSha256": "aa8295622a229012bfa42a3f6da4cc51a1438a34c3ca97f8b0976117e59bb94d",
+  "records": 200,
+  "httpStatuses": {
+    "200": 196,
+    "201": 4
+  },
+  "requestOrdinalsUniqueAndComplete": true,
+  "rowOrder": "HTTP completion order",
+  "allRecordedBodyHashesVerified": true,
+  "authorizationHeadersRecorded": false,
+  "exactRequestTargetAndVersionMatches": true,
+  "labelEvidenceReads": 7,
+  "exactConsolidatedProofs": [
+    {
+      "unit_id": "57166980-954f-4aa1-9f6a-c865c7cd7b7f",
+      "unit_revision": 2,
+      "unit_payload_hash": "3c134231f7081d70d68a71ed0d880216a45c3970fec084c0cffe4f927917a9fb",
+      "contract_version": "1.0.0",
+      "target": {
+        "provider_lineage": "8a00ff75-b331-437e-9d6d-6c2344491221",
+        "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+        "bank_generation": "d7fe8c37-9fa7-4630-a122-c919cfe8c1cb"
+      },
+      "group_key": "taki-layer",
+      "group_definition_hash": "67521ba7afdc5fb036932eaf5bc2363efa85501c9c80a523c1cd50445144287a",
+      "value": "activity",
+      "scope": "global",
+      "producer": "taki-structured-label-v1"
+    },
+    {
+      "unit_id": "62c05282-5926-4867-80df-254888a22c61",
+      "unit_revision": 2,
+      "unit_payload_hash": "633165cadd7ef6caa32f5251e60b254ef471062746deffc22c2dafb211249669",
+      "contract_version": "1.0.0",
+      "target": {
+        "provider_lineage": "8a00ff75-b331-437e-9d6d-6c2344491221",
+        "bank_id": "taki-hs-v1-c-67dc417bc0b371796d762d35c8dc6757",
+        "bank_generation": "9c9add75-83c1-402b-849d-624daaabb937"
+      },
+      "group_key": "taki-layer",
+      "group_definition_hash": "ee3e23b317d3c62a8a6fba6a95204f153a2b6d4942f7bc1dc2b8ea9b1e203676",
+      "value": "episodes",
+      "scope": "character",
+      "producer": "taki-structured-label-v1"
+    }
+  ],
+  "emptyEvidenceResponses": 5,
+  "applicationCommits": 11,
+  "nodeSummary": {
+    "banks": 2,
+    "units": 7,
+    "registryPolicies": 2,
+    "neutralPolicies": 5,
+    "consolidatedProvenUnits": 2,
+    "requests": 200,
+    "labelEvidenceReads": 7,
+    "applicationCommits": 11,
+    "reopenVerified": true,
+    "remoteIoOutsideSqlite": true,
+    "exchangeFile": "G:\\Temp\\pytest-of-unknown\\pytest-62\\test_real_native_labels_reach_0\\http-exchanges.jsonl",
+    "exchangeSha256": "d4adccac3adcd0ffe183c6281ec98e21d038f2dab3bf74661d09687b50adac0b"
+  }
+}

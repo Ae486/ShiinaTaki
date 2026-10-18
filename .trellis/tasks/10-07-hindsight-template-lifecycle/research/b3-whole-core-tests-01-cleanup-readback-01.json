@@ -1,0 +1,17 @@
+{
+  "checkedAtUtc": "2026-10-13T06:01:19.3594824+00:00",
+  "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-whole-checks\\core-tests-01-78638aea306d4d6e8634637615cb8262",
+  "ownershipEvidence": "b3-whole-core-tests-01-result.json",
+  "evidenceSha256": "1c2ec01fda1ca5505463dad857ce091f256f5281f14eb4f3cdcfe0ccdf2c8080",
+  "verifiedWithinOwnedParent": true,
+  "associatedProcesses": [],
+  "removedEntries": [
+    "node-compile-cache",
+    "taki-boot-362tUb",
+    "taki-w3-MpbyUi",
+    "w3-source-upload-k4QNL4"
+  ],
+  "temporaryRootRemoved": true,
+  "originalFailureEvidenceUnchanged": true,
+  "currentHealthyFixtureUntouched": true
+}

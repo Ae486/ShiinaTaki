@@ -1,0 +1,117 @@
+{
+  "checkedAt": "2026-10-07T10:58:05.9566348Z",
+  "head": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a",
+  "checks": [
+    {
+      "manifest": "w9-source-identities-2026-10-07.json",
+      "entries": 11,
+      "mismatches": []
+    },
+    {
+      "manifest": "w9-pre-core-source-identities-2026-10-07.json",
+      "entries": 10,
+      "mismatches": []
+    },
+    {
+      "manifest": "w9-evidence-identities-2026-10-07.json",
+      "entries": 27,
+      "mismatches": []
+    }
+  ],
+  "finalSourceIdentities": [
+    {
+      "path": ".trellis/spec/backend/memory-transition-publication.md",
+      "sha256": "2BFFA64A6C0D93AAAEE3DFA8D0A2A89BB05D8F0BB3534CEA703F6FD2D0C11C8D",
+      "bytes": 16098
+    },
+    {
+      "path": "packages/core/src/db/index.md",
+      "sha256": "73A59E78ACA908DBAB47ABFFCD21009B984C90EB191638328C8B577A2895B420",
+      "bytes": 21877
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-publication-repo.ts",
+      "sha256": "BF032AB13BAB8F86E5111BCE8ECEC2BFF699BEC9F07E1BCCDF69AD25B1816DBD",
+      "bytes": 9789
+    },
+    {
+      "path": "packages/core/src/memory/transitions/index.md",
+      "sha256": "CD227315654ACAA860337A1912C831B60A9EEA6E79DA1E9E9C6E39B25246129A",
+      "bytes": 7188
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-evidence-context.test.ts",
+      "sha256": "AF93F235A1D97AE4BF24B0943BDA7AC6650C20842A6ED9350848267F725E60DC",
+      "bytes": 8940
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-execution.ts",
+      "sha256": "3235BA06BF4D4D20581448921F6F169A3BB2B17CBB0F22BF551A6A705CDFC60A",
+      "bytes": 18773
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-publication-lease.test.ts",
+      "sha256": "BEEAA28B98688254AC40D97748096C7570C38819691C274BBBF462B852319FBB",
+      "bytes": 10017
+    },
+    {
+      "path": "packages/core/src/testing/index.md",
+      "sha256": "8D1CE4AF1E35FBB611871ACD4092FE6C3AE7EE20092CAB2455DF78730AE8EFC3",
+      "bytes": 6504
+    },
+    {
+      "path": "packages/core/src/testing/memory-transition-cycle-fixtures.ts",
+      "sha256": "503B3D4E76E50B1EDD07C697B65951AB6934813E6B5F8F765FE0A9D08C2F541D",
+      "bytes": 11938
+    },
+    {
+      "path": "packages/core/src/testing/memory-transition-publication-fixtures.ts",
+      "sha256": "FF293DCA369746E5219D84081E7CBCB80F454EDC1C9EF5EC9A94865AEFDD756D",
+      "bytes": 7972
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-emergency-context.test.ts",
+      "sha256": "732FB08EE15764E1154D67C5F08D802E556D9DFDFAE4791C7680520312645462",
+      "bytes": 11225
+    }
+  ],
+  "checkerArtifacts": [
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-independent-check.md",
+      "sha256": "5919FEA89F48892D2D8D8AB951097AE3EC94A6C84D98F47CA8E056592A5728AF",
+      "bytes": 12814
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-independent-identities-before-2026-10-07.json",
+      "sha256": "9E81694977100E4FFAE3F88AB59987F08CCCE19D530D5857ABB2C8C199BCF1B6",
+      "bytes": 532
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-independent-regression-2026-10-07.log",
+      "sha256": "9B1845E43168282C64A65BA72CE678FF539602F4759973E169DA1544E7208A92",
+      "bytes": 4608
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-independent-regression-result-2026-10-07.json",
+      "sha256": "75D0F78FC1858B6D1C05356A4A54B6443E6E191BEA6861C4C127B107AE0FE093",
+      "bytes": 328
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-independent-diff-check-2026-10-07.log",
+      "sha256": "455E3009C67335E394BE3337A2D1BDB4DCB3C5CE5CBC5AE6ABEE6A7C611F6337",
+      "bytes": 1483
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-independent-diff-check-result-2026-10-07.json",
+      "sha256": "538FD6E47C194090F05596CB010B7EF300CB7B6EDC03CE39B1EAC8570DE9E06A",
+      "bytes": 154
+    }
+  ],
+  "encodingOrWhitespaceIssues": [],
+  "checkerSourceChanges": [],
+  "regressionExecSession": 80638,
+  "regressionProcessExitCode": 0,
+  "remainingOwnedProcessSessions": [],
+  "terminatedProcessIds": [],
+  "sourceOwnershipReleased": true
+}

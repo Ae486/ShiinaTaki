@@ -1,0 +1,31 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/ty.exe",
+    "check",
+    "--python",
+    "H:/hindsight/.venv/Scripts/python.exe",
+    "--python-platform",
+    "linux",
+    "hindsight_api/engine/retain/template_label_origin.py",
+    "hindsight_api/engine/template_label_store.py",
+    "hindsight_api/engine/template_label_publication.py",
+    "hindsight_api/engine/template_label_evidence.py",
+    "hindsight_api/api/taki_template_lifecycle.py",
+    "hindsight_api/engine/template_snapshot.py",
+    "hindsight_api/config_resolver.py",
+    "hindsight_api/engine/retain/receipt_context.py",
+    "hindsight_api/engine/retain/types.py",
+    "hindsight_api/engine/retain/fact_extraction.py",
+    "hindsight_api/engine/retain/orchestrator.py",
+    "hindsight_api/engine/replication.py",
+    "hindsight_api/engine/consolidation/consolidator.py",
+    "hindsight_api/engine/transition_snapshot.py",
+    "hindsight_api/engine/transfer/export.py",
+    "hindsight_api/admin/cli.py",
+    "hindsight_api/alembic/versions/e62a3d0b9c54_add_template_label_provenance.py"
+  ],
+  "cwd": "H:/hindsight/hindsight-api-slim",
+  "exitCode": 0,
+  "durationSeconds": 0.65,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-native-label-types-01.log"
+}

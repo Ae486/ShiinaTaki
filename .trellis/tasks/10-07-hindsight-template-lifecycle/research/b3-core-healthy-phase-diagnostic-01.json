@@ -1,0 +1,136 @@
+{
+  "owner": "/root/core_independent",
+  "recordedAt": "2026-10-12T18:06:14.616840+00:00",
+  "status": "prepared-awaiting-root-diagnostic-slot",
+  "cwd": "H:/TakiAgent",
+  "branch": "main",
+  "head": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a",
+  "authorizedScope": "Temporary timing only in transition-template-healthy.test.ts; no assertion, budget, fixture, production or control-flow changes",
+  "beforeImage": {
+    "path": "b3-core-healthy-phase-diagnostic-01-before.txt",
+    "sha256": "6642e91f58ad6b542fe95f84685d25729147cdca266072b646155e67ebb9aa10",
+    "bytes": 7705
+  },
+  "instrumentedImage": {
+    "path": "b3-core-healthy-phase-diagnostic-01-source.txt",
+    "sha256": "c3ec50f5cf768e866b19bf504784dff752438efa42d3403855d36359805480dd",
+    "bytes": 12162
+  },
+  "staticReadback": {
+    "originalAssertionLinesUnchanged": true,
+    "assertionLineCount": 14,
+    "registrationAndBudgetLinesUnchanged": true,
+    "awaitCountUnchanged": 16,
+    "templateMatrixCaseCount": 26,
+    "diagnosticSelectorMatches": [
+      "preserves full template history across RETURN and REENTRY (removed=false)",
+      "refuses 'selection' drift after complete 'transition.return-local' readback (removed=false) with atomic rollback"
+    ]
+  },
+  "identities": [
+    {
+      "path": "packages/core/src/memory/transitions/transition-template-healthy.test.ts",
+      "sha256": "c3ec50f5cf768e866b19bf504784dff752438efa42d3403855d36359805480dd",
+      "bytes": 12162
+    },
+    {
+      "path": "packages/core/src/testing/memory-transition-template-healthy-fixture.ts",
+      "sha256": "c7acd7e2a5e3ff47dbf08116fc4ef19daa14d18da7d4a37fc312435dd32cb7a3",
+      "bytes": 3768
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-capture-sync.test.ts",
+      "sha256": "9a347011a9dca1291006bbc157d805e217caf9f64b97dc250867fcbecf114cbc",
+      "bytes": 11572
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-abort.ts",
+      "sha256": "60e39c67e82f65eea20c578dcccd290c83009cd367b02b70e6127ea70f223329",
+      "bytes": 2924
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-execution.ts",
+      "sha256": "3235ba06bf4d4d20581448921f6f169a3bb2b17cbb0f22bf551a6a705cdfc60a",
+      "bytes": 18773
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-runtime.ts",
+      "sha256": "94a639a4cb6d242ac848422f399f542af623759c87b36570bf393c1454bc7967",
+      "bytes": 9790
+    }
+  ],
+  "wholeCoreFailure": {
+    "result": "b3-whole-core-tests-01-result.json",
+    "log": "b3-whole-core-tests-01.log",
+    "exitCode": 1,
+    "durationSeconds": 3761.61,
+    "inputCount": 2417,
+    "changedInputs": [],
+    "files": {
+      "failed": 6,
+      "passed": 516,
+      "total": 522
+    },
+    "tests": {
+      "failed": 31,
+      "passed": 4077,
+      "skipped": 1,
+      "total": 4109
+    },
+    "healthy": {
+      "cases": 26,
+      "passed": 1,
+      "failed": 25,
+      "durationSeconds": 3464.82,
+      "timeouts": 15,
+      "returnDriftStateAssertions": 10,
+      "expected": "outcome_unknown",
+      "received": "failed",
+      "nominalBudgetSeconds": 2400,
+      "logRanges": [
+        "2331-2357",
+        "2886-2959"
+      ]
+    },
+    "preservedTemporaryRoot": "H:/TakiAgent/.trellis/.runtime/b3-whole-checks/core-tests-01-78638aea306d4d6e8634637615cb8262"
+  },
+  "healthyArgv": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "--filter",
+    "@taki/core",
+    "exec",
+    "vitest",
+    "run",
+    "src/memory/transitions/transition-template-healthy.test.ts",
+    "--maxWorkers=1",
+    "--testNamePattern",
+    "(?:preserves full template history across RETURN and REENTRY \\(removed=false\\)|refuses 'selection' drift after complete 'transition\\.return-local' readback \\(removed=false\\) with atomic rollback)$"
+  ],
+  "d2Argv": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "--filter",
+    "@taki/core",
+    "exec",
+    "vitest",
+    "run",
+    "src/memory/hindsight/hindsight-capture-sync.test.ts",
+    "--maxWorkers=1",
+    "--testNamePattern",
+    "\\(D2\\)$"
+  ],
+  "diagnosticSemantics": {
+    "clock": "Unfaked monotonic performance.now(); Date, h.clock, leases, preview TTL and Native fake remain unchanged",
+    "syncProbes": "Each original proof/publish called exactly once; same arguments/result/throw; in-memory numeric timing marks only",
+    "asyncProbes": "Marks surrounding existing awaits; no extra await/yield/retry",
+    "observations": "Settled operation, attempt, receipt, checked resolution, raw selection row, detached binding metadata, synthetic Native outcomes and counters",
+    "output": "One JSON stderr record after existing close per selected representative; diagnostic-state overhead has separate marks"
+  },
+  "testsRun": false,
+  "lintRun": false,
+  "typecheckRun": false,
+  "productionEdits": [],
+  "fixtureEdits": [],
+  "budgetEdits": [],
+  "permanentFixes": [],
+  "gate": "Stage 5B pending; no 5C, real data/model, Git mutation or finish/archive authorization"
+}

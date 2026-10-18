@@ -1,0 +1,12 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "--filter",
+    "@taki/shared",
+    "typecheck"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "durationSeconds": 6.629,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-shared-types-01.log"
+}

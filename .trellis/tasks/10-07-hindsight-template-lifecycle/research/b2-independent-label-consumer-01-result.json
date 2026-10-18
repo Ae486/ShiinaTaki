@@ -1,0 +1,18 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "--filter",
+    "@taki/core",
+    "exec",
+    "vitest",
+    "run",
+    "src/memory/hindsight/hindsight-template-label-evidence.test.ts",
+    "src/memory/hindsight/hindsight-template-binding.test.ts",
+    "--maxWorkers",
+    "2"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "durationSeconds": 12.699,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-independent-label-consumer-01.log"
+}

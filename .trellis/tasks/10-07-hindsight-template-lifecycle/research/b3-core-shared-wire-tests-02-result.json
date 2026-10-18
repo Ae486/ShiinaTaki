@@ -1,0 +1,16 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "--filter",
+    "@taki/shared",
+    "exec",
+    "vitest",
+    "run",
+    "src/hindsight-template-backup-schema.test.ts",
+    "--maxWorkers=2"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "durationSeconds": 2.391,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-shared-wire-tests-02.log"
+}

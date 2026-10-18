@@ -1,0 +1,15 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/python.exe",
+    "H:/TakiAgent/.trellis/tasks/10-07-hindsight-template-lifecycle/research/run-b3-native-clients.py",
+    "clients-02"
+  ],
+  "cwd": "H:/hindsight",
+  "exitCode": 0,
+  "durationSeconds": 120.032,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-clients-02.log",
+  "sources": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-clients-02-sources.json",
+  "changedInputs": [],
+  "ownedTemp": "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\clients-02-kwlyd75j",
+  "ownedTempRemoved": true
+}

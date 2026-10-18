@@ -1,0 +1,15 @@
+
+> takiagent@0.0.0 typecheck H:\TakiAgent
+> pnpm -r --parallel typecheck
+
+Scope: 5 of 6 workspace projects
+apps/cli typecheck$ tsc --noEmit
+apps/desktop typecheck$ tsc --noEmit
+e2e typecheck$ tsc --noEmit
+packages/core typecheck$ tsc --noEmit
+packages/shared typecheck$ tsc --noEmit
+apps/cli typecheck: Done
+e2e typecheck: Done
+packages/shared typecheck: Done
+apps/desktop typecheck: Done
+packages/core typecheck: Done

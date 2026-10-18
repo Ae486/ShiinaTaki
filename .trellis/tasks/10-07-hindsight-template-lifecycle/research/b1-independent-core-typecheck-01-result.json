@@ -1,0 +1,277 @@
+{
+  "command": "pnpm --filter @taki/core typecheck",
+  "cwd": "H:\\TakiAgent",
+  "startedAtUtc": "2026-10-08T06:00:22.7255392Z",
+  "endedAtUtc": "2026-10-08T06:00:56.2987217Z",
+  "elapsedSeconds": 33.5452939,
+  "exitCode": 0,
+  "log": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b1-independent-core-typecheck-01.log",
+  "sourceBefore": [
+    {
+      "path": "packages/core/src/db/index.md",
+      "sha256": "e19de6b88298cf7237185df74f059718959bceaa10d30ca12515c4855230a41f"
+    },
+    {
+      "path": "packages/core/src/db/migrations/041-canonical-memory-maintenance.test.ts",
+      "sha256": "87f8eb2d7bab246ab9907921e7d916b1dbf06ce26e020eabcba9aaeac83b043b"
+    },
+    {
+      "path": "packages/core/src/db/migrations/053-memory-transition-candidates.test.ts",
+      "sha256": "9024c178b8bd6f67a6849fe1f6c8254578dae071f2d907807023ad026cf888bf"
+    },
+    {
+      "path": "packages/core/src/db/migrations/054-memory-transition-publication.test.ts",
+      "sha256": "795f95de661c0886b757d195daf2024b23d99170e926fdbe010bb3e80d037339"
+    },
+    {
+      "path": "packages/core/src/db/migrations/058-hindsight-template-overlays.test.ts",
+      "sha256": "8d6bab0bb499c3f77a74f1e6805f6efe268069df6b5c9b0efe08018fcb01ecdc"
+    },
+    {
+      "path": "packages/core/src/db/migrations/058-hindsight-template-overlays.ts",
+      "sha256": "17138f0f5e05691360331d8a51adcc99fe17f44a8dc0cbe166b576a93922f249"
+    },
+    {
+      "path": "packages/core/src/db/migrations/index-list.test.ts",
+      "sha256": "732e86904ffe168455f1e59a3e866c9d257ceca8da220598d3d0e9342e4f71b9"
+    },
+    {
+      "path": "packages/core/src/db/migrations/index-list.ts",
+      "sha256": "9e18334b0fd35c44d2a8b362d7ff43ac4a6c0228c85c5b9f89ef5ce1c59f25dc"
+    },
+    {
+      "path": "packages/core/src/db/migrations/index.md",
+      "sha256": "56dd84f5023268b8e709456c93ecabd94feb03eefee6be30cb5e8afde99e6073"
+    },
+    {
+      "path": "packages/core/src/db/migrations/lineage-reopen-matrix.test.ts",
+      "sha256": "667254d552f9420ed61e0cc31308c4702b889ca15d995ebc4d9f65d9462b4803"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/index.md",
+      "sha256": "2f5f4b1bc7721203ba1b305163e798e30cadd78346f3f194bf0f14bfa3787637"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-catalog.ts",
+      "sha256": "2fc8f1822114e3fbd82935657d09ac0efbf5766a8d35dd0da9cb5df71ce4a3dc"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-composition.test.ts",
+      "sha256": "c5714a449d73136766d50d0bfd0e677d7b3cc5f13bbfc34eb2e21605a574133e"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-default-store.ts",
+      "sha256": "ef11aab60c21ba38aab8de164ce2be663b43c8fda16371a0e5a40bc5f0a117ec"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-drift.ts",
+      "sha256": "9f103b4183f63c736ee05c1d6de6565a14a00a7b21d174577335ba4bf764b293"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-enrollment.ts",
+      "sha256": "2c66d2eae131f129f280f6cc7d45174e182cb17e5b00caa69c3f444a66044ee8"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-integrity.test.ts",
+      "sha256": "281dea465aed577b4f620056e1fb7b7e1d54457781c91deb225c13db3e723a5b"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-integrity.ts",
+      "sha256": "5964f3d4a06ce40ec3f9933430c890ed53001a8122e29cb832f50a02664d866a"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-label-composition.ts",
+      "sha256": "1275442272ce66e18cae7b3f733537ae0a055f8b4a5a174a25a8cdaebd7e6f77"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-overlay-history.ts",
+      "sha256": "cb265e12b8bdff98125b785d7fda7ea9c65021970641b45d9b6d7bc62513df52"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-overlay-schema.ts",
+      "sha256": "083f8b195434bd41edb96615f3e3f4ce37ba9e9e5e0aa206b3cd502c26b90792"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-overlay-store.test.ts",
+      "sha256": "d8df8bf50ea69ed109207a38de4a676afa39420065a7af244082bf651047b018"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-overlay-store.ts",
+      "sha256": "8569ddce9cedde55bd79fb85907671f4ad28679a7162662199b992fe987e4928"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-preview.ts",
+      "sha256": "4a578c51e4d7d8e5249abed17cf79a9a8e2242d33d49407c02038a516558e1d0"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-projection.ts",
+      "sha256": "b392eec30c7ad8b2ca09e202a4bfd439eeae22ba22e24dc33a8ab6bad3763525"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-receipt-guards.test.ts",
+      "sha256": "d4c10dc627fa7238d9ee8d27337948fb2ef86d88e6c4634822149661b5d44a87"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-receipt.ts",
+      "sha256": "3d02cb9b44c2e57799abaaa3360ed494a3d5d73a809f1e6025342a0d7cce058a"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-resource-composition.ts",
+      "sha256": "3c1e6ca51a977f7d0b7fa53cfb864b4478913ad388306fa022ae791c2d45b81e"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-store-documents.ts",
+      "sha256": "e287b4254f9a015496597610ab3ba010fe343f4883270c5187a03ee9c5b9c595"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-test-fixtures.ts",
+      "sha256": "68693a7579ec2eebde38628a441077bd1ed3991285dea76702acf0f3293a5464"
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-definition-schema.ts",
+      "sha256": "195a89420535a80fa9ac405c590cda224fd5ca4f5bc3629b4901a4e252473e5a"
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-encoding.ts",
+      "sha256": "f33d349c4d60e1be103274f5a69fdd745fe614d4653d001813de634072a6d2df"
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-schema.ts",
+      "sha256": "832815a91a0c48f8df50007f0b89d79b2ecfc3d4dea28bf905f34e6ff9707611"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "path": "packages/core/src/db/index.md",
+      "sha256": "e19de6b88298cf7237185df74f059718959bceaa10d30ca12515c4855230a41f"
+    },
+    {
+      "path": "packages/core/src/db/migrations/041-canonical-memory-maintenance.test.ts",
+      "sha256": "87f8eb2d7bab246ab9907921e7d916b1dbf06ce26e020eabcba9aaeac83b043b"
+    },
+    {
+      "path": "packages/core/src/db/migrations/053-memory-transition-candidates.test.ts",
+      "sha256": "9024c178b8bd6f67a6849fe1f6c8254578dae071f2d907807023ad026cf888bf"
+    },
+    {
+      "path": "packages/core/src/db/migrations/054-memory-transition-publication.test.ts",
+      "sha256": "795f95de661c0886b757d195daf2024b23d99170e926fdbe010bb3e80d037339"
+    },
+    {
+      "path": "packages/core/src/db/migrations/058-hindsight-template-overlays.test.ts",
+      "sha256": "8d6bab0bb499c3f77a74f1e6805f6efe268069df6b5c9b0efe08018fcb01ecdc"
+    },
+    {
+      "path": "packages/core/src/db/migrations/058-hindsight-template-overlays.ts",
+      "sha256": "17138f0f5e05691360331d8a51adcc99fe17f44a8dc0cbe166b576a93922f249"
+    },
+    {
+      "path": "packages/core/src/db/migrations/index-list.test.ts",
+      "sha256": "732e86904ffe168455f1e59a3e866c9d257ceca8da220598d3d0e9342e4f71b9"
+    },
+    {
+      "path": "packages/core/src/db/migrations/index-list.ts",
+      "sha256": "9e18334b0fd35c44d2a8b362d7ff43ac4a6c0228c85c5b9f89ef5ce1c59f25dc"
+    },
+    {
+      "path": "packages/core/src/db/migrations/index.md",
+      "sha256": "56dd84f5023268b8e709456c93ecabd94feb03eefee6be30cb5e8afde99e6073"
+    },
+    {
+      "path": "packages/core/src/db/migrations/lineage-reopen-matrix.test.ts",
+      "sha256": "667254d552f9420ed61e0cc31308c4702b889ca15d995ebc4d9f65d9462b4803"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/index.md",
+      "sha256": "2f5f4b1bc7721203ba1b305163e798e30cadd78346f3f194bf0f14bfa3787637"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-catalog.ts",
+      "sha256": "2fc8f1822114e3fbd82935657d09ac0efbf5766a8d35dd0da9cb5df71ce4a3dc"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-composition.test.ts",
+      "sha256": "c5714a449d73136766d50d0bfd0e677d7b3cc5f13bbfc34eb2e21605a574133e"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-default-store.ts",
+      "sha256": "ef11aab60c21ba38aab8de164ce2be663b43c8fda16371a0e5a40bc5f0a117ec"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-drift.ts",
+      "sha256": "9f103b4183f63c736ee05c1d6de6565a14a00a7b21d174577335ba4bf764b293"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-enrollment.ts",
+      "sha256": "2c66d2eae131f129f280f6cc7d45174e182cb17e5b00caa69c3f444a66044ee8"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-integrity.test.ts",
+      "sha256": "281dea465aed577b4f620056e1fb7b7e1d54457781c91deb225c13db3e723a5b"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-integrity.ts",
+      "sha256": "5964f3d4a06ce40ec3f9933430c890ed53001a8122e29cb832f50a02664d866a"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-label-composition.ts",
+      "sha256": "1275442272ce66e18cae7b3f733537ae0a055f8b4a5a174a25a8cdaebd7e6f77"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-overlay-history.ts",
+      "sha256": "cb265e12b8bdff98125b785d7fda7ea9c65021970641b45d9b6d7bc62513df52"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-overlay-schema.ts",
+      "sha256": "083f8b195434bd41edb96615f3e3f4ce37ba9e9e5e0aa206b3cd502c26b90792"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-overlay-store.test.ts",
+      "sha256": "d8df8bf50ea69ed109207a38de4a676afa39420065a7af244082bf651047b018"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-overlay-store.ts",
+      "sha256": "8569ddce9cedde55bd79fb85907671f4ad28679a7162662199b992fe987e4928"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-preview.ts",
+      "sha256": "4a578c51e4d7d8e5249abed17cf79a9a8e2242d33d49407c02038a516558e1d0"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-projection.ts",
+      "sha256": "b392eec30c7ad8b2ca09e202a4bfd439eeae22ba22e24dc33a8ab6bad3763525"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-receipt-guards.test.ts",
+      "sha256": "d4c10dc627fa7238d9ee8d27337948fb2ef86d88e6c4634822149661b5d44a87"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-receipt.ts",
+      "sha256": "3d02cb9b44c2e57799abaaa3360ed494a3d5d73a809f1e6025342a0d7cce058a"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-resource-composition.ts",
+      "sha256": "3c1e6ca51a977f7d0b7fa53cfb864b4478913ad388306fa022ae791c2d45b81e"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-store-documents.ts",
+      "sha256": "e287b4254f9a015496597610ab3ba010fe343f4883270c5187a03ee9c5b9c595"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-test-fixtures.ts",
+      "sha256": "68693a7579ec2eebde38628a441077bd1ed3991285dea76702acf0f3293a5464"
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-definition-schema.ts",
+      "sha256": "195a89420535a80fa9ac405c590cda224fd5ca4f5bc3629b4901a4e252473e5a"
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-encoding.ts",
+      "sha256": "f33d349c4d60e1be103274f5a69fdd745fe614d4653d001813de634072a6d2df"
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-schema.ts",
+      "sha256": "832815a91a0c48f8df50007f0b89d79b2ecfc3d4dea28bf905f34e6ff9707611"
+    }
+  ]
+}

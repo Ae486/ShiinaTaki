@@ -1,0 +1,174 @@
+{
+  "schema": "c2b-image-prerequisite-review-v1",
+  "task": ".trellis/tasks/10-14-hindsight-managed-deployment",
+  "date": "2026-10-15",
+  "reviewer": "/root/c2a_database_implement",
+  "status": "PASS",
+  "scope": "Independent static review of the exact cached-base inventory packet and future execution manifest only.",
+  "runtime_acceptance": false,
+  "reviewed_inputs": [
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-plan.md",
+      "bytes": 41862,
+      "sha256": "0e4bdf03c903d6bbdca4d0bbfc187de14bb6c9fd8119b816bbfa7e69db0cd803"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-design-r2-review.md",
+      "bytes": 5360,
+      "sha256": "19eb8c1c197604edcefbb977e35127a6be9fdef6d0f25b2593d9ff0809d53d1e"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/inspect-image.py",
+      "bytes": 16369,
+      "sha256": "f7e962da88188e1afb6bbcba9acb1101839f75d38296c603d776da25f44e1ae7"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/README.md",
+      "bytes": 7351,
+      "sha256": "e01f6f96c485817ddbb05c1d9d7129082fb36dc0dec3314f6dea8a45ed8f3dd2"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-image-prerequisite-self-check.md",
+      "bytes": 3106,
+      "sha256": "c9ad6770e9ace32c3547a916be8017806bf965e9b47195c4fe415d8da266440c"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-image-prerequisite-self-check.json",
+      "bytes": 7257,
+      "sha256": "b44ba84d7c41c747933bb1cbf716f8eed6e07d3cb6f7a5ebaf2ca519635b2b5f"
+    }
+  ],
+  "context": {
+    "complete_plan_read": true,
+    "plan_lines": 484,
+    "design_r2_review_read": true,
+    "native_producer_readiness_read": true,
+    "leader_handoff_read": true,
+    "skill": "C:/Users/55473/.codex/skills/code-review-excellence/SKILL.md",
+    "current_task": "Legacy pointer is empty; Root supplied the exact task path."
+  },
+  "blocking_findings": [],
+  "required_modifications": [],
+  "contract_checks": [
+    {
+      "name": "fixed_read_only_inventory",
+      "status": "PASS",
+      "evidence": [
+        "inspect-image.py:20-73",
+        "inspect-image.py:102-192",
+        "inspect-image.py:344-405"
+      ],
+      "detail": "Fixed package/module/cache/pg0 paths, bounded regular-file reads and source AST inspection; no target loader, encoder, subprocess, network or file-write call."
+    },
+    {
+      "name": "effective_interpreter_and_source_locations",
+      "status": "PASS",
+      "evidence": [
+        "inspect-image.py:165-192",
+        "inspect-image.py:344-375"
+      ],
+      "detail": "Requires Linux UID/GID 1000, exact Python 3.11 venv, isolated/no-bytecode stdin entry, purelib and bounded search roots. Records resolved file locations and hashes without claiming an import test."
+    },
+    {
+      "name": "offline_tokenizer_inventory",
+      "status": "PASS",
+      "evidence": [
+        "inspect-image.py:195-291"
+      ],
+      "detail": "Reads named reader/hash/BPE function AST, literal cl100k_base URL/hash and four exact SHA1-named candidates; hashes readable files as UID 1000. No cache directory walk, tempfile discovery, encoder load or download."
+    },
+    {
+      "name": "unresolved_and_safe_output",
+      "status": "PASS",
+      "evidence": [
+        "inspect-image.py:142-162",
+        "inspect-image.py:180-191",
+        "inspect-image.py:272-275",
+        "inspect-image.py:314-341",
+        "inspect-image.py:380-436"
+      ],
+      "detail": "Missing/unreadable modules or metadata, unconfirmed build/reader/cache/CLI and bounded failures remain unresolved with exit 2. Exceptions expose class names or fixed codes; deploymentReady stays false."
+    },
+    {
+      "name": "isolated_runtime_manifest",
+      "status": "PASS",
+      "evidence": [
+        "README.md:23-67",
+        "README.md:69-84"
+      ],
+      "detail": "Pins client hash/engine/base and requires fresh owned token/name/stage. Explicit no-pull network-none read-only UID 1000 stdin process, no TTY flag or mounts/ports, resource caps, prestart inspect and bounded capture/deadlines."
+    },
+    {
+      "name": "owned_cleanup",
+      "status": "PASS",
+      "evidence": [
+        "README.md:86-101"
+      ],
+      "detail": "Reinspect exact ID or original name after lost create reply against ownership/image/settings; stop only verified probe, require stopped before non-force removal, prove absence, archive then remove exact marked staging. Ambiguity preserves resources; no shared daemon/prune/base removal."
+    },
+    {
+      "name": "producer_gate_boundary",
+      "status": "PASS",
+      "evidence": [
+        "c2b-plan.md:81-106",
+        "README.md:80-84",
+        "README.md:103-106",
+        "inspect-image.py:384-388"
+      ],
+      "detail": "Inventory is cached-base static evidence only. Final consumed PG assets, explicit immutable cache pin, same-file offline encoder load and actual API/PG producer remain separate gates before trusted lookup/setup."
+    }
+  ],
+  "checks": [
+    {
+      "name": "python_311_ast_and_in_memory_compile",
+      "command": "& 'G:/anaconda3/python.exe' -I -B -c '<ast.parse(feature_version=(3,11)); compile AST in memory; enumerate imports without executing target>'",
+      "chunk_id": "0094d4",
+      "wall_time_seconds": 0.4836126,
+      "exit_code": 0,
+      "original_token_count": 55,
+      "output": "Python 3.12.7\r\nPython 3.11 AST and in-memory compile passed; target not executed; no pycache\r\nImports: ast, hashlib, importlib.machinery, importlib.metadata, json, os, pathlib, re, signal, stat, sys, sysconfig, time\r\n"
+    },
+    {
+      "name": "ruff_E_F_I",
+      "command": "& 'G:/Roaming/Python/Python312/Scripts/ruff.exe' check --isolated --no-cache --select E,F,I --line-length 100 --target-version py311 '.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/inspect-image.py'",
+      "chunk_id": "09ad5e",
+      "wall_time_seconds": 0.3951236,
+      "exit_code": 0,
+      "original_token_count": 5,
+      "output": "All checks passed!\n"
+    },
+    {
+      "name": "ruff_format_check",
+      "command": "& 'G:/Roaming/Python/Python312/Scripts/ruff.exe' format --isolated --no-cache --check --line-length 100 --target-version py311 '.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/inspect-image.py'",
+      "chunk_id": "5d9d79",
+      "wall_time_seconds": 0.4189434,
+      "exit_code": 0,
+      "original_token_count": 7,
+      "output": "1 file already formatted\n"
+    },
+    {
+      "name": "input_hashes_encoding_links_and_scope_readback",
+      "tool": "G:/anaconda3/python.exe -I -B -; stdlib read-only verification",
+      "chunk_id": "f9c5d2",
+      "wall_time_seconds": 1.0676088,
+      "exit_code": 0,
+      "original_token_count": 697,
+      "output": "{\r\n  \"status\": \"passed\",\r\n  \"self_check_pins_verified\": [\r\n    {\r\n      \"path\": \".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/inspect-image.py\",\r\n      \"bytes\": 16369,\r\n      \"sha256\": \"f7e962da88188e1afb6bbcba9acb1101839f75d38296c603d776da25f44e1ae7\"\r\n    },\r\n    {\r\n      \"path\": \".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/README.md\",\r\n      \"bytes\": 7351,\r\n      \"sha256\": \"e01f6f96c485817ddbb05c1d9d7129082fb36dc0dec3314f6dea8a45ed8f3dd2\"\r\n    },\r\n    {\r\n      \"path\": \".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-plan.md\",\r\n      \"bytes\": 41862,\r\n      \"sha256\": \"0e4bdf03c903d6bbdca4d0bbfc187de14bb6c9fd8119b816bbfa7e69db0cd803\"\r\n    },\r\n    {\r\n      \"path\": \".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-design-r2-review.md\",\r\n      \"bytes\": 5360,\r\n      \"sha256\": \"19eb8c1c197604edcefbb977e35127a6be9fdef6d0f25b2593d9ff0809d53d1e\"\r\n    },\r\n    {\r\n      \"path\": \".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/probe-runtime.py\",\r\n      \"bytes\": 10310,\r\n      \"sha256\": \"57d79748edba8100576eaf79f1090fecb6c2e227563d7522dadf22eead0afd13\"\r\n    }\r\n  ],\r\n  \"reviewed_inputs\": [\r\n    {\r\n      \"path\": \".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-plan.md\",\r\n      \"bytes\": 41862,\r\n      \"sha256\": \"0e4bdf03c903d6bbdca4d0bbfc187de14bb6c9fd8119b816bbfa7e69db0cd803\"\r\n    },\r\n    {\r\n      \"path\": \".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-design-r2-review.md\",\r\n      \"bytes\": 5360,\r\n      \"sha256\": \"19eb8c1c197604edcefbb977e35127a6be9fdef6d0f25b2593d9ff0809d53d1e\"\r\n    },\r\n    {\r\n      \"path\": \".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/inspect-image.py\",\r\n      \"bytes\": 16369,\r\n      \"sha256\": \"f7e962da88188e1afb6bbcba9acb1101839f75d38296c603d776da25f44e1ae7\"\r\n    },\r\n    {\r\n      \"path\": \".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/README.md\",\r\n      \"bytes\": 7351,\r\n      \"sha256\": \"e01f6f96c485817ddbb05c1d9d7129082fb36dc0dec3314f6dea8a45ed8f3dd2\"\r\n    },\r\n    {\r\n      \"path\": \".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-image-prerequisite-self-check.md\",\r\n      \"bytes\": 3106,\r\n      \"sha256\": \"c9ad6770e9ace32c3547a916be8017806bf965e9b47195c4fe415d8da266440c\"\r\n    },\r\n    {\r\n      \"path\": \".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-image-prerequisite-self-check.json\",\r\n      \"bytes\": 7257,\r\n      \"sha256\": \"b44ba84d7c41c747933bb1cbf716f8eed6e07d3cb6f7a5ebaf2ca519635b2b5f\"\r\n    }\r\n  ],\r\n  \"fixture_directory_entries\": [\r\n    \"README.md\",\r\n    \"inspect-image.py\"\r\n  ],\r\n  \"readme_links_valid\": true,\r\n  \"packages\": 9,\r\n  \"modules\": 23,\r\n  \"source_modules\": 5,\r\n  \"target_executed\": false\r\n}\r\n"
+    }
+  ],
+  "runtime_limitations": [
+    "No Docker/WSL/image inventory, API/SQL/provider, model/encoder, build or dependency operation was run by this reviewer.",
+    "Actual cached-image files, package import behavior and cache availability remain unknown until Root runs this exact packet.",
+    "AST assignments/call sites and module hashes are static observations, not proofs that the future encoder or API has executed those branches.",
+    "A verified candidate is not a final cache pin: future mounts, changed HOME and tmpfs must not hide or change the checked bytes.",
+    "The pg0 CLI hash neither inspects raw PostgreSQL binaries/libraries/extensions nor replaces final-image or API lifecycle evidence.",
+    "The command manifest relies on Root's bounded argv runner and fresh frozen identities; this review does not attest a runtime invocation or cleanup result.",
+    "The separate database R2 runtime review and manual task acceptance were not performed here."
+  ],
+  "author_files_modified": false,
+  "reviewer_writes": [
+    ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-image-prerequisite-review.md",
+    ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-image-prerequisite-review.json"
+  ],
+  "release": "No source correction required. After separate DB acceptance, Root may freeze fresh identities and execute only the reviewed inventory packet under the existing authorization. Any unresolved or incomplete result blocks the next gate."
+}

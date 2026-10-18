@@ -1,0 +1,76 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ ❯ src/server/methods/hindsight-template-methods.test.ts (15 tests | 2 failed) 5014ms
+     × shares retained 'outcome_unknown' across reconnect and only resumes from explicit same-plan recovery 661ms
+     × shares retained 'partial' across reconnect and only resumes from explicit same-plan recovery 473ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/server/methods/hindsight-template-methods.test.ts > template lifecycle over actual operator WebSockets > shares retained 'outcome_unknown' across reconnect and only resumes from explicit same-plan recovery
+AssertionError: expected { …(12) } to match object { state: 'outcome_unknown', …(1) }
+(21 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "result": {
+-     "appliedBanks": 0,
++     "appliedBanks": 1,
+      "kind": "template",
+-     "outcome": "outcome_unknown",
++     "outcome": "partial",
+      "totalBanks": 2,
+    },
+    "state": "outcome_unknown",
+  }
+
+ ❯ src/server/methods/hindsight-template-methods.test.ts:193:24
+    191|       const retained = MemoryOperationStatusResultSchema.parse(result(…
+    192|         { operationId: original.operationId }))).operation;
+    193|       expect(retained).toMatchObject({ state: "outcome_unknown", resul…
+       |                        ^
+    194|       const held = MemoryTemplateStatusSchema.parse(result(await call(…
+    195|       expect(held).toMatchObject({ holdPlanId: plan.planId, plan: { pl…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/server/methods/hindsight-template-methods.test.ts > template lifecycle over actual operator WebSockets > shares retained 'partial' across reconnect and only resumes from explicit same-plan recovery
+AssertionError: expected { …(12) } to match object { state: 'outcome_unknown', …(1) }
+(21 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "result": {
+-     "appliedBanks": 1,
++     "appliedBanks": 0,
+      "kind": "template",
+-     "outcome": "partial",
++     "outcome": "outcome_unknown",
+      "totalBanks": 2,
+    },
+    "state": "outcome_unknown",
+  }
+
+ ❯ src/server/methods/hindsight-template-methods.test.ts:193:24
+    191|       const retained = MemoryOperationStatusResultSchema.parse(result(…
+    192|         { operationId: original.operationId }))).operation;
+    193|       expect(retained).toMatchObject({ state: "outcome_unknown", resul…
+       |                        ^
+    194|       const held = MemoryTemplateStatusSchema.parse(result(await call(…
+    195|       expect(held).toMatchObject({ holdPlanId: plan.planId, plan: { pl…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  2 failed | 28 passed (30)
+   Start at  19:27:24
+   Duration  22.13s (transform 10.88s, setup 0ms, import 17.88s, tests 20.12s, environment 1ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/hindsight/template-lifecycle/template-rollout.test.ts src/memory/hindsight/template-lifecycle/template-runtime-control.test.ts src/memory/hindsight/template-lifecycle/template-emergency.test.ts src/server/methods/hindsight-template-methods.test.ts --maxWorkers 2

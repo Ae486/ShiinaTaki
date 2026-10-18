@@ -1,0 +1,90 @@
+Owned fixture: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-f4abc29ffa79
+PostgreSQL: 18.1 ; vector/pg_trgm ready
+Pytest log: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-f4abc29ffa79\pytest.log
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade b2d4f6a8c1e3 -> c9a1b2d3e4f5, Add invalidated_memory_units table for curation (edit/invalidate).
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade c9a1b2d3e4f5 -> c3e5a7b9d1f4, Repair: widen ``*_history.bank_id`` from VARCHAR(64) to TEXT on PostgreSQL.
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade c3e5a7b9d1f4 -> a1d3f5b7c9e2, Repair: widen the remaining live ``bank_id`` columns from VARCHAR(64) to TEXT on PostgreSQL.
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade a1d3f5b7c9e2 -> 2071c7518f88, Add a composite index on memory_links(bank_id, link_type) (PostgreSQL).
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade a1d3f5b7c9e2 -> d4f6a8c2e1b3, Drop the embedding column from the curation archive (invalidated_memory_units).
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade d4f6a8c2e1b3, 2071c7518f88 -> e1f2a3b4c5d6, Merge two divergent migration heads.
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade e1f2a3b4c5d6 -> c7e9f1a3b5d2, Make maintenance routines resilient to schemas that vanish mid-scan.
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade c7e9f1a3b5d2 -> f4d1c2b3a5e6, Add server-side routine for cron-scheduled mental model refresh.
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade f4d1c2b3a5e6 -> c3f7a1b9d2e4, Backfill search_vector for native-backend observations.
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade c3f7a1b9d2e4 -> b57a7c9e0d13, Add bank_stats_cache table for distributed get_bank_stats caching
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade b57a7c9e0d13 -> e7c3a9f1b2d5, Drop the search_vector column from the curation archive (invalidated_memory_units).
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade e7c3a9f1b2d5 -> a8c1e4f7b0d3, Add indexes for terminal cleanup and newest-first operation listing.
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade a8c1e4f7b0d3 -> b6d2f8a4c1e7, Install the maintenance discovery routines into the configured schema.
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade b6d2f8a4c1e7 -> d7b2f8a1c934, Add the ``schemas_with_expired_operations`` cross-tenant discovery routine.
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade d7b2f8a1c934 -> c7d1e9a4b3f2, Add ``causal_links`` to the curation archive (invalidated_memory_units).
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade c7d1e9a4b3f2 -> a1c9e7f3b2d8, Drop observation_history's FK to memory_units.
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade a1c9e7f3b2d8 -> a9b8c7d6e5f4, Add knowledge_pages table (knowledge-base hierarchy).
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade a9b8c7d6e5f4 -> e4a7c1b9d2f6, Drop the never-written `access_count` column from memory_units (and its archive).
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade e4a7c1b9d2f6 -> f2a6d8c4b1e9, Repair: drop the stale global memory_units vector index on per-bank backends.
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade f2a6d8c4b1e9 -> b3e8d1c6f4a9, Add entities.entity_kind and exclude label entities from the trigram index.
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade b3e8d1c6f4a9 -> c4a7e2d9b1f6, Add logical revisions to live and invalidated memory units.
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade c4a7e2d9b1f6 -> d5b8f1c3a7e2, Add idempotency receipts for conditional memory mutations.
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade d5b8f1c3a7e2 -> e6c9a4f2b8d1, Add PostgreSQL lineage and logical replication journal primitives.
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade e6c9a4f2b8d1 -> f7d0a5c3e9b2, Add PostgreSQL materialized logical snapshot metadata and pages.
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade f7d0a5c3e9b2 -> a8e1b6d4f0c3, Persist factual native results and exact retain-part publication evidence.
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade a8e1b6d4f0c3 -> d78a1c4e6f90, Persist atomic current-state import requests and immutable mappings.
+2026-10-07 21:13:50 - INFO - alembic.runtime.migration - Running upgrade d78a1c4e6f90 -> d78b2d5e7a01, Persist first-activation candidates, native outcomes, and immutable evidence.
+2026-10-07 21:13:51 - INFO - alembic.runtime.migration - Running upgrade d78b2d5e7a01 -> d78c3e6f8b12, Coordinate finite cutover work with ordinary native maintenance.
+2026-10-07 21:13:51 - INFO - alembic.runtime.migration - Running upgrade d78c3e6f8b12 -> d77a4f8c2e10, Preserve original Taki artifacts and a joint native/application change stream.
+2026-10-07 21:13:51 - INFO - alembic.runtime.migration - Running upgrade d77a4f8c2e10 -> e30a9d7f6c21, Durable all-writer transition ownership independent from finite D78 leases.
+2026-10-07 21:13:51 - INFO - alembic.runtime.migration - Running upgrade e30a9d7f6c21 -> e40b1e8a7d32, Use existing UUID indexes without changing association publication ownership.
+2026-10-07 21:13:51 - INFO - hindsight_api.migrations - Database migrations completed successfully for schema 'd78_maintenance_6b6a575842f34060801a036f42130c22'
+-------------------------------- live log call --------------------------------
+2026-10-07 21:13:51 - WARNING - hindsight_api.engine.db_utils - [DB POOL] Slow acquire: 0.133s
+PASSED                                                                   [  3%]
+------------------------------ live log teardown ------------------------------
+2026-10-07 21:13:52 - INFO - hindsight_api.engine.memory_engine - close() started
+2026-10-07 21:13:52 - INFO - hindsight_api.engine.db.postgresql - PostgreSQL pool closed
+
+tests/test_configuration_observation.py::test_actual_constructor_read_only_http_projection PASSED [  6%]
+tests/test_configuration_observation.py::test_denial_precedes_database_and_profiles[None-bank] PASSED [ 10%]
+tests/test_configuration_observation.py::test_denial_precedes_database_and_profiles[wrong-bank] PASSED [ 13%]
+tests/test_configuration_observation.py::test_denial_precedes_database_and_profiles[fixture-key-other] PASSED [ 17%]
+tests/test_configuration_observation.py::test_grant_is_exact_true_and_fails_closed[False] PASSED [ 20%]
+tests/test_configuration_observation.py::test_grant_is_exact_true_and_fails_closed[None] PASSED [ 24%]
+tests/test_configuration_observation.py::test_grant_is_exact_true_and_fails_closed[1] PASSED [ 27%]
+tests/test_configuration_observation.py::test_grant_is_exact_true_and_fails_closed[yes] PASSED [ 31%]
+tests/test_configuration_observation.py::test_grant_is_exact_true_and_fails_closed[grant4] PASSED [ 34%]
+tests/test_configuration_observation.py::test_restricted_bank_validator_bypass_and_no_auth_deny PASSED [ 37%]
+tests/test_configuration_observation.py::test_absent_bank_identity_is_unavailable_without_initialization PASSED [ 41%]
+tests/test_configuration_observation.py::test_unsafe_identifier_is_not_disclosed[https://secret/endpoint] PASSED [ 44%]
+tests/test_configuration_observation.py::test_unsafe_identifier_is_not_disclosed[C:/private/model] PASSED [ 48%]
+tests/test_configuration_observation.py::test_unsafe_identifier_is_not_disclosed[/private/model] PASSED [ 51%]
+tests/test_configuration_observation.py::test_unsafe_identifier_is_not_disclosed[secret\nkey] PASSED [ 55%]
+tests/test_configuration_observation.py::test_unsafe_identifier_is_not_disclosed[xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx] PASSED [ 58%]
+tests/test_configuration_observation.py::test_router_custom_disabled_profiles PASSED [ 62%]
+tests/test_configuration_observation.py::test_grants_fail_closed[None] PASSED [ 65%]
+tests/test_configuration_observation.py::test_grants_fail_closed[] PASSED [ 68%]
+tests/test_configuration_observation.py::test_grants_fail_closed[{] PASSED [ 72%]
+tests/test_configuration_observation.py::test_grants_fail_closed[[]] PASSED [ 75%]
+tests/test_configuration_observation.py::test_grants_fail_closed[{"*": ["bank"]}] PASSED [ 79%]
+tests/test_configuration_observation.py::test_grants_fail_closed[{"public": ["*"]}] PASSED [ 82%]
+tests/test_configuration_observation.py::test_grants_fail_closed[{"public": "bank"}] PASSED [ 86%]
+tests/test_configuration_observation.py::test_grants_fail_closed[{"public": ["bank", 1]}] PASSED [ 89%]
+tests/test_configuration_observation.py::test_grants_never_expand_namespaces PASSED [ 93%]
+tests/test_configuration_observation.py::test_missing_installed_store_is_not_lazily_initialized PASSED [ 96%]
+tests/test_configuration_observation.py::test_missing_hook_wrong_namespace_and_invalid_nonce_do_not_disclose PASSED [100%]
+
+============================ slowest 10 durations =============================
+15.35s setup    tests/native_results/test_configuration_observation_pg.py::test_configuration_identity_join_is_read_only_and_namespace_bound
+1.25s call     tests/native_results/test_configuration_observation_pg.py::test_configuration_identity_join_is_read_only_and_namespace_bound
+0.44s setup    tests/test_configuration_observation.py::test_missing_installed_store_is_not_lazily_initialized
+0.42s teardown tests/native_results/test_configuration_observation_pg.py::test_configuration_identity_join_is_read_only_and_namespace_bound
+0.14s call     tests/test_configuration_observation.py::test_actual_constructor_read_only_http_projection
+0.05s call     tests/test_configuration_observation.py::test_missing_hook_wrong_namespace_and_invalid_nonce_do_not_disclose
+0.04s call     tests/test_configuration_observation.py::test_restricted_bank_validator_bypass_and_no_auth_deny
+0.03s setup    tests/test_configuration_observation.py::test_denial_precedes_database_and_profiles[wrong-bank]
+0.03s setup    tests/test_configuration_observation.py::test_actual_constructor_read_only_http_projection
+0.03s setup    tests/test_configuration_observation.py::test_grant_is_exact_true_and_fails_closed[False]
+============================= 29 passed in 20.66s =============================
+{
+    "Fixture":  "taki-hindsight-g1-f4abc29ffa79",
+    "Stopped":  true,
+    "DataRemoved":  true,
+    "RegistryRemoved":  true,
+    "Logs":  "H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-f4abc29ffa79"
+}

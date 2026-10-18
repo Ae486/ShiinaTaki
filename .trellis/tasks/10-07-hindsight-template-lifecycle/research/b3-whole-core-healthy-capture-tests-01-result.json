@@ -1,0 +1,26 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "--filter",
+    "@taki/core",
+    "exec",
+    "vitest",
+    "run",
+    "src/memory/transitions/transition-template-healthy.test.ts",
+    "src/memory/hindsight/hindsight-capture-sync.test.ts",
+    "--maxWorkers=1"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "startedAt": "2026-10-13T05:48:32.687146+00:00",
+  "finishedAt": "2026-10-13T06:13:48.204511+00:00",
+  "exitCode": 0,
+  "durationSeconds": 1515.516,
+  "inputCount": 2417,
+  "changedInputs": [],
+  "inputManifest": "b3-whole-core-healthy-capture-tests-01-inputs.json",
+  "afterManifest": "b3-whole-core-healthy-capture-tests-01-inputs-after.json",
+  "log": "b3-whole-core-healthy-capture-tests-01.log",
+  "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-whole-checks\\core-healthy-capture-tests-01-2e77bd6cbef84a7c9992d20eaa95fee9",
+  "temporaryRootRemoved": true,
+  "remainingFixtureEntries": []
+}

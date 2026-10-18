@@ -1,0 +1,282 @@
+{
+  "capturedAtUtc": "2026-10-09T09:01:34.332664+00:00",
+  "head": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a",
+  "verdict": "PASS - dispatched B2 Core scope only",
+  "baseline": {
+    "file": "b2-independent-core-source-before.json",
+    "sha256": "8d5dc15fcf942a12a662638733015cb5407a77fb7bb9f2a617a1a060aae1e29c",
+    "bytes": 372562
+  },
+  "counts": {
+    "ownedFiles": 101,
+    "changedOwnedFiles": 5,
+    "unchangedOwnedFiles": 96,
+    "frozenCheckInputs": 1939,
+    "changedCheckInputs": 4,
+    "readOnlyLabelFiles": 7,
+    "reviewedContextFiles": 38,
+    "changedContextFiles": 1
+  },
+  "changedOwnedFiles": {
+    "packages/core/src/memory/hindsight/template-lifecycle/index.md": {
+      "before": {
+        "sha256": "0396d53160b877af2c7ac7813f7838e51bdc47c2e49a2d716307d67912b2ed7b",
+        "bytes": 5168
+      },
+      "after": {
+        "sha256": "a623d70123b0388b87941a6fdb5c03d29fb70948b17aac26899fb05247b77f41",
+        "bytes": 5213
+      }
+    },
+    "packages/core/src/memory/hindsight/template-lifecycle/template-emergency.test.ts": {
+      "before": {
+        "sha256": "8906a7b5bf8d592b4b5abcfc3e6f75ff36ad949d9a1ab79319167c296152b84f",
+        "bytes": 13876
+      },
+      "after": {
+        "sha256": "7ee207e73498b2033e3be1f02ab4afdb1175a9035235eb6717c03c3d7bb9dbd8",
+        "bytes": 16173
+      }
+    },
+    "packages/core/src/memory/hindsight/template-lifecycle/template-execution-service.ts": {
+      "before": {
+        "sha256": "6215bb371323468ba9e685e45cde248559431344758d29d5cb0e0528f2cd0d50",
+        "bytes": 7169
+      },
+      "after": {
+        "sha256": "f0b0847baad2df429d1ec66ffc0f7e02687c87b7723619ebb217bcd9ba00ba34",
+        "bytes": 7918
+      }
+    },
+    "packages/core/src/memory/hindsight/template-lifecycle/template-lifecycle-service.test.ts": {
+      "before": {
+        "sha256": "22147d6e7aba0635a0ae42d46b618847328b7088b5ff12f0d207db6defa4ddf8",
+        "bytes": 8180
+      },
+      "after": {
+        "sha256": "db979b182d7911aeaefa01f19c42df14799904e9bb9f82a37efdeb50e2a357a6",
+        "bytes": 10403
+      }
+    },
+    "packages/core/src/memory/hindsight/template-lifecycle/template-rollout.test.ts": {
+      "before": {
+        "sha256": "760bc0f517ff3c8f931f6ebb3ac27953e17d29afecb7dce12b1b81a5ba565766",
+        "bytes": 9504
+      },
+      "after": {
+        "sha256": "bcc94b4c331ba84528b587d056695b492cd8fc20d822385ba5e96eca53318b27",
+        "bytes": 13714
+      }
+    }
+  },
+  "changedCheckInputs": {
+    "packages/core/src/memory/hindsight/template-lifecycle/template-emergency.test.ts": {
+      "before": {
+        "sha256": "8906a7b5bf8d592b4b5abcfc3e6f75ff36ad949d9a1ab79319167c296152b84f",
+        "bytes": 13876
+      },
+      "after": {
+        "sha256": "7ee207e73498b2033e3be1f02ab4afdb1175a9035235eb6717c03c3d7bb9dbd8",
+        "bytes": 16173
+      }
+    },
+    "packages/core/src/memory/hindsight/template-lifecycle/template-execution-service.ts": {
+      "before": {
+        "sha256": "6215bb371323468ba9e685e45cde248559431344758d29d5cb0e0528f2cd0d50",
+        "bytes": 7169
+      },
+      "after": {
+        "sha256": "f0b0847baad2df429d1ec66ffc0f7e02687c87b7723619ebb217bcd9ba00ba34",
+        "bytes": 7918
+      }
+    },
+    "packages/core/src/memory/hindsight/template-lifecycle/template-lifecycle-service.test.ts": {
+      "before": {
+        "sha256": "22147d6e7aba0635a0ae42d46b618847328b7088b5ff12f0d207db6defa4ddf8",
+        "bytes": 8180
+      },
+      "after": {
+        "sha256": "db979b182d7911aeaefa01f19c42df14799904e9bb9f82a37efdeb50e2a357a6",
+        "bytes": 10403
+      }
+    },
+    "packages/core/src/memory/hindsight/template-lifecycle/template-rollout.test.ts": {
+      "before": {
+        "sha256": "760bc0f517ff3c8f931f6ebb3ac27953e17d29afecb7dce12b1b81a5ba565766",
+        "bytes": 9504
+      },
+      "after": {
+        "sha256": "bcc94b4c331ba84528b587d056695b492cd8fc20d822385ba5e96eca53318b27",
+        "bytes": 13714
+      }
+    }
+  },
+  "changedSpec": {
+    ".trellis/spec/backend/hindsight-template-lifecycle.md": {
+      "before": {
+        "sha256": "fe6fbf20c92a4b8e35f3e3a55337fdf5a9c84526a426936216b5df3c7cb95fab",
+        "bytes": 18458
+      },
+      "after": {
+        "sha256": "41addb8d99e78081dee7c3c3f0b25123488d20c74a3ba83fd403c928469af78f",
+        "bytes": 19468
+      }
+    }
+  },
+  "readOnlyLabels": {
+    "packages/core/src/memory/hindsight/hindsight-template-label-evidence.ts": {
+      "sha256": "5d160ef2adaef117a46b34b9a6480784f8e8491ddfb04452763ac263c89d194e",
+      "bytes": 5759
+    },
+    "packages/core/src/memory/hindsight/hindsight-template-label-evidence.test.ts": {
+      "sha256": "19fcf2cfce288e2951e876018bd46fb51b5db5f9b5371d61db02f9eccf97061c",
+      "bytes": 15122
+    },
+    "packages/core/src/memory/hindsight/hindsight-template-binding.test.ts": {
+      "sha256": "5361ec4a8f80b97e10089c6237de1aa39fe3491d0ef3b957380934c3d1cdb8e1",
+      "bytes": 12745
+    },
+    "packages/core/src/memory/hindsight/hindsight-application-binding-runner.ts": {
+      "sha256": "7162a97252d7d003361cc357a76f9ed831a9a34a6ace481a1d48a0212e91cc47",
+      "bytes": 12717
+    },
+    "packages/core/src/memory/hindsight/hindsight-application-binding-context.ts": {
+      "sha256": "2d66dcb6e266e1ede2849576b60dfda14e21af50dd65dbc9f2c3c013b81a52ad",
+      "bytes": 10628
+    },
+    "packages/core/src/testing/hindsight-template-exchange-fixture.ts": {
+      "sha256": "17d1fc9a2fa902de698447e338bf2bb597e64bd83300bdc60732964a2036a46d",
+      "bytes": 10968
+    },
+    "packages/core/src/testing/hindsight-template-native-consumer.fixture.ts": {
+      "sha256": "f2ce07c91d28f5fc0fc27deeca322746693652ba261250d8ac58978b32240b3b",
+      "bytes": 6542
+    }
+  },
+  "readOnlyLabelsUnchanged": true,
+  "unlistedFrozenInputsUnchanged": true,
+  "specDelta": "Only the B2 Core executor lifetime section was added; deleting it reproduces the prior full spec hash.",
+  "immutableEvidence": {
+    "historicalProductionMigrationFiles": 60,
+    "allUnchanged": true,
+    "migration059": {
+      "sha256": "e50671c6311491b05ebf9d5c4bd348f8ad7e0265596b087ad480063cceaac55a",
+      "bytes": 9984
+    },
+    "v1": {
+      "sha256": "9d1f05100444af6c03f319df98cb04bfcf5bfe2504d0c059f2731ee531346952",
+      "bytes": 6401
+    }
+  },
+  "verification": {
+    "lint": {
+      "files": 87,
+      "exitCode": 0
+    },
+    "coreTypecheck": {
+      "exitCode": 0
+    },
+    "nonOverlappingAffectedTests": 93,
+    "green02ReusedPassingFiles": [
+      "H:/TakiAgent/packages/core/src/server/methods/hindsight-template-methods.test.ts",
+      "H:/TakiAgent/packages/core/src/memory/hindsight/template-lifecycle/template-derived-observation.test.ts",
+      "H:/TakiAgent/packages/core/src/memory/hindsight/template-lifecycle/template-emergency.test.ts",
+      "H:/TakiAgent/packages/core/src/memory/hindsight/template-lifecycle/template-executor-store.test.ts",
+      "H:/TakiAgent/packages/core/src/memory/hindsight/template-lifecycle/template-lifecycle-service.test.ts",
+      "H:/TakiAgent/packages/core/src/memory/hindsight/template-lifecycle/template-provision.test.ts",
+      "H:/TakiAgent/packages/core/src/memory/hindsight/template-lifecycle/template-revalidate.test.ts",
+      "H:/TakiAgent/packages/core/src/memory/hindsight/template-lifecycle/template-runtime-control.test.ts",
+      "H:/TakiAgent/packages/core/src/memory/hindsight/template-lifecycle/template-selection.test.ts"
+    ],
+    "green02ReusedCases": 80,
+    "green03CurrentCases": 13,
+    "betweenGreen02And03ChangedOnly": "packages/core/src/memory/hindsight/template-lifecycle/template-rollout.test.ts",
+    "allExecutedCheckSourcesStable": true,
+    "allIsolatedTemporaryRootsRemoved": true,
+    "gitDiffCheckExitCode": 0,
+    "utf8NoBomAndChangedFileWhitespace": "pass"
+  },
+  "artifacts": {
+    "b2-independent-core-stop-red-01.log": {
+      "sha256": "dc2cce96b0d99a622f238da681203bfc4f0ec467d88660515367edd3aef08a04",
+      "bytes": 1925
+    },
+    "b2-independent-core-stop-red-01-result.json": {
+      "sha256": "43ae615addf52d1828756256009dfb37bab4241939c0832f2f5334a2ed7fa047",
+      "bytes": 37684
+    },
+    "b2-independent-core-green-01-launch.json": {
+      "sha256": "6d71295fb831427b1e14e962904eb4db4c759a05c09c69a685b190793dad1ea8",
+      "bytes": 1978
+    },
+    "b2-independent-core-green-01-isolation.json": {
+      "sha256": "7be04ea6c658085ffc162fc762158e7d6b8031a00d0948fcfa5fd7bac6b7e37e",
+      "bytes": 39054
+    },
+    "b2-independent-core-cleanup.json": {
+      "sha256": "8d92a90bf2432572069fa5c94783ea3f8bd94a80c8903462aadc3c715f0cebf4",
+      "bytes": 155
+    },
+    "b2-independent-core-review.md": {
+      "sha256": "fc0a9579c1191867ddef6f5d0d05d408ebc4903e4d51cfa64427894b98d3e018",
+      "bytes": 6879
+    },
+    "b2-independent-core-green-02.log": {
+      "sha256": "78a439011f1a5bbf48d4cc82737b4646d4788176fb7a7ed9a9e3185d1a725267",
+      "bytes": 22396
+    },
+    "b2-independent-core-green-02-result.json": {
+      "sha256": "f221ec3c0174cf797225522c3eedc8c42909e1fc35af583927fba0f752ef83a8",
+      "bytes": 1562
+    },
+    "b2-independent-core-green-02-isolation.json": {
+      "sha256": "50203b51b9501cdc44dd9fc3424e1e47d1c61a28b0108a288dbda0033e937e16",
+      "bytes": 39051
+    },
+    "b2-independent-core-green-02-vitest.json": {
+      "sha256": "84078a85f09d8f8b148202863ccd5cac3efe44e444e5013972bffbab3d73b26a",
+      "bytes": 42984
+    },
+    "b2-independent-core-green-03.log": {
+      "sha256": "0ca4dbbbdb9e2e95e7297ec2b23d370ad9518df6abae9c08677b6438cbf72294",
+      "bytes": 2489
+    },
+    "b2-independent-core-green-03-result.json": {
+      "sha256": "bbaeaeb7d6a46a77b1e90ef9303e70c0c57d2ead4003cafeed6fe92b61f23344",
+      "bytes": 628
+    },
+    "b2-independent-core-green-03-isolation.json": {
+      "sha256": "e4ed2445ea78e706fed6d190331d8588e9fa6a14ee768d15f2a9c055808e3500",
+      "bytes": 38116
+    },
+    "b2-independent-core-green-03-vitest.json": {
+      "sha256": "af9e2ad8739e8810a90ef214c8371cf277d5a236a1bbe100483c23eeeee57797",
+      "bytes": 6376
+    },
+    "b2-independent-core-lint-01.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "b2-independent-core-lint-01-result.json": {
+      "sha256": "f4f28eb228f8949e20a73cd503e06990a7add53b15bfd0edbee3874b9e1e0ae5",
+      "bytes": 7066
+    },
+    "b2-independent-core-lint-01-isolation.json": {
+      "sha256": "9689ec3b4941077ac74e3b71d28e2dc58efc1975942df6875d6e1c3cc5184367",
+      "bytes": 51625
+    },
+    "b2-independent-core-typecheck-01.log": {
+      "sha256": "aae97e3dd3aeb050b304bac2de12cbd29514c2bd4abc4accde3ffc477df3a0db",
+      "bytes": 73
+    },
+    "b2-independent-core-typecheck-01-result.json": {
+      "sha256": "b641891de9a107431daa96c1046ab899bab33d8bfc8a293f08bb5931f04f511d",
+      "bytes": 292
+    },
+    "b2-independent-core-typecheck-01-isolation.json": {
+      "sha256": "c48c8d9544b3393871a15c81e3faaec828f6a8a937274aa41a4b1a4cce1ef9e7",
+      "bytes": 38072
+    }
+  },
+  "ownership": "All 101 Core files, necessary tests/index/Core-spec and the heavy-check slot released to root; no B3 or combined B2/5B acceptance."
+}

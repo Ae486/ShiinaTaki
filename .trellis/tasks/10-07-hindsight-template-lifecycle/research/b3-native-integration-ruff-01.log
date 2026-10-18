@@ -1,0 +1,95 @@
+I001 [*] Import block is un-sorted or un-formatted
+  --> tests\native_results\test_template_backup.py:3:1
+   |
+ 1 |   """B3 real PostgreSQL inventory, authentic service configuration and read-only refusals."""
+ 2 |
+ 3 | / from __future__ import annotations
+ 4 | |
+ 5 | | import copy
+ 6 | | import uuid
+ 7 | | from types import SimpleNamespace
+ 8 | | from unittest.mock import AsyncMock
+ 9 | |
+10 | | import pytest
+11 | |
+12 | | from hindsight_api.config_resolver import ConfigResolver
+13 | | from hindsight_api.engine.schema import fq_table
+14 | | from hindsight_api.engine.template_backup_config import LocalTemplateBackupObserver
+15 | | from hindsight_api.engine.template_backup_encoding import backup_request_hash, receipt_inventory_hash
+16 | | from hindsight_api.engine.template_backup_models import (
+17 | |     TakiBackupRequestV2,
+18 | |     TemplateBackupError,
+19 | |     TemplateBackupReceiptTuple,
+20 | | )
+21 | | from hindsight_api.engine.template_backup_storage import read_backup_database
+22 | | from hindsight_api.engine.template_encoding import normalize_snapshot, request_hash, snapshot_hash, template_hash
+23 | |
+24 | | from .maintenance_helpers import maintenance_schema as maintenance_schema
+25 | | from .template_backup_helpers import (
+26 | |     OBSERVATION_PATH,
+27 | |     apply_bank,
+28 | |     backup_request,
+29 | |     backup_resolver as backup_resolver,
+30 | |     observe,
+31 | |     selected_bank,
+32 | | )
+33 | | from .test_template_independent_refresh import done_result
+34 | | from .test_template_lifecycle import ROOT, plan
+   | |_______________________________________________^
+35 |
+36 |   pytestmark = [pytest.mark.asyncio, pytest.mark.usefixtures("backup_resolver")]
+   |
+help: Organize imports
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> tests\native_results\test_template_backup_transport.py:3:1
+   |
+ 1 |   """Actual route-c and managed route-b CLI, including an independent COPY snapshot."""
+ 2 |
+ 3 | / from __future__ import annotations
+ 4 | |
+ 5 | | import asyncio
+ 6 | | import json
+ 7 | | import uuid
+ 8 | | import zipfile
+ 9 | |
+10 | | import httpx
+11 | | import pytest
+12 | | from typer.testing import CliRunner
+13 | |
+14 | | import hindsight_api.admin.cli as admin_cli
+15 | | from hindsight_api.admin.taki_backup_service import ServiceTemplateBackupObserver
+16 | | from hindsight_api.api import create_app
+17 | | from hindsight_api.engine.template_backup_models import TemplateBackupError
+18 | |
+19 | | from .maintenance_helpers import maintenance_schema as maintenance_schema
+20 | | from .template_backup_helpers import (
+21 | |     apply_bank,
+22 | |     backup_request,
+23 | |     backup_resolver as backup_resolver,
+24 | |     observe,
+25 | |     owned_service,
+26 | |     selected_bank,
+27 | | )
+28 | | from .test_template_lifecycle import ROOT, plan
+   | |_______________________________________________^
+29 |
+30 |   pytestmark = [pytest.mark.asyncio, pytest.mark.usefixtures("backup_resolver")]
+   |
+help: Organize imports
+
+I001 [*] Import block is un-sorted or un-formatted
+   --> tests\native_results\test_template_backup_transport.py:238:5
+    |
+236 |       memory, request_context, api_client, maintenance_schema, tmp_path
+237 |   ):
+238 | /     from .test_template_lifecycle import fresh
+239 | |     from .template_backup_helpers import BackupBank
+    | |___________________________________________________^
+240 |
+241 |       bank = await selected_bank(memory, request_context, api_client)
+    |
+help: Organize imports
+
+Found 3 errors.
+[*] 3 fixable with the `--fix` option.

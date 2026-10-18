@@ -1,0 +1,11 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/python.exe",
+    "hindsight-dev/hindsight_dev/generate_openapi.py",
+    "hindsight-docs/static/openapi.json"
+  ],
+  "cwd": "H:/hindsight",
+  "exitCode": 0,
+  "durationSeconds": 29.566,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-native-openapi-01.log"
+}

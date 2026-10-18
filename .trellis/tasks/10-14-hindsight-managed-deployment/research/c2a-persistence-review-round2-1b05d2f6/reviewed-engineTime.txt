@@ -1,0 +1,15 @@
+async function engineTime(): Promise<string> {
+  requireFact(fixture);
+  const value = (await dockerExchange(fixture.deploymentRegistration, {
+    argv: ["info", "--format", "{{.SystemTime}}"],
+    signal: AbortSignal.timeout(budget(10_000)), maxBytes: 4096,
+  })).toString("utf8").trim();
+  // Preserve Engine RFC3339Nano precision; the Windows clock can exclude completed Engine events.
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,9}))?Z$/.exec(value);
+  requireFact(match);
+  const [year, month, day, hour, minute, second] = match.slice(1, 7).map(Number) as [number, number, number, number, number, number];
+  const probe = new Date(Date.UTC(year, month - 1, day, hour, minute, second));
+  requireFact(probe.getUTCFullYear() === year && probe.getUTCMonth() === month - 1 && probe.getUTCDate() === day
+    && probe.getUTCHours() === hour && probe.getUTCMinutes() === minute && probe.getUTCSeconds() === second);
+  return value;
+}

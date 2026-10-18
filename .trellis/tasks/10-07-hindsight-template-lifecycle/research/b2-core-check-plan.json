@@ -1,0 +1,107 @@
+{
+  "status": "prepared_not_run",
+  "sourceInput": "b2-core-read-check-input-03.json",
+  "scheduling": "One command at a time after root transfers the heavy-check slot; Vitest maxWorkers=2.",
+  "alreadyPassed": {
+    "scopedLint": "b2-core-lint-read-01.json + b2-core-lint-read-02.json",
+    "sharedTypes": "b2-core-shared-typecheck-read-01.json",
+    "coreTypes": "b2-core-typecheck-read-02.json",
+    "firstTests": "b2-core-reads-01-vitest.json (40/40)",
+    "readback": "b2-core-read-check-readback-01.json"
+  },
+  "tests": [
+    {
+      "id": "b2-core-lifecycle-final-01",
+      "package": "@taki/core",
+      "directory": "packages/core",
+      "files": [
+        "src/memory/hindsight/template-lifecycle/template-composition.test.ts",
+        "src/memory/hindsight/template-lifecycle/template-integrity.test.ts",
+        "src/memory/hindsight/template-lifecycle/template-overlay-store.test.ts",
+        "src/memory/hindsight/template-lifecycle/template-receipt-guards.test.ts",
+        "src/memory/hindsight/template-lifecycle/template-executor-store.test.ts",
+        "src/memory/hindsight/template-lifecycle/template-emergency.test.ts",
+        "src/memory/hindsight/template-lifecycle/template-provision.test.ts",
+        "src/memory/hindsight/template-lifecycle/template-revalidate.test.ts",
+        "src/memory/hindsight/template-lifecycle/template-rollout.test.ts",
+        "src/memory/hindsight/template-lifecycle/template-runtime-control.test.ts",
+        "src/memory/hindsight/template-lifecycle/template-selection.test.ts"
+      ],
+      "reason": "Remaining template matrix after shared fixture, guard and executor refactoring; the two passing read-path files are not repeated."
+    },
+    {
+      "id": "b2-core-runtime-adjacent-01",
+      "package": "@taki/core",
+      "directory": "packages/core",
+      "files": [
+        "src/memory/hindsight-lifecycle/hindsight-lifecycle-journey.test.ts",
+        "src/memory/hindsight-runtime-composition.test.ts",
+        "src/memory/hindsight-runtime-binding.test.ts",
+        "src/memory/hindsight-unbound-run.test.ts",
+        "src/memory/runtime-composition.test.ts",
+        "src/memory/runtime-selector.test.ts",
+        "src/memory/hindsight/hindsight-runtime-lifetime.test.ts",
+        "src/memory/hindsight/hindsight-runtime-bank-service.test.ts",
+        "src/memory/operations",
+        "src/memory/transitions/transition-emergency-service.test.ts",
+        "src/memory/transitions/transition-emergency-recovery.test.ts",
+        "src/memory/transitions/transition-emergency-admission.test.ts",
+        "src/memory/transitions/transition-emergency-context.test.ts",
+        "src/db/memory-transition-emergency-publication.test.ts"
+      ],
+      "reason": "Changed runtime/lifecycle/operation registry and W6 quarantine dependencies, including preserved legacy-v1 behavior."
+    },
+    {
+      "id": "b2-core-migrations-final-01",
+      "package": "@taki/core",
+      "directory": "packages/core",
+      "files": [
+        "src/db/migrations/041-canonical-memory-maintenance.test.ts",
+        "src/db/migrations/053-memory-transition-candidates.test.ts",
+        "src/db/migrations/054-memory-transition-publication.test.ts",
+        "src/db/migrations/058-hindsight-template-overlays.test.ts",
+        "src/db/migrations/059-hindsight-template-execution.test.ts",
+        "src/db/migrations/index-list.test.ts",
+        "src/db/migrations/lineage-reopen-matrix.test.ts"
+      ],
+      "reason": "059 registry and full-registry historical migration expectations; fresh/upgrade/reopen/rollback preservation."
+    },
+    {
+      "id": "b2-core-shared-adjacent-01",
+      "package": "@taki/shared",
+      "directory": "packages/shared",
+      "files": [
+        "src/memory-operation-schema.test.ts",
+        "src/memory-authority-status-schema.test.ts",
+        "src/memory-hindsight-lifecycle-schema.test.ts"
+      ],
+      "reason": "Extended request/result, runtime-unavailable and authority status unions."
+    },
+    {
+      "id": "b2-core-desktop-adjacent-01",
+      "package": "@taki/desktop",
+      "directory": "apps/desktop",
+      "files": [
+        "src/windows/home/pages/operations/memory-authority-state.test.ts",
+        "src/windows/home/pages/operations/local-onboarding-card.test.tsx"
+      ],
+      "reason": "Only the two already authorized Desktop availability mappings; no B3 implementation."
+    }
+  ],
+  "types": [
+    {
+      "id": "b2-core-desktop-typecheck-01",
+      "package": "@taki/desktop"
+    },
+    {
+      "id": "b2-core-cli-typecheck-01",
+      "package": "@taki/cli"
+    }
+  ],
+  "boot": {
+    "script": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-core-boot-smoke.mjs",
+    "label": "b2-core-boot-01",
+    "contract": "Real Node/main and authenticated WS on a fresh owned data directory; no dotenv, Hindsight or model network; verify normal process termination, migration head 59 and zero prohibited calls."
+  },
+  "final": "Record actual exits/counts/failures, final source identities, encoding/headers/index/whitespace checks and release all source/check ownership to root. Independent Core review and B3 do not start in this task."
+}

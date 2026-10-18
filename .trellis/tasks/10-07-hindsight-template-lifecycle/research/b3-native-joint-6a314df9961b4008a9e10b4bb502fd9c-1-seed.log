@@ -1,0 +1,5 @@
+{"authorityEpochId":"epoch","nativeCursorMinimum":2,"applicationStateCursorMinimum":0,"banks":[{"scope":"global","canonicalIdentity":"global","externalBankId":"taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633"},{"scope":"character","canonicalIdentity":"character:taki","externalBankId":"taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71"}],"userModel":{"id":"user-travel-notes","name":"User travel notes","source_query":"Summarize only explicit travel plans.","tags":["user-owned","travel"],"max_tokens":1536,"trigger":{"mode":"full","refresh_after_consolidation":false,"fact_types":["world"],"exclude_mental_models":true,"include_chunks":false,"keep_trace":false}}}
+
+--- stderr ---
+(node:3916) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node.EXE --trace-warnings ...` to show where the warning was created)

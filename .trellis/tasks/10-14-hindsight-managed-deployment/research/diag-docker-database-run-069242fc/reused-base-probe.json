@@ -1,0 +1,5 @@
+{
+  "source": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/c2a-database-persistence-run-1b05d2f6/base-probe.json",
+  "sha256": "819eca37907fa96577bcafca977d41304c16e1a14a782205b8170f874d944d5a",
+  "reason": "Same verified immutable base, engine and accepted source manifest; no extra probe run."
+}

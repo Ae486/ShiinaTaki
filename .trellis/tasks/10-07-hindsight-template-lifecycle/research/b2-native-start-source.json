@@ -1,0 +1,1090 @@
+{
+  "capturedAtUtc": "2026-10-08T07:56:33.675907+00:00",
+  "nativeRoot": "H:\\hindsight",
+  "nativeHead": "eb6413a7f58c4f3f0adb88a33a99516f8707fef7",
+  "nativeBranch": "main",
+  "parentMigration": "e51c2f9a8b43",
+  "reservedMigration": "e62a3d0b9c54",
+  "files": [
+    {
+      "path": ".env.example",
+      "bytes": 21841,
+      "sha256": "af87d3985ad0afbebe4a0a9ca77ec485a67ac64795644fa6683c025ba1ef2c17"
+    },
+    {
+      "path": ".gitattributes",
+      "bytes": 124,
+      "sha256": "9412592d2e00ab5ef661476b713d40afbb2a2de8a6102c811d7c172efb0efc70"
+    },
+    {
+      "path": "TAKI_PATCHES.md",
+      "bytes": 91181,
+      "sha256": "6be2689b4cc9bd8f8fefcb62807e746d03b7ddbf019aa70032acfd23049cc31f"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/admin/cli.py",
+      "bytes": 47126,
+      "sha256": "4f5be6781cacbb8c841493298ebdc3321c64668832a47fdabedd717336df6467"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/alembic/versions/e51c2f9a8b43_add_template_lifecycle.py",
+      "bytes": 4644,
+      "sha256": "7237b3f700f70d8c9b1ae51cbb4ae8c1ff3ad2e3ad70d54db2c8b8348f9fe806"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/api/http.py",
+      "bytes": 347317,
+      "sha256": "c0959ca77e69964889cb2fd480a8321838964550d731fe7fc1925b1eceb198cb"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/api/taki_configuration_observation.py",
+      "bytes": 3170,
+      "sha256": "a27775cd88b8e59a17672791cea4d300c251caa726547b22c84ad217ea79dde1"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/api/taki_template_lifecycle.py",
+      "bytes": 5301,
+      "sha256": "1f1864b550b7add894b8b61281a4ce0a411b63db99ab36a20452286d666fa531"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/api/taki_template_schema.py",
+      "bytes": 1245,
+      "sha256": "4a29e37ae183056677740b5973095e2abf1455a76e153bc28da0504e92ccde13"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/configuration_observation.py",
+      "bytes": 5937,
+      "sha256": "73d4711101c141f86c6dedd268c1541679cf1e1063a8d826f9588d89e6797c51"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/configuration_observation_models.py",
+      "bytes": 5320,
+      "sha256": "c2829e87041ab3ee89c17df96e2077a5a7eb0249407083448724b34aaa61a7a0"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/db/base.py",
+      "bytes": 14044,
+      "sha256": "fe4864744f0ebfbe016f1854fea94267b19ed4d6dda8990dc9c5721d8c73fd41"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/db/ops.py",
+      "bytes": 20638,
+      "sha256": "55d11dad0d97cebf999ecda3f9cfa04b52c8aa2aa81a0ed2887efbf6f7ddecef"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/db/ops_postgresql.py",
+      "bytes": 62763,
+      "sha256": "8db6fc6d4a0c62e6c2c880283ee5e7b69ed4b4dd4d2f8733eedfa9be52c26cbd"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/db/oracle.py",
+      "bytes": 58496,
+      "sha256": "44c884fa188162be7dbbe05921122911387dc829e41ca7dd0a503ff830e2f31a"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/llm_wrapper.py",
+      "bytes": 68112,
+      "sha256": "1ed4579693bd26593ac8343338a26c06d5535e452805d5e0c6d23a7bfb850779"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/memories/__init__.py",
+      "bytes": 2733,
+      "sha256": "fd59eb1d4e00a6b29ef3c8e648e47225b82d5e8334b86aba4ec0c0a3ad6ca297"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/memory_engine.py",
+      "bytes": 892410,
+      "sha256": "b120661a146307ddca82311a113952bcfff5254db7bf95f27323bed70023c533"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/reflect/agent.py",
+      "bytes": 73466,
+      "sha256": "94e7d921351351488bc5ecf7f90babf267d35d768fe411de2529e5194739f6fc"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/retain/embedding_utils.py",
+      "bytes": 5741,
+      "sha256": "1e204f0c406b49da8ba30dd1f5404a3eff22c92ece8c03036424abf368134e29"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/taki_compatibility.py",
+      "bytes": 24103,
+      "sha256": "769679e2be532ed73da49075bfed6647a99e9642d487cf1fdbfdfb9bcc40d76c"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/template_access.py",
+      "bytes": 5689,
+      "sha256": "3c33846657d47c6f3bbf9540f83bdc957d0090dac55f1e5ff2a5be3768b379d8"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/template_apply.py",
+      "bytes": 8894,
+      "sha256": "10ce924c12b1512785917835295c262f529051a7945bf2fb72ed3b7db122b915"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/template_definitions.py",
+      "bytes": 11125,
+      "sha256": "a6d7c9ccd2d0d0212886ace457431775d4c15da219037316f83d5df4d945c7bf"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/template_encoding.py",
+      "bytes": 2430,
+      "sha256": "1e06dd678cdad3ba42ad498c3d546cf670aeb88eea3858268108902b7b7663f6"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/template_evidence_models.py",
+      "bytes": 1798,
+      "sha256": "63fc44b641f42cbf25b8989014662b63bd8996a6778a23ea88737a341e3179df"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/template_initialization.py",
+      "bytes": 7702,
+      "sha256": "0d6aee8b27d6e3268ff6e0ebc7fdd4e205bd97c5486005e6b03faf954dabc220"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/template_models.py",
+      "bytes": 8194,
+      "sha256": "f8ebeac52a0c93efae1172efa7d93e29c150e6abd81dacec15b7e4fccf162f9d"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/template_mutations.py",
+      "bytes": 7023,
+      "sha256": "5f811eb1c5580e9e6a241244576a6b508fd018bb9c300b9901eb3df462770385"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/template_provider_guard.py",
+      "bytes": 1735,
+      "sha256": "5d9665bd5a2c0d23fd924f185e9e9d22fff9ca60bbb637e1060fc68590979d6f"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/template_refresh.py",
+      "bytes": 14363,
+      "sha256": "bab10099c78d68b9a31c9cb7dc1039d4ac31d278eb59a22952616a1d1d350a6b"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/template_snapshot.py",
+      "bytes": 14088,
+      "sha256": "fe11c9d8d8db0fb8d67b7eb7f18d55ca337ffa40b960c1ab8fa7a0264aa22ab0"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transition_initialization.py",
+      "bytes": 14798,
+      "sha256": "ca961258000ede8283092008013465ef2513c83da43008dd9171960c236c8e8d"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transition_snapshot.py",
+      "bytes": 8269,
+      "sha256": "c3efb1281bce263ca34cca2f12623ec3a1486e9b34a73f217ca9e7ee28bba2b6"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/extensions/builtin/configuration_observation_grants.py",
+      "bytes": 1129,
+      "sha256": "53abea9038b44d6efa341af0f5cd35b16bca34d469593f364da9565dfa6a442b"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/extensions/builtin/supabase_tenant.py",
+      "bytes": 17665,
+      "sha256": "98bcd7352e56aa6bac3b39e8bc7be2da8bdfdb545ee866ed9b9c2e35529e8853"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/extensions/builtin/taki_memory.py",
+      "bytes": 17499,
+      "sha256": "1d0e20495188cc60525d1fd0c9ca7c96e2eb0c1e1e3309fd60c62c034cff7d63"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/extensions/builtin/tenant.py",
+      "bytes": 5060,
+      "sha256": "387e10f20d692b543edf6e61ce829733c5daaaffa9b8d261e9384446e3eb73dc"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/extensions/tenant.py",
+      "bytes": 9018,
+      "sha256": "a2a11a572ed5c08dc58ac38fac43c38f8d7d8a1048444f7c752955436a730a5b"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/worker/poller.py",
+      "bytes": 85684,
+      "sha256": "43330db300bfbb616de238b15fab75528d9966c45f6970dee4a32e8444081bb7"
+    },
+    {
+      "path": "hindsight-api-slim/tests/conftest.py",
+      "bytes": 26198,
+      "sha256": "43e932d4239dadee446d25e3c48c6ad15c77eec4b4ea616e48194e5048e4ea4a"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/template_hash_vectors.json",
+      "bytes": 4411,
+      "sha256": "7354a952a7f83ecc826577d284541bb1627244723768e4fd5352e592cd0fb90e"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/template_validation_cases.json",
+      "bytes": 27936,
+      "sha256": "331e1253384f8de8d97088bb355dc24e0af1d6959d557eb6147da7a4282da1dc"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_configuration_observation_compatibility.py",
+      "bytes": 623,
+      "sha256": "f7cd6bc4484787ec6e4413404c20d98c884254953e5ff8598e4156de4cca2d9c"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_configuration_observation_pg.py",
+      "bytes": 4017,
+      "sha256": "3de25f6def5688d6ac91275bddd237f304e6e3aa9e5fc60b717ddbfca8e52e7b"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_cutover_compatibility.py",
+      "bytes": 4267,
+      "sha256": "f0c9d32551cb0e694773c530d896500458b1c7fcff94c11ba04eae5cd1f9bd47"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_template_deletion.py",
+      "bytes": 4664,
+      "sha256": "6813230b7f6bd4b7b0f12adeb54cf8c66e351c8dcab032d88130a7480fa9c129"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_template_independent_auxiliary.py",
+      "bytes": 5153,
+      "sha256": "ad389ababd2b795247a11baf56b805432183dc0717a9ebaec316e312b3a8317d"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_template_independent_backup.py",
+      "bytes": 5497,
+      "sha256": "724764454cd0d9cec42cba7da2706c42d65a7902bbad204d80d41b759285f8eb"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_template_independent_refresh.py",
+      "bytes": 16248,
+      "sha256": "a537722652a0b19dd69a024447a8a6fb7d856dfa111d543a0cce4258d42d69ae"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_template_independent_routes.py",
+      "bytes": 8038,
+      "sha256": "3d94ac821a694b7124fdfd29d93cd4cb9c56f6ccacb53041b9e08b5807ce7454"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_template_independent_wire.py",
+      "bytes": 1925,
+      "sha256": "36083928cb718f2f679aca9be8ad4b13f44ed00e24715f123038877a7db68078"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_template_lifecycle.py",
+      "bytes": 14849,
+      "sha256": "d5e796d795a9d8d7e2c92c40c8cf3167158fd87c64198f3c76dffb9676025a96"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_template_provider_guard.py",
+      "bytes": 9902,
+      "sha256": "817dad0dc71966b1bf448a2d79be90b12203ad2e3beefe531535f637c4ce94f1"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_template_publication.py",
+      "bytes": 7209,
+      "sha256": "ddb82cba3952322119e35d640358aac1ef8dffaecaddcedab167f347fbf7549c"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_template_wire.py",
+      "bytes": 2264,
+      "sha256": "2db5fff2c869682122e036b77beb327186c8eec76b7251bae765ab326b54b082"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_transition_backup.py",
+      "bytes": 9821,
+      "sha256": "90f0eb0d0734c36d66220ede23ae2ab5d7e009fd871b1ad171f8cac8196c845e"
+    },
+    {
+      "path": "hindsight-api-slim/tests/test_configuration_observation.py",
+      "bytes": 11673,
+      "sha256": "2661547dbc1a0b9782c0249069ba0fea55165bfdb46a9b3e78db6270a6b33729"
+    },
+    {
+      "path": "hindsight-api-slim/tests/test_supabase_tenant.py",
+      "bytes": 35655,
+      "sha256": "5c2b88465977eae691c7b40aadf5f14243c92e4e1ea1b308ed3425c7e8335eb5"
+    },
+    {
+      "path": "hindsight-api-slim/tests/test_taki_admin_backup.py",
+      "bytes": 19047,
+      "sha256": "e246cd5886f9cff193e1862e37e5da4a085dc3b4237d7d8cb3ca8697a7ea37ae"
+    },
+    {
+      "path": "hindsight-api-slim/tests/test_taki_extension_contract.py",
+      "bytes": 22352,
+      "sha256": "f8d299aa59c823de08250d717b4ee789fe21cb0985b7621d3f58718f49ef1b97"
+    },
+    {
+      "path": "hindsight-clients/configuration-observation-fixture.json",
+      "bytes": 1017,
+      "sha256": "710e674dfcff817fbc22bf36a24a91c36a74449b5fbe4d0d9ddebc6f10929351"
+    },
+    {
+      "path": "hindsight-clients/go/api/openapi.yaml",
+      "bytes": 803640,
+      "sha256": "f6361ebdaf5a4fcc8d2b3c79a616cb17ee89eeceb7ce1d9767f8e2918c2ecdb0"
+    },
+    {
+      "path": "hindsight-clients/go/api_taki_memory_compatibility.go",
+      "bytes": 328922,
+      "sha256": "40f3a27a260b8d1cc5492515a261a8b74ba754925abd87c9d37ac2d9bb3bc123"
+    },
+    {
+      "path": "hindsight-clients/go/configuration_observation_test.go",
+      "bytes": 722,
+      "sha256": "74462190256413f81a6ee69288fabe50596a9cb52bdb2088b219f12606725fca"
+    },
+    {
+      "path": "hindsight-clients/go/model_directives_inner.go",
+      "bytes": 3547,
+      "sha256": "e3dea07ef59eeed59dfcd0499c6aeeb2ec8feee5de97b54beb885369cbd4217f"
+    },
+    {
+      "path": "hindsight-clients/go/model_models_inner.go",
+      "bytes": 3437,
+      "sha256": "f63e567ab2643628898852fb6dc68b4ac08cb8d8344997daad5049f656b4b6ac"
+    },
+    {
+      "path": "hindsight-clients/go/model_models_inner_1.go",
+      "bytes": 3497,
+      "sha256": "ebbfbe38cd0a8988d79c4c2973797adb9b49594f681afff3eead4aa1c8cc7ded"
+    },
+    {
+      "path": "hindsight-clients/go/model_response_result_taki_template.go",
+      "bytes": 3891,
+      "sha256": "3f44c7ce269523903fcf7ba28014208eb9247e827707d62294804e5c57f2c903"
+    },
+    {
+      "path": "hindsight-clients/go/model_stored.go",
+      "bytes": 3566,
+      "sha256": "d95f6417490f8d8cb4752a6a1d9040189942eb04b174dc9c16033e6abaf4d1c1"
+    },
+    {
+      "path": "hindsight-clients/go/model_taki_compatibility_contracts.go",
+      "bytes": 20170,
+      "sha256": "e86b119f81a7c025b79079ad1b436024dc5ef874c4dcabe257f0f4e046e71769"
+    },
+    {
+      "path": "hindsight-clients/go/model_taki_configuration_consolidation_profile.go",
+      "bytes": 5408,
+      "sha256": "2d390211ed12d4aeb52a357f8b2079e52eab4424c9734fa20bed09f40072bf51"
+    },
+    {
+      "path": "hindsight-clients/go/model_taki_configuration_default_profile.go",
+      "bytes": 5174,
+      "sha256": "db5bec73807972e67ec6cbd74ca05ce6f29f4e658f8c47aab82bfdd6ea1d35f0"
+    },
+    {
+      "path": "hindsight-clients/go/model_taki_configuration_not_covered.go",
+      "bytes": 5418,
+      "sha256": "4752885e605f32d7ffc5237be639fa04a8661a9cb83c760ed3d4e3596c6027da"
+    },
+    {
+      "path": "hindsight-clients/go/model_taki_configuration_observation.go",
+      "bytes": 15090,
+      "sha256": "7d50d488aad931cc0cf4d04ebed3c89cb8daeed22f5d9cd799ab3bbeb0069de7"
+    },
+    {
+      "path": "hindsight-clients/go/model_taki_configuration_observation_refusal.go",
+      "bytes": 6051,
+      "sha256": "171626af88ecea15043354e716b15cc1668c317de2aed07402f6b21a4b78dd0c"
+    },
+    {
+      "path": "hindsight-clients/go/model_taki_configuration_profiles.go",
+      "bytes": 7292,
+      "sha256": "2d215439d11b1b15ccd4f3a38b3ebd3861cc58c8ca618342a1f3aded5812439b"
+    },
+    {
+      "path": "hindsight-clients/go/model_taki_configuration_reflect_profile.go",
+      "bytes": 5174,
+      "sha256": "51bafbb310c7df4eed52a5ceedc873dc33742614f92707d47237f3fe235bcf87"
+    },
+    {
+      "path": "hindsight-clients/go/model_taki_configuration_retain_profile.go",
+      "bytes": 5135,
+      "sha256": "d55cec448e3175e4f4c3543fe98428e4fd60825d384d189968dea9ca5369a278"
+    },
+    {
+      "path": "hindsight-clients/go/model_taki_configuration_source.go",
+      "bytes": 5473,
+      "sha256": "164bf8f5ff942497ef0492cb449a921d798a6a646e30c906219f05e523a9a54f"
+    },
+    {
+      "path": "hindsight-clients/go/model_taki_configuration_target.go",
+      "bytes": 6049,
+      "sha256": "bddfb3c00ada08b9c26bb51703615eafa4cba5c0fc1419a6709bf19765c2235e"
+    },
+    {
+      "path": "hindsight-clients/go/model_taki_disabled_configuration_profile.go",
+      "bytes": 4520,
+      "sha256": "9e413af920652b2f80f466af5f1109be43c4260ff815dc93f86878bdd6d2a2d7"
+    },
+    {
+      "path": "hindsight-clients/go/model_taki_single_configuration_profile.go",
+      "bytes": 6693,
+      "sha256": "291893c3bdb45b9cf8c3cbf96962e27ad6d4cf6fe905563a4009c184de62e4fd"
+    },
+    {
+      "path": "hindsight-clients/go/model_taki_unknown_configuration_profile.go",
+      "bytes": 5772,
+      "sha256": "2b3c225e82d2b53be66c0e9fc9a4780312d1ea21f5bf4967269be1a2a03f0fb8"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_absent.go",
+      "bytes": 3953,
+      "sha256": "59a24d54f0a05f90a0619d6e10566f052ffa337c7762be161d479a71323c187f"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_apply_request.go",
+      "bytes": 10375,
+      "sha256": "251df847366faa60e7eaba4799309843718435134693910b898395dbbd437b36"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_backup_evidence.go",
+      "bytes": 11493,
+      "sha256": "d3ee9d458d3e2dfa89509fa7843ef8fac4af98ce9f1bbb804364204c2371214d"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_changes_input.go",
+      "bytes": 5843,
+      "sha256": "7920d97657ec954a80371bba97b0411c7e510ebed69d3c5fbae7d1b929aa9277"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_changes_output.go",
+      "bytes": 5897,
+      "sha256": "157765d022f07734b4054213f60406b521c638cd6c6c7231c7f52eff2e05fae6"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_child.go",
+      "bytes": 7210,
+      "sha256": "1d3d63f325d4036e221f0f0702c30ae813870a1a555190fcdaf33fa5447db3d7"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_config_change.go",
+      "bytes": 4845,
+      "sha256": "5738daacba889ff508333190580f107e5908ee54d74200d3ed4fd0907900c438"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_config_entry.go",
+      "bytes": 5750,
+      "sha256": "793f4c16239b7be3ce5609ffda6c74bb1e52ccf8d24c82984afdfd6e926b56e7"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_directive.go",
+      "bytes": 7310,
+      "sha256": "10829a56063793db8524f014511f82fe5c5cf06ee2f380ffe53c1d068ae5ac03"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_directive_delete.go",
+      "bytes": 5746,
+      "sha256": "64315f4f594d8d364453739f934d4f2ce26c2dbf3a99b3c92a9872a4fc6b6b37"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_directive_selector.go",
+      "bytes": 5010,
+      "sha256": "dc6c3bb8009120c77a24aa3604f0b72d102014a802908e7d0cd72247a9478c7e"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_directive_state.go",
+      "bytes": 7665,
+      "sha256": "22ce5db757b5955350f3f36bbd26e0fc0cbb3cf6407a9485d445e6bfe1594267"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_directive_upsert.go",
+      "bytes": 5146,
+      "sha256": "3db031baf54b149a796968ceb7528f73d74769fe32c300afaa5ca941d910d53e"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_failure.go",
+      "bytes": 5107,
+      "sha256": "3236912f21f741d6bcf711a12afcd539978ec16b750d03cb2b71f18a5a1a80e9"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_initialization_request.go",
+      "bytes": 5671,
+      "sha256": "c7bfd34dcfb4cc206fb50a065ae116d49d5d6689fd486bb4c6540065dc4add4b"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_label_evidence.go",
+      "bytes": 11174,
+      "sha256": "a3199d5a1b2c067c031a4af115d646afa27f9cf8ce03f93c2e6f36745f25dd9c"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_label_evidence_request.go",
+      "bytes": 6237,
+      "sha256": "de42c3dde5cb4b3956fc1324e7f77ce25ce315ea39bf80856d7a9ff94b4843b9"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_label_evidence_result.go",
+      "bytes": 6273,
+      "sha256": "5acf4a5a75d2b1c7ff10ba0b882e03798d0549eac47eecf5a864210cdbc6be8f"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_label_unit.go",
+      "bytes": 5764,
+      "sha256": "cbb21c25f185707f81978b73cf343a0fe4fd4fd3a682bd5e7da64770ffa92449"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_mental_model_input.go",
+      "bytes": 8130,
+      "sha256": "7a0a01a2b93f2a7c1c4d4ee244d523fc1844658010bb9b28d2a7df69abb4dc63"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_mental_model_output.go",
+      "bytes": 8226,
+      "sha256": "b3f044d98a4c7d7cc1224664635bdc7cd6f8306544be3fe8e886ab569243baa1"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_model_delete_input.go",
+      "bytes": 5794,
+      "sha256": "257d80044d0bd80af7dd29a6fae2bdcd1200975a37cba97ab95936d778b4268b"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_model_delete_output.go",
+      "bytes": 5881,
+      "sha256": "126a984226ad46ed34f89040e0a723a9a7b86690bde05d74b187d328be301963"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_model_state_input.go",
+      "bytes": 6356,
+      "sha256": "be819e0d8ccc53ef6c5d0e77a30b28aa76e574f695757447a50f5694b81fd41d"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_model_state_output.go",
+      "bytes": 6450,
+      "sha256": "f034bf12915897a6d826ced2522d4754e8bd2a7cff2cdb292cbff8d700c47810"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_model_upsert_input.go",
+      "bytes": 5233,
+      "sha256": "0de4a5b5275b97afd350365aa21fe260821ca9b8866d36ed8b335f37e4e2eb43"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_model_upsert_output.go",
+      "bytes": 5284,
+      "sha256": "addbdecc847c857f7858bc801e88e1a7d9e87bb174effb5a237a6a0f427e1896"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_object_proof.go",
+      "bytes": 9222,
+      "sha256": "e215bc150fc9c8c9237c4310a56ced49997eb71ed60a365e2721c416e84db437"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_receipt.go",
+      "bytes": 13337,
+      "sha256": "5f45536913f3bbfe0d8b0ff1eb6f77ab0ca3e8bcc71f351d79c907e36d0a561a"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_refresh_choice.go",
+      "bytes": 4998,
+      "sha256": "c32cc6246f5c7e7902c96d4111b9ef01a808c7e0a205942bce640be15c4be40a"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_refresh_result.go",
+      "bytes": 11051,
+      "sha256": "adf82b312644104dababf4cfee2eb26433414d7b8fe75e4b56bb42189373ba6b"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_refresh_result_request.go",
+      "bytes": 7774,
+      "sha256": "544eabc61f7ef0e044becb2b9a242f57e52a43cdf5700237b59e734039939f1f"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_result_absent.go",
+      "bytes": 4029,
+      "sha256": "88b0de475f6f36bb7518a9005936a3386ecd0493da873b2d1f8d8a3ea265300d"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_result_committed.go",
+      "bytes": 5511,
+      "sha256": "bacc8855831d3ccbf8ad8d4ea570993d966fdcb7eecfb8a1ec9340c9bcd5b3d1"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_result_request.go",
+      "bytes": 6709,
+      "sha256": "a0a31d3a9d58fe754f3f5a28e8d47c1a5fc5b2996f02c745b4296d394459672a"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_selectors_input.go",
+      "bytes": 6013,
+      "sha256": "4a363aae2ff586136580d68112b7d42c8dc3cb01c09f2e87c7322bb942759c4b"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_selectors_output.go",
+      "bytes": 6061,
+      "sha256": "509b5c311fd6a2710994e68a5d7f49a6c7a210567e6884ffdb1f0f5e83870101"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_snapshot_input.go",
+      "bytes": 9196,
+      "sha256": "49b58c31a1e4f8ab1935cf1630fdb82db7765f3eeb7f092dfea0b1df6fbcde8a"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_snapshot_output.go",
+      "bytes": 9268,
+      "sha256": "d32fee5bef2b1cd20310706d8dbfca9ad6a2b9e9fcb5f66c49a938bbb77f96a8"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_snapshot_request.go",
+      "bytes": 6097,
+      "sha256": "7ac984a62520671d6060b0786e45410a6bca450b8128e76421ffd6b348c0d43b"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_target.go",
+      "bytes": 5629,
+      "sha256": "b5019e0b0b10b5908499a06e40535c3731273ad334da37b18b7610d1d639f9a5"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_tombstone.go",
+      "bytes": 4079,
+      "sha256": "d16c5876fed59614af878a2221fba57c2e1ab87c9e7f965fcb6f5d5aee1b25f3"
+    },
+    {
+      "path": "hindsight-clients/go/model_template_value.go",
+      "bytes": 4755,
+      "sha256": "cbb4dbeafd371205671c51081cf7a11db0c71fb7ed2c3d18a18c13b78a9b3509"
+    },
+    {
+      "path": "hindsight-clients/go/template_lifecycle_test.go",
+      "bytes": 697,
+      "sha256": "838e34ba3885a81f6d33af883fdf3fccd4853b0a48414cb49da6d277f600550f"
+    },
+    {
+      "path": "hindsight-clients/python/.openapi-generator/FILES",
+      "bytes": 24718,
+      "sha256": "beb8183c00097fce2d8b4d70bb76ff14d97011ce26ec4034988ce44c1bb89149"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/__init__.py",
+      "bytes": 38487,
+      "sha256": "9df52525bdc2cbfad6803aa493d806674959a69b87e0aa5f7af8e6bf62ccf22f"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/api/taki_memory_compatibility_api.py",
+      "bytes": 567041,
+      "sha256": "c1c5cc2299fbcee47a8cd1896d48a8a9d16bcbd7478e3c9b26c4733812fedeea"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/__init__.py",
+      "bytes": 36639,
+      "sha256": "001c27576eb34eb8fc40496c281a6f46af1e9580861e3f0c3007d58903478490"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/directives_inner.py",
+      "bytes": 5629,
+      "sha256": "88f26871b968c2867a08e24b7804af715b40c08f4221a863a714cb8d719089b7"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/models_inner.py",
+      "bytes": 5633,
+      "sha256": "6caea18f8a03e12db8daf6576e95bfacab4afe5b9410569afd8e5c641851b964"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/models_inner1.py",
+      "bytes": 5675,
+      "sha256": "e3527ae108d5e52638935e42ea7f857f90345e648178075d83f9e9ec37c58ce1"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/response_result_taki_template.py",
+      "bytes": 5666,
+      "sha256": "47c9651e24085a9e2496ebcfe581f832ff6c08da1e6981be7690a84f58568a9e"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/stored.py",
+      "bytes": 6050,
+      "sha256": "7f933036f6f599cc35f95e602b4a5edded1de7b2f7850aee8bcd78df7860a526"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/taki_compatibility_contracts.py",
+      "bytes": 9868,
+      "sha256": "0251d9ea8fd407b2e59ae1bc790faeb7ed2fc0412c480c3548468e34d3720331"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/taki_compatibility_support.py",
+      "bytes": 4448,
+      "sha256": "18233bae32b2baabb651b9acf14e8ebb2e9b655e35f532bbd77092a2d3f5560f"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/taki_configuration_consolidation_profile.py",
+      "bytes": 7137,
+      "sha256": "3876e2b7722e66aaff12465525f39ac0db7be24802ae0ecb120261c79aea010d"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/taki_configuration_default_profile.py",
+      "bytes": 7089,
+      "sha256": "9eb34b006d3551b161598a6616051ff7394250e858ee0519311a4ced29ce51c3"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/taki_configuration_not_covered.py",
+      "bytes": 3935,
+      "sha256": "665a53d38f312e409e1a6ad424c8bf5d909627c08010240fa79dd83105db980f"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/taki_configuration_observation.py",
+      "bytes": 7140,
+      "sha256": "f5455aa5d67014f67306758392b817abeb59364ae30798e1e01559de1856a1ca"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/taki_configuration_observation_refusal.py",
+      "bytes": 4042,
+      "sha256": "64ea08a093aed1577e56b21b612cf4721a6b0171b016a4b7c531de5215935c21"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/taki_configuration_profiles.py",
+      "bytes": 4896,
+      "sha256": "e63c2b865b02a21c1e0fe8ff9c1d06540ae85fd14961bfccbf0c6df381604e94"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/taki_configuration_reflect_profile.py",
+      "bytes": 7089,
+      "sha256": "1336a1a348cb7df5443b650f9aea0a012aed7e2b3f4e9c429ba3adef878bb1cd"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/taki_configuration_retain_profile.py",
+      "bytes": 7081,
+      "sha256": "0d6cf133d61264a62772b50ae974af949c16432eb0a1d505a8159df41b0db186"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/taki_configuration_source.py",
+      "bytes": 3759,
+      "sha256": "33209099b014a42fa8111b6b40e9ed9b1acc5dc71c369d12fb9434399f71114c"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/taki_configuration_target.py",
+      "bytes": 3499,
+      "sha256": "6c5b5ccc33ab7bf5871c3d14d61a13bfd11d2ae4c30996cc9c36d3c44cb71cd0"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/taki_disabled_configuration_profile.py",
+      "bytes": 3507,
+      "sha256": "be6ecbd65e5a6254b2af904f6c1d2b252d1ad305157ccf91f840ce930334d9e0"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/taki_single_configuration_profile.py",
+      "bytes": 4996,
+      "sha256": "a9d8717bf8f85b2365b3d677e0954a498c2ddff6e96058f9bf1dec5429bcd872"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/taki_unknown_configuration_profile.py",
+      "bytes": 3947,
+      "sha256": "a062bf2126160ddbe50483f0082ce8bc7043995e8520872125f3ba3340a71f79"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_absent.py",
+      "bytes": 3299,
+      "sha256": "921a8a4abc89893bf141438705b5e03f7c0e4196b3d1e5d02799ff90003cd6cd"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_apply_request.py",
+      "bytes": 6648,
+      "sha256": "66f3ad4717fcf8e30b68b04977ffc94e2cd2c93f643ba171f61a5c63b967d857"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_backup_evidence.py",
+      "bytes": 6964,
+      "sha256": "2e7b74af77c488cbe4610fbfa567a9dd3284d7a75d5704e457b399b27e5928da"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_changes_input.py",
+      "bytes": 4894,
+      "sha256": "ca6084fb2534594fd2bc7283554e31c94b8e9d6751c1236c93befd9396fc4efc"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_changes_output.py",
+      "bytes": 4902,
+      "sha256": "3a69c78fd4e07e85f9e33f6ec7870a07320b8a9015e381f0c1f18767181ab524"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_child.py",
+      "bytes": 4616,
+      "sha256": "09ee14a5d472b2f82ea69cda43fd33f2dedec51c84706ae2243c6723651a2861"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_config_change.py",
+      "bytes": 3805,
+      "sha256": "363fd0128bbaefa5c1f70500c80097b0ffdd1ea3bf64df057c3578ea26134caa"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_config_entry.py",
+      "bytes": 4119,
+      "sha256": "fdee8e7fda15b6561656f72611dbc7602d3a38a8553e294300b34f26fd1b1ec6"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_directive.py",
+      "bytes": 3684,
+      "sha256": "4bdb9eea173b01df0c159e2d64ce974b3aa38184479fe4f3af78159ba5c8c188"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_directive_delete.py",
+      "bytes": 3873,
+      "sha256": "a2e2cf44ae176d1879ac15036635991a38e36c7929dd845ca95d46c5050c3832"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_directive_selector.py",
+      "bytes": 3234,
+      "sha256": "e083f70b39d42736ddf7c2a9c7da6b1f284e5b7645a74bf707df29bc452d14d9"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_directive_state.py",
+      "bytes": 4624,
+      "sha256": "c75d778b080dda4de49cfa0cf4386691bbd08cf8a122b584358518fb6245adfa"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_directive_upsert.py",
+      "bytes": 3758,
+      "sha256": "1dd686e6f8fb80df8919752cfb0c66c43dc93c4b69d65f5ff0cbb3ddee3ca36c"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_failure.py",
+      "bytes": 4558,
+      "sha256": "f4f0e4876d7ed4d74ce5b9aebfd7c9983ff4d763b0488c9b387e747fbaf7dead"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_initialization_request.py",
+      "bytes": 3701,
+      "sha256": "cccdcc056a0a554b4a8082a3546cbb9e0e3b904c6be01d5d3ee5ff87d97e2233"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_label_evidence.py",
+      "bytes": 6127,
+      "sha256": "9ea2ffca456fa3020810e3967de8a47f1a1018dfd5c4a005c165503c98f7f30f"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_label_evidence_request.py",
+      "bytes": 4445,
+      "sha256": "c204c801cf59b347945b19b06ed4864eea06f2ada1f4baae4ecbd4d2a65a7a6c"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_label_evidence_result.py",
+      "bytes": 4493,
+      "sha256": "6b678158a652dba858de1feef6d3a181e30894817674b3376fcd9be0929430a9"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_label_unit.py",
+      "bytes": 3746,
+      "sha256": "1e6b587d007d16ed43bf88927c081ca4ef8c2575bbba9023b2ffb2fccb58ac8a"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_mental_model_input.py",
+      "bytes": 3997,
+      "sha256": "ea3771ea6f1ea779099ad8d0b3f4f4e86d54ea11ca093e22f540223c5d19735f"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_mental_model_output.py",
+      "bytes": 4286,
+      "sha256": "8880be44bf5aa5c4f0a4925c0caab38bdbf9bc39fe2d5d832468baee35cc9339"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_model_delete_input.py",
+      "bytes": 3932,
+      "sha256": "cac0d19065bc12bfa0edabd2d20a9498ba2e947ec378977acf8c8a376664b079"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_model_delete_output.py",
+      "bytes": 4204,
+      "sha256": "194903023074d04605ff5385ceb7b1c6080a3ef71ba7688f20287389b78b5bc6"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_model_state_input.py",
+      "bytes": 4462,
+      "sha256": "a88049fe28f0e50e4c184233d2bf458fd00bfe927cd19b5a0aadec20f8bc4a88"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_model_state_output.py",
+      "bytes": 4755,
+      "sha256": "eaec6f971419739a7eaca394470ab2fd2dec104967209fcf40d7d8b2df6c6294"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_model_upsert_input.py",
+      "bytes": 3792,
+      "sha256": "fcd9a4ca8809eeea86ef10a290f60b816b796b429c24a9c0e011ac92a50d084c"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_model_upsert_output.py",
+      "bytes": 3800,
+      "sha256": "845f1bf991a4640812ebce6b8afe89dca24715f4e65c9c880d5fa5b48a85fc59"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_object_proof.py",
+      "bytes": 4960,
+      "sha256": "0edf67b6f1d64a481c91e797eac630f8cc3babba80fad25a9cb691a226244a07"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_receipt.py",
+      "bytes": 7886,
+      "sha256": "5fbb556bee584d59c945113ff2e39c62d337992e300268a3aca4dcbd62cdcea6"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_refresh_choice.py",
+      "bytes": 3274,
+      "sha256": "3ceadc5e134e79bd4702d46600e3929d241c953dc03b5240fe3aa8a64d94b94a"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_refresh_result.py",
+      "bytes": 6476,
+      "sha256": "c5611daad9098db34399d5e7031c9ef52356b7c245eb2829d330864aa8d94bdc"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_refresh_result_request.py",
+      "bytes": 4445,
+      "sha256": "51f78d64da83ba48d53e271c2ed993374c8f83006895585d1afb0085fbc1aada"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_result_absent.py",
+      "bytes": 3458,
+      "sha256": "8dedacdef87e4e512975bc89bf1dd2d38fa347f8b42ea8b090e28bf5898605f6"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_result_committed.py",
+      "bytes": 3870,
+      "sha256": "8839669d4417d3226f4db0335e8c2c7951c2b72ad4cc56643f67ed3e4d632bf8"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_result_request.py",
+      "bytes": 4336,
+      "sha256": "ac9c326c5113e6a3d5d2602326eeea4cd28cef8315a07cb3087dc653c67d502b"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_selectors_input.py",
+      "bytes": 4503,
+      "sha256": "aa12b7e8ebb1937489c7cd6343cef9051eaaf970d0392c8bccad7fcf5a8fae88"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_selectors_output.py",
+      "bytes": 4477,
+      "sha256": "7e7ade2c9b263405f6ca68037dfdb4a8155e63ec1579a6b566be4e50e89cb32c"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_snapshot_input.py",
+      "bytes": 6615,
+      "sha256": "617391b376b64b2a44c2cb4819033a7038fbe5404d152b3b402db262b090f80b"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_snapshot_output.py",
+      "bytes": 6627,
+      "sha256": "59eacedcbc5c8255c06e668e9b3a370222cf46f2e8654b47747187c87b92316b"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_snapshot_request.py",
+      "bytes": 4215,
+      "sha256": "99f2ae259e9086bd0de45aa72aa79bb6867bdad975df9b58dcc4b54786f12120"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_target.py",
+      "bytes": 3383,
+      "sha256": "813a45e97c1240b24d41190846b794880906003ecc937a5969be7ecc736cd7db"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_tombstone.py",
+      "bytes": 3327,
+      "sha256": "fea5cfad67ed3c7c0f6798f2353e12623adb2b846a41a6e149ae26160a62d4dd"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/template_value.py",
+      "bytes": 3579,
+      "sha256": "ec19613400f4aeb28f9a2c8f609cbe7afcbe5ef5317e1cf8a6a23ac42430828a"
+    },
+    {
+      "path": "hindsight-clients/python/tests/test_configuration_observation.py",
+      "bytes": 1270,
+      "sha256": "4f5f6c5798a5ae29d533482c41229cc15cf417249e9c85b45f9a6c42bdb34dea"
+    },
+    {
+      "path": "hindsight-clients/python/tests/test_template_lifecycle.py",
+      "bytes": 606,
+      "sha256": "1d70dfa974cc2e71f495f3f6e0b7af85616de27901794fed4947a87d4b155397"
+    },
+    {
+      "path": "hindsight-clients/rust/tests/configuration_observation_contract.rs",
+      "bytes": 1070,
+      "sha256": "780cfa1eb376f09bda74535be2ddd4f8eb579b47e828b681239fcd8c7e746043"
+    },
+    {
+      "path": "hindsight-clients/rust/tests/template_lifecycle_contract.rs",
+      "bytes": 601,
+      "sha256": "14c1d251ad9f35e2441166d6a87e8a0c09fd1d9f607dce7ebd8614d9c8ae6876"
+    },
+    {
+      "path": "hindsight-clients/template-lifecycle-fixture.json",
+      "bytes": 1423,
+      "sha256": "f6aedb565ccc78146edc073066519a9d076c7cfac88ca9fdd479a3e1a53076bd"
+    },
+    {
+      "path": "hindsight-clients/typescript/generated/client/client.gen.ts",
+      "bytes": 7402,
+      "sha256": "af4e40b6f3dcc7d853e9a214ba90a6d25ca21b1f5188c941c347a78aa28cac7f"
+    },
+    {
+      "path": "hindsight-clients/typescript/generated/sdk.gen.ts",
+      "bytes": 87720,
+      "sha256": "d1d576ccaf66019e8347f5d0a1f6dcfeaf4e034dab09cf94482058c38549f33d"
+    },
+    {
+      "path": "hindsight-clients/typescript/generated/types.gen.ts",
+      "bytes": 372656,
+      "sha256": "eb4de0b4a9f13747ee3e003fd817da2680cb614326c8379e31aab3850e944901"
+    },
+    {
+      "path": "hindsight-clients/typescript/tests/configuration_observation.test.ts",
+      "bytes": 2005,
+      "sha256": "b4322d21b099852d793641312bbd0d0ecd36a27a4636389a5f8a2de362ecf358"
+    },
+    {
+      "path": "hindsight-clients/typescript/tests/template_lifecycle.test.ts",
+      "bytes": 1339,
+      "sha256": "7475aa0fb97c9ad21de7cc453d226e71c702233133f741a13631b218aa6c54fa"
+    },
+    {
+      "path": "hindsight-control-plane/bin/cli.js",
+      "bytes": 2441,
+      "sha256": "ce3ccd97b3759b2a0848221a9487de67178ce640d1ddc324a3043f7507655ef2"
+    },
+    {
+      "path": "hindsight-dev/tests/test_client_contract_fixtures.py",
+      "bytes": 1903,
+      "sha256": "d45d7aa32fab5f4287035cedd78381b807ae2bf8bc403257e766148ec164a27a"
+    },
+    {
+      "path": "hindsight-dev/tests/test_go_client_postprocess.py",
+      "bytes": 1912,
+      "sha256": "97b4b337db090599fe0766917b9e9a8b5ea648794f37ca060006329336355b57"
+    },
+    {
+      "path": "hindsight-docs/docs/developer/configuration.md",
+      "bytes": 173435,
+      "sha256": "6fbc16d22c14dc3c049461e01704e27366892062a4c71ef73acbb32e0066cc7c"
+    },
+    {
+      "path": "hindsight-docs/static/openapi.json",
+      "bytes": 1034830,
+      "sha256": "8d49efa07c17b9694354259ac9e7795a8c0c824ec6a7b0119947d85f791b012f"
+    },
+    {
+      "path": "hindsight-embed/hindsight_embed/env.example",
+      "bytes": 21841,
+      "sha256": "af87d3985ad0afbebe4a0a9ca77ec485a67ac64795644fa6683c025ba1ef2c17"
+    },
+    {
+      "path": "scripts/generate-clients.sh",
+      "bytes": 22074,
+      "sha256": "870bc97232bacab6e7b467f85c69716c882073f2c4c1e06c803bbde64502ac0f"
+    },
+    {
+      "path": "scripts/openapi-generator-backend.sh",
+      "bytes": 2392,
+      "sha256": "77537a679e1e6413bc043cc6058f7bc6d4ee962c6e443bda420d92ba6d3e6462"
+    },
+    {
+      "path": "scripts/postprocess-go-client.py",
+      "bytes": 8776,
+      "sha256": "39fcd1388259e41ef04da6ae9615ffb72caf19d12f7aeabfe84edcd969a0f1f3"
+    },
+    {
+      "path": "scripts/test-openapi-generator-backend.py",
+      "bytes": 2400,
+      "sha256": "6aa0fb146b8d2aac3761a021d572d817defa3d05ff12926e89c515c22364fb71"
+    }
+  ],
+  "takiSpec": {
+    "path": ".trellis/spec/backend/hindsight-template-lifecycle.md",
+    "bytes": 9549,
+    "sha256": "433341e81c84ac8fe4d9e0dfa8b155a70144f23b881e47c2ce1b5d76b43b26ff"
+  }
+}

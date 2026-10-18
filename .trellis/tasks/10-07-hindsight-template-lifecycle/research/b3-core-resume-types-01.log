@@ -1,0 +1,13 @@
+
+> @taki/core@0.0.0 typecheck H:\TakiAgent\packages\core
+> tsc --noEmit
+
+src/memory/hindsight-backup/hindsight-template-backup-capacity.test.ts(42,60): error TS2322: Type 'string | null' is not assignable to type 'string'.
+  Type 'null' is not assignable to type 'string'.
+src/memory/transitions/transition-template-scope.test.ts(11,52): error TS2322: Type 'string | null' is not assignable to type 'string'.
+  Type 'null' is not assignable to type 'string'.
+src/testing/hindsight-template-backup-consumer-fixture.ts(51,147): error TS2741: Property 'timeoutMs' is missing in type '{}' but required in type 'HindsightCallContext'.
+src/testing/hindsight-template-backup-consumer-fixture.ts(83,131): error TS2741: Property 'timeoutMs' is missing in type '{ signal: AbortSignal; }' but required in type 'HindsightCallContext'.
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/core@0.0.0 typecheck: `tsc --noEmit`
+Exit status 2

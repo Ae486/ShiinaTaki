@@ -1,0 +1,15 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/python.exe",
+    ".trellis/tasks/09-07-hindsight-recovery-evidence/research/validation/run_isolated_hindsight.py",
+    "--",
+    "tests/native_results/test_template_label_recovery.py::test_tracked_retain_restart_cannot_upgrade_original_fallback_or_legacy_plan[successful]",
+    "tests/native_results/test_template_independent_backup.py::test_e40_upgrade_preserves_bank_identity_and_populated_b1_downgrade_refuses",
+    "-q",
+    "--tb=short"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "durationSeconds": 67.54,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-native-labels-boundaries-03.log"
+}

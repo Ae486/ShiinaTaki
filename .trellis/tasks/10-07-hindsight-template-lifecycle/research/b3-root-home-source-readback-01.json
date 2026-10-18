@@ -1,0 +1,12 @@
+{
+  "checkedAtUtc": "2026-10-09T11:36:38.6935439Z",
+  "manifest": "b3-home-source-release-01.json",
+  "manifestSha256": "398a6d80e6a72c70acefa234aa8111e0f43932d2b08ba368f57eec5340ebe9be",
+  "verifiedFiles": 26,
+  "mismatches": [],
+  "pendingChecks": [
+    "Affected backup state suite and lint",
+    "Final Desktop types after Core backup consumer corrections",
+    "Independent Home review"
+  ]
+}

@@ -13,6 +13,25 @@
 
 ## Goal
 
+### Current continuation amendment (2026-10-07)
+
+The [new source review](research/stage4-review-2026-10-07.md) identified a P2 final healthy-publication lease gap.
+W0-W8 remain historically accepted within their recorded scope; downstream readiness additionally requires W9:
+
+- [x] An executor whose lease expires during complete healthy publication read-back cannot commit authority.
+- [x] Expiry atomically rolls back receipt, selected marker/target epoch, installation, custody and queue state;
+      valid-lease publication and existing committed-state recovery still work.
+- [x] A focused pre-fix regression, corrected result and independent review substantiate the boundary.
+
+See [W9 amendment](research/stage4-w9-lease-plan-2026-10-07.md). The owner approved implementation on 2026-10-07:
+add the correctness guard first; extend a consistent finite lease only if functional verification shows it is needed,
+without performance optimization. Original-data/manual boundaries and all historical evidence remain unchanged.
+The [W9 independent check](research/w9-independent-check.md) passed and was accepted on 2026-10-07. The default
+lease was sufficient for scoped functional checks and remains unchanged; full-run test timeouts were separately
+corrected and disclosed. Stage 5 now proceeds through its own planning and artifact gate.
+
+### Original goal
+
 Implement and verify the approved plan for repeated healthy Local/Hindsight authority transitions and a separate emergency Local takeover, reusing the shipped operation, runtime, replica, custody, and backup foundations without losing logical memory or replaying stale work.
 
 ## Requirements

@@ -1,0 +1,141 @@
+{
+  "version": 1,
+  "recordedAt": "2026-10-14T16:20:14.173Z",
+  "reviewer": "/root/c2_design_check",
+  "verdict": "PASS_STATIC_R2_CORRECTION",
+  "scope": "Only run-first-case.ts, README.md and this new R2 review/evidence.",
+  "before": [
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/run-first-case.ts",
+      "sha256": "532f800475d8ed9bf14809865e247c805ac8e81dc3109c88b196e04d6bad013e"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/README.md",
+      "sha256": "a3ada14fe6cb928924b99936a63820a11af96dc3327f16ca0888c4f6d87ca92c"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/preparation-check.json",
+      "sha256": "68f4c32dee404b13c9639f9ef859807048fc0eda47c606d0212c15becca6c09d"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-docker-first-case-review.md",
+      "sha256": "916f9cea25d3a2750de77fe37069894be8dd10812bb7be0c9d3d4741070b20b6"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-docker-first-case-review.json",
+      "sha256": "fcd5d5113ab12f87fdb2ab0457c06c4820ea570205607908da021f4d271875ec"
+    }
+  ],
+  "after": [
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/run-first-case.ts",
+      "sha256": "8aa4bd9d91ccb884fec2488d5ba55d3c22d2d88a46fd719c44ce827ec9342e94"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/README.md",
+      "sha256": "06b9c97a1c9302e52354d8d60f7c0bc760eca67b46029a0b6f37afb4ef9b9c8b"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/preparation-check.json",
+      "sha256": "68f4c32dee404b13c9639f9ef859807048fc0eda47c606d0212c15becca6c09d"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-docker-first-case-review.md",
+      "sha256": "916f9cea25d3a2750de77fe37069894be8dd10812bb7be0c9d3d4741070b20b6"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-docker-first-case-review.json",
+      "sha256": "fcd5d5113ab12f87fdb2ab0457c06c4820ea570205607908da021f4d271875ec"
+    }
+  ],
+  "checks": [
+    {
+      "name": "node-syntax",
+      "cwd": "H:/TakiAgent",
+      "command": "& 'C:/Program Files/nodejs/node.exe' --check .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/run-first-case.ts",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "name": "scoped-eslint",
+      "cwd": "H:/TakiAgent",
+      "command": "& 'G:/Roaming/npm/pnpm.cmd' exec eslint --no-ignore .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/run-first-case.ts",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "name": "single-entry-no-emit",
+      "cwd": "H:/TakiAgent",
+      "command": "& 'C:/Program Files/nodejs/node.exe' --input-type=module -e 'import ts from \"typescript\"; import fs from \"node:fs\"; const file=\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/run-first-case.ts\"; const base=JSON.parse(fs.readFileSync(\"tsconfig.base.json\",\"utf8\")); const parsed=ts.convertCompilerOptionsFromJson(base.compilerOptions,process.cwd()); const program=ts.createProgram([file],{...parsed.options,noEmit:true,incremental:false}); const errors=[...parsed.errors,...ts.getPreEmitDiagnostics(program)]; console.log(JSON.stringify({entry:file,noEmit:true,diagnostics:errors.map(d=>({file:d.file?.fileName,line:d.file&&d.start!==undefined?d.file.getLineAndCharacterOfPosition(d.start).line+1:undefined,code:d.code,message:ts.flattenDiagnosticMessageText(d.messageText,\"\\n\")}))})); process.exitCode=errors.length?1:0;'",
+      "exitCode": 0,
+      "output": "{\"entry\":\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/run-first-case.ts\",\"noEmit\":true,\"diagnostics\":[]}\n"
+    }
+  ],
+  "hashCommand": "$reviewPaths = @('.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/run-first-case.ts','.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/README.md','.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/preparation-check.json','.trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-docker-first-case-review.md','.trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-docker-first-case-review.json')\n$reviewPaths | ForEach-Object { [pscustomobject]@{path=$_;sha256=(Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash.ToLowerInvariant()} } | ConvertTo-Json",
+  "finding": {
+    "id": "R2-F1",
+    "priority": "P2",
+    "issue": "The isolated debug Shell environment omitted TAKI_GATE_AUTOAPPROVE, so its configuration exits before pairing/deployment admission.",
+    "fix": "Add TAKI_GATE_AUTOAPPROVE: allow-once only to the Shell child environment, matching the accepted installed fixture.",
+    "references": [
+      "apps/desktop/src-tauri/src/bin/taki-node.rs:57",
+      "apps/hindsight-host/test-fixtures/deployment-installed-fixture.ts:55"
+    ],
+    "reproduction": "Root's already completed minimized binary probe exited 2 with TAKI_GATE_AUTOAPPROVE is required. This reviewer did not repeat it."
+  },
+  "caseIdentity": {
+    "previousFixtureToken": "fa25c42b-1dbc-4f15-bc50-224bca0b03a1",
+    "newFixtureToken": "8378a950-87c8-44e3-a909-d213a284f113",
+    "coreDeploymentRunId": "Still generated by actual Core admission; the fixture token is only the operator idempotency key.",
+    "oldMarkersOrResourcesReused": false
+  },
+  "nextAttempt": {
+    "owner": "Root",
+    "baseProbe": "Reuse Root's retained successful unchanged first-attempt evidence and record its original path/hash under the fresh staging root.",
+    "rootReportedProbe": {
+      "python": "3.11.16",
+      "dotenv": "1.2.2",
+      "uid": 1000,
+      "gid": 1000,
+      "dataSeed": "empty",
+      "compatible": true
+    },
+    "prerequisites": "Recheck the same pinned immutable base/engine and builder before one new local-only image build; preserve old attempt evidence and use fresh roots/markers.",
+    "unrelatedResources": "Keep Root's current unrelated-container baseline unchanged; gpt-load was already absent before the first attempt's first Docker mutation and must not be restored."
+  },
+  "verification": {
+    "syntax": "pass",
+    "lint": "pass",
+    "singleEntryNoEmit": "pass; zero diagnostics",
+    "runtime": "not run",
+    "behaviorTests": "not run"
+  },
+  "preserved": {
+    "preparationCheck": {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/preparation-check.json",
+      "sha256": "68f4c32dee404b13c9639f9ef859807048fc0eda47c606d0212c15becca6c09d"
+    },
+    "firstStaticReview": {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-docker-first-case-review.md",
+      "sha256": "916f9cea25d3a2750de77fe37069894be8dd10812bb7be0c9d3d4741070b20b6"
+    },
+    "firstStaticEvidence": {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-docker-first-case-review.json",
+      "sha256": "fcd5d5113ab12f87fdb2ab0457c06c4820ea570205607908da021f4d271875ec"
+    },
+    "productionSourceEdits": 0,
+    "accepted182CaseEvidenceRerun": false,
+    "firstAttemptReadbackEdits": 0
+  },
+  "execution": {
+    "dockerCalls": 0,
+    "wslCalls": 0,
+    "appsStarted": 0,
+    "binaryBuilds": 0,
+    "behaviorTests": 0,
+    "newDependencies": 0
+  },
+  "findingsNotFixed": [],
+  "ownership": "Owned fixture files, R2 review/evidence and check slot released to Root."
+}
+

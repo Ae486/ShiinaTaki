@@ -1,0 +1,9 @@
+
+> @taki/shared@0.0.0 typecheck H:\TakiAgent\packages\shared
+> tsc --noEmit
+
+src/hindsight-template-schema.test.ts(21,26): error TS2345: Argument of type 'string | number | boolean | JsonValue[] | { [key: string]: JsonValue; }' is not assignable to parameter of type 'object'.
+  Type 'string' is not assignable to type 'object'.
+H:\TakiAgent\packages\shared:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/shared@0.0.0 typecheck: `tsc --noEmit`
+Exit status 2

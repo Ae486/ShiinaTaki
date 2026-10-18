@@ -1,0 +1,19 @@
+{
+  "sourceManifest": "c1a-source-hashes.json",
+  "sourceFileCount": 122,
+  "sourceMismatches": [],
+  "changedDuringFinalCheck": [],
+  "removedPathsVerified": [
+    "C:/taki-c1a-fixture-609ad25fef7f46b6a9c30b4b510b43f8",
+    "H:/TakiAgent/apps/desktop/src-tauri/target/hindsight-resources-LdMCA6",
+    "H:/TakiAgent/apps/desktop/src-tauri/target/debug/hindsight-host/payload"
+  ],
+  "remainingPaths": [],
+  "coreBootPid": 33200,
+  "coreBootPidPresent": false,
+  "freeBytes": 14580412416,
+  "sourceReleasedBy": "c1a_implement",
+  "sourceAndCheckOwner": "c1a_check",
+  "independentAcceptance": "pending",
+  "c1bStarted": false
+}

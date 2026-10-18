@@ -1,0 +1,883 @@
+{
+  "nativeHeads": [
+    "e40b1e8a7d32"
+  ],
+  "repositories": [
+    {
+      "root": "H:\\TakiAgent",
+      "head": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a",
+      "files": [
+        {
+          "path": ".trellis/spec/backend/index.md",
+          "status": " M",
+          "bytes": 10260,
+          "sha256": "777c9a86d558d101b3d9054625ba700ea4f659ce06f03a3440fd81612184ad07"
+        },
+        {
+          "path": ".trellis/spec/backend/memory-transition-publication.md",
+          "status": " M",
+          "bytes": 16098,
+          "sha256": "2bffa64a6c0d93aaaee3dfa8d0a2a89bb05d8f0bb3534cea703f6fd2d0c11c8d"
+        },
+        {
+          "path": ".trellis/spec/backend/quality-guidelines.md",
+          "status": " M",
+          "bytes": 15625,
+          "sha256": "2a2a584a3bfc0095976fc7276d7f402b40dd6f9b4aeb66ab2f39518d72c55226"
+        },
+        {
+          "path": ".trellis/spec/backend/secret-catalog.md",
+          "status": " M",
+          "bytes": 7345,
+          "sha256": "4c5ce331a2dacb3159d32ff7c02f59578dac473ebc45fd659bf11be891849969"
+        },
+        {
+          "path": ".trellis/spec/frontend/home-window.md",
+          "status": " M",
+          "bytes": 32286,
+          "sha256": "60bd40e867b6dd8d7eda1650d52ca7d1c734baa9b257d92aa5f03beaa0fd4b8b"
+        },
+        {
+          "path": "CLAUDE.md",
+          "status": " M",
+          "bytes": 11159,
+          "sha256": "23ad3ed6ec1beb218e26fb38952bfe42b6691696264a4f0a62b3ed351e5a3678"
+        },
+        {
+          "path": "apps/desktop/src/lib/index.md",
+          "status": " M",
+          "bytes": 4694,
+          "sha256": "936d1d0a33ee66e1176ce38767bc9e03ea6e195ff4664936a09d43caafcf216d"
+        },
+        {
+          "path": "apps/desktop/src/lib/rpc-deadline.ts",
+          "status": " M",
+          "bytes": 6903,
+          "sha256": "a4597d52ba20a4cadb36b612ac5278d72a4085eae183d8e599bb09bcabfa1857"
+        },
+        {
+          "path": "apps/desktop/src/lib/ws-client-methods.ts",
+          "status": " M",
+          "bytes": 12667,
+          "sha256": "a8c96700b7f536cbec497f7ec3f730bbc1e4fcb989349cb5f61625435510538a"
+        },
+        {
+          "path": "apps/desktop/src/lib/ws-client.ts",
+          "status": " M",
+          "bytes": 15543,
+          "sha256": "83e042cf2fcd1bcbb66f98634be7d663cafa9365ca5151a26c042cfc25feb0f0"
+        },
+        {
+          "path": "apps/desktop/src/windows/home/pages/operations/index.md",
+          "status": " M",
+          "bytes": 7856,
+          "sha256": "7ed27f8bd7d9d1fd92267803cccc23212e77aef4b7b0117c79fb3994f851792f"
+        },
+        {
+          "path": "apps/desktop/src/windows/home/pages/operations/operations-page.tsx",
+          "status": " M",
+          "bytes": 3658,
+          "sha256": "93256d9e944e075b120fa82d296eb3588035cfd23428fa71ded5a4fb6f99faaf"
+        },
+        {
+          "path": "docs/HANDOFF.md",
+          "status": " M",
+          "bytes": 57848,
+          "sha256": "01a0f593966ca15f95403a04568871869ddd2906d1d73d4a5000fbf5be31b2f4"
+        },
+        {
+          "path": "eslint.config.js",
+          "status": " M",
+          "bytes": 3862,
+          "sha256": "41bfab9b94f7ded445da69b0908ab89a990c217841093f3121359f660ddbedec"
+        },
+        {
+          "path": "packages/core/src/boot/index.md",
+          "status": " M",
+          "bytes": 1587,
+          "sha256": "26165752376a368aa0ce13939c2476db392f8667a74d20331512062d7e84cca6"
+        },
+        {
+          "path": "packages/core/src/config/config-subscriptions.ts",
+          "status": " M",
+          "bytes": 1538,
+          "sha256": "b2b51e979d0a42d5bfb3ce01063990c1e2fd8957d85b6f13734e07e89259fa5b"
+        },
+        {
+          "path": "packages/core/src/config/index.md",
+          "status": " M",
+          "bytes": 3971,
+          "sha256": "649fe4a050825010b8275c5bb741f527f4ad7b9af3bff23ce1e76b5d4776f3d9"
+        },
+        {
+          "path": "packages/core/src/db/index.md",
+          "status": " M",
+          "bytes": 21877,
+          "sha256": "73a59e78aca908dbab47abffcd21009b984c90eb191638328c8b577a2895b420"
+        },
+        {
+          "path": "packages/core/src/db/memory-transition-publication-repo.ts",
+          "status": " M",
+          "bytes": 9789,
+          "sha256": "bf032ab13bab8f86e5111bce8ecec2bff699bec9f07e1bccdf69ad25b1816dbd"
+        },
+        {
+          "path": "packages/core/src/main.ts",
+          "status": " M",
+          "bytes": 41876,
+          "sha256": "1f1797884967e13e5150d4e98f84d4921ffd1ce9b7f79c7537daddc72ad5ded0"
+        },
+        {
+          "path": "packages/core/src/memory/hindsight/hindsight-application-capability.ts",
+          "status": " M",
+          "bytes": 4036,
+          "sha256": "d18ea9875bfc8efdf050ec13f44c5a317030f18ac4d39ed3bb69606b48f306cc"
+        },
+        {
+          "path": "packages/core/src/memory/hindsight/hindsight-client.ts",
+          "status": " M",
+          "bytes": 21158,
+          "sha256": "b89b315a45a02a31cb326c30654e7f6b283324643386a71e68054dcaf01777b7"
+        },
+        {
+          "path": "packages/core/src/memory/hindsight/hindsight-compatibility-service.ts",
+          "status": " M",
+          "bytes": 6993,
+          "sha256": "4e410cc4b797e145acc337c10ed6a780725b03b2f8b9d31fd5230d6081de97b0"
+        },
+        {
+          "path": "packages/core/src/memory/hindsight/hindsight-contracts.ts",
+          "status": " M",
+          "bytes": 5731,
+          "sha256": "31707c6765822d8bc08951a1905dddc81d11ce8a88873a7b970aa085c6488abd"
+        },
+        {
+          "path": "packages/core/src/memory/hindsight/hindsight-pending-recovery-runner.ts",
+          "status": " M",
+          "bytes": 9859,
+          "sha256": "e5cea87a5ce72e18cd78d25125207988d530b70488378c42b4a100e2d02315fa"
+        },
+        {
+          "path": "packages/core/src/memory/hindsight/hindsight-transition-capability.ts",
+          "status": " M",
+          "bytes": 2056,
+          "sha256": "ceb5c1f471f27e32538a2732a47565a8c62f699cf7159aac9b5a0158f02f8f2d"
+        },
+        {
+          "path": "packages/core/src/memory/hindsight/index.md",
+          "status": " M",
+          "bytes": 19136,
+          "sha256": "a39b4190f4f2fed5c077310a923121079248c645c65f5e27fe39e7e430a2f803"
+        },
+        {
+          "path": "packages/core/src/memory/transitions/index.md",
+          "status": " M",
+          "bytes": 7188,
+          "sha256": "cd227315654acaa860337a1912c831b60a9eea6e79da1e9e9c6e39b25246129a"
+        },
+        {
+          "path": "packages/core/src/memory/transitions/transition-emergency-context.test.ts",
+          "status": " M",
+          "bytes": 11225,
+          "sha256": "732fb08ee15764e1154d67c5f08d802e556d9dfdfae4791c7680520312645462"
+        },
+        {
+          "path": "packages/core/src/memory/transitions/transition-evidence-context.test.ts",
+          "status": " M",
+          "bytes": 8940,
+          "sha256": "af93f235a1d97ae4bf24b0943bda7ac6650c20842a6ed9350848267f725e60dc"
+        },
+        {
+          "path": "packages/core/src/memory/transitions/transition-healthy-execution.ts",
+          "status": " M",
+          "bytes": 18773,
+          "sha256": "3235ba06bf4d4d20581448921f6f169a3bb2b17cbb0f22bf551a6a705cdfc60a"
+        },
+        {
+          "path": "packages/core/src/secrets/index.md",
+          "status": " M",
+          "bytes": 1969,
+          "sha256": "99698fc88eab3ab14e2de68d90b185e6b9f4cfaf787f7e7d641b57f371dd98ab"
+        },
+        {
+          "path": "packages/core/src/secrets/secret-catalog-service.test.ts",
+          "status": " M",
+          "bytes": 12897,
+          "sha256": "11b4eca2564ab9422927a062c2b2b53d6f47a7ea509adb8bb7efc6a25bb8bc2b"
+        },
+        {
+          "path": "packages/core/src/secrets/secret-catalog-service.ts",
+          "status": " M",
+          "bytes": 11159,
+          "sha256": "5585e670f26346ff800daba9674dd152f6b1f42545e5807581d1e3470b0b687c"
+        },
+        {
+          "path": "packages/core/src/server/methods/index.md",
+          "status": " M",
+          "bytes": 8336,
+          "sha256": "4ea9e08b5ed8305fd0a87008e1725e144203b767ee4176169a406b71ce6c0ff4"
+        },
+        {
+          "path": "packages/core/src/testing/hindsight-runtime-composition-fixtures.ts",
+          "status": " M",
+          "bytes": 19738,
+          "sha256": "beb9602b59a30211f028a59bc49fc231363e992fde186a4b60762f74e71a7c08"
+        },
+        {
+          "path": "packages/core/src/testing/index.md",
+          "status": " M",
+          "bytes": 6616,
+          "sha256": "49acd75bbaf552da4d74bc5f24d7a1a96a7bf2aaf6a53e7663a5b18369682fee"
+        },
+        {
+          "path": "packages/core/src/testing/memory-transition-cycle-fixtures.ts",
+          "status": " M",
+          "bytes": 11938,
+          "sha256": "503b3d4e76e50b1edd07c697b65951ab6934813e6b5f8f765fe0a9d08c2f541d"
+        },
+        {
+          "path": "packages/core/src/testing/memory-transition-publication-fixtures.ts",
+          "status": " M",
+          "bytes": 7972,
+          "sha256": "ff293dca369746e5219d84081e7cbcb80f454edc1c9ef5ec9a94865aefdd756d"
+        },
+        {
+          "path": "packages/shared/src/hindsight-connection-schema.ts",
+          "status": " M",
+          "bytes": 7936,
+          "sha256": "f9762fbd73a2fb6de68aea2a604ce500dc36c35a3fc741887d468a236c7a6e15"
+        },
+        {
+          "path": "packages/shared/src/index.md",
+          "status": " M",
+          "bytes": 14732,
+          "sha256": "f7593055137e837bbdd8d957e7b98aaf4501ef9acafa3ecd13e7158b7880d479"
+        },
+        {
+          "path": "packages/shared/src/index.ts",
+          "status": " M",
+          "bytes": 54108,
+          "sha256": "1d8975488c2b9d7087047a54fede4eba41870964729c809cb09fbf5376abea72"
+        },
+        {
+          "path": ".trellis/spec/backend/hindsight-configuration-observation.md",
+          "status": "??",
+          "bytes": 4897,
+          "sha256": "16b255c874a0812e9657aea2f2e11bd530b1e6e0e9cfbce8fbe7208fc3a22145"
+        },
+        {
+          "path": "apps/desktop/src/lib/ws-client-hindsight-configuration.test.ts",
+          "status": "??",
+          "bytes": 3458,
+          "sha256": "8b6ac0d0788d6859365a12d58b70e7bb3b213b3bcd532e803164d26f1ef1ac79"
+        },
+        {
+          "path": "apps/desktop/src/lib/ws-client-hindsight-configuration.ts",
+          "status": "??",
+          "bytes": 1387,
+          "sha256": "079aea008d5727715831e6bc1e75d210daf8d249d57155943f5de5f43492febf"
+        },
+        {
+          "path": "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-browser-fixture.ts",
+          "status": "??",
+          "bytes": 2826,
+          "sha256": "f0ac91d664716f37a095ad854aeeaa8345b9f5aeaeccf56c60688a5165562487"
+        },
+        {
+          "path": "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-browser.test.ts",
+          "status": "??",
+          "bytes": 9329,
+          "sha256": "0588c56a9e81dc4f7c33e04de7b94494ad18bbfa5aaadd8fcd2874fc9c9b8707"
+        },
+        {
+          "path": "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-card.test.tsx",
+          "status": "??",
+          "bytes": 4361,
+          "sha256": "cb5d63722aaf5c7427b2c879cfd8ef9b53789ffd5b278be538006557dd5d56e0"
+        },
+        {
+          "path": "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-card.tsx",
+          "status": "??",
+          "bytes": 6161,
+          "sha256": "f765dad2a21a0144081dd966ddc8bac647164686c543c1754ad9f393dc3078f6"
+        },
+        {
+          "path": "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-controller.test.ts",
+          "status": "??",
+          "bytes": 8194,
+          "sha256": "4f75225e9578d857b6aeb2844ebc56c7d76128295d1cce794d20e0fe7c154937"
+        },
+        {
+          "path": "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-controller.ts",
+          "status": "??",
+          "bytes": 4752,
+          "sha256": "9c37ec01ae504864a3e503d860e9fafc3598da9310236b8549c164c508a91363"
+        },
+        {
+          "path": "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-state.ts",
+          "status": "??",
+          "bytes": 3826,
+          "sha256": "99e75ad5236d91655c0e619143c30fabfec5f3346939895805d32d7a7d12acde"
+        },
+        {
+          "path": "apps/desktop/src/windows/home/pages/operations/use-configuration-characters.ts",
+          "status": "??",
+          "bytes": 1250,
+          "sha256": "67227c01567266a8b564572af9bcfa4ead204445d8a50331be6f4e18babffe7c"
+        },
+        {
+          "path": "apps/desktop/src/windows/home/pages/operations/use-hindsight-configuration.ts",
+          "status": "??",
+          "bytes": 2109,
+          "sha256": "e8c8d9ea98f8ff6185e9eb011a96a50618a04e9623eb8c9183a80675f6fdb8d8"
+        },
+        {
+          "path": "packages/core/src/boot/hindsight-configuration-boot.ts",
+          "status": "??",
+          "bytes": 1727,
+          "sha256": "dceb1ed3badeb90aab81769a6acd8e59869bdcc3d2236b5771a19a727f343448"
+        },
+        {
+          "path": "packages/core/src/memory/hindsight/hindsight-configuration-client.ts",
+          "status": "??",
+          "bytes": 1490,
+          "sha256": "ec1ce254318858840d4ca2bfa3ac90f57afb383aa4e96a423aabe8f28236a9ac"
+        },
+        {
+          "path": "packages/core/src/memory/hindsight/hindsight-configuration-comparison.ts",
+          "status": "??",
+          "bytes": 2506,
+          "sha256": "b065becfd0ee0ab5e4fe305bc277c01612020f7ce9c39fbaa12ea42c1e7b26ba"
+        },
+        {
+          "path": "packages/core/src/memory/hindsight/hindsight-configuration-compatibility.test.ts",
+          "status": "??",
+          "bytes": 3607,
+          "sha256": "d9dbc0194f141d4815abe92a4af8700f707f92cdc8f0330968cf379251c35e7c"
+        },
+        {
+          "path": "packages/core/src/memory/hindsight/hindsight-configuration-context.test.ts",
+          "status": "??",
+          "bytes": 3461,
+          "sha256": "a7e10477fc37355cbefe127c97fef3951ad5e07d78dbd28323528847dfb0b995"
+        },
+        {
+          "path": "packages/core/src/memory/hindsight/hindsight-configuration-context.ts",
+          "status": "??",
+          "bytes": 4080,
+          "sha256": "9ce8c96b0aef85fdcfc63aba0b492e72fae5e3ee34026470cf4d68bdfe630902"
+        },
+        {
+          "path": "packages/core/src/memory/hindsight/hindsight-configuration-secret.test.ts",
+          "status": "??",
+          "bytes": 4043,
+          "sha256": "6918d177c178ead8e02ee8908c46ba9cf6d82c41d2f9ef6a01cc11fefd27b77b"
+        },
+        {
+          "path": "packages/core/src/memory/hindsight/hindsight-configuration-service.test.ts",
+          "status": "??",
+          "bytes": 6690,
+          "sha256": "0ef730d399108727a187c7ae060c1a7897d620f216b03db213d9e8b22122257b"
+        },
+        {
+          "path": "packages/core/src/memory/hindsight/hindsight-configuration-service.ts",
+          "status": "??",
+          "bytes": 11061,
+          "sha256": "02588bf09bc26783557234fbd0c039a1d1e99eab29c3c468eaa2010ee12c20c2"
+        },
+        {
+          "path": "packages/core/src/memory/transitions/transition-healthy-publication-lease.test.ts",
+          "status": "??",
+          "bytes": 10017,
+          "sha256": "beeaa28b98688254ac40d97748096c7570c38819691c274bbbf462b852319fbb"
+        },
+        {
+          "path": "packages/core/src/server/methods/hindsight-configuration-methods.test.ts",
+          "status": "??",
+          "bytes": 4967,
+          "sha256": "82a6179e9dde2814a3f7a8713ddb459f0dbd7ef9933a0422872250947f653b28"
+        },
+        {
+          "path": "packages/core/src/server/methods/hindsight-configuration-methods.ts",
+          "status": "??",
+          "bytes": 1736,
+          "sha256": "7ef33d79125e947ffa6dcbfe2242e48501f4fec039cf26425f8812b1e54148ee"
+        },
+        {
+          "path": "packages/core/src/testing/hindsight-configuration-fixture.ts",
+          "status": "??",
+          "bytes": 4907,
+          "sha256": "5f5402b930f03530f6ce2274feb47923b5b6f636fc10edeba08cb3a0ff619e5e"
+        },
+        {
+          "path": "packages/shared/src/hindsight-configuration-observation-schema.test.ts",
+          "status": "??",
+          "bytes": 1695,
+          "sha256": "04e26704b5dc502c7ed778de4ed0c824b45d5813abc2ba8afb6afdf34e99315b"
+        },
+        {
+          "path": "packages/shared/src/hindsight-configuration-observation-schema.ts",
+          "status": "??",
+          "bytes": 5624,
+          "sha256": "31195b02ba38ea3c9ad5fb77b194a0fa47e666581cce9809fca277ba9db8d7dc"
+        }
+      ]
+    },
+    {
+      "root": "H:\\hindsight",
+      "head": "eb6413a7f58c4f3f0adb88a33a99516f8707fef7",
+      "files": [
+        {
+          "path": ".env.example",
+          "status": " M",
+          "bytes": 21841,
+          "sha256": "af87d3985ad0afbebe4a0a9ca77ec485a67ac64795644fa6683c025ba1ef2c17"
+        },
+        {
+          "path": ".gitattributes",
+          "status": " M",
+          "bytes": 124,
+          "sha256": "9412592d2e00ab5ef661476b713d40afbb2a2de8a6102c811d7c172efb0efc70"
+        },
+        {
+          "path": "TAKI_PATCHES.md",
+          "status": " M",
+          "bytes": 88361,
+          "sha256": "8d297cd4f492a7933b61dbe0bb3c5365f22b968d0f03c0110908c8a2fb7cd258"
+        },
+        {
+          "path": "hindsight-api-slim/hindsight_api/engine/db/base.py",
+          "status": " M",
+          "bytes": 14044,
+          "sha256": "fe4864744f0ebfbe016f1854fea94267b19ed4d6dda8990dc9c5721d8c73fd41"
+        },
+        {
+          "path": "hindsight-api-slim/hindsight_api/engine/db/ops.py",
+          "status": " M",
+          "bytes": 20638,
+          "sha256": "55d11dad0d97cebf999ecda3f9cfa04b52c8aa2aa81a0ed2887efbf6f7ddecef"
+        },
+        {
+          "path": "hindsight-api-slim/hindsight_api/engine/db/ops_postgresql.py",
+          "status": " M",
+          "bytes": 62763,
+          "sha256": "8db6fc6d4a0c62e6c2c880283ee5e7b69ed4b4dd4d2f8733eedfa9be52c26cbd"
+        },
+        {
+          "path": "hindsight-api-slim/hindsight_api/engine/db/oracle.py",
+          "status": " M",
+          "bytes": 58496,
+          "sha256": "44c884fa188162be7dbbe05921122911387dc829e41ca7dd0a503ff830e2f31a"
+        },
+        {
+          "path": "hindsight-api-slim/hindsight_api/engine/memories/__init__.py",
+          "status": " M",
+          "bytes": 2733,
+          "sha256": "fd59eb1d4e00a6b29ef3c8e648e47225b82d5e8334b86aba4ec0c0a3ad6ca297"
+        },
+        {
+          "path": "hindsight-api-slim/hindsight_api/engine/memory_engine.py",
+          "status": " M",
+          "bytes": 890748,
+          "sha256": "420f547ef3042df3114e0b89b68c4c5548ffe18396099a57f92a8e00dd02ca30"
+        },
+        {
+          "path": "hindsight-api-slim/hindsight_api/engine/taki_compatibility.py",
+          "status": " M",
+          "bytes": 23388,
+          "sha256": "9cccd0bba3561388d56e16181fc78b42ab49f42346c664cc4bea6b50579b779c"
+        },
+        {
+          "path": "hindsight-api-slim/hindsight_api/extensions/builtin/supabase_tenant.py",
+          "status": " M",
+          "bytes": 17665,
+          "sha256": "98bcd7352e56aa6bac3b39e8bc7be2da8bdfdb545ee866ed9b9c2e35529e8853"
+        },
+        {
+          "path": "hindsight-api-slim/hindsight_api/extensions/builtin/taki_memory.py",
+          "status": " M",
+          "bytes": 17340,
+          "sha256": "ad4cc3a891e2a86c6c2851cfc0ffe08f5517ee05bb041786acb70c756867845a"
+        },
+        {
+          "path": "hindsight-api-slim/hindsight_api/extensions/builtin/tenant.py",
+          "status": " M",
+          "bytes": 5060,
+          "sha256": "387e10f20d692b543edf6e61ce829733c5daaaffa9b8d261e9384446e3eb73dc"
+        },
+        {
+          "path": "hindsight-api-slim/hindsight_api/extensions/tenant.py",
+          "status": " M",
+          "bytes": 9018,
+          "sha256": "a2a11a572ed5c08dc58ac38fac43c38f8d7d8a1048444f7c752955436a730a5b"
+        },
+        {
+          "path": "hindsight-api-slim/tests/conftest.py",
+          "status": " M",
+          "bytes": 26198,
+          "sha256": "43e932d4239dadee446d25e3c48c6ad15c77eec4b4ea616e48194e5048e4ea4a"
+        },
+        {
+          "path": "hindsight-api-slim/tests/native_results/test_cutover_compatibility.py",
+          "status": " M",
+          "bytes": 4267,
+          "sha256": "f0c9d32551cb0e694773c530d896500458b1c7fcff94c11ba04eae5cd1f9bd47"
+        },
+        {
+          "path": "hindsight-api-slim/tests/test_supabase_tenant.py",
+          "status": " M",
+          "bytes": 35655,
+          "sha256": "5c2b88465977eae691c7b40aadf5f14243c92e4e1ea1b308ed3425c7e8335eb5"
+        },
+        {
+          "path": "hindsight-api-slim/tests/test_taki_admin_backup.py",
+          "status": " M",
+          "bytes": 19047,
+          "sha256": "e246cd5886f9cff193e1862e37e5da4a085dc3b4237d7d8cb3ca8697a7ea37ae"
+        },
+        {
+          "path": "hindsight-api-slim/tests/test_taki_extension_contract.py",
+          "status": " M",
+          "bytes": 21212,
+          "sha256": "f9cb7717ba4692ef6ae1b5629e2c5aee65742f779bd9b4840f9ebcba2f2192d6"
+        },
+        {
+          "path": "hindsight-clients/go/api/openapi.yaml",
+          "status": " M",
+          "bytes": 719194,
+          "sha256": "e0245864d1cb9cac60cd75ad8d9aa27c6d632aff730f07974af079d8a64f8d62"
+        },
+        {
+          "path": "hindsight-clients/go/api_taki_memory_compatibility.go",
+          "status": " M",
+          "bytes": 301932,
+          "sha256": "bca91ed3b38c5cc437599721ada31d40bc9651ce34f4a3842906d8118ab410d8"
+        },
+        {
+          "path": "hindsight-clients/go/model_taki_compatibility_contracts.go",
+          "status": " M",
+          "bytes": 18348,
+          "sha256": "84711cefc0d3ed96d0c48da83d4b0624ff2dec23cdcfddb372bb7eea77789405"
+        },
+        {
+          "path": "hindsight-clients/python/.openapi-generator/FILES",
+          "status": " M",
+          "bytes": 22056,
+          "sha256": "32e23383fa04fe2f0263d6e70cf713dcc778b67e78881345103e3d8fbc81ac70"
+        },
+        {
+          "path": "hindsight-clients/python/hindsight_client_api/__init__.py",
+          "status": " M",
+          "bytes": 34410,
+          "sha256": "1b7a88a41582eebb99429d5e4773e376e17f5bf6e48520dea41050657826f2d4"
+        },
+        {
+          "path": "hindsight-clients/python/hindsight_client_api/api/taki_memory_compatibility_api.py",
+          "status": " M",
+          "bytes": 520535,
+          "sha256": "85bdc28b7a7c536b27d1a26a93ec8d182fe223f5dd1b40eca20e4e723724e92b"
+        },
+        {
+          "path": "hindsight-clients/python/hindsight_client_api/models/__init__.py",
+          "status": " M",
+          "bytes": 32562,
+          "sha256": "fc27e5c7d7a304b94666724dffdcee58cf9366389c8aeb0c480f2a21f325190d"
+        },
+        {
+          "path": "hindsight-clients/python/hindsight_client_api/models/taki_compatibility_contracts.py",
+          "status": " M",
+          "bytes": 9170,
+          "sha256": "e2085a7aacb152b81152424086363747337d0410521ddb9cabe586bad477d73b"
+        },
+        {
+          "path": "hindsight-clients/typescript/generated/client/client.gen.ts",
+          "status": " M",
+          "bytes": 7402,
+          "sha256": "af4e40b6f3dcc7d853e9a214ba90a6d25ca21b1f5188c941c347a78aa28cac7f"
+        },
+        {
+          "path": "hindsight-clients/typescript/generated/sdk.gen.ts",
+          "status": " M",
+          "bytes": 85354,
+          "sha256": "30dbc27c37ef4fd0be2bb545dd838c6aba3413dd5c68f69ab89a95aa787a55dd"
+        },
+        {
+          "path": "hindsight-clients/typescript/generated/types.gen.ts",
+          "status": " M",
+          "bytes": 353002,
+          "sha256": "ca52d08dba66713de169479f4be9730107999f9029e1258587a7e670a153375e"
+        },
+        {
+          "path": "hindsight-control-plane/bin/cli.js",
+          "status": " M",
+          "bytes": 2441,
+          "sha256": "ce3ccd97b3759b2a0848221a9487de67178ce640d1ddc324a3043f7507655ef2"
+        },
+        {
+          "path": "hindsight-docs/docs/developer/configuration.md",
+          "status": " M",
+          "bytes": 173435,
+          "sha256": "6fbc16d22c14dc3c049461e01704e27366892062a4c71ef73acbb32e0066cc7c"
+        },
+        {
+          "path": "hindsight-docs/static/openapi.json",
+          "status": " M",
+          "bytes": 972227,
+          "sha256": "42c1d819c4f20f9a4859c29fb8a935be312c1023670b09f7d69460485597d2da"
+        },
+        {
+          "path": "hindsight-embed/hindsight_embed/env.example",
+          "status": " M",
+          "bytes": 21841,
+          "sha256": "af87d3985ad0afbebe4a0a9ca77ec485a67ac64795644fa6683c025ba1ef2c17"
+        },
+        {
+          "path": "scripts/generate-clients.sh",
+          "status": " M",
+          "bytes": 22074,
+          "sha256": "870bc97232bacab6e7b467f85c69716c882073f2c4c1e06c803bbde64502ac0f"
+        },
+        {
+          "path": "hindsight-api-slim/hindsight_api/api/taki_configuration_observation.py",
+          "status": "??",
+          "bytes": 3170,
+          "sha256": "a27775cd88b8e59a17672791cea4d300c251caa726547b22c84ad217ea79dde1"
+        },
+        {
+          "path": "hindsight-api-slim/hindsight_api/engine/configuration_observation.py",
+          "status": "??",
+          "bytes": 5937,
+          "sha256": "73d4711101c141f86c6dedd268c1541679cf1e1063a8d826f9588d89e6797c51"
+        },
+        {
+          "path": "hindsight-api-slim/hindsight_api/engine/configuration_observation_models.py",
+          "status": "??",
+          "bytes": 5320,
+          "sha256": "c2829e87041ab3ee89c17df96e2077a5a7eb0249407083448724b34aaa61a7a0"
+        },
+        {
+          "path": "hindsight-api-slim/hindsight_api/extensions/builtin/configuration_observation_grants.py",
+          "status": "??",
+          "bytes": 1129,
+          "sha256": "53abea9038b44d6efa341af0f5cd35b16bca34d469593f364da9565dfa6a442b"
+        },
+        {
+          "path": "hindsight-api-slim/tests/native_results/test_configuration_observation_compatibility.py",
+          "status": "??",
+          "bytes": 623,
+          "sha256": "f7cd6bc4484787ec6e4413404c20d98c884254953e5ff8598e4156de4cca2d9c"
+        },
+        {
+          "path": "hindsight-api-slim/tests/native_results/test_configuration_observation_pg.py",
+          "status": "??",
+          "bytes": 4017,
+          "sha256": "3de25f6def5688d6ac91275bddd237f304e6e3aa9e5fc60b717ddbfca8e52e7b"
+        },
+        {
+          "path": "hindsight-api-slim/tests/test_configuration_observation.py",
+          "status": "??",
+          "bytes": 11673,
+          "sha256": "2661547dbc1a0b9782c0249069ba0fea55165bfdb46a9b3e78db6270a6b33729"
+        },
+        {
+          "path": "hindsight-clients/configuration-observation-fixture.json",
+          "status": "??",
+          "bytes": 1017,
+          "sha256": "710e674dfcff817fbc22bf36a24a91c36a74449b5fbe4d0d9ddebc6f10929351"
+        },
+        {
+          "path": "hindsight-clients/go/configuration_observation_test.go",
+          "status": "??",
+          "bytes": 722,
+          "sha256": "74462190256413f81a6ee69288fabe50596a9cb52bdb2088b219f12606725fca"
+        },
+        {
+          "path": "hindsight-clients/go/model_taki_configuration_consolidation_profile.go",
+          "status": "??",
+          "bytes": 5408,
+          "sha256": "2d390211ed12d4aeb52a357f8b2079e52eab4424c9734fa20bed09f40072bf51"
+        },
+        {
+          "path": "hindsight-clients/go/model_taki_configuration_default_profile.go",
+          "status": "??",
+          "bytes": 5174,
+          "sha256": "db5bec73807972e67ec6cbd74ca05ce6f29f4e658f8c47aab82bfdd6ea1d35f0"
+        },
+        {
+          "path": "hindsight-clients/go/model_taki_configuration_not_covered.go",
+          "status": "??",
+          "bytes": 5418,
+          "sha256": "4752885e605f32d7ffc5237be639fa04a8661a9cb83c760ed3d4e3596c6027da"
+        },
+        {
+          "path": "hindsight-clients/go/model_taki_configuration_observation.go",
+          "status": "??",
+          "bytes": 15090,
+          "sha256": "7d50d488aad931cc0cf4d04ebed3c89cb8daeed22f5d9cd799ab3bbeb0069de7"
+        },
+        {
+          "path": "hindsight-clients/go/model_taki_configuration_observation_refusal.go",
+          "status": "??",
+          "bytes": 6051,
+          "sha256": "171626af88ecea15043354e716b15cc1668c317de2aed07402f6b21a4b78dd0c"
+        },
+        {
+          "path": "hindsight-clients/go/model_taki_configuration_profiles.go",
+          "status": "??",
+          "bytes": 7292,
+          "sha256": "2d215439d11b1b15ccd4f3a38b3ebd3861cc58c8ca618342a1f3aded5812439b"
+        },
+        {
+          "path": "hindsight-clients/go/model_taki_configuration_reflect_profile.go",
+          "status": "??",
+          "bytes": 5174,
+          "sha256": "51bafbb310c7df4eed52a5ceedc873dc33742614f92707d47237f3fe235bcf87"
+        },
+        {
+          "path": "hindsight-clients/go/model_taki_configuration_retain_profile.go",
+          "status": "??",
+          "bytes": 5135,
+          "sha256": "d55cec448e3175e4f4c3543fe98428e4fd60825d384d189968dea9ca5369a278"
+        },
+        {
+          "path": "hindsight-clients/go/model_taki_configuration_source.go",
+          "status": "??",
+          "bytes": 5473,
+          "sha256": "164bf8f5ff942497ef0492cb449a921d798a6a646e30c906219f05e523a9a54f"
+        },
+        {
+          "path": "hindsight-clients/go/model_taki_configuration_target.go",
+          "status": "??",
+          "bytes": 6049,
+          "sha256": "bddfb3c00ada08b9c26bb51703615eafa4cba5c0fc1419a6709bf19765c2235e"
+        },
+        {
+          "path": "hindsight-clients/go/model_taki_disabled_configuration_profile.go",
+          "status": "??",
+          "bytes": 4520,
+          "sha256": "9e413af920652b2f80f466af5f1109be43c4260ff815dc93f86878bdd6d2a2d7"
+        },
+        {
+          "path": "hindsight-clients/go/model_taki_single_configuration_profile.go",
+          "status": "??",
+          "bytes": 6693,
+          "sha256": "291893c3bdb45b9cf8c3cbf96962e27ad6d4cf6fe905563a4009c184de62e4fd"
+        },
+        {
+          "path": "hindsight-clients/go/model_taki_unknown_configuration_profile.go",
+          "status": "??",
+          "bytes": 5772,
+          "sha256": "2b3c225e82d2b53be66c0e9fc9a4780312d1ea21f5bf4967269be1a2a03f0fb8"
+        },
+        {
+          "path": "hindsight-clients/python/hindsight_client_api/models/taki_configuration_consolidation_profile.py",
+          "status": "??",
+          "bytes": 7137,
+          "sha256": "3876e2b7722e66aaff12465525f39ac0db7be24802ae0ecb120261c79aea010d"
+        },
+        {
+          "path": "hindsight-clients/python/hindsight_client_api/models/taki_configuration_default_profile.py",
+          "status": "??",
+          "bytes": 7089,
+          "sha256": "9eb34b006d3551b161598a6616051ff7394250e858ee0519311a4ced29ce51c3"
+        },
+        {
+          "path": "hindsight-clients/python/hindsight_client_api/models/taki_configuration_not_covered.py",
+          "status": "??",
+          "bytes": 3935,
+          "sha256": "665a53d38f312e409e1a6ad424c8bf5d909627c08010240fa79dd83105db980f"
+        },
+        {
+          "path": "hindsight-clients/python/hindsight_client_api/models/taki_configuration_observation.py",
+          "status": "??",
+          "bytes": 7140,
+          "sha256": "f5455aa5d67014f67306758392b817abeb59364ae30798e1e01559de1856a1ca"
+        },
+        {
+          "path": "hindsight-clients/python/hindsight_client_api/models/taki_configuration_observation_refusal.py",
+          "status": "??",
+          "bytes": 4042,
+          "sha256": "64ea08a093aed1577e56b21b612cf4721a6b0171b016a4b7c531de5215935c21"
+        },
+        {
+          "path": "hindsight-clients/python/hindsight_client_api/models/taki_configuration_profiles.py",
+          "status": "??",
+          "bytes": 4896,
+          "sha256": "e63c2b865b02a21c1e0fe8ff9c1d06540ae85fd14961bfccbf0c6df381604e94"
+        },
+        {
+          "path": "hindsight-clients/python/hindsight_client_api/models/taki_configuration_reflect_profile.py",
+          "status": "??",
+          "bytes": 7089,
+          "sha256": "1336a1a348cb7df5443b650f9aea0a012aed7e2b3f4e9c429ba3adef878bb1cd"
+        },
+        {
+          "path": "hindsight-clients/python/hindsight_client_api/models/taki_configuration_retain_profile.py",
+          "status": "??",
+          "bytes": 7081,
+          "sha256": "0d6cf133d61264a62772b50ae974af949c16432eb0a1d505a8159df41b0db186"
+        },
+        {
+          "path": "hindsight-clients/python/hindsight_client_api/models/taki_configuration_source.py",
+          "status": "??",
+          "bytes": 3759,
+          "sha256": "33209099b014a42fa8111b6b40e9ed9b1acc5dc71c369d12fb9434399f71114c"
+        },
+        {
+          "path": "hindsight-clients/python/hindsight_client_api/models/taki_configuration_target.py",
+          "status": "??",
+          "bytes": 3499,
+          "sha256": "6c5b5ccc33ab7bf5871c3d14d61a13bfd11d2ae4c30996cc9c36d3c44cb71cd0"
+        },
+        {
+          "path": "hindsight-clients/python/hindsight_client_api/models/taki_disabled_configuration_profile.py",
+          "status": "??",
+          "bytes": 3507,
+          "sha256": "be6ecbd65e5a6254b2af904f6c1d2b252d1ad305157ccf91f840ce930334d9e0"
+        },
+        {
+          "path": "hindsight-clients/python/hindsight_client_api/models/taki_single_configuration_profile.py",
+          "status": "??",
+          "bytes": 4996,
+          "sha256": "a9d8717bf8f85b2365b3d677e0954a498c2ddff6e96058f9bf1dec5429bcd872"
+        },
+        {
+          "path": "hindsight-clients/python/hindsight_client_api/models/taki_unknown_configuration_profile.py",
+          "status": "??",
+          "bytes": 3947,
+          "sha256": "a062bf2126160ddbe50483f0082ce8bc7043995e8520872125f3ba3340a71f79"
+        },
+        {
+          "path": "hindsight-clients/python/tests/test_configuration_observation.py",
+          "status": "??",
+          "bytes": 1270,
+          "sha256": "4f5f6c5798a5ae29d533482c41229cc15cf417249e9c85b45f9a6c42bdb34dea"
+        },
+        {
+          "path": "hindsight-clients/rust/tests/configuration_observation_contract.rs",
+          "status": "??",
+          "bytes": 1070,
+          "sha256": "780cfa1eb376f09bda74535be2ddd4f8eb579b47e828b681239fcd8c7e746043"
+        },
+        {
+          "path": "hindsight-clients/typescript/tests/configuration_observation.test.ts",
+          "status": "??",
+          "bytes": 2005,
+          "sha256": "b4322d21b099852d793641312bbd0d0ecd36a27a4636389a5f8a2de362ecf358"
+        },
+        {
+          "path": "scripts/openapi-generator-backend.sh",
+          "status": "??",
+          "bytes": 2392,
+          "sha256": "77537a679e1e6413bc043cc6058f7bc6d4ee962c6e443bda420d92ba6d3e6462"
+        },
+        {
+          "path": "scripts/test-openapi-generator-backend.py",
+          "status": "??",
+          "bytes": 2400,
+          "sha256": "6aa0fb146b8d2aac3761a021d572d817defa3d05ff12926e89c515c22364fb71"
+        }
+      ]
+    }
+  ]
+}

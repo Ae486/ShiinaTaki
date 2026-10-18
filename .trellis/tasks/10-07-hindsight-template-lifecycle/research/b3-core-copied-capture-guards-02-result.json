@@ -1,0 +1,20 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "--filter",
+    "@taki/core",
+    "exec",
+    "vitest",
+    "run",
+    "src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts",
+    "--maxWorkers=2"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "durationSeconds": 53.316,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-copied-capture-guards-02.log",
+  "sourceIdentity": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-copied-capture-guards-02-source.json",
+  "sourceAfter": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-copied-capture-guards-02-source-after.json",
+  "inputCount": 1588,
+  "sourceMismatches": []
+}

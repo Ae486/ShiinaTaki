@@ -1,0 +1,6 @@
+{
+  "startedAt": "2026-10-07T10:41:17.4756248Z",
+  "finishedAt": "2026-10-07T10:42:12.2934991Z",
+  "exitCode": 0,
+  "command": "pnpm --filter @taki/core test --maxWorkers=2 --reporter=verbose src/memory/transitions/transition-emergency-context.test.ts"
+}

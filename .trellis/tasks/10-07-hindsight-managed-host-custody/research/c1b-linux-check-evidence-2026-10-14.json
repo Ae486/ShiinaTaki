@@ -1,0 +1,919 @@
+{
+  "version": 1,
+  "status": "pass",
+  "preflight": {
+    "at": "2026-10-14T09:07:44.4225990Z",
+    "cwd": "H:\\TakiAgent",
+    "takiHead": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a",
+    "takiBranch": "main",
+    "nativeHead": "eb6413a7f58c4f3f0adb88a33a99516f8707fef7",
+    "nativeBranch": "main",
+    "manifestSha256": "f69ca93f675bf3513ef687952c357c0be0004a305e1ff46ecc91c21d12033c17",
+    "hashes": [
+      {
+        "repository": "native",
+        "path": "docker/standalone/managed_bootstrap/__init__.py",
+        "sha256": "cbf487cffc9c62b5c6fe61f32d80070b5843f70f966c5fca163c675e21ddbf1d",
+        "expectedSha256": "cbf487cffc9c62b5c6fe61f32d80070b5843f70f966c5fca163c675e21ddbf1d",
+        "matches": true
+      },
+      {
+        "repository": "native",
+        "path": "docker/standalone/managed_bootstrap/protocol.py",
+        "sha256": "074247650a31cfc47a1931ef6c7b258aa6f1d3a649bbb792ff2878257f6f8b88",
+        "expectedSha256": "074247650a31cfc47a1931ef6c7b258aa6f1d3a649bbb792ff2878257f6f8b88",
+        "matches": true
+      },
+      {
+        "repository": "native",
+        "path": "docker/standalone/managed_bootstrap/bootstrap.py",
+        "sha256": "b8331bd8c9645d265578ed65f9f77402f170813f20d1d2683b5aa0a7d0768101",
+        "expectedSha256": "b8331bd8c9645d265578ed65f9f77402f170813f20d1d2683b5aa0a7d0768101",
+        "matches": true
+      },
+      {
+        "repository": "native",
+        "path": "docker/standalone/managed_bootstrap/supervision.py",
+        "sha256": "ff768434e0cef9eb2b6996351ba31e1dedede95211809d2ab8e8d09b5d9a5064",
+        "expectedSha256": "ff768434e0cef9eb2b6996351ba31e1dedede95211809d2ab8e8d09b5d9a5064",
+        "matches": true
+      },
+      {
+        "repository": "native",
+        "path": "docker/standalone/managed_bootstrap/unix_socket.py",
+        "sha256": "a972e2a68f2fbf16c836425bb0f07da0d83886e218eedc0588eadd92351463a7",
+        "expectedSha256": "a972e2a68f2fbf16c836425bb0f07da0d83886e218eedc0588eadd92351463a7",
+        "matches": true
+      },
+      {
+        "repository": "native",
+        "path": "docker/standalone/managed_bootstrap/submitter.py",
+        "sha256": "5a6ad60266066d1cff2559d46c6b2b15d4a93cf882de1e487790ad0fb6863c4a",
+        "expectedSha256": "5a6ad60266066d1cff2559d46c6b2b15d4a93cf882de1e487790ad0fb6863c4a",
+        "matches": true
+      },
+      {
+        "repository": "native",
+        "path": "docker/standalone/managed_bootstrap/README.md",
+        "sha256": "c3ca3734d3547c7f565583d12b769758cf41b19008ff6753860aa2487df29eb5",
+        "expectedSha256": "c3ca3734d3547c7f565583d12b769758cf41b19008ff6753860aa2487df29eb5",
+        "matches": true
+      },
+      {
+        "repository": "native",
+        "path": "docker/standalone/tests/test_managed_bootstrap_protocol.py",
+        "sha256": "ff59ed7c5e866ad9a9f93bea47af47e45e8f580ed6113641d1f9da59f6a5bb15",
+        "expectedSha256": "ff59ed7c5e866ad9a9f93bea47af47e45e8f580ed6113641d1f9da59f6a5bb15",
+        "matches": true
+      },
+      {
+        "repository": "native",
+        "path": "docker/standalone/tests/test_managed_bootstrap_process.py",
+        "sha256": "30035061fcad9c87c6372f0af06265aa1de2ebfd0a741c0247ca335083078306",
+        "expectedSha256": "30035061fcad9c87c6372f0af06265aa1de2ebfd0a741c0247ca335083078306",
+        "matches": true
+      },
+      {
+        "repository": "native",
+        "path": "docker/standalone/tests/test_managed_bootstrap_linux.py",
+        "sha256": "beafedbf0e0d025d12b3174d3719256bbb8dd68cf175e7ae55cf386a629c28e0",
+        "expectedSha256": "beafedbf0e0d025d12b3174d3719256bbb8dd68cf175e7ae55cf386a629c28e0",
+        "matches": true
+      },
+      {
+        "repository": "native",
+        "path": "docker/standalone/tests/fixtures/fixed_consumer.py",
+        "sha256": "f6fb9ee20ccc6a5a48960efd35a4e992d225a6a99317886ca41985d9b2c0b18c",
+        "expectedSha256": "f6fb9ee20ccc6a5a48960efd35a4e992d225a6a99317886ca41985d9b2c0b18c",
+        "matches": true
+      },
+      {
+        "repository": "native",
+        "path": "docker/standalone/tests/fixtures/pipe_bootstrap.py",
+        "sha256": "f8b617caf9831483dc0b86bdce62050dc30ecbb81f229ffad62df98ca37620f1",
+        "expectedSha256": "f8b617caf9831483dc0b86bdce62050dc30ecbb81f229ffad62df98ca37620f1",
+        "matches": true
+      },
+      {
+        "repository": "native",
+        "path": "docker/standalone/tests/fixtures/pipe_submitter.py",
+        "sha256": "8453e7a1da9e4706cbe2635c4e3d37378b52401fd6c3930170888767f09bfc74",
+        "expectedSha256": "8453e7a1da9e4706cbe2635c4e3d37378b52401fd6c3930170888767f09bfc74",
+        "matches": true
+      },
+      {
+        "repository": "native",
+        "path": "docker/standalone/tests/fixtures/unix_bootstrap.py",
+        "sha256": "8611e2cb9f1dcc48dc88027bf24e04727d16bf57074ccc2b2d65ebf97f72105a",
+        "expectedSha256": "8611e2cb9f1dcc48dc88027bf24e04727d16bf57074ccc2b2d65ebf97f72105a",
+        "matches": true
+      },
+      {
+        "repository": "native",
+        "path": "docker/standalone/tests/fixtures/unix_submitter.py",
+        "sha256": "dd5fcb8c0fe108012dc8542760995b60083c74ff6b5cd2e6de07d0922ee43c68",
+        "expectedSha256": "dd5fcb8c0fe108012dc8542760995b60083c74ff6b5cd2e6de07d0922ee43c68",
+        "matches": true
+      },
+      {
+        "repository": "taki",
+        "path": "apps/hindsight-host/src/restart-observer.ts",
+        "sha256": "4b80c79e9aad52f3759ecbcb749253ae7c86a22c413f0f9d7b8731e163ade86f",
+        "expectedSha256": "4b80c79e9aad52f3759ecbcb749253ae7c86a22c413f0f9d7b8731e163ade86f",
+        "matches": true
+      },
+      {
+        "repository": "taki",
+        "path": "apps/hindsight-host/src/restart-observer.test.ts",
+        "sha256": "d22e77c9dd106e87d52e50542ae553ebcfaca94a9abae5e4b1bd6a0ea14ffc9f",
+        "expectedSha256": "d22e77c9dd106e87d52e50542ae553ebcfaca94a9abae5e4b1bd6a0ea14ffc9f",
+        "matches": true
+      },
+      {
+        "repository": "taki",
+        "path": "apps/hindsight-host/src/index.md",
+        "sha256": "710c32d6e5d4487b7a8d77ab81156ab048c851f3ab454270b71940fb22e4ad6e",
+        "expectedSha256": "710c32d6e5d4487b7a8d77ab81156ab048c851f3ab454270b71940fb22e4ad6e",
+        "matches": true
+      },
+      {
+        "repository": "taki",
+        "path": "apps/hindsight-host/README.md",
+        "sha256": "2bfad9ef4a27efd80c60b92a56577d217a3f79a2caddcd87321d00d5c088c7d3",
+        "expectedSha256": "2bfad9ef4a27efd80c60b92a56577d217a3f79a2caddcd87321d00d5c088c7d3",
+        "matches": true
+      },
+      {
+        "repository": "native",
+        "path": "docker/standalone/start-all.sh",
+        "sha256": "8289b688c207bb1ef9a6ec5522d5391cb31b18c85d2f607b29bb77cd5e6e31b0",
+        "expectedSha256": "8289b688c207bb1ef9a6ec5522d5391cb31b18c85d2f607b29bb77cd5e6e31b0",
+        "matches": true
+      },
+      {
+        "repository": "native",
+        "path": "hindsight-api-slim/hindsight_api/config.py",
+        "sha256": "c19b8147c5741cae55a39de259fea8f5da2c3be7f57fba20859ce49e5d9bb5bd",
+        "expectedSha256": "c19b8147c5741cae55a39de259fea8f5da2c3be7f57fba20859ce49e5d9bb5bd",
+        "matches": true
+      },
+      {
+        "repository": "native",
+        "path": "ruff.toml",
+        "sha256": "e75b1308b58b44dcdcac523dee68b99e694eec7b222ddb0cd3cc69b8919ac082",
+        "expectedSha256": "e75b1308b58b44dcdcac523dee68b99e694eec7b222ddb0cd3cc69b8919ac082",
+        "matches": true
+      },
+      {
+        "repository": "native",
+        "path": "pyproject.toml",
+        "sha256": "f9111ebf30ada7b24fbd66b1fd847aaafa25f7ed1cfa8caca648c817034a2010",
+        "expectedSha256": "f9111ebf30ada7b24fbd66b1fd847aaafa25f7ed1cfa8caca648c817034a2010",
+        "matches": true
+      },
+      {
+        "repository": "native",
+        "path": "hindsight-api-slim/pyproject.toml",
+        "sha256": "6a1735ecb0d5e5f86662cb2138af8c616f36ec1ce071067f190887b4864f59b5",
+        "expectedSha256": "6a1735ecb0d5e5f86662cb2138af8c616f36ec1ce071067f190887b4864f59b5",
+        "matches": true
+      },
+      {
+        "repository": "native",
+        "path": "uv.lock",
+        "sha256": "0d247c326b04bd7b8e58140a0b984ba00b848c49b0a0996afe8b8cd81ed07131",
+        "expectedSha256": "0d247c326b04bd7b8e58140a0b984ba00b848c49b0a0996afe8b8cd81ed07131",
+        "matches": true
+      },
+      {
+        "repository": "taki",
+        "path": "packages/shared/src/hindsight-custody-schema.ts",
+        "sha256": "c032dec7bd6c7ad719fc25a34db5dc1ed374c147c7d104602b54ce9e88dfaef0",
+        "expectedSha256": "c032dec7bd6c7ad719fc25a34db5dc1ed374c147c7d104602b54ce9e88dfaef0",
+        "matches": true
+      },
+      {
+        "repository": "taki",
+        "path": "apps/hindsight-host/src/main.ts",
+        "sha256": "c5bd8c3c41dd2bcbef22fe60bc8e968028e3308e926e7eecdd9fd4bc2bc6c2b3",
+        "expectedSha256": "c5bd8c3c41dd2bcbef22fe60bc8e968028e3308e926e7eecdd9fd4bc2bc6c2b3",
+        "matches": true
+      },
+      {
+        "repository": "taki",
+        "path": "apps/hindsight-host/scripts/build.ts",
+        "sha256": "3ba6b9fe68395ac955b79556f799cde6a8e7e8c2ef6c3d65926c34612ddf2083",
+        "expectedSha256": "3ba6b9fe68395ac955b79556f799cde6a8e7e8c2ef6c3d65926c34612ddf2083",
+        "matches": true
+      },
+      {
+        "repository": "taki",
+        "path": "apps/hindsight-host/package.json",
+        "sha256": "ac174d8d210f9895d94a7f182fbf9b1ee61fe273444a158e502e7610c5be0291",
+        "expectedSha256": "ac174d8d210f9895d94a7f182fbf9b1ee61fe273444a158e502e7610c5be0291",
+        "matches": true
+      },
+      {
+        "repository": "taki",
+        "path": "pnpm-lock.yaml",
+        "sha256": "8fd90b14d80bef5e930888519188f255e16cf046a0221df0fedf3b9d441db19d",
+        "expectedSha256": "8fd90b14d80bef5e930888519188f255e16cf046a0221df0fedf3b9d441db19d",
+        "matches": true
+      },
+      {
+        "repository": "taki",
+        "path": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/c1a-independent-source-hashes.json",
+        "sha256": "e18cdbb4319a6b1d5f54a592d102a6bac95465f266535fdc3c1aeb9bdf1a172b",
+        "expectedSha256": "e18cdbb4319a6b1d5f54a592d102a6bac95465f266535fdc3c1aeb9bdf1a172b",
+        "matches": true
+      },
+      {
+        "repository": "taki",
+        "path": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/c1b-check-log.json",
+        "sha256": "432a5e298ab083936f13c5e130f6e0230c1a0747119cae623d7af825e2db7e16",
+        "expectedSha256": "432a5e298ab083936f13c5e130f6e0230c1a0747119cae623d7af825e2db7e16",
+        "matches": true
+      },
+      {
+        "repository": "taki",
+        "path": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/c1b-cleanup-evidence.json",
+        "sha256": "c404a1abfcd9b7aaf17e4f8f3125bb028f37950b1cc426a932af25df60326b74",
+        "expectedSha256": "c404a1abfcd9b7aaf17e4f8f3125bb028f37950b1cc426a932af25df60326b74",
+        "matches": true
+      },
+      {
+        "repository": "taki",
+        "path": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/c1b-implementation-handoff.md",
+        "sha256": "736c7e462066731c8db42f1f594669791715df19eb07207a7db75e5cec3c6abb",
+        "expectedSha256": "736c7e462066731c8db42f1f594669791715df19eb07207a7db75e5cec3c6abb",
+        "matches": true
+      }
+    ],
+    "tempExists": false,
+    "drives": [
+      {
+        "Name": "G",
+        "Free": 150203047936,
+        "Used": 640268062720
+      },
+      {
+        "Name": "H",
+        "Free": 14312742912,
+        "Used": 195402149888
+      }
+    ],
+    "wslState": "  NAME              STATE           VERSION\r\n\r\n* Ubuntu-22.04      Stopped         2\r\n\r\n  docker-desktop    Stopped         2\r\n\r\n\r\n"
+  },
+  "downloads": [
+    {
+      "name": "cpython-3.11.17+20261013-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz",
+      "sha256": "3b8e5a248bcc351265ffe68f5e457668a2e09c99a47f81f658988c7d3d107522",
+      "bytes": 30823613,
+      "verified": true
+    },
+    {
+      "name": "python_dotenv-1.2.2-py3-none-any.whl",
+      "sha256": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+      "bytes": 22101,
+      "verified": true
+    }
+  ],
+  "tests": [
+    {
+      "runtime": {
+        "python": "3.11.17",
+        "executable": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+        "prefix": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python",
+        "dotenvVersion": "1.2.2",
+        "dotenvFile": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/lib/python3.11/site-packages/dotenv/__init__.py",
+        "pipVersion": "26.2.1",
+        "uid": 0,
+        "euid": 0,
+        "AF_UNIX": true,
+        "SO_PEERCRED": true,
+        "killpg": true
+      },
+      "command": [
+        "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "docker/standalone/tests",
+        "-p",
+        "test_managed_bootstrap_linux.py",
+        "-v"
+      ],
+      "cwd": "/mnt/h/hindsight",
+      "startedAt": "2026-10-14T09:12:42.614931+00:00",
+      "endedAt": "2026-10-14T09:13:14.892072+00:00",
+      "elapsedSeconds": 32.277013404,
+      "exitCode": 1,
+      "testPid": 514,
+      "testPidReaped": true,
+      "fixtureBaseline": [],
+      "ownedFixtures": [
+        {
+          "path": "/tmp/taki-c1b-fake-vf52cyep",
+          "marker": "owned Linux fake process proof",
+          "pids": [],
+          "existsAfter": false
+        },
+        {
+          "path": "/tmp/taki-c1b-fake-0kgjvc3g",
+          "marker": "owned Linux fake process proof",
+          "pids": [],
+          "existsAfter": false
+        },
+        {
+          "path": "/tmp/taki-c1b-fake-_x0qi7ln",
+          "marker": "owned Linux fake process proof",
+          "pids": [
+            {
+              "pid": 552,
+              "startTicks": "2230",
+              "role": "consumer-pid.json",
+              "fixture": "/tmp/taki-c1b-fake-_x0qi7ln",
+              "executable": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+              "sameIdentityAliveAfter": false
+            }
+          ],
+          "existsAfter": false
+        },
+        {
+          "path": "/tmp/taki-c1b-fake-pbrfcbq5",
+          "marker": "owned Linux fake process proof",
+          "pids": [],
+          "existsAfter": false
+        },
+        {
+          "path": "/tmp/taki-c1b-fake-gec43hi1",
+          "marker": "owned Linux fake process proof",
+          "pids": [],
+          "existsAfter": false
+        },
+        {
+          "path": "/tmp/taki-c1b-fake-sum3m6tn",
+          "marker": "owned Linux fake process proof",
+          "pids": [],
+          "existsAfter": false
+        },
+        {
+          "path": "/tmp/taki-c1b-fake-z4ec7v2n",
+          "marker": "owned Linux fake process proof",
+          "pids": [],
+          "existsAfter": false
+        },
+        {
+          "path": "/tmp/taki-c1b-fake-3ma12nz9",
+          "marker": "owned Linux fake process proof",
+          "pids": [],
+          "existsAfter": false
+        }
+      ],
+      "observedProcessIdentities": [
+        {
+          "pid": 552,
+          "startTicks": "2230",
+          "role": "consumer-pid.json",
+          "fixture": "/tmp/taki-c1b-fake-_x0qi7ln",
+          "executable": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+          "sameIdentityAliveAfter": false
+        }
+      ],
+      "remainingFixtures": [],
+      "log": "test_changed_startup_and_configuration_never_spawn (test_managed_bootstrap_linux.LinuxProcessTests.test_changed_startup_and_configuration_never_spawn) ... FAIL\ntest_graceful_shutdown_keeps_its_own_thirty_second_budget (test_managed_bootstrap_linux.LinuxProcessTests.test_graceful_shutdown_keeps_its_own_thirty_second_budget) ... FAIL\ntest_lost_ack_can_be_observed_after_admission_expiry (test_managed_bootstrap_linux.LinuxProcessTests.test_lost_ack_can_be_observed_after_admission_expiry) ... ok\ntest_real_process_group_signal_and_grandchild_reaping (test_managed_bootstrap_linux.LinuxProcessTests.test_real_process_group_signal_and_grandchild_reaping) ... FAIL\ntest_signal_during_partial_frame_cancels_private_read_promptly (test_managed_bootstrap_linux.LinuxProcessTests.test_signal_during_partial_frame_cancels_private_read_promptly) ... ok\ntest_socket_uid_modes_actual_submission_duplicate_and_cleanup (test_managed_bootstrap_linux.LinuxProcessTests.test_socket_uid_modes_actual_submission_duplicate_and_cleanup) ... FAIL\ntest_trickle_bytes_cannot_extend_original_deadline (test_managed_bootstrap_linux.LinuxProcessTests.test_trickle_bytes_cannot_extend_original_deadline) ... FAIL\ntest_wrong_kernel_peer_uid_and_unsafe_directory_refuse (test_managed_bootstrap_linux.LinuxProcessTests.test_wrong_kernel_peer_uid_and_unsafe_directory_refuse) ... FAIL\n\n======================================================================\nFAIL: test_changed_startup_and_configuration_never_spawn (test_managed_bootstrap_linux.LinuxProcessTests.test_changed_startup_and_configuration_never_spawn)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/mnt/h/hindsight/docker/standalone/tests/test_managed_bootstrap_linux.py\", line 177, in test_changed_startup_and_configuration_never_spawn\n    self.start()\n  File \"/mnt/h/hindsight/docker/standalone/tests/test_managed_bootstrap_linux.py\", line 94, in start\n    self.assertTrue((self.root / \"socket/bootstrap.sock\").exists())\nAssertionError: False is not true\n\n======================================================================\nFAIL: test_graceful_shutdown_keeps_its_own_thirty_second_budget (test_managed_bootstrap_linux.LinuxProcessTests.test_graceful_shutdown_keeps_its_own_thirty_second_budget)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/mnt/h/hindsight/docker/standalone/tests/test_managed_bootstrap_linux.py\", line 230, in test_graceful_shutdown_keeps_its_own_thirty_second_budget\n    self.start(mode=\"graceful\", admission=3, lifetime=120)\n  File \"/mnt/h/hindsight/docker/standalone/tests/test_managed_bootstrap_linux.py\", line 94, in start\n    self.assertTrue((self.root / \"socket/bootstrap.sock\").exists())\nAssertionError: False is not true\n\n======================================================================\nFAIL: test_real_process_group_signal_and_grandchild_reaping (test_managed_bootstrap_linux.LinuxProcessTests.test_real_process_group_signal_and_grandchild_reaping)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/mnt/h/hindsight/docker/standalone/tests/test_managed_bootstrap_linux.py\", line 218, in test_real_process_group_signal_and_grandchild_reaping\n    self.start(mode=\"group\", lifetime=120)\n  File \"/mnt/h/hindsight/docker/standalone/tests/test_managed_bootstrap_linux.py\", line 94, in start\n    self.assertTrue((self.root / \"socket/bootstrap.sock\").exists())\nAssertionError: False is not true\n\n======================================================================\nFAIL: test_socket_uid_modes_actual_submission_duplicate_and_cleanup (test_managed_bootstrap_linux.LinuxProcessTests.test_socket_uid_modes_actual_submission_duplicate_and_cleanup)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/mnt/h/hindsight/docker/standalone/tests/test_managed_bootstrap_linux.py\", line 118, in test_socket_uid_modes_actual_submission_duplicate_and_cleanup\n    self.start(lifetime=1.5)\n  File \"/mnt/h/hindsight/docker/standalone/tests/test_managed_bootstrap_linux.py\", line 94, in start\n    self.assertTrue((self.root / \"socket/bootstrap.sock\").exists())\nAssertionError: False is not true\n\n======================================================================\nFAIL: test_trickle_bytes_cannot_extend_original_deadline (test_managed_bootstrap_linux.LinuxProcessTests.test_trickle_bytes_cannot_extend_original_deadline)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/mnt/h/hindsight/docker/standalone/tests/test_managed_bootstrap_linux.py\", line 198, in test_trickle_bytes_cannot_extend_original_deadline\n    self.start(admission=0.5)\n  File \"/mnt/h/hindsight/docker/standalone/tests/test_managed_bootstrap_linux.py\", line 94, in start\n    self.assertTrue((self.root / \"socket/bootstrap.sock\").exists())\nAssertionError: False is not true\n\n======================================================================\nFAIL: test_wrong_kernel_peer_uid_and_unsafe_directory_refuse (test_managed_bootstrap_linux.LinuxProcessTests.test_wrong_kernel_peer_uid_and_unsafe_directory_refuse)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/mnt/h/hindsight/docker/standalone/tests/test_managed_bootstrap_linux.py\", line 134, in test_wrong_kernel_peer_uid_and_unsafe_directory_refuse\n    self.start()\n  File \"/mnt/h/hindsight/docker/standalone/tests/test_managed_bootstrap_linux.py\", line 94, in start\n    self.assertTrue((self.root / \"socket/bootstrap.sock\").exists())\nAssertionError: False is not true\n\n----------------------------------------------------------------------\nRan 8 tests in 27.843s\n\nFAILED (failures=6)\n",
+      "run": 1,
+      "counts": {
+        "passed": 2,
+        "failed": 6,
+        "skipped": 0
+      },
+      "changeBeforeRun": "accepted_source_baseline"
+    },
+    {
+      "runtime": {
+        "python": "3.11.17",
+        "executable": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+        "prefix": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python",
+        "dotenvVersion": "1.2.2",
+        "dotenvFile": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/lib/python3.11/site-packages/dotenv/__init__.py",
+        "pipVersion": "26.2.1",
+        "uid": 0,
+        "euid": 0,
+        "AF_UNIX": true,
+        "SO_PEERCRED": true,
+        "killpg": true
+      },
+      "command": [
+        "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "docker/standalone/tests",
+        "-p",
+        "test_managed_bootstrap_linux.py",
+        "-v"
+      ],
+      "cwd": "/mnt/h/hindsight",
+      "startedAt": "2026-10-14T09:16:36.126945+00:00",
+      "endedAt": "2026-10-14T09:17:25.907008+00:00",
+      "elapsedSeconds": 49.710042511000005,
+      "exitCode": 1,
+      "testPid": 511,
+      "testPidReaped": true,
+      "fixtureBaseline": [],
+      "ownedFixtures": [
+        {
+          "path": "/tmp/taki-c1b-fake-wv4knolc",
+          "marker": "owned Linux fake process proof",
+          "pids": [],
+          "existsAfter": false
+        },
+        {
+          "path": "/tmp/taki-c1b-fake-qdbloefp",
+          "marker": "owned Linux fake process proof",
+          "pids": [],
+          "existsAfter": false
+        },
+        {
+          "path": "/tmp/taki-c1b-fake-7frurpls",
+          "marker": "owned Linux fake process proof",
+          "pids": [
+            {
+              "pid": 571,
+              "startTicks": "2902",
+              "role": "consumer-pid.json",
+              "fixture": "/tmp/taki-c1b-fake-7frurpls",
+              "executable": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+              "sameIdentityAliveAfter": false
+            }
+          ],
+          "existsAfter": false
+        },
+        {
+          "path": "/tmp/taki-c1b-fake-_xb3dboz",
+          "marker": "owned Linux fake process proof",
+          "pids": [
+            {
+              "pid": 592,
+              "startTicks": "3932",
+              "role": "consumer-pid.json",
+              "fixture": "/tmp/taki-c1b-fake-_xb3dboz",
+              "executable": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+              "sameIdentityAliveAfter": false
+            },
+            {
+              "pid": 595,
+              "startTicks": "4144",
+              "role": "grandchild-pid.json",
+              "fixture": "/tmp/taki-c1b-fake-_xb3dboz",
+              "executable": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+              "sameIdentityAliveAfter": false
+            }
+          ],
+          "existsAfter": false
+        },
+        {
+          "path": "/tmp/taki-c1b-fake-ts6zhe4e",
+          "marker": "owned Linux fake process proof",
+          "pids": [],
+          "existsAfter": false
+        },
+        {
+          "path": "/tmp/taki-c1b-fake-4214a8f_",
+          "marker": "owned Linux fake process proof",
+          "pids": [],
+          "existsAfter": false
+        },
+        {
+          "path": "/tmp/taki-c1b-fake-bt3lkzj0",
+          "marker": "owned Linux fake process proof",
+          "pids": [],
+          "existsAfter": false
+        },
+        {
+          "path": "/tmp/taki-c1b-fake-7rkvi1sh",
+          "marker": "owned Linux fake process proof",
+          "pids": [],
+          "existsAfter": false
+        }
+      ],
+      "observedProcessIdentities": [
+        {
+          "pid": 571,
+          "startTicks": "2902",
+          "role": "consumer-pid.json",
+          "fixture": "/tmp/taki-c1b-fake-7frurpls",
+          "executable": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+          "sameIdentityAliveAfter": false
+        },
+        {
+          "pid": 592,
+          "startTicks": "3932",
+          "role": "consumer-pid.json",
+          "fixture": "/tmp/taki-c1b-fake-_xb3dboz",
+          "executable": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+          "sameIdentityAliveAfter": false
+        },
+        {
+          "pid": 595,
+          "startTicks": "4144",
+          "role": "grandchild-pid.json",
+          "fixture": "/tmp/taki-c1b-fake-_xb3dboz",
+          "executable": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+          "sameIdentityAliveAfter": false
+        }
+      ],
+      "remainingFixtures": [],
+      "log": "test_changed_startup_and_configuration_never_spawn (test_managed_bootstrap_linux.LinuxProcessTests.test_changed_startup_and_configuration_never_spawn) ... FAIL\ntest_graceful_shutdown_keeps_its_own_thirty_second_budget (test_managed_bootstrap_linux.LinuxProcessTests.test_graceful_shutdown_keeps_its_own_thirty_second_budget) ... FAIL\ntest_lost_ack_can_be_observed_after_admission_expiry (test_managed_bootstrap_linux.LinuxProcessTests.test_lost_ack_can_be_observed_after_admission_expiry) ... ok\ntest_real_process_group_signal_and_grandchild_reaping (test_managed_bootstrap_linux.LinuxProcessTests.test_real_process_group_signal_and_grandchild_reaping) ... ok\ntest_signal_during_partial_frame_cancels_private_read_promptly (test_managed_bootstrap_linux.LinuxProcessTests.test_signal_during_partial_frame_cancels_private_read_promptly) ... ok\ntest_socket_uid_modes_actual_submission_duplicate_and_cleanup (test_managed_bootstrap_linux.LinuxProcessTests.test_socket_uid_modes_actual_submission_duplicate_and_cleanup) ... FAIL\ntest_trickle_bytes_cannot_extend_original_deadline (test_managed_bootstrap_linux.LinuxProcessTests.test_trickle_bytes_cannot_extend_original_deadline) ... ok\ntest_wrong_kernel_peer_uid_and_unsafe_directory_refuse (test_managed_bootstrap_linux.LinuxProcessTests.test_wrong_kernel_peer_uid_and_unsafe_directory_refuse) ... ok\n\n======================================================================\nFAIL: test_changed_startup_and_configuration_never_spawn (test_managed_bootstrap_linux.LinuxProcessTests.test_changed_startup_and_configuration_never_spawn)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/mnt/h/hindsight/docker/standalone/tests/test_managed_bootstrap_linux.py\", line 183, in test_changed_startup_and_configuration_never_spawn\n    self.assertEqual(self.submit(changed).reason, Reason.STALE)\nAssertionError: <Reason.UNKNOWN: 'outcome-unknown'> != <Reason.STALE: 'snapshot-stale'>\n\n======================================================================\nFAIL: test_graceful_shutdown_keeps_its_own_thirty_second_budget (test_managed_bootstrap_linux.LinuxProcessTests.test_graceful_shutdown_keeps_its_own_thirty_second_budget)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/mnt/h/hindsight/docker/standalone/tests/test_managed_bootstrap_linux.py\", line 234, in test_graceful_shutdown_keeps_its_own_thirty_second_budget\n    self.assertEqual(self.submit(fixture_frame(self.challenge().binding)).state, \"running\")\nAssertionError: 'unavailable' != 'running'\n- unavailable\n+ running\n\n\n======================================================================\nFAIL: test_socket_uid_modes_actual_submission_duplicate_and_cleanup (test_managed_bootstrap_linux.LinuxProcessTests.test_socket_uid_modes_actual_submission_duplicate_and_cleanup)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/mnt/h/hindsight/docker/standalone/tests/test_managed_bootstrap_linux.py\", line 125, in test_socket_uid_modes_actual_submission_duplicate_and_cleanup\n    self.assertEqual(self.submit(frame).state, \"running\")\nAssertionError: 'unavailable' != 'running'\n- unavailable\n+ running\n\n\n----------------------------------------------------------------------\nRan 8 tests in 45.988s\n\nFAILED (failures=3)\n",
+      "run": 2,
+      "counts": {
+        "passed": 5,
+        "failed": 3,
+        "skipped": 0
+      },
+      "changeBeforeRun": "fixture_bootstrap_readiness_3_to_10_seconds"
+    },
+    {
+      "runtime": {
+        "python": "3.11.17",
+        "executable": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+        "prefix": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python",
+        "dotenvVersion": "1.2.2",
+        "dotenvFile": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/lib/python3.11/site-packages/dotenv/__init__.py",
+        "pipVersion": "26.2.1",
+        "uid": 0,
+        "euid": 0,
+        "AF_UNIX": true,
+        "SO_PEERCRED": true,
+        "killpg": true
+      },
+      "command": [
+        "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "docker/standalone/tests",
+        "-p",
+        "test_managed_bootstrap_linux.py",
+        "-v"
+      ],
+      "cwd": "/mnt/h/hindsight",
+      "startedAt": "2026-10-14T09:20:25.539685+00:00",
+      "endedAt": "2026-10-14T09:21:39.367979+00:00",
+      "elapsedSeconds": 72.075028843,
+      "exitCode": 0,
+      "testPid": 462,
+      "testPidReaped": true,
+      "fixtureBaseline": [],
+      "ownedFixtures": [
+        {
+          "path": "/tmp/taki-c1b-fake-ou6cgl3r",
+          "marker": "owned Linux fake process proof",
+          "pids": [],
+          "existsAfter": false
+        },
+        {
+          "path": "/tmp/taki-c1b-fake-bsuzchzs",
+          "marker": "owned Linux fake process proof",
+          "pids": [
+            {
+              "pid": 518,
+              "startTicks": "10858",
+              "role": "consumer-pid.json",
+              "fixture": "/tmp/taki-c1b-fake-bsuzchzs",
+              "executable": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+              "sameIdentityAliveAfter": false
+            }
+          ],
+          "existsAfter": false
+        },
+        {
+          "path": "/tmp/taki-c1b-fake-b5f93d0t",
+          "marker": "owned Linux fake process proof",
+          "pids": [
+            {
+              "pid": 539,
+              "startTicks": "12656",
+              "role": "consumer-pid.json",
+              "fixture": "/tmp/taki-c1b-fake-b5f93d0t",
+              "executable": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+              "sameIdentityAliveAfter": false
+            }
+          ],
+          "existsAfter": false
+        },
+        {
+          "path": "/tmp/taki-c1b-fake-1g3ugisp",
+          "marker": "owned Linux fake process proof",
+          "pids": [
+            {
+              "pid": 556,
+              "startTicks": "13672",
+              "role": "consumer-pid.json",
+              "fixture": "/tmp/taki-c1b-fake-1g3ugisp",
+              "executable": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+              "sameIdentityAliveAfter": false
+            },
+            {
+              "pid": 557,
+              "startTicks": "13856",
+              "role": "grandchild-pid.json",
+              "fixture": "/tmp/taki-c1b-fake-1g3ugisp",
+              "executable": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+              "sameIdentityAliveAfter": false
+            }
+          ],
+          "existsAfter": false
+        },
+        {
+          "path": "/tmp/taki-c1b-fake-mwhkavt7",
+          "marker": "owned Linux fake process proof",
+          "pids": [],
+          "existsAfter": false
+        },
+        {
+          "path": "/tmp/taki-c1b-fake-kykno7iy",
+          "marker": "owned Linux fake process proof",
+          "pids": [
+            {
+              "pid": 568,
+              "startTicks": "14867",
+              "role": "consumer-pid.json",
+              "fixture": "/tmp/taki-c1b-fake-kykno7iy",
+              "executable": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+              "sameIdentityAliveAfter": false
+            }
+          ],
+          "existsAfter": false
+        },
+        {
+          "path": "/tmp/taki-c1b-fake-2mztuqv7",
+          "marker": "owned Linux fake process proof",
+          "pids": [],
+          "existsAfter": false
+        },
+        {
+          "path": "/tmp/taki-c1b-fake-5r968kzn",
+          "marker": "owned Linux fake process proof",
+          "pids": [],
+          "existsAfter": false
+        }
+      ],
+      "observedProcessIdentities": [
+        {
+          "pid": 518,
+          "startTicks": "10858",
+          "role": "consumer-pid.json",
+          "fixture": "/tmp/taki-c1b-fake-bsuzchzs",
+          "executable": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+          "sameIdentityAliveAfter": false
+        },
+        {
+          "pid": 539,
+          "startTicks": "12656",
+          "role": "consumer-pid.json",
+          "fixture": "/tmp/taki-c1b-fake-b5f93d0t",
+          "executable": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+          "sameIdentityAliveAfter": false
+        },
+        {
+          "pid": 556,
+          "startTicks": "13672",
+          "role": "consumer-pid.json",
+          "fixture": "/tmp/taki-c1b-fake-1g3ugisp",
+          "executable": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+          "sameIdentityAliveAfter": false
+        },
+        {
+          "pid": 557,
+          "startTicks": "13856",
+          "role": "grandchild-pid.json",
+          "fixture": "/tmp/taki-c1b-fake-1g3ugisp",
+          "executable": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+          "sameIdentityAliveAfter": false
+        },
+        {
+          "pid": 568,
+          "startTicks": "14867",
+          "role": "consumer-pid.json",
+          "fixture": "/tmp/taki-c1b-fake-kykno7iy",
+          "executable": "/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11",
+          "sameIdentityAliveAfter": false
+        }
+      ],
+      "remainingFixtures": [],
+      "log": "test_changed_startup_and_configuration_never_spawn (test_managed_bootstrap_linux.LinuxProcessTests.test_changed_startup_and_configuration_never_spawn) ... ok\ntest_graceful_shutdown_keeps_its_own_thirty_second_budget (test_managed_bootstrap_linux.LinuxProcessTests.test_graceful_shutdown_keeps_its_own_thirty_second_budget) ... ok\ntest_lost_ack_can_be_observed_after_admission_expiry (test_managed_bootstrap_linux.LinuxProcessTests.test_lost_ack_can_be_observed_after_admission_expiry) ... ok\ntest_real_process_group_signal_and_grandchild_reaping (test_managed_bootstrap_linux.LinuxProcessTests.test_real_process_group_signal_and_grandchild_reaping) ... ok\ntest_signal_during_partial_frame_cancels_private_read_promptly (test_managed_bootstrap_linux.LinuxProcessTests.test_signal_during_partial_frame_cancels_private_read_promptly) ... ok\ntest_socket_uid_modes_actual_submission_duplicate_and_cleanup (test_managed_bootstrap_linux.LinuxProcessTests.test_socket_uid_modes_actual_submission_duplicate_and_cleanup) ... ok\ntest_trickle_bytes_cannot_extend_original_deadline (test_managed_bootstrap_linux.LinuxProcessTests.test_trickle_bytes_cannot_extend_original_deadline) ... ok\ntest_wrong_kernel_peer_uid_and_unsafe_directory_refuse (test_managed_bootstrap_linux.LinuxProcessTests.test_wrong_kernel_peer_uid_and_unsafe_directory_refuse) ... ok\n\n----------------------------------------------------------------------\nRan 8 tests in 69.093s\n\nOK\n",
+      "run": 3,
+      "counts": {
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0
+      },
+      "changeBeforeRun": "positive_fixture_admission_3_to_10_seconds_duplicate_lifetime_1_5_to_6_seconds_wait_5_to_15_seconds"
+    }
+  ],
+  "archivePreflight": {
+    "phase": "archive_preflight",
+    "systemPython": "3.10.12",
+    "kernel": "6.6.87.2-microsoft-standard-WSL2",
+    "uid": 0,
+    "euid": 0,
+    "osRelease": "PRETTY_NAME=\"Ubuntu 22.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"22.04\"\nVERSION=\"22.04.5 LTS (Jammy Jellyfish)\"\nVERSION_CODENAME=jammy\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=jammy\n",
+    "archiveEntries": 4907,
+    "archiveExpandedBytes": 82198661,
+    "wheelExpandedBytes": 61892,
+    "projectedTotalBytes": 113106267,
+    "capBytes": 536870912,
+    "fixturesBefore": []
+  },
+  "installation": {
+    "command": "wsl.exe -d Ubuntu-22.04 --exec /mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11 -I -B -m pip --isolated --disable-pip-version-check install --no-index --no-deps --no-cache-dir --no-compile /mnt/g/Temp/taki-c1b-linux-20261014/python_dotenv-1.2.2-py3-none-any.whl\nexit $LASTEXITCODE",
+    "exitCode": 0,
+    "output": "Processing /mnt/g/Temp/taki-c1b-linux-20261014/python_dotenv-1.2.2-py3-none-any.whl\nInstalling collected packages: python-dotenv\nSuccessfully installed python-dotenv-1.2.2\nWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.\n"
+  },
+  "probes": [
+    {
+      "name": "bootstrap-ready",
+      "command": "$probe = @'\nimport json, pathlib, signal, subprocess, tempfile, time\nruntime=\"/mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11\"\nfixture_script=\"/mnt/h/hindsight/docker/standalone/tests/fixtures/unix_bootstrap.py\"\nwith tempfile.TemporaryDirectory(prefix=\"taki-c1b-fake-\") as temporary:\n    root=pathlib.Path(temporary)\n    (root/\"C1B_FAKE_ONLY\").write_text(\"owned Linux fake process proof\")\n    (root/\"socket\").mkdir(mode=0o700)\n    environment={\"PYTHON_DOTENV_DISABLED\":\"true\",\"PYTHONDONTWRITEBYTECODE\":\"1\",\"PYTHONUNBUFFERED\":\"1\",\"PYTHONNOUSERSITE\":\"1\",\"HOME\":str(root),\"TMP\":str(root),\"TEMP\":str(root)}\n    started=time.monotonic()\n    child=subprocess.Popen([runtime,\"-I\",\"-B\",fixture_script,str(root),\"all\",\"30\",\"1\"],stdin=subprocess.DEVNULL,stdout=subprocess.PIPE,stderr=subprocess.PIPE,cwd=root,env=environment)\n    try:\n        while child.poll() is None and not (root/\"socket/bootstrap.sock\").exists() and time.monotonic()-started<15:\n            time.sleep(0.01)\n        result={\"fixture\":str(root),\"pid\":child.pid,\"socketReady\":(root/\"socket/bootstrap.sock\").exists(),\"socketReadySeconds\":time.monotonic()-started,\"exitedBeforeSignal\":child.poll()}\n    finally:\n        if child.poll() is None:\n            child.send_signal(signal.SIGTERM)\n        out,err=child.communicate(timeout=40)\n    result.update({\"exitCode\":child.returncode,\"stdoutBytes\":len(out),\"stderrBytes\":len(err),\"reaped\":True})\nresult[\"fixtureAbsentAfter\"]=not root.exists()\nprint(json.dumps(result),flush=True)\n'@\n$probe | wsl.exe -d Ubuntu-22.04 --exec /usr/bin/python3 -B -\nexit $LASTEXITCODE",
+      "exitCode": 0,
+      "result": {
+        "fixture": "/tmp/taki-c1b-fake-85jpqmyz",
+        "pid": 458,
+        "socketReady": true,
+        "socketReadySeconds": 4.548567515,
+        "exitedBeforeSignal": null,
+        "exitCode": 0,
+        "stdoutBytes": 0,
+        "stderrBytes": 0,
+        "reaped": true,
+        "fixtureAbsentAfter": true
+      }
+    },
+    {
+      "name": "submitter-cold-start",
+      "command": "$probe = @'\nimport json, sys, time\nsys.path.insert(0,\"/mnt/h/hindsight/docker/standalone/tests\")\nfrom test_managed_bootstrap_linux import LinuxProcessTests\nfrom test_managed_bootstrap_protocol import fixture_frame\ncase=LinuxProcessTests(\"test_socket_uid_modes_actual_submission_duplicate_and_cleanup\")\ncase.setUp()\nresult={\"fixture\":str(case.root)}\ntry:\n    start=time.monotonic()\n    case.start(admission=3,lifetime=1)\n    result[\"socketReadySeconds\"]=time.monotonic()-start\n    challenge=case.challenge()\n    start=time.monotonic()\n    status=case.submit(fixture_frame(challenge.binding))\n    result.update({\"submitterSeconds\":time.monotonic()-start,\"state\":status.state,\"reason\":str(status.reason),\"bootstrapPid\":case.process.pid})\nfinally:\n    case.tearDown()\nresult[\"fixtureAbsentAfter\"]=not case.root.exists()\nprint(json.dumps(result),flush=True)\n'@\n$probe | wsl.exe -d Ubuntu-22.04 --exec /mnt/g/Temp/taki-c1b-linux-20261014/runtime/python/bin/python3.11 -I -B -\nexit $LASTEXITCODE",
+      "exitCode": 0,
+      "result": {
+        "fixture": "/tmp/taki-c1b-fake-0ku6tc45",
+        "socketReadySeconds": 3.5362396460000003,
+        "submitterSeconds": 3.523244267000001,
+        "state": "unavailable",
+        "reason": "outcome-unknown",
+        "bootstrapPid": 512,
+        "fixtureAbsentAfter": true
+      }
+    }
+  ],
+  "testCaptureMethod": "The exact unittest argv was launched from /mnt/h/hindsight by an existing system-Python observer. The observer only captured output, fixture marker paths, consumer/grandchild PIDs and /proc start ticks; each suite and probe reaped its own children. No stdin frame, credential or process environment was logged.",
+  "checks": [
+    {
+      "name": "lint",
+      "command": "& 'H:/hindsight/.venv/Scripts/ruff.exe' check --no-cache --config 'H:/hindsight/ruff.toml' 'H:/hindsight/docker/standalone/tests/test_managed_bootstrap_linux.py'",
+      "chunk_id": "883c90",
+      "wall_time_seconds": 1.787121,
+      "exit_code": 0,
+      "original_token_count": 5,
+      "output": "All checks passed!\n",
+      "stage": "bootstrap_ready_fix"
+    },
+    {
+      "name": "format",
+      "command": "& 'H:/hindsight/.venv/Scripts/ruff.exe' format --check --no-cache --config 'H:/hindsight/ruff.toml' 'H:/hindsight/docker/standalone/tests/test_managed_bootstrap_linux.py'",
+      "chunk_id": "ddb62a",
+      "wall_time_seconds": 0.3306246,
+      "exit_code": 0,
+      "original_token_count": 7,
+      "output": "1 file already formatted\n",
+      "stage": "bootstrap_ready_fix"
+    },
+    {
+      "name": "typecheck",
+      "command": "& 'H:/hindsight/.venv/Scripts/ty.exe' check --project 'H:/hindsight/hindsight-api-slim' --python 'H:/hindsight/.venv/Scripts/python.exe' --extra-search-path 'H:/hindsight/docker/standalone' --python-platform all 'H:/hindsight/docker/standalone/managed_bootstrap'",
+      "chunk_id": "3f04be",
+      "wall_time_seconds": 1.617885,
+      "exit_code": 0,
+      "original_token_count": 5,
+      "output": "All checks passed!\n",
+      "stage": "bootstrap_ready_fix"
+    },
+    {
+      "name": "lint",
+      "command": "& 'H:/hindsight/.venv/Scripts/ruff.exe' check --no-cache --config 'H:/hindsight/ruff.toml' 'H:/hindsight/docker/standalone/tests/test_managed_bootstrap_linux.py'",
+      "chunk_id": "109297",
+      "wall_time_seconds": 0.3434819,
+      "exit_code": 0,
+      "original_token_count": 5,
+      "output": "All checks passed!\n",
+      "stage": "final_fixture_fix"
+    },
+    {
+      "name": "format",
+      "command": "& 'H:/hindsight/.venv/Scripts/ruff.exe' format --check --no-cache --config 'H:/hindsight/ruff.toml' 'H:/hindsight/docker/standalone/tests/test_managed_bootstrap_linux.py'",
+      "chunk_id": "140481",
+      "wall_time_seconds": 0.3440141,
+      "exit_code": 0,
+      "original_token_count": 7,
+      "output": "1 file already formatted\n",
+      "stage": "final_fixture_fix"
+    },
+    {
+      "name": "typecheck",
+      "command": "& 'H:/hindsight/.venv/Scripts/ty.exe' check --project 'H:/hindsight/hindsight-api-slim' --python 'H:/hindsight/.venv/Scripts/python.exe' --extra-search-path 'H:/hindsight/docker/standalone' --python-platform all 'H:/hindsight/docker/standalone/managed_bootstrap'",
+      "chunk_id": "a42ff1",
+      "wall_time_seconds": 0.4560022,
+      "exit_code": 0,
+      "original_token_count": 5,
+      "output": "All checks passed!\n",
+      "stage": "final_fixture_fix"
+    }
+  ],
+  "finalSourceHashes": {
+    "manifestSha256": "f69ca93f675bf3513ef687952c357c0be0004a305e1ff46ecc91c21d12033c17",
+    "unchangedCount": 32,
+    "changes": [
+      {
+        "repository": "native",
+        "path": "docker/standalone/managed_bootstrap/README.md",
+        "bytes": 8092,
+        "sha256": "fd0f09737f67dbee7839c378e0331affed008b870aa34819ab9e3c1005fe8a56",
+        "expectedSha256": "c3ca3734d3547c7f565583d12b769758cf41b19008ff6753860aa2487df29eb5",
+        "matches": false
+      },
+      {
+        "repository": "native",
+        "path": "docker/standalone/tests/test_managed_bootstrap_linux.py",
+        "bytes": 11474,
+        "sha256": "3342c16eaeb872e315a837664370fd24e8c8ea5382f3730889e019ef16325129",
+        "expectedSha256": "beafedbf0e0d025d12b3174d3719256bbb8dd68cf175e7ae55cf386a629c28e0",
+        "matches": false
+      }
+    ],
+    "takiHead": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a",
+    "nativeHead": "eb6413a7f58c4f3f0adb88a33a99516f8707fef7"
+  },
+  "cleanup": {
+    "linuxCommand": "$readback = @'\nimport importlib.util, json, os, pathlib, platform\nroot=pathlib.Path(\"/mnt/g/Temp/taki-c1b-linux-20261014\")\nmatches=[]\nfor proc in pathlib.Path(\"/proc\").iterdir():\n    if not proc.name.isdigit():\n        continue\n    try:\n        args=(proc/\"cmdline\").read_bytes().split(b\"\\0\")\n        if any(arg.startswith(b\"/mnt/g/Temp/taki-c1b-linux-20261014/\") or arg.startswith(b\"/mnt/h/hindsight/docker/standalone/tests/fixtures/\") for arg in args):\n            fields=(proc/\"stat\").read_text().rsplit(\")\",1)[1].split()\n            matches.append({\"pid\":int(proc.name),\"startTicks\":fields[19],\"state\":fields[0]})\n    except (FileNotFoundError, ProcessLookupError, PermissionError):\n        continue\nprint(json.dumps({\"systemPython\":platform.python_version(),\"systemDotenvAvailable\":importlib.util.find_spec(\"dotenv\") is not None,\"remainingFixturePaths\":[str(p) for p in pathlib.Path(\"/tmp\").glob(\"taki-c1b-fake-*\")],\"matchingOwnedProcesses\":matches,\"tempBytesBeforeRemoval\":sum(p.lstat().st_size for p in root.rglob(\"*\") if p.is_file() and not p.is_symlink()),\"capBytes\":512*1024**2}),flush=True)\n'@\n$readback | wsl.exe -d Ubuntu-22.04 --exec /usr/bin/python3 -B -\nexit $LASTEXITCODE",
+    "linuxExitCode": 0,
+    "linuxResult": {
+      "systemPython": "3.10.12",
+      "systemDotenvAvailable": false,
+      "remainingFixturePaths": [],
+      "matchingOwnedProcesses": [],
+      "tempBytesBeforeRemoval": 113112994,
+      "capBytes": 536870912
+    },
+    "windowsCommand": "$ErrorActionPreference = 'Stop'\n$expectedRoot = [IO.Path]::GetFullPath('G:/Temp/taki-c1b-linux-20261014')\n$allowedParent = [IO.Path]::GetFullPath('G:/Temp') + [IO.Path]::DirectorySeparatorChar\n$resolvedRoot = (Resolve-Path -LiteralPath $expectedRoot).Path\nif ($resolvedRoot -ne $expectedRoot -or -not $resolvedRoot.StartsWith($allowedParent, [StringComparison]::OrdinalIgnoreCase)) { throw 'Cleanup path escaped approved root' }\nif ((Get-Item -LiteralPath $resolvedRoot).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Cleanup root is a reparse point' }\n$evidencePath = 'H:/TakiAgent/.trellis/tasks/10-07-hindsight-managed-host-custody/research/c1b-linux-check-evidence-2026-10-14.json'\n$evidence = Get-Content -LiteralPath $evidencePath -Raw | ConvertFrom-Json\nif (@($evidence.tests).Count -ne 3 -or $evidence.tests[2].counts.passed -ne 8) { throw 'Retained test evidence incomplete' }\nRemove-Item -LiteralPath $resolvedRoot -Recurse -Force\n[pscustomobject]@{at=(Get-Date).ToUniversalTime().ToString('o');resolvedRoot=$resolvedRoot;approvedParent=$allowedParent;tempRootAbsent=(-not (Test-Path -LiteralPath $expectedRoot));evidencePreserved=(Test-Path -LiteralPath $evidencePath);nativeTestPreserved=(Test-Path -LiteralPath 'H:/hindsight/docker/standalone/tests/test_managed_bootstrap_linux.py');drives=@(Get-PSDrive -Name G,H | Select-Object Name,Free,Used);wslState=((wsl.exe --list --verbose | Out-String) -replace [char]0,'')} | ConvertTo-Json -Depth 4",
+    "windowsExitCode": 0,
+    "windowsResult": {
+      "at": "2026-10-14T09:26:27.6372334Z",
+      "resolvedRoot": "G:\\Temp\\taki-c1b-linux-20261014",
+      "approvedParent": "G:\\Temp\\",
+      "tempRootAbsent": true,
+      "evidencePreserved": true,
+      "nativeTestPreserved": true,
+      "drives": [
+        {
+          "Name": "G",
+          "Free": 150073966592,
+          "Used": 640397144064
+        },
+        {
+          "Name": "H",
+          "Free": 14312681472,
+          "Used": 195402211328
+        }
+      ],
+      "wslState": "  NAME              STATE           VERSION\r\n\r\n* Ubuntu-22.04      Stopped         2\r\n\r\n  docker-desktop    Stopped         2\r\n\r\n\r\n"
+    },
+    "allOwnedResourcesCleaned": true,
+    "wholeDistroTerminationUsed": false,
+    "buildOutputOrVhdxRemovalUsed": false,
+    "scope": "Only the exact approved G: root was removed. The 24 suite fixtures and two diagnostic fixtures cleaned themselves through their recorded owners. No /tmp cleanup deletion was needed."
+  },
+  "ac7Recommendation": "PASS for the complete C1 fake-secret process criterion, combined with previously accepted 24 Windows Native and 20 fake-observer tests. AC2/6 service/installer, C2 Docker, C3 real models and manual gates remain open; deploymentReady=false.",
+  "productionCodeChanged": false,
+  "ownedChanges": [
+    {
+      "path": "H:/hindsight/docker/standalone/tests/test_managed_bootstrap_linux.py",
+      "reason": "Measured 4.5486s bootstrap readiness and 3.5232s submitter cold start on DrvFS exceeded 3s fixture budgets.",
+      "changes": [
+        "bootstrap readiness timeout 3 -> 10 seconds",
+        "positive-test default admission 3 -> 10 seconds",
+        "duplicate-test fake child lifetime 1.5 -> 6 seconds and final wait 5 -> 15 seconds",
+        "graceful-test admission 3 -> 10 seconds, still shorter than its 12-second TERM handler and production 30-second grace",
+        "expiry 1 second, trickle 0.5 second, private I/O and shutdown assertions unchanged"
+      ]
+    },
+    {
+      "path": "H:/hindsight/docker/standalone/managed_bootstrap/README.md",
+      "reason": "Synchronize Linux evidence row and closing evidence sentence with dated 8/8 result."
+    }
+  ]
+}

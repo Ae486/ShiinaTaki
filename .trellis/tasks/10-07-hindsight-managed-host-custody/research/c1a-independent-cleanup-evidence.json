@@ -1,0 +1,15 @@
+{
+  "removedPaths": [
+    "C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674"
+  ],
+  "detachedJunction": "C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674\\catalog-junction",
+  "verifiedJunctionTarget": "C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674\\fake-core-data",
+  "remainingPaths": [],
+  "fixtureProcessesBeforeCleanup": [],
+  "fixtureProcessesAfterCleanup": [],
+  "cargoTargetRetained": true,
+  "originalPermissionsChanged": false,
+  "originalDataTouched": false,
+  "hFreeBytes": 14580150272,
+  "checkedAt": "2026-10-13T10:42:25.0824939Z"
+}

@@ -1,0 +1,18 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "exec",
+    "eslint",
+    "packages/core/src/memory/hindsight/hindsight-template-label-evidence.ts",
+    "packages/core/src/memory/hindsight/hindsight-template-label-evidence.test.ts",
+    "packages/core/src/memory/hindsight/hindsight-template-binding.test.ts",
+    "packages/core/src/memory/hindsight/hindsight-application-binding-runner.ts",
+    "packages/core/src/memory/hindsight/hindsight-application-binding-context.ts",
+    "packages/core/src/testing/hindsight-template-exchange-fixture.ts",
+    "packages/core/src/testing/hindsight-template-native-consumer.fixture.ts"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "durationSeconds": 6.241,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-independent-label-lint-01.log"
+}

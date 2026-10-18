@@ -1,0 +1,622 @@
+{
+  "version": 1,
+  "createdAt": "2026-10-15T11:11:58.016Z",
+  "reviewer": "/root/c2_design_check",
+  "task": ".trellis/tasks/10-14-hindsight-managed-deployment",
+  "scope": "offline-first-start-prerequisite",
+  "result": {
+    "independentRuntimeReview": "PASS_PREREQUISITE_ONLY",
+    "runtimeStatus": "prerequisite_pass",
+    "firstFailure": null,
+    "ownedContainerAndVolumeCleanup": "PASS",
+    "originalSevenContainers": "UNCHANGED_AT_RECORDED_OBSERVATIONS",
+    "admittedDatabaseChild": "NOT_TESTED",
+    "loggedDataRestartPersistence": "NOT_TESTED",
+    "deploymentReady": false
+  },
+  "findings": {
+    "fixed": [],
+    "notFixed": []
+  },
+  "staging": {
+    "path": "G:/TakiAgent-c2a-database/first-fd3e5b9c-c0f8-4fd8-b1d1-17a8dd1cce7e",
+    "token": "fd3e5b9c-c0f8-4fd8-b1d1-17a8dd1cce7e",
+    "state": "RETAINED_FOR_ROOT_PRESERVATION_VERIFICATION_AND_REMOVAL",
+    "modifiedByReviewer": false
+  },
+  "resourceIdentity": {
+    "dockerExecutable": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+    "dockerSha256": "0a4d8fe2ab107ceae44ee5f5fc1e1c155790042b7e3d3163826660da882b389d",
+    "engineEndpoint": "npipe:////./pipe/dockerDesktopLinuxEngine",
+    "engineId": "93e8319e-24b7-4a7d-88f1-60923ad681e0",
+    "imageId": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+    "containerName": "taki-c2a-db-first-fd3e5b9c-c0f8-4fd8-b1d1-17a8dd1cce7e",
+    "containerId": "324ae76d27cec7966558b0842c6386a1ceb6c7b969dd678b513398a306dfa6bb",
+    "volumeName": "taki-c2a-db-first-fd3e5b9c-c0f8-4fd8-b1d1-17a8dd1cce7e-data"
+  },
+  "frozenInputs": [
+    {
+      "file": "first-start.py",
+      "bytes": 28600,
+      "sha256": "7d1ee67f7b3027da781795e365b58a9cb93f847cdba7cc31425f05030d2f7ff6",
+      "matchesManifest": true,
+      "matchesReleased": true
+    },
+    {
+      "file": "README.md",
+      "bytes": 12772,
+      "sha256": "c304db7acf32830bea23d98b00a45941ff19f0b76a9bde705ce6c1c9ba176e05",
+      "matchesManifest": true,
+      "matchesReleased": true
+    },
+    {
+      "file": "c2a-database-extraction-self-check.json",
+      "bytes": 23269,
+      "sha256": "1f4385ff6f14449f7f8822b586bf0b60dd99e22fe7f4eca006386a5640baf9da",
+      "matchesManifest": true,
+      "matchesReleased": true
+    },
+    {
+      "file": "c2a-database-extraction-plan.md",
+      "bytes": 15266,
+      "sha256": "9996da457893c5bc42505f3aad234ff3937e47c8ef0bd2c7ae84c14fa9b0aa1d",
+      "matchesManifest": true,
+      "matchesReleased": true
+    },
+    {
+      "file": "c2a-database-extraction-review.md",
+      "bytes": 6695,
+      "sha256": "d013bdf26592630cabe80bc71e1774c62281c0dd653e9955e31a6d0a8089958c",
+      "matchesManifest": true,
+      "matchesReleased": true
+    },
+    {
+      "file": "c2a-database-extraction-implementation-review.md",
+      "bytes": 5924,
+      "sha256": "0b736a67552dba7ba439c3963d2df58d0974c9cb0d26e2246ceacd5077270125",
+      "matchesManifest": true,
+      "matchesReleased": true
+    },
+    {
+      "file": "c2a-database-extraction-implementation-review.json",
+      "bytes": 10107,
+      "sha256": "7923d547692c959e61826d8a17e7cab3a27afbbcf49ca6206cc2598cf91025fe",
+      "matchesManifest": true,
+      "matchesReleased": true
+    }
+  ],
+  "evidenceFiles": [
+    {
+      "file": "first-start-result.json",
+      "bytes": 8201,
+      "sha256": "2db443fb5b74d9ed0b98ebddda6156cfce75e0fcb20d0cf24b485bea0ac2557d"
+    },
+    {
+      "file": "first-start-runtime.json",
+      "bytes": 20851,
+      "sha256": "9c3666b38752f715d7624b96ec1bbf57d0b18857757ef861930f9d4c44cd0962"
+    },
+    {
+      "file": "first-start-command.json",
+      "bytes": 20137,
+      "sha256": "6721a2f8113f2ba737880c32ffb07063f51ed7f4472fe4e4d52aa3c52a422d34"
+    },
+    {
+      "file": "commands.jsonl",
+      "bytes": 44255,
+      "sha256": "52fcf316fb5d4c72f8422ed93da4360395960da7dc5be04a6cf661a0569f49d0"
+    },
+    {
+      "file": "input-manifest.json",
+      "bytes": 1819,
+      "sha256": "0569c35fce38fc6433179a22ff10fb944520865bee6ddc9f43ccff73e04e2af3"
+    },
+    {
+      "file": "resource-identities.json",
+      "bytes": 370,
+      "sha256": "bc7663b8b8963b23ea1960c472788d5f0659e1850c7e6ca6d967676d021bf184"
+    },
+    {
+      "file": "runtime-prerequisites.json",
+      "bytes": 404,
+      "sha256": "d45ceb0d6d8da73f5909dbbcdc7ae841fe3c1aa6e16a37265d657b24fa4902cb"
+    },
+    {
+      "file": "original-before-containers.json",
+      "bytes": 1546,
+      "sha256": "c4667b5486b3ab64f761f6393845248518f4178026d162173d4e4d269d8fc079"
+    },
+    {
+      "file": "original-after-containers.json",
+      "bytes": 1546,
+      "sha256": "c4667b5486b3ab64f761f6393845248518f4178026d162173d4e4d269d8fc079"
+    },
+    {
+      "file": "run-first-start.mjs",
+      "bytes": 11249,
+      "sha256": "08036c099c53e7d58c39f40c649e2930d7930d2a16eb93b54964d4b82acc569a"
+    },
+    {
+      "file": "command-runner.mjs",
+      "bytes": 3233,
+      "sha256": "92cc067e25aff35c1ce4e260d380170f3cc5235123fe28c46402409c05dfddd7"
+    },
+    {
+      "file": "baseline.json",
+      "bytes": 108,
+      "sha256": "fa070d6dc8ab41fe840c56a759b9ac232c0751c2427978cf7bf958ba5b0f4a42"
+    },
+    {
+      "file": ".c2a-db-first-owner",
+      "bytes": 36,
+      "sha256": "52ce96f106c02c9d971dccc0181846693c55466a209628ea6c07cc5f4c74f6aa"
+    },
+    {
+      "file": "run.started",
+      "bytes": 24,
+      "sha256": "d5eb2790155db28a73a53dbf549715e8c439ed78109c792d9e25b71562f0b59e"
+    },
+    {
+      "file": "first-start.started",
+      "bytes": 24,
+      "sha256": "fcf747b4b06391c7b0e8b4f125cf6d583aca09968046b4c673c0743d383a7566"
+    }
+  ],
+  "assessment": {
+    "checks": {
+      "sevenFrozenInputsMatchManifestAndRelease": true,
+      "resultManifestExact": true,
+      "ownerTokenExact": true,
+      "runtimePrereqHashMatchesFrozenPayload": true,
+      "resourceManifestExact": true,
+      "attachRecordExact": true,
+      "runtimeEqualsActualAttachStdout": true,
+      "runtimeScopeAndClosedReadiness": true,
+      "successWithoutFailureOrSignal": true,
+      "freshSeedAndSoleSupervisor": true,
+      "oneStartAndSqlConnection": true,
+      "containerExitClean": true,
+      "actualEngineAndImageMatchPrerequisites": true,
+      "pinnedEngineAndImage": true,
+      "exactDockerHostConfigAndMinimalEnvironment": true,
+      "expectedAbsencesOnlyNonzeroCommands": true,
+      "oneCreationStartAndOwnedRemovalOnly": true,
+      "freshNameAndVolumeAbsentBeforeCreate": true,
+      "creationRepliesAndManifestBind": true,
+      "createExactAcceptedArgv": true,
+      "exactObservedTopology": true,
+      "threeContainerInspectionsEqualRawResults": true,
+      "resourceConfigStableThroughCleanup": true,
+      "rawVolumeInspectionsMatch": true,
+      "exactInteractiveAttachWithinBound": true,
+      "matchingPg0Interface": true,
+      "sqlActualSettings": true,
+      "rawProcFieldsAgree": true,
+      "liveBackendPostmasterAndSupervisorChain": true,
+      "actualPg0StartArgvExact": true,
+      "instanceMetadataBindsActualDatabase": true,
+      "fourExactRawToolsWithVersions": true,
+      "hashBudgetAndRecordedSum": true,
+      "eightUtilityCallsAllSucceedWithinCaps": true,
+      "checkedStopExactArgvAndOutput": true,
+      "rawControlStateAndSqlIdentifierMatch": true,
+      "originalPostmasterActuallyReapedClean": true,
+      "sameSupervisorOnlyAfterShutdown": true,
+      "noForcedOrUnknownCleanup": true,
+      "sharedElapsedBounds": true,
+      "observedVolumeMetadataAndFinalLogsWithinBounds": true,
+      "pgLogConfirmsReadinessFastShutdownAndCleanEnd": true,
+      "cleanupEngineRevalidated": true,
+      "exactStoppedCidRemovedAndAbsent": true,
+      "exactUnmountedVolumeRemovedAndAbsent": true,
+      "originalSnapshotsMatchRawInspects": true,
+      "originalSevenIdsStateStartPolicyIdentical": true,
+      "originalContainerIdSetExactBeforeAfter": true,
+      "protectedContainersNeverMutationTargets": true,
+      "cleanupCompletedInsideSharedBudget": true,
+      "knownInitialGCapacity": true,
+      "capturedLogsHashAndBytesRecomputed": true,
+      "attachOutputByteBoundsVerified": true
+    },
+    "failedChecks": [],
+    "frozenBindings": [
+      {
+        "file": "first-start.py",
+        "bytes": 28600,
+        "sha256": "7d1ee67f7b3027da781795e365b58a9cb93f847cdba7cc31425f05030d2f7ff6",
+        "matchesManifest": true,
+        "matchesReleased": true
+      },
+      {
+        "file": "README.md",
+        "bytes": 12772,
+        "sha256": "c304db7acf32830bea23d98b00a45941ff19f0b76a9bde705ce6c1c9ba176e05",
+        "matchesManifest": true,
+        "matchesReleased": true
+      },
+      {
+        "file": "c2a-database-extraction-self-check.json",
+        "bytes": 23269,
+        "sha256": "1f4385ff6f14449f7f8822b586bf0b60dd99e22fe7f4eca006386a5640baf9da",
+        "matchesManifest": true,
+        "matchesReleased": true
+      },
+      {
+        "file": "c2a-database-extraction-plan.md",
+        "bytes": 15266,
+        "sha256": "9996da457893c5bc42505f3aad234ff3937e47c8ef0bd2c7ae84c14fa9b0aa1d",
+        "matchesManifest": true,
+        "matchesReleased": true
+      },
+      {
+        "file": "c2a-database-extraction-review.md",
+        "bytes": 6695,
+        "sha256": "d013bdf26592630cabe80bc71e1774c62281c0dd653e9955e31a6d0a8089958c",
+        "matchesManifest": true,
+        "matchesReleased": true
+      },
+      {
+        "file": "c2a-database-extraction-implementation-review.md",
+        "bytes": 5924,
+        "sha256": "0b736a67552dba7ba439c3963d2df58d0974c9cb0d26e2246ceacd5077270125",
+        "matchesManifest": true,
+        "matchesReleased": true
+      },
+      {
+        "file": "c2a-database-extraction-implementation-review.json",
+        "bytes": 10107,
+        "sha256": "7923d547692c959e61826d8a17e7cab3a27afbbcf49ca6206cc2598cf91025fe",
+        "matchesManifest": true,
+        "matchesReleased": true
+      }
+    ],
+    "procFacts": [
+      {
+        "name": "cli_live",
+        "pid": 9,
+        "startTicks": 874051,
+        "ppid": 1,
+        "pgid": 9,
+        "session": 9,
+        "executable": "/app/api/.venv/lib/python3.11/site-packages/pg0/bin/pg0",
+        "rawProcFieldsMatch": true
+      },
+      {
+        "name": "postmaster_live",
+        "pid": 27,
+        "startTicks": 874204,
+        "ppid": 1,
+        "pgid": 27,
+        "session": 27,
+        "executable": "/home/hindsight/.pg0/.pg0/installation/18.1.0/bin/postgres",
+        "rawProcFieldsMatch": true
+      },
+      {
+        "name": "backend_live",
+        "pid": 37,
+        "startTicks": 874223,
+        "ppid": 27,
+        "pgid": 37,
+        "session": 37,
+        "executable": "/home/hindsight/.pg0/.pg0/installation/18.1.0/bin/postgres",
+        "rawProcFieldsMatch": true
+      }
+    ],
+    "mutationCounts": {
+      "volumeCreate": 1,
+      "containerCreate": 1,
+      "containerStart": 1,
+      "containerRemove": 1,
+      "volumeRemove": 1,
+      "containerStop": 0,
+      "containerRestart": 0,
+      "containerExec": 0
+    },
+    "controlFields": {
+      "systemIdentifier": "7696846713986908180",
+      "state": "shut down",
+      "controlVersion": "1800",
+      "fullPageWrites": "on"
+    },
+    "elapsed": {
+      "sqlSeconds": 1.737,
+      "shutdownSeconds": 0.144,
+      "payloadSeconds": 2.226,
+      "attachClientMilliseconds": 2911,
+      "rootMilliseconds": 6813,
+      "cleanupObservedWindowsWallClockMilliseconds": 1824
+    },
+    "postmasterArgvContainsF": true,
+    "effectiveFsync": "on",
+    "scope": "offline-first-start-prerequisite"
+  },
+  "runtime": {
+    "startDispatches": 1,
+    "connectionAttempts": 1,
+    "cliExitCode": 0,
+    "sql": {
+      "version": "PostgreSQL 18.1 on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit",
+      "postmaster_start_time": "2026-10-15 10:56:15.409329+00",
+      "backend_pid": 37,
+      "data_directory": "/home/hindsight/.pg0/c2a-first/data",
+      "fsync": "on",
+      "synchronous_commit": "on",
+      "full_page_writes": "on",
+      "port": "55432",
+      "listen_addresses": "127.0.0.1",
+      "unix_socket_directories": "/home/hindsight/.pg0/socket",
+      "system_identifier": "7696846713986908180"
+    },
+    "processIdentity": [
+      {
+        "name": "cli_live",
+        "pid": 9,
+        "startTicks": 874051,
+        "ppid": 1,
+        "pgid": 9,
+        "session": 9,
+        "executable": "/app/api/.venv/lib/python3.11/site-packages/pg0/bin/pg0",
+        "rawProcFieldsMatch": true
+      },
+      {
+        "name": "postmaster_live",
+        "pid": 27,
+        "startTicks": 874204,
+        "ppid": 1,
+        "pgid": 27,
+        "session": 27,
+        "executable": "/home/hindsight/.pg0/.pg0/installation/18.1.0/bin/postgres",
+        "rawProcFieldsMatch": true
+      },
+      {
+        "name": "backend_live",
+        "pid": 37,
+        "startTicks": 874223,
+        "ppid": 27,
+        "pgid": 37,
+        "session": 37,
+        "executable": "/home/hindsight/.pg0/.pg0/installation/18.1.0/bin/postgres",
+        "rawProcFieldsMatch": true
+      }
+    ],
+    "rawTools": {
+      "postgres": {
+        "path": "/home/hindsight/.pg0/.pg0/installation/18.1.0/bin/postgres",
+        "sha256": "c51a24681dd5002766ea2f2081340d894762144a75148f89b3d2b4f98995f46d",
+        "bytes": 11223384,
+        "uid": 1000,
+        "gid": 1000,
+        "mode": "0o755",
+        "readable_executable": true,
+        "parents_traversable": true
+      },
+      "initdb": {
+        "path": "/home/hindsight/.pg0/.pg0/installation/18.1.0/bin/initdb",
+        "sha256": "3ca6d4b1cecbd837ef33320e37ff2ecd1abec29aa052bf04b71991f226d34549",
+        "bytes": 210736,
+        "uid": 1000,
+        "gid": 1000,
+        "mode": "0o755",
+        "readable_executable": true,
+        "parents_traversable": true
+      },
+      "pg_ctl": {
+        "path": "/home/hindsight/.pg0/.pg0/installation/18.1.0/bin/pg_ctl",
+        "sha256": "cda21f47857542878b0c687ece522ef96cafeacd3cc3f1bd2ceebd25d71cc76a",
+        "bytes": 85208,
+        "uid": 1000,
+        "gid": 1000,
+        "mode": "0o755",
+        "readable_executable": true,
+        "parents_traversable": true
+      },
+      "pg_controldata": {
+        "path": "/home/hindsight/.pg0/.pg0/installation/18.1.0/bin/pg_controldata",
+        "sha256": "72d19abe534d1823a02cb2418d57b1b2f815bcc031cbe9c3946d01b2b8f6c499",
+        "bytes": 69816,
+        "uid": 1000,
+        "gid": 1000,
+        "mode": "0o755",
+        "readable_executable": true,
+        "parents_traversable": true
+      }
+    },
+    "reaped": [
+      {
+        "pid": 27,
+        "wait_status": 0,
+        "exit_code": 0
+      },
+      {
+        "pid": 28,
+        "wait_status": 0,
+        "exit_code": 0
+      }
+    ],
+    "shutdown": {
+      "state": "checked",
+      "system_identifier": "7696846713986908180",
+      "remaining_pids": [
+        1
+      ],
+      "elapsed_seconds": 0.144
+    },
+    "finalContainerState": {
+      "Dead": false,
+      "Error": "",
+      "ExitCode": 0,
+      "FinishedAt": "2026-10-15T10:56:15.882392717Z",
+      "OOMKilled": false,
+      "Paused": false,
+      "Pid": 0,
+      "Restarting": false,
+      "Running": false,
+      "StartedAt": "2026-10-15T10:56:13.453955417Z",
+      "Status": "exited"
+    },
+    "elapsed": {
+      "sqlSeconds": 1.737,
+      "shutdownSeconds": 0.144,
+      "payloadSeconds": 2.226,
+      "attachClientMilliseconds": 2911,
+      "rootMilliseconds": 6813,
+      "cleanupObservedWindowsWallClockMilliseconds": 1824
+    },
+    "bounds": {
+      "sampledVolumeMetadataBytes": 113951227,
+      "sampledVolumeMetadataEntries": 2515,
+      "maximumVolumeMetadataBytes": 1073741824,
+      "maximumVolumeEntries": 4096,
+      "rawBinaryHashBytes": 45794816,
+      "maximumRawBinaryHashBytes": 268435456,
+      "attachStdoutBytes": 18200,
+      "attachStdoutSha256": "bd253cf5a316e10811d1c6e1cf72a588d2e7b36b81edd1d184396b1e6ca2b9e2",
+      "attachStderrBytes": 0,
+      "capturedLogs": [
+        {
+          "path": "/home/hindsight/.pg0/startup.log",
+          "bytes": 573,
+          "sha256": "6982880341fa0012a147fb7a1ae04652107f753c9b77349f277043340e5cf916",
+          "matchesCapturedBytes": true,
+          "matchesRecordedHash": true
+        },
+        {
+          "path": "/home/hindsight/.pg0/log/postgresql.log",
+          "bytes": 1174,
+          "sha256": "1800fd4e365a11fcde25594734b709646e721f750336ac3c4f366bb5d8b4cf65",
+          "matchesCapturedBytes": true,
+          "matchesRecordedHash": true
+        }
+      ]
+    }
+  },
+  "commandBoundary": {
+    "recordedDockerCalls": 22,
+    "zeroBasedAttachCommandIndex": 10,
+    "expectedAbsenceExitOneIndices": [
+      2,
+      3,
+      15,
+      19
+    ],
+    "mutations": {
+      "volumeCreate": 1,
+      "containerCreate": 1,
+      "containerStart": 1,
+      "containerRemove": 1,
+      "volumeRemove": 1,
+      "containerStop": 0,
+      "containerRestart": 0,
+      "containerExec": 0
+    },
+    "originalContainerInspectionIndices": [
+      5,
+      20
+    ],
+    "completeContainerIdSetIndices": [
+      4,
+      21
+    ],
+    "exactCleanupCommandIndices": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21
+    ],
+    "hostEnvironmentKeys": [
+      "SystemRoot",
+      "TEMP",
+      "TMP"
+    ],
+    "actualCreateMatchesPlan": true,
+    "noImageBuildPullOrDaemonMutation": true,
+    "noUnrelatedMutationTargets": true,
+    "source": "Retained Root runner and command arrays agree. The frozen supervisor is read, hash-checked, passed as stdin bytes, and stdin is closed."
+  },
+  "importantObservedDetails": [
+    "The actual postmaster argv includes -F and a later explicit -c fsync=on. Actual SQL reports fsync, synchronous_commit and full_page_writes on; effective SQL settings determine this result.",
+    "Postmaster PID 27, start ticks 874204, was adopted by PID 1 and was reaped with wait status 0. A second adopted PID 28 was also reaped with status 0; its role is not independently named in the retained process snapshots.",
+    "Raw pg_ctl fast stop took 0.122 seconds; pg_controldata took 0.021 seconds. Their shared checked-shutdown phase took 0.144 seconds and reported the same SQL cluster identifier in shut-down state.",
+    "The sampled pg_log_bytes field and final captured log size refer to different observation times. The final complete PostgreSQL log is 1174 bytes; its bytes and hash were independently recomputed.",
+    "Windows runner timestamps and Linux/daemon timestamps are different clock domains. Bounds use recorded command order and same-domain elapsed values, not cross-domain wall-clock ordering."
+  ],
+  "sourceBoundAssertions": [
+    {
+      "file": "reviewed-inputs/first-start.py",
+      "lines": "293-339,431-450",
+      "fact": "PID 1 / UID-GID 1000, empty seed and environment clearing before psycopg2 import; no environment dump was separately retained."
+    },
+    {
+      "file": "reviewed-inputs/first-start.py",
+      "lines": "341-393,431-515",
+      "fact": "One fixed pg0 start and one fixed SELECT; live CLI/backend/postmaster identities and metadata are captured by the executed frozen source."
+    },
+    {
+      "file": "reviewed-inputs/first-start.py",
+      "lines": "412-429,563-570,605-618",
+      "fact": "Original PID-file binding, unchanged postmaster identity before stop and PID-file absence afterward are successful source assertions; separate raw PID-file bytes were not retained."
+    },
+    {
+      "file": "reviewed-inputs/first-start.py",
+      "lines": "210-236,511-515",
+      "fact": "Exact ELF/access/traversal and binary hashes are produced by the executed source. This reviewer recomputed the frozen source/evidence/log hashes, not the already removed Linux binaries."
+    },
+    {
+      "file": "reviewed-inputs/first-start.py",
+      "lines": "146-208,535-641",
+      "fact": "Shared monotonic deadlines and sampled metadata limits were active; this successful run does not exercise timeout or forced-cleanup failures."
+    },
+    {
+      "file": "command-runner.mjs",
+      "lines": "10-14,16-43",
+      "fact": "Cleared host environment, shell-false hidden-window spawn, per-command capacity/output/time checks and explicit Docker endpoint/config are retained source assertions corroborated by the command records."
+    }
+  ],
+  "verification": {
+    "independentlyDerivedComparisons": 53,
+    "failedComparisons": [],
+    "syntax": "PASS_REUSED_SAME_SOURCE_SHA256_AST_AND_IN_MEMORY_COMPILE",
+    "lint": "PASS_REUSED_SAME_SOURCE_SHA256_RUFF_E_F_I",
+    "format": "PASS_REUSED_SAME_SOURCE_SHA256_RUFF_FORMAT",
+    "typeCheck": "NOT_APPLICABLE_PYTHON_FIXTURE",
+    "reusedStaticEvidence": {
+      "file": "reviewed-inputs/c2a-database-extraction-implementation-review.json",
+      "sha256": "7923d547692c959e61826d8a17e7cab3a27afbbcf49ca6206cc2598cf91025fe",
+      "sourceSha256": "7d1ee67f7b3027da781795e365b58a9cb93f847cdba7cc31425f05030d2f7ff6",
+      "originalVerification": "PASS_FRESH_AST_AND_IN_MEMORY_COMPILE",
+      "staticChecksRerun": false
+    },
+    "actualRuntime": "PASS_EXISTING_ROOT_RUN_INDEPENDENTLY_REVIEWED",
+    "testsRerun": false,
+    "dockerCallsByReviewer": 0,
+    "targetRuntimeCallsByReviewer": 0,
+    "productionEdits": false,
+    "specOrTemplateSync": "NOT_REQUIRED_TASK_EVIDENCE_ONLY"
+  },
+  "boundaries": [
+    "This passes offline extraction, raw-tool availability, one real SQL startup, adopted-postmaster supervision and checked clean shutdown for the standalone prerequisite.",
+    "It does not pass the admitted database child or its Host/Core/private-delivery/supervision path.",
+    "No workload table or generated logged row was written and read after restart; original-volume database restart/persistence remains open.",
+    "No Native API/provider/model readiness, trusted C2b receipt, C1 service or owner manual acceptance is established.",
+    "No inner Native ACK-loss, daemon restart or other failure matrix is added by this result.",
+    "Original-workload protection is supported by exact command targets and before/after IDs/status/start-time/restart-policy observations, not an exhaustive continuous host/daemon audit.",
+    "Storage values are bounded sampled metadata sizes, not a Docker quota or continuous physical-allocation measurement.",
+    "Source/interface correspondence is not a reproducible-build attestation.",
+    "Only the current two review reports were added. R1 failure, R2 evidence, accepted checks, source, raw stage evidence and task metadata were not changed."
+  ],
+  "ownership": {
+    "newReports": [
+      ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-extraction-runtime-review.md",
+      ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-extraction-runtime-review.json"
+    ],
+    "state": "RELEASE_TO_ROOT_AFTER_REPORT_READBACK",
+    "next": "Root preserves and verifies the raw stage and this review, then removes only the owned stage. The separately owned task-specific database-child plan may consume these measured prerequisite facts; execution still follows its independent review."
+  }
+}
+

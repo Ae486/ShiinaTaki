@@ -1,0 +1,81 @@
+{
+    "observedAt":  "2026-10-08T15:18:48.3422014+08:00",
+    "fixtures":  [
+                     {
+                         "fixture":  "taki-hindsight-g1-9b1caf3bb472",
+                         "stoppedRecorded":  true,
+                         "dataRemoved":  true,
+                         "registryRemoved":  true,
+                         "originalPostgresPid":  40804,
+                         "originalPostgresPidAbsent":  true
+                     },
+                     {
+                         "fixture":  "taki-hindsight-g1-26b13d415121",
+                         "stoppedRecorded":  true,
+                         "dataRemoved":  true,
+                         "registryRemoved":  true,
+                         "originalPostgresPid":  24988,
+                         "originalPostgresPidAbsent":  true
+                     },
+                     {
+                         "fixture":  "taki-hindsight-g1-da81fad5d7e5",
+                         "stoppedRecorded":  true,
+                         "dataRemoved":  true,
+                         "registryRemoved":  true,
+                         "originalPostgresPid":  48984,
+                         "originalPostgresPidAbsent":  true
+                     },
+                     {
+                         "fixture":  "taki-hindsight-g1-38311cdee71c",
+                         "stoppedRecorded":  true,
+                         "dataRemoved":  true,
+                         "registryRemoved":  true,
+                         "originalPostgresPid":  45608,
+                         "originalPostgresPidAbsent":  true
+                     },
+                     {
+                         "fixture":  "taki-hindsight-g1-cf93163e37bf",
+                         "stoppedRecorded":  true,
+                         "dataRemoved":  true,
+                         "registryRemoved":  true,
+                         "originalPostgresPid":  43308,
+                         "originalPostgresPidAbsent":  true
+                     },
+                     {
+                         "fixture":  "taki-hindsight-g1-881b0fa8004f",
+                         "stoppedRecorded":  true,
+                         "dataRemoved":  true,
+                         "registryRemoved":  true,
+                         "originalPostgresPid":  50580,
+                         "originalPostgresPidAbsent":  true
+                     },
+                     {
+                         "fixture":  "taki-hindsight-g1-8dd90b85eb50",
+                         "stoppedRecorded":  true,
+                         "dataRemoved":  true,
+                         "registryRemoved":  true,
+                         "originalPostgresPid":  26480,
+                         "originalPostgresPidAbsent":  true
+                     },
+                     {
+                         "fixture":  "taki-hindsight-g1-5a4962484a6d",
+                         "stoppedRecorded":  true,
+                         "dataRemoved":  true,
+                         "registryRemoved":  true,
+                         "originalPostgresPid":  43124,
+                         "originalPostgresPidAbsent":  true
+                     },
+                     {
+                         "fixture":  "taki-hindsight-g1-befa9df1db23",
+                         "stoppedRecorded":  true,
+                         "dataRemoved":  true,
+                         "registryRemoved":  true,
+                         "originalPostgresPid":  50216,
+                         "originalPostgresPidAbsent":  true
+                     }
+                 ],
+    "survivingCheckProcesses":  [
+
+                                ],
+    "passed":  true
+}

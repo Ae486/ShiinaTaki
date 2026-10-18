@@ -1,0 +1,11 @@
+--- docker-database/database-read.py
++++ diag-docker-database/database-read.py
+@@ -15,7 +15,7 @@
+ import uuid
+ from pathlib import Path
+ 
+-CASE = "1b05d2f6-494c-4a6d-a601-1e807eca1486"
++CASE = "069242fc-3c26-4413-a767-0d01d819f95e"
+ ROOT = Path("/home/hindsight/.pg0")
+ DATABASE = ROOT / "c2a-db"
+ RUNTIME = Path("/run/taki-hindsight")

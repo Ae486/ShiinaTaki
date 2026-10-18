@@ -1,0 +1,24 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "--filter",
+    "@taki/desktop",
+    "exec",
+    "vitest",
+    "run",
+    "src/windows/home/pages/operations/memory-transitions-browser.test.ts",
+    "--maxWorkers=1"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "startedAt": "2026-10-11T11:27:10.385895+00:00",
+  "finishedAt": "2026-10-11T11:27:43.419068+00:00",
+  "exitCode": 1,
+  "durationSeconds": 33.032,
+  "inputManifest": "b3-independent-home-resume-transitions-browser-20261011-01-inputs.json",
+  "sourceCount": 2056,
+  "changedInputs": [],
+  "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-independent-home\\resume-transitions-browser-20261011-01-0323ee3fdb05450ab1644eccbf451e7f",
+  "temporaryRootRemoved": true,
+  "remainingFixtureEntries": [],
+  "log": "b3-independent-home-resume-transitions-browser-20261011-01.log"
+}

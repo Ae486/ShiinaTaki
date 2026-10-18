@@ -1,0 +1,291 @@
+{
+  "caseId": "1b05d2f6-494c-4a6d-a601-1e807eca1486",
+  "recordedAt": "2026-10-18T12:37:11.2285805Z",
+  "source": "G:\\TakiAgent-c2a-database\\persistence-1b05d2f6-494c-4a6d-a601-1e807eca1486",
+  "destination": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\c2a-database-persistence-run-1b05d2f6",
+  "fileCount": 52,
+  "directoryCount": 15,
+  "totalBytes": 2082458,
+  "allCopiedHashesMatch": true,
+  "sourceRetained": true,
+  "retentionReason": "Failed run: preserve all staging evidence; no retry and no additional cleanup beyond the launcher cleanup.",
+  "directories": [
+    "build-config",
+    "build-config\\buildx",
+    "build-config\\buildx\\activity",
+    "build-config\\buildx\\defaults",
+    "build-config\\buildx\\instances",
+    "build-config\\buildx\\refs",
+    "build-config\\buildx\\refs\\default",
+    "build-config\\buildx\\refs\\default\\default",
+    "client-config",
+    "context",
+    "context\\docker",
+    "context\\docker\\standalone",
+    "context\\docker\\standalone\\managed_bootstrap",
+    "frozen-inputs",
+    "frozen-inputs\\docker-database"
+  ],
+  "files": [
+    {
+      "path": ".c2a-docker-owner",
+      "bytes": 36,
+      "sha256": "0b9598546ba553ef6aeaf121018e759cf79deb517a7f7857281845fac7738937"
+    },
+    {
+      "path": "frozen-inputs/c2a-database-persistence-exact-byte-review-round2-1b05d2f6.md",
+      "bytes": 7645,
+      "sha256": "e1e1ea1e9abbb6a16377709be17da33b92f91cbff7962a6e0a78958b128880e5"
+    },
+    {
+      "path": "frozen-inputs/c2a-database-persistence-r2-self-check.json",
+      "bytes": 61914,
+      "sha256": "e25ea9b3058f6425cb6aed90baaa78ff63639e17d96f14dc7bf50b93da86a734"
+    },
+    {
+      "path": "frozen-inputs/c2a-implementation-source-manifest.json",
+      "bytes": 108542,
+      "sha256": "f27379be3b4b5e61e1b2821c2eda2d87bf54e5c2983b034bdb637ee789961ae2"
+    },
+    {
+      "path": "build-config/buildx/.buildNodeID",
+      "bytes": 16,
+      "sha256": "97929f67bd9491029ba0262a8e341c58eb8372c6f84474fcc30cb150b2fc9e09"
+    },
+    {
+      "path": "build-config/buildx/.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build-config/buildx/current",
+      "bytes": 76,
+      "sha256": "ad4436223bfadf60e9921a9be166da1d9c454921db007f16b8f21e5553cde791"
+    },
+    {
+      "path": "frozen-inputs/docker-database/database-read.py",
+      "bytes": 6084,
+      "sha256": "4bd830c60a4ddecc4e8e7018d2b19eb08093c81fc5d7f3ee0a8ff380178e4271"
+    },
+    {
+      "path": "frozen-inputs/docker-database/fake_child.py",
+      "bytes": 44233,
+      "sha256": "9d65b8875e5d798a024dff9b4a182d6cff7bf4b62646954e38cd0c2e12ce3819"
+    },
+    {
+      "path": "frozen-inputs/docker-database/README.md",
+      "bytes": 22962,
+      "sha256": "ffd27eba8edae875cdd8f8a84beea17e4dc1385e180c879fba7388816181419a"
+    },
+    {
+      "path": "frozen-inputs/docker-database/run-persistence.ts",
+      "bytes": 56502,
+      "sha256": "c39fd6e465f922cefd198abe1e6d531d731359f8969b183ae9b5b4d2cf06ee27"
+    },
+    {
+      "path": "frozen-inputs/c2a-database-persistence-exact-byte-review-round2-1b05d2f6.json",
+      "bytes": 56945,
+      "sha256": "f3a54993b2e9a53be30f90ab98fbee5b4b7807d119ae5858d0cd08cc7b57711e"
+    },
+    {
+      "path": "build-config/buildx/activity/default",
+      "bytes": 20,
+      "sha256": "f26f30901fb8fd230b80b158cc0201458fb35613adf42fdb345e9240273782e8"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/__init__.py",
+      "bytes": 80,
+      "sha256": "cbf487cffc9c62b5c6fe61f32d80070b5843f70f966c5fca163c675e21ddbf1d"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/bootstrap.py",
+      "bytes": 6323,
+      "sha256": "b8331bd8c9645d265578ed65f9f77402f170813f20d1d2683b5aa0a7d0768101"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/control.py",
+      "bytes": 5593,
+      "sha256": "c75dcdf2285df614c4836dab4898a2980a2a1e8e4572862861596ab244f39d5e"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/fake_child.py",
+      "bytes": 44233,
+      "sha256": "9d65b8875e5d798a024dff9b4a182d6cff7bf4b62646954e38cd0c2e12ce3819"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/fake_consumer.py",
+      "bytes": 4302,
+      "sha256": "52b3d0664b06ef82dca4765d2c08e820c16c2af5e2814a02f98fe08f8e220eb3"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/owner_protocol.py",
+      "bytes": 3199,
+      "sha256": "cd9cdbea572354dbbc1200098d9edfe9280679c2b346a67c1326a795b01c1804"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/owner.py",
+      "bytes": 2460,
+      "sha256": "5b10f9f09def8ff985c96fed56c31f4ec4976f684d7e3b044fdc8a66afb38acc"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/protocol.py",
+      "bytes": 13320,
+      "sha256": "074247650a31cfc47a1931ef6c7b258aa6f1d3a649bbb792ff2878257f6f8b88"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/submitter.py",
+      "bytes": 4913,
+      "sha256": "5a6ad60266066d1cff2559d46c6b2b15d4a93cf882de1e487790ad0fb6863c4a"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/supervision.py",
+      "bytes": 4552,
+      "sha256": "ff768434e0cef9eb2b6996351ba31e1dedede95211809d2ab8e8d09b5d9a5064"
+    },
+    {
+      "path": "context/docker/standalone/Dockerfile.c2a-fake",
+      "bytes": 555,
+      "sha256": "2be1279ef4621f5d42397879fab2e436d780224eb3c02d591180faf9e9a9fcff"
+    },
+    {
+      "path": "build-config/config.json",
+      "bytes": 94,
+      "sha256": "c880ae25bec63e8fc31f72fe393a1f37d2d7a1aba39858b5f3813492dd9b075f"
+    },
+    {
+      "path": "verified-inputs-immediately-before.json",
+      "bytes": 2332,
+      "sha256": "495d10baf73c0e3aa846b0cd8ac420b773f0c2dee28fbbf00700060d42ea12ac"
+    },
+    {
+      "path": "verified-inputs-before-launch.json",
+      "bytes": 2332,
+      "sha256": "4048422d35dd7001de1b74c77f37318b78035dff3051f104566fffc1d1a17e72"
+    },
+    {
+      "path": "adapter-build.json",
+      "bytes": 672,
+      "sha256": "58938c23a84bf24dcfe7cd2e4cf64fb030e2c2799567e0e11685c465cf3aa2a5"
+    },
+    {
+      "path": "base-probe.json",
+      "bytes": 316,
+      "sha256": "819eca37907fa96577bcafca977d41304c16e1a14a782205b8170f874d944d5a"
+    },
+    {
+      "path": "baseline.json",
+      "bytes": 119,
+      "sha256": "443e0ba746a27ac85701d72f9e9b72727100831a1e5fd2809f44b9931de1d4b1"
+    },
+    {
+      "path": "build-result.json",
+      "bytes": 3384,
+      "sha256": "a3781df6b50c579cc1221246bfea4b38ee01d6da120bd3fdd3978a4e05ea70df"
+    },
+    {
+      "path": "build.started",
+      "bytes": 24,
+      "sha256": "8da183be322dd03bbf240e624357239806ef8d99502aa761f03df0873e5b7e7c"
+    },
+    {
+      "path": "build.stderr.log",
+      "bytes": 2129,
+      "sha256": "616de9d559b777c52fb548584419fb591e6e32c7905225df3a09a5905e5c8610"
+    },
+    {
+      "path": "build.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "command-runner.mjs",
+      "bytes": 3022,
+      "sha256": "ce12b29dd098ebf88ea10345313e0eab1c241dba34808151f60cb55f215ef129"
+    },
+    {
+      "path": "commands.jsonl",
+      "bytes": 13685,
+      "sha256": "e2be5bbf25d0c835ed157a81a3a7e45323222d1c6e0cfffbfc602101ee303d02"
+    },
+    {
+      "path": "context-manifest.json",
+      "bytes": 4451,
+      "sha256": "42782de496a0eb90f7d22f9968804affb3182257570f37c6c0a43ccd5c5dfaa8"
+    },
+    {
+      "path": "failure-stop.json",
+      "bytes": 31832,
+      "sha256": "c8bd0e59d6c269d10566fd2fcf4add54e7dda331d10bd6bde5581099b0438871"
+    },
+    {
+      "path": "fake-key-adapter.exe",
+      "bytes": 155648,
+      "sha256": "58a7b15f048522b9dbac140c9f99539d55bb3f8d28a2fb238f5455745d82dace"
+    },
+    {
+      "path": "fake-key-adapter.pdb",
+      "bytes": 1314816,
+      "sha256": "d606ce46828b18494afb3fb828d1b66b773920a7ebce63948ad28f00c98b12cf"
+    },
+    {
+      "path": "frozen-inputs-manifest.json",
+      "bytes": 1336,
+      "sha256": "1affa5f5fb2355e643ff2430f0dc40f222c20d6acadbdf4c35c3ca01e39a579c"
+    },
+    {
+      "path": "image-id.txt",
+      "bytes": 71,
+      "sha256": "636128809287f19d4960080b709f3eff79be27e8ad38f7386458d63529aaf203"
+    },
+    {
+      "path": "launcher-dispatched",
+      "bytes": 24,
+      "sha256": "e91bcb738a0effc35cefad1083c9d0fd96758b06efd2a046a97dc117116145db"
+    },
+    {
+      "path": "launcher-result.json",
+      "bytes": 766,
+      "sha256": "6356c7553369920de274abf8cae87f6b5ed9010c75b56b070b97e8c3e2c2fd48"
+    },
+    {
+      "path": "launcher.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "launcher.stdout.log",
+      "bytes": 224,
+      "sha256": "52c80384afb127bd199a960cdef3aa32043e23a4480929242475889bc35a1f3c"
+    },
+    {
+      "path": "persistence.json",
+      "bytes": 76375,
+      "sha256": "e7fce21aeb548f873bab59e4bbab701eb2a5ff840ec81f94a6a621247159eb3a"
+    },
+    {
+      "path": "persistence.started",
+      "bytes": 24,
+      "sha256": "292920ca9bd9356071de83ffa757296bae2ecc13f8bad986d4b5b666ad81f905"
+    },
+    {
+      "path": "result-image.json",
+      "bytes": 3766,
+      "sha256": "17b478f8a7c038531debaf6d78535130a6af7167771bc6b258362851cf51cca4"
+    },
+    {
+      "path": "reused-base-probe.json",
+      "bytes": 811,
+      "sha256": "6a28b7231a63645f9d8da34188bb3201b1dae3ef975df10d5f9bea09dd007f1b"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/unix_socket.py",
+      "bytes": 9434,
+      "sha256": "08b6e604211d19e31ad61782c96b91a004277b37c31d6e9a0bdfdda681cd7725"
+    },
+    {
+      "path": "build-config/buildx/refs/default/default/vldkptpj9gabf11l590p2ogcv",
+      "bytes": 266,
+      "sha256": "7faedca96c9896dbdd3981645af2c422b526786ecfb02f11a9fc283c1c06dd0f"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "command": [
+    "git",
+    "diff",
+    "--check"
+  ],
+  "cwd": "H:/hindsight",
+  "exitCode": 0,
+  "durationSeconds": 1.699,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-native-diff-check-01.log"
+}

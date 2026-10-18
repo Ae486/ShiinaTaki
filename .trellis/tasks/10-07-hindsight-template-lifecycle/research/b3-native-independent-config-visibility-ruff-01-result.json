@@ -1,0 +1,18 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/python.exe",
+    "-m",
+    "ruff",
+    "check",
+    "hindsight_api/engine/template_access.py",
+    "tests/native_results/test_template_independent_routes.py"
+  ],
+  "cwd": "H:/hindsight/hindsight-api-slim",
+  "exitCode": 0,
+  "durationSeconds": 1.251,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-independent-config-visibility-ruff-01.log",
+  "sources": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-independent-config-visibility-ruff-01-sources.json",
+  "changedInputs": [],
+  "ownedTemp": "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\independent-config-visibility-ruff-01-_17limqt",
+  "ownedTempRemoved": true
+}

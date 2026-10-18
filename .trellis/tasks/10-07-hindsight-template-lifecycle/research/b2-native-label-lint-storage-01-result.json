@@ -1,0 +1,11 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/ruff.exe",
+    "check",
+    "tests/native_results/test_template_label_storage.py"
+  ],
+  "cwd": "H:/hindsight/hindsight-api-slim",
+  "exitCode": 0,
+  "durationSeconds": 0.068,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-native-label-lint-storage-01.log"
+}

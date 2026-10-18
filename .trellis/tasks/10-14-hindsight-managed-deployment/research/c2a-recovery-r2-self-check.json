@@ -1,0 +1,355 @@
+{
+  "version": 1,
+  "createdAt": "2026-10-15T10:29:07.363Z",
+  "task": ".trellis/tasks/10-14-hindsight-managed-deployment",
+  "agent": "/root/c2a_recovery_implement",
+  "stage": "R2 narrow task-fixture repair and affected static checks",
+  "result": {
+    "affectedStaticChecks": "PASS",
+    "independentReview": "PENDING",
+    "runtime": "NOT_RUN",
+    "deploymentReady": false
+  },
+  "ownership": {
+    "files": [
+      ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts",
+      ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/README.md",
+      ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-r2-self-check.md",
+      ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-r2-self-check.json"
+    ],
+    "state": "ready-for-independent-review",
+    "productionFilesChanged": [],
+    "sharedFixturesChanged": [],
+    "otherOwnerFilesChanged": [],
+    "runtimeAndMetadataOwner": "Root"
+  },
+  "firstAttempt": {
+    "caseId": "f217a02f-f8a5-466f-ab59-0e97940debe0",
+    "archivedEvidence": {
+      "files": [
+        {
+          "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-first-attempt-evidence.zip",
+          "bytes": 179395,
+          "sha256": "fb0d5afca5f04df4d800c25d831db49c218a2d3233a07c919f5baa55e11b795d"
+        },
+        {
+          "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-first-attempt-preservation.json",
+          "bytes": 13663,
+          "sha256": "4942fdac40af9fe756ba0bd0f8bbd395131ac683ff94dbe6bb95ead1030eeaac"
+        }
+      ],
+      "entryCount": 72,
+      "entryVerificationOwner": "Root",
+      "verifiedByThisAgent": "Archive bytes and SHA-256 match Root's released binding; individual entries were not reverified.",
+      "originalPathNote": "G: paths in retained original records are historical read locations; Root owns removing the temporary R1 stage."
+    },
+    "result": "FAIL, unchanged",
+    "rawRuntimeFacts": {
+      "caseId": "f217a02f-f8a5-466f-ab59-0e97940debe0",
+      "protectedRootRemoved": true,
+      "casePassed": false,
+      "localFiles": {
+        "files": 827,
+        "bytes": 103461077,
+        "hits": 0
+      },
+      "ownedRuntimeCleanup": true,
+      "failureStage": "final-effect-and-containment-check"
+    },
+    "runtimeEvidence": {
+      "path": "G:/TakiAgent-c2a-docker-acceptance/recovery-f217a02f-f8a5-466f-ab59-0e97940debe0/recovery.json",
+      "bytes": 182384,
+      "sha256": "22075fc1db3122b682056be6c99dedfb237d606e9ffefbcb46e24ff0c79d3551",
+      "encoding": "UTF-8",
+      "bom": false,
+      "lastWriteUtc": "2026-10-15T10:16:00.2460097Z"
+    },
+    "launcherCommand": {
+      "startedAt": "2026-10-15T10:14:21.81Z",
+      "program": "C:/Program Files/nodejs/node.exe",
+      "args": [
+        "H:/TakiAgent/.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts",
+        "--execute-approved-recovery"
+      ],
+      "environmentKeys": [
+        "SystemRoot",
+        "TEMP",
+        "TMP",
+        "WS_NO_BUFFER_UTIL",
+        "WS_NO_UTF_8_VALIDATE"
+      ],
+      "timeoutMs": 840000,
+      "stdout": "{\"caseId\":\"f217a02f-f8a5-466f-ab59-0e97940debe0\",\"passed\":false,\"ownedRuntimeCleanup\":true,\"evidence\":\"G:\\\\TakiAgent-c2a-docker-acceptance\\\\recovery-f217a02f-f8a5-466f-ab59-0e97940debe0\\\\recovery.json\",\"deploymentReady\":false}\n",
+      "stderr": "",
+      "failure": null,
+      "exitCode": 1,
+      "signal": null,
+      "elapsedMs": 98478
+    },
+    "originalLauncherLogLine": "{\"startedAt\":\"2026-10-15T10:14:21.810Z\",\"program\":\"C:/Program Files/nodejs/node.exe\",\"args\":[\"H:/TakiAgent/.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts\",\"--execute-approved-recovery\"],\"environmentKeys\":[\"SystemRoot\",\"TEMP\",\"TMP\",\"WS_NO_BUFFER_UTIL\",\"WS_NO_UTF_8_VALIDATE\"],\"timeoutMs\":840000,\"stdout\":\"{\\\"caseId\\\":\\\"f217a02f-f8a5-466f-ab59-0e97940debe0\\\",\\\"passed\\\":false,\\\"ownedRuntimeCleanup\\\":true,\\\"evidence\\\":\\\"G:\\\\\\\\TakiAgent-c2a-docker-acceptance\\\\\\\\recovery-f217a02f-f8a5-466f-ab59-0e97940debe0\\\\\\\\recovery.json\\\",\\\"deploymentReady\\\":false}\\n\",\"stderr\":\"\",\"failure\":null,\"exitCode\":1,\"signal\":null,\"elapsedMs\":98478}",
+    "commandAndReviewBindings": [
+      {
+        "bytes": 20294,
+        "sha256": "94821254e0853eb0eb6c4db94e09f0a724b42c67f62b8667e517a23c0cd59c80",
+        "path": "G:/TakiAgent-c2a-docker-acceptance/recovery-f217a02f-f8a5-466f-ab59-0e97940debe0/commands.jsonl"
+      },
+      {
+        "bytes": 757,
+        "sha256": "c58d0d76cac1f9d9976c4b5484ec81570932a3c91a7ad88f6f680110606e021c",
+        "path": "G:/TakiAgent-c2a-docker-acceptance/recovery-f217a02f-f8a5-466f-ab59-0e97940debe0/launcher-command.json"
+      },
+      {
+        "bytes": 8867,
+        "sha256": "71eaa2acc16b83133d4cd972ea790bb96dd374f60bc856245289ec1afca08587",
+        "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-first-attempt.md"
+      }
+    ],
+    "localization": "The independent diagnosis identifies the live scanTree call after final inspectExecs and before effectCounts assignment. The Shell retains deployment.lock with share mode 0 until its owner lifetime ends.",
+    "diagnosticLimits": "The original catch did not retain the earliest failing leaf, errno or stack. No exact EBUSY/EPERM message or kernel trace is claimed.",
+    "originalStaticFailures": [
+      {
+        "name": "single-entry-no-emit",
+        "cwd": "H:/TakiAgent",
+        "command": "& 'C:/Program Files/nodejs/node.exe' --input-type=module -e 'import ts from \"typescript\"; import fs from \"node:fs\"; const file=\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts\"; const base=JSON.parse(fs.readFileSync(\"tsconfig.base.json\",\"utf8\")); const parsed=ts.convertCompilerOptionsFromJson(base.compilerOptions,process.cwd()); const program=ts.createProgram([file],{...parsed.options,noEmit:true,incremental:false}); const errors=[...parsed.errors,...ts.getPreEmitDiagnostics(program)]; console.log(JSON.stringify({entry:file,noEmit:true,diagnostics:errors.map(d=>({file:d.file?.fileName,line:d.file&&d.start!==undefined?d.file.getLineAndCharacterOfPosition(d.start).line+1:undefined,code:d.code,message:ts.flattenDiagnosticMessageText(d.messageText,\"\\n\")}))})); process.exitCode=errors.length?1:0;'",
+        "startedAt": "2026-10-15T09:29:54.433Z",
+        "elapsedMs": 7151,
+        "result": {
+          "chunk_id": "4da74e",
+          "wall_time_seconds": 6.3646278,
+          "exit_code": 1,
+          "original_token_count": 130,
+          "output": "{\"entry\":\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts\",\"noEmit\":true,\"diagnostics\":[{\"file\":\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts\",\"line\":13,\"code\":2307,\"message\":\"Cannot find module 'zod' or its corresponding type declarations.\"},{\"file\":\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts\",\"line\":284,\"code\":7006,\"message\":\"Parameter 'value' implicitly has an 'any' type.\"}]}\n"
+        }
+      }
+    ]
+  },
+  "repair": {
+    "changedBehavior": [
+      "Remove only the redundant full-tree scan while the replacement Shell/helper are live.",
+      "Keep all live event, exec, resource, startup, identity, marker and containment assertions in their original order.",
+      "Keep the existing complete protected-tree scan after stopProcesses and requireHelperGone, before protected-root removal.",
+      "Set protectedTreeScannedAfterStop only after that scan completes and require it after cleanup before the result can retain final PASS.",
+      "Bind the runner and README to Root's fresh R2 token and exact roots/tag."
+    ],
+    "completeScanUnchanged": [
+      "No persistent-file or deployment.lock exemption.",
+      "No change to sentinel detection, symlink checks, regular-file requirement, file-count/total-byte/per-file bounds.",
+      "The provisioning scan is retained before the live stack exists."
+    ],
+    "firstFailurePreserved": "The main catch still sets casePassed=false and failureStage; successful cleanup never resets that failure to true. Any cleanup or required-scan failure sets casePassed=false, ownedRuntimeCleanup=false and the separate cleanupFailureStage.",
+    "excludedChanges": [
+      "No production lock/sharing change.",
+      "No new helper abstraction, dependency, build or behavior test.",
+      "No R1 evidence, consumed marker or original review rewrite."
+    ]
+  },
+  "r2": {
+    "caseId": "775da07b-2b69-44a3-868c-2604423dac11",
+    "staging": "G:/TakiAgent-c2a-docker-acceptance/recovery-775da07b-2b69-44a3-868c-2604423dac11",
+    "protectedRoot": "C:/taki-c2a-docker-recovery-775da07b-2b69-44a3-868c-2604423dac11",
+    "imageTag": "taki-c2a-fake:775da07b-2b69-44a3-868c-2604423dac11",
+    "preparedOrExecutedByThisAgent": false
+  },
+  "changedInputs": [
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts",
+      "bytes": 47588,
+      "sha256": "869146af78a9cde99cf70af2c857049548c3c097aedd09f63c95d779c8d11017",
+      "encoding": "UTF-8",
+      "bom": false,
+      "lastWriteUtc": "2026-10-15T10:25:25.9934905Z",
+      "before": {
+        "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts",
+        "bytes": 47334,
+        "sha256": "f7c907eda8a156da8ca20be9d199c2d6ac5eb35ac84b01625ace6a50f608493e"
+      }
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/README.md",
+      "bytes": 9848,
+      "sha256": "9c73c76e240e84e45b98d6872a9e6596f9df7d6e7c12d55d46556d36b9c0e3e4",
+      "encoding": "UTF-8",
+      "bom": false,
+      "lastWriteUtc": "2026-10-15T10:25:25.9955998Z",
+      "before": {
+        "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/README.md",
+        "bytes": 9401,
+        "sha256": "08643e9afef9600213a0570faed2058bcb74ead8acea99d61159d83b4f4831be"
+      }
+    }
+  ],
+  "checks": {
+    "attemptCount": 3,
+    "attempts": [
+      {
+        "name": "node-syntax",
+        "command": "& 'C:/Program Files/nodejs/node.exe' --check .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts",
+        "cwd": "H:/TakiAgent",
+        "startedAt": "2026-10-15T10:26:22.682Z",
+        "elapsedMs": 1234,
+        "result": {
+          "chunk_id": "b87777",
+          "wall_time_seconds": 0.4383104,
+          "exit_code": 0,
+          "original_token_count": 0,
+          "output": ""
+        }
+      },
+      {
+        "name": "scoped-eslint",
+        "command": "& 'G:/Roaming/npm/pnpm.cmd' exec eslint --no-ignore .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts",
+        "cwd": "H:/TakiAgent",
+        "startedAt": "2026-10-15T10:26:34.297Z",
+        "elapsedMs": 4612,
+        "result": {
+          "chunk_id": "354eb4",
+          "wall_time_seconds": 3.9174503,
+          "exit_code": 0,
+          "original_token_count": 0,
+          "output": ""
+        }
+      },
+      {
+        "name": "single-entry-no-emit",
+        "command": "& 'C:/Program Files/nodejs/node.exe' --input-type=module -e 'import ts from \"typescript\"; import fs from \"node:fs\"; const file=\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts\"; const base=JSON.parse(fs.readFileSync(\"tsconfig.base.json\",\"utf8\")); const parsed=ts.convertCompilerOptionsFromJson(base.compilerOptions,process.cwd()); const program=ts.createProgram([file],{...parsed.options,noEmit:true,incremental:false}); const errors=[...parsed.errors,...ts.getPreEmitDiagnostics(program)]; console.log(JSON.stringify({entry:file,noEmit:true,diagnostics:errors.map(d=>({file:d.file?.fileName,line:d.file&&d.start!==undefined?d.file.getLineAndCharacterOfPosition(d.start).line+1:undefined,code:d.code,message:ts.flattenDiagnosticMessageText(d.messageText,\"\\n\")}))})); process.exitCode=errors.length?1:0;'",
+        "cwd": "H:/TakiAgent",
+        "startedAt": "2026-10-15T10:26:38.909Z",
+        "elapsedMs": 7043,
+        "result": {
+          "chunk_id": "654932",
+          "wall_time_seconds": 6.3441527,
+          "exit_code": 0,
+          "original_token_count": 34,
+          "output": "{\"entry\":\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts\",\"noEmit\":true,\"diagnostics\":[]}\n"
+        }
+      }
+    ]
+  },
+  "unchangedProbe": {
+    "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/recovery-probe.py",
+    "bytes": 5131,
+    "sha256": "e3e49ad25888b34332184775f3193a47ad9e3c0c4943fd08e3dc7b3611119b29",
+    "encoding": "UTF-8",
+    "bom": false,
+    "lastWriteUtc": "2026-10-15T09:21:29.0804548Z",
+    "matchesBefore": true,
+    "reusedChecks": [
+      {
+        "name": "python-ast",
+        "command": "& 'H:/hindsight/.venv/Scripts/python.exe' -B -c 'import ast, pathlib, sys; ast.parse(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\")); print(\"AST_OK\")' .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/recovery-probe.py",
+        "cwd": "H:/TakiAgent",
+        "startedAt": "2026-10-15T09:29:18.412Z",
+        "elapsedMs": 2472,
+        "result": {
+          "chunk_id": "310b77",
+          "wall_time_seconds": 1.7350284,
+          "exit_code": 0,
+          "original_token_count": 2,
+          "output": "AST_OK\r\n"
+        }
+      },
+      {
+        "name": "python-ruff-check",
+        "cwd": "H:/TakiAgent",
+        "command": "& 'H:/hindsight/.venv/Scripts/ruff.exe' check --no-cache --config H:/hindsight/hindsight-api-slim/pyproject.toml .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/recovery-probe.py",
+        "startedAt": "2026-10-15T09:35:24.925Z",
+        "elapsedMs": 2441,
+        "result": {
+          "chunk_id": "4cd486",
+          "wall_time_seconds": 1.7295338,
+          "exit_code": 0,
+          "original_token_count": 5,
+          "output": "All checks passed!\n"
+        }
+      },
+      {
+        "name": "python-ruff-format",
+        "cwd": "H:/TakiAgent",
+        "command": "& 'H:/hindsight/.venv/Scripts/ruff.exe' format --check --no-cache --config H:/hindsight/hindsight-api-slim/pyproject.toml .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/recovery-probe.py",
+        "startedAt": "2026-10-15T09:35:51.645Z",
+        "elapsedMs": 1084,
+        "result": {
+          "chunk_id": "4984fb",
+          "wall_time_seconds": 0.378822,
+          "exit_code": 0,
+          "original_token_count": 7,
+          "output": "1 file already formatted\n"
+        }
+      }
+    ],
+    "note": "The probe bytes are unchanged. These are prior hash-bound results, not R2 reruns."
+  },
+  "retainedBaselines": {
+    "frozenManifest": {
+      "path": "G:/TakiAgent-c2a-docker-acceptance/recovery-f217a02f-f8a5-466f-ab59-0e97940debe0/frozen-inputs.json",
+      "bytes": 3231,
+      "sha256": "bb94c313a6d283ca0d8e0be93662dc72cc117e96bcc0f1050587fc9f24cc72da",
+      "encoding": "UTF-8",
+      "bom": false,
+      "lastWriteUtc": "2026-10-15T10:21:27.0244336Z"
+    },
+    "rootVerifiedFrozenInputCount": 22,
+    "rehashedAllFrozenInputsByThisAgent": false,
+    "directlyRecheckedFrozenInputs": [
+      {
+        "path": "G:/TakiAgent-c2a-docker-acceptance/recovery-f217a02f-f8a5-466f-ab59-0e97940debe0/frozen-inputs/run-recovery.ts",
+        "bytes": 47334,
+        "sha256": "f7c907eda8a156da8ca20be9d199c2d6ac5eb35ac84b01625ace6a50f608493e",
+        "encoding": "UTF-8",
+        "bom": false,
+        "lastWriteUtc": "2026-10-15T09:45:13.6832091Z"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-docker-acceptance/recovery-f217a02f-f8a5-466f-ab59-0e97940debe0/frozen-inputs/README.md",
+        "bytes": 9401,
+        "sha256": "08643e9afef9600213a0570faed2058bcb74ead8acea99d61159d83b4f4831be",
+        "encoding": "UTF-8",
+        "bom": false,
+        "lastWriteUtc": "2026-10-15T09:28:06.1319234Z"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-docker-acceptance/recovery-f217a02f-f8a5-466f-ab59-0e97940debe0/frozen-inputs/c2a-recovery-self-check.json",
+        "bytes": 18482,
+        "sha256": "25224a0c7befd75b1f91b95d95693c1cbb2b19c29e5641ab1fc8f8677aa568fc",
+        "encoding": "UTF-8",
+        "bom": false,
+        "lastWriteUtc": "2026-10-15T09:56:42.6753657Z"
+      }
+    ],
+    "originalRuntimeJsonHashUnchanged": true,
+    "originalSelfCheckAndReviewRewritten": false
+  },
+  "readOnlyDiffs": {
+    "exitCodeMeaning": "git diff --no-index returns 1 for the expected differences; these are not failed static checks.",
+    "source": {
+      "chunk_id": "0a65b5",
+      "wall_time_seconds": 0.5161785,
+      "exit_code": 1,
+      "original_token_count": 720,
+      "output": "diff --git a/G:/TakiAgent-c2a-docker-acceptance/recovery-f217a02f-f8a5-466f-ab59-0e97940debe0/frozen-inputs/run-recovery.ts b/.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts\nindex 8f1c574..64798b3 100644\n--- a/G:/TakiAgent-c2a-docker-acceptance/recovery-f217a02f-f8a5-466f-ab59-0e97940debe0/frozen-inputs/run-recovery.ts\n+++ b/.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts\n@@ -29,7 +29,7 @@ import { pairOperator, setPermissionLevel } from \"../../../../../e2e/src/fixture\n import { openRpcSocket, type RpcSocket } from \"../../../../../e2e/src/fixture/rpc-socket.ts\";\n import { startCapabilityRelay, type CapabilityRelay } from \"../../../../../e2e/src/fixture/ws-relay.ts\";\n \n-const CASE = \"f217a02f-f8a5-466f-ab59-0e97940debe0\";\n+const CASE = \"775da07b-2b69-44a3-868c-2604423dac11\";\n const REPOSITORY = fileURLToPath(new URL(\"../../../../../\", import.meta.url));\n const HERE = fileURLToPath(new URL(\"./\", import.meta.url));\n const ROOT = resolve(`C:/taki-c2a-docker-recovery-${CASE}`);\n@@ -533,7 +533,8 @@ async function recoveryCase(paths: BootPaths, generation: Generation) {\n   await resumeNewStartup(original, waiting, markerSha256);\n   stage = \"final-effect-and-containment-check\";\n   await inspectExecs(original, since, true);\n-  scanTree();\n+  // The live Shell owns deployment.lock exclusively. The required full-tree scan\n+  // runs in cleanup after the owned stack is reaped, without skipping any file.\n   report.effectCounts = { containerCreate: 1, volumeCreate: 1, containerStart: 2, maintenanceRestart: 1, submit: 2,\n     source: \"actual resource-scoped events, exec metadata, unchanged original registry entries and fresh startup entry\" };\n }\n@@ -625,7 +626,7 @@ async function cleanup() {\n     report.pendingImageTag = null;\n   }\n   if (ownsRoot) {\n-    scanTree();\n+    scanTree(); report.protectedTreeScannedAfterStop = true;\n     requireFact(realpathSync(ROOT).toLowerCase() === ROOT.toLowerCase() && readFileSync(join(ROOT, \".c2a-docker-owner\"), \"utf8\") === CASE);\n     rmSync(ROOT, { recursive: true }); requireFact(!existsSync(ROOT)); report.protectedRootRemoved = true;\n   }\n@@ -681,7 +682,7 @@ try { await main(); }\n catch { report.casePassed = false; report.failureStage = stage; process.exitCode = 1; }\n finally {\n   if (ownsRun) {\n-    try { await cleanup(); report.ownedRuntimeCleanup = true; }\n+    try { await cleanup(); requireFact(report.protectedTreeScannedAfterStop === true); report.ownedRuntimeCleanup = true; }\n     catch { report.casePassed = false; report.ownedRuntimeCleanup = false; report.cleanupFailureStage = stage; process.exitCode = 1; }\n     report.scans = scans; report.elapsedMs = Date.now() - startedAt;\n     report.stagingDisposition = \"Retained for Root to copy evidence, verify paths, and remove; build cache/VHDX reclamation unclaimed\";\n"
+    },
+    "readme": {
+      "chunk_id": "c6249e",
+      "wall_time_seconds": 0.4503376,
+      "exit_code": 1,
+      "original_token_count": 1090,
+      "output": "diff --git a/G:/TakiAgent-c2a-docker-acceptance/recovery-f217a02f-f8a5-466f-ab59-0e97940debe0/frozen-inputs/README.md b/.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/README.md\nindex d6d2548..7241107 100644\n--- a/G:/TakiAgent-c2a-docker-acceptance/recovery-f217a02f-f8a5-466f-ab59-0e97940debe0/frozen-inputs/README.md\n+++ b/.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/README.md\n@@ -5,6 +5,9 @@ This task-only fixture implements the [accepted recovery plan](../c2a-recovery-p\n execution. Root owns preparation, runtime, evidence preservation and exact cleanup. The owner has\n already authorized this isolated scope; the execution flag is a single-use guard, not approval.\n \n+R2 corrects only protected-tree scan ordering and uses the fresh token below. The failed first\n+recovery attempt, its consumed token and its frozen inputs remain unchanged.\n+\n The fault drops exactly one successful Host inject completion **before Core acceptance**, using\n the existing in-memory E2E relay. It does not drop the inner Native socket ACK. The original Run\n must settle `outcome_unknown` while the actual child stays alive. The fixture then kills/reaps its\n@@ -15,10 +18,10 @@ explicit fresh-startup admission. Marker persistence is filesystem evidence, nev\n \n | Input/resource | Exact binding |\n | --- | --- |\n-| Token | `f217a02f-f8a5-466f-ab59-0e97940debe0` |\n-| Staging `S` | `G:/TakiAgent-c2a-docker-acceptance/recovery-f217a02f-f8a5-466f-ab59-0e97940debe0` |\n-| Protected root `R` | `C:/taki-c2a-docker-recovery-f217a02f-f8a5-466f-ab59-0e97940debe0` |\n-| Image tag | `taki-c2a-fake:f217a02f-f8a5-466f-ab59-0e97940debe0` |\n+| Token | `775da07b-2b69-44a3-868c-2604423dac11` |\n+| Staging `S` | `G:/TakiAgent-c2a-docker-acceptance/recovery-775da07b-2b69-44a3-868c-2604423dac11` |\n+| Protected root `R` | `C:/taki-c2a-docker-recovery-775da07b-2b69-44a3-868c-2604423dac11` |\n+| Image tag | `taki-c2a-fake:775da07b-2b69-44a3-868c-2604423dac11` |\n | Docker executable | `C:/Program Files/Docker/Docker/resources/bin/docker.exe` |\n | Docker/engine | `29.0.1` / `93e8319e-24b7-4a7d-88f1-60923ad681e0` |\n | Endpoint | `npipe:////./pipe/dockerDesktopLinuxEngine` |\n@@ -44,8 +47,8 @@ the unchanged small context, using the existing fixed Docker executable/endpoint\n docker --host <fixed-endpoint> --config S/build-config buildx build --builder default\n   --pull=false --network=none --load --progress=plain\n   --build-arg NATIVE_IMAGE=taki-hindsight-api:local\n-  --label taki.c2a.fixture=f217a02f-f8a5-466f-ab59-0e97940debe0\n-  --iidfile S/image-id.txt --tag taki-c2a-fake:f217a02f-f8a5-466f-ab59-0e97940debe0\n+  --label taki.c2a.fixture=775da07b-2b69-44a3-868c-2604423dac11\n+  --iidfile S/image-id.txt --tag taki-c2a-fake:775da07b-2b69-44a3-868c-2604423dac11\n   --file S/context/docker/standalone/Dockerfile.c2a-fake S/context\n ```\n \n@@ -122,6 +125,9 @@ Verify resource/tag absence, scan R and check its exact canonical path/token and\n points before removing only R. Root preserves/verifies the evidence before the same checks/removal\n of S. Unknown identities are retained for Root inspection, never adopted for deletion.\n \n+The full protected-tree scan runs after the owned stack exits and releases the Shell's exclusive\n+deployment.lock. Its after-stop completion is required for final PASS; no persistent file is skipped.\n+\n Root compares the original seven-container baseline and leaves Desktop/redis/arboris-app unaffected.\n No shared daemon interruption, prune, broad cleanup, cache/VHDX reclamation or Git lifecycle action.\n Inner Native ACK loss, inner create/start/submit faults, custody rotation, actual database, C1 service,\n@@ -131,4 +137,5 @@ Static checks are Node syntax, scoped ESLint `--no-ignore`, R2's single-entry no\n Python AST, and scoped Ruff check/format. The launcher has a documented task-only file-size exemption\n and one cohesive fault-closure size exemption; all other lint rules and production limits remain.\n No behavior test, Core/Shell/Docker run, Host/image/Rust build or unchanged 182-case suite is part of\n-this implementation's static check phase. See [self-check evidence](../c2a-recovery-self-check.md).\n+this implementation's static check phase. See [original self-check evidence](../c2a-recovery-self-check.md)\n+and the [R2 repair self-check](../c2a-recovery-r2-self-check.md).\n"
+    }
+  },
+  "orchestrationNotes": [
+    {
+      "stage": "load-original-static-records",
+      "result": "The previous turn's in-memory recovery-static-checks entry was unavailable; no shell check was dispatched.",
+      "rawToolOutput": "Script error:\nError: Original static records unavailable\n    at exec_main.mjs:2:36",
+      "resolution": "Read the hash-frozen R1 self-check JSON as the authoritative original record."
+    }
+  ],
+  "notRun": [
+    "Docker/WSL/Core/Shell lifecycle or recovery behavior",
+    "Image/Host/Rust builds",
+    "Unchanged Python checks or accepted 182-case source suite",
+    "Database/C1 service/C2b/real-model/manual acceptance",
+    "Git lifecycle operations"
+  ],
+  "remaining": "Independent static review and Root-controlled R2 execution remain pending. First-attempt FAIL is not replaced by these static results."
+}

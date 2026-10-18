@@ -1,0 +1,7 @@
+
+> @taki/core@0.0.0 typecheck H:\TakiAgent\packages\core
+> tsc --noEmit
+
+src/testing/hindsight-template-observation-fixtures.ts(44,65): error TS2345: Argument of type '{ version: 1; source: "authenticated-service"; observationId: `${string}-${string}-${string}-${string}-${string}`; observedAt: string; schema: string; contextHash: string; requestHash: string; inheritedConfigHash: string; }' is not assignable to parameter of type '{ version: 1; source: "local-service" | "authenticated-service"; observationId: string; observedAt: string; schema: string; contextHash: string; requestHash: string; inheritedConfigHash: string; observationHash: string; }'.
+  Property 'observationHash' is missing in type '{ version: 1; source: "authenticated-service"; observationId: `${string}-${string}-${string}-${string}-${string}`; observedAt: string; schema: string; contextHash: string; requestHash: string; inheritedConfigHash: string; }' but required in type '{ version: 1; source: "local-service" | "authenticated-service"; observationId: string; observedAt: string; schema: string; contextHash: string; requestHash: string; inheritedConfigHash: string; observationHash: string; }'.
+ ELIFECYCLE  Command failed with exit code 2.

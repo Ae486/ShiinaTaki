@@ -1,0 +1,33 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/ty.exe",
+    "check",
+    "--python",
+    "H:/hindsight/.venv/Scripts/python.exe",
+    "--python-platform",
+    "linux",
+    "hindsight_api/engine/template_access.py",
+    "hindsight_api/engine/template_apply.py",
+    "hindsight_api/engine/template_definitions.py",
+    "hindsight_api/engine/template_encoding.py",
+    "hindsight_api/engine/template_evidence_models.py",
+    "hindsight_api/engine/template_initialization.py",
+    "hindsight_api/engine/template_models.py",
+    "hindsight_api/engine/template_mutations.py",
+    "hindsight_api/engine/template_refresh.py",
+    "hindsight_api/engine/template_snapshot.py",
+    "hindsight_api/api/taki_template_lifecycle.py",
+    "hindsight_api/api/taki_template_schema.py",
+    "hindsight_api/engine/memory_engine.py",
+    "hindsight_api/worker/poller.py",
+    "hindsight_api/engine/transition_initialization.py",
+    "hindsight_api/engine/taki_compatibility.py",
+    "hindsight_api/extensions/builtin/taki_memory.py",
+    "hindsight_api/api/http.py",
+    "hindsight_api/alembic/versions/e51c2f9a8b43_add_template_lifecycle.py"
+  ],
+  "cwd": "H:/hindsight/hindsight-api-slim",
+  "exitCode": 0,
+  "durationSeconds": 2.724,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b1-native-ty-scoped-01.log"
+}

@@ -1,0 +1,12 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/ruff.exe",
+    "format",
+    "hindsight_api/config_resolver.py",
+    "tests/native_results/test_template_label_recovery.py"
+  ],
+  "cwd": "H:/hindsight/hindsight-api-slim",
+  "exitCode": 0,
+  "durationSeconds": 0.105,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-independent-bank-fallback-format-01.log"
+}

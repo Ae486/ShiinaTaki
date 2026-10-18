@@ -1,0 +1,229 @@
+{
+  "caseId": "1b05d2f6-494c-4a6d-a601-1e807eca1486",
+  "engineAfter": {
+    "value": {
+      "id": "93e8319e-24b7-4a7d-88f1-60923ad681e0",
+      "os": "linux",
+      "architecture": "x86_64",
+      "version": "29.0.1",
+      "time": "2026-10-18T12:36:16.814151137Z"
+    },
+    "windowsBefore": "2026-10-18T12:36:15.999Z",
+    "windowsAfter": "2026-10-18T12:36:16.157Z"
+  },
+  "comparisons": [
+    {
+      "name": "/taki-openbili-backend",
+      "before": {
+        "id": "1e389e0a2f95121ca804c186c20916196e9e46f67a7691c3d184404a7292deb8",
+        "name": "/taki-openbili-backend",
+        "status": "running",
+        "startedAt": "2026-10-18T05:55:39.597065125Z"
+      },
+      "after": {
+        "id": "1e389e0a2f95121ca804c186c20916196e9e46f67a7691c3d184404a7292deb8",
+        "name": "/taki-openbili-backend",
+        "status": "running",
+        "startedAt": "2026-10-18T05:55:39.597065125Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true
+    },
+    {
+      "name": "/taki-hindsight-api-retest",
+      "before": {
+        "id": "c07d86d32382757d292dd4ebf318e6c44260c817d95f35187663d4d33a26b865",
+        "name": "/taki-hindsight-api-retest",
+        "status": "exited",
+        "startedAt": "2026-08-18T16:47:39.697781196Z"
+      },
+      "after": {
+        "id": "c07d86d32382757d292dd4ebf318e6c44260c817d95f35187663d4d33a26b865",
+        "name": "/taki-hindsight-api-retest",
+        "status": "exited",
+        "startedAt": "2026-08-18T16:47:39.697781196Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true
+    },
+    {
+      "name": "/taki-hindsight-api",
+      "before": {
+        "id": "a38b49e64f74ee4fa4f5cf5531e467d74dda2b64dc7e28e78a9bdadd37272519",
+        "name": "/taki-hindsight-api",
+        "status": "exited",
+        "startedAt": "2026-08-18T14:11:54.085514229Z"
+      },
+      "after": {
+        "id": "a38b49e64f74ee4fa4f5cf5531e467d74dda2b64dc7e28e78a9bdadd37272519",
+        "name": "/taki-hindsight-api",
+        "status": "exited",
+        "startedAt": "2026-08-18T14:11:54.085514229Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true
+    },
+    {
+      "name": "/redis",
+      "before": {
+        "id": "8f5e4468c3a7c0100330e012fdca3da843abfcc732361b71308f06d6eeada5c2",
+        "name": "/redis",
+        "status": "running",
+        "startedAt": "2026-10-18T04:36:51.09898313Z"
+      },
+      "after": {
+        "id": "8f5e4468c3a7c0100330e012fdca3da843abfcc732361b71308f06d6eeada5c2",
+        "name": "/redis",
+        "status": "running",
+        "startedAt": "2026-10-18T04:36:51.09898313Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true
+    },
+    {
+      "name": "/my_pgvector",
+      "before": {
+        "id": "7992fb2bba71e13dc290e305941ded32b9046c1ec4b67a3697863ff79079cf8b",
+        "name": "/my_pgvector",
+        "status": "exited",
+        "startedAt": "2026-04-11T08:18:53.87731237Z"
+      },
+      "after": {
+        "id": "7992fb2bba71e13dc290e305941ded32b9046c1ec4b67a3697863ff79079cf8b",
+        "name": "/my_pgvector",
+        "status": "exited",
+        "startedAt": "2026-04-11T08:18:53.87731237Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true
+    },
+    {
+      "name": "/rustfs_loacl",
+      "before": {
+        "id": "ba11af042db0879902996426522611b267f38eab7d21f05e21036929c415cc24",
+        "name": "/rustfs_loacl",
+        "status": "exited",
+        "startedAt": "2026-04-11T08:18:55.176936785Z"
+      },
+      "after": {
+        "id": "ba11af042db0879902996426522611b267f38eab7d21f05e21036929c415cc24",
+        "name": "/rustfs_loacl",
+        "status": "exited",
+        "startedAt": "2026-04-11T08:18:55.176936785Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true
+    },
+    {
+      "name": "/rpa-redis",
+      "before": {
+        "id": "9d4fc8fb7a4869ac422d9e78a924b49e698e61a562de3af7576dfd18ef81cd98",
+        "name": "/rpa-redis",
+        "status": "exited",
+        "startedAt": "2026-02-20T17:46:12.832921192Z"
+      },
+      "after": {
+        "id": "9d4fc8fb7a4869ac422d9e78a924b49e698e61a562de3af7576dfd18ef81cd98",
+        "name": "/rpa-redis",
+        "status": "exited",
+        "startedAt": "2026-02-20T17:46:12.832921192Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true
+    },
+    {
+      "name": "/arboris-app",
+      "before": {
+        "id": "697330c3cd8966e02d97fa228c5233a0805531bff00275107630e34fadda0b1a",
+        "name": "/arboris-app",
+        "status": "running",
+        "startedAt": "2026-10-18T04:36:51.09648348Z"
+      },
+      "after": {
+        "id": "697330c3cd8966e02d97fa228c5233a0805531bff00275107630e34fadda0b1a",
+        "name": "/arboris-app",
+        "status": "running",
+        "startedAt": "2026-10-18T04:36:51.09648348Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true
+    }
+  ],
+  "allEightUnchanged": true,
+  "tagAbsent": true,
+  "protectedRootAbsent": true,
+  "stageRetained": true,
+  "resources": {
+    "containers": "",
+    "volumes": ""
+  },
+  "space": {
+    "before": {
+      "recordedAt": "2026-10-18T12:29:53.942Z",
+      "gFree": 138496249856,
+      "cFree": 25590050816,
+      "hFree": 2377773056
+    },
+    "after": {
+      "recordedAt": "2026-10-18T12:36:16.612Z",
+      "gFree": 138393354240,
+      "cFree": 25587851264,
+      "hFree": 2377285632
+    },
+    "delta": {
+      "gFree": -102895616,
+      "cFree": -2199552,
+      "hFree": -487424
+    }
+  },
+  "verifiedInputs": {
+    "caseId": "1b05d2f6-494c-4a6d-a601-1e807eca1486",
+    "pins": [
+      {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/docker-database/run-persistence.ts",
+        "bytes": 56502,
+        "sha256": "c39fd6e465f922cefd198abe1e6d531d731359f8969b183ae9b5b4d2cf06ee27",
+        "expected": "c39fd6e465f922cefd198abe1e6d531d731359f8969b183ae9b5b4d2cf06ee27"
+      },
+      {
+        "path": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "bytes": 41758128,
+        "sha256": "0a4d8fe2ab107ceae44ee5f5fc1e1c155790042b7e3d3163826660da882b389d",
+        "expected": "0a4d8fe2ab107ceae44ee5f5fc1e1c155790042b7e3d3163826660da882b389d"
+      },
+      {
+        "path": "C:/Program Files/nodejs/node.exe",
+        "bytes": 92534088,
+        "sha256": "9a4eb5f1c29c6a2e93852ead46b999e284a6a5ca8bab4d4e241d587d025a52de",
+        "expected": "9a4eb5f1c29c6a2e93852ead46b999e284a6a5ca8bab4d4e241d587d025a52de"
+      },
+      {
+        "path": "H:/TakiAgent/apps/desktop/src-tauri/target/debug/taki-node.exe",
+        "bytes": 9058816,
+        "sha256": "1ed31593324eaea703590e6dd12b348dfe99c38c7530207b12c89300e8a582c9",
+        "expected": "1ed31593324eaea703590e6dd12b348dfe99c38c7530207b12c89300e8a582c9"
+      },
+      {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/c2a-implementation-source-manifest.json",
+        "bytes": 108542,
+        "sha256": "f27379be3b4b5e61e1b2821c2eda2d87bf54e5c2983b034bdb637ee789961ae2",
+        "expected": "f27379be3b4b5e61e1b2821c2eda2d87bf54e5c2983b034bdb637ee789961ae2"
+      },
+      {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/docker-database/database-read.py",
+        "bytes": 6084,
+        "sha256": "4bd830c60a4ddecc4e8e7018d2b19eb08093c81fc5d7f3ee0a8ff380178e4271",
+        "expected": "4bd830c60a4ddecc4e8e7018d2b19eb08093c81fc5d7f3ee0a8ff380178e4271"
+      },
+      {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/docker-database/fake_child.py",
+        "bytes": 44233,
+        "sha256": "9d65b8875e5d798a024dff9b4a182d6cff7bf4b62646954e38cd0c2e12ce3819",
+        "expected": "9d65b8875e5d798a024dff9b4a182d6cff7bf4b62646954e38cd0c2e12ce3819"
+      }
+    ],
+    "tokenOccurrencesPerFile": 1,
+    "acceptedSourceEntries": 109,
+    "recordedAt": "2026-10-18T12:36:16.841Z"
+  }
+}

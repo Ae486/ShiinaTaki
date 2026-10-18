@@ -1,0 +1,109 @@
+{
+  "canonicalSha256": "bf3cabf4ab6477e2a27e2504e3c1633632fb8468d175593c6d75a9b6794e4a71",
+  "comparisons": {
+    "b1": {
+      "paths": {
+        "added": [
+          "/ext/taki-memory/template/label-evidence"
+        ],
+        "removed": [],
+        "changed": []
+      },
+      "schemas": {
+        "added": [],
+        "removed": [],
+        "changed": []
+      }
+    },
+    "head": {
+      "paths": {
+        "added": [
+          "/ext/taki-memory/banks/{bank_id}/configuration-observation",
+          "/ext/taki-memory/template/apply",
+          "/ext/taki-memory/template/label-evidence",
+          "/ext/taki-memory/template/refresh-result",
+          "/ext/taki-memory/template/result",
+          "/ext/taki-memory/template/snapshot"
+        ],
+        "removed": [],
+        "changed": []
+      },
+      "schemas": {
+        "added": [
+          "TakiConfigurationNotCovered",
+          "TakiConfigurationObservation",
+          "TakiConfigurationObservationRefusal",
+          "TakiConfigurationProfiles",
+          "TakiConfigurationSource",
+          "TakiConfigurationTarget",
+          "TakiDisabledConfigurationProfile",
+          "TakiSingleConfigurationProfile",
+          "TakiUnknownConfigurationProfile",
+          "TemplateAbsent",
+          "TemplateApplyRequest",
+          "TemplateApplyRequest_initialization_Nullable",
+          "TemplateBackupEvidence",
+          "TemplateBackupEvidence_initialization_proof_hash_Nullable",
+          "TemplateBackupEvidence_latest_receipt_hash_Nullable",
+          "TemplateBackupEvidence_latest_request_id_Nullable",
+          "TemplateChanges-Input",
+          "TemplateChanges-Output",
+          "TemplateChild",
+          "TemplateConfigChange",
+          "TemplateConfigEntry",
+          "TemplateDirective",
+          "TemplateDirectiveDelete",
+          "TemplateDirectiveSelector",
+          "TemplateDirectiveState",
+          "TemplateDirectiveState_definition_Nullable",
+          "TemplateDirectiveState_proof_Nullable",
+          "TemplateDirectiveUpsert",
+          "TemplateFailure",
+          "TemplateInitializationRequest",
+          "TemplateLabelEvidence",
+          "TemplateLabelEvidenceRequest",
+          "TemplateLabelEvidenceResult",
+          "TemplateLabelUnit",
+          "TemplateMentalModel-Input",
+          "TemplateMentalModel-Input_trigger_Nullable",
+          "TemplateMentalModel-Output",
+          "TemplateMentalModel-Output_trigger_Nullable",
+          "TemplateModelDelete-Input",
+          "TemplateModelDelete-Output",
+          "TemplateModelState-Input",
+          "TemplateModelState-Input_definition_Nullable",
+          "TemplateModelState-Input_proof_Nullable",
+          "TemplateModelState-Output",
+          "TemplateModelState-Output_definition_Nullable",
+          "TemplateModelState-Output_proof_Nullable",
+          "TemplateModelUpsert-Input",
+          "TemplateModelUpsert-Output",
+          "TemplateObjectProof",
+          "TemplateReceipt",
+          "TemplateReceipt_initialization_proof_hash_Nullable",
+          "TemplateRefreshChoice",
+          "TemplateRefreshResult",
+          "TemplateRefreshResultRequest",
+          "TemplateRefreshResult_result_payload_hash_Nullable",
+          "TemplateRefreshResult_result_revision_Nullable",
+          "TemplateResultAbsent",
+          "TemplateResultCommitted",
+          "TemplateResultRequest",
+          "TemplateSelectors-Input",
+          "TemplateSelectors-Output",
+          "TemplateSnapshot-Input",
+          "TemplateSnapshot-Output",
+          "TemplateSnapshotRequest",
+          "TemplateTarget",
+          "TemplateTombstone",
+          "TemplateValue"
+        ],
+        "removed": [],
+        "changed": [
+          "TakiCompatibilityContracts",
+          "TakiCompatibilitySupport"
+        ]
+      }
+    }
+  }
+}

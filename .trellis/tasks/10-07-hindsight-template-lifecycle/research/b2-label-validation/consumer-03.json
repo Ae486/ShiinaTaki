@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "--filter",
+    "@taki/core",
+    "exec",
+    "vitest",
+    "run",
+    "src/memory/hindsight/hindsight-template-label-evidence.test.ts",
+    "src/memory/hindsight/hindsight-template-binding.test.ts",
+    "--maxWorkers",
+    "2"
+  ],
+  "executable": "pnpm",
+  "command": "pnpm --filter @taki/core exec vitest run src/memory/hindsight/hindsight-template-label-evidence.test.ts src/memory/hindsight/hindsight-template-binding.test.ts --maxWorkers 2",
+  "startedAt": "2026-10-08T10:02:03.6545382+00:00",
+  "exitCode": 0,
+  "endedAt": "2026-10-08T10:02:15.5073387+00:00",
+  "cwd": "H:/TakiAgent"
+}

@@ -1,0 +1,20 @@
+{
+  "checkedAtUtc": "2026-10-11T11:27:30.885764+00:00",
+  "reviewer": "root (did not author these Home edits)",
+  "checks": [
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-browser.test.ts",
+      "beforeMatchesPriorRecordedInput": true,
+      "onlyExecutableAndCommentChanged": true,
+      "currentSha256": "d940471919de6fbd40404046b7511ece9da4543bad8353a85c66f00af2cd66dd"
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/memory-transitions-browser.test.ts",
+      "beforeMatchesPriorRecordedInput": true,
+      "onlyExecutableAndCommentChanged": true,
+      "currentSha256": "49a9009735b8f0d5ea80e26fb53d8c6a33cf7e92a9047947b2ce902a216542bb"
+    }
+  ],
+  "verdict": "PASS",
+  "scope": "Static adjacent browser runner delta only; browser results and final graph gates are separate."
+}

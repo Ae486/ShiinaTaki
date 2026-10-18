@@ -1,0 +1,10 @@
+HTTP REST API enabled
+Traceback (most recent call last):
+  File "H:\hindsight\hindsight-dev\hindsight_dev\generate_openapi.py", line 223, in <module>
+    generate_openapi_spec(output)
+  File "H:\hindsight\hindsight-dev\hindsight_dev\generate_openapi.py", line 193, in generate_openapi_spec
+    openapi_schema = app.openapi()
+                     ^^^^^^^^^^^^^
+  File "H:\hindsight\hindsight-api-slim\hindsight_api\api\taki_template_schema.py", line 49, in template_openapi
+    raise ValueError("Template evidence schema conflicts with a live schema")
+ValueError: Template evidence schema conflicts with a live schema

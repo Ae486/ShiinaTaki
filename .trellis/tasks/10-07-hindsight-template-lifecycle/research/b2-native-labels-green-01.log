@@ -1,0 +1,90 @@
+Owned fixture: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-abf57c679bcc
+PostgreSQL: 18.1 ; vector/pg_trgm ready
+Pytest log: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-abf57c679bcc\pytest.log
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade a1d3f5b7c9e2 -> 2071c7518f88, Add a composite index on memory_links(bank_id, link_type) (PostgreSQL).
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade a1d3f5b7c9e2 -> d4f6a8c2e1b3, Drop the embedding column from the curation archive (invalidated_memory_units).
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade d4f6a8c2e1b3, 2071c7518f88 -> e1f2a3b4c5d6, Merge two divergent migration heads.
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade e1f2a3b4c5d6 -> c7e9f1a3b5d2, Make maintenance routines resilient to schemas that vanish mid-scan.
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade c7e9f1a3b5d2 -> f4d1c2b3a5e6, Add server-side routine for cron-scheduled mental model refresh.
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade f4d1c2b3a5e6 -> c3f7a1b9d2e4, Backfill search_vector for native-backend observations.
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade c3f7a1b9d2e4 -> b57a7c9e0d13, Add bank_stats_cache table for distributed get_bank_stats caching
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade b57a7c9e0d13 -> e7c3a9f1b2d5, Drop the search_vector column from the curation archive (invalidated_memory_units).
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade e7c3a9f1b2d5 -> a8c1e4f7b0d3, Add indexes for terminal cleanup and newest-first operation listing.
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade a8c1e4f7b0d3 -> b6d2f8a4c1e7, Install the maintenance discovery routines into the configured schema.
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade b6d2f8a4c1e7 -> d7b2f8a1c934, Add the ``schemas_with_expired_operations`` cross-tenant discovery routine.
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade d7b2f8a1c934 -> c7d1e9a4b3f2, Add ``causal_links`` to the curation archive (invalidated_memory_units).
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade c7d1e9a4b3f2 -> a1c9e7f3b2d8, Drop observation_history's FK to memory_units.
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade a1c9e7f3b2d8 -> a9b8c7d6e5f4, Add knowledge_pages table (knowledge-base hierarchy).
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade a9b8c7d6e5f4 -> e4a7c1b9d2f6, Drop the never-written `access_count` column from memory_units (and its archive).
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade e4a7c1b9d2f6 -> f2a6d8c4b1e9, Repair: drop the stale global memory_units vector index on per-bank backends.
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade f2a6d8c4b1e9 -> b3e8d1c6f4a9, Add entities.entity_kind and exclude label entities from the trigram index.
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade b3e8d1c6f4a9 -> c4a7e2d9b1f6, Add logical revisions to live and invalidated memory units.
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade c4a7e2d9b1f6 -> d5b8f1c3a7e2, Add idempotency receipts for conditional memory mutations.
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade d5b8f1c3a7e2 -> e6c9a4f2b8d1, Add PostgreSQL lineage and logical replication journal primitives.
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade e6c9a4f2b8d1 -> f7d0a5c3e9b2, Add PostgreSQL materialized logical snapshot metadata and pages.
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade f7d0a5c3e9b2 -> a8e1b6d4f0c3, Persist factual native results and exact retain-part publication evidence.
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade a8e1b6d4f0c3 -> d78a1c4e6f90, Persist atomic current-state import requests and immutable mappings.
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade d78a1c4e6f90 -> d78b2d5e7a01, Persist first-activation candidates, native outcomes, and immutable evidence.
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade d78b2d5e7a01 -> d78c3e6f8b12, Coordinate finite cutover work with ordinary native maintenance.
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade d78c3e6f8b12 -> d77a4f8c2e10, Preserve original Taki artifacts and a joint native/application change stream.
+2026-10-08 17:05:40 - INFO - alembic.runtime.migration - Running upgrade d77a4f8c2e10 -> e30a9d7f6c21, Durable all-writer transition ownership independent from finite D78 leases.
+2026-10-08 17:05:41 - INFO - alembic.runtime.migration - Running upgrade e30a9d7f6c21 -> e40b1e8a7d32, Use existing UUID indexes without changing association publication ownership.
+2026-10-08 17:05:41 - INFO - alembic.runtime.migration - Running upgrade e40b1e8a7d32 -> e51c2f9a8b43, Add immutable template receipts, child admissions/results and pristine definition proof.
+2026-10-08 17:05:41 - INFO - alembic.runtime.migration - Running upgrade e51c2f9a8b43 -> e62a3d0b9c54, Bind private structured-label origins to exact current Native unit versions.
+2026-10-08 17:05:41 - INFO - hindsight_api.migrations - Database migrations completed successfully for schema 'd78_maintenance_402dac1f006545a7af04eeb6162584f0'
+2026-10-08 17:05:42 - INFO - hindsight_api.api - HTTP REST API enabled
+-------------------------------- live log call --------------------------------
+2026-10-08 17:05:43 - INFO - hindsight_api.config_resolver - Updated bank config for taki-hs-v1-c-68428586365257c72043df44a493ca4c: ['entity_labels', 'retain_extraction_mode']
+2026-10-08 17:05:43 - WARNING - hindsight_api.engine.db_utils - [DB POOL] Slow acquire: 0.225s
+2026-10-08 17:05:43 - INFO - hindsight_api.engine.retain.orchestrator - [streaming] Phase 1 (entity resolution): 0.259s
+2026-10-08 17:05:43 - INFO - hindsight_api.engine.retain.orchestrator - [streaming] Phase 2 (write txn): 0.160s
+2026-10-08 17:05:43 - INFO - hindsight_api.engine.retain.orchestrator - [streaming] Consumer batch 1 total (excluding fire-and-forget): 0.424s
+2026-10-08 17:05:43 - INFO - hindsight_api.engine.retain.orchestrator - [streaming] Final ANN chunk 1/1: 9 links in 0.029s
+2026-10-08 17:05:43 - INFO - hindsight_api.engine.retain.orchestrator - 
+============================================================
+RETAIN_BATCH START: taki-hs-v1-c-68428586365257c72043df44a493ca4c
+Batch size: 1 content items, 63 chars
+============================================================
+[streaming] 1 chunks, batch_size 100 — 1 batch
+  Extract facts: 3 facts, 1 chunks from 1 contents in 0.016s
+  Generate embeddings: 3 embeddings in 0.000s
+[streaming] Consumer batch 1: processing 3 facts from 1 chunks
+[streaming] Document label-source-403498643afe4554a05f7b5daf0a0a3c tracked (full content)
+  Store chunks: 1 chunks in 0.013s
+  Insert facts: 3 units in 0.000s
+  Insert unit_entities: 3 pairs in 0.016s
+  Temporal links: 12 links in 0.031s
+  Semantic links: skipped (deferred to final ANN pass)
+  Causal links: 0 links in 0.000s
+[streaming] Final ANN: loaded 3 units with embeddings in 0.004s
+      [8.1] ANN search (Phase 1): 3 units → 9 links in 0.015s
+[streaming] Final ANN: 9 total semantic links
+[streaming] Final ANN pass: 0.033s for 3 units
+============================================================
+STREAMING RETAIN COMPLETE: 3 units across 1 batches in 0.500s
+Document: label-source-403498643afe4554a05f7b5daf0a0a3c
+============================================================
+PASSED                                                                   [ 66%]
+------------------------------ live log teardown ------------------------------
+2026-10-08 17:05:43 - INFO - hindsight_api.engine.memory_engine - close() started
+2026-10-08 17:05:43 - INFO - hindsight_api.engine.db.postgresql - PostgreSQL pool closed
+
+tests/test_document_transfer.py::test_export_bank_covers_schema PASSED   [100%]
+
+============================ slowest 10 durations =============================
+16.04s setup    tests/native_results/test_template_labels.py::test_label_sidecar_migration_and_read_only_empty_result
+5.80s setup    tests/native_results/test_template_labels.py::test_actual_extraction_binds_one_raw_label_without_promoting_caller_data
+0.87s call     tests/native_results/test_template_labels.py::test_actual_extraction_binds_one_raw_label_without_promoting_caller_data
+0.46s teardown tests/native_results/test_template_labels.py::test_label_sidecar_migration_and_read_only_empty_result
+0.34s call     tests/native_results/test_template_labels.py::test_label_sidecar_migration_and_read_only_empty_result
+0.20s teardown tests/native_results/test_template_labels.py::test_actual_extraction_binds_one_raw_label_without_promoting_caller_data
+
+(3 durations < 0.005s hidden.  Use -vv to show these durations.)
+============================= 3 passed in 25.59s ==============================
+{
+    "Fixture":  "taki-hindsight-g1-abf57c679bcc",
+    "Stopped":  true,
+    "DataRemoved":  true,
+    "RegistryRemoved":  true,
+    "Logs":  "H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-abf57c679bcc"
+}

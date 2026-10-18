@@ -1,0 +1,24 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "--filter",
+    "@taki/desktop",
+    "exec",
+    "vitest",
+    "run",
+    "src/windows/home/pages/operations/hindsight-template-controller.test.ts",
+    "--maxWorkers=2"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "startedAt": "2026-10-09T13:26:12.150678+00:00",
+  "finishedAt": "2026-10-09T13:26:14.974458+00:00",
+  "exitCode": 1,
+  "durationSeconds": 2.828,
+  "inputManifest": "b3-independent-home-controller-green-01-inputs.json",
+  "sourceCount": 2042,
+  "changedInputs": [],
+  "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-independent-home\\controller-green-01-8b6bac58fa4b4a75af0acbe2a1bfe534",
+  "temporaryRootRemoved": true,
+  "remainingFixtureEntries": [],
+  "log": "b3-independent-home-controller-green-01.log"
+}

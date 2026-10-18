@@ -1,0 +1,312 @@
+{
+  "checkedAtUtc": "2026-10-12T15:39:19.195809+00:00",
+  "freeze": "b3-root-joint-06-freeze-20261012.json",
+  "freezeSha256": "56a5e574b895eb01b69a73307f45dcd9a997e6e0155bcc2e57acc3ff38795596",
+  "inputCount": 2594,
+  "mismatches": [],
+  "result": {
+    "command": [
+      "H:/hindsight/.venv/Scripts/python.exe",
+      ".trellis/tasks/09-07-hindsight-recovery-evidence/research/validation/run_isolated_hindsight.py",
+      "--allow-http-fixture",
+      "--",
+      "tests/native_results/test_template_backup_pair.py",
+      "-q",
+      "--tb=short"
+    ],
+    "cwd": "H:/TakiAgent",
+    "exitCode": 0,
+    "durationSeconds": 390.753,
+    "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-joint-06.log",
+    "sources": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-joint-06-sources.json",
+    "changedInputs": [],
+    "ownedTemp": "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\joint-06-brotbpbk",
+    "ownedTempRemoved": true
+  },
+  "scenarios": [
+    {
+      "artifact": "b3-native-joint-aaae03b8006e40e6ab9486ced192bb5c-commands.json",
+      "sha256": "ba951fa42ff14f82ae9043cf5c6607d8293a63f16dfdd374bfb8dcb5c6ddcccb",
+      "scenario": "customized",
+      "restoredDatabaseDropped": true,
+      "nativeTablesCompared": [
+        "replication_provider_lineage",
+        "replication_bank_state",
+        "replication_logical_changes",
+        "replication_logical_snapshots",
+        "replication_logical_snapshot_pages",
+        "memory_native_operation_receipts",
+        "memory_retain_part_receipts",
+        "banks",
+        "documents",
+        "entities",
+        "chunks",
+        "memory_units",
+        "invalidated_memory_units",
+        "memory_mutation_receipts",
+        "unit_entities",
+        "entity_cooccurrences",
+        "memory_links",
+        "observation_history",
+        "mental_models",
+        "mental_model_history",
+        "knowledge_pages",
+        "directives",
+        "async_operations",
+        "webhooks",
+        "file_storage",
+        "audit_log",
+        "llm_requests",
+        "graph_maintenance_queue",
+        "memory_current_state_transfers",
+        "memory_current_state_transfer_mappings",
+        "memory_bank_maintenance",
+        "memory_cutover_verifications",
+        "memory_cutover_steps",
+        "memory_cutover_actions",
+        "memory_cutover_evidence_pages",
+        "memory_application_banks",
+        "memory_application_bodies",
+        "memory_application_body_parts",
+        "memory_application_native_heads",
+        "memory_application_artifacts",
+        "memory_application_changes",
+        "memory_application_operations",
+        "memory_application_snapshots",
+        "memory_transition_requests",
+        "memory_transition_bank_origins",
+        "memory_transition_initializations",
+        "memory_transition_fences",
+        "memory_transition_writers",
+        "memory_transition_work",
+        "memory_transition_history",
+        "memory_transition_maintenance",
+        "memory_transition_steps",
+        "memory_transition_actions",
+        "memory_transition_evidence_pages",
+        "memory_transition_auxiliary_pages",
+        "memory_transition_deltas",
+        "memory_template_receipts",
+        "memory_template_children",
+        "memory_template_refresh_results",
+        "memory_template_label_proofs",
+        "memory_template_label_heads"
+      ],
+      "physicalRowsEqual": true,
+      "selectedRevision": "taki-bank-v2",
+      "receiptCounts": [
+        2,
+        1
+      ],
+      "refreshChildRows": 1,
+      "refreshResultRows": 1,
+      "fakeRefreshProviderCalls": 5,
+      "fakeRefreshToolCalls": 4,
+      "fakeRefreshFinalTextCalls": 1,
+      "commands": [
+        {
+          "mode": "seed",
+          "exitCode": 0,
+          "timedOut": false
+        },
+        {
+          "mode": "prepare",
+          "exitCode": 0,
+          "timedOut": false
+        },
+        {
+          "mode": "native-cli-managed",
+          "exitCode": 0,
+          "timedOut": false
+        },
+        {
+          "mode": "native-cli-mismatched",
+          "exitCode": 0,
+          "timedOut": false
+        },
+        {
+          "mode": "admit",
+          "exitCode": 2,
+          "timedOut": false
+        },
+        {
+          "mode": "admit",
+          "exitCode": 0,
+          "timedOut": false
+        },
+        {
+          "mode": "preflight",
+          "exitCode": 0,
+          "timedOut": false
+        },
+        {
+          "mode": "preflight",
+          "exitCode": 2,
+          "timedOut": false
+        },
+        {
+          "mode": "verify",
+          "exitCode": 0,
+          "timedOut": false
+        },
+        {
+          "mode": "preflight",
+          "exitCode": 0,
+          "timedOut": false
+        },
+        {
+          "mode": "preflight",
+          "exitCode": 2,
+          "timedOut": false
+        },
+        {
+          "mode": "verify",
+          "exitCode": 0,
+          "timedOut": false
+        }
+      ]
+    },
+    {
+      "artifact": "b3-native-joint-fbe295c6f03c43dcbf7e0143fb2bd460-commands.json",
+      "sha256": "54751d06cfce7874f05750e631ec5020b983dfa02d93957ef927991bd14b9380",
+      "scenario": "removed",
+      "restoredDatabaseDropped": true,
+      "nativeTablesCompared": [
+        "replication_provider_lineage",
+        "replication_bank_state",
+        "replication_logical_changes",
+        "replication_logical_snapshots",
+        "replication_logical_snapshot_pages",
+        "memory_native_operation_receipts",
+        "memory_retain_part_receipts",
+        "banks",
+        "documents",
+        "entities",
+        "chunks",
+        "memory_units",
+        "invalidated_memory_units",
+        "memory_mutation_receipts",
+        "unit_entities",
+        "entity_cooccurrences",
+        "memory_links",
+        "observation_history",
+        "mental_models",
+        "mental_model_history",
+        "knowledge_pages",
+        "directives",
+        "async_operations",
+        "webhooks",
+        "file_storage",
+        "audit_log",
+        "llm_requests",
+        "graph_maintenance_queue",
+        "memory_current_state_transfers",
+        "memory_current_state_transfer_mappings",
+        "memory_bank_maintenance",
+        "memory_cutover_verifications",
+        "memory_cutover_steps",
+        "memory_cutover_actions",
+        "memory_cutover_evidence_pages",
+        "memory_application_banks",
+        "memory_application_bodies",
+        "memory_application_body_parts",
+        "memory_application_native_heads",
+        "memory_application_artifacts",
+        "memory_application_changes",
+        "memory_application_operations",
+        "memory_application_snapshots",
+        "memory_transition_requests",
+        "memory_transition_bank_origins",
+        "memory_transition_initializations",
+        "memory_transition_fences",
+        "memory_transition_writers",
+        "memory_transition_work",
+        "memory_transition_history",
+        "memory_transition_maintenance",
+        "memory_transition_steps",
+        "memory_transition_actions",
+        "memory_transition_evidence_pages",
+        "memory_transition_auxiliary_pages",
+        "memory_transition_deltas",
+        "memory_template_receipts",
+        "memory_template_children",
+        "memory_template_refresh_results",
+        "memory_template_label_proofs",
+        "memory_template_label_heads"
+      ],
+      "physicalRowsEqual": true,
+      "selectedRevision": "none",
+      "receiptCounts": [
+        3,
+        1
+      ],
+      "refreshChildRows": 1,
+      "refreshResultRows": 1,
+      "fakeRefreshProviderCalls": 5,
+      "fakeRefreshToolCalls": 4,
+      "fakeRefreshFinalTextCalls": 1,
+      "commands": [
+        {
+          "mode": "seed",
+          "exitCode": 0,
+          "timedOut": false
+        },
+        {
+          "mode": "prepare",
+          "exitCode": 0,
+          "timedOut": false
+        },
+        {
+          "mode": "native-cli-managed",
+          "exitCode": 0,
+          "timedOut": false
+        },
+        {
+          "mode": "native-cli-mismatched",
+          "exitCode": 0,
+          "timedOut": false
+        },
+        {
+          "mode": "admit",
+          "exitCode": 2,
+          "timedOut": false
+        },
+        {
+          "mode": "admit",
+          "exitCode": 0,
+          "timedOut": false
+        },
+        {
+          "mode": "preflight",
+          "exitCode": 0,
+          "timedOut": false
+        },
+        {
+          "mode": "preflight",
+          "exitCode": 2,
+          "timedOut": false
+        },
+        {
+          "mode": "verify",
+          "exitCode": 0,
+          "timedOut": false
+        },
+        {
+          "mode": "preflight",
+          "exitCode": 0,
+          "timedOut": false
+        },
+        {
+          "mode": "preflight",
+          "exitCode": 2,
+          "timedOut": false
+        },
+        {
+          "mode": "verify",
+          "exitCode": 0,
+          "timedOut": false
+        }
+      ]
+    }
+  ]
+}

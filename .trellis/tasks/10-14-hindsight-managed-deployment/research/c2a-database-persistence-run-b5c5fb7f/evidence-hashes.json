@@ -1,0 +1,356 @@
+{
+  "algorithm": "SHA-256",
+  "files": [
+    {
+      "path": ".c2a-docker-owner",
+      "bytes": 36,
+      "sha256": "fc2306b139c6d4b7f691bdbc7a952fa1d359f278ad3536513b94297d1081727a"
+    },
+    {
+      "path": "adapter-build.json",
+      "bytes": 672,
+      "sha256": "c6575130c465530bfe5bcd5706ac4eaf5a30b8bd91dc6c627d719d5654293285"
+    },
+    {
+      "path": "base-probe.json",
+      "bytes": 316,
+      "sha256": "819eca37907fa96577bcafca977d41304c16e1a14a782205b8170f874d944d5a"
+    },
+    {
+      "path": "baseline.json",
+      "bytes": 119,
+      "sha256": "38425eecd9d8a51af832e8d2da434bf9585d2ab16ce923ad3081a3a468d77c1c"
+    },
+    {
+      "path": "build-config/buildx/.buildNodeID",
+      "bytes": 16,
+      "sha256": "c36f1694a4bc26212b663cc566e635c1acab25551dd3949414759088d63e5cbc"
+    },
+    {
+      "path": "build-config/buildx/.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build-config/buildx/activity/default",
+      "bytes": 20,
+      "sha256": "a8c2553eb96a47d2394f89f7f28761366837632efbbe6624475f5ccbda1c6cfc"
+    },
+    {
+      "path": "build-config/buildx/current",
+      "bytes": 76,
+      "sha256": "ad4436223bfadf60e9921a9be166da1d9c454921db007f16b8f21e5553cde791"
+    },
+    {
+      "path": "build-config/buildx/refs/default/default/6np2dacs0f6n4x27jfld0m81h",
+      "bytes": 266,
+      "sha256": "57a7ba9fdd28ae147e7282a46a4f0ec4975311cc43f17a75ab6d5f239b79e9c0"
+    },
+    {
+      "path": "build-config/config.json",
+      "bytes": 94,
+      "sha256": "c880ae25bec63e8fc31f72fe393a1f37d2d7a1aba39858b5f3813492dd9b075f"
+    },
+    {
+      "path": "build-result.json",
+      "bytes": 3233,
+      "sha256": "597e5fce3a21fec20a44833a1d26881332cfa49b3085e38a8907afdc06de0b29"
+    },
+    {
+      "path": "build.started",
+      "bytes": 24,
+      "sha256": "50ad948c744590a115e6e3239341755a17e002affda19eec5f79747e2ace993f"
+    },
+    {
+      "path": "build.stderr.log",
+      "bytes": 1981,
+      "sha256": "4bb9a5b765c9d1a4aadcfd6e460f73db8ec9f867104c8dbbb1f1cafa20964e41"
+    },
+    {
+      "path": "build.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "command-runner.mjs",
+      "bytes": 3022,
+      "sha256": "9c3c7c608f6b8f829dcb38354781c02b201fe6854ae9a220ed625863384a6ff0"
+    },
+    {
+      "path": "commands.jsonl",
+      "bytes": 13544,
+      "sha256": "c92533620ab79eddfb31cfda1b5c3a060f64254fc6b2057176ed70c900b7bf1d"
+    },
+    {
+      "path": "context/docker/standalone/Dockerfile.c2a-fake",
+      "bytes": 555,
+      "sha256": "2be1279ef4621f5d42397879fab2e436d780224eb3c02d591180faf9e9a9fcff"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/__init__.py",
+      "bytes": 80,
+      "sha256": "cbf487cffc9c62b5c6fe61f32d80070b5843f70f966c5fca163c675e21ddbf1d"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/bootstrap.py",
+      "bytes": 6323,
+      "sha256": "b8331bd8c9645d265578ed65f9f77402f170813f20d1d2683b5aa0a7d0768101"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/control.py",
+      "bytes": 5593,
+      "sha256": "c75dcdf2285df614c4836dab4898a2980a2a1e8e4572862861596ab244f39d5e"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/fake_child.py",
+      "bytes": 44233,
+      "sha256": "f76cfbd0eec0a8614c16ba947939dd13367163e84c9ff1c584476711814c6180"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/fake_consumer.py",
+      "bytes": 4302,
+      "sha256": "52b3d0664b06ef82dca4765d2c08e820c16c2af5e2814a02f98fe08f8e220eb3"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/owner.py",
+      "bytes": 2460,
+      "sha256": "5b10f9f09def8ff985c96fed56c31f4ec4976f684d7e3b044fdc8a66afb38acc"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/owner_protocol.py",
+      "bytes": 3199,
+      "sha256": "cd9cdbea572354dbbc1200098d9edfe9280679c2b346a67c1326a795b01c1804"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/protocol.py",
+      "bytes": 13320,
+      "sha256": "074247650a31cfc47a1931ef6c7b258aa6f1d3a649bbb792ff2878257f6f8b88"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/submitter.py",
+      "bytes": 4913,
+      "sha256": "5a6ad60266066d1cff2559d46c6b2b15d4a93cf882de1e487790ad0fb6863c4a"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/supervision.py",
+      "bytes": 4552,
+      "sha256": "ff768434e0cef9eb2b6996351ba31e1dedede95211809d2ab8e8d09b5d9a5064"
+    },
+    {
+      "path": "context/docker/standalone/managed_bootstrap/unix_socket.py",
+      "bytes": 9434,
+      "sha256": "08b6e604211d19e31ad61782c96b91a004277b37c31d6e9a0bdfdda681cd7725"
+    },
+    {
+      "path": "context-manifest.json",
+      "bytes": 5674,
+      "sha256": "1a2861cd9148611264d5553524b0ea61abec0678c3a1e4c62afd851e9aca8da9"
+    },
+    {
+      "path": "diagnostic-manifest.json",
+      "bytes": 1456,
+      "sha256": "1c754040700b1ca80f60f5ecd382beb1d2c49dbaa1ce25653c4687f8aad57a69"
+    },
+    {
+      "path": "execution-owner.mjs",
+      "bytes": 15544,
+      "sha256": "3bb84173e95ad7deeb26671c74de59b113119783a0a32af7b0b7448ccdb66a8c"
+    },
+    {
+      "path": "experiment-bindings.json",
+      "bytes": 508,
+      "sha256": "7caef1cd2bd52336ab76f2334626e144d40e3a58d2f79786ce966f07ffaadf9a"
+    },
+    {
+      "path": "fake-key-adapter.exe",
+      "bytes": 155648,
+      "sha256": "7bdc5497ac2fa7ac7f14a31d66c9edbaf66d3fe403f1a97dee3fbbd185043f56"
+    },
+    {
+      "path": "fake-key-adapter.pdb",
+      "bytes": 1314816,
+      "sha256": "79df4fc3efaf2b8d6e16356662a8c54916794d768481e4b01abb82bd689975ae"
+    },
+    {
+      "path": "final-audit.json",
+      "bytes": 21070,
+      "sha256": "44b49dd4c3cdc94b4eda098d8f5e4bec37b9f7bf78279403ef2368064369b693"
+    },
+    {
+      "path": "final-stop.json",
+      "bytes": 58267,
+      "sha256": "7846c7479d8d3ef95d3b1fec22f44e967286455d05037f19da1029935b7cc8e5"
+    },
+    {
+      "path": "first-stop.json",
+      "bytes": 59210,
+      "sha256": "4da40402f542c49403e1d20d1423b42743684b5aa739e52656d98b00256465a5"
+    },
+    {
+      "path": "frozen-inputs/c2a-implementation-source-manifest.json",
+      "bytes": 108542,
+      "sha256": "f27379be3b4b5e61e1b2821c2eda2d87bf54e5c2983b034bdb637ee789961ae2"
+    },
+    {
+      "path": "frozen-inputs/docker-database/database-read.py",
+      "bytes": 6084,
+      "sha256": "4bd830c60a4ddecc4e8e7018d2b19eb08093c81fc5d7f3ee0a8ff380178e4271"
+    },
+    {
+      "path": "frozen-inputs/docker-database/fake_child.py",
+      "bytes": 44233,
+      "sha256": "9d65b8875e5d798a024dff9b4a182d6cff7bf4b62646954e38cd0c2e12ce3819"
+    },
+    {
+      "path": "frozen-inputs/docker-database/README.md",
+      "bytes": 22962,
+      "sha256": "ffd27eba8edae875cdd8f8a84beea17e4dc1385e180c879fba7388816181419a"
+    },
+    {
+      "path": "frozen-inputs/docker-database/run-persistence.ts",
+      "bytes": 56502,
+      "sha256": "c39fd6e465f922cefd198abe1e6d531d731359f8969b183ae9b5b4d2cf06ee27"
+    },
+    {
+      "path": "frozen-inputs/docker-database-run-b5c5fb7f/database-read.py",
+      "bytes": 6084,
+      "sha256": "03895f6f4efd670eb323fd5b0935d6233445ae68252e9c6dfe8b3a0a39d56b21"
+    },
+    {
+      "path": "frozen-inputs/docker-database-run-b5c5fb7f/fake_child.py",
+      "bytes": 44233,
+      "sha256": "f76cfbd0eec0a8614c16ba947939dd13367163e84c9ff1c584476711814c6180"
+    },
+    {
+      "path": "frozen-inputs/docker-database-run-b5c5fb7f/run-persistence.ts",
+      "bytes": 56502,
+      "sha256": "c18c81a43f824b65802cdce7bcc900029eb3806225923d4c45ddbc3c1de56eca"
+    },
+    {
+      "path": "frozen-inputs-manifest.json",
+      "bytes": 1303,
+      "sha256": "8d282d16ef4da5e425db97dc9e79b9e8da36ea128c712c8587945aae109ed5d5"
+    },
+    {
+      "path": "image-id.txt",
+      "bytes": 71,
+      "sha256": "688906fe6a75f29a9f9ad9ac155e457ac3d723556e29fef2bf17213e68b7f3c0"
+    },
+    {
+      "path": "launcher-dispatched",
+      "bytes": 24,
+      "sha256": "aedf810ffddaf477a67e7ccfcd3448eb77ef1b51af2f1453ed1786cfab310916"
+    },
+    {
+      "path": "launcher-result.json",
+      "bytes": 778,
+      "sha256": "38b3ff49836c36ad91d640b55e6ac832f528b87da20d3e99f9b65778be17fe45"
+    },
+    {
+      "path": "launcher.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "launcher.stdout.log",
+      "bytes": 223,
+      "sha256": "b4878e065c55cb57e0c81059e326e53487b1210c6a9e3b2c0beac94820797303"
+    },
+    {
+      "path": "leftover-13-archive-check.json",
+      "bytes": 27781,
+      "sha256": "fefd605619e10a9e2e23765b750366dcdd5d28192c9f2a0c0e7f4e375a24490d"
+    },
+    {
+      "path": "leftover-1b-initial-hashes.json",
+      "bytes": 9754,
+      "sha256": "70cef5f70011a36aacdf6a68d4bc530aed59561e74558b8d530d4bfa757695cc"
+    },
+    {
+      "path": "owner-commands.jsonl",
+      "bytes": 12495,
+      "sha256": "0dcd3860af15c7b29d7e1b188365594c7bcc146d15b5240dfe918b298b32b7d9"
+    },
+    {
+      "path": "persistence.json",
+      "bytes": 646337,
+      "sha256": "ee55accdf40015de0834b9b977b44e9f83c752a2a3e0c8a0a9ad7761c9bb2120"
+    },
+    {
+      "path": "persistence.started",
+      "bytes": 24,
+      "sha256": "7681177da9bdf35c939851b6665fe3d9a23c1a4cb4d6584bb4f6c2d3fd595524"
+    },
+    {
+      "path": "post-run-verification.json",
+      "bytes": 11416,
+      "sha256": "eb99fe0c8f0917f02d266e57ee93cf61967de16def9b100154d5b0a40358eef5"
+    },
+    {
+      "path": "preflight.json",
+      "bytes": 3930,
+      "sha256": "dd8338f843331290e8910cbd96950d2fe2dbb4245ca28a6f7c9371245c4df86e"
+    },
+    {
+      "path": "preserve-stage.ps1",
+      "bytes": 5282,
+      "sha256": "50bbc3eed0ddcc27c55546b007b68f1ed7b01806115fa57f5e32d007b0456b7e"
+    },
+    {
+      "path": "report.json",
+      "bytes": 24188,
+      "sha256": "548c090649c6070beec9981f5ee6c8291789f434213aec94f0b92ae9c239d45d"
+    },
+    {
+      "path": "report.md",
+      "bytes": 5920,
+      "sha256": "664695dc21e2fff846d021e93e4e187aa024dfa724d9129048e2a873f67c0b87"
+    },
+    {
+      "path": "result-image.json",
+      "bytes": 3765,
+      "sha256": "6be0f54e90e8dee97e27973487cc0a45113b2b1dbabf906a92087e091368bfe7"
+    },
+    {
+      "path": "reused-base-probe.json",
+      "bytes": 331,
+      "sha256": "38bbef733c145d7ae30198d0d28bb499ecfa7d7ebf49d50b7f79ccf254d1017c"
+    },
+    {
+      "path": "stage-archive-manifest.json",
+      "bytes": 9606,
+      "sha256": "f22cf2da4509ab8d170b785c40b48245580d151a11c6dd5b04513763fdf41bab"
+    },
+    {
+      "path": "stage-cleanup.json",
+      "bytes": 493,
+      "sha256": "850498c1b50e043e2b6084d08986462c75fc3df2bb351e967395847e22c28aa4"
+    },
+    {
+      "path": "tsconfig.noemit.json",
+      "bytes": 229,
+      "sha256": "5d012d42f30889e5828ec44994ab2fe9d25f5e63fa1da1cefcab7bf9c0d41639"
+    },
+    {
+      "path": "typecheck.json",
+      "bytes": 126,
+      "sha256": "f2813a25cbe3e2103096e0c5f59baa80c65f0bb5400bd96f3316cef3927d4746"
+    },
+    {
+      "path": "verified-inputs-before-launch.json",
+      "bytes": 2635,
+      "sha256": "fa64a18f4b9daf7393de6774cbe5d9a408af9489c42ed735697dd0d3590f744f"
+    },
+    {
+      "path": "verified-inputs-before.json",
+      "bytes": 2635,
+      "sha256": "3b58926b6a923c8930f7b60eab5f8b060d40b9e4b46901b6bd7a6fb348de98db"
+    },
+    {
+      "path": "verified-inputs-immediately-before.json",
+      "bytes": 2635,
+      "sha256": "72f91d4b4bd401b652066bcd3ac15160df0fcc81d29df970156a9d861a0ceaeb"
+    }
+  ],
+  "selfExcluded": true
+}

@@ -1,0 +1,35 @@
+{
+  "argv": [
+    "pnpm",
+    "--filter",
+    "@taki/core",
+    "exec",
+    "vitest",
+    "run",
+    "src/memory/hindsight/template-lifecycle/template-rollout.test.ts",
+    "src/memory/hindsight/template-lifecycle/template-runtime-control.test.ts",
+    "src/memory/hindsight/template-lifecycle/template-emergency.test.ts",
+    "src/server/methods/hindsight-template-methods.test.ts",
+    "--maxWorkers",
+    "2"
+  ],
+  "resolvedExecutable": "G:\\Roaming\\npm\\pnpm.CMD",
+  "cwd": "H:\\TakiAgent",
+  "startedAt": "2026-10-08T11:27:22.998349+00:00",
+  "endedAt": "2026-10-08T11:27:46.956956+00:00",
+  "durationSeconds": 23.953,
+  "exitCode": 1,
+  "testSourceBefore": {
+    "packages/core/src/memory/hindsight/template-lifecycle/template-rollout.test.ts": "760bc0f517ff3c8f931f6ebb3ac27953e17d29afecb7dce12b1b81a5ba565766",
+    "packages/core/src/memory/hindsight/template-lifecycle/template-runtime-control.test.ts": "11a42d611fb99967515415ced816e4a1d4945452fde56b7bc471cc881aa5f3ec",
+    "packages/core/src/memory/hindsight/template-lifecycle/template-emergency.test.ts": "8906a7b5bf8d592b4b5abcfc3e6f75ff36ad949d9a1ab79319167c296152b84f",
+    "packages/core/src/server/methods/hindsight-template-methods.test.ts": "85ddf46f65854abf8cc1e20a5f4e1e78228dff7f7ff1a6102cf449e54c8cceeb"
+  },
+  "testSourceAfter": {
+    "packages/core/src/memory/hindsight/template-lifecycle/template-rollout.test.ts": "760bc0f517ff3c8f931f6ebb3ac27953e17d29afecb7dce12b1b81a5ba565766",
+    "packages/core/src/memory/hindsight/template-lifecycle/template-runtime-control.test.ts": "11a42d611fb99967515415ced816e4a1d4945452fde56b7bc471cc881aa5f3ec",
+    "packages/core/src/memory/hindsight/template-lifecycle/template-emergency.test.ts": "8906a7b5bf8d592b4b5abcfc3e6f75ff36ad949d9a1ab79319167c296152b84f",
+    "packages/core/src/server/methods/hindsight-template-methods.test.ts": "85ddf46f65854abf8cc1e20a5f4e1e78228dff7f7ff1a6102cf449e54c8cceeb"
+  },
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-operator-methods-01-vitest.log"
+}

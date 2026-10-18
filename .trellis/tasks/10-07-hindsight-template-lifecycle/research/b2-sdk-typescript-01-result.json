@@ -1,0 +1,13 @@
+{
+  "command": [
+    "C:/Program Files/nodejs/npm.cmd",
+    "test",
+    "--",
+    "--runInBand",
+    "--testPathIgnorePatterns=main_operations.test.ts"
+  ],
+  "cwd": "H:/hindsight/hindsight-clients/typescript",
+  "exitCode": 0,
+  "durationSeconds": 13.291,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-sdk-typescript-01.log"
+}

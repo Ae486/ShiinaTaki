@@ -1,0 +1,90 @@
+Owned fixture: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-9b1caf3bb472
+PostgreSQL: 18.1 ; vector/pg_trgm ready
+Pytest log: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-9b1caf3bb472\pytest.log
+tests\native_results\test_template_independent_wire.py:32: in test_shared_lifecycle_validation_cases
+    with pytest.raises((ValueError, ValidationError)):
+E   Failed: DID NOT RAISE any of (<class 'ValueError'>, <class 'pydantic_core._pydantic_core.ValidationError'>)
+________ test_shared_lifecycle_validation_cases[oversized-nested-tag] _________
+tests\native_results\test_template_independent_wire.py:32: in test_shared_lifecycle_validation_cases
+    with pytest.raises((ValueError, ValidationError)):
+E   Failed: DID NOT RAISE any of (<class 'ValueError'>, <class 'pydantic_core._pydantic_core.ValidationError'>)
+__________ test_shared_lifecycle_validation_cases[empty-nested-tag] ___________
+tests\native_results\test_template_independent_wire.py:32: in test_shared_lifecycle_validation_cases
+    with pytest.raises((ValueError, ValidationError)):
+E   Failed: DID NOT RAISE any of (<class 'ValueError'>, <class 'pydantic_core._pydantic_core.ValidationError'>)
+______ test_shared_lifecycle_validation_cases[invalid-excluded-model-id] ______
+tests\native_results\test_template_independent_wire.py:32: in test_shared_lifecycle_validation_cases
+    with pytest.raises((ValueError, ValidationError)):
+E   Failed: DID NOT RAISE any of (<class 'ValueError'>, <class 'pydantic_core._pydantic_core.ValidationError'>)
+_____ test_shared_lifecycle_validation_cases[oversized-excluded-model-id] _____
+tests\native_results\test_template_independent_wire.py:32: in test_shared_lifecycle_validation_cases
+    with pytest.raises((ValueError, ValidationError)):
+E   Failed: DID NOT RAISE any of (<class 'ValueError'>, <class 'pydantic_core._pydantic_core.ValidationError'>)
+_______ test_shared_lifecycle_validation_cases[nested-description-type] _______
+tests\native_results\test_template_independent_wire.py:33: in test_shared_lifecycle_validation_cases
+    validate()
+tests\native_results\test_template_independent_wire.py:23: in validate
+    return validate_labels(value)
+           ^^^^^^^^^^^^^^^^^^^^^^
+hindsight_api\engine\template_definitions.py:166: in validate_labels
+    _label_fields(group, is_group=True)
+hindsight_api\engine\template_definitions.py:211: in _label_fields
+    _label_fields(field)
+hindsight_api\engine\template_definitions.py:185: in _label_fields
+    _text(value["description"])
+hindsight_api\engine\template_definitions.py:18: in _text
+    if len(value.encode("utf-8", errors="strict")) > limit:
+           ^^^^^^^^^^^^
+E   AttributeError: 'int' object has no attribute 'encode'
+_______ test_shared_lifecycle_validation_cases[group-description-type] ________
+tests\native_results\test_template_independent_wire.py:33: in test_shared_lifecycle_validation_cases
+    validate()
+tests\native_results\test_template_independent_wire.py:23: in validate
+    return validate_labels(value)
+           ^^^^^^^^^^^^^^^^^^^^^^
+hindsight_api\engine\template_definitions.py:166: in validate_labels
+    _label_fields(group, is_group=True)
+hindsight_api\engine\template_definitions.py:185: in _label_fields
+    _text(value["description"])
+hindsight_api\engine\template_definitions.py:18: in _text
+    if len(value.encode("utf-8", errors="strict")) > limit:
+           ^^^^^^^^^^^^
+E   AttributeError: 'int' object has no attribute 'encode'
+____ test_shared_lifecycle_validation_cases[label-value-description-type] _____
+tests\native_results\test_template_independent_wire.py:33: in test_shared_lifecycle_validation_cases
+    validate()
+tests\native_results\test_template_independent_wire.py:23: in validate
+    return validate_labels(value)
+           ^^^^^^^^^^^^^^^^^^^^^^
+hindsight_api\engine\template_definitions.py:166: in validate_labels
+    _label_fields(group, is_group=True)
+hindsight_api\engine\template_definitions.py:203: in _label_fields
+    _text(item["description"])
+hindsight_api\engine\template_definitions.py:18: in _text
+    if len(value.encode("utf-8", errors="strict")) > limit:
+           ^^^^^^^^^^^^
+E   AttributeError: 'int' object has no attribute 'encode'
+============================ slowest 10 durations =============================
+0.14s call     tests/native_results/test_template_independent_wire.py::test_native_cron_compiler_retains_existing_syntax[@hourly]
+
+(9 durations < 0.005s hidden.  Use -vv to show these durations.)
+=========================== short test summary info ===========================
+FAILED tests/native_results/test_template_independent_wire.py::test_shared_lifecycle_validation_cases[unknown-nested-leaf-key]
+FAILED tests/native_results/test_template_independent_wire.py::test_shared_lifecycle_validation_cases[ambiguous-nested-group]
+FAILED tests/native_results/test_template_independent_wire.py::test_shared_lifecycle_validation_cases[legacy-python-alias-is-not-wire]
+FAILED tests/native_results/test_template_independent_wire.py::test_shared_lifecycle_validation_cases[too-many-nested-tags]
+FAILED tests/native_results/test_template_independent_wire.py::test_shared_lifecycle_validation_cases[oversized-nested-tag]
+FAILED tests/native_results/test_template_independent_wire.py::test_shared_lifecycle_validation_cases[empty-nested-tag]
+FAILED tests/native_results/test_template_independent_wire.py::test_shared_lifecycle_validation_cases[invalid-excluded-model-id]
+FAILED tests/native_results/test_template_independent_wire.py::test_shared_lifecycle_validation_cases[oversized-excluded-model-id]
+FAILED tests/native_results/test_template_independent_wire.py::test_shared_lifecycle_validation_cases[nested-description-type]
+FAILED tests/native_results/test_template_independent_wire.py::test_shared_lifecycle_validation_cases[group-description-type]
+FAILED tests/native_results/test_template_independent_wire.py::test_shared_lifecycle_validation_cases[label-value-description-type]
+======================== 11 failed, 31 passed in 5.14s ========================
+{
+    "Fixture":  "taki-hindsight-g1-9b1caf3bb472",
+    "Stopped":  true,
+    "DataRemoved":  true,
+    "RegistryRemoved":  true,
+    "Logs":  "H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-9b1caf3bb472"
+}

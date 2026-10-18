@@ -1,0 +1,17 @@
+{
+  "cwd": "H:\\TakiAgent",
+  "command": "pnpm",
+  "argv": [
+    "--filter",
+    "@taki/desktop",
+    "exec",
+    "vitest",
+    "run",
+    "src/windows/home/pages/operations/hindsight-template-controller.test.ts",
+    "--maxWorkers=2"
+  ],
+  "startedAt": "2026-10-09T10:59:55.2946340Z",
+  "finishedAt": "2026-10-09T11:00:26.5232892Z",
+  "exitCode": 0,
+  "inputManifest": "b3-home-inputs-02.json"
+}

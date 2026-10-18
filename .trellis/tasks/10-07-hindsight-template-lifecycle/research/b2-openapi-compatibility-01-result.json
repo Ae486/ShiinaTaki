@@ -1,0 +1,10 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/python.exe",
+    ".trellis/tasks/10-07-hindsight-template-lifecycle/research/verify-b2-openapi.py"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "durationSeconds": 0.387,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-openapi-compatibility-01.log"
+}

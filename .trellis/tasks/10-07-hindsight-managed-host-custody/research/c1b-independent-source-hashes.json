@@ -1,0 +1,315 @@
+{
+  "version": 1,
+  "capturedAt": "2026-10-13T12:09:48.0227758Z",
+  "roots": {
+    "taki": "H:/TakiAgent",
+    "native": "H:/hindsight"
+  },
+  "branches": {
+    "native": "main",
+    "taki": "main"
+  },
+  "heads": {
+    "native": "eb6413a7f58c4f3f0adb88a33a99516f8707fef7",
+    "taki": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a"
+  },
+  "releaseManifest": "c1b-source-hashes.json",
+  "releaseManifestSha256": "29743a9e470beb0e9d69e7ff7ad1b30986ec30759339adfdc0de64280ccdb059",
+  "files": [
+    {
+      "repository": "native",
+      "path": "docker/standalone/managed_bootstrap/__init__.py",
+      "kind": "owned-source",
+      "bytes": 80,
+      "sha256": "cbf487cffc9c62b5c6fe61f32d80070b5843f70f966c5fca163c675e21ddbf1d"
+    },
+    {
+      "repository": "native",
+      "path": "docker/standalone/managed_bootstrap/protocol.py",
+      "kind": "owned-source",
+      "bytes": 13320,
+      "sha256": "074247650a31cfc47a1931ef6c7b258aa6f1d3a649bbb792ff2878257f6f8b88"
+    },
+    {
+      "repository": "native",
+      "path": "docker/standalone/managed_bootstrap/bootstrap.py",
+      "kind": "owned-source",
+      "bytes": 6323,
+      "sha256": "b8331bd8c9645d265578ed65f9f77402f170813f20d1d2683b5aa0a7d0768101"
+    },
+    {
+      "repository": "native",
+      "path": "docker/standalone/managed_bootstrap/supervision.py",
+      "kind": "owned-source",
+      "bytes": 4552,
+      "sha256": "ff768434e0cef9eb2b6996351ba31e1dedede95211809d2ab8e8d09b5d9a5064"
+    },
+    {
+      "repository": "native",
+      "path": "docker/standalone/managed_bootstrap/unix_socket.py",
+      "kind": "owned-source",
+      "bytes": 9179,
+      "sha256": "a972e2a68f2fbf16c836425bb0f07da0d83886e218eedc0588eadd92351463a7"
+    },
+    {
+      "repository": "native",
+      "path": "docker/standalone/managed_bootstrap/submitter.py",
+      "kind": "owned-source",
+      "bytes": 4913,
+      "sha256": "5a6ad60266066d1cff2559d46c6b2b15d4a93cf882de1e487790ad0fb6863c4a"
+    },
+    {
+      "repository": "native",
+      "path": "docker/standalone/managed_bootstrap/README.md",
+      "kind": "owned-source",
+      "bytes": 7978,
+      "sha256": "c3ca3734d3547c7f565583d12b769758cf41b19008ff6753860aa2487df29eb5"
+    },
+    {
+      "repository": "native",
+      "path": "docker/standalone/tests/test_managed_bootstrap_protocol.py",
+      "kind": "owned-source",
+      "bytes": 14219,
+      "sha256": "ff59ed7c5e866ad9a9f93bea47af47e45e8f580ed6113641d1f9da59f6a5bb15"
+    },
+    {
+      "repository": "native",
+      "path": "docker/standalone/tests/test_managed_bootstrap_process.py",
+      "kind": "owned-source",
+      "bytes": 12699,
+      "sha256": "30035061fcad9c87c6372f0af06265aa1de2ebfd0a741c0247ca335083078306"
+    },
+    {
+      "repository": "native",
+      "path": "docker/standalone/tests/test_managed_bootstrap_linux.py",
+      "kind": "owned-source",
+      "bytes": 10908,
+      "sha256": "beafedbf0e0d025d12b3174d3719256bbb8dd68cf175e7ae55cf386a629c28e0"
+    },
+    {
+      "repository": "native",
+      "path": "docker/standalone/tests/fixtures/fixed_consumer.py",
+      "kind": "owned-source",
+      "bytes": 5916,
+      "sha256": "f6fb9ee20ccc6a5a48960efd35a4e992d225a6a99317886ca41985d9b2c0b18c"
+    },
+    {
+      "repository": "native",
+      "path": "docker/standalone/tests/fixtures/pipe_bootstrap.py",
+      "kind": "owned-source",
+      "bytes": 2686,
+      "sha256": "f8b617caf9831483dc0b86bdce62050dc30ecbb81f229ffad62df98ca37620f1"
+    },
+    {
+      "repository": "native",
+      "path": "docker/standalone/tests/fixtures/pipe_submitter.py",
+      "kind": "owned-source",
+      "bytes": 1837,
+      "sha256": "8453e7a1da9e4706cbe2635c4e3d37378b52401fd6c3930170888767f09bfc74"
+    },
+    {
+      "repository": "native",
+      "path": "docker/standalone/tests/fixtures/unix_bootstrap.py",
+      "kind": "owned-source",
+      "bytes": 1151,
+      "sha256": "8611e2cb9f1dcc48dc88027bf24e04727d16bf57074ccc2b2d65ebf97f72105a"
+    },
+    {
+      "repository": "native",
+      "path": "docker/standalone/tests/fixtures/unix_submitter.py",
+      "kind": "owned-source",
+      "bytes": 622,
+      "sha256": "dd5fcb8c0fe108012dc8542760995b60083c74ff6b5cd2e6de07d0922ee43c68"
+    },
+    {
+      "repository": "taki",
+      "path": "apps/hindsight-host/src/restart-observer.ts",
+      "kind": "owned-source",
+      "bytes": 12766,
+      "sha256": "4b80c79e9aad52f3759ecbcb749253ae7c86a22c413f0f9d7b8731e163ade86f"
+    },
+    {
+      "repository": "taki",
+      "path": "apps/hindsight-host/src/restart-observer.test.ts",
+      "kind": "owned-source",
+      "bytes": 10247,
+      "sha256": "d22e77c9dd106e87d52e50542ae553ebcfaca94a9abae5e4b1bd6a0ea14ffc9f"
+    },
+    {
+      "repository": "taki",
+      "path": "apps/hindsight-host/src/index.md",
+      "kind": "owned-source",
+      "bytes": 1545,
+      "sha256": "710c32d6e5d4487b7a8d77ab81156ab048c851f3ab454270b71940fb22e4ad6e"
+    },
+    {
+      "repository": "taki",
+      "path": "apps/hindsight-host/README.md",
+      "kind": "owned-source",
+      "bytes": 12008,
+      "sha256": "2bfad9ef4a27efd80c60b92a56577d217a3f79a2caddcd87321d00d5c088c7d3"
+    },
+    {
+      "repository": "native",
+      "path": "docker/standalone/start-all.sh",
+      "kind": "reused-input",
+      "bytes": 11346,
+      "sha256": "8289b688c207bb1ef9a6ec5522d5391cb31b18c85d2f607b29bb77cd5e6e31b0"
+    },
+    {
+      "repository": "native",
+      "path": "hindsight-api-slim/hindsight_api/config.py",
+      "kind": "reused-input",
+      "bytes": 214066,
+      "sha256": "c19b8147c5741cae55a39de259fea8f5da2c3be7f57fba20859ce49e5d9bb5bd"
+    },
+    {
+      "repository": "native",
+      "path": "ruff.toml",
+      "kind": "reused-input",
+      "bytes": 877,
+      "sha256": "e75b1308b58b44dcdcac523dee68b99e694eec7b222ddb0cd3cc69b8919ac082"
+    },
+    {
+      "repository": "native",
+      "path": "pyproject.toml",
+      "kind": "reused-input",
+      "bytes": 435,
+      "sha256": "f9111ebf30ada7b24fbd66b1fd847aaafa25f7ed1cfa8caca648c817034a2010"
+    },
+    {
+      "repository": "native",
+      "path": "hindsight-api-slim/pyproject.toml",
+      "kind": "reused-input",
+      "bytes": 11974,
+      "sha256": "6a1735ecb0d5e5f86662cb2138af8c616f36ec1ce071067f190887b4864f59b5"
+    },
+    {
+      "repository": "native",
+      "path": "uv.lock",
+      "kind": "reused-input",
+      "bytes": 1126832,
+      "sha256": "0d247c326b04bd7b8e58140a0b984ba00b848c49b0a0996afe8b8cd81ed07131"
+    },
+    {
+      "repository": "taki",
+      "path": "packages/shared/src/hindsight-custody-schema.ts",
+      "kind": "reused-input",
+      "bytes": 5699,
+      "sha256": "c032dec7bd6c7ad719fc25a34db5dc1ed374c147c7d104602b54ce9e88dfaef0"
+    },
+    {
+      "repository": "taki",
+      "path": "apps/hindsight-host/src/main.ts",
+      "kind": "reused-input",
+      "bytes": 3410,
+      "sha256": "c5bd8c3c41dd2bcbef22fe60bc8e968028e3308e926e7eecdd9fd4bc2bc6c2b3"
+    },
+    {
+      "repository": "taki",
+      "path": "apps/hindsight-host/scripts/build.ts",
+      "kind": "reused-input",
+      "bytes": 8783,
+      "sha256": "3ba6b9fe68395ac955b79556f799cde6a8e7e8c2ef6c3d65926c34612ddf2083"
+    },
+    {
+      "repository": "taki",
+      "path": "apps/hindsight-host/package.json",
+      "kind": "reused-input",
+      "bytes": 520,
+      "sha256": "ac174d8d210f9895d94a7f182fbf9b1ee61fe273444a158e502e7610c5be0291"
+    },
+    {
+      "repository": "taki",
+      "path": "pnpm-lock.yaml",
+      "kind": "reused-input",
+      "bytes": 128367,
+      "sha256": "8fd90b14d80bef5e930888519188f255e16cf046a0221df0fedf3b9d441db19d"
+    },
+    {
+      "repository": "taki",
+      "path": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/c1a-independent-source-hashes.json",
+      "kind": "reused-input",
+      "bytes": 25870,
+      "sha256": "e18cdbb4319a6b1d5f54a592d102a6bac95465f266535fdc3c1aeb9bdf1a172b"
+    },
+    {
+      "repository": "taki",
+      "path": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/c1b-check-log.json",
+      "kind": "owned-evidence",
+      "bytes": 49772,
+      "sha256": "432a5e298ab083936f13c5e130f6e0230c1a0747119cae623d7af825e2db7e16"
+    },
+    {
+      "repository": "taki",
+      "path": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/c1b-cleanup-evidence.json",
+      "kind": "owned-evidence",
+      "bytes": 1774,
+      "sha256": "c404a1abfcd9b7aaf17e4f8f3125bb028f37950b1cc426a932af25df60326b74"
+    },
+    {
+      "repository": "taki",
+      "path": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/c1b-implementation-handoff.md",
+      "kind": "owned-evidence",
+      "bytes": 10731,
+      "sha256": "736c7e462066731c8db42f1f594669791715df19eb07207a7db75e5cec3c6abb"
+    }
+  ],
+  "changesFromRelease": [
+    {
+      "repository": "native",
+      "path": "docker/standalone/managed_bootstrap/unix_socket.py",
+      "releaseSha256": "90403f6668db4ce2c8c3ef03f0d80fc5d4aa2d0098d1ebfa4fe4788c808b99ad",
+      "sha256": "a972e2a68f2fbf16c836425bb0f07da0d83886e218eedc0588eadd92351463a7"
+    },
+    {
+      "repository": "native",
+      "path": "docker/standalone/managed_bootstrap/README.md",
+      "releaseSha256": "de45b3b6c49386063a7563361d3ead755c40c07afce754c25ddb9a89fb3dfcaa",
+      "sha256": "c3ca3734d3547c7f565583d12b769758cf41b19008ff6753860aa2487df29eb5"
+    },
+    {
+      "repository": "native",
+      "path": "docker/standalone/tests/test_managed_bootstrap_protocol.py",
+      "releaseSha256": "9853b1dc5028f9f9e589a3cae5ca9537ef9ffb1415e2542c4dcef03130a5adf2",
+      "sha256": "ff59ed7c5e866ad9a9f93bea47af47e45e8f580ed6113641d1f9da59f6a5bb15"
+    },
+    {
+      "repository": "native",
+      "path": "docker/standalone/tests/test_managed_bootstrap_linux.py",
+      "releaseSha256": "e5b9f77f99a58942b4e1e2ae44e28c765e47e2683c63bcc10956c4a9a4f4fd65",
+      "sha256": "beafedbf0e0d025d12b3174d3719256bbb8dd68cf175e7ae55cf386a629c28e0"
+    }
+  ],
+  "acceptedC1aComparison": {
+    "changes": [
+      {
+        "path": ".trellis/spec/backend/hindsight-host-custody.md",
+        "acceptedSha256": "ede9d98fdf84ca73bfef12d76cc5fb6fe28e80541f54137aa2ac051ec3620df4",
+        "currentSha256": "05e61149e811a60b8d39b5b10f7787a08d66177319ab7f774bb55c8b64f5a682",
+        "authorizedDocumentation": true
+      },
+      {
+        "path": ".trellis/spec/backend/index.md",
+        "acceptedSha256": "0aafb9c790a7444f1c58a42dbbb6ef7c908c748623399d2d0193499147b7f150",
+        "currentSha256": "45225fde15aaa8005c1582d41d29dea121545d780501f9bddd29fd9880f590b6",
+        "authorizedDocumentation": true
+      },
+      {
+        "path": "apps/hindsight-host/README.md",
+        "acceptedSha256": "fa8880ed9d7b2563f0fc9d22e4207113b4213d639329d3d03ece44fca6e8b860",
+        "currentSha256": "2bfad9ef4a27efd80c60b92a56577d217a3f79a2caddcd87321d00d5c088c7d3",
+        "authorizedDocumentation": true
+      },
+      {
+        "path": "apps/hindsight-host/src/index.md",
+        "acceptedSha256": "c2938259dc1e7c927b65c7d1d8c6133d83378de6dcbbf5b2d7b57a353bd8a3a0",
+        "currentSha256": "710c32d6e5d4487b7a8d77ab81156ab048c851f3ab454270b71940fb22e4ad6e",
+        "authorizedDocumentation": true
+      }
+    ],
+    "unchangedCount": 124,
+    "inputCount": 128,
+    "acceptedManifest": "c1a-independent-source-hashes.json"
+  }
+}

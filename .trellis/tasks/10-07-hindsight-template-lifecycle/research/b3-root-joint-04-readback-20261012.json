@@ -1,0 +1,8 @@
+{
+  "checkedAtUtc": "2026-10-12T11:38:09.872675+00:00",
+  "freeze": "b3-root-joint-04-freeze-20261012.json",
+  "inputs": 2594,
+  "mismatches": [],
+  "jointResult": "b3-native-joint-04-result.json",
+  "jointExitCode": 1
+}

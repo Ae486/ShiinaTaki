@@ -1,0 +1,188 @@
+{
+  "version": 1,
+  "capturedAt": "2026-10-08T10:23:08.160230+00:00",
+  "task": ".trellis/tasks/10-07-hindsight-template-lifecycle",
+  "owner": "/root/stage5b_label_implement",
+  "status": "ready_for_independent_review",
+  "repository": {
+    "path": "H:\\TakiAgent",
+    "branch": "main",
+    "head": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a"
+  },
+  "files": [
+    {
+      "file": "packages/core/src/memory/hindsight/hindsight-template-label-evidence.ts",
+      "sha256": "5d160ef2adaef117a46b34b9a6480784f8e8491ddfb04452763ac263c89d194e",
+      "bytes": 5759
+    },
+    {
+      "file": "packages/core/src/memory/hindsight/hindsight-template-label-evidence.test.ts",
+      "sha256": "19fcf2cfce288e2951e876018bd46fb51b5db5f9b5371d61db02f9eccf97061c",
+      "bytes": 15122
+    },
+    {
+      "file": "packages/core/src/memory/hindsight/hindsight-template-binding.test.ts",
+      "sha256": "5361ec4a8f80b97e10089c6237de1aa39fe3491d0ef3b957380934c3d1cdb8e1",
+      "bytes": 12745
+    },
+    {
+      "file": "packages/core/src/memory/hindsight/hindsight-application-binding-runner.ts",
+      "sha256": "7162a97252d7d003361cc357a76f9ed831a9a34a6ace481a1d48a0212e91cc47",
+      "bytes": 12717
+    },
+    {
+      "file": "packages/core/src/memory/hindsight/hindsight-application-binding-context.ts",
+      "sha256": "2d66dcb6e266e1ede2849576b60dfda14e21af50dd65dbc9f2c3c013b81a52ad",
+      "bytes": 10628
+    },
+    {
+      "file": "packages/core/src/testing/hindsight-template-exchange-fixture.ts",
+      "sha256": "17d1fc9a2fa902de698447e338bf2bb597e64bd83300bdc60732964a2036a46d",
+      "bytes": 10968
+    },
+    {
+      "file": "packages/core/src/testing/hindsight-template-native-consumer.fixture.ts",
+      "sha256": "f2ce07c91d28f5fc0fc27deeca322746693652ba261250d8ac58978b32240b3b",
+      "bytes": 6542
+    }
+  ],
+  "sourceChecks": {
+    "utf8WithoutBom": true,
+    "trailingWhitespaceAbsent": true,
+    "trackedDiffCheckExitCode": 0,
+    "existingPolicyFileUnchangedFromHead": true
+  },
+  "focusedTests": {
+    "argv": [
+      "--filter",
+      "@taki/core",
+      "exec",
+      "vitest",
+      "run",
+      "src/memory/hindsight/hindsight-template-label-evidence.test.ts",
+      "src/memory/hindsight/hindsight-template-binding.test.ts",
+      "--maxWorkers",
+      "2"
+    ],
+    "executable": "pnpm",
+    "command": "pnpm --filter @taki/core exec vitest run src/memory/hindsight/hindsight-template-label-evidence.test.ts src/memory/hindsight/hindsight-template-binding.test.ts --maxWorkers 2",
+    "startedAt": "2026-10-08T10:02:03.6545382+00:00",
+    "exitCode": 0,
+    "endedAt": "2026-10-08T10:02:15.5073387+00:00",
+    "cwd": "H:/TakiAgent",
+    "passed": 69,
+    "failed": 0,
+    "testFiles": 2,
+    "log": "b2-label-validation/consumer-03.log"
+  },
+  "lint": {
+    "command": "pnpm exec eslint packages/core/src/memory/hindsight/hindsight-template-label-evidence.ts packages/core/src/memory/hindsight/hindsight-template-label-evidence.test.ts packages/core/src/memory/hindsight/hindsight-template-binding.test.ts packages/core/src/memory/hindsight/hindsight-application-binding-runner.ts packages/core/src/memory/hindsight/hindsight-application-binding-context.ts packages/core/src/testing/hindsight-template-exchange-fixture.ts packages/core/src/testing/hindsight-template-native-consumer.fixture.ts",
+    "exitCode": 0,
+    "endedAt": "2026-10-08T10:03:12.2217597+00:00",
+    "cwd": "H:/TakiAgent",
+    "startedAt": "2026-10-08T10:03:08.3714911+00:00",
+    "argv": [
+      "exec",
+      "eslint",
+      "packages/core/src/memory/hindsight/hindsight-template-label-evidence.ts",
+      "packages/core/src/memory/hindsight/hindsight-template-label-evidence.test.ts",
+      "packages/core/src/memory/hindsight/hindsight-template-binding.test.ts",
+      "packages/core/src/memory/hindsight/hindsight-application-binding-runner.ts",
+      "packages/core/src/memory/hindsight/hindsight-application-binding-context.ts",
+      "packages/core/src/testing/hindsight-template-exchange-fixture.ts",
+      "packages/core/src/testing/hindsight-template-native-consumer.fixture.ts"
+    ],
+    "executable": "pnpm",
+    "fileCount": 7,
+    "log": "b2-label-validation/lint-02.log"
+  },
+  "reusedTypechecks": [
+    {
+      "command": [
+        "pnpm",
+        "--filter",
+        "@taki/shared",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "owner": "/root/stage5b_composition_implement",
+      "log": "b2-core-shared-typecheck-current.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "--filter",
+        "@taki/core",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "owner": "/root/stage5b_composition_implement",
+      "log": "b2-core-typecheck-current.log"
+    }
+  ],
+  "integration": {
+    "nativeTest": "tests/native_results/test_template_label_runtime_consumer.py::test_real_native_labels_reach_core_binding_and_survive_sqlite_reopen",
+    "nativeTestPassed": true,
+    "nodeExitCode": 0,
+    "stdout": "b2-native-http-dd7e6dfe82504d7e9c521dd64ac8dd0b.log",
+    "exchange": "b2-native-http-dd7e6dfe82504d7e9c521dd64ac8dd0b-exchanges.jsonl",
+    "exchangeSha256": "a09db13ea041d04722bd3d392a8ddda8c49f0916cd598e9b701c2c28f667f345",
+    "nodeSummary": {
+      "banks": 2,
+      "units": 7,
+      "registryPolicies": 2,
+      "neutralPolicies": 5,
+      "consolidatedProvenUnits": 2,
+      "requests": 200,
+      "labelEvidenceReads": 7,
+      "applicationCommits": 11,
+      "reopenVerified": true,
+      "remoteIoOutsideSqlite": true,
+      "exchangeFile": "G:\\Temp\\pytest-of-unknown\\pytest-60\\test_real_native_labels_reach_0\\http-exchanges.jsonl",
+      "exchangeSha256": "a09db13ea041d04722bd3d392a8ddda8c49f0916cd598e9b701c2c28f667f345"
+    },
+    "exchangeAudit": "b2-label-validation/http-exchange-audit-02.json",
+    "enclosingNativeBatch": {
+      "command": [
+        "H:/hindsight/.venv/Scripts/python.exe",
+        ".trellis/tasks/09-07-hindsight-recovery-evidence/research/validation/run_isolated_hindsight.py",
+        "--allow-http-fixture",
+        "--",
+        "tests/native_results/test_template_label_recovery.py",
+        "tests/native_results/test_template_label_storage.py",
+        "tests/native_results/test_template_independent_backup.py",
+        "tests/native_results/test_template_label_lifecycle.py::test_real_delta_replacement_invalidates_old_units_and_binds_new_extraction",
+        "tests/native_results/test_template_label_lifecycle.py::test_label_route_auth_actions_fields_hooks_and_bounds_fail_closed",
+        "tests/native_results/test_template_label_runtime_consumer.py",
+        "-q",
+        "--tb=short"
+      ],
+      "cwd": "H:/TakiAgent",
+      "exitCode": 1,
+      "durationSeconds": 296.098,
+      "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-native-labels-boundaries-02.log"
+    },
+    "enclosingBatchPassed": 13,
+    "enclosingBatchFailed": 2,
+    "cleanup": {
+      "nodeExited": true,
+      "uvicornStopped": true,
+      "ownedPostgresStopped": true,
+      "ownedPostgresDataRemoved": true,
+      "ownedPostgresRegistryRemoved": true,
+      "pytestSeedAndSqliteRetained": "G:/Temp/pytest-of-unknown/pytest-60/test_real_native_labels_reach_0"
+    }
+  },
+  "retainedFailures": [
+    "b2-label-validation/consumer-01.log",
+    "b2-core-typecheck-wiring.log",
+    "b2-label-validation/http-exchange-audit-01.json",
+    "b2-native-labels-boundaries-02.log"
+  ],
+  "remaining": [
+    "independent label and combined B2 review",
+    "Core-owned shared folder indexes",
+    "Native-owned two recovery/backup expectation corrections and canonical generation",
+    "Core-owned full lifecycle runtime/operation verification"
+  ]
+}

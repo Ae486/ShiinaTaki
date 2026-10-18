@@ -1,0 +1,47 @@
+=== RUN   TestConfigurationObservationProfiles
+--- PASS: TestConfigurationObservationProfiles (0.00s)
+=== RUN   TestCurrentStateSafeIntegerAndNullableWire
+--- PASS: TestCurrentStateSafeIntegerAndNullableWire (0.00s)
+=== RUN   TestCurrentStateObservationScopeUnion
+=== RUN   TestCurrentStateObservationScopeUnion/null
+=== RUN   TestCurrentStateObservationScopeUnion/"per_tag"
+=== RUN   TestCurrentStateObservationScopeUnion/"combined"
+=== RUN   TestCurrentStateObservationScopeUnion/"all_combinations"
+=== RUN   TestCurrentStateObservationScopeUnion/"shared"
+=== RUN   TestCurrentStateObservationScopeUnion/[]
+=== RUN   TestCurrentStateObservationScopeUnion/[["scope:one"],[]]
+--- PASS: TestCurrentStateObservationScopeUnion (0.00s)
+    --- PASS: TestCurrentStateObservationScopeUnion/null (0.00s)
+    --- PASS: TestCurrentStateObservationScopeUnion/"per_tag" (0.00s)
+    --- PASS: TestCurrentStateObservationScopeUnion/"combined" (0.00s)
+    --- PASS: TestCurrentStateObservationScopeUnion/"all_combinations" (0.00s)
+    --- PASS: TestCurrentStateObservationScopeUnion/"shared" (0.00s)
+    --- PASS: TestCurrentStateObservationScopeUnion/[] (0.00s)
+    --- PASS: TestCurrentStateObservationScopeUnion/[["scope:one"],[]] (0.00s)
+=== RUN   TestCurrentStateDeclaredEvidenceDiscriminator
+=== RUN   TestCurrentStateDeclaredEvidenceDiscriminator/missing
+=== RUN   TestCurrentStateDeclaredEvidenceDiscriminator/unknown
+=== RUN   TestCurrentStateDeclaredEvidenceDiscriminator/wrong_type
+=== RUN   TestCurrentStateDeclaredEvidenceDiscriminator/uppercase
+=== RUN   TestCurrentStateDeclaredEvidenceDiscriminator/both_cases
+--- PASS: TestCurrentStateDeclaredEvidenceDiscriminator (0.00s)
+    --- PASS: TestCurrentStateDeclaredEvidenceDiscriminator/missing (0.00s)
+    --- PASS: TestCurrentStateDeclaredEvidenceDiscriminator/unknown (0.00s)
+    --- PASS: TestCurrentStateDeclaredEvidenceDiscriminator/wrong_type (0.00s)
+    --- PASS: TestCurrentStateDeclaredEvidenceDiscriminator/uppercase (0.00s)
+    --- PASS: TestCurrentStateDeclaredEvidenceDiscriminator/both_cases (0.00s)
+=== RUN   TestDispositionTraitsCompatibility
+--- PASS: TestDispositionTraitsCompatibility (0.00s)
+=== RUN   TestNativeResultNullableStatus
+--- PASS: TestNativeResultNullableStatus (0.00s)
+=== RUN   TestNativeReferenceNullableDocument
+--- PASS: TestNativeReferenceNullableDocument (0.00s)
+=== RUN   TestTemplateLifecyclePresence
+--- PASS: TestTemplateLifecyclePresence (0.00s)
+=== RUN   TestTransitionNullableArtifactContract
+--- PASS: TestTransitionNullableArtifactContract (0.00s)
+PASS
+ok  	github.com/vectorize-io/hindsight/hindsight-clients/go	1.562s
+testing: warning: no tests to run
+PASS
+ok  	github.com/vectorize-io/hindsight/hindsight-clients/go/test	0.268s [no tests to run]

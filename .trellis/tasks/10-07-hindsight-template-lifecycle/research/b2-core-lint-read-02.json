@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "pnpm",
+    "exec",
+    "eslint",
+    "packages/core/src/memory/hindsight/template-lifecycle/template-execution-service.ts"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "inputManifest": "b2-core-read-check-input-03.json",
+  "startedAt": "2026-10-08T13:06:25.1057463Z",
+  "finishedAt": "2026-10-08T13:06:28.2624473Z",
+  "files": 1,
+  "exit": 0
+}

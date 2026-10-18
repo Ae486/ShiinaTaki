@@ -1,0 +1,117 @@
+{
+  "head": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a",
+  "sharedIndexEffectiveLines": 597,
+  "sharedIndexLimit": 625,
+  "files": [
+    {
+      "path": "packages/shared/src/hindsight-backup-schema.ts",
+      "sha256": "e5b3c457c1109773cf020e671a08290d8c2178b254dabbae28290669298e7db9",
+      "bytes": 9817
+    },
+    {
+      "path": "packages/shared/src/hindsight-backup-v1-schema.ts",
+      "sha256": "b02e2f52d815db7cae21cac7348751afba969c070cc47f7a77dbeffa05cacfde",
+      "bytes": 10788
+    },
+    {
+      "path": "packages/shared/src/hindsight-backup-v2-schema.ts",
+      "sha256": "533bfd8c38e9ea010736bc08a73db198f97a57a3a15891c741339fff58be6fc1",
+      "bytes": 8874
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-backup-schema.ts",
+      "sha256": "dcec35b94c796eced78669fe8e054f8a94ac730d89b12289b4d39b12ca59ac6b",
+      "bytes": 3518
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-backup-attestation-schema.ts",
+      "sha256": "a61557e17223987b62911c6475fc9f55796e3c0825de97638fb2fe9638cdd377",
+      "bytes": 2729
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-backup-encoding.ts",
+      "sha256": "7de6f70feb5d072119bdcfe82547015c3128b44b9d11b7f109066b3d0114d8f4",
+      "bytes": 5110
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-backup-schema.test.ts",
+      "sha256": "2bb0c82bc6c2d797129facfdb798de87a1a04c1f749544143ebc61ef7660e2c2",
+      "bytes": 12535
+    },
+    {
+      "path": "packages/shared/src/hindsight-connection-schema.ts",
+      "sha256": "fa36e0afa3c9754f104b29e56d2f5150385f792582bbd6032217e94c3325f43f",
+      "bytes": 8136
+    },
+    {
+      "path": "packages/shared/src/index.ts",
+      "sha256": "d70db090bb756b243f9d7a2b48e6fe1cfb420d22335baaaafea2dcf8041c9877",
+      "bytes": 60261
+    },
+    {
+      "path": "packages/shared/src/index.md",
+      "sha256": "ddfd212d9f0ca0cd826db1535491e32c17bab49699427c37418dd19521a88c3d",
+      "bytes": 16391
+    },
+    {
+      "path": "packages/shared/src/fixtures/index.md",
+      "sha256": "083a5275f3014b09cd015a219227b4fb2b95213d04256c5af5eb715cce52d413",
+      "bytes": 393
+    },
+    {
+      "path": "packages/shared/src/fixtures/hindsight-template-backup-v2.json",
+      "sha256": "acc74518e6f7ff7da0de00842c0f5d642a38a0daab7bf195670b96c560694e43",
+      "bytes": 120035
+    },
+    {
+      "path": "packages/shared/src/hindsight-backup-schema.test.ts",
+      "sha256": "06e7f42191c99bfeebc4906d57c1d8f0a6890aed227aa13a637668ccd9d42677",
+      "bytes": 14268
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-schema.test.ts",
+      "sha256": "3b6f0c23dafd98a1bfeac1ff1c1372b43078fd169eddf6d1e76aeb076dfc94f2",
+      "bytes": 4661
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-validation.test.ts",
+      "sha256": "a631da133df5bcf6f3f0169b2a65f56847b63c71609caf98914480e9b5563958",
+      "bytes": 1630
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-schema.ts",
+      "sha256": "832815a91a0c48f8df50007f0b89d79b2ecfc3d4dea28bf905f34e6ff9707611",
+      "bytes": 8616
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-definition-schema.ts",
+      "sha256": "195a89420535a80fa9ac405c590cda224fd5ca4f5bc3629b4901a4e252473e5a",
+      "bytes": 10917
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-encoding.ts",
+      "sha256": "f33d349c4d60e1be103274f5a69fdd745fe614d4653d001813de634072a6d2df",
+      "bytes": 3203
+    },
+    {
+      "path": "packages/shared/src/hindsight-current-state-encoding.ts",
+      "sha256": "6462733bdb757c5e9c86b0fe121292bfc6755f33e83dbaf37d13288844e491b5",
+      "bytes": 2117
+    },
+    {
+      "path": "eslint.config.js",
+      "sha256": "ab81a826df00f2691e74242ada2043663da1eda23ed9d6cc69afb2cb79a7c3da",
+      "bytes": 3865
+    },
+    {
+      "path": "CLAUDE.md",
+      "sha256": "1f24dc603bba70220f69fb294bf77f358b52cb5d16fdbe1bc5853613ea9832be",
+      "bytes": 11228
+    },
+    {
+      "path": ".trellis/spec/backend/quality-guidelines.md",
+      "sha256": "79240c31ae2db03707ef98853c770cc9edc5748e1320a4ce1eabe711a7fa374d",
+      "bytes": 15772
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "checkedAtUtc": "2026-10-07T14:16:29.7396252Z",
+  "entries": 809,
+  "changedKeys": [],
+  "repeatMismatch": [],
+  "diskMismatch": [],
+  "rustArtifact": "H:\\hindsight\\hindsight-clients\\rust\\target\\release\\build\\hindsight-client-bdb67ae8d29b8761\\out\\hindsight_client_generated.rs",
+  "jarSha256": "615e014705af34861e789e0b2a11075d3c80db134f881e937265479a4a83996e",
+  "nativeEnvSha256": "af87d3985ad0afbebe4a0a9ca77ec485a67ac64795644fa6683c025ba1ef2c17",
+  "embedEnvSha256": "af87d3985ad0afbebe4a0a9ca77ec485a67ac64795644fa6683c025ba1ef2c17"
+}

@@ -1,0 +1,15 @@
+
+--- stderr ---
+(node:28220) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node.EXE --trace-warnings ...` to show where the warning was created)
+H:\TakiAgent\packages\core\src\memory\transitions\transition-template-auxiliary.ts:8
+  isHindsightTemplateConfigValue, parseHindsightApplicationJson, hindsightTemplateBackupReceiptsValue,
+  ^
+SyntaxError: The requested module '@taki/shared' does not provide an export named 'isHindsightTemplateConfigValue'
+    at #asyncInstantiate (node:internal/modules/esm/module_job:327:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async ModuleJob.run (node:internal/modules/esm/module_job:431:5)
+    at async node:internal/modules/esm/loader:643:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.18.0

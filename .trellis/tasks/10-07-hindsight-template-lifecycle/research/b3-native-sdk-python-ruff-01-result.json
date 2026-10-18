@@ -1,0 +1,21 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/ruff.exe",
+    "check",
+    "--config",
+    "hindsight-api-slim/pyproject.toml",
+    "hindsight-clients/python/tests/test_template_backup.py",
+    "hindsight-api-slim/tests/test_taki_template_backup_contract.py",
+    "H:/TakiAgent/.trellis/tasks/10-07-hindsight-template-lifecycle/research/run-b3-native-check.py",
+    "H:/TakiAgent/.trellis/tasks/10-07-hindsight-template-lifecycle/research/pin-b3-generated.py",
+    "H:/TakiAgent/.trellis/tasks/10-07-hindsight-template-lifecycle/research/run-b3-native-clients.py"
+  ],
+  "cwd": "H:/hindsight",
+  "exitCode": 0,
+  "durationSeconds": 0.23,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-sdk-python-ruff-01.log",
+  "sources": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-sdk-python-ruff-01-sources.json",
+  "changedInputs": [],
+  "ownedTemp": "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\sdk-python-ruff-01-vep570b0",
+  "ownedTempRemoved": true
+}

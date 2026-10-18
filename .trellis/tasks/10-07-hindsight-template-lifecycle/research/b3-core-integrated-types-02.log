@@ -1,0 +1,6 @@
+
+> @taki/core@0.0.0 typecheck H:\TakiAgent\packages\core
+> tsc --noEmit
+
+src/testing/hindsight-template-backup-joint-fixture.ts(42,23): error TS4058: Return type of exported function has or is using name 'TemplateFixtureState' from external module "H:/TakiAgent/packages/core/src/memory/hindsight/template-lifecycle/template-lifecycle-fixtures" but cannot be named.
+ ELIFECYCLE  Command failed with exit code 2.

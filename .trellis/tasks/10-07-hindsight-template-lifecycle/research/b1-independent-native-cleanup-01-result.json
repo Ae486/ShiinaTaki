@@ -1,0 +1,14 @@
+{
+  "command": [
+    "powershell.exe",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    ".trellis/tasks/10-07-hindsight-template-lifecycle/research/check-b1-independent-native-cleanup.ps1"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 1,
+  "durationSeconds": 1.753,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b1-independent-native-cleanup-01.log"
+}

@@ -1,0 +1,5 @@
+{
+  "command": "pnpm exec eslint <b2-core-lint-paths.json>",
+  "files": 83,
+  "exit": 1
+}

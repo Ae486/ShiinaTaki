@@ -1,0 +1,36 @@
+{
+  "fixtureRoot": "C:\\taki-c1a-fixture-609ad25fef7f46b6a9c30b4b510b43f8",
+  "manifestFileCount": 794,
+  "build": "taki-hindsight-host-c1-v1",
+  "manifestSha256": "41c76dd260a7cbb2b36318649e0ad0c24a6cb38540b0c1ae34bc95517d428cf1",
+  "registrationSha256": "9d067a861672084ffc7586bc478c53e4c19da83229ed4d089699f2e4aa339c26",
+  "runtime": {
+    "path": "C:\\taki-c1a-fixture-609ad25fef7f46b6a9c30b4b510b43f8\\node.exe",
+    "sha256": "9a4eb5f1c29c6a2e93852ead46b999e284a6a5ca8bab4d4e241d587d025a52de",
+    "version": "v24.18.0"
+  },
+  "fakeAdapter": {
+    "path": "C:\\taki-c1a-fixture-609ad25fef7f46b6a9c30b4b510b43f8\\payload-final\\bin\\taki-secret-key.exe",
+    "sha256": "9880ec07ab4c4800920e922352db702459422893bd9d443cae88cdb3c1e34ac0"
+  },
+  "dependencyVersions": {
+    "libsodium": "0.8.4",
+    "libsodium-wrappers": "0.8.4",
+    "json-rpc-2.0": "1.7.1",
+    "ws": "8.21.0",
+    "zod": "4.4.3"
+  },
+  "catalogUnchanged": true,
+  "preloadFileAbsent": true,
+  "desktopStage": "H:\\TakiAgent\\apps\\desktop\\src-tauri\\target\\hindsight-resources-LdMCA6",
+  "desktopMapped": "H:\\TakiAgent\\apps\\desktop\\src-tauri\\target\\debug\\hindsight-host\\payload",
+  "mappedFilesMatch": true,
+  "stageFileCount": 795,
+  "mappedFileCount": 795,
+  "stageManifestSha256": "5753c88766202b58eda3e3050261af58124bebe21739a918f464fde7099a02f1",
+  "mappedManifestSha256": "5753c88766202b58eda3e3050261af58124bebe21739a918f464fde7099a02f1",
+  "fixtureProcesses": [],
+  "coreBootPid": 33200,
+  "coreBootProcesses": [],
+  "linuxDistributionBuiltOnly": true
+}

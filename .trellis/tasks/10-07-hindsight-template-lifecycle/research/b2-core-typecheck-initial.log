@@ -1,0 +1,15 @@
+
+> @taki/core@0.0.0 typecheck H:\TakiAgent\packages\core
+> tsc --noEmit
+
+src/memory/hindsight/template-lifecycle/template-plan-guard.ts(30,76): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string | undefined'.
+  Type 'null' is not assignable to type 'string | undefined'.
+src/memory/hindsight/template-lifecycle/template-plan-store.ts(25,74): error TS2339: Property 'planId' does not exist on type '{ kind: "local"; runId: string; previewId: string | null; snapshotId: string | null; activationTransactionId: string | null; progress: { phase: "ready" | "completed" | "binding" | ... 6 more ... | "activating"; sourceCount: number | null; resolvedCount: number | null; blockingCount: number | null; }; } | ... 7 more ...'.
+  Property 'planId' does not exist on type '{ kind: "local"; runId: string; previewId: string | null; snapshotId: string | null; activationTransactionId: string | null; progress: { phase: "ready" | "completed" | "binding" | "snapshot" | ... 5 more ... | "activating"; sourceCount: number | null; resolvedCount: number | null; blockingCount: number | null; }; }'.
+src/memory/hindsight/template-lifecycle/template-status.ts(29,109): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string | undefined'.
+  Type 'null' is not assignable to type 'string | undefined'.
+src/memory/operations/memory-operation-template-guard.ts(15,39): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/core@0.0.0 typecheck: `tsc --noEmit`
+Exit status 2

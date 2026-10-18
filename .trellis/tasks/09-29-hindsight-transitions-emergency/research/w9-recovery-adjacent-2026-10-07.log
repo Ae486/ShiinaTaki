@@ -1,0 +1,13 @@
+
+> @taki/core@0.0.0 test H:\TakiAgent\packages\core
+> vitest run "--maxWorkers=2" "src/db/memory-transition-publication.test.ts" "src/db/memory-transition-publication-order.test.ts" "src/db/memory-transition-emergency-publication.test.ts" "src/memory/transitions/transition-evidence-context.test.ts" "src/memory/transitions/transition-healthy-publication-lease.test.ts" "src/memory/transitions/transition-healthy-boundaries.test.ts" "src/memory/transitions/transition-healthy-terminal-boundary.test.ts" "src/memory/transitions/transition-healthy-reconstruction.test.ts" "src/memory/transitions/transition-emergency-lease.test.ts" "src/memory/transitions/transition-emergency-recovery.test.ts" "src/memory/transitions/transition-runtime-recovery.test.ts"
+
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+
+ Test Files  11 passed (11)
+      Tests  67 passed (67)
+   Start at  18:22:10
+   Duration  89.84s (transform 13.22s, setup 0ms, import 30.74s, tests 143.32s, environment 2ms)
+

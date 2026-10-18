@@ -1,0 +1,571 @@
+{
+  "stage": "G:\\TakiAgent-c2a-database\\persistence-13f04d85-ee84-408e-890c-88922e36c69e",
+  "files": [
+    {
+      "file": ".c2a-docker-owner",
+      "bytes": 36,
+      "sha256": "bdb61657ee46e79598c8b31d8762e571c4aeb65f81dae3a161e1be2d12023f16",
+      "archiveLocations": []
+    },
+    {
+      "file": "adapter-build.json",
+      "bytes": 1371,
+      "sha256": "e0e42054e954f33a7c187c589f9a6c930143f9dd930a010dd2426e81125a8c57",
+      "archiveLocations": []
+    },
+    {
+      "file": "base-probe.json",
+      "bytes": 316,
+      "sha256": "819eca37907fa96577bcafca977d41304c16e1a14a782205b8170f874d944d5a",
+      "archiveLocations": [
+        "c2a-database-persistence-run-1b05d2f6\\base-probe.json",
+        "diag-docker-database-run-069242fc\\base-probe.json",
+        "c2a-database-persistence-first-attempt-evidence.zip::base-probe.json",
+        "c2a-docker-first-attempt-evidence.zip::base-probe.json",
+        "c2a-docker-second-attempt-evidence.zip::base-probe.json",
+        "c2a-recovery-first-attempt-evidence.zip::base-probe.json",
+        "c2a-recovery-second-attempt-evidence.zip::base-probe.json"
+      ]
+    },
+    {
+      "file": "baseline.json",
+      "bytes": 104,
+      "sha256": "2c43296728925d9b6c61fa704991b76663aff87019e625fa6b8440b6393aa9a8",
+      "archiveLocations": []
+    },
+    {
+      "file": "build-command.json",
+      "bytes": 3555,
+      "sha256": "2a7b68cdc86131a935daefbd313ce341108831ee56542cc023b36be1f1a0b271",
+      "archiveLocations": []
+    },
+    {
+      "file": "build-config/buildx/.buildNodeID",
+      "bytes": 16,
+      "sha256": "c20560d975f1e5ef963f0bef095004e42a0b86d7bf41ddce97d0245dda54c08a",
+      "archiveLocations": []
+    },
+    {
+      "file": "build-config/buildx/.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archiveLocations": [
+        "c2a-database-persistence-run-1b05d2f6\\build.stdout.log",
+        "c2a-database-persistence-run-1b05d2f6\\launcher.stderr.log",
+        "diag-docker-database-run-069242fc\\build.stdout.log",
+        "diag-docker-database-run-069242fc\\launcher.stderr.log",
+        "c2a-database-persistence-run-1b05d2f6\\build-config\\buildx\\.lock",
+        "diag-docker-database-run-069242fc\\build-config\\buildx\\.lock",
+        "c2a-database-persistence-first-attempt-evidence.zip::build-config/buildx/.lock",
+        "c2a-docker-builder-evidence.zip::builder-config/buildx/.lock",
+        "c2a-docker-first-attempt-evidence.zip::build-config/buildx/.lock",
+        "c2a-docker-second-attempt-evidence.zip::build-config/buildx/.lock",
+        "c2a-recovery-first-attempt-evidence.zip::build-config/buildx/.lock",
+        "c2a-recovery-second-attempt-evidence.zip::build-config/buildx/.lock"
+      ]
+    },
+    {
+      "file": "build-config/buildx/activity/default",
+      "bytes": 20,
+      "sha256": "118107037cca1db6f410011b77de76576bf7bba2031eb36b97b23bf1cb4103b9",
+      "archiveLocations": []
+    },
+    {
+      "file": "build-config/buildx/current",
+      "bytes": 76,
+      "sha256": "ad4436223bfadf60e9921a9be166da1d9c454921db007f16b8f21e5553cde791",
+      "archiveLocations": [
+        "c2a-database-persistence-run-1b05d2f6\\build-config\\buildx\\current",
+        "diag-docker-database-run-069242fc\\build-config\\buildx\\current",
+        "c2a-database-persistence-first-attempt-evidence.zip::build-config/buildx/current",
+        "c2a-docker-builder-evidence.zip::builder-config/buildx/current",
+        "c2a-docker-first-attempt-evidence.zip::build-config/buildx/current",
+        "c2a-docker-second-attempt-evidence.zip::build-config/buildx/current",
+        "c2a-recovery-first-attempt-evidence.zip::build-config/buildx/current",
+        "c2a-recovery-second-attempt-evidence.zip::build-config/buildx/current"
+      ]
+    },
+    {
+      "file": "build-config/buildx/refs/default/default/enj5zv97c6elqdfc8i4h3ztkz",
+      "bytes": 266,
+      "sha256": "690aab76d8e9f4a4a97cc35809172c04d5f3f6e7a9da9509c8e96170ddaf5ac8",
+      "archiveLocations": []
+    },
+    {
+      "file": "build-config/config.json",
+      "bytes": 81,
+      "sha256": "c61bdfa290e9f2f08d80543aae256794d0e8bf61333cf7a3479b3ef52add6b1d",
+      "archiveLocations": [
+        "c2a-database-persistence-first-attempt-evidence.zip::build-config/config.json",
+        "c2a-docker-builder-evidence.zip::builder-config/config.json"
+      ]
+    },
+    {
+      "file": "build.started",
+      "bytes": 24,
+      "sha256": "c8a8942e98635f1e088c7b90b22fe4c319abb33ae03590154c823b41b8b4f0c6",
+      "archiveLocations": []
+    },
+    {
+      "file": "built-image.json",
+      "bytes": 379,
+      "sha256": "b882e1ef5a1df055c682529ad0add7e8c7fe696f913e471120cd5576781afa69",
+      "archiveLocations": []
+    },
+    {
+      "file": "command-runner.mjs",
+      "bytes": 3022,
+      "sha256": "478f7b51f300bb1df7165407141e1f21328d36a7189a44ee180680a80aa1f812",
+      "archiveLocations": []
+    },
+    {
+      "file": "commands.jsonl",
+      "bytes": 94038,
+      "sha256": "f9689b13644554adc0393ff162967308befd1e00ace2cf4503ecddfc5dba1cc4",
+      "archiveLocations": []
+    },
+    {
+      "file": "context/docker/standalone/Dockerfile.c2a-fake",
+      "bytes": 555,
+      "sha256": "2be1279ef4621f5d42397879fab2e436d780224eb3c02d591180faf9e9a9fcff",
+      "archiveLocations": [
+        "c2a-database-persistence-run-1b05d2f6\\context\\docker\\standalone\\Dockerfile.c2a-fake",
+        "diag-docker-database-run-069242fc\\context\\docker\\standalone\\Dockerfile.c2a-fake",
+        "c2a-database-persistence-first-attempt-evidence.zip::context/docker/standalone/Dockerfile.c2a-fake",
+        "c2a-docker-first-attempt-evidence.zip::context/docker/standalone/Dockerfile.c2a-fake",
+        "c2a-docker-second-attempt-evidence.zip::context/docker/standalone/Dockerfile.c2a-fake",
+        "c2a-recovery-first-attempt-evidence.zip::context/docker/standalone/Dockerfile.c2a-fake",
+        "c2a-recovery-first-attempt-evidence.zip::frozen-inputs/Dockerfile.c2a-fake",
+        "c2a-recovery-second-attempt-evidence.zip::context/docker/standalone/Dockerfile.c2a-fake"
+      ]
+    },
+    {
+      "file": "context/docker/standalone/managed_bootstrap/__init__.py",
+      "bytes": 80,
+      "sha256": "cbf487cffc9c62b5c6fe61f32d80070b5843f70f966c5fca163c675e21ddbf1d",
+      "archiveLocations": [
+        "c2a-database-persistence-run-1b05d2f6\\context\\docker\\standalone\\managed_bootstrap\\__init__.py",
+        "diag-docker-database-run-069242fc\\context\\docker\\standalone\\managed_bootstrap\\__init__.py",
+        "c2a-database-persistence-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/__init__.py",
+        "c2a-docker-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/__init__.py",
+        "c2a-docker-second-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/__init__.py",
+        "c2a-recovery-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/__init__.py",
+        "c2a-recovery-first-attempt-evidence.zip::frozen-inputs/__init__.py",
+        "c2a-recovery-second-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/__init__.py"
+      ]
+    },
+    {
+      "file": "context/docker/standalone/managed_bootstrap/bootstrap.py",
+      "bytes": 6323,
+      "sha256": "b8331bd8c9645d265578ed65f9f77402f170813f20d1d2683b5aa0a7d0768101",
+      "archiveLocations": [
+        "c2a-database-persistence-run-1b05d2f6\\context\\docker\\standalone\\managed_bootstrap\\bootstrap.py",
+        "diag-docker-database-run-069242fc\\context\\docker\\standalone\\managed_bootstrap\\bootstrap.py",
+        "c2a-database-persistence-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/bootstrap.py",
+        "c2a-docker-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/bootstrap.py",
+        "c2a-docker-second-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/bootstrap.py",
+        "c2a-recovery-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/bootstrap.py",
+        "c2a-recovery-first-attempt-evidence.zip::frozen-inputs/bootstrap.py",
+        "c2a-recovery-second-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/bootstrap.py"
+      ]
+    },
+    {
+      "file": "context/docker/standalone/managed_bootstrap/control.py",
+      "bytes": 5593,
+      "sha256": "c75dcdf2285df614c4836dab4898a2980a2a1e8e4572862861596ab244f39d5e",
+      "archiveLocations": [
+        "c2a-database-persistence-run-1b05d2f6\\context\\docker\\standalone\\managed_bootstrap\\control.py",
+        "diag-docker-database-run-069242fc\\context\\docker\\standalone\\managed_bootstrap\\control.py",
+        "c2a-database-persistence-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/control.py",
+        "c2a-docker-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/control.py",
+        "c2a-docker-second-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/control.py",
+        "c2a-recovery-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/control.py",
+        "c2a-recovery-first-attempt-evidence.zip::frozen-inputs/control.py",
+        "c2a-recovery-second-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/control.py"
+      ]
+    },
+    {
+      "file": "context/docker/standalone/managed_bootstrap/fake_child.py",
+      "bytes": 44233,
+      "sha256": "427bc9e824e4a1dacadf29acca4d0e57faed1800a41972eb4c7797fc5b974800",
+      "archiveLocations": []
+    },
+    {
+      "file": "context/docker/standalone/managed_bootstrap/fake_consumer.py",
+      "bytes": 4302,
+      "sha256": "52b3d0664b06ef82dca4765d2c08e820c16c2af5e2814a02f98fe08f8e220eb3",
+      "archiveLocations": [
+        "c2a-database-persistence-run-1b05d2f6\\context\\docker\\standalone\\managed_bootstrap\\fake_consumer.py",
+        "diag-docker-database-run-069242fc\\context\\docker\\standalone\\managed_bootstrap\\fake_consumer.py",
+        "c2a-database-persistence-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/fake_consumer.py",
+        "c2a-docker-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/fake_consumer.py",
+        "c2a-docker-second-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/fake_consumer.py",
+        "c2a-recovery-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/fake_consumer.py",
+        "c2a-recovery-first-attempt-evidence.zip::frozen-inputs/fake_consumer.py",
+        "c2a-recovery-second-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/fake_consumer.py"
+      ]
+    },
+    {
+      "file": "context/docker/standalone/managed_bootstrap/owner.py",
+      "bytes": 2460,
+      "sha256": "5b10f9f09def8ff985c96fed56c31f4ec4976f684d7e3b044fdc8a66afb38acc",
+      "archiveLocations": [
+        "c2a-database-persistence-run-1b05d2f6\\context\\docker\\standalone\\managed_bootstrap\\owner.py",
+        "diag-docker-database-run-069242fc\\context\\docker\\standalone\\managed_bootstrap\\owner.py",
+        "c2a-database-persistence-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/owner.py",
+        "c2a-docker-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/owner.py",
+        "c2a-docker-second-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/owner.py",
+        "c2a-recovery-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/owner.py",
+        "c2a-recovery-first-attempt-evidence.zip::frozen-inputs/owner.py",
+        "c2a-recovery-second-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/owner.py"
+      ]
+    },
+    {
+      "file": "context/docker/standalone/managed_bootstrap/owner_protocol.py",
+      "bytes": 3199,
+      "sha256": "cd9cdbea572354dbbc1200098d9edfe9280679c2b346a67c1326a795b01c1804",
+      "archiveLocations": [
+        "c2a-database-persistence-run-1b05d2f6\\context\\docker\\standalone\\managed_bootstrap\\owner_protocol.py",
+        "diag-docker-database-run-069242fc\\context\\docker\\standalone\\managed_bootstrap\\owner_protocol.py",
+        "c2a-database-persistence-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/owner_protocol.py",
+        "c2a-docker-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/owner_protocol.py",
+        "c2a-docker-second-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/owner_protocol.py",
+        "c2a-recovery-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/owner_protocol.py",
+        "c2a-recovery-first-attempt-evidence.zip::frozen-inputs/owner_protocol.py",
+        "c2a-recovery-second-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/owner_protocol.py"
+      ]
+    },
+    {
+      "file": "context/docker/standalone/managed_bootstrap/protocol.py",
+      "bytes": 13320,
+      "sha256": "074247650a31cfc47a1931ef6c7b258aa6f1d3a649bbb792ff2878257f6f8b88",
+      "archiveLocations": [
+        "c2a-database-persistence-run-1b05d2f6\\context\\docker\\standalone\\managed_bootstrap\\protocol.py",
+        "diag-docker-database-run-069242fc\\context\\docker\\standalone\\managed_bootstrap\\protocol.py",
+        "c2a-database-persistence-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/protocol.py",
+        "c2a-docker-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/protocol.py",
+        "c2a-docker-second-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/protocol.py",
+        "c2a-recovery-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/protocol.py",
+        "c2a-recovery-first-attempt-evidence.zip::frozen-inputs/protocol.py",
+        "c2a-recovery-second-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/protocol.py"
+      ]
+    },
+    {
+      "file": "context/docker/standalone/managed_bootstrap/submitter.py",
+      "bytes": 4913,
+      "sha256": "5a6ad60266066d1cff2559d46c6b2b15d4a93cf882de1e487790ad0fb6863c4a",
+      "archiveLocations": [
+        "c2a-database-persistence-run-1b05d2f6\\context\\docker\\standalone\\managed_bootstrap\\submitter.py",
+        "diag-docker-database-run-069242fc\\context\\docker\\standalone\\managed_bootstrap\\submitter.py",
+        "c2a-database-persistence-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/submitter.py",
+        "c2a-docker-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/submitter.py",
+        "c2a-docker-second-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/submitter.py",
+        "c2a-recovery-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/submitter.py",
+        "c2a-recovery-first-attempt-evidence.zip::frozen-inputs/submitter.py",
+        "c2a-recovery-second-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/submitter.py"
+      ]
+    },
+    {
+      "file": "context/docker/standalone/managed_bootstrap/supervision.py",
+      "bytes": 4552,
+      "sha256": "ff768434e0cef9eb2b6996351ba31e1dedede95211809d2ab8e8d09b5d9a5064",
+      "archiveLocations": [
+        "c2a-database-persistence-run-1b05d2f6\\context\\docker\\standalone\\managed_bootstrap\\supervision.py",
+        "diag-docker-database-run-069242fc\\context\\docker\\standalone\\managed_bootstrap\\supervision.py",
+        "c2a-database-persistence-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/supervision.py",
+        "c2a-docker-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/supervision.py",
+        "c2a-docker-second-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/supervision.py",
+        "c2a-recovery-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/supervision.py",
+        "c2a-recovery-first-attempt-evidence.zip::frozen-inputs/supervision.py",
+        "c2a-recovery-second-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/supervision.py"
+      ]
+    },
+    {
+      "file": "context/docker/standalone/managed_bootstrap/unix_socket.py",
+      "bytes": 9434,
+      "sha256": "08b6e604211d19e31ad61782c96b91a004277b37c31d6e9a0bdfdda681cd7725",
+      "archiveLocations": [
+        "c2a-database-persistence-run-1b05d2f6\\context\\docker\\standalone\\managed_bootstrap\\unix_socket.py",
+        "diag-docker-database-run-069242fc\\context\\docker\\standalone\\managed_bootstrap\\unix_socket.py",
+        "c2a-database-persistence-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/unix_socket.py",
+        "c2a-docker-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/unix_socket.py",
+        "c2a-docker-second-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/unix_socket.py",
+        "c2a-recovery-first-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/unix_socket.py",
+        "c2a-recovery-first-attempt-evidence.zip::frozen-inputs/unix_socket.py",
+        "c2a-recovery-second-attempt-evidence.zip::context/docker/standalone/managed_bootstrap/unix_socket.py"
+      ]
+    },
+    {
+      "file": "failure-stop.json",
+      "bytes": 58258,
+      "sha256": "3cc8fded9aa77058602e4e072063cf82cd45d1eaf18fcc4d61173590d6275a5c",
+      "archiveLocations": []
+    },
+    {
+      "file": "fake-key-adapter.exe",
+      "bytes": 155648,
+      "sha256": "922f70f128e074b8043b959c6dd047e4eab7c6f6a337eeb16f2d102cebf74fe3",
+      "archiveLocations": []
+    },
+    {
+      "file": "fake-key-adapter.pdb",
+      "bytes": 1314816,
+      "sha256": "0f8e8966554784487ca3c8431612b8122fb8e50896c7016fd4c3bbb1e2bbed7b",
+      "archiveLocations": []
+    },
+    {
+      "file": "final-stop.json",
+      "bytes": 58258,
+      "sha256": "3cc8fded9aa77058602e4e072063cf82cd45d1eaf18fcc4d61173590d6275a5c",
+      "archiveLocations": []
+    },
+    {
+      "file": "first-stop.json",
+      "bytes": 59299,
+      "sha256": "38ec2dcc0071385d36a9c8aefaf8cfc177a261e29093cb54a4e3926735bbcaf3",
+      "archiveLocations": [
+        "diag-docker-database-run-069242fc\\comparison-inputs\\prior-13f04d85-first-stop.json"
+      ]
+    },
+    {
+      "file": "image-id.txt",
+      "bytes": 71,
+      "sha256": "282b9bd9296229d7008a19479dd417b5aac48fe3aaf02bfbbd1aa14b67c4288f",
+      "archiveLocations": []
+    },
+    {
+      "file": "launch-persistence.mjs",
+      "bytes": 1039,
+      "sha256": "d455bf466b308dccbf5be3f81d2c5d6f2aecaeedd6a27b1b1eb912ed2d7a2c8c",
+      "archiveLocations": []
+    },
+    {
+      "file": "launcher-command.json",
+      "bytes": 762,
+      "sha256": "99a202ae5851b6fc8063868e7dd1ab360ee71cee3ccab73039914042e48551a9",
+      "archiveLocations": []
+    },
+    {
+      "file": "original-before-containers.json",
+      "bytes": 1546,
+      "sha256": "c4667b5486b3ab64f761f6393845248518f4178026d162173d4e4d269d8fc079",
+      "archiveLocations": [
+        "c2a-database-first-start-evidence.zip::original-after-containers.json",
+        "c2a-database-first-start-evidence.zip::original-before-containers.json",
+        "c2a-database-persistence-first-attempt-evidence.zip::original-before-containers.json",
+        "c2a-database-probe-evidence.zip::original-before-containers.json",
+        "c2a-recovery-first-attempt-evidence.zip::original-before-containers.json",
+        "c2a-recovery-second-attempt-evidence.zip::original-before-containers.json"
+      ]
+    },
+    {
+      "file": "persistence.json",
+      "bytes": 607940,
+      "sha256": "c186c99560ea0a7bf5f2961efebb74132c2e8ab3e1b7dfdce58517424f38f7f5",
+      "archiveLocations": []
+    },
+    {
+      "file": "persistence.started",
+      "bytes": 24,
+      "sha256": "40c8727035a97e70d437c5e048d6963e74e3798e971440830263683d7966a485",
+      "archiveLocations": []
+    },
+    {
+      "file": "prepare-persistence.mjs",
+      "bytes": 6068,
+      "sha256": "42e030f64a51ea27d456ccda3ee7673db7ec1ec633b88dd13baa187d9711943a",
+      "archiveLocations": [
+        "c2a-database-persistence-first-attempt-evidence.zip::prepare-persistence.mjs"
+      ]
+    },
+    {
+      "file": "prepared-inputs.json",
+      "bytes": 16362,
+      "sha256": "bcbd675c74a88c9cd778708675cb769524479c2838fb64b221c0b18775317119",
+      "archiveLocations": []
+    },
+    {
+      "file": "readback-persistence.mjs",
+      "bytes": 4218,
+      "sha256": "580099516b8a8bca3f976501eb233612f012cd347bcef662d1ce7f449e358d8b",
+      "archiveLocations": [
+        "c2a-database-persistence-first-attempt-evidence.zip::readback-persistence.mjs"
+      ]
+    },
+    {
+      "file": "recover-event-evidence.mjs",
+      "bytes": 6102,
+      "sha256": "3ee3840da4877e1972db3f0733f7655e5c3690c24340d77afeb7d8414facdf9d",
+      "archiveLocations": []
+    },
+    {
+      "file": "reused-base-probe.json",
+      "bytes": 518,
+      "sha256": "dd71d8cccb2ba9d6f64caae18384f4084609ab587030d7eb66e215ca83febb52",
+      "archiveLocations": []
+    },
+    {
+      "file": "reviewed-fixture/c2a-database-persistence-design-review.md",
+      "bytes": 4868,
+      "sha256": "bade2cab57318c88d19b5f66684f3a708fee2e3349f2c543874db3b2f1be628a",
+      "archiveLocations": [
+        "c2a-database-persistence-design-review.md",
+        "c2a-database-persistence-first-attempt-evidence.zip::reviewed-fixture/c2a-database-persistence-design-review.md"
+      ]
+    },
+    {
+      "file": "reviewed-fixture/c2a-database-persistence-first-attempt-diagnosis.md",
+      "bytes": 9567,
+      "sha256": "dff5c47fb35994e1758917b8fed93ab1b3b02111901ca56915d61f61cc0be076",
+      "archiveLocations": [
+        "c2a-database-persistence-first-attempt-diagnosis.md",
+        "c2a-database-persistence-first-attempt-evidence.zip::c2a-database-persistence-first-attempt-diagnosis.md"
+      ]
+    },
+    {
+      "file": "reviewed-fixture/c2a-database-persistence-plan.md",
+      "bytes": 26961,
+      "sha256": "186f60061a4ecd7ac26443f90c079225c3bc9efb782f27227b50763ff0088e4c",
+      "archiveLocations": [
+        "c2a-database-persistence-plan.md",
+        "c2a-database-persistence-first-attempt-evidence.zip::reviewed-fixture/c2a-database-persistence-plan.md"
+      ]
+    },
+    {
+      "file": "reviewed-fixture/c2a-database-persistence-r2-review.json",
+      "bytes": 16689,
+      "sha256": "8bbc575c2c78f3b47e7bfb4eb0efce81e3f9269436f5cd47fbb5c38348f80f2b",
+      "archiveLocations": [
+        "c2a-database-persistence-r2-review.json"
+      ]
+    },
+    {
+      "file": "reviewed-fixture/c2a-database-persistence-r2-review.md",
+      "bytes": 8246,
+      "sha256": "adb534e1b3796e10bb7fad3eec026be3ec1ece7a8960a377a8647175c0bd6a2c",
+      "archiveLocations": [
+        "c2a-database-persistence-r2-review.md"
+      ]
+    },
+    {
+      "file": "reviewed-fixture/c2a-database-persistence-r2-self-check.json",
+      "bytes": 11785,
+      "sha256": "33e734d05e75f3631a44b363f801a0c3e7f3a8091bc403ca8b88a17cba9b5f49",
+      "archiveLocations": []
+    },
+    {
+      "file": "reviewed-fixture/c2a-database-persistence-r2-self-check.md",
+      "bytes": 5150,
+      "sha256": "88f25c4e31ddf4eafaecca68ed7817753f2269de61d94458798b96118c733196",
+      "archiveLocations": []
+    },
+    {
+      "file": "reviewed-fixture/c2a-database-persistence-self-check.json",
+      "bytes": 25243,
+      "sha256": "13706e83e2c733114a66e1246df20752acb42adffdc3376bbaf702c81598c72d",
+      "archiveLocations": [
+        "c2a-database-persistence-self-check.json",
+        "c2a-database-persistence-first-attempt-evidence.zip::reviewed-fixture/c2a-database-persistence-self-check.json"
+      ]
+    },
+    {
+      "file": "reviewed-fixture/c2a-implementation-source-manifest.json",
+      "bytes": 108542,
+      "sha256": "f27379be3b4b5e61e1b2821c2eda2d87bf54e5c2983b034bdb637ee789961ae2",
+      "archiveLocations": [
+        "c2a-implementation-source-manifest.json",
+        "c2a-database-persistence-run-1b05d2f6\\frozen-inputs\\c2a-implementation-source-manifest.json",
+        "diag-docker-database-run-069242fc\\frozen-inputs\\c2a-implementation-source-manifest.json",
+        "c2a-database-persistence-first-attempt-evidence.zip::reviewed-fixture/c2a-implementation-source-manifest.json"
+      ]
+    },
+    {
+      "file": "reviewed-fixture/docker-database/database-read.py",
+      "bytes": 6084,
+      "sha256": "0ad82eb436c9c4389852c07ddb7c28eed6e9b5cd59740fb71c1ebb42db243419",
+      "archiveLocations": []
+    },
+    {
+      "file": "reviewed-fixture/docker-database/fake_child.py",
+      "bytes": 44233,
+      "sha256": "427bc9e824e4a1dacadf29acca4d0e57faed1800a41972eb4c7797fc5b974800",
+      "archiveLocations": []
+    },
+    {
+      "file": "reviewed-fixture/docker-database/README.md",
+      "bytes": 22962,
+      "sha256": "ffd27eba8edae875cdd8f8a84beea17e4dc1385e180c879fba7388816181419a",
+      "archiveLocations": [
+        "docker-database\\README.md",
+        "c2a-database-persistence-run-1b05d2f6\\frozen-inputs\\docker-database\\README.md",
+        "diag-docker-database-run-069242fc\\frozen-inputs\\docker-database\\README.md"
+      ]
+    },
+    {
+      "file": "reviewed-fixture/docker-database/run-persistence.ts",
+      "bytes": 55442,
+      "sha256": "951de1587a37a0dba96fbf76bf029943128c9e80fc7ea1aa5dfe888fff470d25",
+      "archiveLocations": []
+    },
+    {
+      "file": "root-event-recovery.json",
+      "bytes": 94113,
+      "sha256": "cc226df30e739ec3ee1f9514b8ce3815a1fa3290b06d8210545cbea03520a23e",
+      "archiveLocations": []
+    },
+    {
+      "file": "root-post-run-readback.json",
+      "bytes": 2672,
+      "sha256": "a754467a25ee3ba88fb1e0e3325db982b692fdcc1c0f8d7ac2f9561ccbccbf27",
+      "archiveLocations": []
+    },
+    {
+      "file": "root-preparation-check.json",
+      "bytes": 1342,
+      "sha256": "adaee7647e2bf340e00c427f7b8500b9d681ff4d2e59e7bca30b612a843b0c69",
+      "archiveLocations": []
+    },
+    {
+      "file": "runtime-prerequisites.json",
+      "bytes": 2387,
+      "sha256": "9942543cab12e2c7a9c7ea0d2e7cace217b7c958bd8c323d9bf0952559ea6bc9",
+      "archiveLocations": []
+    }
+  ],
+  "allArchived": false,
+  "missing": [
+    ".c2a-docker-owner",
+    "adapter-build.json",
+    "baseline.json",
+    "build-command.json",
+    "build-config/buildx/.buildNodeID",
+    "build-config/buildx/activity/default",
+    "build-config/buildx/refs/default/default/enj5zv97c6elqdfc8i4h3ztkz",
+    "build.started",
+    "built-image.json",
+    "command-runner.mjs",
+    "commands.jsonl",
+    "context/docker/standalone/managed_bootstrap/fake_child.py",
+    "failure-stop.json",
+    "fake-key-adapter.exe",
+    "fake-key-adapter.pdb",
+    "final-stop.json",
+    "image-id.txt",
+    "launch-persistence.mjs",
+    "launcher-command.json",
+    "persistence.json",
+    "persistence.started",
+    "prepared-inputs.json",
+    "recover-event-evidence.mjs",
+    "reused-base-probe.json",
+    "reviewed-fixture/c2a-database-persistence-r2-self-check.json",
+    "reviewed-fixture/c2a-database-persistence-r2-self-check.md",
+    "reviewed-fixture/docker-database/database-read.py",
+    "reviewed-fixture/docker-database/fake_child.py",
+    "reviewed-fixture/docker-database/run-persistence.ts",
+    "root-event-recovery.json",
+    "root-post-run-readback.json",
+    "root-preparation-check.json",
+    "runtime-prerequisites.json"
+  ]
+}

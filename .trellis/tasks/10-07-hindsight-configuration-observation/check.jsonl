@@ -1,0 +1,19 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend checklist, architectural invariants and quality gates."}
+{"file": ".trellis/spec/backend/server-push-and-connection-auth.md", "reason": "Actual operator-role enforcement and real-producer-only read/push behavior."}
+{"file": ".trellis/spec/backend/secret-catalog.md", "reason": "Existing secret ownership and no value exposure or new secret type."}
+{"file": ".trellis/spec/backend/memory-hindsight-lifecycle.md", "reason": "Existing Bank/connection identity and exclusion of model/template change from ordinary revalidation."}
+{"file": ".trellis/spec/backend/memory-operations.md", "reason": "Reuse current operator foundations; a bounded side-effect-free read needs no duplicate operation ledger."}
+{"file": ".trellis/spec/backend/memory-transition-healthy-drivers.md", "reason": "Preserve manifest/preview/capability admission and committed recovery under new optional build support."}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Fixed safe error projection, no raw provider/extension errors."}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Test real permission/producer/identity boundaries with owned fixtures."}
+{"file": ".trellis/spec/frontend/index.md", "reason": "Home/component pre-development and quality requirements."}
+{"file": ".trellis/spec/frontend/home-window.md", "reason": "Reuse Operations/Settings and their shared operator connection."}
+{"file": ".trellis/spec/frontend/operator-connection-recovery.md", "reason": "Connection generation, deadlines, disposal and reattachment."}
+{"file": ".trellis/spec/frontend/reactive-read-models.md", "reason": "Core-owned observational state; no invented push or browser-owned authority."}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Loading/denied/stale/partial states and controller/DOM checks."}
+{"file": ".trellis/spec/guides/index.md", "reason": "Source grounding, cross-layer and reuse guidance."}
+{"file": ".trellis/tasks/08-09-hindsight-memory-provider/prd.md", "reason": "Parent R9/R10 and preserved existing-instance/secret/deployment requirements."}
+{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/stage5-readiness-2026-10-07.md", "reason": "Current residual scope and C02/C11/C12/C16 evidence boundaries."}
+{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/stage5-configuration-contract-2026-10-07.md", "reason": "Verified Native tenant permissions and actual runtime producer; API-only coverage and new disclosure policy."}
+{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-independent-check.md", "reason": "Accepted Stage4 predecessor and exact regression/evidence scope."}
+{"file": ".trellis/tasks/10-07-hindsight-configuration-observation/research/review-plan.md", "reason": "Leader risk-based full-slice review dimensions and validation cadence approved through delegated scheduling."}

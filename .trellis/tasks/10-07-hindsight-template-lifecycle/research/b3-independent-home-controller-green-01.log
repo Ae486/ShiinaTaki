@@ -1,0 +1,40 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mH:/TakiAgent/apps/desktop[39m
+
+ [31m❯[39m src/windows/home/pages/operations/hindsight-template-controller.test.ts [2m([22m[2m0 test[22m[2m)[22m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Suites 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/windows/home/pages/operations/hindsight-template-controller.test.ts[2m [ src/windows/home/pages/operations/hindsight-template-controller.test.ts ][22m
+[31m[1mError[22m: Transform failed with 1 error:
+
+[31m[PARSE_ERROR] [0mExpected `,` or `}` but found `]`
+    [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m src/windows/home/pages/operations/hindsight-template-controller.test.ts:92:120 [38;5;246m][0m
+    [38;5;246m│[0m
+ [38;5;246m90 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249mm[0m[38;5;249mo[0m[38;5;249md[0m[38;5;249me[0m[38;5;249ml[0m[38;5;249ms[0m[38;5;249m:[0m[38;5;249m [0m[38;5;249m[[0m{[38;5;249m [0m[38;5;249mi[0m[38;5;249md[0m[38;5;249m:[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249mu[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249m-[0m[38;5;249mm[0m[38;5;249mo[0m[38;5;249md[0m[38;5;249me[0m[38;5;249ml[0m[38;5;249m"[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mc[0m[38;5;249mh[0m[38;5;249mo[0m[38;5;249mi[0m[38;5;249mc[0m[38;5;249me[0m[38;5;249m:[0m[38;5;249m [0m[38;5;249m{[0m[38;5;249m [0m[38;5;249mm[0m[38;5;249mo[0m[38;5;249md[0m[38;5;249me[0m[38;5;249m:[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249mv[0m[38;5;249ma[0m[38;5;249ml[0m[38;5;249mu[0m[38;5;249me[0m[38;5;249m"[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mv[0m[38;5;249ma[0m[38;5;249ml[0m[38;5;249mu[0m[38;5;249me[0m[38;5;249m:[0m[38;5;249m [0m[38;5;249m{[0m[38;5;249m [0m[38;5;249mi[0m[38;5;249md[0m[38;5;249m:[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249mu[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249m-[0m[38;5;249mm[0m[38;5;249mo[0m[38;5;249md[0m[38;5;249me[0m[38;5;249ml[0m[38;5;249m"[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mn[0m[38;5;249ma[0m[38;5;249mm[0m[38;5;249me[0m[38;5;249m:[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249mU[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249m"[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249ms[0m[38;5;249mo[0m[38;5;249mu[0m[38;5;249mr[0m[38;5;249mc[0m[38;5;249me[0m[38;5;249m_[0m[38;5;249mq[0m[38;5;249mu[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249my[0m[38;5;249m:[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249mU[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249m [0m[38;5;249mq[0m[38;5;249mu[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249my[0m[38;5;249m"[0m[38;5;249m,[0m
+ [38;5;240m   │[0m                ┬  
+ [38;5;240m   │[0m                ╰── Opened here
+ [38;5;240m   │[0m 
+ [38;5;246m92 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mc[0m[38;5;249ml[0m[38;5;249mu[0m[38;5;249md[0m[38;5;249me[0m[38;5;249m_[0m[38;5;249mc[0m[38;5;249mh[0m[38;5;249mu[0m[38;5;249mn[0m[38;5;249mk[0m[38;5;249ms[0m[38;5;249m:[0m[38;5;249m [0m[38;5;249mf[0m[38;5;249ma[0m[38;5;249ml[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mr[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249m_[0m[38;5;249ms[0m[38;5;249mc[0m[38;5;249mh[0m[38;5;249me[0m[38;5;249mm[0m[38;5;249ma[0m[38;5;249m:[0m[38;5;249m [0m[38;5;249m{[0m[38;5;249m [0m[38;5;249mt[0m[38;5;249my[0m[38;5;249mp[0m[38;5;249me[0m[38;5;249m:[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249mo[0m[38;5;249mb[0m[38;5;249mj[0m[38;5;249me[0m[38;5;249mc[0m[38;5;249mt[0m[38;5;249m"[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249mp[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mp[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249mi[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249m:[0m[38;5;249m [0m[38;5;249m{[0m[38;5;249m [0m[38;5;249ms[0m[38;5;249mu[0m[38;5;249mm[0m[38;5;249mm[0m[38;5;249ma[0m[38;5;249mr[0m[38;5;249my[0m[38;5;249m:[0m[38;5;249m [0m[38;5;249m{[0m[38;5;249m [0m[38;5;249mt[0m[38;5;249my[0m[38;5;249mp[0m[38;5;249me[0m[38;5;249m:[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249mr[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mg[0m[38;5;249m"[0m[38;5;249m [0m[38;5;249m}[0m[38;5;249m [0m[38;5;249m}[0m[38;5;249m [0m[38;5;249m}[0m[38;5;249m [0m[38;5;249m}[0m[38;5;249m [0m[38;5;249m}[0m[38;5;249m [0m[38;5;249m}[0m][38;5;249m,[0m
+ [38;5;240m   │[0m                                                                                                                        ┬  
+ [38;5;240m   │[0m                                                                                                                        ╰── `,` or `}` expected
+[38;5;246m────╯[0m
+[39m
+  Plugin: [35mvite:oxc[39m
+  File: [36mH:/TakiAgent/apps/desktop/src/windows/home/pages/operations/hindsight-template-controller.test.ts[39m
+[90m [2m❯[22m transformWithOxc ../../node_modules/.pnpm/vite@8.1.3_@types+node@24.13.3_jiti@2.7.0_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:[2m3661:19[22m[39m
+[90m [2m❯[22m TransformPluginContext.transform ../../node_modules/.pnpm/vite@8.1.3_@types+node@24.13.3_jiti@2.7.0_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:[2m3732:26[22m[39m
+[90m [2m❯[22m EnvironmentPluginContainer.transform ../../node_modules/.pnpm/vite@8.1.3_@types+node@24.13.3_jiti@2.7.0_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:[2m29745:51[22m[39m
+[90m [2m❯[22m loadAndTransform ../../node_modules/.pnpm/vite@8.1.3_@types+node@24.13.3_jiti@2.7.0_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:[2m19729:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [2mno tests[22m
+[2m   Start at [22m 21:26:13
+[2m   Duration [22m 390ms[2m (transform 0ms, setup 0ms, import 0ms, tests 0ms, environment 0ms)[22m
+
+undefined
+H:\TakiAgent\apps\desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/windows/home/pages/operations/hindsight-template-controller.test.ts --maxWorkers=2

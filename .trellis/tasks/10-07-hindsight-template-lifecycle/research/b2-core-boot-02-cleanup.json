@@ -1,0 +1,16 @@
+{
+  "checkedAtUtc": "2026-10-13T06:41:56.9775546+00:00",
+  "result": "b2-core-boot-02-result.json",
+  "resultSha256": "565c520f738c05ca63929d4638ddcb5dea38a3600f32169f2b9d2e251f6f86eb",
+  "pid": 31560,
+  "processStopped": true,
+  "port": 5432,
+  "portReleased": true,
+  "dataDir": "H:\\TakiAgent\\.trellis\\.runtime\\stage5b-core-boot\\owned-3Aj5h4",
+  "verifiedWithinOwnedParent": true,
+  "dataDirRemoved": true,
+  "migrationHead": 59.0,
+  "verified": true,
+  "prohibitedCalls": 0,
+  "originalResultUnchanged": true
+}

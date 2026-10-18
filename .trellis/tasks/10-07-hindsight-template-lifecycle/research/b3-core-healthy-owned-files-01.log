@@ -1,0 +1,34 @@
+{
+  "fileCount": 85,
+  "untrackedFileCount": 37,
+  "currentInputCount": 1592,
+  "sourceComparisons": {
+    "healthy-template-green-01": [
+      "packages/core/src/testing/hindsight-template-observation-fixtures.ts"
+    ],
+    "healthy-legacy-reuse-01": [
+      "packages/core/src/testing/hindsight-template-observation-fixtures.ts"
+    ],
+    "healthy-offline-w6-01": [
+      "packages/core/src/testing/hindsight-template-observation-fixtures.ts"
+    ],
+    "healthy-template-types-02": [],
+    "healthy-owned-lint-01": [],
+    "healthy-observer-final-01": []
+  },
+  "issues": [
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-template-backup-capability.ts",
+      "issue": "missing-index-entry"
+    },
+    {
+      "path": "packages/shared/src/hindsight-backup-v1-schema.ts",
+      "issue": "new-blank-line-at-eof"
+    },
+    {
+      "path": "packages/shared/src/memory-transition-template-schema.ts",
+      "issue": "missing-index-entry"
+    }
+  ],
+  "fileInventory": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-healthy-owned-files-01-files.json"
+}

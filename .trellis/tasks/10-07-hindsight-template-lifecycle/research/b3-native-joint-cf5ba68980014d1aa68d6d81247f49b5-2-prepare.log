@@ -1,0 +1,21 @@
+
+--- stderr ---
+(node:8952) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node.EXE --trace-warnings ...` to show where the warning was created)
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Core must record the terminal semantic result
+    at copiedRefresh (file:///H:/TakiAgent/.trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-joint-entry.mjs:112:12)
+    at prepare (file:///H:/TakiAgent/.trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-joint-entry.mjs:50:33)
+    at async file:///H:/TakiAgent/.trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-joint-entry.mjs:24:27 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v24.18.0

@@ -1,0 +1,14 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/python.exe",
+    "scripts/postprocess-go-client.py",
+    "--spec",
+    "hindsight-docs/static/openapi.json",
+    "--directory",
+    "hindsight-clients/go"
+  ],
+  "cwd": "H:/hindsight",
+  "exitCode": 0,
+  "durationSeconds": 2.129,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b1-go-postprocess-green-01.log"
+}

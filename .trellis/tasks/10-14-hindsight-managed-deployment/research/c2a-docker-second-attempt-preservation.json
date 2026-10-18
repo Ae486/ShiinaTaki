@@ -1,0 +1,267 @@
+{
+  "version": 1,
+  "recordedAt": "2026-10-15T08:24:43.0063426Z",
+  "caseId": "8378a950-87c8-44e3-a909-d213a284f113",
+  "status": "real-docker-first-case-passed-preserved-and-cleaned",
+  "archive": {
+    "file": "c2a-docker-second-attempt-evidence.zip",
+    "bytes": 60128,
+    "sha256": "789e5c43dcd115455987bbed0dbdc049773b9233d4111049fd8ce089310fe7be",
+    "entries": [
+      {
+        "path": ".c2a-docker-owner",
+        "bytes": 36,
+        "sha256": "56603b3f7fdf8c1a9a81adeffe0dc3c0831897b54e0115f29b1caf9eacc58f0e"
+      },
+      {
+        "path": "adapter-build.json",
+        "bytes": 1380,
+        "sha256": "7e0e47e048e3fd9d6128c2855290d1c59833d2cd3b9dda896be72d30eb94d812"
+      },
+      {
+        "path": "base-probe.json",
+        "bytes": 316,
+        "sha256": "819eca37907fa96577bcafca977d41304c16e1a14a782205b8170f874d944d5a"
+      },
+      {
+        "path": "baseline.json",
+        "bytes": 226,
+        "sha256": "32d3158226d9157049a1c8dd6098e9969c36b86350121bebd029f1de0ba7ccc1"
+      },
+      {
+        "path": "build-command.json",
+        "bytes": 3533,
+        "sha256": "540a3a3162449efb0a7a453b5bb185b64f5b81c5e542b83bdada1966b2f35644"
+      },
+      {
+        "path": "build.started",
+        "bytes": 24,
+        "sha256": "06636d3586991d9730a8627c61f57f6db78205b358b7de42cbea012413718bdb"
+      },
+      {
+        "path": "built-image.json",
+        "bytes": 341,
+        "sha256": "d1d2a7a84d32bb3633b199174e0bcd401185f1250b58138eb6973f0608f47281"
+      },
+      {
+        "path": "command-runner.mjs",
+        "bytes": 3030,
+        "sha256": "f10f5cce754422548516ebe895d93e5c547673eb97ece30a135e4365fa442da5"
+      },
+      {
+        "path": "commands.jsonl",
+        "bytes": 29420,
+        "sha256": "7e49a512137ee681162331c1888a30af61841a08cb501c4b9561532a162d91ba"
+      },
+      {
+        "path": "first-case.json",
+        "bytes": 19220,
+        "sha256": "02bb074fdc82b326c27e7430d4171fd271be2b4cc5b6ff3b273bc1c64eaf08fd"
+      },
+      {
+        "path": "first-case.started",
+        "bytes": 24,
+        "sha256": "ea8f8d480e96f898698261646a33fd685d8bb5135277c541d2da95f682cf5b65"
+      },
+      {
+        "path": "image-id.txt",
+        "bytes": 71,
+        "sha256": "fc0f1b0b860462abc390ba123984654166a7d064fd0cc607485ed7758e9c60b9"
+      },
+      {
+        "path": "interruption-recovery.json",
+        "bytes": 384,
+        "sha256": "2184e6fff11d5544d49593d57e4d134feb25865663165dd86555cec2dab6bb82"
+      },
+      {
+        "path": "launcher-command.json",
+        "bytes": 713,
+        "sha256": "e3267a4e23aef75d5fac3aa59dcd12873f05eb04b55fb52634ef0b0c3abafc71"
+      },
+      {
+        "path": "original-before-containers.json",
+        "bytes": 1707,
+        "sha256": "ec6a3a6101636fc8786a2d4b13d738e65a9b742478c94b377bb87d12b123d239"
+      },
+      {
+        "path": "prepared-inputs.json",
+        "bytes": 2644,
+        "sha256": "a74ba5797f7c0dbc072f0c61f3a6b1e1c2ac2be4a925f284a5e988c72fa04fc4"
+      },
+      {
+        "path": "reused-base-probe.json",
+        "bytes": 521,
+        "sha256": "f167a38757787f3cc192a93e988c260b2ba67cb25b409f335f5002aa103e049a"
+      },
+      {
+        "path": "root-case-readback.json",
+        "bytes": 2518,
+        "sha256": "08f4f0e6144ecd21b052b5dd8703c319bfc2b0878033211790d4919a454c8771"
+      },
+      {
+        "path": "root-post-recovery.json",
+        "bytes": 3782,
+        "sha256": "2fb0affddc86725d22218ee2dee20d478aa142145a0991b2aa76f01b8465f756"
+      },
+      {
+        "path": "runtime-prerequisites.json",
+        "bytes": 2406,
+        "sha256": "afbc72aa5895902032ff34eb868504a59a1bbe2fbb9027d25889fb050b6a530f"
+      },
+      {
+        "path": "build-config/config.json",
+        "bytes": 94,
+        "sha256": "c880ae25bec63e8fc31f72fe393a1f37d2d7a1aba39858b5f3813492dd9b075f"
+      },
+      {
+        "path": "reviewed-fixture/base-probe.py",
+        "bytes": 1438,
+        "sha256": "a6d0548b53bf557157590cc87edb1f30ff190fa5813edf0a477a3ba399b6c021"
+      },
+      {
+        "path": "reviewed-fixture/container-scan.py",
+        "bytes": 2289,
+        "sha256": "cd5eab55311c699c7ef153c1dac036e18d961021028db2942b4a9b376a03a3c0"
+      },
+      {
+        "path": "reviewed-fixture/preparation-check.json",
+        "bytes": 2976,
+        "sha256": "68f4c32dee404b13c9639f9ef859807048fc0eda47c606d0212c15becca6c09d"
+      },
+      {
+        "path": "reviewed-fixture/README.md",
+        "bytes": 12724,
+        "sha256": "06b9c97a1c9302e52354d8d60f7c0bc760eca67b46029a0b6f37afb4ef9b9c8b"
+      },
+      {
+        "path": "reviewed-fixture/run-first-case.ts",
+        "bytes": 24939,
+        "sha256": "8aa4bd9d91ccb884fec2488d5ba55d3c22d2d88a46fd719c44ce827ec9342e94"
+      },
+      {
+        "path": "build-config/buildx/.buildNodeID",
+        "bytes": 16,
+        "sha256": "66cf00c84e25cdae0198e05de77eca8d7f3b3830511c4581a2452d27fac50a54"
+      },
+      {
+        "path": "build-config/buildx/.lock",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "build-config/buildx/current",
+        "bytes": 76,
+        "sha256": "ad4436223bfadf60e9921a9be166da1d9c454921db007f16b8f21e5553cde791"
+      },
+      {
+        "path": "build-config/buildx/activity/default",
+        "bytes": 20,
+        "sha256": "b6683fa35c1a1ba66eced5553677e7390f8e10347f3e4e7fd11110b611b907be"
+      },
+      {
+        "path": "context/docker/standalone/Dockerfile.c2a-fake",
+        "bytes": 555,
+        "sha256": "2be1279ef4621f5d42397879fab2e436d780224eb3c02d591180faf9e9a9fcff"
+      },
+      {
+        "path": "context/docker/standalone/managed_bootstrap/__init__.py",
+        "bytes": 80,
+        "sha256": "cbf487cffc9c62b5c6fe61f32d80070b5843f70f966c5fca163c675e21ddbf1d"
+      },
+      {
+        "path": "context/docker/standalone/managed_bootstrap/bootstrap.py",
+        "bytes": 6323,
+        "sha256": "b8331bd8c9645d265578ed65f9f77402f170813f20d1d2683b5aa0a7d0768101"
+      },
+      {
+        "path": "context/docker/standalone/managed_bootstrap/control.py",
+        "bytes": 5593,
+        "sha256": "c75dcdf2285df614c4836dab4898a2980a2a1e8e4572862861596ab244f39d5e"
+      },
+      {
+        "path": "context/docker/standalone/managed_bootstrap/fake_child.py",
+        "bytes": 2073,
+        "sha256": "8d2267eb2b5af484179a7e8b2c301e067fe59197d63d91178415873ed7c96e93"
+      },
+      {
+        "path": "context/docker/standalone/managed_bootstrap/fake_consumer.py",
+        "bytes": 4302,
+        "sha256": "52b3d0664b06ef82dca4765d2c08e820c16c2af5e2814a02f98fe08f8e220eb3"
+      },
+      {
+        "path": "context/docker/standalone/managed_bootstrap/owner_protocol.py",
+        "bytes": 3199,
+        "sha256": "cd9cdbea572354dbbc1200098d9edfe9280679c2b346a67c1326a795b01c1804"
+      },
+      {
+        "path": "context/docker/standalone/managed_bootstrap/owner.py",
+        "bytes": 2460,
+        "sha256": "5b10f9f09def8ff985c96fed56c31f4ec4976f684d7e3b044fdc8a66afb38acc"
+      },
+      {
+        "path": "context/docker/standalone/managed_bootstrap/protocol.py",
+        "bytes": 13320,
+        "sha256": "074247650a31cfc47a1931ef6c7b258aa6f1d3a649bbb792ff2878257f6f8b88"
+      },
+      {
+        "path": "context/docker/standalone/managed_bootstrap/submitter.py",
+        "bytes": 4913,
+        "sha256": "5a6ad60266066d1cff2559d46c6b2b15d4a93cf882de1e487790ad0fb6863c4a"
+      },
+      {
+        "path": "context/docker/standalone/managed_bootstrap/supervision.py",
+        "bytes": 4552,
+        "sha256": "ff768434e0cef9eb2b6996351ba31e1dedede95211809d2ab8e8d09b5d9a5064"
+      },
+      {
+        "path": "context/docker/standalone/managed_bootstrap/unix_socket.py",
+        "bytes": 9434,
+        "sha256": "08b6e604211d19e31ad61782c96b91a004277b37c31d6e9a0bdfdda681cd7725"
+      },
+      {
+        "path": "build-config/buildx/refs/default/default/zkszy3xytjbm6c5yh1ltrjd1k",
+        "bytes": 282,
+        "sha256": "297201f1c8c39b5c7ac6f98dea7a20222c3ac18b35d164ed487a3ee86da7b78f"
+      }
+    ]
+  },
+  "omittedRebuildableBinaries": [
+    {
+      "path": "fake-key-adapter.exe",
+      "bytes": 155648,
+      "sha256": "1471db82190f5918ad3156b54ac0ac585bdf7230eb07f42cc89735afe18a268f"
+    },
+    {
+      "path": "fake-key-adapter.pdb",
+      "bytes": 1314816,
+      "sha256": "23cefc7ce8a6b8524d3e26a1d72747ae74fb9a5d75cb128cd131a1fe80df6b6d"
+    }
+  ],
+  "cleanup": {
+    "stagingRemoved": "G:\\TakiAgent-c2a-docker-acceptance\\first-case-8378a950-87c8-44e3-a909-d213a284f113",
+    "logicalBytesRemoved": 1644418.0,
+    "testedPidsAbsent": [
+      43024,
+      45932
+    ],
+    "protectedRootAbsent": true,
+    "dockerResources": "Exact test container, volume and image tag independently absent after authorized Desktop recovery",
+    "originalContainers": "Seven original IDs retained; redis/arboris-app running with new start times after interruption and authorized Desktop startup",
+    "baseImage": "Pinned cached base unchanged",
+    "buildCacheOrVhdxReclaimed": false
+  },
+  "capacity": [
+    {
+      "Name": "C",
+      "Free": 27859095552
+    },
+    {
+      "Name": "G",
+      "Free": 144116428800
+    },
+    {
+      "Name": "H",
+      "Free": 12881350656
+    }
+  ]
+}

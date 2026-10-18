@@ -1,0 +1,298 @@
+{
+  "caseId": "b5c5fb7f-cd8a-402a-bd11-92839d191e98",
+  "engineAfter": {
+    "value": {
+      "id": "93e8319e-24b7-4a7d-88f1-60923ad681e0",
+      "os": "linux",
+      "architecture": "x86_64",
+      "version": "29.0.1",
+      "time": "2026-10-18T13:13:21.209368532Z"
+    },
+    "windowsBefore": "2026-10-18T13:13:21.138Z",
+    "windowsAfter": "2026-10-18T13:13:21.310Z"
+  },
+  "comparisons": [
+    {
+      "name": "/taki-openbili-backend",
+      "before": {
+        "id": "1e389e0a2f95121ca804c186c20916196e9e46f67a7691c3d184404a7292deb8",
+        "name": "/taki-openbili-backend",
+        "status": "running",
+        "startedAt": "2026-10-18T05:55:39.597065125Z",
+        "finishedAt": "2026-10-18T05:55:39.315572313Z",
+        "restartCount": 0,
+        "image": "sha256:f24e8519df02cee288cada771654064d8f133894ab2648fb0da1513d1238a7e6",
+        "running": true
+      },
+      "after": {
+        "id": "1e389e0a2f95121ca804c186c20916196e9e46f67a7691c3d184404a7292deb8",
+        "name": "/taki-openbili-backend",
+        "status": "running",
+        "startedAt": "2026-10-18T05:55:39.597065125Z",
+        "finishedAt": "2026-10-18T05:55:39.315572313Z",
+        "restartCount": 0,
+        "image": "sha256:f24e8519df02cee288cada771654064d8f133894ab2648fb0da1513d1238a7e6",
+        "running": true
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true
+    },
+    {
+      "name": "/taki-hindsight-api-retest",
+      "before": {
+        "id": "c07d86d32382757d292dd4ebf318e6c44260c817d95f35187663d4d33a26b865",
+        "name": "/taki-hindsight-api-retest",
+        "status": "exited",
+        "startedAt": "2026-08-18T16:47:39.697781196Z",
+        "finishedAt": "2026-10-14T14:27:17.510076459Z",
+        "restartCount": 0,
+        "image": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+        "running": false
+      },
+      "after": {
+        "id": "c07d86d32382757d292dd4ebf318e6c44260c817d95f35187663d4d33a26b865",
+        "name": "/taki-hindsight-api-retest",
+        "status": "exited",
+        "startedAt": "2026-08-18T16:47:39.697781196Z",
+        "finishedAt": "2026-10-14T14:27:17.510076459Z",
+        "restartCount": 0,
+        "image": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+        "running": false
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true
+    },
+    {
+      "name": "/taki-hindsight-api",
+      "before": {
+        "id": "a38b49e64f74ee4fa4f5cf5531e467d74dda2b64dc7e28e78a9bdadd37272519",
+        "name": "/taki-hindsight-api",
+        "status": "exited",
+        "startedAt": "2026-08-18T14:11:54.085514229Z",
+        "finishedAt": "2026-08-18T16:31:05.802894207Z",
+        "restartCount": 0,
+        "image": "sha256:02f4b13387a3dde494e1edb414519e0ee4f1d13f14503f2e15050549818a0ef5",
+        "running": false
+      },
+      "after": {
+        "id": "a38b49e64f74ee4fa4f5cf5531e467d74dda2b64dc7e28e78a9bdadd37272519",
+        "name": "/taki-hindsight-api",
+        "status": "exited",
+        "startedAt": "2026-08-18T14:11:54.085514229Z",
+        "finishedAt": "2026-08-18T16:31:05.802894207Z",
+        "restartCount": 0,
+        "image": "sha256:02f4b13387a3dde494e1edb414519e0ee4f1d13f14503f2e15050549818a0ef5",
+        "running": false
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true
+    },
+    {
+      "name": "/redis",
+      "before": {
+        "id": "8f5e4468c3a7c0100330e012fdca3da843abfcc732361b71308f06d6eeada5c2",
+        "name": "/redis",
+        "status": "running",
+        "startedAt": "2026-10-18T04:36:51.09898313Z",
+        "finishedAt": "2026-10-18T04:36:49.317051749Z",
+        "restartCount": 0,
+        "image": "sha256:c6a3c149aae23f911f2f4dbd9d144718f802046b6f1706d4abf4ff84cc2792aa",
+        "running": true
+      },
+      "after": {
+        "id": "8f5e4468c3a7c0100330e012fdca3da843abfcc732361b71308f06d6eeada5c2",
+        "name": "/redis",
+        "status": "running",
+        "startedAt": "2026-10-18T04:36:51.09898313Z",
+        "finishedAt": "2026-10-18T04:36:49.317051749Z",
+        "restartCount": 0,
+        "image": "sha256:c6a3c149aae23f911f2f4dbd9d144718f802046b6f1706d4abf4ff84cc2792aa",
+        "running": true
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true
+    },
+    {
+      "name": "/my_pgvector",
+      "before": {
+        "id": "7992fb2bba71e13dc290e305941ded32b9046c1ec4b67a3697863ff79079cf8b",
+        "name": "/my_pgvector",
+        "status": "exited",
+        "startedAt": "2026-04-11T08:18:53.87731237Z",
+        "finishedAt": "2026-07-13T16:08:02.340463365Z",
+        "restartCount": 0,
+        "image": "sha256:494dff7e67e7bc2c826b94c331364978d145ebb86fd338154138b084223b7f67",
+        "running": false
+      },
+      "after": {
+        "id": "7992fb2bba71e13dc290e305941ded32b9046c1ec4b67a3697863ff79079cf8b",
+        "name": "/my_pgvector",
+        "status": "exited",
+        "startedAt": "2026-04-11T08:18:53.87731237Z",
+        "finishedAt": "2026-07-13T16:08:02.340463365Z",
+        "restartCount": 0,
+        "image": "sha256:494dff7e67e7bc2c826b94c331364978d145ebb86fd338154138b084223b7f67",
+        "running": false
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true
+    },
+    {
+      "name": "/rustfs_loacl",
+      "before": {
+        "id": "ba11af042db0879902996426522611b267f38eab7d21f05e21036929c415cc24",
+        "name": "/rustfs_loacl",
+        "status": "exited",
+        "startedAt": "2026-04-11T08:18:55.176936785Z",
+        "finishedAt": "2026-07-13T16:08:02.340598508Z",
+        "restartCount": 0,
+        "image": "sha256:0725587f6fcca83c1898f321424327d6e6da5e01ea20382905dd258ed5af3be4",
+        "running": false
+      },
+      "after": {
+        "id": "ba11af042db0879902996426522611b267f38eab7d21f05e21036929c415cc24",
+        "name": "/rustfs_loacl",
+        "status": "exited",
+        "startedAt": "2026-04-11T08:18:55.176936785Z",
+        "finishedAt": "2026-07-13T16:08:02.340598508Z",
+        "restartCount": 0,
+        "image": "sha256:0725587f6fcca83c1898f321424327d6e6da5e01ea20382905dd258ed5af3be4",
+        "running": false
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true
+    },
+    {
+      "name": "/rpa-redis",
+      "before": {
+        "id": "9d4fc8fb7a4869ac422d9e78a924b49e698e61a562de3af7576dfd18ef81cd98",
+        "name": "/rpa-redis",
+        "status": "exited",
+        "startedAt": "2026-02-20T17:46:12.832921192Z",
+        "finishedAt": "2026-02-22T09:08:37.904271714Z",
+        "restartCount": 0,
+        "image": "sha256:976ab0f0939b78c06d802bcd3bea44c5142ea9a756a57b861e08819817f768c8",
+        "running": false
+      },
+      "after": {
+        "id": "9d4fc8fb7a4869ac422d9e78a924b49e698e61a562de3af7576dfd18ef81cd98",
+        "name": "/rpa-redis",
+        "status": "exited",
+        "startedAt": "2026-02-20T17:46:12.832921192Z",
+        "finishedAt": "2026-02-22T09:08:37.904271714Z",
+        "restartCount": 0,
+        "image": "sha256:976ab0f0939b78c06d802bcd3bea44c5142ea9a756a57b861e08819817f768c8",
+        "running": false
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true
+    },
+    {
+      "name": "/arboris-app",
+      "before": {
+        "id": "697330c3cd8966e02d97fa228c5233a0805531bff00275107630e34fadda0b1a",
+        "name": "/arboris-app",
+        "status": "running",
+        "startedAt": "2026-10-18T04:36:51.09648348Z",
+        "finishedAt": "2026-10-18T04:36:49.316945058Z",
+        "restartCount": 0,
+        "image": "sha256:862344867ee7582178ddb83d278a5c682f6a919b3e8bd4dbb2f6a7c37c362343",
+        "running": true
+      },
+      "after": {
+        "id": "697330c3cd8966e02d97fa228c5233a0805531bff00275107630e34fadda0b1a",
+        "name": "/arboris-app",
+        "status": "running",
+        "startedAt": "2026-10-18T04:36:51.09648348Z",
+        "finishedAt": "2026-10-18T04:36:49.316945058Z",
+        "restartCount": 0,
+        "image": "sha256:862344867ee7582178ddb83d278a5c682f6a919b3e8bd4dbb2f6a7c37c362343",
+        "running": true
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true
+    }
+  ],
+  "allEightUnchanged": true,
+  "tagAbsent": true,
+  "protectedRootAbsent": true,
+  "stageRetained": true,
+  "resources": {
+    "containers": "",
+    "volumes": ""
+  },
+  "space": {
+    "before": {
+      "recordedAt": "2026-10-18T13:11:22.083Z",
+      "gFree": 138391666688,
+      "cFree": 25573949440,
+      "hFree": 2369019904
+    },
+    "after": {
+      "recordedAt": "2026-10-18T13:13:21.765Z",
+      "gFree": 138388844544,
+      "cFree": 25572044800,
+      "hFree": 2372349952
+    },
+    "delta": {
+      "gFree": -2822144,
+      "cFree": -1904640,
+      "hFree": 3330048
+    }
+  },
+  "verifiedInputs": {
+    "caseId": "b5c5fb7f-cd8a-402a-bd11-92839d191e98",
+    "pins": [
+      {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/docker-database/run-persistence.ts",
+        "bytes": 56502,
+        "sha256": "c39fd6e465f922cefd198abe1e6d531d731359f8969b183ae9b5b4d2cf06ee27",
+        "expected": "c39fd6e465f922cefd198abe1e6d531d731359f8969b183ae9b5b4d2cf06ee27"
+      },
+      {
+        "path": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "bytes": 41758128,
+        "sha256": "0a4d8fe2ab107ceae44ee5f5fc1e1c155790042b7e3d3163826660da882b389d",
+        "expected": "0a4d8fe2ab107ceae44ee5f5fc1e1c155790042b7e3d3163826660da882b389d"
+      },
+      {
+        "path": "C:/Program Files/nodejs/node.exe",
+        "bytes": 92534088,
+        "sha256": "9a4eb5f1c29c6a2e93852ead46b999e284a6a5ca8bab4d4e241d587d025a52de",
+        "expected": "9a4eb5f1c29c6a2e93852ead46b999e284a6a5ca8bab4d4e241d587d025a52de"
+      },
+      {
+        "path": "H:/TakiAgent/apps/desktop/src-tauri/target/debug/taki-node.exe",
+        "bytes": 9058816,
+        "sha256": "1ed31593324eaea703590e6dd12b348dfe99c38c7530207b12c89300e8a582c9",
+        "expected": "1ed31593324eaea703590e6dd12b348dfe99c38c7530207b12c89300e8a582c9"
+      },
+      {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/c2a-implementation-source-manifest.json",
+        "bytes": 108542,
+        "sha256": "f27379be3b4b5e61e1b2821c2eda2d87bf54e5c2983b034bdb637ee789961ae2",
+        "expected": "f27379be3b4b5e61e1b2821c2eda2d87bf54e5c2983b034bdb637ee789961ae2"
+      },
+      {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/docker-database/database-read.py",
+        "bytes": 6084,
+        "sha256": "4bd830c60a4ddecc4e8e7018d2b19eb08093c81fc5d7f3ee0a8ff380178e4271",
+        "expected": "4bd830c60a4ddecc4e8e7018d2b19eb08093c81fc5d7f3ee0a8ff380178e4271"
+      },
+      {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/docker-database/fake_child.py",
+        "bytes": 44233,
+        "sha256": "9d65b8875e5d798a024dff9b4a182d6cff7bf4b62646954e38cd0c2e12ce3819",
+        "expected": "9d65b8875e5d798a024dff9b4a182d6cff7bf4b62646954e38cd0c2e12ce3819"
+      }
+    ],
+    "diagnosticHashes": {
+      "run-persistence.ts": "c18c81a43f824b65802cdce7bcc900029eb3806225923d4c45ddbc3c1de56eca",
+      "database-read.py": "03895f6f4efd670eb323fd5b0935d6233445ae68252e9c6dfe8b3a0a39d56b21",
+      "fake_child.py": "f76cfbd0eec0a8614c16ba947939dd13367163e84c9ff1c584476711814c6180"
+    },
+    "tokenOccurrencesPerFile": 1,
+    "acceptedSourceEntries": 109,
+    "recordedAt": "2026-10-18T13:13:22.035Z"
+  }
+}

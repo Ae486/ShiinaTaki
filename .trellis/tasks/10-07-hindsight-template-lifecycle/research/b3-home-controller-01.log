@@ -1,0 +1,98 @@
+
+ RUN  v4.1.10 H:/TakiAgent/apps/desktop
+
+ ❯ src/windows/home/pages/operations/hindsight-template-controller.test.ts (10 tests | 5 failed) 6653ms
+     × subscribes, reads all Bank consequences before confirmation and submits exactly once 1188ms
+     × requires full deletion and provider acknowledgement and preserves user choices after removal 620ms
+     × a lost submit acknowledgement and second observer rediscover partial work without replay 1673ms
+     × published binding failure recovers only binding and physical reopen keeps original identity 844ms
+     × current derived reads do not promote rollout history and failure clears previous success 881ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/windows/home/pages/operations/hindsight-template-controller.test.ts > Home templates through actual authenticated WsClient/Core operations > subscribes, reads all Bank consequences before confirmation and submits exactly once
+AssertionError: expected undefined to match object { kind: 'template', outcome: 'bound' }
+
+- Expected:
+{
+  "kind": "template",
+  "outcome": "bound",
+}
+
++ Received:
+undefined
+
+ ❯ src/windows/home/pages/operations/hindsight-template-controller.test.ts:41:84
+     39|     await Promise.all([t.controller.confirm(ACK), t.controller.confirm…
+     40|     await t.h.owner.stop(); await t.controller.refresh();
+     41|     expect(t.h.control.submits).toBe(1); expect(t.state().frame?.origi…
+       |                                                                                    ^
+     42|     expect(t.h.control.submitted).toEqual([{ request: { kind: "templat…
+     43|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/windows/home/pages/operations/hindsight-template-controller.test.ts > Home templates through actual authenticated WsClient/Core operations > requires full deletion and provider acknowledgement and preserves user choices after removal
+TypeError: Cannot read properties of null (reading 'user')
+ ❯ src/windows/home/pages/operations/hindsight-template-controller.test.ts:56:21
+     54|     await t.controller.confirm(ACK); await t.h.owner.stop(); await t.c…
+     55|     const selected = t.state().frame!.template.bank!.selected!;
+     56|     expect(selected.user.models[0]?.choice.mode).toBe("value");
+       |                     ^
+     57|     const updated = t.state().draft!; if (updated.target.kind !== "ban…
+     58|     t.controller.edit({ ...updated, target: { ...updated.target, templ…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/windows/home/pages/operations/hindsight-template-controller.test.ts > Home templates through actual authenticated WsClient/Core operations > a lost submit acknowledgement and second observer rediscover partial work without replay
+AssertionError: expected null to be 'already_bound' // Object.is equality
+
+- Expected:
+"already_bound"
+
++ Received:
+null
+
+ ❯ src/windows/home/pages/operations/hindsight-template-controller.test.ts:132:64
+    130|     expect(t.h.control.submits).toBe(2);
+    131|     expect(t.h.f.native.calls.filter((call) => call.method === "apply"…
+    132|     expect(t.state().frame?.template.recoverUnavailableReason).toBe("a…
+       |                                                                ^
+    133|   });
+    134|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/windows/home/pages/operations/hindsight-template-controller.test.ts > Home templates through actual authenticated WsClient/Core operations > published binding failure recovers only binding and physical reopen keeps original identity
+TypeError: Cannot read properties of null (reading 'publicationId')
+ ❯ src/windows/home/pages/operations/hindsight-template-controller.test.ts:138:63
+    136|     const t = await fixture(); t.h.f.state.failBinding = true;
+    137|     await t.controller.preview(); await t.controller.confirm(ACK); awa…
+    138|     const plan = t.state().frame!.template.plan!; expect(plan.publicat…
+       |                                                               ^
+    139|     expect(t.state().frame?.original?.result).toMatchObject({ outcome:…
+    140|     t.controller.replace(null); t.client.close(); await t.h.reopen(); …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/windows/home/pages/operations/hindsight-template-controller.test.ts > Home templates through actual authenticated WsClient/Core operations > current derived reads do not promote rollout history and failure clears previous success
+TypeError: Cannot read properties of null (reading 'banks')
+ ❯ src/windows/home/pages/operations/hindsight-template-controller.test.ts:154:69
+    152|     t.controller.edit({ ...t.state().draft!, refresh: [{ bankId: first…
+    153|     await t.controller.preview(); await t.controller.confirm(ACK); awa…
+    154|     const plan = t.state().frame!.template.plan!; const bank = plan.ba…
+       |                                                                     ^
+    155|     const child = { planId: plan.planId, bankId: bank.bank.target.bank…
+    156|     t.h.control.childState = "completed"; await t.controller.observeCh…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 5 passed (10)
+   Start at  18:39:35
+   Duration  14.75s (transform 6.14s, setup 0ms, import 7.77s, tests 6.65s, environment 0ms)
+
+undefined
+H:\TakiAgent\apps\desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/windows/home/pages/operations/hindsight-template-controller.test.ts --maxWorkers=2

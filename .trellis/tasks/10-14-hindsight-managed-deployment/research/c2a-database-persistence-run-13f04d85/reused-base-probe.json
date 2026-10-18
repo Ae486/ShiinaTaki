@@ -1,0 +1,7 @@
+{
+  "sourceArchive": "H:/TakiAgent/.trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-persistence-first-attempt-evidence.zip",
+  "archiveSha256": "049a9a614ddf2f109698afbd73296ee28c0e4a780361514223fe26f1732bfcd9",
+  "member": "base-probe.json",
+  "memberSha256": "819eca37907fa96577bcafca977d41304c16e1a14a782205b8170f874d944d5a",
+  "reason": "Reuse the accepted immutable-base probe; actual engine/base rechecked before build. The source case remains FAIL for its unrelated fixture assertion."
+}

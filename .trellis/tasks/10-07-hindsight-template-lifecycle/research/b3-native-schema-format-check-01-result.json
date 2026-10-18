@@ -1,0 +1,19 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/ruff.exe",
+    "format",
+    "--check",
+    "--config",
+    "hindsight-api-slim/pyproject.toml",
+    "hindsight-api-slim/hindsight_api/api/taki_template_schema.py",
+    "hindsight-api-slim/tests/test_taki_template_backup_contract.py"
+  ],
+  "cwd": "H:/hindsight",
+  "exitCode": 0,
+  "durationSeconds": 0.244,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-schema-format-check-01.log",
+  "sources": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-schema-format-check-01-sources.json",
+  "changedInputs": [],
+  "ownedTemp": "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\schema-format-check-01-pq_jzupl",
+  "ownedTempRemoved": true
+}

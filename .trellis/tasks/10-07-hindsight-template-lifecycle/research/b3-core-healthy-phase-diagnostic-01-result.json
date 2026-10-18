@@ -1,0 +1,27 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "--filter",
+    "@taki/core",
+    "exec",
+    "vitest",
+    "run",
+    "src/memory/transitions/transition-template-healthy.test.ts",
+    "--maxWorkers=1",
+    "--testNamePattern",
+    "(?:preserves full template history across RETURN and REENTRY \\(removed=false\\)|refuses 'selection' drift after complete 'transition\\.return-local' readback \\(removed=false\\) with atomic rollback)$"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 1,
+  "durationSeconds": 146.023,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-healthy-phase-diagnostic-01.log",
+  "cleanup": {
+    "path": "H:\\TakiAgent\\.trellis\\.runtime\\b3-core-healthy-phase-diagnostic-01-temp",
+    "leftovers": [],
+    "removed": true
+  },
+  "sourceIdentity": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-healthy-phase-diagnostic-01-source.json",
+  "sourceAfter": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-healthy-phase-diagnostic-01-source-after.json",
+  "inputCount": 1599,
+  "sourceMismatches": []
+}

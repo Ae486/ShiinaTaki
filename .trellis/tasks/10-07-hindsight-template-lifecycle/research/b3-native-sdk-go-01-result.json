@@ -1,0 +1,19 @@
+{
+  "command": [
+    "H:/TakiAgent/.trellis/.runtime/g1-toolchain/go/go/bin/go.exe",
+    "test",
+    "./...",
+    "-count=1",
+    "-v",
+    "-run",
+    "^(TestDispositionTraitsCompatibility|TestNativeResultNullableStatus|TestNativeReferenceNullableDocument|TestCurrentState.*|TestTransitionNullableArtifactContract|TestConfigurationObservationProfiles|TestTemplateLifecyclePresence|TestTemplateBackupV2PreservesExactWire)$"
+  ],
+  "cwd": "H:/hindsight/hindsight-clients/go",
+  "exitCode": 0,
+  "durationSeconds": 8.775,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-sdk-go-01.log",
+  "sources": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-sdk-go-01-sources.json",
+  "changedInputs": [],
+  "ownedTemp": "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\sdk-go-01-otg9lmkj",
+  "ownedTempRemoved": true
+}

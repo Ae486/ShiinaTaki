@@ -1,0 +1,22 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "--filter",
+    "@taki/core",
+    "exec",
+    "vitest",
+    "run",
+    "src/memory/transitions/transition-healthy-snapshot-recovery.test.ts",
+    "-t",
+    "reuses sealed evidence after a proven Bank executor expires",
+    "--maxWorkers=2"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "durationSeconds": 29.932,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-healthy-legacy-reuse-01.log",
+  "sourceIdentity": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-healthy-legacy-reuse-01-source.json",
+  "sourceAfter": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-healthy-legacy-reuse-01-source-after.json",
+  "inputCount": 1592,
+  "sourceMismatches": []
+}

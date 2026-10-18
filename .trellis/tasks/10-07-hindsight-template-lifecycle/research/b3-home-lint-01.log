@@ -1,0 +1,11 @@
+
+H:\TakiAgent\apps\desktop\src\windows\home\pages\operations\hindsight-template-preview.tsx
+   7:37  error  'MemoryTemplatePreviewParams' is defined but never used                        @typescript-eslint/no-unused-vars
+  90:1   error  Function 'requestRefresh' has too many parameters (4). Maximum allowed is 3    max-params
+  95:1   error  Function 'copyUserResource' has too many parameters (4). Maximum allowed is 3  max-params
+
+H:\TakiAgent\apps\desktop\src\windows\home\pages\operations\hindsight-template-resource-editor.tsx
+  52:1  error  Function 'changeMode' has too many parameters (4). Maximum allowed is 3  max-params
+
+✖ 4 problems (4 errors, 0 warnings)
+

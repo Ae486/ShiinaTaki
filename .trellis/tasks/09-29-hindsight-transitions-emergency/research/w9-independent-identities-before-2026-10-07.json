@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-10-07T10:50:27.4866036Z",
+  "workspace": "H:\\TakiAgent",
+  "head": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a",
+  "checks": [
+    {
+      "manifest": "w9-source-identities-2026-10-07.json",
+      "entries": 11,
+      "mismatches": []
+    },
+    {
+      "manifest": "w9-pre-core-source-identities-2026-10-07.json",
+      "entries": 10,
+      "mismatches": []
+    },
+    {
+      "manifest": "w9-evidence-identities-2026-10-07.json",
+      "entries": 27,
+      "mismatches": []
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mH:/TakiAgent/packages/core[39m
+
+ [32m✓[39m src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 37039[2mms[22m[39m
+     [33m[2m✓[22m[39m uses the actual joint publication and copy path for removed overlays and complete user-owned models [33m 12934[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses a compatibility-only connection before taking any Core copy [33m 2265[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects a copied connection revision changed after admission but before backupTo [33m 2950[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'connection revision' drift after backupTo completes [33m 3062[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'configuration fingerprint' drift after backupTo completes [33m 3131[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'reviewed deployment mode' drift after backupTo completes [33m 3072[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses 'raw Bank setup' drift after backupTo completes [33m 3036[2mms[22m[39m
+     [33m[2m✓[22m[39m rechecks the complete connection at 'capturing-native' before dispatch or staging [33m 3292[2mms[22m[39m
+     [33m[2m✓[22m[39m rechecks the complete connection at 'sealing' before dispatch or staging [33m 3294[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m9 passed[39m[22m[90m (9)[39m
+[2m   Start at [22m 22:45:05
+[2m   Duration [22m 51.13s[2m (transform 10.91s, setup 0ms, import 13.63s, tests 37.04s, environment 0ms)[22m
+

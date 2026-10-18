@@ -1,0 +1,715 @@
+{
+  "version": 1,
+  "recordedAt": "2026-10-14T22:17:34.847073+08:00",
+  "task": "10-14-hindsight-managed-deployment",
+  "sourceFilesVerified": 109,
+  "sourceTreeSha256": "b0e7896be6c5e49c7d588fb59a537787c1614c6bc302cacda30372c001eca2f9",
+  "sourceMismatchCount": 0,
+  "baseline": {
+    "sha256": "1bac2d220ad7d4a31e090e55159452875efddc042db097b543aa0222f0e66a04",
+    "archivedAs": "implementation/baseline.json",
+    "disposition": "Exact task-only reverse-checkable patches replace temporary before-file copies."
+  },
+  "reports": [
+    {
+      "path": "c2a-implementation-self-check.md",
+      "bytes": 18625,
+      "sha256": "b0480b3792c6a4aac32de7e6bfde2b5a48d9a51bbb2740a1cf7255500b1d4dc4"
+    },
+    {
+      "path": "c2a-implementation-source-manifest.json",
+      "bytes": 108542,
+      "sha256": "f27379be3b4b5e61e1b2821c2eda2d87bf54e5c2983b034bdb637ee789961ae2"
+    },
+    {
+      "path": "c2a-source-review.md",
+      "bytes": 25411,
+      "sha256": "0781732e9aded31edacd7c5cdb4dd3c8359ee560870ca1a39a0e428e00a095e5"
+    },
+    {
+      "path": "c2a-independent-source-evidence.json",
+      "bytes": 112088,
+      "sha256": "3cec56a3bebae51a2e9d7ce2fe134192f885989b826042bf0bd8509a6a4955ea"
+    }
+  ],
+  "patches": [
+    {
+      "repository": "TakiAgent",
+      "path": "c2a-source-delta-takiagent.patch",
+      "files": 99,
+      "bytes": 471472,
+      "sha256": "c02b148c582a65ab530d37cc875b9b54eea2f26c28d090d851ae6596059c3ff4",
+      "reverseCheck": {
+        "argv": [
+          "git",
+          "-c",
+          "core.autocrlf=false",
+          "apply",
+          "--reverse",
+          "--check",
+          "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\c2a-source-delta-takiagent.patch"
+        ],
+        "exitCode": 0
+      }
+    },
+    {
+      "repository": "hindsight",
+      "path": "c2a-source-delta-hindsight.patch",
+      "files": 10,
+      "bytes": 36991,
+      "sha256": "4bace8f7c3687c995a95535cf0a44b9ed30ea3cfb96825698504fd10841d8c0f",
+      "reverseCheck": {
+        "argv": [
+          "git",
+          "-c",
+          "core.autocrlf=false",
+          "apply",
+          "--reverse",
+          "--check",
+          "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\c2a-source-delta-hindsight.patch"
+        ],
+        "exitCode": 0
+      }
+    }
+  ],
+  "evidenceArchive": {
+    "path": "c2a-source-check-evidence.zip",
+    "bytes": 96490,
+    "sha256": "15d014be7778ce733620ffd4091817ab019bb8ec408102f1996a5c435320fee4",
+    "entries": [
+      {
+        "path": "implementation/baseline.json",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/baseline.json",
+        "bytes": 25818,
+        "sha256": "1bac2d220ad7d4a31e090e55159452875efddc042db097b543aa0222f0e66a04"
+      },
+      {
+        "path": "implementation/baseline.py",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/baseline.py",
+        "bytes": 913,
+        "sha256": "f3c8a6d6ad17a305b9300211930aac462326aaff1ff484a06e7d31473831152f"
+      },
+      {
+        "path": "implementation/c2-core-adapter-regression-4.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2-core-adapter-regression-4.log",
+        "bytes": 230,
+        "sha256": "c2592fa64ca1c3966925ae276d22ced233d1b965489112c81c873ef8ff34c170"
+      },
+      {
+        "path": "implementation/c2-core-host-regression-3.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2-core-host-regression-3.log",
+        "bytes": 1599,
+        "sha256": "286a1749914ae6413d2ca55fc7afca34b895225b0d546350a7fc2c3a40c0adc2"
+      },
+      {
+        "path": "implementation/c2-installed-1.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2-installed-1.log",
+        "bytes": 1758,
+        "sha256": "0690b9c74cb0cea0ccf3e7894d6937793cccefe337f23e6a392e81c22e5d3285"
+      },
+      {
+        "path": "implementation/c2-installed-2.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2-installed-2.log",
+        "bytes": 1758,
+        "sha256": "11f4dfccb253f560b87e611b0fb677d02bb9cd5112f22924a619ca5f642985bd"
+      },
+      {
+        "path": "implementation/c2-installed-3.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2-installed-3.log",
+        "bytes": 228,
+        "sha256": "2398f76b0892fa9f3162a06ee4d5aaadbda138ea36fed8cdd21e2bd4285e9449"
+      },
+      {
+        "path": "implementation/c2-installed-drop-order.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2-installed-drop-order.log",
+        "bytes": 228,
+        "sha256": "71639e79371603cae15ffbddc4a057b41d92ceadbd70ab0e16e11c03aedc53d2"
+      },
+      {
+        "path": "implementation/c2-installed-final-2.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2-installed-final-2.log",
+        "bytes": 230,
+        "sha256": "c787887f058511f9fcb0e821b2d2eaa9f2a35c5060453df652d1a16ef28dea40"
+      },
+      {
+        "path": "implementation/c2-installed-final.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2-installed-final.log",
+        "bytes": 1466,
+        "sha256": "74fe88c4bfc484d0536d50222577e8ddf216e9830e020418ed9455a5a6a08b1e"
+      },
+      {
+        "path": "implementation/c2-source-text-final.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2-source-text-final.log",
+        "bytes": 128,
+        "sha256": "bda52df0791253010bf0a332623126050d6f79925d28a5ad4fad5dff0e68bc38"
+      },
+      {
+        "path": "implementation/c2-ts-lint-1.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2-ts-lint-1.log",
+        "bytes": 602,
+        "sha256": "46cb2605d7ecb3715114b921b498f4dd0efbd9972256aafbd11645c37a80cffd"
+      },
+      {
+        "path": "implementation/c2a-independent-core-adapter-registry.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2a-independent-core-adapter-registry.log",
+        "bytes": 230,
+        "sha256": "6ac533db7032934e12697eb953d489636da6c83a5d943b910a0f52c9e26beee0"
+      },
+      {
+        "path": "implementation/c2a-independent-core-types.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2a-independent-core-types.log",
+        "bytes": 77,
+        "sha256": "200b048828a3070d7e0970f063d8183336d03cbcf6006207a3c20ec524ac82c4"
+      },
+      {
+        "path": "implementation/c2a-independent-hindsight-host-types.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2a-independent-hindsight-host-types.log",
+        "bytes": 93,
+        "sha256": "438425c13e8beb30e625e77e6bcec6f645aacd80394f9c7515d8609a30730400"
+      },
+      {
+        "path": "implementation/c2a-independent-host-processes.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2a-independent-host-processes.log",
+        "bytes": 230,
+        "sha256": "fe018cdc673fbf1e6beb9a11356e91b91c0c5ad3b7367abc9e176fe53fd6bba2"
+      },
+      {
+        "path": "implementation/c2a-independent-inputs-initial.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2a-independent-inputs-initial.log",
+        "bytes": 474,
+        "sha256": "ef5e1668b2d582dbf745b43c0e1f256d50e9a3746e0deb9cf0a4a990fbb5cbfb"
+      },
+      {
+        "path": "implementation/c2a-independent-installed.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2a-independent-installed.log",
+        "bytes": 228,
+        "sha256": "c4cd62bf054829fcdc4ccab619fd963973ae0868202b6e3af2ccabcf3921fed1"
+      },
+      {
+        "path": "implementation/c2a-independent-native-format.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2a-independent-native-format.log",
+        "bytes": 27,
+        "sha256": "3fa62c94b1301255f0c64c429c668a4fabc4cb9d3848edb2790b607266d16092"
+      },
+      {
+        "path": "implementation/c2a-independent-native-lint.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2a-independent-native-lint.log",
+        "bytes": 20,
+        "sha256": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0"
+      },
+      {
+        "path": "implementation/c2a-independent-native-processes.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2a-independent-native-processes.log",
+        "bytes": 885,
+        "sha256": "be2fb9a1e130a86a5c8b8555d02bde8531c82f33bcc3409082ea6061a5e163ea"
+      },
+      {
+        "path": "implementation/c2a-independent-native-types.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2a-independent-native-types.log",
+        "bytes": 20,
+        "sha256": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0"
+      },
+      {
+        "path": "implementation/c2a-independent-rust-clippy.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2a-independent-rust-clippy.log",
+        "bytes": 61,
+        "sha256": "fb356f55060b345be4e95cbfee9a1a0a5da71846a78e546965eea5d1090c5327"
+      },
+      {
+        "path": "implementation/c2a-independent-rust-focused.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2a-independent-rust-focused.log",
+        "bytes": 1994,
+        "sha256": "0c27089d46153ba3b598c7521b79ddc1d9718c8eafadf5d3eb2510b79e440584"
+      },
+      {
+        "path": "implementation/c2a-independent-rust-wire.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2a-independent-rust-wire.log",
+        "bytes": 371,
+        "sha256": "5eeb33c9fa331940e6431d9a925d6d4de6d4836b21f5fb21cf8f3f1f37736be5"
+      },
+      {
+        "path": "implementation/c2a-independent-shared-protocol.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2a-independent-shared-protocol.log",
+        "bytes": 225,
+        "sha256": "74e40bc8f09455fcb2aceab08dc6d6c8ef25ef4d3841b4fc18400fee80f2227d"
+      },
+      {
+        "path": "implementation/c2a-independent-shared-types.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2a-independent-shared-types.log",
+        "bytes": 81,
+        "sha256": "f9e1326358c4b06cc9030a0db5e834bd737e52677aa159683b70c68a9b6631b2"
+      },
+      {
+        "path": "implementation/c2a-independent-ts-lint.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/c2a-independent-ts-lint.log",
+        "bytes": 11537,
+        "sha256": "b7003f17586df7e3d83f4a3b76222455d9d368a521cd8922575f235bab12a8ab"
+      },
+      {
+        "path": "implementation/changed-py.json",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/changed-py.json",
+        "bytes": 531,
+        "sha256": "55ac0118e6d6ee01012ad26c90d3934f51e9f0667e545dc698879531fa0ec594"
+      },
+      {
+        "path": "implementation/changed-ts.json",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/changed-ts.json",
+        "bytes": 2862,
+        "sha256": "58d2b5b2d4fe293e83a772a997a66104789c2b6ac6e655aa5982739cd19c62db"
+      },
+      {
+        "path": "implementation/check-venv-direct.py",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/check-venv-direct.py",
+        "bytes": 508,
+        "sha256": "07492f107e7a02f6ec4d9b5efecdd0abf9b808ba9123f1398939793c03b38f3e"
+      },
+      {
+        "path": "implementation/checks.jsonl",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/checks.jsonl",
+        "bytes": 42978,
+        "sha256": "fca9742d79adca36ef4de8bb3046320d38736ea922d9222d93650efca768ae46"
+      },
+      {
+        "path": "implementation/core-c2-broker-compatibility-1.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/core-c2-broker-compatibility-1.log",
+        "bytes": 223,
+        "sha256": "73e78797d447cc30a9b606544d46fffca7dc2db40b28d099ba8d293cbce20a7f"
+      },
+      {
+        "path": "implementation/core-c2-process-1.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/core-c2-process-1.log",
+        "bytes": 6100,
+        "sha256": "207918c772218f3de620d343091a8c534bf1b7d019d54f755975f0ecde8c4db2"
+      },
+      {
+        "path": "implementation/core-c2-process-2.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/core-c2-process-2.log",
+        "bytes": 230,
+        "sha256": "57ac6c4a23ed0f0d6b302293dba66e73551396605e1f8c78b346bb975340ed69"
+      },
+      {
+        "path": "implementation/core-types-1.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/core-types-1.log",
+        "bytes": 1838,
+        "sha256": "bd4bc253d0796ecc69a6677b01e15096c5154367173a7e3281f10cc55f1ea8dc"
+      },
+      {
+        "path": "implementation/core-types-2.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/core-types-2.log",
+        "bytes": 9123,
+        "sha256": "1b58201d7deab6943fd52f94bad7156837cf29e0492b66eedae5fbd0d403f09b"
+      },
+      {
+        "path": "implementation/core-types-3.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/core-types-3.log",
+        "bytes": 77,
+        "sha256": "200b048828a3070d7e0970f063d8183336d03cbcf6006207a3c20ec524ac82c4"
+      },
+      {
+        "path": "implementation/debug-child.py",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/debug-child.py",
+        "bytes": 786,
+        "sha256": "227ae8d6645aa4298410fcff3642428dce1006ea2eb2cbe31935286e771be043"
+      },
+      {
+        "path": "implementation/finalize-evidence.py",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/finalize-evidence.py",
+        "bytes": 7467,
+        "sha256": "c94841268662f5b106f913aa1e0aeed7ae92330be3d92fe6016d5070edae873a"
+      },
+      {
+        "path": "implementation/host-c2-process-1.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/host-c2-process-1.log",
+        "bytes": 3271,
+        "sha256": "a8f9f32b9870b710198ae72f321db880109dcd957b54ddf44bb00b4509ab17d5"
+      },
+      {
+        "path": "implementation/host-c2-process-2.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/host-c2-process-2.log",
+        "bytes": 230,
+        "sha256": "2f1b8f3b20d58b9610e6824b05a5ba34772c0fde8716e0021fafb05ce500bc40"
+      },
+      {
+        "path": "implementation/host-c2-types-final-2.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/host-c2-types-final-2.log",
+        "bytes": 93,
+        "sha256": "438425c13e8beb30e625e77e6bcec6f645aacd80394f9c7515d8609a30730400"
+      },
+      {
+        "path": "implementation/host-c2-types-final.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/host-c2-types-final.log",
+        "bytes": 93,
+        "sha256": "438425c13e8beb30e625e77e6bcec6f645aacd80394f9c7515d8609a30730400"
+      },
+      {
+        "path": "implementation/host-types-1.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/host-types-1.log",
+        "bytes": 1035,
+        "sha256": "60ea37eeee5b74f45ca43406aedab6e91fc5bdce30a3f1e96f4e0f54d6c59fcd"
+      },
+      {
+        "path": "implementation/host-types-2.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/host-types-2.log",
+        "bytes": 93,
+        "sha256": "438425c13e8beb30e625e77e6bcec6f645aacd80394f9c7515d8609a30730400"
+      },
+      {
+        "path": "implementation/make-wire-fixtures.py",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/make-wire-fixtures.py",
+        "bytes": 5061,
+        "sha256": "df4c88059bf904b24bcbea66c248a0bd6575f626c8a0ac8b794e3689a4be7f78"
+      },
+      {
+        "path": "implementation/native-c2-1.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/native-c2-1.log",
+        "bytes": 1786,
+        "sha256": "4e215d133442f2d331a9c3963eac2d88e9ed79ef58666e0e11e1b689889cb71b"
+      },
+      {
+        "path": "implementation/native-c2-2.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/native-c2-2.log",
+        "bytes": 885,
+        "sha256": "90ad0f326b2a3ab828cd536bfc9fa89b9dbd94379f0d89a4b41a7fae09ef3e9d"
+      },
+      {
+        "path": "implementation/native-c2-diff-final.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/native-c2-diff-final.log",
+        "bytes": 6155,
+        "sha256": "79eb4a18718f67b9ca3956a664b0d1785686495686ab5137a678e193029db28c"
+      },
+      {
+        "path": "implementation/native-c2-format-1.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/native-c2-format-1.log",
+        "bytes": 45,
+        "sha256": "4f5eda22f7a6ff04959ff177a7204708623226a6390c17725d1fe76dc439cdf9"
+      },
+      {
+        "path": "implementation/native-c2-format-check-2.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/native-c2-format-check-2.log",
+        "bytes": 27,
+        "sha256": "3fa62c94b1301255f0c64c429c668a4fabc4cb9d3848edb2790b607266d16092"
+      },
+      {
+        "path": "implementation/native-c2-process-final.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/native-c2-process-final.log",
+        "bytes": 885,
+        "sha256": "c110ed303973c21776322d9ceda61e3de8eb193957162002b3f1c6f8c5bbb6bc"
+      },
+      {
+        "path": "implementation/native-c2-ruff-1.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/native-c2-ruff-1.log",
+        "bytes": 2168,
+        "sha256": "9eb7775542b464f182e7b3b35e29508c6c8cd676ebb62ac14cac9a9033f80864"
+      },
+      {
+        "path": "implementation/native-c2-ruff-2.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/native-c2-ruff-2.log",
+        "bytes": 20,
+        "sha256": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0"
+      },
+      {
+        "path": "implementation/native-c2-ruff-fix-1.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/native-c2-ruff-fix-1.log",
+        "bytes": 40,
+        "sha256": "2908db4cb9b02d6a2cb4e220dd425c224bd687a533712c8c898de975c9e12b82"
+      },
+      {
+        "path": "implementation/native-c2-ty-1.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/native-c2-ty-1.log",
+        "bytes": 9311,
+        "sha256": "33f358f59d6cb25eeb8b2faa216feeaa0f0977fdea5297f56568ca56440087dc"
+      },
+      {
+        "path": "implementation/native-c2-ty-2.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/native-c2-ty-2.log",
+        "bytes": 20,
+        "sha256": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0"
+      },
+      {
+        "path": "implementation/owned-resources-final.json",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/owned-resources-final.json",
+        "bytes": 1182,
+        "sha256": "f8876edb0e5a37bfc8cf329b17d2b703b2d2aac570e8f4da444b445879deb0ad"
+      },
+      {
+        "path": "implementation/run-check.ps1",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/run-check.ps1",
+        "bytes": 679,
+        "sha256": "9f2aa48e188455cd3ae7391add71bc7be421060379f42e45cffbd794a9f60ec4"
+      },
+      {
+        "path": "implementation/rust-c2-clippy-1.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/rust-c2-clippy-1.log",
+        "bytes": 1453,
+        "sha256": "43d91a72c677ddc2f619ba5a918da7da393e256e2552709ae643864282bbffea"
+      },
+      {
+        "path": "implementation/rust-c2-clippy-2.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/rust-c2-clippy-2.log",
+        "bytes": 134,
+        "sha256": "abc30dd802f8e4f55b1f6b60a2d53a177f2ff9b91bf8187a641c7429589e0301"
+      },
+      {
+        "path": "implementation/rust-c2-clippy-drop-order.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/rust-c2-clippy-drop-order.log",
+        "bytes": 133,
+        "sha256": "7f0c91f19ce77732244cf172c7d923e562f0eb504ca482c60d04a351d737bc76"
+      },
+      {
+        "path": "implementation/rust-c2-focused-drop-order.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/rust-c2-focused-drop-order.log",
+        "bytes": 2067,
+        "sha256": "ccfd3e9ddf201dc40eaf38261f75dd0eb372641175ec3521e90c05452b14501d"
+      },
+      {
+        "path": "implementation/rust-c2-focused-final.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/rust-c2-focused-final.log",
+        "bytes": 2067,
+        "sha256": "03e9d7d06b56a7570b996849100a6a419fca627af5189f8550ff8052797a3d80"
+      },
+      {
+        "path": "implementation/rust-c2-lib-tests-2.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/rust-c2-lib-tests-2.log",
+        "bytes": 17368,
+        "sha256": "25b17e82cd3b5761b5669d141e7493dc4ed755a332b500037a66aa3dd8316e6c"
+      },
+      {
+        "path": "implementation/rust-c2-node-build-1.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/rust-c2-node-build-1.log",
+        "bytes": 224,
+        "sha256": "d4756cedd8fb396ce52c12def654c80405a5981088e3199bdbf34a7e8bcb4e07"
+      },
+      {
+        "path": "implementation/rust-c2-node-build-2.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/rust-c2-node-build-2.log",
+        "bytes": 453,
+        "sha256": "75e8c87615e7f76474c8a0fee895efeb52daa254fc671a4d5613878297295fff"
+      },
+      {
+        "path": "implementation/rust-c2-node-build-drop-order.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/rust-c2-node-build-drop-order.log",
+        "bytes": 453,
+        "sha256": "24b2d8955f55af06b2cbb76d9ac01eb822135b78a9e3d070b1c3583d97f38c3d"
+      },
+      {
+        "path": "implementation/rust-c2-node-build-final.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/rust-c2-node-build-final.log",
+        "bytes": 453,
+        "sha256": "ca57b46240b6338d6ec094050a29c5a78a7a50a304f23fb8cfd3f0a0993551ba"
+      },
+      {
+        "path": "implementation/rust-c2-wire-final.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/rust-c2-wire-final.log",
+        "bytes": 371,
+        "sha256": "1207d52121d850b4531d57bff98ccb09ea4ea1657230d7eb7fb5722e0bc1aa1f"
+      },
+      {
+        "path": "implementation/rust-hindsight-1.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/rust-hindsight-1.log",
+        "bytes": 1663,
+        "sha256": "c1144ccb34716a26407ffc79cdc8a8a28788f8de9168265deb7ec1a773fef5bf"
+      },
+      {
+        "path": "implementation/shared-c2-protocol-1.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/shared-c2-protocol-1.log",
+        "bytes": 1546,
+        "sha256": "a20d0f944a9b3b1d9f818d512237af548d30f49e1ccd5c4beffeb3dc85878f8f"
+      },
+      {
+        "path": "implementation/shared-c2-protocol-2.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/shared-c2-protocol-2.log",
+        "bytes": 225,
+        "sha256": "9203256a4e249b5ae752857c6b08ec7ce023b47ad48e982636caec305eee0ed0"
+      },
+      {
+        "path": "implementation/shared-c2-types-2.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/shared-c2-types-2.log",
+        "bytes": 81,
+        "sha256": "f9e1326358c4b06cc9030a0db5e834bd737e52677aa159683b70c68a9b6631b2"
+      },
+      {
+        "path": "implementation/shared-types-1.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/shared-types-1.log",
+        "bytes": 81,
+        "sha256": "f9e1326358c4b06cc9030a0db5e834bd737e52677aa159683b70c68a9b6631b2"
+      },
+      {
+        "path": "implementation/taki-c2-diff-final.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/taki-c2-diff-final.log",
+        "bytes": 2028,
+        "sha256": "4f63e184b0d7717f29fc1cd4457e90a2c1686b09b157f30a2807e02f50927b33"
+      },
+      {
+        "path": "implementation/taki-c2a-fixture-31d4cba8-7c8f-430c-9982-4b1fbf37104f.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/taki-c2a-fixture-31d4cba8-7c8f-430c-9982-4b1fbf37104f.log",
+        "bytes": 3610,
+        "sha256": "5033487ab61f5560185494e4975aaf6e3bec7df5519cae1602ad3932601ea801"
+      },
+      {
+        "path": "implementation/taki-c2a-fixture-5010ba6e-0e22-406e-9da4-35fbc11e768c.json",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/taki-c2a-fixture-5010ba6e-0e22-406e-9da4-35fbc11e768c.json",
+        "bytes": 27569,
+        "sha256": "57da9f007a9c03f3017cee97d2dd1077b93ec47b793c6fc7dc82e565c77b8eaf"
+      },
+      {
+        "path": "implementation/taki-c2a-fixture-5010ba6e-0e22-406e-9da4-35fbc11e768c.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/taki-c2a-fixture-5010ba6e-0e22-406e-9da4-35fbc11e768c.log",
+        "bytes": 6761,
+        "sha256": "88a1ce93ac939975fa897d047183ef9d312de49227e6c9ddc724d32b41495a3e"
+      },
+      {
+        "path": "implementation/taki-c2a-fixture-8c889e88-8a2c-4a3e-8641-1108d8d6f280.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/taki-c2a-fixture-8c889e88-8a2c-4a3e-8641-1108d8d6f280.log",
+        "bytes": 6762,
+        "sha256": "50a5cd1fb13d1a6344de306b83acfe7454b2c7f1e32e1103bce9a087331be622"
+      },
+      {
+        "path": "implementation/taki-c2a-fixture-9d43a95c-7a55-4ba8-889d-1b6c216e3c3d.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/taki-c2a-fixture-9d43a95c-7a55-4ba8-889d-1b6c216e3c3d.log",
+        "bytes": 6762,
+        "sha256": "e647ccae03f23ad3bac57185e27be41805401ed5af8fd14cf6c7e8b796cc6f36"
+      },
+      {
+        "path": "implementation/taki-c2a-fixture-e0000a60-c6a8-41e4-a102-da99f5efc626.json",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/taki-c2a-fixture-e0000a60-c6a8-41e4-a102-da99f5efc626.json",
+        "bytes": 27569,
+        "sha256": "dfb8c75191e78e9bd924d3f19ea0ba3d0c6c9abade408147dc555daafafd870d"
+      },
+      {
+        "path": "implementation/taki-c2a-fixture-e0000a60-c6a8-41e4-a102-da99f5efc626.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/taki-c2a-fixture-e0000a60-c6a8-41e4-a102-da99f5efc626.log",
+        "bytes": 6761,
+        "sha256": "7ff8e77a929c880554e84ea8e1fa452846d30cc91c1f0badaba95047856eb7e2"
+      },
+      {
+        "path": "implementation/taki-c2a-fixture-f9a819b1-00c2-4475-9d41-d1b4d3132413.json",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/taki-c2a-fixture-f9a819b1-00c2-4475-9d41-d1b4d3132413.json",
+        "bytes": 27569,
+        "sha256": "bcf2221d8e9738b757eb9db950cb900e54666c70db04178135f149dd38d49ba0"
+      },
+      {
+        "path": "implementation/taki-c2a-fixture-f9a819b1-00c2-4475-9d41-d1b4d3132413.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/taki-c2a-fixture-f9a819b1-00c2-4475-9d41-d1b4d3132413.log",
+        "bytes": 6762,
+        "sha256": "7624e19d61200e8bccfcf3a6fda44b1db4349c78f8a97a59a7778c71d1ce1c51"
+      },
+      {
+        "path": "implementation/taki-c2a-fixture-fee896fe-995b-4cce-8c51-64d0950cdc38.log",
+        "sourcePath": "G:/Temp/taki-c2a-source-20261014-impl/taki-c2a-fixture-fee896fe-995b-4cce-8c51-64d0950cdc38.log",
+        "bytes": 3628,
+        "sha256": "bba7ae90bb3033675279bf2fce780af89f4b088957da2bf1cc64995cc2de38ac"
+      },
+      {
+        "path": "independent/audit-inputs.py",
+        "sourcePath": "G:/Temp/taki-c2a-independent-20261014-check/audit-inputs.py",
+        "bytes": 3988,
+        "sha256": "4aafd78ce98e784c46ef476268a4535d431d27515b3e4cc8e8d582fb4715bf1c"
+      },
+      {
+        "path": "independent/implementation-checks-prefix.jsonl",
+        "sourcePath": "G:/Temp/taki-c2a-independent-20261014-check/implementation-checks-prefix.jsonl",
+        "bytes": 32775,
+        "sha256": "637a2aa6a13378dd157506f1883d6027e23df20f3071dfd36f855127b19a10e6"
+      },
+      {
+        "path": "independent/preliminary-review.md",
+        "sourcePath": "G:/Temp/taki-c2a-independent-20261014-check/preliminary-review.md",
+        "bytes": 22382,
+        "sha256": "879da1bdc860561b40b061fb84d155a7e7f81effc221b40b2f3c9fe406d9e61d"
+      },
+      {
+        "path": "root/preserve.py",
+        "sourcePath": "G:/Temp/taki-c2a-root-20261014-closure/preserve.py",
+        "bytes": 6172,
+        "sha256": "82537c9b351c944f72a2206966149c68a72e83cf6af67226f64aa84691b17f5d"
+      }
+    ]
+  },
+  "cleanup": {
+    "state": "complete",
+    "completedAt": "2026-10-14T14:19:50.2289958Z",
+    "removedRoots": [
+      {
+        "path": "G:\\Temp\\taki-c2a-source-20261014-impl",
+        "files": 1579,
+        "logicalBytes": 11953648.0
+      },
+      {
+        "path": "G:\\Temp\\taki-c2a-independent-20261014-check",
+        "files": 8,
+        "logicalBytes": 59648.0
+      },
+      {
+        "path": "G:\\Temp\\taki-c2a-root-20261014-closure",
+        "files": 157,
+        "logicalBytes": 1208810.0
+      }
+    ],
+    "logicalBytesRemoved": 13222106.0,
+    "precheck": {
+      "recordedAt": "2026-10-14T14:18:38.3598512Z",
+      "roots": [
+        {
+          "path": "G:\\Temp\\taki-c2a-source-20261014-impl",
+          "files": 1579,
+          "bytes": 11953648.0,
+          "reparsePoints": 0
+        },
+        {
+          "path": "G:\\Temp\\taki-c2a-independent-20261014-check",
+          "files": 8,
+          "bytes": 59648.0,
+          "reparsePoints": 0
+        },
+        {
+          "path": "G:\\Temp\\taki-c2a-root-20261014-closure",
+          "files": 156,
+          "bytes": 1207986.0,
+          "reparsePoints": 0
+        }
+      ],
+      "protectedFixtureRoots": [],
+      "testedPids": [
+        33644
+      ],
+      "liveTestedProcesses": [],
+      "capacity": [
+        {
+          "Name": "C",
+          "Free": 27746742272
+        },
+        {
+          "Name": "G",
+          "Free": 145021464576
+        },
+        {
+          "Name": "H",
+          "Free": 13104574464
+        }
+      ]
+    },
+    "protectedFixtureRoots": [],
+    "liveTestedProcesses": [],
+    "capacity": [
+      {
+        "Name": "C",
+        "Free": 27747917824
+      },
+      {
+        "Name": "G",
+        "Free": 145042153472
+      },
+      {
+        "Name": "H",
+        "Free": 13104574464
+      }
+    ],
+    "retained": "Existing Rust targets, source, dependencies, T4 evidence and the task evidence archive/patches",
+    "spaceClaim": "Logical owned-file bytes only; unrelated disk activity prevents attributing all free-space changes to this cleanup."
+  },
+  "limits": [
+    "No source rollback or Git lifecycle action was executed.",
+    "Metadata/spec/handoff edits are outside the preserved 109-file implementation delta.",
+    "Real Docker, Linux C2 runtime, database, original-data and model acceptance remain open."
+  ]
+}

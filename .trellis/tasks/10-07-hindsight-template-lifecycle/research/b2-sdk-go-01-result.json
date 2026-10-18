@@ -1,0 +1,15 @@
+{
+  "command": [
+    "H:/TakiAgent/.trellis/.runtime/g1-toolchain/go/go/bin/go.exe",
+    "test",
+    "./...",
+    "-count=1",
+    "-v",
+    "-run",
+    "^(TestDispositionTraitsCompatibility|TestNativeResultNullableStatus|TestNativeReferenceNullableDocument|TestCurrentState.*|TestTransitionNullableArtifactContract|TestConfigurationObservationProfiles|TestTemplateLifecyclePresence)$"
+  ],
+  "cwd": "H:/hindsight/hindsight-clients/go",
+  "exitCode": 0,
+  "durationSeconds": 11.877,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-sdk-go-01.log"
+}

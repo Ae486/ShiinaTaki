@@ -1,0 +1,38 @@
+{
+  "fileCount": 85,
+  "untrackedFileCount": 37,
+  "currentInputCount": 1592,
+  "sourceComparisons": {
+    "healthy-template-green-01": [
+      "packages/core/src/testing/hindsight-template-observation-fixtures.ts",
+      "packages/shared/src/hindsight-backup-v1-schema.ts"
+    ],
+    "healthy-legacy-reuse-01": [
+      "packages/core/src/testing/hindsight-template-observation-fixtures.ts",
+      "packages/shared/src/hindsight-backup-v1-schema.ts"
+    ],
+    "healthy-offline-w6-01": [
+      "packages/core/src/testing/hindsight-template-observation-fixtures.ts",
+      "packages/shared/src/hindsight-backup-v1-schema.ts"
+    ],
+    "healthy-template-types-02": [
+      "packages/shared/src/hindsight-backup-v1-schema.ts"
+    ],
+    "healthy-owned-lint-01": [
+      "packages/shared/src/hindsight-backup-v1-schema.ts"
+    ],
+    "healthy-observer-final-01": [
+      "packages/shared/src/hindsight-backup-v1-schema.ts"
+    ]
+  },
+  "schemaEofOnly": {
+    "healthy-template-green-01": true,
+    "healthy-legacy-reuse-01": true,
+    "healthy-offline-w6-01": true,
+    "healthy-template-types-02": true,
+    "healthy-owned-lint-01": true,
+    "healthy-observer-final-01": true
+  },
+  "issues": [],
+  "fileInventory": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-healthy-owned-files-02-files.json"
+}

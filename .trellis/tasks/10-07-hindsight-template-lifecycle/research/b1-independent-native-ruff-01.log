@@ -1,0 +1,24 @@
+I001 [*] Import block is un-sorted or un-formatted
+  --> tests\native_results\test_template_independent_refresh.py:3:1
+   |
+ 1 |   """Independent adversarial checks on real template refresh claims and publication."""
+ 2 |
+ 3 | / import asyncio
+ 4 | | import uuid
+ 5 | | from types import SimpleNamespace
+ 6 | | from unittest.mock import AsyncMock
+ 7 | |
+ 8 | | import pytest
+ 9 | |
+10 | | from hindsight_api.engine.memory_engine import fq_table
+11 | | from hindsight_api.engine.template_encoding import request_hash
+12 | | from hindsight_api.engine.response_models import LLMToolCall, LLMToolCallResult
+13 | |
+14 | | from .maintenance_helpers import maintenance_schema as maintenance_schema
+15 | | from .test_template_lifecycle import ROOT, fresh, plan
+   | |______________________________________________________^
+   |
+help: Organize imports
+
+Found 1 error.
+[*] 1 fixable with the `--fix` option.

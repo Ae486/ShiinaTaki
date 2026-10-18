@@ -1,0 +1,24 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "--filter",
+    "@taki/cli",
+    "exec",
+    "vitest",
+    "run",
+    "--maxWorkers=2"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "startedAt": "2026-10-13T06:23:42.483753+00:00",
+  "finishedAt": "2026-10-13T06:23:49.431613+00:00",
+  "exitCode": 0,
+  "durationSeconds": 6.953,
+  "inputCount": 2417,
+  "changedInputs": [],
+  "inputManifest": "b3-whole-cli-tests-01-inputs.json",
+  "afterManifest": "b3-whole-cli-tests-01-inputs-after.json",
+  "log": "b3-whole-cli-tests-01.log",
+  "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-whole-checks\\cli-tests-01-21a3fb1230214d73b447de22fba970a9",
+  "temporaryRootRemoved": true,
+  "remainingFixtureEntries": []
+}

@@ -1,0 +1,98 @@
+[
+  {
+    "path": "docker/standalone/Dockerfile.c2a-fake",
+    "source": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/c2a-database-persistence-run-1b05d2f6/context/docker/standalone/Dockerfile.c2a-fake",
+    "bytes": 555,
+    "sha256": "2be1279ef4621f5d42397879fab2e436d780224eb3c02d591180faf9e9a9fcff",
+    "upstreamSha256": "2be1279ef4621f5d42397879fab2e436d780224eb3c02d591180faf9e9a9fcff",
+    "replacement": false
+  },
+  {
+    "path": "docker/standalone/managed_bootstrap/__init__.py",
+    "source": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/c2a-database-persistence-run-1b05d2f6/context/docker/standalone/managed_bootstrap/__init__.py",
+    "bytes": 80,
+    "sha256": "cbf487cffc9c62b5c6fe61f32d80070b5843f70f966c5fca163c675e21ddbf1d",
+    "upstreamSha256": "cbf487cffc9c62b5c6fe61f32d80070b5843f70f966c5fca163c675e21ddbf1d",
+    "replacement": false
+  },
+  {
+    "path": "docker/standalone/managed_bootstrap/bootstrap.py",
+    "source": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/c2a-database-persistence-run-1b05d2f6/context/docker/standalone/managed_bootstrap/bootstrap.py",
+    "bytes": 6323,
+    "sha256": "b8331bd8c9645d265578ed65f9f77402f170813f20d1d2683b5aa0a7d0768101",
+    "upstreamSha256": "b8331bd8c9645d265578ed65f9f77402f170813f20d1d2683b5aa0a7d0768101",
+    "replacement": false
+  },
+  {
+    "path": "docker/standalone/managed_bootstrap/control.py",
+    "source": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/c2a-database-persistence-run-1b05d2f6/context/docker/standalone/managed_bootstrap/control.py",
+    "bytes": 5593,
+    "sha256": "c75dcdf2285df614c4836dab4898a2980a2a1e8e4572862861596ab244f39d5e",
+    "upstreamSha256": "c75dcdf2285df614c4836dab4898a2980a2a1e8e4572862861596ab244f39d5e",
+    "replacement": false
+  },
+  {
+    "path": "docker/standalone/managed_bootstrap/fake_child.py",
+    "source": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/docker-database-run-b5c5fb7f/fake_child.py",
+    "bytes": 44233,
+    "sha256": "f76cfbd0eec0a8614c16ba947939dd13367163e84c9ff1c584476711814c6180",
+    "upstreamSha256": "9d65b8875e5d798a024dff9b4a182d6cff7bf4b62646954e38cd0c2e12ce3819",
+    "replacement": true
+  },
+  {
+    "path": "docker/standalone/managed_bootstrap/fake_consumer.py",
+    "source": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/c2a-database-persistence-run-1b05d2f6/context/docker/standalone/managed_bootstrap/fake_consumer.py",
+    "bytes": 4302,
+    "sha256": "52b3d0664b06ef82dca4765d2c08e820c16c2af5e2814a02f98fe08f8e220eb3",
+    "upstreamSha256": "52b3d0664b06ef82dca4765d2c08e820c16c2af5e2814a02f98fe08f8e220eb3",
+    "replacement": false
+  },
+  {
+    "path": "docker/standalone/managed_bootstrap/owner.py",
+    "source": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/c2a-database-persistence-run-1b05d2f6/context/docker/standalone/managed_bootstrap/owner.py",
+    "bytes": 2460,
+    "sha256": "5b10f9f09def8ff985c96fed56c31f4ec4976f684d7e3b044fdc8a66afb38acc",
+    "upstreamSha256": "5b10f9f09def8ff985c96fed56c31f4ec4976f684d7e3b044fdc8a66afb38acc",
+    "replacement": false
+  },
+  {
+    "path": "docker/standalone/managed_bootstrap/owner_protocol.py",
+    "source": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/c2a-database-persistence-run-1b05d2f6/context/docker/standalone/managed_bootstrap/owner_protocol.py",
+    "bytes": 3199,
+    "sha256": "cd9cdbea572354dbbc1200098d9edfe9280679c2b346a67c1326a795b01c1804",
+    "upstreamSha256": "cd9cdbea572354dbbc1200098d9edfe9280679c2b346a67c1326a795b01c1804",
+    "replacement": false
+  },
+  {
+    "path": "docker/standalone/managed_bootstrap/protocol.py",
+    "source": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/c2a-database-persistence-run-1b05d2f6/context/docker/standalone/managed_bootstrap/protocol.py",
+    "bytes": 13320,
+    "sha256": "074247650a31cfc47a1931ef6c7b258aa6f1d3a649bbb792ff2878257f6f8b88",
+    "upstreamSha256": "074247650a31cfc47a1931ef6c7b258aa6f1d3a649bbb792ff2878257f6f8b88",
+    "replacement": false
+  },
+  {
+    "path": "docker/standalone/managed_bootstrap/submitter.py",
+    "source": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/c2a-database-persistence-run-1b05d2f6/context/docker/standalone/managed_bootstrap/submitter.py",
+    "bytes": 4913,
+    "sha256": "5a6ad60266066d1cff2559d46c6b2b15d4a93cf882de1e487790ad0fb6863c4a",
+    "upstreamSha256": "5a6ad60266066d1cff2559d46c6b2b15d4a93cf882de1e487790ad0fb6863c4a",
+    "replacement": false
+  },
+  {
+    "path": "docker/standalone/managed_bootstrap/supervision.py",
+    "source": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/c2a-database-persistence-run-1b05d2f6/context/docker/standalone/managed_bootstrap/supervision.py",
+    "bytes": 4552,
+    "sha256": "ff768434e0cef9eb2b6996351ba31e1dedede95211809d2ab8e8d09b5d9a5064",
+    "upstreamSha256": "ff768434e0cef9eb2b6996351ba31e1dedede95211809d2ab8e8d09b5d9a5064",
+    "replacement": false
+  },
+  {
+    "path": "docker/standalone/managed_bootstrap/unix_socket.py",
+    "source": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/c2a-database-persistence-run-1b05d2f6/context/docker/standalone/managed_bootstrap/unix_socket.py",
+    "bytes": 9434,
+    "sha256": "08b6e604211d19e31ad61782c96b91a004277b37c31d6e9a0bdfdda681cd7725",
+    "upstreamSha256": "08b6e604211d19e31ad61782c96b91a004277b37c31d6e9a0bdfdda681cd7725",
+    "replacement": false
+  }
+]

@@ -1,0 +1,20 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "exec",
+    "eslint",
+    "apps/desktop/src/windows/home/pages/operations/hindsight-template-browser.test.ts"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "startedAt": "2026-10-09T14:31:59.407339+00:00",
+  "finishedAt": "2026-10-09T14:32:07.586585+00:00",
+  "exitCode": 0,
+  "durationSeconds": 8.188,
+  "inputManifest": "b3-independent-home-lint-browser-final-01-inputs.json",
+  "sourceCount": 2042,
+  "changedInputs": [],
+  "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-independent-home\\lint-browser-final-01-d819fb947f9f42768ba289fc2e5e8b77",
+  "temporaryRootRemoved": true,
+  "remainingFixtureEntries": [],
+  "log": "b3-independent-home-lint-browser-final-01.log"
+}

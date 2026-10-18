@@ -1,0 +1,80 @@
+I001 [*] Import block is un-sorted or un-formatted
+  --> hindsight_api\admin\taki_backup_request.py:3:1
+   |
+ 1 |   """Version-aware, bounded Core request files and HTTP input; no v2-to-v1 fallback."""
+ 2 |
+ 3 | / from __future__ import annotations
+ 4 | |
+ 5 | | from pathlib import Path
+ 6 | |
+ 7 | | from hindsight_api.engine.template_backup_json import load_backup_json
+ 8 | | from hindsight_api.engine.template_backup_models import BACKUP_V2_REQUEST_BYTES, TakiBackupRequestV2, TemplateBackupError
+ 9 | |
+10 | | from .taki_backup import MAX_V1_REQUEST_BYTES, TakiBackupRequest
+   | |________________________________________________________________^
+11 |
+12 |   TakiBackupRequestVersion = TakiBackupRequest | TakiBackupRequestV2
+   |
+help: Organize imports
+
+I001 [*] Import block is un-sorted or un-formatted
+   --> hindsight_api\engine\memory_engine.py:376:5
+    |
+375 |   if TYPE_CHECKING:
+376 | /     from hindsight_api.api.taki_application_state import TakiApplicationReflectRequest, TakiApplicationReflectResponse
+377 | |     from hindsight_api.extensions import (
+378 | |         BankWriteOperation,
+379 | |         OperationValidatorExtension,
+380 | |         TenantExtension,
+381 | |         ValidationResult,
+382 | |     )
+383 | |     from hindsight_api.models import RequestContext
+384 | |
+385 | |     from . import transition_models
+386 | |     from .application_state import models as application_models
+387 | |     from .application_state.read_admission import ReflectReadAdmission
+388 | |     from .application_state.service import ApplicationStateService
+389 | |     from .audit import AuditLogListResponse, AuditLogStatsResponse
+390 | |     from .configuration_observation_models import TakiConfigurationObservation
+391 | |     from .template_backup_config import LocalTemplateBackupObserver
+392 | |     from .template_backup_models import TakiBackupRequestV2
+393 | |     from .template_backup_models import TemplateBackupObservationRequest, TemplateBackupObservationResponse
+394 | |     from .cutover_verification import (
+395 | |         AdvanceCutoverVerificationRequest,
+396 | |         CutoverEvidencePage,
+397 | |         CutoverVerificationRequest,
+398 | |         CutoverVerificationStatus,
+399 | |     )
+400 | |     from .cutover_verification_model import CutoverModelProofContext
+401 | |     from .cutover_verification_runner import CutoverVerificationService
+402 | |     from .logical_snapshot import LogicalSnapshotMetadata, LogicalSnapshotPage
+403 | |     from .native_operation_receipts import (
+404 | |         NativeMutationContext,
+405 | |         NativeOperationKind,
+406 | |         NativeRetainAdmission,
+407 | |         TakiNativeIdentity,
+408 | |         TakiNativeResultPage,
+409 | |         TakiNativeResultStatus,
+410 | |         TakiTrackedMutationRequest,
+411 | |         TakiTrackedRetainRequest,
+412 | |     )
+413 | |     from .reflect.evidence import ReflectInputEvidence
+414 | |     from .replication import LogicalChangePage, PendingLogicalChange
+415 | |     from .retain.receipt_context import NativeRetainExecution, RetainReceiptContext
+416 | |     from .taki_compatibility import TakiCompatibilityManifest
+417 | |     from .transfer import BankImportResult, ImportResult
+418 | |     from .transfer.current_state_schema import (
+419 | |         CurrentStateMappingPage,
+420 | |         CurrentStateTransferRequest,
+421 | |         CurrentStateTransferResult,
+422 | |     )
+423 | |     from .transfer.transition_delta_models import TakiTransitionDeltaRequest, TakiTransitionDeltaResult
+424 | |     from .transition_api_service import TransitionApiService
+425 | |     from .transition_snapshot import TakiTransitionAuxiliaryPage
+426 | |     from .transition_source_models import TakiTransitionSourcePartRequest, TakiTransitionSourceUploadRequest
+    | |____________________________________________________________________________________________________________^
+    |
+help: Organize imports
+
+Found 2 errors.
+[*] 2 fixable with the `--fix` option.

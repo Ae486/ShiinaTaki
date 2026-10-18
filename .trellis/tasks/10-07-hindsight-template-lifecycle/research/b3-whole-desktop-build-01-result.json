@@ -1,0 +1,22 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "--filter",
+    "@taki/desktop",
+    "run",
+    "build"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "startedAt": "2026-10-13T06:28:41.046096+00:00",
+  "finishedAt": "2026-10-13T06:28:47.345951+00:00",
+  "exitCode": 0,
+  "durationSeconds": 6.296,
+  "inputCount": 2417,
+  "changedInputs": [],
+  "inputManifest": "b3-whole-desktop-build-01-inputs.json",
+  "afterManifest": "b3-whole-desktop-build-01-inputs-after.json",
+  "log": "b3-whole-desktop-build-01.log",
+  "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-whole-checks\\desktop-build-01-6cb4d0e0105b4b0789d93bad08f9cd7c",
+  "temporaryRootRemoved": true,
+  "remainingFixtureEntries": []
+}

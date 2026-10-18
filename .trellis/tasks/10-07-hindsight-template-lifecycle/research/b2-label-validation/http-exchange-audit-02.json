@@ -1,0 +1,33 @@
+{
+  "kind": "read-only retained HTTP exchange audit",
+  "exitCode": 0,
+  "exchangeFile": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-native-http-dd7e6dfe82504d7e9c521dd64ac8dd0b-exchanges.jsonl",
+  "exchangeSha256": "a09db13ea041d04722bd3d392a8ddda8c49f0916cd598e9b701c2c28f667f345",
+  "records": 200,
+  "requestOrdinalsUniqueAndComplete": true,
+  "rowOrder": "HTTP completion order",
+  "allRecordedBodyHashesVerified": true,
+  "authorizationHeadersRecorded": false,
+  "labelEvidenceReads": 7,
+  "exactProofRows": 2,
+  "provenValues": [
+    "activity",
+    "episodes"
+  ],
+  "emptyEvidenceResponses": 5,
+  "applicationCommits": 11,
+  "nodeSummary": {
+    "banks": 2,
+    "units": 7,
+    "registryPolicies": 2,
+    "neutralPolicies": 5,
+    "consolidatedProvenUnits": 2,
+    "requests": 200,
+    "labelEvidenceReads": 7,
+    "applicationCommits": 11,
+    "reopenVerified": true,
+    "remoteIoOutsideSqlite": true,
+    "exchangeFile": "G:\\Temp\\pytest-of-unknown\\pytest-60\\test_real_native_labels_reach_0\\http-exchanges.jsonl",
+    "exchangeSha256": "a09db13ea041d04722bd3d392a8ddda8c49f0916cd598e9b701c2c28f667f345"
+  }
+}

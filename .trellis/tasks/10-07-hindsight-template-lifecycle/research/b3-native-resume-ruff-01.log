@@ -1,0 +1,51 @@
+I001 [*] Import block is un-sorted or un-formatted
+  --> tests\native_results\template_backup_joint_helpers.py:3:1
+   |
+ 1 |   """Real PG/HTTP/CLI/Core entry adapters for the isolated B3 paired-restore gate."""
+ 2 |
+ 3 | / from __future__ import annotations
+ 4 | |
+ 5 | | import asyncio
+ 6 | | import hashlib
+ 7 | | import json
+ 8 | | import os
+ 9 | | import shutil
+10 | | import subprocess
+11 | | import uuid
+12 | | from collections.abc import AsyncIterator
+13 | | from contextlib import asynccontextmanager
+14 | | from dataclasses import dataclass, field, replace
+15 | | from pathlib import Path
+16 | | from typing import Any
+17 | | from urllib.parse import urlsplit
+18 | |
+19 | | import asyncpg
+20 | | import pytest
+21 | | import uvicorn
+22 | | from pydantic import BaseModel, ConfigDict, Field
+23 | | from starlette.types import ASGIApp, Message, Receive, Scope, Send
+24 | | from typer.testing import CliRunner
+25 | |
+26 | | from hindsight_api.admin.cli import _restore
+27 | | from hindsight_api.admin.cli import app as admin_app
+28 | | from hindsight_api.api import create_app
+29 | | from hindsight_api.engine.cross_encoder import RRFPassthroughCrossEncoder
+30 | | from hindsight_api.engine.memory_engine import MemoryEngine
+31 | | from hindsight_api.engine.schema import fq_table
+32 | | from hindsight_api.engine.query_analyzer import DateparserQueryAnalyzer
+33 | | from hindsight_api.engine.task_backend import SyncTaskBackend
+34 | | from hindsight_api.engine.template_backup_models import TakiBackupRequestV2
+35 | | from hindsight_api.engine.template_encoding import receipt_hash, request_hash
+36 | | from hindsight_api.engine.template_models import TemplateApplyRequest, TemplateReceipt, TemplateRefreshResult
+37 | | from hindsight_api.migrations import run_migrations
+38 | | from hindsight_api.models import RequestContext
+39 | |
+40 | | from .conftest import FixtureEmbeddings
+   | |_______________________________________^
+41 |
+42 |   TAKI_ROOT = Path("H:/TakiAgent")
+   |
+help: Organize imports
+
+Found 1 error.
+[*] 1 fixable with the `--fix` option.

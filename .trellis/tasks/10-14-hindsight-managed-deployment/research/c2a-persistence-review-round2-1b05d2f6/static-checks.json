@@ -1,0 +1,38 @@
+[
+  {
+    "status": "fulfilled",
+    "value": {
+      "name": "byte-and-node",
+      "command": "& 'C:/Program Files/nodejs/node.exe' '.trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-persistence-review-round2-1b05d2f6/verify-phase-a.mjs'",
+      "chunk_id": "c03495",
+      "wall_time_seconds": 1.0234662,
+      "exit_code": 0,
+      "original_token_count": 424,
+      "output": "{\"input\":\"2026-10-15T12:49:45.123456789Z\",\"result\":\"ACCEPTED\",\"returned\":\"2026-10-15T12:49:45.123456789Z\",\"unchanged\":true,\"passed\":true,\"calls\":[{\"registration\":{\"reviewMock\":true},\"argv\":[\"info\",\"--format\",\"{{.SystemTime}}\"],\"maxBytes\":4096}],\"budgetMs\":10000}\n{\"input\":\"2026-10-15T12:49:45Z\",\"result\":\"ACCEPTED\",\"returned\":\"2026-10-15T12:49:45Z\",\"unchanged\":true,\"passed\":true,\"calls\":[{\"registration\":{\"reviewMock\":true},\"argv\":[\"info\",\"--format\",\"{{.SystemTime}}\"],\"maxBytes\":4096}],\"budgetMs\":10000}\n{\"input\":\"2026-02-30T00:00:00Z\",\"result\":\"REJECTED\",\"error\":\"C2A_CHECK_FAILED\",\"passed\":true,\"calls\":[{\"registration\":{\"reviewMock\":true},\"argv\":[\"info\",\"--format\",\"{{.SystemTime}}\"],\"maxBytes\":4096}],\"budgetMs\":10000}\n{\"input\":\"2026-13-01T00:00:00Z\",\"result\":\"REJECTED\",\"error\":\"C2A_CHECK_FAILED\",\"passed\":true,\"calls\":[{\"registration\":{\"reviewMock\":true},\"argv\":[\"info\",\"--format\",\"{{.SystemTime}}\"],\"maxBytes\":4096}],\"budgetMs\":10000}\n{\"input\":\"2026-10-15T24:00:00Z\",\"result\":\"REJECTED\",\"error\":\"C2A_CHECK_FAILED\",\"passed\":true,\"calls\":[{\"registration\":{\"reviewMock\":true},\"argv\":[\"info\",\"--format\",\"{{.SystemTime}}\"],\"maxBytes\":4096}],\"budgetMs\":10000}\n{\"input\":\"2026-10-15T12:49:45.123456789+08:00\",\"result\":\"REJECTED\",\"error\":\"C2A_CHECK_FAILED\",\"passed\":true,\"calls\":[{\"registration\":{\"reviewMock\":true},\"argv\":[\"info\",\"--format\",\"{{.SystemTime}}\"],\"maxBytes\":4096}],\"budgetMs\":10000}\n{\"input\":\"not-a-time\",\"result\":\"REJECTED\",\"error\":\"C2A_CHECK_FAILED\",\"passed\":true,\"calls\":[{\"registration\":{\"reviewMock\":true},\"argv\":[\"info\",\"--format\",\"{{.SystemTime}}\"],\"maxBytes\":4096}],\"budgetMs\":10000}\n{\"byteChecks\":\"PASS\",\"sevenInputs\":\"7/7 PASS\",\"nativePins\":12,\"sourceManifestPins\":109}\n"
+    }
+  },
+  {
+    "status": "fulfilled",
+    "value": {
+      "name": "eslint",
+      "command": "& 'C:/Program Files/nodejs/node.exe' node_modules/eslint/bin/eslint.js --no-ignore .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/run-persistence.ts",
+      "chunk_id": "92695d",
+      "wall_time_seconds": 3.3777052,
+      "exit_code": 0,
+      "original_token_count": 0,
+      "output": ""
+    }
+  },
+  {
+    "status": "fulfilled",
+    "value": {
+      "name": "tsc-noEmit",
+      "command": "@'\nconst ts=require('typescript'),fs=require('node:fs');\nconst entry='.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/run-persistence.ts';\nconst config=JSON.parse(fs.readFileSync('tsconfig.base.json','utf8'));\nconst parsed=ts.convertCompilerOptionsFromJson(config.compilerOptions, process.cwd());\nconst program=ts.createProgram([entry],{...parsed.options,noEmit:true,incremental:false});\nconst diagnostics=[...parsed.errors,...ts.getPreEmitDiagnostics(program)].map(d=>({file:d.file?.fileName,line:d.file&&d.start!==undefined?d.file.getLineAndCharacterOfPosition(d.start).line+1:undefined,code:d.code,message:ts.flattenDiagnosticMessageText(d.messageText,'\\n')}));\nconsole.log(JSON.stringify({entry,noEmit:true,diagnostics}));process.exitCode=diagnostics.length?1:0;\n'@ | & 'C:/Program Files/nodejs/node.exe' -",
+      "chunk_id": "a95f9d",
+      "wall_time_seconds": 6.7079428,
+      "exit_code": 0,
+      "original_token_count": 35,
+      "output": "{\"entry\":\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/run-persistence.ts\",\"noEmit\":true,\"diagnostics\":[]}\n"
+    }
+  }
+]

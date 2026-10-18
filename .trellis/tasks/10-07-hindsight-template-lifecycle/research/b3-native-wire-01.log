@@ -1,0 +1,68 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.5, pytest-9.0.3, pluggy-1.6.0
+rootdir: H:\hindsight\hindsight-api-slim
+configfile: pyproject.toml
+plugins: anyio-4.11.0, langsmith-0.9.1, asyncio-1.3.0, rerunfailures-16.1, timeout-2.4.0, xdist-3.8.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 300.0s
+timeout method: thread
+timeout func_only: False
+collected 48 items
+
+tests/test_taki_template_backup_contract.py::test_shared_positive_wire_is_lossless[request-TakiBackupRequestV2] PASSED [  2%]
+tests/test_taki_template_backup_contract.py::test_shared_positive_wire_is_lossless[proofBody-TakiBackupProofBodyV2] PASSED [  4%]
+tests/test_taki_template_backup_contract.py::test_shared_positive_wire_is_lossless[proof-TakiBackupProofV2] PASSED [  6%]
+tests/test_taki_template_backup_contract.py::test_shared_positive_wire_is_lossless[nativeResponse-TakiBackupResponseV2] PASSED [  8%]
+tests/test_taki_template_backup_contract.py::test_shared_positive_wire_is_lossless[archiveProof-TakiBackupArchiveV2] PASSED [ 10%]
+tests/test_taki_template_backup_contract.py::test_shared_positive_wire_is_lossless[observationRequest-TemplateBackupObservationRequest] PASSED [ 12%]
+tests/test_taki_template_backup_contract.py::test_shared_positive_wire_is_lossless[observationResponse-TemplateBackupObservationResponse] PASSED [ 14%]
+tests/test_taki_template_backup_contract.py::test_shared_positive_wire_is_lossless[selectedBankProof-TemplateBackupBankProofV2] PASSED [ 16%]
+tests/test_taki_template_backup_contract.py::test_shared_positive_wire_is_lossless[unselectedBankProof-TemplateBackupBankProofV2] PASSED [ 18%]
+tests/test_taki_template_backup_contract.py::test_shared_strict_invalid_cases_refuse[request-missing-version] PASSED [ 20%]
+tests/test_taki_template_backup_contract.py::test_shared_strict_invalid_cases_refuse[request-v1] PASSED [ 22%]
+tests/test_taki_template_backup_contract.py::test_shared_strict_invalid_cases_refuse[request-snake-alias] PASSED [ 25%]
+tests/test_taki_template_backup_contract.py::test_shared_strict_invalid_cases_refuse[request-bank-omitted] PASSED [ 27%]
+tests/test_taki_template_backup_contract.py::test_shared_strict_invalid_cases_refuse[request-duplicate-bank] PASSED [ 29%]
+tests/test_taki_template_backup_contract.py::test_shared_strict_invalid_cases_refuse[proof-missing-templates] PASSED [ 31%]
+tests/test_taki_template_backup_contract.py::test_shared_strict_invalid_cases_refuse[proof-missing-zip-digest] PASSED [ 33%]
+tests/test_taki_template_backup_contract.py::test_shared_strict_invalid_cases_refuse[proof-body-cannot-be-endpoint] PASSED [ 35%]
+tests/test_taki_template_backup_contract.py::test_shared_strict_invalid_cases_refuse[observation-cannot-carry-zip] PASSED [ 37%]
+tests/test_taki_template_backup_contract.py::test_shared_strict_invalid_cases_refuse[observation-wrong-schema] PASSED [ 39%]
+tests/test_taki_template_backup_contract.py::test_shared_strict_invalid_cases_refuse[observation-missing-nonce] PASSED [ 41%]
+tests/test_taki_template_backup_contract.py::test_shared_strict_invalid_cases_refuse[unselected-cannot-assert-projection] PASSED [ 43%]
+tests/test_taki_template_backup_contract.py::test_shared_strict_invalid_cases_refuse[selected-needs-context] PASSED [ 45%]
+tests/test_taki_template_backup_contract.py::test_shared_canonical_bytes_and_digest[0-vector0] PASSED [ 47%]
+tests/test_taki_template_backup_contract.py::test_shared_canonical_bytes_and_digest[1-vector1] PASSED [ 50%]
+tests/test_taki_template_backup_contract.py::test_shared_canonical_bytes_and_digest[2-vector2] PASSED [ 52%]
+tests/test_taki_template_backup_contract.py::test_shared_canonical_bytes_and_digest[3-vector3] PASSED [ 54%]
+tests/test_taki_template_backup_contract.py::test_shared_canonical_bytes_and_digest[4-vector4] PASSED [ 56%]
+tests/test_taki_template_backup_contract.py::test_shared_canonical_bytes_and_digest[5-vector5] PASSED [ 58%]
+tests/test_taki_template_backup_contract.py::test_shared_canonical_bytes_and_digest[6-vector6] PASSED [ 60%]
+tests/test_taki_template_backup_contract.py::test_shared_canonical_bytes_and_digest[7-vector7] PASSED [ 62%]
+tests/test_taki_template_backup_contract.py::test_shared_canonical_bytes_and_digest[8-vector8] PASSED [ 64%]
+tests/test_taki_template_backup_contract.py::test_shared_canonical_bytes_and_digest[9-vector9] PASSED [ 66%]
+tests/test_taki_template_backup_contract.py::test_shared_canonical_bytes_and_digest[10-vector10] PASSED [ 68%]
+tests/test_taki_template_backup_contract.py::test_shared_canonical_bytes_and_digest[11-vector11] PASSED [ 70%]
+tests/test_taki_template_backup_contract.py::test_hash_helpers_bind_the_complete_original_request_and_definition_facets PASSED [ 72%]
+tests/test_taki_template_backup_contract.py::test_original_hash_and_selector_forgery_refuses_before_sql PASSED [ 75%]
+tests/test_taki_template_backup_contract.py::test_v1_serialized_request_and_archive_meaning_is_unchanged PASSED [ 77%]
+tests/test_taki_template_backup_contract.py::test_v2_refusal_does_not_fall_back_or_accept_duplicate_json PASSED [ 79%]
+tests/test_taki_template_backup_contract.py::test_file_bound_precedes_parse_and_still_bounds_a_growing_file PASSED [ 81%]
+tests/test_taki_template_backup_contract.py::test_capacity_preserves_maximum_plan_and_full_observation_request PASSED [ 83%]
+tests/test_taki_template_backup_contract.py::test_256_bank_complete_proof_and_512_entries_fit_response_and_manifest PASSED [ 85%]
+tests/test_taki_template_backup_contract.py::test_cli_service_options_require_explicit_safe_url_and_key_environment_name[None-KEY] PASSED [ 87%]
+tests/test_taki_template_backup_contract.py::test_cli_service_options_require_explicit_safe_url_and_key_environment_name[http://localhost-None] PASSED [ 89%]
+tests/test_taki_template_backup_contract.py::test_cli_service_options_require_explicit_safe_url_and_key_environment_name[http://secret@localhost-KEY] PASSED [ 91%]
+tests/test_taki_template_backup_contract.py::test_cli_service_options_require_explicit_safe_url_and_key_environment_name[https://localhost?key=unsafe-KEY] PASSED [ 93%]
+tests/test_taki_template_backup_contract.py::test_cli_service_options_require_explicit_safe_url_and_key_environment_name[file:///tmp/proof.json-KEY] PASSED [ 95%]
+tests/test_taki_template_backup_contract.py::test_cli_service_options_require_explicit_safe_url_and_key_environment_name[http://localhost-KEY=value] PASSED [ 97%]
+tests/test_taki_template_backup_contract.py::test_cli_key_is_neither_an_ordinary_argument_nor_observer_repr PASSED [100%]
+
+============================ slowest 10 durations =============================
+0.11s call     tests/test_taki_template_backup_contract.py::test_256_bank_complete_proof_and_512_entries_fit_response_and_manifest
+0.02s setup    tests/test_taki_template_backup_contract.py::test_file_bound_precedes_parse_and_still_bounds_a_growing_file
+0.01s call     tests/test_taki_template_backup_contract.py::test_shared_positive_wire_is_lossless[request-TakiBackupRequestV2]
+0.01s call     tests/test_taki_template_backup_contract.py::test_original_hash_and_selector_forgery_refuses_before_sql
+
+(6 durations < 0.005s hidden.  Use -vv to show these durations.)
+============================= 48 passed in 8.25s ==============================

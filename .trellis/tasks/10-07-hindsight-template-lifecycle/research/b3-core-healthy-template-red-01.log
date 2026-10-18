@@ -1,0 +1,2452 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mH:/TakiAgent/packages/core[39m
+
+ [31m❯[39m src/memory/transitions/transition-template-observer.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m8 failed[39m[2m)[22m[33m 357738[2mms[22m[39m
+[31m     [31m×[31m requests each Bank's verified receipt and terminal refresh membership without another Bank's IDs[39m[33m 54785[2mms[22m[39m
+[31m     [31m×[31m freshly compares source context before reusing a saved final candidate without rewriting evidence[39m[33m 24295[2mms[22m[39m
+[31m     [31m×[31m freshly compares saved W2 evidence when a later Bank interrupted preparation[39m[33m 34622[2mms[22m[39m
+[31m     [31m×[31m accepts fresh observations after compatible transport reconstruction and preserves every original document byte[39m[33m 24866[2mms[22m[39m
+[31m     [31m×[31m refuses a missing W2 marker even when Native observation claims membership[39m[33m 52451[2mms[22m[39m
+[31m     [31m×[31m refuses a wrong-request W2 marker even when Native observation claims membership[39m[33m 54218[2mms[22m[39m
+[31m     [31m×[31m refuses a wrong-target W2 marker even when Native observation claims membership[39m[33m 55533[2mms[22m[39m
+[31m     [31m×[31m refuses a pending W2 marker even when Native observation claims membership[39m[33m 56963[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 8 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/memory/transitions/transition-template-observer.test.ts[2m > [22mhealthy template association current-target checks[2m > [22mrequests each Bank's verified receipt and terminal refresh membership without another Bank's IDs
+[31m[1mAssertionError[22m: expected [] to deeply equal [ …(3) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [[39m
+[32m-   "template-receipt:6272ab65-0432-4005-a021-828e0ee2be8c",[39m
+[32m-   "template-receipt:9f5c34b6-e781-474b-8938-2d1750d0e98d",[39m
+[32m-   "template-refresh-result:9d094320-ee48-40f2-8684-b6c51859ad2b",[39m
+[32m- ][39m
+[31m+ [][39m
+
+[36m [2m❯[22m src/memory/transitions/transition-template-observer.test.ts:[2m38:36[22m[39m
+    [90m 36|[39m       const ids = receipts.flatMap((value) => ["template-receipt:" + v…
+    [90m 37|[39m         ...value.children.map((child) => "template-refresh-result:" + …
+    [90m 38|[39m       [34mexpect[39m(request[33m.[39moperationIds)[33m.[39m[34mtoEqual[39m(ids)[33m;[39m
+    [90m   |[39m                                    [31m^[39m
+    [90m 39|[39m     }
+    [90m 40|[39m     expect(requested.flatMap((request) => request.operationIds).filter…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/memory/transitions/transition-template-observer.test.ts[2m > [22mhealthy template association current-target checks[2m > [22mfreshly compares source context before reusing a saved final candidate without rewriting evidence
+[31m[1mAssertionError[22m: promise resolved "{ version: 1, …(13) }" instead of rejecting[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[31m+ {[39m
+[31m+   "candidateId": "3a586cb5ca81232d20a60ef07c60e3777f7038f033066d37264388797ad0fbce",[39m
+[31m+   "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+   "evidenceIds": [[39m
+[31m+     "d6fb5b199b8625923398b4342268476cf35e4e07d875a7dd79eefd54e653c870",[39m
+[31m+     "63291d97d2d0cf32a48ae263b265d77a22fc2e781460f282db526ed289b8fabb",[39m
+[31m+   ],[39m
+[31m+   "localCaptureId": null,[39m
+[31m+   "mappingHash": "e070992a7f4a70ecf0711eb509244a40c02fa8378143b6802ffa34964935b65d",[39m
+[31m+   "mappings": [[39m
+[31m+     {[39m
+[31m+       "application": {[39m
+[31m+         "key": {[39m
+[31m+           "artifact_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",[39m
+[31m+           "artifact_kind": "bank",[39m
+[31m+         },[39m
+[31m+         "record_hash": "6985bea282fc6402a424f770901eb9946fa5b673833d5023a094bc56940a72d3",[39m
+[31m+         "revision": 2,[39m
+[31m+       },[39m
+[31m+       "applicationBodyHash": "e25f966966502a301bb272eac9a4acb3e0c5716fc48b55d952508e0ffd3364c6",[39m
+[31m+       "kind": "bank",[39m
+[31m+       "localBankId": "24971163-a548-41f7-9b7c-f79da70e8536",[39m
+[31m+       "localId": "24971163-a548-41f7-9b7c-f79da70e8536",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 10,[39m
+[31m+         "object_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",[39m
+[31m+         "object_kind": "bank",[39m
+[31m+         "object_revision": 3,[39m
+[31m+         "payload_hash": "1af042535386a74668f96ca4087a32f4c8623fd0ca4d5b2b4f55fef5a4e61483",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "372a38504858168ad945136b85f8ec2cdeb665a5eca6b73181126252db4c9f57",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "mental_model",[39m
+[31m+       "localBankId": "24971163-a548-41f7-9b7c-f79da70e8536",[39m
+[31m+       "localId": "2db6997a-15d3-5849-bf38-47b8a75781c7",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 11,[39m
+[31m+         "object_id": "taki-character-continuity-v1",[39m
+[31m+         "object_kind": "mental_model",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "be4888f516882eaa33d5339c50678e2db672c8aca2d22d81376f6f37e5a0bce1",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "6c2cd05edebc3db46e20a756f0f9e0c09be5ef89dfa5375b0edcea2c77c0eb08",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "directive",[39m
+[31m+       "localBankId": "24971163-a548-41f7-9b7c-f79da70e8536",[39m
+[31m+       "localId": "689ea890-c32e-5793-a800-4a69c4a21f4c",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 12,[39m
+[31m+         "object_id": "e7e9c431-915a-462d-a50e-5533885c4044",[39m
+[31m+         "object_kind": "directive",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "662a701a2dfac4825a85bde9aad73179a0723fbf6966a0a25f2f15275329e39e",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "8dcfe220e3c6164d662e9e8930e95da3b60a8233723556d976249c135ce1721f",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": {[39m
+[31m+         "key": {[39m
+[31m+           "artifact_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",[39m
+[31m+           "artifact_kind": "bank",[39m
+[31m+         },[39m
+[31m+         "record_hash": "7c7469fc0186e7b092d27255abd913ea564aea321139bd698c346ff95d296255",[39m
+[31m+         "revision": 2,[39m
+[31m+       },[39m
+[31m+       "applicationBodyHash": "6d46dd4048ce6d126bfc432e78901f1b3d6501516823dbf8a530761c442bdc09",[39m
+[31m+       "kind": "bank",[39m
+[31m+       "localBankId": "40b6daa4-2ba0-40eb-b959-335666d50223",[39m
+[31m+       "localId": "40b6daa4-2ba0-40eb-b959-335666d50223",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 10,[39m
+[31m+         "object_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",[39m
+[31m+         "object_kind": "bank",[39m
+[31m+         "object_revision": 3,[39m
+[31m+         "payload_hash": "a0a7ef853fb39017bf4858443f51bc28572158f2992f8b9c53fae16874c5b15a",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "d047985d3c6f5220b0f2510b889729e6ea2256fa743e1f1c942d30938c2fd637",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "mental_model",[39m
+[31m+       "localBankId": "40b6daa4-2ba0-40eb-b959-335666d50223",[39m
+[31m+       "localId": "b4350695-0d4e-555f-8d4e-d8d170c037c9",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 11,[39m
+[31m+         "object_id": "taki-global-continuity-v1",[39m
+[31m+         "object_kind": "mental_model",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "27e3a32b361fec1ee8f69ff05d0c0d5161456c19e67792dae77463f5bd889b5c",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "b8b0140d09da953b2347421814acca1547b87977f54b3621ee77c1b5962a2c67",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "directive",[39m
+[31m+       "localBankId": "40b6daa4-2ba0-40eb-b959-335666d50223",[39m
+[31m+       "localId": "6304dc1c-93c3-5059-96e2-9e746c9502bf",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 12,[39m
+[31m+         "object_id": "5d620de1-b216-4920-99d3-dcec90e134c1",[39m
+[31m+         "object_kind": "directive",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "051f88d744b621f99122a3801b96ab741b11511b1d323c207f941674adef18bd",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "e2eefd86c4940c795b6290c9f76f160b53a75e66b3128098df7fca3550cd9553",[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   "pendingSources": [],[39m
+[31m+   "predecessorEpochId": "epoch",[39m
+[31m+   "scopes": [[39m
+[31m+     {[39m
+[31m+       "evidenceId": "d6fb5b199b8625923398b4342268476cf35e4e07d875a7dd79eefd54e653c870",[39m
+[31m+       "localBankId": "24971163-a548-41f7-9b7c-f79da70e8536",[39m
+[31m+       "nativeBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",[39m
+[31m+       "nativeGeneration": "22222222-2222-4222-8222-222222222222",[39m
+[31m+       "origin": "new",[39m
+[31m+       "originEpochId": null,[39m
+[31m+       "scope": {[39m
+[31m+         "characterId": "taki",[39m
+[31m+         "kind": "character",[39m
+[31m+       },[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "evidenceId": "63291d97d2d0cf32a48ae263b265d77a22fc2e781460f282db526ed289b8fabb",[39m
+[31m+       "localBankId": "40b6daa4-2ba0-40eb-b959-335666d50223",[39m
+[31m+       "nativeBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",[39m
+[31m+       "nativeGeneration": "22222222-2222-4222-8222-222222222222",[39m
+[31m+       "origin": "new",[39m
+[31m+       "originEpochId": null,[39m
+[31m+       "scope": {[39m
+[31m+         "characterId": null,[39m
+[31m+         "kind": "global",[39m
+[31m+       },[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   "state": {[39m
+[31m+     "banks": [[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "8ef7b7ec-57b0-4e7e-ab4d-06bcf74c0c57",[39m
+[31m+         "bankId": "24971163-a548-41f7-9b7c-f79da70e8536",[39m
+[31m+         "config": {[39m
+[31m+           "entity_labels": [[39m
+[31m+             {[39m
+[31m+               "description": "Classify each fact only when its scope and meaning are clear. Use unclassified when uncertain. A label grants no pin, disclosure or visibility permission.",[39m
+[31m+               "key": "taki-layer",[39m
+[31m+               "optional": true,[39m
+[31m+               "tag": true,[39m
+[31m+               "type": "value",[39m
+[31m+               "values": [[39m
+[31m+                 {[39m
+[31m+                   "value": "relationship",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "episodes",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "intentions",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "unclassified",[39m
+[31m+                 },[39m
+[31m+               ],[39m
+[31m+             },[39m
+[31m+           ],[39m
+[31m+           "observations_instructions": "Synthesize only durable observations supported by source facts for this Character-user relationship. Preserve uncertainty and provenance.",[39m
+[31m+           "reflect_mission": "Use durable memories to support this Character-user relationship without crossing its ownership boundary.",[39m
+[31m+           "retain_mission": "Extract durable facts, preferences, experiences, intentions, and corrections that belong to this Character-user relationship. Preserve source meaning and avoid inventing details.",[39m
+[31m+         },[39m
+[31m+         "createdAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+         "disposition": {[39m
+[31m+           "empathy": 3,[39m
+[31m+           "literalism": 3,[39m
+[31m+           "skepticism": 3,[39m
+[31m+         },[39m
+[31m+         "mission": "",[39m
+[31m+         "name": "Fixture Bank",[39m
+[31m+         "revision": 3,[39m
+[31m+         "scope": {[39m
+[31m+           "characterId": "taki",[39m
+[31m+           "kind": "character",[39m
+[31m+         },[39m
+[31m+         "updatedAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "8ef7b7ec-57b0-4e7e-ab4d-06bcf74c0c57",[39m
+[31m+         "bankId": "40b6daa4-2ba0-40eb-b959-335666d50223",[39m
+[31m+         "config": {[39m
+[31m+           "entity_labels": [[39m
+[31m+             {[39m
+[31m+               "description": "Classify each fact only when its scope and meaning are clear. Use unclassified when uncertain. A label grants no pin, disclosure or visibility permission.",[39m
+[31m+               "key": "taki-layer",[39m
+[31m+               "optional": true,[39m
+[31m+               "tag": true,[39m
+[31m+               "type": "value",[39m
+[31m+               "values": [[39m
+[31m+                 {[39m
+[31m+                   "value": "profile",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "activity",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "unclassified",[39m
+[31m+                 },[39m
+[31m+               ],[39m
+[31m+             },[39m
+[31m+           ],[39m
+[31m+           "observations_instructions": "Synthesize only durable observations supported by source facts for user-wide continuity across Characters. Preserve uncertainty and provenance.",[39m
+[31m+           "reflect_mission": "Use durable memories to support user-wide continuity across Characters without crossing its ownership boundary.",[39m
+[31m+           "retain_mission": "Extract durable facts, preferences, experiences, intentions, and corrections that belong to user-wide continuity across Characters. Preserve source meaning and avoid inventing details.",[39m
+[31m+         },[39m
+[31m+         "createdAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+         "disposition": {[39m
+[31m+           "empathy": 3,[39m
+[31m+           "literalism": 3,[39m
+[31m+           "skepticism": 3,[39m
+[31m+         },[39m
+[31m+         "mission": "",[39m
+[31m+         "name": "Fixture Bank",[39m
+[31m+         "revision": 3,[39m
+[31m+         "scope": {[39m
+[31m+           "characterId": null,[39m
+[31m+           "kind": "global",[39m
+[31m+         },[39m
+[31m+         "updatedAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+       },[39m
+[31m+     ],[39m
+[31m+     "blocks": [],[39m
+[31m+     "derived": [[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "8ef7b7ec-57b0-4e7e-ab4d-06bcf74c0c57",[39m
+[31m+         "bankId": "24971163-a548-41f7-9b7c-f79da70e8536",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "24971163-a548-41f7-9b7c-f79da70e8536",[39m
+[31m+           "content": "Respect Taki Memory Layer ownership and visibility metadata. Treat unclassified memory conservatively and never invent provenance.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "directiveId": "689ea890-c32e-5793-a800-4a69c4a21f4c",[39m
+[31m+           "isActive": true,[39m
+[31m+           "kind": "directive",[39m
+[31m+           "name": "taki-character-memory-policy-v1",[39m
+[31m+           "priority": 100,[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-template-v1",[39m
+[31m+             "taki-scope:character",[39m
+[31m+           ],[39m
+[31m+           "updatedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "8ef7b7ec-57b0-4e7e-ab4d-06bcf74c0c57",[39m
+[31m+         "bankId": "24971163-a548-41f7-9b7c-f79da70e8536",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "24971163-a548-41f7-9b7c-f79da70e8536",[39m
+[31m+           "content": "Fixture generated content.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "kind": "mental_model",[39m
+[31m+           "lastRefreshedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "maxTokens": 1024,[39m
+[31m+           "mentalModelId": "2db6997a-15d3-5849-bf38-47b8a75781c7",[39m
+[31m+           "name": "Taki Character Relationship",[39m
+[31m+           "reflectResponse": null,[39m
+[31m+           "sourceQuery": "What durable patterns and corrections should guide this Character-user relationship?",[39m
+[31m+           "structuredContent": null,[39m
+[31m+           "subtype": "mental_model",[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-scope:character",[39m
+[31m+           ],[39m
+[31m+           "trigger": null,[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "8ef7b7ec-57b0-4e7e-ab4d-06bcf74c0c57",[39m
+[31m+         "bankId": "40b6daa4-2ba0-40eb-b959-335666d50223",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "40b6daa4-2ba0-40eb-b959-335666d50223",[39m
+[31m+           "content": "Respect Taki Memory Layer ownership and visibility metadata. Treat unclassified memory conservatively and never invent provenance.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "directiveId": "6304dc1c-93c3-5059-96e2-9e746c9502bf",[39m
+[31m+           "isActive": true,[39m
+[31m+           "kind": "directive",[39m
+[31m+           "name": "taki-global-memory-policy-v1",[39m
+[31m+           "priority": 100,[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-template-v1",[39m
+[31m+             "taki-scope:global",[39m
+[31m+           ],[39m
+[31m+           "updatedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "8ef7b7ec-57b0-4e7e-ab4d-06bcf74c0c57",[39m
+[31m+         "bankId": "40b6daa4-2ba0-40eb-b959-335666d50223",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "40b6daa4-2ba0-40eb-b959-335666d50223",[39m
+[31m+           "content": "Fixture generated content.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "kind": "mental_model",[39m
+[31m+           "lastRefreshedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "maxTokens": 1024,[39m
+[31m+           "mentalModelId": "b4350695-0d4e-555f-8d4e-d8d170c037c9",[39m
+[31m+           "name": "Taki Global Continuity",[39m
+[31m+           "reflectResponse": null,[39m
+[31m+           "sourceQuery": "What durable patterns and corrections should guide user-wide continuity across Characters?",[39m
+[31m+           "structuredContent": null,[39m
+[31m+           "subtype": "mental_model",[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-scope:global",[39m
+[31m+           ],[39m
+[31m+           "trigger": null,[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+     ],[39m
+[31m+     "historicalReferences": [],[39m
+[31m+     "history": [],[39m
+[31m+     "records": [],[39m
+[31m+     "sourceAliases": [],[39m
+[31m+     "sourceSets": [],[39m
+[31m+     "sources": [],[39m
+[31m+   },[39m
+[31m+   "stateHash": "3eb1ed598bdf199968e3e8b30fd2cbcd7e84e3c3d93e417f6f727364f5065414",[39m
+[31m+   "targetEpochId": "8ef7b7ec-57b0-4e7e-ab4d-06bcf74c0c57",[39m
+[31m+   "transitionId": "e2fa526c-4109-4328-8bd0-48ad3f399454",[39m
+[31m+   "version": 1,[39m
+[2m  }[22m
+
+[36m [2m❯[22m src/memory/transitions/transition-template-observer.test.ts:[2m48:30[22m[39m
+    [90m 46|[39m     [35mconst[39m bankId [33m=[39m f[33m.[39mobserver[33m.[39mrequests[[34m0[39m][33m![39m[33m.[39mrequest[33m.[39mnativeBankIds[[34m0[39m][33m![39m[33m;[39m
+    [90m 47|[39m     f[33m.[39mobserver[33m.[39mcontexts[33m.[39m[35mset[39m(bankId[33m,[39m [32m"d"[39m[33m.[39m[34mrepeat[39m([34m64[39m))[33m;[39m
+    [90m 48|[39m     [35mawait[39m [34mexpect[39m(f[33m.[39m[34mprepare[39m())[33m.[39mrejects[33m.[39m[34mtoThrow[39m()[33m;[39m
+    [90m   |[39m                              [31m^[39m
+    [90m 49|[39m     [34mexpect[39m(f[33m.[39mobserver[33m.[39mrequests)[33m.[39m[34mtoHaveLength[39m([34m3[39m)[33m;[39m
+    [90m 50|[39m     [34mexpect[39m([34mdocuments[39m(f))[33m.[39m[34mtoEqual[39m(saved)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/memory/transitions/transition-template-observer.test.ts[2m > [22mhealthy template association current-target checks[2m > [22mfreshly compares saved W2 evidence when a later Bank interrupted preparation
+[31m[1mAssertionError[22m: promise resolved "{ version: 1, …(13) }" instead of rejecting[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[31m+ {[39m
+[31m+   "candidateId": "79de3fe10ec4d507c3a2722c5d424cd492d725df920e5bbe4e7e9948557619c0",[39m
+[31m+   "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+   "evidenceIds": [[39m
+[31m+     "d53cefde7debe344289932fd69a70a60ecc5a0f32677654007b6739208ceefe9",[39m
+[31m+     "359182ae58ba542e4afebbcc7a01b82fc4970889e30524bc6e9cd64fb963d037",[39m
+[31m+   ],[39m
+[31m+   "localCaptureId": null,[39m
+[31m+   "mappingHash": "2d95f6ad6e8633f49af8414a6508aca086af77ae54156672ace16e09297db25a",[39m
+[31m+   "mappings": [[39m
+[31m+     {[39m
+[31m+       "application": {[39m
+[31m+         "key": {[39m
+[31m+           "artifact_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",[39m
+[31m+           "artifact_kind": "bank",[39m
+[31m+         },[39m
+[31m+         "record_hash": "c814e87553982cda3699aeefa844fa8f921d50ec304fd78c98f207f83d119ef4",[39m
+[31m+         "revision": 2,[39m
+[31m+       },[39m
+[31m+       "applicationBodyHash": "e25f966966502a301bb272eac9a4acb3e0c5716fc48b55d952508e0ffd3364c6",[39m
+[31m+       "kind": "bank",[39m
+[31m+       "localBankId": "62e8fd2b-840c-4ec3-8c41-e07871ebee4d",[39m
+[31m+       "localId": "62e8fd2b-840c-4ec3-8c41-e07871ebee4d",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 10,[39m
+[31m+         "object_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",[39m
+[31m+         "object_kind": "bank",[39m
+[31m+         "object_revision": 3,[39m
+[31m+         "payload_hash": "1af042535386a74668f96ca4087a32f4c8623fd0ca4d5b2b4f55fef5a4e61483",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "372a38504858168ad945136b85f8ec2cdeb665a5eca6b73181126252db4c9f57",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "mental_model",[39m
+[31m+       "localBankId": "62e8fd2b-840c-4ec3-8c41-e07871ebee4d",[39m
+[31m+       "localId": "2db6997a-15d3-5849-bf38-47b8a75781c7",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 11,[39m
+[31m+         "object_id": "taki-character-continuity-v1",[39m
+[31m+         "object_kind": "mental_model",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "be4888f516882eaa33d5339c50678e2db672c8aca2d22d81376f6f37e5a0bce1",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "61318edff98504e83f99a8d3091dbef835fc2737cd5fdd322c350385346e077e",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "directive",[39m
+[31m+       "localBankId": "62e8fd2b-840c-4ec3-8c41-e07871ebee4d",[39m
+[31m+       "localId": "143642c2-9078-54c4-8cd7-519a7d4f4ff6",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 12,[39m
+[31m+         "object_id": "1dfe1a6b-2df4-4413-b5fd-a894566470cc",[39m
+[31m+         "object_kind": "directive",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "8e6d3134f3e349054210d77b8a031e5b3e0cdaf674d635b76d7a1af991dd9203",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "fb8bd643238d33678b63e4e089ce40cc7fe0d1f9f5b082970e54e198f685f722",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": {[39m
+[31m+         "key": {[39m
+[31m+           "artifact_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",[39m
+[31m+           "artifact_kind": "bank",[39m
+[31m+         },[39m
+[31m+         "record_hash": "14ebe82115fbf814eb26e3024bffb8e49d290485584af33064422c57c6f4d6b2",[39m
+[31m+         "revision": 2,[39m
+[31m+       },[39m
+[31m+       "applicationBodyHash": "6d46dd4048ce6d126bfc432e78901f1b3d6501516823dbf8a530761c442bdc09",[39m
+[31m+       "kind": "bank",[39m
+[31m+       "localBankId": "586ed00a-14fe-4167-abdb-9ff9ced25021",[39m
+[31m+       "localId": "586ed00a-14fe-4167-abdb-9ff9ced25021",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 10,[39m
+[31m+         "object_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",[39m
+[31m+         "object_kind": "bank",[39m
+[31m+         "object_revision": 3,[39m
+[31m+         "payload_hash": "a0a7ef853fb39017bf4858443f51bc28572158f2992f8b9c53fae16874c5b15a",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "d047985d3c6f5220b0f2510b889729e6ea2256fa743e1f1c942d30938c2fd637",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "mental_model",[39m
+[31m+       "localBankId": "586ed00a-14fe-4167-abdb-9ff9ced25021",[39m
+[31m+       "localId": "b4350695-0d4e-555f-8d4e-d8d170c037c9",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 11,[39m
+[31m+         "object_id": "taki-global-continuity-v1",[39m
+[31m+         "object_kind": "mental_model",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "27e3a32b361fec1ee8f69ff05d0c0d5161456c19e67792dae77463f5bd889b5c",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "fc348e833123da7ffddd993ea84ffb8a0cbf36b034263c01dc482549bace4bfb",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "directive",[39m
+[31m+       "localBankId": "586ed00a-14fe-4167-abdb-9ff9ced25021",[39m
+[31m+       "localId": "84c4df9d-31ca-5de7-9061-ced81a6a2a94",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 12,[39m
+[31m+         "object_id": "cd6ed0c0-3f17-4675-98c1-70baa61e303f",[39m
+[31m+         "object_kind": "directive",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "c2fb54d28db51fa40e6d9ef90694f2c73aa066d24db68d5fd76a44ebffe3a8bf",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "c00ba0aa02c98bfe24e485a26d2d0f78fe1f9fe9741e869c0f8c87153ac05a59",[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   "pendingSources": [],[39m
+[31m+   "predecessorEpochId": "epoch",[39m
+[31m+   "scopes": [[39m
+[31m+     {[39m
+[31m+       "evidenceId": "d53cefde7debe344289932fd69a70a60ecc5a0f32677654007b6739208ceefe9",[39m
+[31m+       "localBankId": "62e8fd2b-840c-4ec3-8c41-e07871ebee4d",[39m
+[31m+       "nativeBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",[39m
+[31m+       "nativeGeneration": "22222222-2222-4222-8222-222222222222",[39m
+[31m+       "origin": "new",[39m
+[31m+       "originEpochId": null,[39m
+[31m+       "scope": {[39m
+[31m+         "characterId": "taki",[39m
+[31m+         "kind": "character",[39m
+[31m+       },[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "evidenceId": "359182ae58ba542e4afebbcc7a01b82fc4970889e30524bc6e9cd64fb963d037",[39m
+[31m+       "localBankId": "586ed00a-14fe-4167-abdb-9ff9ced25021",[39m
+[31m+       "nativeBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",[39m
+[31m+       "nativeGeneration": "22222222-2222-4222-8222-222222222222",[39m
+[31m+       "origin": "new",[39m
+[31m+       "originEpochId": null,[39m
+[31m+       "scope": {[39m
+[31m+         "characterId": null,[39m
+[31m+         "kind": "global",[39m
+[31m+       },[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   "state": {[39m
+[31m+     "banks": [[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "bcb52379-d624-4a47-bb3b-dbc661b45026",[39m
+[31m+         "bankId": "586ed00a-14fe-4167-abdb-9ff9ced25021",[39m
+[31m+         "config": {[39m
+[31m+           "entity_labels": [[39m
+[31m+             {[39m
+[31m+               "description": "Classify each fact only when its scope and meaning are clear. Use unclassified when uncertain. A label grants no pin, disclosure or visibility permission.",[39m
+[31m+               "key": "taki-layer",[39m
+[31m+               "optional": true,[39m
+[31m+               "tag": true,[39m
+[31m+               "type": "value",[39m
+[31m+               "values": [[39m
+[31m+                 {[39m
+[31m+                   "value": "profile",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "activity",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "unclassified",[39m
+[31m+                 },[39m
+[31m+               ],[39m
+[31m+             },[39m
+[31m+           ],[39m
+[31m+           "observations_instructions": "Synthesize only durable observations supported by source facts for user-wide continuity across Characters. Preserve uncertainty and provenance.",[39m
+[31m+           "reflect_mission": "Use durable memories to support user-wide continuity across Characters without crossing its ownership boundary.",[39m
+[31m+           "retain_mission": "Extract durable facts, preferences, experiences, intentions, and corrections that belong to user-wide continuity across Characters. Preserve source meaning and avoid inventing details.",[39m
+[31m+         },[39m
+[31m+         "createdAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+         "disposition": {[39m
+[31m+           "empathy": 3,[39m
+[31m+           "literalism": 3,[39m
+[31m+           "skepticism": 3,[39m
+[31m+         },[39m
+[31m+         "mission": "",[39m
+[31m+         "name": "Fixture Bank",[39m
+[31m+         "revision": 3,[39m
+[31m+         "scope": {[39m
+[31m+           "characterId": null,[39m
+[31m+           "kind": "global",[39m
+[31m+         },[39m
+[31m+         "updatedAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "bcb52379-d624-4a47-bb3b-dbc661b45026",[39m
+[31m+         "bankId": "62e8fd2b-840c-4ec3-8c41-e07871ebee4d",[39m
+[31m+         "config": {[39m
+[31m+           "entity_labels": [[39m
+[31m+             {[39m
+[31m+               "description": "Classify each fact only when its scope and meaning are clear. Use unclassified when uncertain. A label grants no pin, disclosure or visibility permission.",[39m
+[31m+               "key": "taki-layer",[39m
+[31m+               "optional": true,[39m
+[31m+               "tag": true,[39m
+[31m+               "type": "value",[39m
+[31m+               "values": [[39m
+[31m+                 {[39m
+[31m+                   "value": "relationship",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "episodes",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "intentions",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "unclassified",[39m
+[31m+                 },[39m
+[31m+               ],[39m
+[31m+             },[39m
+[31m+           ],[39m
+[31m+           "observations_instructions": "Synthesize only durable observations supported by source facts for this Character-user relationship. Preserve uncertainty and provenance.",[39m
+[31m+           "reflect_mission": "Use durable memories to support this Character-user relationship without crossing its ownership boundary.",[39m
+[31m+           "retain_mission": "Extract durable facts, preferences, experiences, intentions, and corrections that belong to this Character-user relationship. Preserve source meaning and avoid inventing details.",[39m
+[31m+         },[39m
+[31m+         "createdAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+         "disposition": {[39m
+[31m+           "empathy": 3,[39m
+[31m+           "literalism": 3,[39m
+[31m+           "skepticism": 3,[39m
+[31m+         },[39m
+[31m+         "mission": "",[39m
+[31m+         "name": "Fixture Bank",[39m
+[31m+         "revision": 3,[39m
+[31m+         "scope": {[39m
+[31m+           "characterId": "taki",[39m
+[31m+           "kind": "character",[39m
+[31m+         },[39m
+[31m+         "updatedAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+       },[39m
+[31m+     ],[39m
+[31m+     "blocks": [],[39m
+[31m+     "derived": [[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "bcb52379-d624-4a47-bb3b-dbc661b45026",[39m
+[31m+         "bankId": "586ed00a-14fe-4167-abdb-9ff9ced25021",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "586ed00a-14fe-4167-abdb-9ff9ced25021",[39m
+[31m+           "content": "Respect Taki Memory Layer ownership and visibility metadata. Treat unclassified memory conservatively and never invent provenance.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "directiveId": "84c4df9d-31ca-5de7-9061-ced81a6a2a94",[39m
+[31m+           "isActive": true,[39m
+[31m+           "kind": "directive",[39m
+[31m+           "name": "taki-global-memory-policy-v1",[39m
+[31m+           "priority": 100,[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-template-v1",[39m
+[31m+             "taki-scope:global",[39m
+[31m+           ],[39m
+[31m+           "updatedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "bcb52379-d624-4a47-bb3b-dbc661b45026",[39m
+[31m+         "bankId": "586ed00a-14fe-4167-abdb-9ff9ced25021",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "586ed00a-14fe-4167-abdb-9ff9ced25021",[39m
+[31m+           "content": "Fixture generated content.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "kind": "mental_model",[39m
+[31m+           "lastRefreshedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "maxTokens": 1024,[39m
+[31m+           "mentalModelId": "b4350695-0d4e-555f-8d4e-d8d170c037c9",[39m
+[31m+           "name": "Taki Global Continuity",[39m
+[31m+           "reflectResponse": null,[39m
+[31m+           "sourceQuery": "What durable patterns and corrections should guide user-wide continuity across Characters?",[39m
+[31m+           "structuredContent": null,[39m
+[31m+           "subtype": "mental_model",[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-scope:global",[39m
+[31m+           ],[39m
+[31m+           "trigger": null,[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "bcb52379-d624-4a47-bb3b-dbc661b45026",[39m
+[31m+         "bankId": "62e8fd2b-840c-4ec3-8c41-e07871ebee4d",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "62e8fd2b-840c-4ec3-8c41-e07871ebee4d",[39m
+[31m+           "content": "Respect Taki Memory Layer ownership and visibility metadata. Treat unclassified memory conservatively and never invent provenance.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "directiveId": "143642c2-9078-54c4-8cd7-519a7d4f4ff6",[39m
+[31m+           "isActive": true,[39m
+[31m+           "kind": "directive",[39m
+[31m+           "name": "taki-character-memory-policy-v1",[39m
+[31m+           "priority": 100,[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-template-v1",[39m
+[31m+             "taki-scope:character",[39m
+[31m+           ],[39m
+[31m+           "updatedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "bcb52379-d624-4a47-bb3b-dbc661b45026",[39m
+[31m+         "bankId": "62e8fd2b-840c-4ec3-8c41-e07871ebee4d",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "62e8fd2b-840c-4ec3-8c41-e07871ebee4d",[39m
+[31m+           "content": "Fixture generated content.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "kind": "mental_model",[39m
+[31m+           "lastRefreshedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "maxTokens": 1024,[39m
+[31m+           "mentalModelId": "2db6997a-15d3-5849-bf38-47b8a75781c7",[39m
+[31m+           "name": "Taki Character Relationship",[39m
+[31m+           "reflectResponse": null,[39m
+[31m+           "sourceQuery": "What durable patterns and corrections should guide this Character-user relationship?",[39m
+[31m+           "structuredContent": null,[39m
+[31m+           "subtype": "mental_model",[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-scope:character",[39m
+[31m+           ],[39m
+[31m+           "trigger": null,[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+     ],[39m
+[31m+     "historicalReferences": [],[39m
+[31m+     "history": [],[39m
+[31m+     "records": [],[39m
+[31m+     "sourceAliases": [],[39m
+[31m+     "sourceSets": [],[39m
+[31m+     "sources": [],[39m
+[31m+   },[39m
+[31m+   "stateHash": "9446e8266f5dafc99a69badf9cfe2e8c369f31d0681bee42ed47665a3bb9f792",[39m
+[31m+   "targetEpochId": "bcb52379-d624-4a47-bb3b-dbc661b45026",[39m
+[31m+   "transitionId": "df7a8629-1628-4993-9160-d979e0b1f0a0",[39m
+[31m+   "version": 1,[39m
+[2m  }[22m
+
+[36m [2m❯[22m src/memory/transitions/transition-template-observer.test.ts:[2m61:30[22m[39m
+    [90m 59|[39m     f[33m.[39mobserver[33m.[39mstate[33m.[39mbefore [33m=[39m undefined[33m;[39m
+    [90m 60|[39m     f.observer.contexts.set(f.observer.requests[0]!.request.nativeBank…
+    [90m 61|[39m     [35mawait[39m [34mexpect[39m(f[33m.[39m[34mprepare[39m())[33m.[39mrejects[33m.[39m[34mtoThrow[39m()[33m;[39m
+    [90m   |[39m                              [31m^[39m
+    [90m 62|[39m     [34mexpect[39m(f[33m.[39mobserver[33m.[39mrequests)[33m.[39m[34mtoHaveLength[39m([34m3[39m)[33m;[39m
+    [90m 63|[39m     [34mexpect[39m([34mdocuments[39m(f))[33m.[39m[34mtoEqual[39m(saved)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/memory/transitions/transition-template-observer.test.ts[2m > [22mhealthy template association current-target checks[2m > [22maccepts fresh observations after compatible transport reconstruction and preserves every original document byte
+[31m[1mAssertionError[22m: expected [] to have a length of 2 but got +0[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 2[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m src/memory/transitions/transition-template-observer.test.ts:[2m78:32[22m[39m
+    [90m 76|[39m     restarted[33m.[39mstate[33m.[39mbefore [33m=[39m () [33m=>[39m { [34mexpect[39m(depth)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m }[33m;[39m
+    [90m 77|[39m     [34mexpect[39m([35mawait[39m f[33m.[39m[34mprepare[39m())[33m.[39m[34mtoEqual[39m(candidate)[33m;[39m
+    [90m 78|[39m     [34mexpect[39m(restarted[33m.[39mrequests)[33m.[39m[34mtoHaveLength[39m([34m2[39m)[33m;[39m
+    [90m   |[39m                                [31m^[39m
+    [90m 79|[39m     expect(restarted.requests.every((request) => !f.observer.requests.…
+    [90m 80|[39m     [34mexpect[39m([34mdocuments[39m(f))[33m.[39m[34mtoEqual[39m(saved)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/memory/transitions/transition-template-observer.test.ts[2m > [22mhealthy W2 independently proves declared semantic refresh results[2m > [22mrefuses a missing W2 marker even when Native observation claims membership
+[31m[1mAssertionError[22m: promise resolved "{ version: 1, …(13) }" instead of rejecting[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[31m+ {[39m
+[31m+   "candidateId": "9c80f6bea256ee58292af21cd5f4cb35c61e2b7796d5b352795cca7be0c71b70",[39m
+[31m+   "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+   "evidenceIds": [[39m
+[31m+     "55386d22e389597d505049e724cb43b7fd408a5dd9a89f9792067bdbe5307651",[39m
+[31m+     "620daab217787a9fccdfa088863dcf30fcbdb454a0d08a13f56c8ec504fc3974",[39m
+[31m+   ],[39m
+[31m+   "localCaptureId": null,[39m
+[31m+   "mappingHash": "2b45d33dba11e1f2907e0b70467b20946d195d5c54169c219965c6230cce5296",[39m
+[31m+   "mappings": [[39m
+[31m+     {[39m
+[31m+       "application": {[39m
+[31m+         "key": {[39m
+[31m+           "artifact_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",[39m
+[31m+           "artifact_kind": "bank",[39m
+[31m+         },[39m
+[31m+         "record_hash": "c24db2f52e7331f39fa3ff5704a0e06f9a796c5e4cd934fe81cd3f8414cfa276",[39m
+[31m+         "revision": 2,[39m
+[31m+       },[39m
+[31m+       "applicationBodyHash": "e25f966966502a301bb272eac9a4acb3e0c5716fc48b55d952508e0ffd3364c6",[39m
+[31m+       "kind": "bank",[39m
+[31m+       "localBankId": "69aa6a14-4f84-4098-ac00-9cae0e1736b7",[39m
+[31m+       "localId": "69aa6a14-4f84-4098-ac00-9cae0e1736b7",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 10,[39m
+[31m+         "object_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",[39m
+[31m+         "object_kind": "bank",[39m
+[31m+         "object_revision": 3,[39m
+[31m+         "payload_hash": "1af042535386a74668f96ca4087a32f4c8623fd0ca4d5b2b4f55fef5a4e61483",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "372a38504858168ad945136b85f8ec2cdeb665a5eca6b73181126252db4c9f57",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "mental_model",[39m
+[31m+       "localBankId": "69aa6a14-4f84-4098-ac00-9cae0e1736b7",[39m
+[31m+       "localId": "2db6997a-15d3-5849-bf38-47b8a75781c7",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 11,[39m
+[31m+         "object_id": "taki-character-continuity-v1",[39m
+[31m+         "object_kind": "mental_model",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "be4888f516882eaa33d5339c50678e2db672c8aca2d22d81376f6f37e5a0bce1",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "aa1cbeed35557e1cb1e38ca5e4ec62c01bbd242f601c6f27d3185c6342b69e89",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "mental_model",[39m
+[31m+       "localBankId": "69aa6a14-4f84-4098-ac00-9cae0e1736b7",[39m
+[31m+       "localId": "a7f50d20-0a3f-5cae-a207-65d6a8eeb529",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 12,[39m
+[31m+         "object_id": "user-travel-notes",[39m
+[31m+         "object_kind": "mental_model",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "126b45535bebf1aa573090c72d80b7b4ee6b1a54daee7353e272d8a47804ddca",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "ae3e0208fe878e9ef67093e931c8386b8b83c06d9782a72418afdd79fdb65210",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "directive",[39m
+[31m+       "localBankId": "69aa6a14-4f84-4098-ac00-9cae0e1736b7",[39m
+[31m+       "localId": "7f6a3ad0-7ab7-5b97-b280-36288dbda355",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 13,[39m
+[31m+         "object_id": "3b162b72-f5a0-4e65-a8c3-a75457cbd7f7",[39m
+[31m+         "object_kind": "directive",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "e4097b2c3c7e9d42ed2e933a5f1fe0c25267ac45b87ad99cfdbbff7d8e618ad7",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "8c4761a176737c5b9fc95cd7dbcfd2e3c5d7ecc0a89c907ccc675de884c44c76",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": {[39m
+[31m+         "key": {[39m
+[31m+           "artifact_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",[39m
+[31m+           "artifact_kind": "bank",[39m
+[31m+         },[39m
+[31m+         "record_hash": "1695f3e51b05515e50154164d1db5f5ce47a80b567ec59a8fda4bcd80f759ade",[39m
+[31m+         "revision": 2,[39m
+[31m+       },[39m
+[31m+       "applicationBodyHash": "6d46dd4048ce6d126bfc432e78901f1b3d6501516823dbf8a530761c442bdc09",[39m
+[31m+       "kind": "bank",[39m
+[31m+       "localBankId": "d4c8decc-0b84-4a31-8841-d22d53e559f1",[39m
+[31m+       "localId": "d4c8decc-0b84-4a31-8841-d22d53e559f1",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 10,[39m
+[31m+         "object_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",[39m
+[31m+         "object_kind": "bank",[39m
+[31m+         "object_revision": 3,[39m
+[31m+         "payload_hash": "a0a7ef853fb39017bf4858443f51bc28572158f2992f8b9c53fae16874c5b15a",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "d047985d3c6f5220b0f2510b889729e6ea2256fa743e1f1c942d30938c2fd637",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "mental_model",[39m
+[31m+       "localBankId": "d4c8decc-0b84-4a31-8841-d22d53e559f1",[39m
+[31m+       "localId": "b4350695-0d4e-555f-8d4e-d8d170c037c9",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 11,[39m
+[31m+         "object_id": "taki-global-continuity-v1",[39m
+[31m+         "object_kind": "mental_model",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "27e3a32b361fec1ee8f69ff05d0c0d5161456c19e67792dae77463f5bd889b5c",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "0a12a1b469b65d39a8e17a550f8505c95e339bef1bbda3dab438ae112fca0113",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "directive",[39m
+[31m+       "localBankId": "d4c8decc-0b84-4a31-8841-d22d53e559f1",[39m
+[31m+       "localId": "7b23385e-de35-523d-913b-51a8eae4a94f",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 12,[39m
+[31m+         "object_id": "f61ac872-3e7c-4ce7-bfad-6b2d807bd7c7",[39m
+[31m+         "object_kind": "directive",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "42e171ab96241c2c01f57b0351bcbd31f0a339cca9e0e3a9f33d54dc45283cfd",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "7c8f9e05caf472fefd6091d782a169828cc0606b0c33de423f4ccf698acd9694",[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   "pendingSources": [],[39m
+[31m+   "predecessorEpochId": "epoch",[39m
+[31m+   "scopes": [[39m
+[31m+     {[39m
+[31m+       "evidenceId": "55386d22e389597d505049e724cb43b7fd408a5dd9a89f9792067bdbe5307651",[39m
+[31m+       "localBankId": "69aa6a14-4f84-4098-ac00-9cae0e1736b7",[39m
+[31m+       "nativeBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",[39m
+[31m+       "nativeGeneration": "22222222-2222-4222-8222-222222222222",[39m
+[31m+       "origin": "new",[39m
+[31m+       "originEpochId": null,[39m
+[31m+       "scope": {[39m
+[31m+         "characterId": "taki",[39m
+[31m+         "kind": "character",[39m
+[31m+       },[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "evidenceId": "620daab217787a9fccdfa088863dcf30fcbdb454a0d08a13f56c8ec504fc3974",[39m
+[31m+       "localBankId": "d4c8decc-0b84-4a31-8841-d22d53e559f1",[39m
+[31m+       "nativeBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",[39m
+[31m+       "nativeGeneration": "22222222-2222-4222-8222-222222222222",[39m
+[31m+       "origin": "new",[39m
+[31m+       "originEpochId": null,[39m
+[31m+       "scope": {[39m
+[31m+         "characterId": null,[39m
+[31m+         "kind": "global",[39m
+[31m+       },[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   "state": {[39m
+[31m+     "banks": [[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "4d5051cb-8f5e-4cf5-b470-1c319a59d1f3",[39m
+[31m+         "bankId": "69aa6a14-4f84-4098-ac00-9cae0e1736b7",[39m
+[31m+         "config": {[39m
+[31m+           "entity_labels": [[39m
+[31m+             {[39m
+[31m+               "description": "Classify each fact only when its scope and meaning are clear. Use unclassified when uncertain. A label grants no pin, disclosure or visibility permission.",[39m
+[31m+               "key": "taki-layer",[39m
+[31m+               "optional": true,[39m
+[31m+               "tag": true,[39m
+[31m+               "type": "value",[39m
+[31m+               "values": [[39m
+[31m+                 {[39m
+[31m+                   "value": "relationship",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "episodes",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "intentions",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "unclassified",[39m
+[31m+                 },[39m
+[31m+               ],[39m
+[31m+             },[39m
+[31m+           ],[39m
+[31m+           "observations_instructions": "Synthesize only durable observations supported by source facts for this Character-user relationship. Preserve uncertainty and provenance.",[39m
+[31m+           "reflect_mission": "Use durable memories to support this Character-user relationship without crossing its ownership boundary.",[39m
+[31m+           "retain_mission": "Extract durable facts, preferences, experiences, intentions, and corrections that belong to this Character-user relationship. Preserve source meaning and avoid inventing details.",[39m
+[31m+         },[39m
+[31m+         "createdAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+         "disposition": {[39m
+[31m+           "empathy": 3,[39m
+[31m+           "literalism": 3,[39m
+[31m+           "skepticism": 3,[39m
+[31m+         },[39m
+[31m+         "mission": "",[39m
+[31m+         "name": "Fixture Bank",[39m
+[31m+         "revision": 3,[39m
+[31m+         "scope": {[39m
+[31m+           "characterId": "taki",[39m
+[31m+           "kind": "character",[39m
+[31m+         },[39m
+[31m+         "updatedAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "4d5051cb-8f5e-4cf5-b470-1c319a59d1f3",[39m
+[31m+         "bankId": "d4c8decc-0b84-4a31-8841-d22d53e559f1",[39m
+[31m+         "config": {[39m
+[31m+           "entity_labels": [[39m
+[31m+             {[39m
+[31m+               "description": "Classify each fact only when its scope and meaning are clear. Use unclassified when uncertain. A label grants no pin, disclosure or visibility permission.",[39m
+[31m+               "key": "taki-layer",[39m
+[31m+               "optional": true,[39m
+[31m+               "tag": true,[39m
+[31m+               "type": "value",[39m
+[31m+               "values": [[39m
+[31m+                 {[39m
+[31m+                   "value": "profile",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "activity",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "unclassified",[39m
+[31m+                 },[39m
+[31m+               ],[39m
+[31m+             },[39m
+[31m+           ],[39m
+[31m+           "observations_instructions": "Synthesize only durable observations supported by source facts for user-wide continuity across Characters. Preserve uncertainty and provenance.",[39m
+[31m+           "reflect_mission": "Use durable memories to support user-wide continuity across Characters without crossing its ownership boundary.",[39m
+[31m+           "retain_mission": "Extract durable facts, preferences, experiences, intentions, and corrections that belong to user-wide continuity across Characters. Preserve source meaning and avoid inventing details.",[39m
+[31m+         },[39m
+[31m+         "createdAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+         "disposition": {[39m
+[31m+           "empathy": 3,[39m
+[31m+           "literalism": 3,[39m
+[31m+           "skepticism": 3,[39m
+[31m+         },[39m
+[31m+         "mission": "",[39m
+[31m+         "name": "Fixture Bank",[39m
+[31m+         "revision": 3,[39m
+[31m+         "scope": {[39m
+[31m+           "characterId": null,[39m
+[31m+           "kind": "global",[39m
+[31m+         },[39m
+[31m+         "updatedAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+       },[39m
+[31m+     ],[39m
+[31m+     "blocks": [],[39m
+[31m+     "derived": [[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "4d5051cb-8f5e-4cf5-b470-1c319a59d1f3",[39m
+[31m+         "bankId": "69aa6a14-4f84-4098-ac00-9cae0e1736b7",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "69aa6a14-4f84-4098-ac00-9cae0e1736b7",[39m
+[31m+           "content": "Respect Taki Memory Layer ownership and visibility metadata. Treat unclassified memory conservatively and never invent provenance.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "directiveId": "7f6a3ad0-7ab7-5b97-b280-36288dbda355",[39m
+[31m+           "isActive": true,[39m
+[31m+           "kind": "directive",[39m
+[31m+           "name": "taki-character-memory-policy-v1",[39m
+[31m+           "priority": 100,[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-template-v1",[39m
+[31m+             "taki-scope:character",[39m
+[31m+           ],[39m
+[31m+           "updatedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "4d5051cb-8f5e-4cf5-b470-1c319a59d1f3",[39m
+[31m+         "bankId": "69aa6a14-4f84-4098-ac00-9cae0e1736b7",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "69aa6a14-4f84-4098-ac00-9cae0e1736b7",[39m
+[31m+           "content": "Fixture generated content.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "kind": "mental_model",[39m
+[31m+           "lastRefreshedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "maxTokens": 1024,[39m
+[31m+           "mentalModelId": "2db6997a-15d3-5849-bf38-47b8a75781c7",[39m
+[31m+           "name": "Taki Character Relationship",[39m
+[31m+           "reflectResponse": null,[39m
+[31m+           "sourceQuery": "What durable patterns and corrections should guide this Character-user relationship?",[39m
+[31m+           "structuredContent": null,[39m
+[31m+           "subtype": "mental_model",[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-scope:character",[39m
+[31m+           ],[39m
+[31m+           "trigger": null,[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "4d5051cb-8f5e-4cf5-b470-1c319a59d1f3",[39m
+[31m+         "bankId": "69aa6a14-4f84-4098-ac00-9cae0e1736b7",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "69aa6a14-4f84-4098-ac00-9cae0e1736b7",[39m
+[31m+           "content": "Fixture generated content.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "kind": "mental_model",[39m
+[31m+           "lastRefreshedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "maxTokens": 1536,[39m
+[31m+           "mentalModelId": "a7f50d20-0a3f-5cae-a207-65d6a8eeb529",[39m
+[31m+           "name": "User travel notes",[39m
+[31m+           "reflectResponse": null,[39m
+[31m+           "sourceQuery": "Summarize only explicit travel plans.",[39m
+[31m+           "structuredContent": null,[39m
+[31m+           "subtype": "mental_model",[39m
+[31m+           "tags": [[39m
+[31m+             "user-owned",[39m
+[31m+             "travel",[39m
+[31m+           ],[39m
+[31m+           "trigger": {[39m
+[31m+             "exclude_mental_models": true,[39m
+[31m+             "fact_types": [[39m
+[31m+               "world",[39m
+[31m+             ],[39m
+[31m+             "include_chunks": false,[39m
+[31m+             "keep_trace": false,[39m
+[31m+             "mode": "full",[39m
+[31m+             "refresh_after_consolidation": false,[39m
+[31m+           },[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "4d5051cb-8f5e-4cf5-b470-1c319a59d1f3",[39m
+[31m+         "bankId": "d4c8decc-0b84-4a31-8841-d22d53e559f1",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "d4c8decc-0b84-4a31-8841-d22d53e559f1",[39m
+[31m+           "content": "Respect Taki Memory Layer ownership and visibility metadata. Treat unclassified memory conservatively and never invent provenance.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "directiveId": "7b23385e-de35-523d-913b-51a8eae4a94f",[39m
+[31m+           "isActive": true,[39m
+[31m+           "kind": "directive",[39m
+[31m+           "name": "taki-global-memory-policy-v1",[39m
+[31m+           "priority": 100,[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-template-v1",[39m
+[31m+             "taki-scope:global",[39m
+[31m+           ],[39m
+[31m+           "updatedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "4d5051cb-8f5e-4cf5-b470-1c319a59d1f3",[39m
+[31m+         "bankId": "d4c8decc-0b84-4a31-8841-d22d53e559f1",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "d4c8decc-0b84-4a31-8841-d22d53e559f1",[39m
+[31m+           "content": "Fixture generated content.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "kind": "mental_model",[39m
+[31m+           "lastRefreshedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "maxTokens": 1024,[39m
+[31m+           "mentalModelId": "b4350695-0d4e-555f-8d4e-d8d170c037c9",[39m
+[31m+           "name": "Taki Global Continuity",[39m
+[31m+           "reflectResponse": null,[39m
+[31m+           "sourceQuery": "What durable patterns and corrections should guide user-wide continuity across Characters?",[39m
+[31m+           "structuredContent": null,[39m
+[31m+           "subtype": "mental_model",[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-scope:global",[39m
+[31m+           ],[39m
+[31m+           "trigger": null,[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+     ],[39m
+[31m+     "historicalReferences": [],[39m
+[31m+     "history": [],[39m
+[31m+     "records": [],[39m
+[31m+     "sourceAliases": [],[39m
+[31m+     "sourceSets": [],[39m
+[31m+     "sources": [],[39m
+[31m+   },[39m
+[31m+   "stateHash": "ab7c5f658d4ab09f995756867104beef2dd4761a71ff5a6326d6dac553d93fa5",[39m
+[31m+   "targetEpochId": "4d5051cb-8f5e-4cf5-b470-1c319a59d1f3",[39m
+[31m+   "transitionId": "17308ab6-cef4-4e05-9a40-90839aab060f",[39m
+[31m+   "version": 1,[39m
+[2m  }[22m
+
+[36m [2m❯[22m src/memory/transitions/transition-template-observer.test.ts:[2m103:30[22m[39m
+    [90m101|[39m     Object.assign(evidence, resealTemplateAuxiliary(evidence, records)…
+    [90m102|[39m     [34mexpect[39m(f[33m.[39mobserver[33m.[39mrefreshResults[33m.[39msize)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m103|[39m     await expect(f.prepare()).rejects.toThrow("MEMORY_TRANSITION_PROOF…
+    [90m   |[39m                              [31m^[39m
+    [90m104|[39m     expect(f.fixture.db.prepare("SELECT * FROM memory_transition_candi…
+    [90m105|[39m   }[33m,[39m [34m30_000[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/memory/transitions/transition-template-observer.test.ts[2m > [22mhealthy W2 independently proves declared semantic refresh results[2m > [22mrefuses a wrong-request W2 marker even when Native observation claims membership
+[31m[1mAssertionError[22m: promise resolved "{ version: 1, …(13) }" instead of rejecting[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[31m+ {[39m
+[31m+   "candidateId": "58ebd54a488345f910fa72688dd1ab3d35fe07e0818d4b8b01b43600487760dd",[39m
+[31m+   "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+   "evidenceIds": [[39m
+[31m+     "b1cbee1784350dd76cdbcdbd2f64b2f341d829ae09e5fca2fc86bb5a271a5972",[39m
+[31m+     "a9e97a7b75619fe0830a2ec737ceb053c015f3df4c211e3b60fbef622bf2ffa1",[39m
+[31m+   ],[39m
+[31m+   "localCaptureId": null,[39m
+[31m+   "mappingHash": "b126c164f62bd07598f3b33ae6c51cd4ca263a9b2d86fed4fc0c3c2dbea7caad",[39m
+[31m+   "mappings": [[39m
+[31m+     {[39m
+[31m+       "application": {[39m
+[31m+         "key": {[39m
+[31m+           "artifact_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",[39m
+[31m+           "artifact_kind": "bank",[39m
+[31m+         },[39m
+[31m+         "record_hash": "ce4c6b503c2374f95789f9469d2b930a9c0100820a9d8f8c3bd9f9dd542e8cae",[39m
+[31m+         "revision": 2,[39m
+[31m+       },[39m
+[31m+       "applicationBodyHash": "e25f966966502a301bb272eac9a4acb3e0c5716fc48b55d952508e0ffd3364c6",[39m
+[31m+       "kind": "bank",[39m
+[31m+       "localBankId": "787e6ad9-e5ca-47c0-bd60-8c1656935939",[39m
+[31m+       "localId": "787e6ad9-e5ca-47c0-bd60-8c1656935939",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 10,[39m
+[31m+         "object_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",[39m
+[31m+         "object_kind": "bank",[39m
+[31m+         "object_revision": 3,[39m
+[31m+         "payload_hash": "1af042535386a74668f96ca4087a32f4c8623fd0ca4d5b2b4f55fef5a4e61483",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "372a38504858168ad945136b85f8ec2cdeb665a5eca6b73181126252db4c9f57",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "mental_model",[39m
+[31m+       "localBankId": "787e6ad9-e5ca-47c0-bd60-8c1656935939",[39m
+[31m+       "localId": "2db6997a-15d3-5849-bf38-47b8a75781c7",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 11,[39m
+[31m+         "object_id": "taki-character-continuity-v1",[39m
+[31m+         "object_kind": "mental_model",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "be4888f516882eaa33d5339c50678e2db672c8aca2d22d81376f6f37e5a0bce1",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "258c435f71fee125f063218dfb5c5bebfd31ecda4bc3eefefa503024ba93568f",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "mental_model",[39m
+[31m+       "localBankId": "787e6ad9-e5ca-47c0-bd60-8c1656935939",[39m
+[31m+       "localId": "a7f50d20-0a3f-5cae-a207-65d6a8eeb529",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 12,[39m
+[31m+         "object_id": "user-travel-notes",[39m
+[31m+         "object_kind": "mental_model",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "126b45535bebf1aa573090c72d80b7b4ee6b1a54daee7353e272d8a47804ddca",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "f4c42a11c755eb5907086e95e128c052a03a0daa1773e5468669157b82923e01",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "directive",[39m
+[31m+       "localBankId": "787e6ad9-e5ca-47c0-bd60-8c1656935939",[39m
+[31m+       "localId": "878d1239-7ba3-5fb6-a40c-189a0be7b0da",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 13,[39m
+[31m+         "object_id": "14e4617a-3d94-434c-a70d-2fa8c32951c2",[39m
+[31m+         "object_kind": "directive",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "564aa70a91bd52e582de0905de60e5ca82105abf5dc4d01958014dc9d31900b7",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "8c12c0f408e7026cea2d9ad40ec32d3ba28ce752b9db95be240f3aef1dd9633b",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": {[39m
+[31m+         "key": {[39m
+[31m+           "artifact_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",[39m
+[31m+           "artifact_kind": "bank",[39m
+[31m+         },[39m
+[31m+         "record_hash": "355bcf8fa4d195458ea15e2100d74c899a5928f8b6e04384ff06bfa57ac7f059",[39m
+[31m+         "revision": 2,[39m
+[31m+       },[39m
+[31m+       "applicationBodyHash": "6d46dd4048ce6d126bfc432e78901f1b3d6501516823dbf8a530761c442bdc09",[39m
+[31m+       "kind": "bank",[39m
+[31m+       "localBankId": "71d8a563-5bb8-4968-b5d8-96c8dda4eb6f",[39m
+[31m+       "localId": "71d8a563-5bb8-4968-b5d8-96c8dda4eb6f",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 10,[39m
+[31m+         "object_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",[39m
+[31m+         "object_kind": "bank",[39m
+[31m+         "object_revision": 3,[39m
+[31m+         "payload_hash": "a0a7ef853fb39017bf4858443f51bc28572158f2992f8b9c53fae16874c5b15a",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "d047985d3c6f5220b0f2510b889729e6ea2256fa743e1f1c942d30938c2fd637",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "mental_model",[39m
+[31m+       "localBankId": "71d8a563-5bb8-4968-b5d8-96c8dda4eb6f",[39m
+[31m+       "localId": "b4350695-0d4e-555f-8d4e-d8d170c037c9",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 11,[39m
+[31m+         "object_id": "taki-global-continuity-v1",[39m
+[31m+         "object_kind": "mental_model",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "27e3a32b361fec1ee8f69ff05d0c0d5161456c19e67792dae77463f5bd889b5c",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "1e7c0a740457a1b5d4f5133bf134d6e90f135c1c941f89ce29520fa619a23e77",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "directive",[39m
+[31m+       "localBankId": "71d8a563-5bb8-4968-b5d8-96c8dda4eb6f",[39m
+[31m+       "localId": "c022d21a-63c7-5273-81e5-7659811d587a",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 12,[39m
+[31m+         "object_id": "0e01628e-c77c-4bcf-aae9-d9621a398da3",[39m
+[31m+         "object_kind": "directive",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "4ce3c7bc19d7d5141ca3163df5442e650737681a35b1866c82aadb0177ce4a6f",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "8bcd02ae0de7584f2a789e79c4bd4afbf53ff54ec8738b4d6b0a74a40c4b2d06",[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   "pendingSources": [],[39m
+[31m+   "predecessorEpochId": "epoch",[39m
+[31m+   "scopes": [[39m
+[31m+     {[39m
+[31m+       "evidenceId": "b1cbee1784350dd76cdbcdbd2f64b2f341d829ae09e5fca2fc86bb5a271a5972",[39m
+[31m+       "localBankId": "787e6ad9-e5ca-47c0-bd60-8c1656935939",[39m
+[31m+       "nativeBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",[39m
+[31m+       "nativeGeneration": "22222222-2222-4222-8222-222222222222",[39m
+[31m+       "origin": "new",[39m
+[31m+       "originEpochId": null,[39m
+[31m+       "scope": {[39m
+[31m+         "characterId": "taki",[39m
+[31m+         "kind": "character",[39m
+[31m+       },[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "evidenceId": "a9e97a7b75619fe0830a2ec737ceb053c015f3df4c211e3b60fbef622bf2ffa1",[39m
+[31m+       "localBankId": "71d8a563-5bb8-4968-b5d8-96c8dda4eb6f",[39m
+[31m+       "nativeBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",[39m
+[31m+       "nativeGeneration": "22222222-2222-4222-8222-222222222222",[39m
+[31m+       "origin": "new",[39m
+[31m+       "originEpochId": null,[39m
+[31m+       "scope": {[39m
+[31m+         "characterId": null,[39m
+[31m+         "kind": "global",[39m
+[31m+       },[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   "state": {[39m
+[31m+     "banks": [[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "6fa3be43-33f5-4329-a98f-9c7626994272",[39m
+[31m+         "bankId": "71d8a563-5bb8-4968-b5d8-96c8dda4eb6f",[39m
+[31m+         "config": {[39m
+[31m+           "entity_labels": [[39m
+[31m+             {[39m
+[31m+               "description": "Classify each fact only when its scope and meaning are clear. Use unclassified when uncertain. A label grants no pin, disclosure or visibility permission.",[39m
+[31m+               "key": "taki-layer",[39m
+[31m+               "optional": true,[39m
+[31m+               "tag": true,[39m
+[31m+               "type": "value",[39m
+[31m+               "values": [[39m
+[31m+                 {[39m
+[31m+                   "value": "profile",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "activity",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "unclassified",[39m
+[31m+                 },[39m
+[31m+               ],[39m
+[31m+             },[39m
+[31m+           ],[39m
+[31m+           "observations_instructions": "Synthesize only durable observations supported by source facts for user-wide continuity across Characters. Preserve uncertainty and provenance.",[39m
+[31m+           "reflect_mission": "Use durable memories to support user-wide continuity across Characters without crossing its ownership boundary.",[39m
+[31m+           "retain_mission": "Extract durable facts, preferences, experiences, intentions, and corrections that belong to user-wide continuity across Characters. Preserve source meaning and avoid inventing details.",[39m
+[31m+         },[39m
+[31m+         "createdAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+         "disposition": {[39m
+[31m+           "empathy": 3,[39m
+[31m+           "literalism": 3,[39m
+[31m+           "skepticism": 3,[39m
+[31m+         },[39m
+[31m+         "mission": "",[39m
+[31m+         "name": "Fixture Bank",[39m
+[31m+         "revision": 3,[39m
+[31m+         "scope": {[39m
+[31m+           "characterId": null,[39m
+[31m+           "kind": "global",[39m
+[31m+         },[39m
+[31m+         "updatedAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "6fa3be43-33f5-4329-a98f-9c7626994272",[39m
+[31m+         "bankId": "787e6ad9-e5ca-47c0-bd60-8c1656935939",[39m
+[31m+         "config": {[39m
+[31m+           "entity_labels": [[39m
+[31m+             {[39m
+[31m+               "description": "Classify each fact only when its scope and meaning are clear. Use unclassified when uncertain. A label grants no pin, disclosure or visibility permission.",[39m
+[31m+               "key": "taki-layer",[39m
+[31m+               "optional": true,[39m
+[31m+               "tag": true,[39m
+[31m+               "type": "value",[39m
+[31m+               "values": [[39m
+[31m+                 {[39m
+[31m+                   "value": "relationship",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "episodes",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "intentions",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "unclassified",[39m
+[31m+                 },[39m
+[31m+               ],[39m
+[31m+             },[39m
+[31m+           ],[39m
+[31m+           "observations_instructions": "Synthesize only durable observations supported by source facts for this Character-user relationship. Preserve uncertainty and provenance.",[39m
+[31m+           "reflect_mission": "Use durable memories to support this Character-user relationship without crossing its ownership boundary.",[39m
+[31m+           "retain_mission": "Extract durable facts, preferences, experiences, intentions, and corrections that belong to this Character-user relationship. Preserve source meaning and avoid inventing details.",[39m
+[31m+         },[39m
+[31m+         "createdAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+         "disposition": {[39m
+[31m+           "empathy": 3,[39m
+[31m+           "literalism": 3,[39m
+[31m+           "skepticism": 3,[39m
+[31m+         },[39m
+[31m+         "mission": "",[39m
+[31m+         "name": "Fixture Bank",[39m
+[31m+         "revision": 3,[39m
+[31m+         "scope": {[39m
+[31m+           "characterId": "taki",[39m
+[31m+           "kind": "character",[39m
+[31m+         },[39m
+[31m+         "updatedAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+       },[39m
+[31m+     ],[39m
+[31m+     "blocks": [],[39m
+[31m+     "derived": [[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "6fa3be43-33f5-4329-a98f-9c7626994272",[39m
+[31m+         "bankId": "71d8a563-5bb8-4968-b5d8-96c8dda4eb6f",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "71d8a563-5bb8-4968-b5d8-96c8dda4eb6f",[39m
+[31m+           "content": "Respect Taki Memory Layer ownership and visibility metadata. Treat unclassified memory conservatively and never invent provenance.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "directiveId": "c022d21a-63c7-5273-81e5-7659811d587a",[39m
+[31m+           "isActive": true,[39m
+[31m+           "kind": "directive",[39m
+[31m+           "name": "taki-global-memory-policy-v1",[39m
+[31m+           "priority": 100,[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-template-v1",[39m
+[31m+             "taki-scope:global",[39m
+[31m+           ],[39m
+[31m+           "updatedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "6fa3be43-33f5-4329-a98f-9c7626994272",[39m
+[31m+         "bankId": "71d8a563-5bb8-4968-b5d8-96c8dda4eb6f",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "71d8a563-5bb8-4968-b5d8-96c8dda4eb6f",[39m
+[31m+           "content": "Fixture generated content.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "kind": "mental_model",[39m
+[31m+           "lastRefreshedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "maxTokens": 1024,[39m
+[31m+           "mentalModelId": "b4350695-0d4e-555f-8d4e-d8d170c037c9",[39m
+[31m+           "name": "Taki Global Continuity",[39m
+[31m+           "reflectResponse": null,[39m
+[31m+           "sourceQuery": "What durable patterns and corrections should guide user-wide continuity across Characters?",[39m
+[31m+           "structuredContent": null,[39m
+[31m+           "subtype": "mental_model",[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-scope:global",[39m
+[31m+           ],[39m
+[31m+           "trigger": null,[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "6fa3be43-33f5-4329-a98f-9c7626994272",[39m
+[31m+         "bankId": "787e6ad9-e5ca-47c0-bd60-8c1656935939",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "787e6ad9-e5ca-47c0-bd60-8c1656935939",[39m
+[31m+           "content": "Respect Taki Memory Layer ownership and visibility metadata. Treat unclassified memory conservatively and never invent provenance.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "directiveId": "878d1239-7ba3-5fb6-a40c-189a0be7b0da",[39m
+[31m+           "isActive": true,[39m
+[31m+           "kind": "directive",[39m
+[31m+           "name": "taki-character-memory-policy-v1",[39m
+[31m+           "priority": 100,[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-template-v1",[39m
+[31m+             "taki-scope:character",[39m
+[31m+           ],[39m
+[31m+           "updatedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "6fa3be43-33f5-4329-a98f-9c7626994272",[39m
+[31m+         "bankId": "787e6ad9-e5ca-47c0-bd60-8c1656935939",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "787e6ad9-e5ca-47c0-bd60-8c1656935939",[39m
+[31m+           "content": "Fixture generated content.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "kind": "mental_model",[39m
+[31m+           "lastRefreshedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "maxTokens": 1024,[39m
+[31m+           "mentalModelId": "2db6997a-15d3-5849-bf38-47b8a75781c7",[39m
+[31m+           "name": "Taki Character Relationship",[39m
+[31m+           "reflectResponse": null,[39m
+[31m+           "sourceQuery": "What durable patterns and corrections should guide this Character-user relationship?",[39m
+[31m+           "structuredContent": null,[39m
+[31m+           "subtype": "mental_model",[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-scope:character",[39m
+[31m+           ],[39m
+[31m+           "trigger": null,[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "6fa3be43-33f5-4329-a98f-9c7626994272",[39m
+[31m+         "bankId": "787e6ad9-e5ca-47c0-bd60-8c1656935939",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "787e6ad9-e5ca-47c0-bd60-8c1656935939",[39m
+[31m+           "content": "Fixture generated content.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "kind": "mental_model",[39m
+[31m+           "lastRefreshedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "maxTokens": 1536,[39m
+[31m+           "mentalModelId": "a7f50d20-0a3f-5cae-a207-65d6a8eeb529",[39m
+[31m+           "name": "User travel notes",[39m
+[31m+           "reflectResponse": null,[39m
+[31m+           "sourceQuery": "Summarize only explicit travel plans.",[39m
+[31m+           "structuredContent": null,[39m
+[31m+           "subtype": "mental_model",[39m
+[31m+           "tags": [[39m
+[31m+             "user-owned",[39m
+[31m+             "travel",[39m
+[31m+           ],[39m
+[31m+           "trigger": {[39m
+[31m+             "exclude_mental_models": true,[39m
+[31m+             "fact_types": [[39m
+[31m+               "world",[39m
+[31m+             ],[39m
+[31m+             "include_chunks": false,[39m
+[31m+             "keep_trace": false,[39m
+[31m+             "mode": "full",[39m
+[31m+             "refresh_after_consolidation": false,[39m
+[31m+           },[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+     ],[39m
+[31m+     "historicalReferences": [],[39m
+[31m+     "history": [],[39m
+[31m+     "records": [],[39m
+[31m+     "sourceAliases": [],[39m
+[31m+     "sourceSets": [],[39m
+[31m+     "sources": [],[39m
+[31m+   },[39m
+[31m+   "stateHash": "09044c15d70e55ed4caf24b468f955202376a84c48cde6e8cdc2950e3c91d395",[39m
+[31m+   "targetEpochId": "6fa3be43-33f5-4329-a98f-9c7626994272",[39m
+[31m+   "transitionId": "2d5df4c8-d15b-47e6-994f-f17a0fcb20db",[39m
+[31m+   "version": 1,[39m
+[2m  }[22m
+
+[36m [2m❯[22m src/memory/transitions/transition-template-observer.test.ts:[2m103:30[22m[39m
+    [90m101|[39m     Object.assign(evidence, resealTemplateAuxiliary(evidence, records)…
+    [90m102|[39m     [34mexpect[39m(f[33m.[39mobserver[33m.[39mrefreshResults[33m.[39msize)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m103|[39m     await expect(f.prepare()).rejects.toThrow("MEMORY_TRANSITION_PROOF…
+    [90m   |[39m                              [31m^[39m
+    [90m104|[39m     expect(f.fixture.db.prepare("SELECT * FROM memory_transition_candi…
+    [90m105|[39m   }[33m,[39m [34m30_000[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/memory/transitions/transition-template-observer.test.ts[2m > [22mhealthy W2 independently proves declared semantic refresh results[2m > [22mrefuses a wrong-target W2 marker even when Native observation claims membership
+[31m[1mAssertionError[22m: promise resolved "{ version: 1, …(13) }" instead of rejecting[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[31m+ {[39m
+[31m+   "candidateId": "d1c6e9bed7d168d8e07fdddd17430a4206c8cb6ac864e63d0949ed84723e860d",[39m
+[31m+   "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+   "evidenceIds": [[39m
+[31m+     "6acd601bb9f5a77b1e547c4b34119feaddb85a9212e3e95eef9f87f2e0674a6a",[39m
+[31m+     "ea072571f8c3f9e1a1f1fab1760d1918f66d4094ffb1b719949501e2626bda73",[39m
+[31m+   ],[39m
+[31m+   "localCaptureId": null,[39m
+[31m+   "mappingHash": "aa808eb1e9b3aaadeb315905cc4333acec700e87a6267dd51f797842daf83a1f",[39m
+[31m+   "mappings": [[39m
+[31m+     {[39m
+[31m+       "application": {[39m
+[31m+         "key": {[39m
+[31m+           "artifact_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",[39m
+[31m+           "artifact_kind": "bank",[39m
+[31m+         },[39m
+[31m+         "record_hash": "be19f4e46bff2ae6b4b8c8e9f75f6d199adc9810ccf146fc26dca9e7555c7e58",[39m
+[31m+         "revision": 2,[39m
+[31m+       },[39m
+[31m+       "applicationBodyHash": "e25f966966502a301bb272eac9a4acb3e0c5716fc48b55d952508e0ffd3364c6",[39m
+[31m+       "kind": "bank",[39m
+[31m+       "localBankId": "23d3b77c-4717-40f5-b0f6-679959afac73",[39m
+[31m+       "localId": "23d3b77c-4717-40f5-b0f6-679959afac73",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 10,[39m
+[31m+         "object_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",[39m
+[31m+         "object_kind": "bank",[39m
+[31m+         "object_revision": 3,[39m
+[31m+         "payload_hash": "1af042535386a74668f96ca4087a32f4c8623fd0ca4d5b2b4f55fef5a4e61483",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "372a38504858168ad945136b85f8ec2cdeb665a5eca6b73181126252db4c9f57",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "mental_model",[39m
+[31m+       "localBankId": "23d3b77c-4717-40f5-b0f6-679959afac73",[39m
+[31m+       "localId": "2db6997a-15d3-5849-bf38-47b8a75781c7",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 11,[39m
+[31m+         "object_id": "taki-character-continuity-v1",[39m
+[31m+         "object_kind": "mental_model",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "be4888f516882eaa33d5339c50678e2db672c8aca2d22d81376f6f37e5a0bce1",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "d6c2319969e0732751b3c3081857201fc47cc5f0b279695cfb5385fec19e21bc",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "mental_model",[39m
+[31m+       "localBankId": "23d3b77c-4717-40f5-b0f6-679959afac73",[39m
+[31m+       "localId": "a7f50d20-0a3f-5cae-a207-65d6a8eeb529",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 12,[39m
+[31m+         "object_id": "user-travel-notes",[39m
+[31m+         "object_kind": "mental_model",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "126b45535bebf1aa573090c72d80b7b4ee6b1a54daee7353e272d8a47804ddca",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "e2d984818040afaa69f9e3bcb56480aafcb53bb697ebfb2383b6070809154ae8",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "directive",[39m
+[31m+       "localBankId": "23d3b77c-4717-40f5-b0f6-679959afac73",[39m
+[31m+       "localId": "08a8d4f8-2063-52b4-81c5-187b5cc463f2",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 13,[39m
+[31m+         "object_id": "f70908fc-2d53-4fb8-830a-7d3efc6ac13d",[39m
+[31m+         "object_kind": "directive",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "caf112bc1eb1165dce1c85c57e9180e014707b959350aeae48c53b968549a137",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "c5895d984e206e2c73979e5c26d8178d3acd2219ecf7ae42a80f0e4f820a7f9b",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": {[39m
+[31m+         "key": {[39m
+[31m+           "artifact_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",[39m
+[31m+           "artifact_kind": "bank",[39m
+[31m+         },[39m
+[31m+         "record_hash": "c65bb137e936ae61ff766ae8ce4c603bf91cf80d8a12debaafea06538083bb62",[39m
+[31m+         "revision": 2,[39m
+[31m+       },[39m
+[31m+       "applicationBodyHash": "6d46dd4048ce6d126bfc432e78901f1b3d6501516823dbf8a530761c442bdc09",[39m
+[31m+       "kind": "bank",[39m
+[31m+       "localBankId": "1f1c7f14-7143-4076-aa58-778ad0152d43",[39m
+[31m+       "localId": "1f1c7f14-7143-4076-aa58-778ad0152d43",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 10,[39m
+[31m+         "object_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",[39m
+[31m+         "object_kind": "bank",[39m
+[31m+         "object_revision": 3,[39m
+[31m+         "payload_hash": "a0a7ef853fb39017bf4858443f51bc28572158f2992f8b9c53fae16874c5b15a",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "d047985d3c6f5220b0f2510b889729e6ea2256fa743e1f1c942d30938c2fd637",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "mental_model",[39m
+[31m+       "localBankId": "1f1c7f14-7143-4076-aa58-778ad0152d43",[39m
+[31m+       "localId": "b4350695-0d4e-555f-8d4e-d8d170c037c9",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 11,[39m
+[31m+         "object_id": "taki-global-continuity-v1",[39m
+[31m+         "object_kind": "mental_model",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "27e3a32b361fec1ee8f69ff05d0c0d5161456c19e67792dae77463f5bd889b5c",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "ce7f07e53a90be2921eae0edc3f8353e06fb06d852240dc301fbbb046bc406a5",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "directive",[39m
+[31m+       "localBankId": "1f1c7f14-7143-4076-aa58-778ad0152d43",[39m
+[31m+       "localId": "7c0ee51a-c6cb-5ef2-8913-1eb5b5fe7a85",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 12,[39m
+[31m+         "object_id": "3a734d3e-3718-4cc4-a4bb-f07d442b96da",[39m
+[31m+         "object_kind": "directive",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "7dbb6d2df1e665538de38486bb874c6573491e2a8a89ea3455772f41c5eaa8ce",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "55091e82dc6be41f576e642dd2c0dd38ebfd2ae1f77998ae7b5f43edfe36f44b",[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   "pendingSources": [],[39m
+[31m+   "predecessorEpochId": "epoch",[39m
+[31m+   "scopes": [[39m
+[31m+     {[39m
+[31m+       "evidenceId": "6acd601bb9f5a77b1e547c4b34119feaddb85a9212e3e95eef9f87f2e0674a6a",[39m
+[31m+       "localBankId": "23d3b77c-4717-40f5-b0f6-679959afac73",[39m
+[31m+       "nativeBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",[39m
+[31m+       "nativeGeneration": "22222222-2222-4222-8222-222222222222",[39m
+[31m+       "origin": "new",[39m
+[31m+       "originEpochId": null,[39m
+[31m+       "scope": {[39m
+[31m+         "characterId": "taki",[39m
+[31m+         "kind": "character",[39m
+[31m+       },[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "evidenceId": "ea072571f8c3f9e1a1f1fab1760d1918f66d4094ffb1b719949501e2626bda73",[39m
+[31m+       "localBankId": "1f1c7f14-7143-4076-aa58-778ad0152d43",[39m
+[31m+       "nativeBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",[39m
+[31m+       "nativeGeneration": "22222222-2222-4222-8222-222222222222",[39m
+[31m+       "origin": "new",[39m
+[31m+       "originEpochId": null,[39m
+[31m+       "scope": {[39m
+[31m+         "characterId": null,[39m
+[31m+         "kind": "global",[39m
+[31m+       },[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   "state": {[39m
+[31m+     "banks": [[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "c79858a3-2ccc-4924-b115-bc35de7a715b",[39m
+[31m+         "bankId": "1f1c7f14-7143-4076-aa58-778ad0152d43",[39m
+[31m+         "config": {[39m
+[31m+           "entity_labels": [[39m
+[31m+             {[39m
+[31m+               "description": "Classify each fact only when its scope and meaning are clear. Use unclassified when uncertain. A label grants no pin, disclosure or visibility permission.",[39m
+[31m+               "key": "taki-layer",[39m
+[31m+               "optional": true,[39m
+[31m+               "tag": true,[39m
+[31m+               "type": "value",[39m
+[31m+               "values": [[39m
+[31m+                 {[39m
+[31m+                   "value": "profile",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "activity",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "unclassified",[39m
+[31m+                 },[39m
+[31m+               ],[39m
+[31m+             },[39m
+[31m+           ],[39m
+[31m+           "observations_instructions": "Synthesize only durable observations supported by source facts for user-wide continuity across Characters. Preserve uncertainty and provenance.",[39m
+[31m+           "reflect_mission": "Use durable memories to support user-wide continuity across Characters without crossing its ownership boundary.",[39m
+[31m+           "retain_mission": "Extract durable facts, preferences, experiences, intentions, and corrections that belong to user-wide continuity across Characters. Preserve source meaning and avoid inventing details.",[39m
+[31m+         },[39m
+[31m+         "createdAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+         "disposition": {[39m
+[31m+           "empathy": 3,[39m
+[31m+           "literalism": 3,[39m
+[31m+           "skepticism": 3,[39m
+[31m+         },[39m
+[31m+         "mission": "",[39m
+[31m+         "name": "Fixture Bank",[39m
+[31m+         "revision": 3,[39m
+[31m+         "scope": {[39m
+[31m+           "characterId": null,[39m
+[31m+           "kind": "global",[39m
+[31m+         },[39m
+[31m+         "updatedAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "c79858a3-2ccc-4924-b115-bc35de7a715b",[39m
+[31m+         "bankId": "23d3b77c-4717-40f5-b0f6-679959afac73",[39m
+[31m+         "config": {[39m
+[31m+           "entity_labels": [[39m
+[31m+             {[39m
+[31m+               "description": "Classify each fact only when its scope and meaning are clear. Use unclassified when uncertain. A label grants no pin, disclosure or visibility permission.",[39m
+[31m+               "key": "taki-layer",[39m
+[31m+               "optional": true,[39m
+[31m+               "tag": true,[39m
+[31m+               "type": "value",[39m
+[31m+               "values": [[39m
+[31m+                 {[39m
+[31m+                   "value": "relationship",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "episodes",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "intentions",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "unclassified",[39m
+[31m+                 },[39m
+[31m+               ],[39m
+[31m+             },[39m
+[31m+           ],[39m
+[31m+           "observations_instructions": "Synthesize only durable observations supported by source facts for this Character-user relationship. Preserve uncertainty and provenance.",[39m
+[31m+           "reflect_mission": "Use durable memories to support this Character-user relationship without crossing its ownership boundary.",[39m
+[31m+           "retain_mission": "Extract durable facts, preferences, experiences, intentions, and corrections that belong to this Character-user relationship. Preserve source meaning and avoid inventing details.",[39m
+[31m+         },[39m
+[31m+         "createdAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+         "disposition": {[39m
+[31m+           "empathy": 3,[39m
+[31m+           "literalism": 3,[39m
+[31m+           "skepticism": 3,[39m
+[31m+         },[39m
+[31m+         "mission": "",[39m
+[31m+         "name": "Fixture Bank",[39m
+[31m+         "revision": 3,[39m
+[31m+         "scope": {[39m
+[31m+           "characterId": "taki",[39m
+[31m+           "kind": "character",[39m
+[31m+         },[39m
+[31m+         "updatedAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+       },[39m
+[31m+     ],[39m
+[31m+     "blocks": [],[39m
+[31m+     "derived": [[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "c79858a3-2ccc-4924-b115-bc35de7a715b",[39m
+[31m+         "bankId": "1f1c7f14-7143-4076-aa58-778ad0152d43",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "1f1c7f14-7143-4076-aa58-778ad0152d43",[39m
+[31m+           "content": "Respect Taki Memory Layer ownership and visibility metadata. Treat unclassified memory conservatively and never invent provenance.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "directiveId": "7c0ee51a-c6cb-5ef2-8913-1eb5b5fe7a85",[39m
+[31m+           "isActive": true,[39m
+[31m+           "kind": "directive",[39m
+[31m+           "name": "taki-global-memory-policy-v1",[39m
+[31m+           "priority": 100,[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-template-v1",[39m
+[31m+             "taki-scope:global",[39m
+[31m+           ],[39m
+[31m+           "updatedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "c79858a3-2ccc-4924-b115-bc35de7a715b",[39m
+[31m+         "bankId": "1f1c7f14-7143-4076-aa58-778ad0152d43",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "1f1c7f14-7143-4076-aa58-778ad0152d43",[39m
+[31m+           "content": "Fixture generated content.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "kind": "mental_model",[39m
+[31m+           "lastRefreshedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "maxTokens": 1024,[39m
+[31m+           "mentalModelId": "b4350695-0d4e-555f-8d4e-d8d170c037c9",[39m
+[31m+           "name": "Taki Global Continuity",[39m
+[31m+           "reflectResponse": null,[39m
+[31m+           "sourceQuery": "What durable patterns and corrections should guide user-wide continuity across Characters?",[39m
+[31m+           "structuredContent": null,[39m
+[31m+           "subtype": "mental_model",[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-scope:global",[39m
+[31m+           ],[39m
+[31m+           "trigger": null,[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "c79858a3-2ccc-4924-b115-bc35de7a715b",[39m
+[31m+         "bankId": "23d3b77c-4717-40f5-b0f6-679959afac73",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "23d3b77c-4717-40f5-b0f6-679959afac73",[39m
+[31m+           "content": "Respect Taki Memory Layer ownership and visibility metadata. Treat unclassified memory conservatively and never invent provenance.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "directiveId": "08a8d4f8-2063-52b4-81c5-187b5cc463f2",[39m
+[31m+           "isActive": true,[39m
+[31m+           "kind": "directive",[39m
+[31m+           "name": "taki-character-memory-policy-v1",[39m
+[31m+           "priority": 100,[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-template-v1",[39m
+[31m+             "taki-scope:character",[39m
+[31m+           ],[39m
+[31m+           "updatedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "c79858a3-2ccc-4924-b115-bc35de7a715b",[39m
+[31m+         "bankId": "23d3b77c-4717-40f5-b0f6-679959afac73",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "23d3b77c-4717-40f5-b0f6-679959afac73",[39m
+[31m+           "content": "Fixture generated content.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "kind": "mental_model",[39m
+[31m+           "lastRefreshedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "maxTokens": 1024,[39m
+[31m+           "mentalModelId": "2db6997a-15d3-5849-bf38-47b8a75781c7",[39m
+[31m+           "name": "Taki Character Relationship",[39m
+[31m+           "reflectResponse": null,[39m
+[31m+           "sourceQuery": "What durable patterns and corrections should guide this Character-user relationship?",[39m
+[31m+           "structuredContent": null,[39m
+[31m+           "subtype": "mental_model",[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-scope:character",[39m
+[31m+           ],[39m
+[31m+           "trigger": null,[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "c79858a3-2ccc-4924-b115-bc35de7a715b",[39m
+[31m+         "bankId": "23d3b77c-4717-40f5-b0f6-679959afac73",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "23d3b77c-4717-40f5-b0f6-679959afac73",[39m
+[31m+           "content": "Fixture generated content.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "kind": "mental_model",[39m
+[31m+           "lastRefreshedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "maxTokens": 1536,[39m
+[31m+           "mentalModelId": "a7f50d20-0a3f-5cae-a207-65d6a8eeb529",[39m
+[31m+           "name": "User travel notes",[39m
+[31m+           "reflectResponse": null,[39m
+[31m+           "sourceQuery": "Summarize only explicit travel plans.",[39m
+[31m+           "structuredContent": null,[39m
+[31m+           "subtype": "mental_model",[39m
+[31m+           "tags": [[39m
+[31m+             "user-owned",[39m
+[31m+             "travel",[39m
+[31m+           ],[39m
+[31m+           "trigger": {[39m
+[31m+             "exclude_mental_models": true,[39m
+[31m+             "fact_types": [[39m
+[31m+               "world",[39m
+[31m+             ],[39m
+[31m+             "include_chunks": false,[39m
+[31m+             "keep_trace": false,[39m
+[31m+             "mode": "full",[39m
+[31m+             "refresh_after_consolidation": false,[39m
+[31m+           },[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+     ],[39m
+[31m+     "historicalReferences": [],[39m
+[31m+     "history": [],[39m
+[31m+     "records": [],[39m
+[31m+     "sourceAliases": [],[39m
+[31m+     "sourceSets": [],[39m
+[31m+     "sources": [],[39m
+[31m+   },[39m
+[31m+   "stateHash": "efac5bbbb863989e612e546f53dd16fe18ef7d638b87536ae92c1025602b9504",[39m
+[31m+   "targetEpochId": "c79858a3-2ccc-4924-b115-bc35de7a715b",[39m
+[31m+   "transitionId": "82d213f0-4890-406d-9a3f-d827a2e43ec7",[39m
+[31m+   "version": 1,[39m
+[2m  }[22m
+
+[36m [2m❯[22m src/memory/transitions/transition-template-observer.test.ts:[2m103:30[22m[39m
+    [90m101|[39m     Object.assign(evidence, resealTemplateAuxiliary(evidence, records)…
+    [90m102|[39m     [34mexpect[39m(f[33m.[39mobserver[33m.[39mrefreshResults[33m.[39msize)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m103|[39m     await expect(f.prepare()).rejects.toThrow("MEMORY_TRANSITION_PROOF…
+    [90m   |[39m                              [31m^[39m
+    [90m104|[39m     expect(f.fixture.db.prepare("SELECT * FROM memory_transition_candi…
+    [90m105|[39m   }[33m,[39m [34m30_000[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/memory/transitions/transition-template-observer.test.ts[2m > [22mhealthy W2 independently proves declared semantic refresh results[2m > [22mrefuses a pending W2 marker even when Native observation claims membership
+[31m[1mAssertionError[22m: promise resolved "{ version: 1, …(13) }" instead of rejecting[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[31m+ {[39m
+[31m+   "candidateId": "daeba59406caf5570a102a1db1748e0f96e13e25e714ebcb9b1a7925b803361f",[39m
+[31m+   "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+   "evidenceIds": [[39m
+[31m+     "27392173af9a9c0376b1c91aa0bc2b56ab338450b291a4b16fb557043b88f211",[39m
+[31m+     "47a28789b703fe0b707d6114e0e16ce6d954a59be815d83a7094fc91f57ff9c9",[39m
+[31m+   ],[39m
+[31m+   "localCaptureId": null,[39m
+[31m+   "mappingHash": "6e27313f2ddb07a90e5a8b7df1cd731a510724b2ce8e898bfdbe7ab12af75aa0",[39m
+[31m+   "mappings": [[39m
+[31m+     {[39m
+[31m+       "application": {[39m
+[31m+         "key": {[39m
+[31m+           "artifact_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",[39m
+[31m+           "artifact_kind": "bank",[39m
+[31m+         },[39m
+[31m+         "record_hash": "c4d2cfb51323599b502e507401996e1e4d98c2b26bcd3a1789b58c6489ff7c6b",[39m
+[31m+         "revision": 2,[39m
+[31m+       },[39m
+[31m+       "applicationBodyHash": "e25f966966502a301bb272eac9a4acb3e0c5716fc48b55d952508e0ffd3364c6",[39m
+[31m+       "kind": "bank",[39m
+[31m+       "localBankId": "2c9dd578-3ff5-46be-a63c-2d08ec649a6d",[39m
+[31m+       "localId": "2c9dd578-3ff5-46be-a63c-2d08ec649a6d",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 10,[39m
+[31m+         "object_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",[39m
+[31m+         "object_kind": "bank",[39m
+[31m+         "object_revision": 3,[39m
+[31m+         "payload_hash": "1af042535386a74668f96ca4087a32f4c8623fd0ca4d5b2b4f55fef5a4e61483",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "372a38504858168ad945136b85f8ec2cdeb665a5eca6b73181126252db4c9f57",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "mental_model",[39m
+[31m+       "localBankId": "2c9dd578-3ff5-46be-a63c-2d08ec649a6d",[39m
+[31m+       "localId": "2db6997a-15d3-5849-bf38-47b8a75781c7",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 11,[39m
+[31m+         "object_id": "taki-character-continuity-v1",[39m
+[31m+         "object_kind": "mental_model",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "be4888f516882eaa33d5339c50678e2db672c8aca2d22d81376f6f37e5a0bce1",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "56594800940f2c7c1d6bc5dbd7499987b6460fa5aeadc01b4f1b1ee77019d0e8",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "mental_model",[39m
+[31m+       "localBankId": "2c9dd578-3ff5-46be-a63c-2d08ec649a6d",[39m
+[31m+       "localId": "a7f50d20-0a3f-5cae-a207-65d6a8eeb529",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 12,[39m
+[31m+         "object_id": "user-travel-notes",[39m
+[31m+         "object_kind": "mental_model",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "126b45535bebf1aa573090c72d80b7b4ee6b1a54daee7353e272d8a47804ddca",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "05ead661dcd7c38728f5159e7f184bfe953339fe78f2a785c167273d4023f7c8",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "directive",[39m
+[31m+       "localBankId": "2c9dd578-3ff5-46be-a63c-2d08ec649a6d",[39m
+[31m+       "localId": "9faf0fa7-6cae-57ef-9dfe-635b34e2cb84",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 13,[39m
+[31m+         "object_id": "f908628a-89b2-4e4a-b27b-d63988639a38",[39m
+[31m+         "object_kind": "directive",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "072facee13f05dc8ab1b41692c1de74de7df73fcaad15cd0f08abdadaed11052",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "dcb9d51176794274c855591bf096bb5300662a58b7c19d25b02c4dc9cce5f47c",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": {[39m
+[31m+         "key": {[39m
+[31m+           "artifact_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",[39m
+[31m+           "artifact_kind": "bank",[39m
+[31m+         },[39m
+[31m+         "record_hash": "cc4427e211fff1099b00b347c56ae02880ec46101fff47185d2941f327377648",[39m
+[31m+         "revision": 2,[39m
+[31m+       },[39m
+[31m+       "applicationBodyHash": "6d46dd4048ce6d126bfc432e78901f1b3d6501516823dbf8a530761c442bdc09",[39m
+[31m+       "kind": "bank",[39m
+[31m+       "localBankId": "1b86dc0a-d961-4cc6-b9c9-5be3509ef508",[39m
+[31m+       "localId": "1b86dc0a-d961-4cc6-b9c9-5be3509ef508",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 10,[39m
+[31m+         "object_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",[39m
+[31m+         "object_kind": "bank",[39m
+[31m+         "object_revision": 3,[39m
+[31m+         "payload_hash": "a0a7ef853fb39017bf4858443f51bc28572158f2992f8b9c53fae16874c5b15a",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "d047985d3c6f5220b0f2510b889729e6ea2256fa743e1f1c942d30938c2fd637",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "mental_model",[39m
+[31m+       "localBankId": "1b86dc0a-d961-4cc6-b9c9-5be3509ef508",[39m
+[31m+       "localId": "b4350695-0d4e-555f-8d4e-d8d170c037c9",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 11,[39m
+[31m+         "object_id": "taki-global-continuity-v1",[39m
+[31m+         "object_kind": "mental_model",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "27e3a32b361fec1ee8f69ff05d0c0d5161456c19e67792dae77463f5bd889b5c",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "ce0c8884d753ca5336e5fa19778e8559114da173084151b3242f3c0c1e0bb5d6",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "application": null,[39m
+[31m+       "applicationBodyHash": null,[39m
+[31m+       "kind": "directive",[39m
+[31m+       "localBankId": "1b86dc0a-d961-4cc6-b9c9-5be3509ef508",[39m
+[31m+       "localId": "308131d7-3c94-55b7-a334-5dda342b7e1e",[39m
+[31m+       "native": {[39m
+[31m+         "native_cursor": 12,[39m
+[31m+         "object_id": "6db05f42-d652-477c-a593-ad9a561e28d3",[39m
+[31m+         "object_kind": "directive",[39m
+[31m+         "object_revision": 1,[39m
+[31m+         "payload_hash": "cebba3bc0e8aaf4d19181dcfdb616c28578fb49cc536cbeaf8faa2eea93d71f9",[39m
+[31m+       },[39m
+[31m+       "origin": "native-derived",[39m
+[31m+       "semanticHash": "36e3a0148c8929ab28dd7c39a7f981cc7c780783a36c2f43f5a909096feff132",[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   "pendingSources": [],[39m
+[31m+   "predecessorEpochId": "epoch",[39m
+[31m+   "scopes": [[39m
+[31m+     {[39m
+[31m+       "evidenceId": "27392173af9a9c0376b1c91aa0bc2b56ab338450b291a4b16fb557043b88f211",[39m
+[31m+       "localBankId": "2c9dd578-3ff5-46be-a63c-2d08ec649a6d",[39m
+[31m+       "nativeBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",[39m
+[31m+       "nativeGeneration": "22222222-2222-4222-8222-222222222222",[39m
+[31m+       "origin": "new",[39m
+[31m+       "originEpochId": null,[39m
+[31m+       "scope": {[39m
+[31m+         "characterId": "taki",[39m
+[31m+         "kind": "character",[39m
+[31m+       },[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "evidenceId": "47a28789b703fe0b707d6114e0e16ce6d954a59be815d83a7094fc91f57ff9c9",[39m
+[31m+       "localBankId": "1b86dc0a-d961-4cc6-b9c9-5be3509ef508",[39m
+[31m+       "nativeBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",[39m
+[31m+       "nativeGeneration": "22222222-2222-4222-8222-222222222222",[39m
+[31m+       "origin": "new",[39m
+[31m+       "originEpochId": null,[39m
+[31m+       "scope": {[39m
+[31m+         "characterId": null,[39m
+[31m+         "kind": "global",[39m
+[31m+       },[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   "state": {[39m
+[31m+     "banks": [[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "c4b83f8e-f376-433a-a807-7f551dbb267b",[39m
+[31m+         "bankId": "1b86dc0a-d961-4cc6-b9c9-5be3509ef508",[39m
+[31m+         "config": {[39m
+[31m+           "entity_labels": [[39m
+[31m+             {[39m
+[31m+               "description": "Classify each fact only when its scope and meaning are clear. Use unclassified when uncertain. A label grants no pin, disclosure or visibility permission.",[39m
+[31m+               "key": "taki-layer",[39m
+[31m+               "optional": true,[39m
+[31m+               "tag": true,[39m
+[31m+               "type": "value",[39m
+[31m+               "values": [[39m
+[31m+                 {[39m
+[31m+                   "value": "profile",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "activity",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "unclassified",[39m
+[31m+                 },[39m
+[31m+               ],[39m
+[31m+             },[39m
+[31m+           ],[39m
+[31m+           "observations_instructions": "Synthesize only durable observations supported by source facts for user-wide continuity across Characters. Preserve uncertainty and provenance.",[39m
+[31m+           "reflect_mission": "Use durable memories to support user-wide continuity across Characters without crossing its ownership boundary.",[39m
+[31m+           "retain_mission": "Extract durable facts, preferences, experiences, intentions, and corrections that belong to user-wide continuity across Characters. Preserve source meaning and avoid inventing details.",[39m
+[31m+         },[39m
+[31m+         "createdAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+         "disposition": {[39m
+[31m+           "empathy": 3,[39m
+[31m+           "literalism": 3,[39m
+[31m+           "skepticism": 3,[39m
+[31m+         },[39m
+[31m+         "mission": "",[39m
+[31m+         "name": "Fixture Bank",[39m
+[31m+         "revision": 3,[39m
+[31m+         "scope": {[39m
+[31m+           "characterId": null,[39m
+[31m+           "kind": "global",[39m
+[31m+         },[39m
+[31m+         "updatedAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "c4b83f8e-f376-433a-a807-7f551dbb267b",[39m
+[31m+         "bankId": "2c9dd578-3ff5-46be-a63c-2d08ec649a6d",[39m
+[31m+         "config": {[39m
+[31m+           "entity_labels": [[39m
+[31m+             {[39m
+[31m+               "description": "Classify each fact only when its scope and meaning are clear. Use unclassified when uncertain. A label grants no pin, disclosure or visibility permission.",[39m
+[31m+               "key": "taki-layer",[39m
+[31m+               "optional": true,[39m
+[31m+               "tag": true,[39m
+[31m+               "type": "value",[39m
+[31m+               "values": [[39m
+[31m+                 {[39m
+[31m+                   "value": "relationship",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "episodes",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "intentions",[39m
+[31m+                 },[39m
+[31m+                 {[39m
+[31m+                   "value": "unclassified",[39m
+[31m+                 },[39m
+[31m+               ],[39m
+[31m+             },[39m
+[31m+           ],[39m
+[31m+           "observations_instructions": "Synthesize only durable observations supported by source facts for this Character-user relationship. Preserve uncertainty and provenance.",[39m
+[31m+           "reflect_mission": "Use durable memories to support this Character-user relationship without crossing its ownership boundary.",[39m
+[31m+           "retain_mission": "Extract durable facts, preferences, experiences, intentions, and corrections that belong to this Character-user relationship. Preserve source meaning and avoid inventing details.",[39m
+[31m+         },[39m
+[31m+         "createdAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+         "disposition": {[39m
+[31m+           "empathy": 3,[39m
+[31m+           "literalism": 3,[39m
+[31m+           "skepticism": 3,[39m
+[31m+         },[39m
+[31m+         "mission": "",[39m
+[31m+         "name": "Fixture Bank",[39m
+[31m+         "revision": 3,[39m
+[31m+         "scope": {[39m
+[31m+           "characterId": "taki",[39m
+[31m+           "kind": "character",[39m
+[31m+         },[39m
+[31m+         "updatedAt": "2026-09-11T08:00:00.000Z",[39m
+[31m+       },[39m
+[31m+     ],[39m
+[31m+     "blocks": [],[39m
+[31m+     "derived": [[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "c4b83f8e-f376-433a-a807-7f551dbb267b",[39m
+[31m+         "bankId": "1b86dc0a-d961-4cc6-b9c9-5be3509ef508",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "1b86dc0a-d961-4cc6-b9c9-5be3509ef508",[39m
+[31m+           "content": "Respect Taki Memory Layer ownership and visibility metadata. Treat unclassified memory conservatively and never invent provenance.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "directiveId": "308131d7-3c94-55b7-a334-5dda342b7e1e",[39m
+[31m+           "isActive": true,[39m
+[31m+           "kind": "directive",[39m
+[31m+           "name": "taki-global-memory-policy-v1",[39m
+[31m+           "priority": 100,[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-template-v1",[39m
+[31m+             "taki-scope:global",[39m
+[31m+           ],[39m
+[31m+           "updatedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "c4b83f8e-f376-433a-a807-7f551dbb267b",[39m
+[31m+         "bankId": "1b86dc0a-d961-4cc6-b9c9-5be3509ef508",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "1b86dc0a-d961-4cc6-b9c9-5be3509ef508",[39m
+[31m+           "content": "Fixture generated content.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "kind": "mental_model",[39m
+[31m+           "lastRefreshedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "maxTokens": 1024,[39m
+[31m+           "mentalModelId": "b4350695-0d4e-555f-8d4e-d8d170c037c9",[39m
+[31m+           "name": "Taki Global Continuity",[39m
+[31m+           "reflectResponse": null,[39m
+[31m+           "sourceQuery": "What durable patterns and corrections should guide user-wide continuity across Characters?",[39m
+[31m+           "structuredContent": null,[39m
+[31m+           "subtype": "mental_model",[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-scope:global",[39m
+[31m+           ],[39m
+[31m+           "trigger": null,[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "c4b83f8e-f376-433a-a807-7f551dbb267b",[39m
+[31m+         "bankId": "2c9dd578-3ff5-46be-a63c-2d08ec649a6d",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "2c9dd578-3ff5-46be-a63c-2d08ec649a6d",[39m
+[31m+           "content": "Respect Taki Memory Layer ownership and visibility metadata. Treat unclassified memory conservatively and never invent provenance.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "directiveId": "9faf0fa7-6cae-57ef-9dfe-635b34e2cb84",[39m
+[31m+           "isActive": true,[39m
+[31m+           "kind": "directive",[39m
+[31m+           "name": "taki-character-memory-policy-v1",[39m
+[31m+           "priority": 100,[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-template-v1",[39m
+[31m+             "taki-scope:character",[39m
+[31m+           ],[39m
+[31m+           "updatedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "c4b83f8e-f376-433a-a807-7f551dbb267b",[39m
+[31m+         "bankId": "2c9dd578-3ff5-46be-a63c-2d08ec649a6d",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "2c9dd578-3ff5-46be-a63c-2d08ec649a6d",[39m
+[31m+           "content": "Fixture generated content.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "kind": "mental_model",[39m
+[31m+           "lastRefreshedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "maxTokens": 1024,[39m
+[31m+           "mentalModelId": "2db6997a-15d3-5849-bf38-47b8a75781c7",[39m
+[31m+           "name": "Taki Character Relationship",[39m
+[31m+           "reflectResponse": null,[39m
+[31m+           "sourceQuery": "What durable patterns and corrections should guide this Character-user relationship?",[39m
+[31m+           "structuredContent": null,[39m
+[31m+           "subtype": "mental_model",[39m
+[31m+           "tags": [[39m
+[31m+             "taki-owned",[39m
+[31m+             "taki-scope:character",[39m
+[31m+           ],[39m
+[31m+           "trigger": null,[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "authorityEpochId": "c4b83f8e-f376-433a-a807-7f551dbb267b",[39m
+[31m+         "bankId": "2c9dd578-3ff5-46be-a63c-2d08ec649a6d",[39m
+[31m+         "objectRevision": 1,[39m
+[31m+         "payload": {[39m
+[31m+           "bankId": "2c9dd578-3ff5-46be-a63c-2d08ec649a6d",[39m
+[31m+           "content": "Fixture generated content.",[39m
+[31m+           "createdAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "kind": "mental_model",[39m
+[31m+           "lastRefreshedAt": "2026-10-01T00:00:00.000Z",[39m
+[31m+           "maxTokens": 1536,[39m
+[31m+           "mentalModelId": "a7f50d20-0a3f-5cae-a207-65d6a8eeb529",[39m
+[31m+           "name": "User travel notes",[39m
+[31m+           "reflectResponse": null,[39m
+[31m+           "sourceQuery": "Summarize only explicit travel plans.",[39m
+[31m+           "structuredContent": null,[39m
+[31m+           "subtype": "mental_model",[39m
+[31m+           "tags": [[39m
+[31m+             "user-owned",[39m
+[31m+             "travel",[39m
+[31m+           ],[39m
+[31m+           "trigger": {[39m
+[31m+             "exclude_mental_models": true,[39m
+[31m+             "fact_types": [[39m
+[31m+               "world",[39m
+[31m+             ],[39m
+[31m+             "include_chunks": false,[39m
+[31m+             "keep_trace": false,[39m
+[31m+             "mode": "full",[39m
+[31m+             "refresh_after_consolidation": false,[39m
+[31m+           },[39m
+[31m+         },[39m
+[31m+       },[39m
+[31m+     ],[39m
+[31m+     "historicalReferences": [],[39m
+[31m+     "history": [],[39m
+[31m+     "records": [],[39m
+[31m+     "sourceAliases": [],[39m
+[31m+     "sourceSets": [],[39m
+[31m+     "sources": [],[39m
+[31m+   },[39m
+[31m+   "stateHash": "d618886c58dab82c85fac3c22871a01b531f6ddbca05d244d9d2a86ad8e71b6f",[39m
+[31m+   "targetEpochId": "c4b83f8e-f376-433a-a807-7f551dbb267b",[39m
+[31m+   "transitionId": "e26facdb-2adf-4480-8c0e-17b7d284787e",[39m
+[31m+   "version": 1,[39m
+[2m  }[22m
+
+[36m [2m❯[22m src/memory/transitions/transition-template-observer.test.ts:[2m103:30[22m[39m
+    [90m101|[39m     Object.assign(evidence, resealTemplateAuxiliary(evidence, records)…
+    [90m102|[39m     [34mexpect[39m(f[33m.[39mobserver[33m.[39mrefreshResults[33m.[39msize)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m103|[39m     await expect(f.prepare()).rejects.toThrow("MEMORY_TRANSITION_PROOF…
+    [90m   |[39m                              [31m^[39m
+    [90m104|[39m     expect(f.fixture.db.prepare("SELECT * FROM memory_transition_candi…
+    [90m105|[39m   }[33m,[39m [34m30_000[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m8 failed[39m[22m[90m (8)[39m
+[2m   Start at [22m 23:10:12
+[2m   Duration [22m 371.36s[2m (transform 10.52s, setup 0ms, import 13.02s, tests 357.74s, environment 0ms)[22m
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/transitions/transition-template-observer.test.ts --maxWorkers=2

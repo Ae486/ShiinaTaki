@@ -1,0 +1,148 @@
+{
+  "generatedAt": "2026-10-07T16:53:02.6001201Z",
+  "head": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a",
+  "scope": "B1 Core composition and 058 only",
+  "files": [
+    {
+      "path": "packages/core/src/db/index.md",
+      "bytes": 22064,
+      "sha256": "e19de6b88298cf7237185df74f059718959bceaa10d30ca12515c4855230a41f"
+    },
+    {
+      "path": "packages/core/src/db/migrations/058-hindsight-template-overlays.test.ts",
+      "bytes": 4284,
+      "sha256": "8d6bab0bb499c3f77a74f1e6805f6efe268069df6b5c9b0efe08018fcb01ecdc"
+    },
+    {
+      "path": "packages/core/src/db/migrations/058-hindsight-template-overlays.ts",
+      "bytes": 7211,
+      "sha256": "17138f0f5e05691360331d8a51adcc99fe17f44a8dc0cbe166b576a93922f249"
+    },
+    {
+      "path": "packages/core/src/db/migrations/index-list.test.ts",
+      "bytes": 529,
+      "sha256": "732e86904ffe168455f1e59a3e866c9d257ceca8da220598d3d0e9342e4f71b9"
+    },
+    {
+      "path": "packages/core/src/db/migrations/index-list.ts",
+      "bytes": 7129,
+      "sha256": "9e18334b0fd35c44d2a8b362d7ff43ac4a6c0228c85c5b9f89ef5ce1c59f25dc"
+    },
+    {
+      "path": "packages/core/src/db/migrations/index.md",
+      "bytes": 8750,
+      "sha256": "56dd84f5023268b8e709456c93ecabd94feb03eefee6be30cb5e8afde99e6073"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/index.md",
+      "bytes": 1979,
+      "sha256": "8445e2686ff353a6d1b662c93df4d8fb15299b6019d08daa7b737a3b05c7c02b"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-catalog.ts",
+      "bytes": 3719,
+      "sha256": "2fc8f1822114e3fbd82935657d09ac0efbf5766a8d35dd0da9cb5df71ce4a3dc"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-composition.test.ts",
+      "bytes": 16314,
+      "sha256": "c5714a449d73136766d50d0bfd0e677d7b3cc5f13bbfc34eb2e21605a574133e"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-default-store.ts",
+      "bytes": 4034,
+      "sha256": "ef11aab60c21ba38aab8de164ce2be663b43c8fda16371a0e5a40bc5f0a117ec"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-drift.ts",
+      "bytes": 3244,
+      "sha256": "9f103b4183f63c736ee05c1d6de6565a14a00a7b21d174577335ba4bf764b293"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-enrollment.ts",
+      "bytes": 6577,
+      "sha256": "2c66d2eae131f129f280f6cc7d45174e182cb17e5b00caa69c3f444a66044ee8"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-integrity.test.ts",
+      "bytes": 7056,
+      "sha256": "ebdd37e510580184809f95a498dd01ea38eef74ad83acffe44ca94bf594314ec"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-integrity.ts",
+      "bytes": 3085,
+      "sha256": "5964f3d4a06ce40ec3f9933430c890ed53001a8122e29cb832f50a02664d866a"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-label-composition.ts",
+      "bytes": 2538,
+      "sha256": "1275442272ce66e18cae7b3f733537ae0a055f8b4a5a174a25a8cdaebd7e6f77"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-overlay-history.ts",
+      "bytes": 5641,
+      "sha256": "cb265e12b8bdff98125b785d7fda7ea9c65021970641b45d9b6d7bc62513df52"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-overlay-schema.ts",
+      "bytes": 3758,
+      "sha256": "083f8b195434bd41edb96615f3e3f4ce37ba9e9e5e0aa206b3cd502c26b90792"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-overlay-store.test.ts",
+      "bytes": 10178,
+      "sha256": "9d35bfca0d683195fe3c8dc2ced654294cb408ca04862ded1a171edfdabeba0d"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-overlay-store.ts",
+      "bytes": 7520,
+      "sha256": "8569ddce9cedde55bd79fb85907671f4ad28679a7162662199b992fe987e4928"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-preview.ts",
+      "bytes": 10590,
+      "sha256": "4a578c51e4d7d8e5249abed17cf79a9a8e2242d33d49407c02038a516558e1d0"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-projection.ts",
+      "bytes": 1831,
+      "sha256": "b392eec30c7ad8b2ca09e202a4bfd439eeae22ba22e24dc33a8ab6bad3763525"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-receipt.ts",
+      "bytes": 4533,
+      "sha256": "d196af1e314f6227fdfe9ba6d1db79293e47d83eb594bbfc4f6f7e53ecbe148e"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-resource-composition.ts",
+      "bytes": 2391,
+      "sha256": "3c1e6ca51a977f7d0b7fa53cfb864b4478913ad388306fa022ae791c2d45b81e"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-store-documents.ts",
+      "bytes": 2203,
+      "sha256": "e287b4254f9a015496597610ab3ba010fe343f4883270c5187a03ee9c5b9c595"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/template-lifecycle/template-test-fixtures.ts",
+      "bytes": 5529,
+      "sha256": "4a46f56a93289bf94471b16ac8c7dfd116d70a3e58d8539797b7a7f64edd53ea"
+    }
+  ],
+  "sharedConsumers": [
+    {
+      "path": "packages/shared/src/hindsight-template-definition-schema.ts",
+      "sha256": "57b29cc4b2b6cc1e1ed4684d7716413736dad8cfb38e517dfc807f6ff29f365a"
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-schema.ts",
+      "sha256": "a4ce8d7250810dfe6846291b261bdb83e7739272dd75f385c20598464c16c6f1"
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-encoding.ts",
+      "sha256": "f33d349c4d60e1be103274f5a69fdd745fe614d4653d001813de634072a6d2df"
+    }
+  ],
+  "immutableV1Preserved": true,
+  "checkedUtf8NoBomAndTrailingWhitespace": true
+}

@@ -1,0 +1,13 @@
+............F............                                                [100%]
+================================== FAILURES ===================================
+______________ test_template_sdk_fixture_uses_actual_native_wire ______________
+tests\test_client_contract_fixtures.py:48: in test_template_sdk_fixture_uses_actual_native_wire
+    assert TemplateApplyRequest.model_validate(wire).model_dump(mode="json", exclude_unset=True) == wire
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   pydantic_core._pydantic_core.ValidationError: 1 validation error for TemplateApplyRequest
+E   changes.config.0.stored
+E     Input tag 'tombstone' found using 'kind' does not match any of the expected tags: 'absent', 'null_tombstone', 'value' [type=union_tag_invalid, input_value={'kind': 'tombstone'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.12/v/union_tag_invalid
+=========================== short test summary info ===========================
+FAILED tests/test_client_contract_fixtures.py::test_template_sdk_fixture_uses_actual_native_wire
+1 failed, 24 passed in 34.45s

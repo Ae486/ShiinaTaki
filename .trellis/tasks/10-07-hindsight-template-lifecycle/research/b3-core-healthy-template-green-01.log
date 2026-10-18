@@ -1,0 +1,32 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mH:/TakiAgent/packages/core[39m
+
+ [32m✓[39m src/memory/transitions/transition-healthy-publication-lease.test.ts [2m([22m[2m13 tests[22m[2m)[22m[33m 29223[2mms[22m[39m
+     [33m[2m✓[22m[39m rolls back all 'transition.return-local' publication state when the 'publication' read-back reaches leaseUntil [33m 2223[2mms[22m[39m
+     [33m[2m✓[22m[39m rolls back all 'transition.return-local' publication state when the 'template' read-back reaches leaseUntil [33m 2166[2mms[22m[39m
+     [33m[2m✓[22m[39m rolls back all 'transition.reenter-hindsight' publication state when the 'publication' read-back reaches leaseUntil [33m 4207[2mms[22m[39m
+     [33m[2m✓[22m[39m rolls back all 'transition.reenter-hindsight' publication state when the 'template' read-back reaches leaseUntil [33m 5100[2mms[22m[39m
+     [33m[2m✓[22m[39m commits transition.return-local just before leaseUntil and reads the same receipt after expiry without new writes [33m 2042[2mms[22m[39m
+     [33m[2m✓[22m[39m commits transition.reenter-hindsight just before leaseUntil and reads the same receipt after expiry without new writes [33m 7130[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects a changed ownerId after complete read-back instead of adopting the current executor [33m 949[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects a changed operationId after complete read-back instead of adopting the current executor [33m 907[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects a changed attemptId after complete read-back instead of adopting the current executor [33m 918[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects a changed generation after complete read-back instead of adopting the current executor [33m 904[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects a changed revision after complete read-back instead of adopting the current executor [33m 933[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects a changed unchanged-revision after complete read-back instead of adopting the current executor [33m 913[2mms[22m[39m
+     [33m[2m✓[22m[39m requires an explicit live clock before a new publication can write [33m 826[2mms[22m[39m
+ [32m✓[39m src/memory/transitions/transition-template-observer.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 55384[2mms[22m[39m
+     [33m[2m✓[22m[39m requests each Bank's verified receipt and terminal refresh membership without another Bank's IDs [33m 9119[2mms[22m[39m
+     [33m[2m✓[22m[39m freshly compares nonce, source context, complete inventory and every definition facet before reusing a candidate [33m 10997[2mms[22m[39m
+     [33m[2m✓[22m[39m freshly compares saved W2 evidence when a later Bank interrupted preparation [33m 4561[2mms[22m[39m
+     [33m[2m✓[22m[39m accepts fresh observations after compatible transport reconstruction and preserves every original document byte [33m 6203[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses a missing W2 marker even when Native observation claims membership [33m 6105[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses a wrong-request W2 marker even when Native observation claims membership [33m 6125[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses a wrong-target W2 marker even when Native observation claims membership [33m 6275[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses a pending W2 marker even when Native observation claims membership [33m 5993[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[32m21 passed[39m[22m[90m (21)[39m
+[2m   Start at [22m 23:45:26
+[2m   Duration [22m 67.40s[2m (transform 16.35s, setup 0ms, import 22.32s, tests 84.61s, environment 1ms)[22m
+

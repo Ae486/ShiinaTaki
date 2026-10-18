@@ -1,0 +1,33 @@
+{
+  "owner": "/root/core_independent",
+  "recordedAt": "2026-10-13T05:44:41.786434+00:00",
+  "status": "proposed-not-applied",
+  "patch": "b3-core-healthy-capture-final-proposal-01.patch.txt",
+  "patchSha256": "99c88caf5f09f490a40397c5fe360ac5cfd74758cc5625c4792db41aa320652d",
+  "files": [
+    {
+      "source": "packages/core/src/memory/transitions/transition-template-healthy.test.ts",
+      "beforeImage": "b3-core-healthy-phase-diagnostic-01-before.txt",
+      "beforeSha256": "6642e91f58ad6b542fe95f84685d25729147cdca266072b646155e67ebb9aa10",
+      "proposedImage": "b3-core-healthy-final-proposed-01.txt",
+      "proposedSha256": "2fcc757b3443abe2d1a5919339a6c0524d6eabecb198f0c271283effaf118918",
+      "currentInstrumentedSha256": "bee37357f5abab368c249d8b54bc5972068f774a28592b34b566771cc576e951"
+    },
+    {
+      "source": "packages/core/src/memory/hindsight/hindsight-capture-sync.test.ts",
+      "beforeImage": "b3-core-capture-final-before-01.txt",
+      "beforeSha256": "9a347011a9dca1291006bbc157d805e217caf9f64b97dc250867fcbecf114cbc",
+      "proposedImage": "b3-core-capture-final-proposed-01.txt",
+      "proposedSha256": "ae3b49e6c47ada489883eda36f2f586b41f8d9797805325c8d307c7486856c54"
+    }
+  ],
+  "budgetsMilliseconds": {
+    "selectedReturn": 60000,
+    "selectedTwoDirections": 180000,
+    "removedReturn": 240000,
+    "removedTwoDirections": 360000,
+    "d2Only": 15000
+  },
+  "sourceChanges": "Remove temporary probes; retain original full-row rollback, all 26+10 cases and existing assertions except the proven RETURN result expectation; no production/fixture clocks or leases changed",
+  "checksStarted": false
+}

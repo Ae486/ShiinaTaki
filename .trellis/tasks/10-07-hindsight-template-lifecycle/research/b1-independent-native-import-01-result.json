@@ -1,0 +1,11 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/python.exe",
+    "-c",
+    "import hindsight_api; from hindsight_api.engine.reflect.agent import run_reflect_agent; print('Native entrypoint and reflect imports passed')"
+  ],
+  "cwd": "H:/hindsight",
+  "exitCode": 0,
+  "durationSeconds": 3.453,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b1-independent-native-import-01.log"
+}

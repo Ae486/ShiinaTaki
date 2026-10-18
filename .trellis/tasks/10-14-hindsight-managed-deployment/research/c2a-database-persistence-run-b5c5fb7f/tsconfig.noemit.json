@@ -1,0 +1,11 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "incremental": false
+  },
+  "files": [
+    "../docker-database-run-b5c5fb7f/run-persistence.ts"
+  ],
+  "include": []
+}

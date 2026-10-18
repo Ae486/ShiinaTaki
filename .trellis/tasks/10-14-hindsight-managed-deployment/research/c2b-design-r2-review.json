@@ -1,0 +1,166 @@
+{
+  "version": 1,
+  "date": "2026-10-15",
+  "task": ".trellis/tasks/10-14-hindsight-managed-deployment",
+  "reviewer": "/root/c2_design_check",
+  "scope": "PLAN_ONLY_TARGETED_DELTA",
+  "decision": "PASS",
+  "revisedPlan": {
+    "file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-plan.md",
+    "bytes": 41862,
+    "sha256": "0e4bdf03c903d6bbdca4d0bbfc187de14bb6c9fd8119b816bbfa7e69db0cd803"
+  },
+  "originalReviewInputs": [
+    {
+      "file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-design-review.md",
+      "bytes": 11520,
+      "sha256": "44e592ce05aaf5665c859333f1cf6d0e8703c84e05a645ab672c9bf11ed67b76"
+    },
+    {
+      "file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-design-review.json",
+      "bytes": 10295,
+      "sha256": "fb1b5e44b3f69ff52032a5e4870bed3b964d1c04461f153ec4337ca084de8b7c"
+    }
+  ],
+  "originalPlan": {
+    "bytes": 38003,
+    "sha256": "bb569d33bdd1e31a6672aeff87acfab5383b477316453cc3c7dcb6fed329eafa",
+    "decision": "CORRECTION_REQUIRED"
+  },
+  "originalReportsPreserved": true,
+  "deltaBlocksCompared": 15,
+  "findingsFixed": [
+    {
+      "id": "R1",
+      "file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-plan.md",
+      "lineRanges": [
+        [
+          325,
+          366
+        ],
+        [
+          377,
+          415
+        ]
+      ],
+      "fixedBy": "plan author",
+      "issue": "A pre-plan hold could not use existing plan-backed foreign keys or the immediate readTemplatePlan recovery path.",
+      "resolution": "The existing capsule owns pre-plan admission and original facts; real Bank/snapshot identities precede atomic real-plan/hold transfer; explicit missing-plan recovery preserves original ownership and unknown outcomes."
+    }
+  ],
+  "findingsNotFixed": [],
+  "checks": [
+    {
+      "id": "pre_plan_and_transfer",
+      "status": "PASS",
+      "lineRanges": [
+        [
+          325,
+          349
+        ]
+      ],
+      "observed": "Capsule/producer progress is claimed before Bank effects; existing operation-bound reservations and dispatch facts precede an atomic real-plan/admission/executor/hold transfer with rollback retaining the original hold."
+    },
+    {
+      "id": "missing_plan_recovery",
+      "status": "PASS",
+      "lineRanges": [
+        [
+          391,
+          415
+        ]
+      ],
+      "observed": "Pre-plan capsule resolution precedes readTemplatePlan; one admitted continuation is revision-bound; undispatched, known-created and unknown-dispatched cases remain distinct; original unknown settlement and exact result/publication identity are preserved."
+    },
+    {
+      "id": "shared_guards",
+      "status": "PASS",
+      "lineRanges": [
+        [
+          361,
+          366
+        ]
+      ],
+      "observed": "Memory-operation admission, direct setup and Run-owned deployment start/resume share the capsule/hold check; deployment checks both admission and dispatch, while capsule acquisition rejects conflicting deployment work."
+    },
+    {
+      "id": "existing_handler_idempotency",
+      "status": "PASS",
+      "lineRanges": [
+        [
+          295,
+          308
+        ]
+      ],
+      "observed": "The actual existing handler.existing admission hook is named before guard/admit; the exact operation/in-flight result is reused without another registry or scheduler."
+    },
+    {
+      "id": "prerequisite_order",
+      "status": "PASS",
+      "lineRanges": [
+        [
+          100,
+          106
+        ],
+        [
+          428,
+          436
+        ]
+      ],
+      "observed": "Offline installed-image/cache inventory precedes the minimal actual API producer; broad lookup/setup slices 3-4 remain gated on its actual migrations/auth/identity/API+PG stop/same-volume startup proof."
+    },
+    {
+      "id": "post_admission_http",
+      "status": "PASS",
+      "lineRanges": [
+        [
+          215,
+          220
+        ]
+      ],
+      "observed": "Mapping/routes/waiting precede inject; authenticated host-loopback HTTP follows legitimate launch and precedes usable reference/setup publication."
+    }
+  ],
+  "reusedSourceBasis": {
+    "originalReviewJsonSha256": "fb1b5e44b3f69ff52032a5e4870bed3b964d1c04461f153ec4337ca084de8b7c",
+    "fullSourceSurveyRepeated": false,
+    "idempotencyHook": {
+      "file": "packages/core/src/memory/operations/memory-operation-service.ts",
+      "lineRanges": [
+        [
+          118,
+          123
+        ]
+      ],
+      "inspectedOriginalSourceSha256": "edf8e08bc16c5a30a343d1a077e01e0ccb977750a27eb43ebcc4fb04d6460ed6",
+      "basis": "Previously inspected source retained by this reviewer; no new source survey or execution."
+    }
+  },
+  "verification": {
+    "inputHashes": "MATCHED",
+    "originalReports": "UNCHANGED",
+    "lint": {
+      "status": "NOT_RUN",
+      "reason": "PLAN ONLY; no executable source change."
+    },
+    "typeCheck": {
+      "status": "NOT_RUN",
+      "reason": "PLAN ONLY; no executable source change."
+    },
+    "tests": "NOT_RUN",
+    "build": "NOT_RUN",
+    "docker": "NOT_RUN",
+    "implementationAcceptance": "NOT_ESTABLISHED",
+    "runtimeAcceptance": "NOT_ESTABLISHED",
+    "c2bCompletion": "NOT_ESTABLISHED"
+  },
+  "reviewerWrites": [
+    ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-design-r2-review.md",
+    ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-design-r2-review.json"
+  ],
+  "otherFilesChanged": [],
+  "scopeExpansion": false,
+  "broadConsumerWorkAdmitted": false,
+  "release": "Design correction resolved. Continue ordered prerequisite work under existing authorization; broad consumer work still requires the actual producer gate. Preserve original review reports."
+}
+

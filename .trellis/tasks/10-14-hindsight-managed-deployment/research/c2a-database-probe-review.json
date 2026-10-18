@@ -1,0 +1,208 @@
+{
+  "schema": "c2a-database-probe-review-v1",
+  "date": "2026-10-15",
+  "task": ".trellis/tasks/10-14-hindsight-managed-deployment",
+  "reviewer": "/root/c2_design_check",
+  "verdict": "PASS_STATIC_PROBE",
+  "scope": "Independent static review of the released non-starting cached-image metadata probe; Root owns runtime.",
+  "inputs": [
+    {
+      "path": "research/docker-database/probe-runtime.py",
+      "bytes": 10310,
+      "sha256": "57d79748edba8100576eaf79f1090fecb6c2e227563d7522dadf22eead0afd13"
+    },
+    {
+      "path": "research/docker-database/README.md",
+      "bytes": 7449,
+      "sha256": "92ccfd530cac3bd4110b66502555daf056c157272a11b5c18c9316c0339831f2"
+    },
+    {
+      "path": "research/c2a-database-probe-self-check.json",
+      "bytes": 7938,
+      "sha256": "0d05ee756ae10bfd659be85f0ae4cb7febd99b225c1a7b16ea20d4277d1d7cde"
+    },
+    {
+      "path": "research/c2a-database-design-review.md",
+      "bytes": 7042,
+      "sha256": "24bb3a3d32e4da400177ac257d343218dd4edfe5fdb1904803d1eda9f5549d48"
+    }
+  ],
+  "sourceEdits": [],
+  "findingsFixed": [
+    {
+      "id": "DBP-D1",
+      "kind": "documentation-only",
+      "file": "research/docker-database/README.md",
+      "issue": "The proposed staging/marker differed from Root's existing prepared orchestration layout.",
+      "fix": "Use G:/TakiAgent-c2a-docker-acceptance/database-probe-T and .c2a-docker-owner; record the prepared token and continue from retained preflight."
+    }
+  ],
+  "findingsNotFixed": [],
+  "inspectedEntryPoints": [
+    {
+      "line": 38,
+      "text": "def facts(path):"
+    },
+    {
+      "line": 60,
+      "text": "def digest(path, limit=512 * 1024 * 1024):"
+    },
+    {
+      "line": 72,
+      "text": "def package(name):"
+    },
+    {
+      "line": 99,
+      "text": "def source_evidence(path):"
+    },
+    {
+      "line": 131,
+      "text": "def version_only(path):"
+    },
+    {
+      "line": 175,
+      "text": "def inspect():"
+    },
+    {
+      "line": 260,
+      "text": "if __name__ == \"__main__\":"
+    },
+    {
+      "line": 262,
+      "text": "    signal.alarm(50)"
+    }
+  ],
+  "review": {
+    "packageSurface": "Fixed pg0-embedded and psycopg2-binary distribution metadata; package-listed pg0 assets, relevant source, fixed seed and immediate-entry metadata only. No target-package import, recursive cache/model scan or data-content read.",
+    "binaryCalls": {
+      "names": [
+        "postgres",
+        "initdb",
+        "pg_ctl",
+        "pg_controldata"
+      ],
+      "condition": "Package-listed, resolved permitted location, readable executable regular ELF; once per basename.",
+      "args": [
+        "--version"
+      ],
+      "environment": {
+        "HOME": "/home/hindsight",
+        "LANG": "C",
+        "LC_ALL": "C"
+      },
+      "stdin": "DEVNULL",
+      "cwd": "/"
+    },
+    "bounds": {
+      "rootExecutionSeconds": 60,
+      "scriptAlarmSeconds": 50,
+      "utilitySeconds": 3,
+      "utilityReapSeconds": 1,
+      "jsonBytesIncludingNewline": 131072,
+      "utilityCombinedOutputBytes": 4096,
+      "rootDockerStderrBytes": 8192,
+      "rootCleanupSeconds": 60,
+      "assets": 32,
+      "packageEntries": 4096,
+      "packagePathTextBytes": 262144,
+      "sourceBytes": 65536,
+      "sourceExcerptBytes": 24576,
+      "perAssetHashBytes": 536870912,
+      "totalHashBytes": 805306368
+    },
+    "deadlineBehavior": "Whole-probe SIGALRM raises InterruptedError; the local utility TimeoutError handler does not consume it. Outer handling returns an unresolved result.",
+    "outputBehavior": "Missing assets, version/loader failure or incomplete/oversize evidence remain unresolved prerequisites. Exit 0 alone does not establish usable PostgreSQL.",
+    "rootCommands": "Explicit pinned executable/endpoint/empty client config and cached image. Fresh token/name/root, create with no pull/network/writable rootfs/volume/port, exact hashed stdin with EOF, inspect returned CID before start, no TTY. Separate bounded cleanup revalidates that CID or the unique frozen name after an uncertain create; no unknown-resource cleanup.",
+    "acceptance": "Inventory only. SQL readiness, process ownership, shutdown, persistence, real credentials, deployment readiness and receipts remain unaccepted."
+  },
+  "verification": {
+    "lint": "PASS (reused hash-bound Ruff E/F/I and format results)",
+    "syntax": "PASS (reused hash-bound AST and in-memory compile result)",
+    "typeCheck": "Not applicable to this unannotated standalone Python probe; AST/compile is not a type check.",
+    "tests": "Not run",
+    "checks": [
+      {
+        "command": "& 'G:/anaconda3/python.exe' -I -B -c 'import ast, pathlib, sys; p = pathlib.Path(\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/probe-runtime.py\"); source = p.read_bytes(); ast.parse(source, filename=str(p)); compile(source, str(p), \"exec\"); print(\"Python \" + sys.version.split()[0]); print(\"AST and in-memory compile passed; no target execution or pycache\")'",
+        "chunk_id": "483a65",
+        "wall_time_seconds": 0.5238348,
+        "exit_code": 0,
+        "original_token_count": 21,
+        "output": "Python 3.12.7\r\nAST and in-memory compile passed; no target execution or pycache\r\n",
+        "execution": "reused unchanged self-check; not rerun by reviewer"
+      },
+      {
+        "command": "& 'G:/Roaming/Python/Python312/Scripts/ruff.exe' check --isolated --no-cache --select E,F,I --line-length 100 '.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/probe-runtime.py'",
+        "chunk_id": "1772c8",
+        "wall_time_seconds": 0.3352864,
+        "exit_code": 0,
+        "original_token_count": 5,
+        "output": "All checks passed!\n",
+        "execution": "reused unchanged self-check; not rerun by reviewer"
+      },
+      {
+        "command": "& 'G:/Roaming/Python/Python312/Scripts/ruff.exe' format --isolated --check --line-length 100 '.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/probe-runtime.py'",
+        "chunk_id": "5546c6",
+        "wall_time_seconds": 0.3919053,
+        "exit_code": 0,
+        "original_token_count": 7,
+        "output": "1 file already formatted\n",
+        "execution": "reused unchanged self-check; not rerun by reviewer"
+      }
+    ],
+    "firstStaticFailurePreserved": {
+      "selfCheck": "c2a-database-probe-self-check.json",
+      "sha256": "0d05ee756ae10bfd659be85f0ae4cb7febd99b225c1a7b16ea20d4277d1d7cde",
+      "details": {
+        "command": "& 'G:/Roaming/Python/Python312/Scripts/ruff.exe' check --isolated --no-cache --select E,F,I --line-length 100 '.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/probe-runtime.py'",
+        "exit_code": 1,
+        "diagnostics": "I001 import order and seven E501 long lines.",
+        "output_excerpt": "Found 8 errors.\n[*] 1 fixable with the `--fix` option.",
+        "format_command": "& 'G:/Roaming/Python/Python312/Scripts/ruff.exe' format --isolated --check --line-length 100 '.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/probe-runtime.py'",
+        "format_exit_code": 1,
+        "format_output_excerpt": "Would reformat: .trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-database\\probe-runtime.py\n1 file would be reformatted",
+        "resolution": "Wrapped long literals, applied installed Ruff import fix and formatter, then verified the final file."
+      }
+    },
+    "dockerCalls": 0,
+    "wslCalls": 0,
+    "probeExecutions": 0,
+    "appStarts": 0,
+    "builds": 0,
+    "installs": 0,
+    "projectSuiteReruns": 0,
+    "releasedInputHashesMatchedBeforeDocAlignment": true,
+    "probeSourceUnchanged": true,
+    "readmeUtf8NoBom": true,
+    "readmeWhitespaceClean": true
+  },
+  "ownershipReleased": [
+    "research/docker-database/probe-runtime.py",
+    "research/docker-database/README.md",
+    "research/c2a-database-probe-review.md",
+    "research/c2a-database-probe-review.json"
+  ],
+  "documentationEdits": [
+    {
+      "path": "research/docker-database/README.md",
+      "before": {
+        "path": "research/docker-database/README.md",
+        "bytes": 7238,
+        "sha256": "bd6c263902568209dc94215a37c8ebf38696687da30d85b565168a2ed589e4fb"
+      },
+      "after": {
+        "path": "research/docker-database/README.md",
+        "bytes": 7449,
+        "sha256": "92ccfd530cac3bd4110b66502555daf056c157272a11b5c18c9316c0339831f2"
+      },
+      "reason": "Root already prepared its established G: database-probe staging and .c2a-docker-owner marker; align the README without a second staging or runner.",
+      "token": "4f0d332f-d9d9-4c30-a847-36cfc02afb7d"
+    }
+  ],
+  "rootPreparedInvocation": {
+    "token": "4f0d332f-d9d9-4c30-a847-36cfc02afb7d",
+    "staging": "G:/TakiAgent-c2a-docker-acceptance/database-probe-4f0d332f-d9d9-4c30-a847-36cfc02afb7d",
+    "marker": ".c2a-docker-owner",
+    "preflight": "Root-reported retained engine/base/no-volumes and seven-container checks; reviewer made no runtime call.",
+    "probeContainerCreatedAtReview": "Root reports no probe container created yet."
+  }
+}

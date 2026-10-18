@@ -1,0 +1,6 @@
+{
+  "command": "pnpm --filter @taki/core test --maxWorkers=2 --reporter=verbose src/memory/transitions/transition-healthy-publication-lease.test.ts src/memory/transitions/transition-evidence-context.test.ts",
+  "startedAt": "2026-10-07T10:50:49.3540052Z",
+  "finishedAt": "2026-10-07T10:51:17.9530006Z",
+  "exitCode": 0
+}

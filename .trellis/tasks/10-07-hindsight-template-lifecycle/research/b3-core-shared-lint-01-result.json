@@ -1,0 +1,21 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "exec",
+    "eslint",
+    "eslint.config.js",
+    "packages/shared/src/index.ts",
+    "packages/shared/src/hindsight-connection-schema.ts",
+    "packages/shared/src/hindsight-backup-schema.ts",
+    "packages/shared/src/hindsight-backup-v1-schema.ts",
+    "packages/shared/src/hindsight-backup-v2-schema.ts",
+    "packages/shared/src/hindsight-template-backup-schema.ts",
+    "packages/shared/src/hindsight-template-backup-attestation-schema.ts",
+    "packages/shared/src/hindsight-template-backup-encoding.ts",
+    "packages/shared/src/hindsight-template-backup-schema.test.ts"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 1,
+  "durationSeconds": 3.454,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-shared-lint-01.log"
+}

@@ -1,0 +1,16 @@
+{
+  "command": [
+    "node",
+    "--experimental-transform-types",
+    ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-joint-entry.mjs",
+    "seed"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "durationSeconds": 2.877,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-joint-entry-seed-01.log",
+  "sourceIdentity": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-joint-entry-seed-01-source.json",
+  "sourceAfter": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-joint-entry-seed-01-source-after.json",
+  "inputCount": 1587,
+  "sourceMismatches": []
+}

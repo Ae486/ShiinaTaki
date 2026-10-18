@@ -1,0 +1,188 @@
+{
+  "version": 1,
+  "createdAt": "2026-10-15T12:34:29.905Z",
+  "task": ".trellis/tasks/10-14-hindsight-managed-deployment",
+  "agent": "/root/c2a_database_implement",
+  "result": {
+    "affectedStaticChecks": "PASS",
+    "independentR2Review": "PENDING",
+    "runtime": "NOT_RUN",
+    "deploymentReady": false
+  },
+  "scope": {
+    "caseId": "13f04d85-ee84-408e-890c-88922e36c69e",
+    "staging": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e",
+    "protectedRoot": "C:/taki-c2a-db-persistence-13f04d85-ee84-408e-890c-88922e36c69e",
+    "tag": "taki-c2a-db:13f04d85-ee84-408e-890c-88922e36c69e",
+    "rootsCreated": false,
+    "productionChanges": [],
+    "previousReportsChanged": [],
+    "runtimeOwner": "Root"
+  },
+  "files": [
+    {
+      "file": "docker-database/fake_child.py",
+      "bytes": 44233,
+      "sha256": "427bc9e824e4a1dacadf29acca4d0e57faed1800a41972eb4c7797fc5b974800"
+    },
+    {
+      "file": "docker-database/database-read.py",
+      "bytes": 6084,
+      "sha256": "0ad82eb436c9c4389852c07ddb7c28eed6e9b5cd59740fb71c1ebb42db243419"
+    },
+    {
+      "file": "docker-database/run-persistence.ts",
+      "bytes": 55442,
+      "sha256": "951de1587a37a0dba96fbf76bf029943128c9e80fc7ea1aa5dfe888fff470d25"
+    },
+    {
+      "file": "docker-database/README.md",
+      "bytes": 22962,
+      "sha256": "ffd27eba8edae875cdd8f8a84beea17e4dc1385e180c879fba7388816181419a"
+    }
+  ],
+  "firstAttempt": {
+    "caseId": "20d996bf-64b6-47c7-908d-730ebdb371c4",
+    "result": "FAIL_UNCHANGED",
+    "archive": "c2a-database-persistence-first-attempt-evidence.zip",
+    "archiveBytes": 531237,
+    "archiveSha256": "049a9a614ddf2f109698afbd73296ee28c0e4a780361514223fe26f1732bfcd9",
+    "archiveVerifiedHere": "whole archive SHA and exact frozen Python file comparison; Root owns full entry verification",
+    "stagingRemovedByRoot": true,
+    "diagnosisFiles": [
+      "c2a-database-persistence-first-attempt-diagnosis.md",
+      "c2a-database-persistence-first-attempt-diagnosis.json"
+    ],
+    "rootCause": "Universal observed assertion contradicted create/start resource-step semantics",
+    "rawRegistryUnavailable": true
+  },
+  "changes": [
+    "Correct initial predicate to action order and Effect/Core IDs, injection observed, and volume/container/start steps verified.",
+    "Retain parsed public status and a bounded registry projection before assertions; reuse the projection in generation evidence instead of full authorization/custody-bearing records.",
+    "Retain only non-reusable checkpoint/startup-authorization/snapshot correlation IDs, not grant or authorization objects.",
+    "Retain distinct initial resource/helper/Run/SQL stages, allowlisted first failure code, and separate cleanup failure code.",
+    "Retain bounded owned-helper PID/parent/creation and fixed-argv-match diagnostics before checks.",
+    "Preserve latest existing fixed-reader facts before readiness assertions.",
+    "On failure only, after existing cleanup stop/inspect and before rm, copy the fixed last-stop report once with existing 128KiB/10s bounds and same five-minute cleanup deadline; failure is secondary and does not overwrite the original.",
+    "Replace the single case UUID in each of the three executable files; Python bytes otherwise equal frozen R1."
+  ],
+  "checks": {
+    "finalResults": [
+      {
+        "name": "archive/hash and Python token-only AST/compile",
+        "status": "PASS",
+        "attemptIndex": 0
+      },
+      {
+        "name": "Node syntax",
+        "status": "PASS",
+        "attemptIndex": 4
+      },
+      {
+        "name": "ESLint",
+        "status": "PASS_NO_WARNINGS",
+        "attemptIndex": 5
+      },
+      {
+        "name": "single-entry noEmit",
+        "status": "PASS_0_DIAGNOSTICS",
+        "attemptIndex": 6
+      }
+    ],
+    "attempts": [
+      {
+        "name": "archive-and-python-token",
+        "cmd": "@'\nimport ast,hashlib,json,pathlib,zipfile\nroot=pathlib.Path(\".trellis/tasks/10-14-hindsight-managed-deployment/research\")\narchive=root/\"c2a-database-persistence-first-attempt-evidence.zip\"\nassert hashlib.sha256(archive.read_bytes()).hexdigest()==\"049a9a614ddf2f109698afbd73296ee28c0e4a780361514223fe26f1732bfcd9\"\nold=b\"20d996bf-64b6-47c7-908d-730ebdb371c4\"; new=b\"13f04d85-ee84-408e-890c-88922e36c69e\"\nwith zipfile.ZipFile(archive) as z:\n    out=[]\n    for name in (\"fake_child.py\",\"database-read.py\"):\n        suffix=\"reviewed-fixture/docker-database/\"+name\n        matches=[n for n in z.namelist() if n.replace(\"\\\\\",\"/\").endswith(suffix)]\n        assert len(matches)==1,matches\n        previous=z.read(matches[0]);current=(root/\"docker-database\"/name).read_bytes()\n        assert previous.count(old)==current.count(new)==1\n        assert previous.replace(old,new)==current,name\n        ast.parse(current,filename=name);compile(current,name,\"exec\")\n        out.append({\"file\":name,\"tokenOnly\":True,\"bytes\":len(current),\"sha256\":hashlib.sha256(current).hexdigest(),\"astAndCompile\":\"PASS\"})\nprint(json.dumps({\"archiveSha256\":hashlib.sha256(archive.read_bytes()).hexdigest(),\"python\":out,\"runtimeMainExecuted\":False}))\n'@ | & 'G:/anaconda3/python.exe' -I -B -",
+        "startedAt": "2026-10-15T12:28:50.443Z",
+        "chunk_id": "fb5c79",
+        "wall_time_seconds": 0.772325,
+        "exit_code": 0,
+        "original_token_count": 116,
+        "output": "{\"archiveSha256\": \"049a9a614ddf2f109698afbd73296ee28c0e4a780361514223fe26f1732bfcd9\", \"python\": [{\"file\": \"fake_child.py\", \"tokenOnly\": true, \"bytes\": 44233, \"sha256\": \"427bc9e824e4a1dacadf29acca4d0e57faed1800a41972eb4c7797fc5b974800\", \"astAndCompile\": \"PASS\"}, {\"file\": \"database-read.py\", \"tokenOnly\": true, \"bytes\": 6084, \"sha256\": \"0ad82eb436c9c4389852c07ddb7c28eed6e9b5cd59740fb71c1ebb42db243419\", \"astAndCompile\": \"PASS\"}], \"runtimeMainExecuted\": false}\r\n"
+      },
+      {
+        "name": "node-syntax",
+        "cmd": "& 'C:/Program Files/nodejs/node.exe' --check .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/run-persistence.ts",
+        "startedAt": "2026-10-15T12:28:50.443Z",
+        "chunk_id": "80ffd7",
+        "wall_time_seconds": 0.460548,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      },
+      {
+        "name": "eslint",
+        "cmd": "& 'G:/Roaming/npm/pnpm.cmd' exec eslint --no-ignore .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/run-persistence.ts",
+        "startedAt": "2026-10-15T12:28:50.443Z",
+        "chunk_id": "88ebb8",
+        "wall_time_seconds": 6.2177497,
+        "exit_code": 1,
+        "original_token_count": 65,
+        "output": "\nH:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-database\\run-persistence.ts\n  692:1  error  Async function 'cleanup' has too many lines (51). Maximum allowed is 50  max-lines-per-function\n\n✖ 1 problem (1 error, 0 warnings)\n\n"
+      },
+      {
+        "name": "no-emit",
+        "cmd": "& 'C:/Program Files/nodejs/node.exe' --input-type=module -e 'import ts from \"typescript\"; import fs from \"node:fs\"; const file=\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/run-persistence.ts\"; const base=JSON.parse(fs.readFileSync(\"tsconfig.base.json\",\"utf8\")); const parsed=ts.convertCompilerOptionsFromJson(base.compilerOptions,process.cwd()); const program=ts.createProgram([file],{...parsed.options,noEmit:true,incremental:false}); const errors=[...parsed.errors,...ts.getPreEmitDiagnostics(program)]; console.log(JSON.stringify({entry:file,noEmit:true,diagnostics:errors.map(d=>({file:d.file?.fileName,line:d.file&&d.start!==undefined?d.file.getLineAndCharacterOfPosition(d.start).line+1:undefined,code:d.code,message:ts.flattenDiagnosticMessageText(d.messageText,\"\\n\")}))})); process.exitCode=errors.length?1:0;'",
+        "startedAt": "2026-10-15T12:28:50.443Z",
+        "chunk_id": "bbb9fc",
+        "wall_time_seconds": 10.0160975,
+        "session_id": 43633,
+        "original_token_count": 35,
+        "output": "{\"entry\":\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/run-persistence.ts\",\"noEmit\":true,\"diagnostics\":[]}\n",
+        "completion": {
+          "chunk_id": "60170b",
+          "wall_time_seconds": 0.0000192,
+          "exit_code": 0,
+          "original_token_count": 0,
+          "output": ""
+        }
+      },
+      {
+        "name": "node-syntax-final",
+        "cmd": "& 'C:/Program Files/nodejs/node.exe' --check .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/run-persistence.ts",
+        "startedAt": "2026-10-15T12:31:01.269Z",
+        "chunk_id": "82ba6b",
+        "wall_time_seconds": 0.4886377,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      },
+      {
+        "name": "eslint-final",
+        "cmd": "& 'G:/Roaming/npm/pnpm.cmd' exec eslint --no-ignore .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/run-persistence.ts",
+        "startedAt": "2026-10-15T12:31:01.269Z",
+        "chunk_id": "985a94",
+        "wall_time_seconds": 5.0334864,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      },
+      {
+        "name": "no-emit-final",
+        "cmd": "& 'C:/Program Files/nodejs/node.exe' --input-type=module -e 'import ts from \"typescript\"; import fs from \"node:fs\"; const file=\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/run-persistence.ts\"; const base=JSON.parse(fs.readFileSync(\"tsconfig.base.json\",\"utf8\")); const parsed=ts.convertCompilerOptionsFromJson(base.compilerOptions,process.cwd()); const program=ts.createProgram([file],{...parsed.options,noEmit:true,incremental:false}); const errors=[...parsed.errors,...ts.getPreEmitDiagnostics(program)]; console.log(JSON.stringify({entry:file,noEmit:true,diagnostics:errors.map(d=>({file:d.file?.fileName,line:d.file&&d.start!==undefined?d.file.getLineAndCharacterOfPosition(d.start).line+1:undefined,code:d.code,message:ts.flattenDiagnosticMessageText(d.messageText,\"\\n\")}))})); process.exitCode=errors.length?1:0;'",
+        "startedAt": "2026-10-15T12:31:01.269Z",
+        "chunk_id": "30bf48",
+        "wall_time_seconds": 10.0040762,
+        "session_id": 54620,
+        "original_token_count": 0,
+        "output": "",
+        "completion": {
+          "chunk_id": "7598bc",
+          "wall_time_seconds": 0.0000197,
+          "exit_code": 0,
+          "original_token_count": 35,
+          "output": "{\"entry\":\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/run-persistence.ts\",\"noEmit\":true,\"diagnostics\":[]}\n"
+        }
+      }
+    ],
+    "retainedFailure": "The single fixed failure-report call raised cohesive task cleanup to 51 logical lines; an exact task-only size directive documents required ordering. No production rule changed.",
+    "reused": "Python Ruff/format and four stream-helper cases were not rerun: exact frozen-byte comparison proves only the case literal changed, with AST/compile checked again."
+  },
+  "review": {
+    "sourceDiff": "Read-only unified comparison with frozen R1 launcher reviewed; no database/supervision/protocol/SQL/scan/deadline change",
+    "encoding": "UTF-8, no BOM, no CRLF or trailing whitespace",
+    "rootAndResourceEffects": "No Docker/WSL/app/build/probe or source matrix command executed; reserved R2 roots absent",
+    "limits": "Static checks do not establish actual admitted PG persistence, graceful shutdown, process reap or report timing."
+  },
+  "next": "Root obtains independent R2 byte review before the same single reviewed sequence under the fresh reserved token."
+}

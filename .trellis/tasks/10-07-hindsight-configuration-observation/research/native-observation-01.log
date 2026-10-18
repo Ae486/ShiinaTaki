@@ -1,0 +1,79 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.5, pytest-9.0.3, pluggy-1.6.0
+rootdir: H:\hindsight\hindsight-api-slim
+configfile: pyproject.toml
+plugins: anyio-4.11.0, langsmith-0.9.1, asyncio-1.3.0, rerunfailures-16.1, timeout-2.4.0, xdist-3.8.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 300.0s
+timeout method: thread
+timeout func_only: False
+created: 8/8 workers
+8 workers [26 items]
+
+scheduling tests via LoadGroupScheduling
+
+hindsight-api-slim\tests\test_configuration_observation.py::test_denial_precedes_database_and_profiles[fixture-key-other] 
+hindsight-api-slim\tests\test_configuration_observation.py::test_denial_precedes_database_and_profiles[wrong-bank] 
+hindsight-api-slim\tests\test_configuration_observation.py::test_actual_constructor_read_only_http_projection 
+hindsight-api-slim\tests\test_configuration_observation.py::test_denial_precedes_database_and_profiles[None-bank] 
+hindsight-api-slim\tests\test_configuration_observation.py::test_grant_is_exact_true_and_fails_closed[1] 
+hindsight-api-slim\tests\test_configuration_observation.py::test_grant_is_exact_true_and_fails_closed[None] 
+hindsight-api-slim\tests\test_configuration_observation.py::test_grant_is_exact_true_and_fails_closed[yes] 
+hindsight-api-slim\tests\test_configuration_observation.py::test_grant_is_exact_true_and_fails_closed[False] 
+[gw1] [  3%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_grant_is_exact_true_and_fails_closed[1] 
+[gw5] [  7%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_grant_is_exact_true_and_fails_closed[None] 
+[gw0] [ 11%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_denial_precedes_database_and_profiles[wrong-bank] 
+[gw2] [ 15%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_denial_precedes_database_and_profiles[fixture-key-other] 
+[gw3] [ 19%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_grant_is_exact_true_and_fails_closed[False] 
+[gw6] [ 23%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_denial_precedes_database_and_profiles[None-bank] 
+[gw7] [ 26%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_grant_is_exact_true_and_fails_closed[yes] 
+hindsight-api-slim\tests\test_configuration_observation.py::test_unsafe_identifier_is_not_disclosed[/private/model] 
+hindsight-api-slim\tests\test_configuration_observation.py::test_absent_bank_identity_is_unavailable_without_initialization 
+hindsight-api-slim\tests\test_configuration_observation.py::test_unsafe_identifier_is_not_disclosed[https://secret/endpoint] 
+hindsight-api-slim\tests\test_configuration_observation.py::test_unsafe_identifier_is_not_disclosed[secret\nkey] 
+hindsight-api-slim\tests\test_configuration_observation.py::test_unsafe_identifier_is_not_disclosed[C:/private/model] 
+hindsight-api-slim\tests\test_configuration_observation.py::test_restricted_bank_validator_bypass_and_no_auth_deny 
+hindsight-api-slim\tests\test_configuration_observation.py::test_unsafe_identifier_is_not_disclosed[xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx] 
+[gw5] [ 30%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_unsafe_identifier_is_not_disclosed[/private/model] 
+[gw1] [ 34%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_unsafe_identifier_is_not_disclosed[secret\nkey] 
+[gw2] [ 38%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_unsafe_identifier_is_not_disclosed[https://secret/endpoint] 
+[gw3] [ 42%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_unsafe_identifier_is_not_disclosed[C:/private/model] 
+[gw7] [ 46%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_unsafe_identifier_is_not_disclosed[xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx] 
+hindsight-api-slim\tests\test_configuration_observation.py::test_router_custom_disabled_profiles 
+hindsight-api-slim\tests\test_configuration_observation.py::test_grants_fail_closed[{] 
+hindsight-api-slim\tests\test_configuration_observation.py::test_grants_fail_closed[None] 
+[gw5] [ 50%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_router_custom_disabled_profiles 
+hindsight-api-slim\tests\test_configuration_observation.py::test_grants_fail_closed[[]] 
+hindsight-api-slim\tests\test_configuration_observation.py::test_grants_fail_closed[{"public": ["*"]}] 
+[gw2] [ 53%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_grants_fail_closed[{] 
+[gw1] [ 57%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_grants_fail_closed[None] 
+[gw3] [ 61%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_grants_fail_closed[[]] 
+[gw7] [ 65%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_grants_fail_closed[{"public": ["*"]}] 
+hindsight-api-slim\tests\test_configuration_observation.py::test_grants_fail_closed[{"public": "bank"}] 
+hindsight-api-slim\tests\test_configuration_observation.py::test_grants_fail_closed[{"public": ["bank", 1]}] 
+hindsight-api-slim\tests\test_configuration_observation.py::test_grants_never_expand_namespaces 
+[gw5] [ 69%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_grants_fail_closed[{"public": "bank"}] 
+[gw2] [ 73%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_grants_fail_closed[{"public": ["bank", 1]}] 
+[gw1] [ 76%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_grants_never_expand_namespaces 
+[gw6] [ 80%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_restricted_bank_validator_bypass_and_no_auth_deny 
+hindsight-api-slim\tests\test_configuration_observation.py::test_grants_fail_closed[{"*": ["bank"]}] 
+[gw6] [ 84%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_grants_fail_closed[{"*": ["bank"]}] 
+[gw0] [ 88%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_absent_bank_identity_is_unavailable_without_initialization 
+hindsight-api-slim\tests\test_configuration_observation.py::test_grants_fail_closed[] 
+[gw0] [ 92%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_grants_fail_closed[] 
+[gw4] [ 96%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_actual_constructor_read_only_http_projection 
+hindsight-api-slim\tests\test_configuration_observation.py::test_grant_is_exact_true_and_fails_closed[grant4] 
+[gw4] [100%] PASSED hindsight-api-slim\tests\test_configuration_observation.py::test_grant_is_exact_true_and_fails_closed[grant4] 
+
+============================ slowest 10 durations =============================
+1.42s call     tests/test_configuration_observation.py::test_actual_constructor_read_only_http_projection
+1.08s call     tests/test_configuration_observation.py::test_denial_precedes_database_and_profiles[None-bank]
+1.08s call     tests/test_configuration_observation.py::test_grant_is_exact_true_and_fails_closed[False]
+1.08s call     tests/test_configuration_observation.py::test_denial_precedes_database_and_profiles[fixture-key-other]
+1.08s call     tests/test_configuration_observation.py::test_grant_is_exact_true_and_fails_closed[yes]
+1.08s call     tests/test_configuration_observation.py::test_denial_precedes_database_and_profiles[wrong-bank]
+1.07s call     tests/test_configuration_observation.py::test_grant_is_exact_true_and_fails_closed[1]
+1.07s call     tests/test_configuration_observation.py::test_grant_is_exact_true_and_fails_closed[None]
+0.26s call     tests/test_configuration_observation.py::test_absent_bank_identity_is_unavailable_without_initialization
+0.16s setup    tests/test_configuration_observation.py::test_grant_is_exact_true_and_fails_closed[None]
+======================= 26 passed in 117.87s (0:01:57) ========================

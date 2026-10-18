@@ -1,0 +1,10 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "typecheck"
+  ],
+  "cwd": "H:/TakiAgent/packages/core",
+  "exitCode": 0,
+  "durationSeconds": 30.075,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-independent-core-typecheck-01.log"
+}

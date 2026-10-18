@@ -1,0 +1,113 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mH:/TakiAgent/packages/core[39m
+
+ [32m✓[39m src/memory/transitions/transition-emergency-context.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 65763[2mms[22m[39m
+     [33m[2m✓[22m[39m deduplicates expensive immutable work within candidate without a verdict cache [33m 10679[2mms[22m[39m
+     [33m[2m✓[22m[39m deduplicates expensive immutable work within proof without a verdict cache [33m 9282[2mms[22m[39m
+     [33m[2m✓[22m[39m deduplicates expensive immutable work within publication without a verdict cache [33m 9320[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects forged objects, cross-database and expired contexts and isolates body bytes and Maps [33m 8988[2mms[22m[39m
+     [33m[2m✓[22m[39m rereads surviving SQL bytes and identity even when a pure projection already exists [33m 9152[2mms[22m[39m
+     [33m[2m✓[22m[39m keys pure projection by full mappings and explicit policy Map entries rather than {} [33m 8784[2mms[22m[39m
+     [33m[2m✓[22m[39m opens a fresh emergency context for each observer read and still checks mutable publication joins [33m 9552[2mms[22m[39m
+ [32m✓[39m src/memory/transitions/transition-emergency-service.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 115309[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps primary finalization during-copy assigned exactly once [33m 12398[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps primary finalization after-commit-before-bind assigned exactly once [33m 10762[2mms[22m[39m
+     [33m[2m✓[22m[39m seals original Pending uncertainty without relabeling or dispatching it under Local [33m 13643[2mms[22m[39m
+     [33m[2m✓[22m[39m accepts complete surviving evidence even when historical setup is no longer verified [33m 10494[2mms[22m[39m
+     [33m[2m✓[22m[39m discloses missing replica state without creating a submit identity [33m 8075[2mms[22m[39m
+     [33m[2m✓[22m[39m discloses partial replica state without creating a submit identity [33m 8274[2mms[22m[39m
+     [33m[2m✓[22m[39m passes a hung replica producer and rejects its later callback [33m 12212[2mms[22m[39m
+     [33m[2m✓[22m[39m passes a hung backup producer and rejects its later callback [33m 10758[2mms[22m[39m
+     [33m[2m✓[22m[39m uses the committed Hindsight receipt to quarantine a reentry whose admission still names Local [33m 6740[2mms[22m[39m
+     [33m[2m✓[22m[39m commits and binds Local with absent credentials and backup without any new Native dispatch [33m 10715[2mms[22m[39m
+     [33m[2m✓[22m[39m quarantines a permanently hung healthy operation without rewriting its attempt or dispatch history [33m 11233[2mms[22m[39m
+ [32m✓[39m src/memory/transitions/transition-emergency-recovery.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 58601[2mms[22m[39m
+     [33m[2m✓[22m[39m recovers seal-before-ack using original incident and receipt identities [33m 12508[2mms[22m[39m
+     [33m[2m✓[22m[39m recovers ack-before-candidate using original incident and receipt identities [33m 11787[2mms[22m[39m
+     [33m[2m✓[22m[39m recovers before-commit using original incident and receipt identities [33m 11977[2mms[22m[39m
+     [33m[2m✓[22m[39m recovers commit-reply using original incident and receipt identities [33m 11150[2mms[22m[39m
+     [33m[2m✓[22m[39m recovers binding using original incident and receipt identities [33m 11177[2mms[22m[39m
+ [32m✓[39m src/db/memory-transition-emergency-publication.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 29064[2mms[22m[39m
+     [33m[2m✓[22m[39m preserves mixed unknown and unconsumed primary members without re-adopting the unknown member [33m 9998[2mms[22m[39m
+     [33m[2m✓[22m[39m rebuilds original logical state and selects Local with one immutable incident/foreign-branch receipt [33m 9670[2mms[22m[39m
+     [33m[2m✓[22m[39m rolls back the entire authority transaction when immutable receipt insertion fails [33m 9394[2mms[22m[39m
+ [32m✓[39m src/memory/hindsight-lifecycle/hindsight-lifecycle-journey.test.ts [2m([22m[2m22 tests[22m[2m)[22m[33m 40527[2mms[22m[39m
+     [33m[2m✓[22m[39m retirement detaches a hung bank.provision and prevents its late export from publishing or dispatching again [33m 1659[2mms[22m[39m
+     [33m[2m✓[22m[39m retirement detaches a hung connection.revalidate and prevents its late export from publishing or dispatching again [33m 1564[2mms[22m[39m
+     [33m[2m✓[22m[39m degrades a new Character, provisions a fresh Bank that binds, recalls Global + Character and ingests the degraded turn once [33m 3295[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses at admission under a Local marker, a drifted connection and an already ready Bank, with no row [33m 1672[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses an occupied Bank with no PUT and no row, and a template conflict with zero native calls [33m 1602[2mms[22m[39m
+     [33m[2m✓[22m[39m leaves a failed row on a rejected dry-run while the other Banks keep serving, then provisions idempotently after a first-sync failure [33m 2351[2mms[22m[39m
+     [33m[2m✓[22m[39m degrades on a changed timeout, revalidates without touching Bank rows, stops the old scheduler once and ingests the witnessed turn once [33m 2399[2mms[22m[39m
+     [33m[2m✓[22m[39m replaces the binding under an in-flight Run: the old Run's memory calls fail structured, the next Run is served [33m 2474[2mms[22m[39m
+     [33m[2m✓[22m[39m settles a replacement that fails to build as failed runtime_unavailable, leaves the binding unavailable and offers recoverBinding [33m 1758[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses a disabled connection, a deployment-mode change and a template change with the authority and binding kept [33m 880[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses a deployment-mode change made across a restart, where the runtime was built on the unreviewed settings [33m 1447[2mms[22m[39m
+     [33m[2m✓[22m[39m revalidates a benign change made across a restart, advancing the reviewed fingerprint and mode, then a later key rotation [33m 2018[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps a pre-050 row with no reviewed mode fail-closed for a change made across a restart [33m 1660[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses a different provider lineage after admission, keeping the old binding and the reviewed fingerprint [33m 1116[2mms[22m[39m
+     [33m[2m✓[22m[39m settles a health check the provider fails (503) or an unsupported version as failed with its closed code, writing no reviewed state and no Bank row [33m 1089[2mms[22m[39m
+     [33m[2m✓[22m[39m calls verifiedReconnect once after a foreground success following an outage, never from scheduled runs, and on an unchanged revalidate [33m 3120[2mms[22m[39m
+     [33m[2m✓[22m[39m submits one automatic bank.provision per Character and fingerprint, held across restart, and never retries a failed attempt [33m 1733[2mms[22m[39m
+     [33m[2m✓[22m[39m automatically revalidates a changed connection once and the next Run is served with memory [33m 1912[2mms[22m[39m
+     [33m[2m✓[22m[39m settles an automatic revalidation against a different lineage as one failed attempt, keeps the binding and never retries it [33m 1143[2mms[22m[39m
+     [33m[2m✓[22m[39m settles an automatic revalidation whose health check the provider fails once and never retries it for the same fingerprint [33m 1112[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses an automatic submit while another memory family is busy, leaving the Run degraded and nothing queued [33m 1600[2mms[22m[39m
+     [33m[2m✓[22m[39m carries a new Character's exact primary witnesses through the fence and provisions its Bank after activation [33m 2919[2mms[22m[39m
+ [32m✓[39m src/memory/operations/memory-operation-kind-backup-admit.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 10826[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses both under the Local marker and admit on a stale epoch, leaving no row [33m 1031[2mms[22m[39m
+     [33m[2m✓[22m[39m shares the exclusive hindsight-backup family in both directions [33m 1981[2mms[22m[39m
+     [33m[2m✓[22m[39m stages a capture, admits the operator ZIP verified, re-verifies it and reports it in status [33m 2161[2mms[22m[39m
+     [33m[2m✓[22m[39m fails an admit whose ZIP lacks the proof and hands the ZIP back [33m 1838[2mms[22m[39m
+     [33m[2m✓[22m[39m returns a ZIP claimed before a restart to the inbox as outcome_unknown [33m 1893[2mms[22m[39m
+     [33m[2m✓[22m[39m settles an admit whose pair was sealed before the restart as completed [33m 1919[2mms[22m[39m
+ [32m✓[39m src/memory/operations/memory-operation-kind-backup-capture.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 12852[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses under the Local marker, on a stale epoch, without a published runtime and without the producer, leaving no row [33m 1101[2mms[22m[39m
+     [33m[2m✓[22m[39m is exclusive with setup, onboarding, activation and lifecycle in both directions [33m 2008[2mms[22m[39m
+     [33m[2m✓[22m[39m cancels only before the deferred claim, with no native call [33m 1719[2mms[22m[39m
+     [33m[2m✓[22m[39m captures a verified pair while chat keeps committing and Run writes refuse retryably, then resumes writers [33m 2898[2mms[22m[39m
+     [33m[2m✓[22m[39m fails ROUTE_UNAVAILABLE on the production route while the native endpoint is off, leaving nothing listed and writers resumed [33m 1719[2mms[22m[39m
+     [33m[2m✓[22m[39m records the pair mismatch in the result when native lacks a Core Bank [33m 1775[2mms[22m[39m
+     [33m[2m✓[22m[39m settles a capture interrupted by a restart as outcome_unknown, quarantining its partial dir without redispatch [33m 1628[2mms[22m[39m
+ [32m✓[39m src/memory/operations/memory-operation-kind-lifecycle.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 9456[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses under a Local marker, on a stale epoch and without the lifecycle service, leaving no row [33m 995[2mms[22m[39m
+     [33m[2m✓[22m[39m stamps the Core origin and refuses both kinds while any of the four exclusive families holds an open row [33m 1952[2mms[22m[39m
+     [33m[2m✓[22m[39m cancels only before the deferred claim, with no native call [33m 2240[2mms[22m[39m
+     [33m[2m✓[22m[39m settles a crashed provision from the B3 row and replica binding, else outcome_unknown without redispatch [33m 2157[2mms[22m[39m
+     [33m[2m✓[22m[39m settles a crashed revalidation only from the recorded fingerprint, its evidence and a runtime built on it [33m 2105[2mms[22m[39m
+ [32m✓[39m src/memory/operations/memory-operation-kind-hindsight.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 9630[2mms[22m[39m
+     [33m[2m✓[22m[39m mints every identity in Core, runs the chain once, persists checkpoints and settles from the receipt and binding [33m 767[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses the wrong marker, a stale client view, a drifted or unconfigured setup and recover without a matching receipt [33m 690[2mms[22m[39m
+     [33m[2m✓[22m[39m reports missing verified Bank scopes as a completed blocked activation without any native call [33m 518[2mms[22m[39m
+     [33m[2m✓[22m[39m is mutually single-flight with the setup and local-onboarding families and blocks direct setup RPCs while open [33m 834[2mms[22m[39m
+     [33m[2m✓[22m[39m cancels only before the claim and never starts the producer on a lost claim or a stopping service [33m 941[2mms[22m[39m
+     [33m[2m✓[22m[39m classifies foreign rows at boot: committed from the receipt, incomplete under Local, unknown on a mismatch or unreadable marker [33m 1110[2mms[22m[39m
+     [33m[2m✓[22m[39m marks an interrupted pre-COMMIT attempt incomplete with the durable phase and lets resume finish without a second POST [33m 994[2mms[22m[39m
+     [33m[2m✓[22m[39m resumes a recaptured run after a restart mid-verify with the per-preparation ids the interrupted attempt posted [33m 1236[2mms[22m[39m
+     [33m[2m✓[22m[39m settles a post-COMMIT bind failure as runtime_unavailable, repairs through recover without re-promoting and keeps history immutable [33m 949[2mms[22m[39m
+     [33m[2m✓[22m[39m settles a refused repair as failed with its closed code instead of completing over a swallowed fault [33m 821[2mms[22m[39m
+     [33m[2m✓[22m[39m rebuilds the committed identity from receipts when no operation row carries it [33m 769[2mms[22m[39m
+ [32m✓[39m src/memory/operations/memory-operation-kind-local.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 2843[2mms[22m[39m
+     [33m[2m✓[22m[39m marks an unpublished reservation unknown, offers retry, and retry materializes the same reserved run [33m 458[2mms[22m[39m
+     [33m[2m✓[22m[39m reconstructs a prepared run as completed and an incomplete run as unknown without dispatching work [33m 390[2mms[22m[39m
+     [33m[2m✓[22m[39m classifies activation rows from the receipt: committed, committed-but-unavailable, mismatched, or never committed [33m 418[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps a committed-but-unavailable activation failed after a later repair succeeds [33m 497[2mms[22m[39m
+     [33m[2m✓[22m[39m offers source reconciliation on a healthy binding and repairs without a second commit [33m 539[2mms[22m[39m
+     [33m[2m✓[22m[39m settles a refused repair as failed with its closed code instead of completing over a swallowed custody fault [33m 531[2mms[22m[39m
+ [32m✓[39m src/memory/operations/memory-operation-kind-replica.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 1337[2mms[22m[39m
+ [32m✓[39m src/memory/operations/memory-operation-service.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 1246[2mms[22m[39m
+ [32m✓[39m src/memory/runtime-composition.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 1362[2mms[22m[39m
+ [32m✓[39m src/memory/operations/memory-authority-status.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 1001[2mms[22m[39m
+ [32m✓[39m src/memory/operations/memory-operation-kind-transition.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 937[2mms[22m[39m
+     [33m[2m✓[22m[39m boot observes UNKNOWN without dispatch; a new authorized operation resolves the original fence and preserves terminal history after reopen [33m 391[2mms[22m[39m
+ [32m✓[39m src/memory/hindsight-runtime-binding.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 132[2mms[22m[39m
+ [32m✓[39m src/memory/hindsight/hindsight-runtime-bank-service.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 755[2mms[22m[39m
+ [32m✓[39m src/memory/runtime-selector.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 61[2mms[22m[39m
+ [32m✓[39m src/memory/operations/memory-operation-kind-backup.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m19 passed[39m[22m[90m (19)[39m
+[2m      Tests [22m [1m[32m142 passed[39m[22m[90m (142)[39m
+[2m   Start at [22m 22:31:15
+[2m   Duration [22m 209.27s[2m (transform 21.74s, setup 0ms, import 48.91s, tests 361.71s, environment 3ms)[22m
+
+JSON report written to H:/TakiAgent/.trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-core-runtime-remainder-01-vitest.json

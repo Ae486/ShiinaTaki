@@ -1,0 +1,17 @@
+{
+  "owner": "/root/core_independent",
+  "recordedAt": "2026-10-13T05:35:24.103741+00:00",
+  "source": "packages/core/src/memory/transitions/transition-template-healthy.test.ts",
+  "beforeImage": "b3-core-healthy-positive-180s-measurement-01-before.txt",
+  "beforeSha256": "c3ec50f5cf768e866b19bf504784dff752438efa42d3403855d36359805480dd",
+  "sourceImage": "b3-core-healthy-positive-180s-measurement-01-source.txt",
+  "sourceSha256": "bee37357f5abab368c249d8b54bc5972068f774a28592b34b566771cc576e951",
+  "diff": "b3-core-healthy-positive-180s-measurement-01-diff.txt",
+  "onlyEdit": "selected-positive explicit timeout literal 60000 -> 180000; removed positive remains 180000",
+  "allOtherSourceBytesUnchanged": true,
+  "unchangedD2Sha256": "9a347011a9dca1291006bbc157d805e217caf9f64b97dc250867fcbecf114cbc",
+  "selector": "preserves full template history across RETURN and REENTRY \\(removed=false\\)$",
+  "workers": 1,
+  "permanentBudgetAcceptance": false,
+  "sourceFreeze": true
+}

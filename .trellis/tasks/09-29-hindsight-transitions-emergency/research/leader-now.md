@@ -1,5 +1,31 @@
 # Leader immediate continuation
 
+## Current - 2026-10-07 W9 accepted; Stage 5 engineering planning
+
+W9 is implemented and independently accepted. Read `stage4-review-2026-10-07.md`, `w9-implementation.md` and
+`w9-independent-check.md`. Actual final guard checks the original executor at live time after complete read-back
+inside the atomic publication. Independent regression20/20, adjacent67/67 and all5workspace types/root lint pass.
+The first complete Core run remains exit1:3791pass/4default5s test timeouts/1existing skip. Only those4test deadlines
+were aligned with existing30s siblings, then exact file7/7passed. This composed gate was independently accepted;
+no second clean full run is claimed. All11final source identities and27evidence pins match. Lease remains5minutes.
+
+Both implementation and check agents released source and have no owned running processes. W9 source/spec/index
+changes remain uncommitted. Parent updated acceptance/planning docs; no push/archive/original-data/model work.
+The existing Stage4 task stays in_progress with its manual/environment boundaries open. Current manifests are
+W9-scoped; historical W0-W8 context and pinned reports stay preserved. Never rerun old corpus wrappers.
+
+Next: existing B7 `08-09-memory-operations-ui` remains planning. Both Stage5 source reports are complete.
+The proposed child `.trellis/tasks/10-07-hindsight-configuration-observation` was created with `--no-start` under
+prior task-planning consent. Its PRD/design/implement and18-entry context manifests are prepared and validate.
+It is NOT activated: one owner decision remains on the new default-denied, Native-admin exact namespace/Bank
+grant allowing authenticated tenant-key holders/Core operators to inspect bounded API-runtime model identity.
+API-only/single-profile coverage does not certify worker/fleet, routed, embedding/reranker or actual upstream model.
+See the child artifacts and `stage5-configuration-contract-2026-10-07.md`; do not reopen source-answerable questions.
+After owner artifact/policy approval, activate the child and dispatch one full vertical implementer. If declined,
+retain this planning record and prioritize accepted template lifecycle. There is currently no live child or test
+process, no Stage5 source edit, and no new deployment/original-data/model/Git authorization. Parent Stage4 session
+binding remains in place until a reviewed new implementation task is started.
+
 ## Owner execution direction - 2026-10-06
 
 Continue the existing bound Trellis task. The owner delegates implementation coordination, review dimensions
@@ -11,7 +37,7 @@ receive a documented line-count lint exception or modest limit change; avoid acc
 The active startup fixer may directly finish diagnosis/repair/targeted verification; no duplicate whole check
 is required before the parent resumes actual execution. Existing authorization and data/Git boundaries remain.
 
-## Current - owner-authorized local commit batch after W8 acceptance
+## Prior - owner-authorized local commit batch after W8 acceptance
 
 The owner requested local commits first, then a complete implementation and real-data/LLM test report.
 Native commit: `eb6413a7f58c4f3f0adb88a33a99516f8707fef7`, containing 367 reviewed source/contract/dependency files.

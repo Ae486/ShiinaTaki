@@ -1,0 +1,24 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "--filter",
+    "@taki/shared",
+    "exec",
+    "vitest",
+    "run",
+    "--maxWorkers=2"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "startedAt": "2026-10-13T06:21:40.709636+00:00",
+  "finishedAt": "2026-10-13T06:22:02.426368+00:00",
+  "exitCode": 0,
+  "durationSeconds": 21.704,
+  "inputCount": 2417,
+  "changedInputs": [],
+  "inputManifest": "b3-whole-shared-tests-01-inputs.json",
+  "afterManifest": "b3-whole-shared-tests-01-inputs-after.json",
+  "log": "b3-whole-shared-tests-01.log",
+  "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-whole-checks\\shared-tests-01-8f4bcad6af7e434dbefeb7084a0fd71b",
+  "temporaryRootRemoved": true,
+  "remainingFixtureEntries": []
+}

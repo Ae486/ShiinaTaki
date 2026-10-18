@@ -1,0 +1,6 @@
+{
+  "path": "packages/core/src/memory/transitions/transition-emergency-context.test.ts",
+  "sha256": "6CA6500D7643FDC3EFDA569226CC4DCC5A1B46E50E656D50D60301F1F4B318CC",
+  "bytes": 10993,
+  "reason": "First full Core recorded exactly four default 5000ms test timeouts; adjust only these cases to existing sibling 30000ms budget."
+}

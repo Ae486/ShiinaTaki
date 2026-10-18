@@ -1,0 +1,40 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ ❯ src/memory/hindsight/template-lifecycle/template-emergency.test.ts (5 tests | 1 failed | 4 skipped) 1060ms
+     × does not revisit closed SQLite when an ignored Apply finishes after takeover and shutdown 1058ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/memory/hindsight/template-lifecycle/template-emergency.test.ts > template holds through the actual offline emergency producer > does not revisit closed SQLite when an ignored Apply finishes after takeover and shutdown
+AssertionError: expected [ …(3) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "SELECT * FROM hindsight_template_publications WHERE plan_id=:id",
++   "transaction",
++   "SELECT operation_id,kind,family,state,reason,authority_epoch_id,request_json,producer_json,result_json,error_code,owner_boot_id,created_at,updated_at,terminal_at FROM memory_operations WHERE operation_id=:id",
++ ]
+
+ ❯ src/memory/hindsight/template-lifecycle/template-emergency.test.ts:107:24
+    105|       await new Promise<void>((resolve) => setImmediate(resolve));
+    106|       await new Promise<void>((resolve) => setImmediate(resolve));
+    107|       expect(attempts).toEqual([]);
+       |                        ^
+    108|     } finally {
+    109|       release.resolve(); f.db.prepare = prepare; f.db.transaction = tr…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 skipped (5)
+   Start at  15:41:54
+   Duration  12.29s (transform 8.63s, setup 0ms, import 10.84s, tests 1.06s, environment 0ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/hindsight/template-lifecycle/template-emergency.test.ts --testNamePattern does not revisit closed SQLite --maxWorkers=2

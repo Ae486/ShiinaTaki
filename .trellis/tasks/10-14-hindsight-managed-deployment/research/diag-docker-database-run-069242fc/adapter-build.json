@@ -1,0 +1,23 @@
+{
+  "compiler": "C:/Users/55473/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rustc.exe",
+  "compilerSha256": "6d1c5543ed3a45cfbc1c1332d42d6550d883c14d3c2e323427e631c331cebeeb",
+  "version": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+  "sourceSha256": "50f17ba43882725d5e23884ffafd121f03f4e4deec4977a9cea2c25ef76b14be",
+  "outputSha256": "a3ba7739249c824aecf8126cd977587095a8c4ab2b327d7d6efd0db13ea07d43",
+  "environmentKeys": [
+    "SystemRoot",
+    "WINDIR",
+    "COMSPEC",
+    "PATH",
+    "PATHEXT",
+    "ProgramFiles",
+    "ProgramFiles(x86)",
+    "ProgramW6432",
+    "ProgramData",
+    "USERPROFILE",
+    "LOCALAPPDATA",
+    "APPDATA",
+    "TEMP",
+    "TMP"
+  ]
+}

@@ -1,0 +1,134 @@
+error[unresolved-import]: Cannot resolve imported module `fastapi`
+  --> hindsight_api\api\taki_configuration_observation.py:9:6
+   |
+ 7 | from typing import TYPE_CHECKING, Annotated, Any
+ 8 |
+ 9 | from fastapi import APIRouter, Depends, Path, Query, Request, Response
+   |      ^^^^^^^
+10 | from fastapi.exceptions import RequestValidationError
+11 | from fastapi.responses import JSONResponse
+   |
+info: Searched in the following paths during module resolution:
+info:   1. H:\hindsight\hindsight-api-slim (first-party code)
+info:   2. vendored://stdlib (stdlib typeshed stubs vendored by ty)
+info:   3. G:\anaconda3\Lib\site-packages (site-packages)
+info:   4. G:\anaconda3\Lib\site-packages\win32 (editable install)
+info:   5. G:\anaconda3\Lib\site-packages\win32\lib (editable install)
+info:   ... and 1 more paths. Run with `-v` to see all paths.
+info: make sure your Python environment is properly configured: https://docs.astral.sh/ty/modules/#python-environment
+info: rule `unresolved-import` is enabled by default
+
+error[unresolved-import]: Cannot resolve imported module `fastapi.exceptions`
+  --> hindsight_api\api\taki_configuration_observation.py:10:6
+   |
+ 9 | from fastapi import APIRouter, Depends, Path, Query, Request, Response
+10 | from fastapi.exceptions import RequestValidationError
+   |      ^^^^^^^^^^^^^^^^^^
+11 | from fastapi.responses import JSONResponse
+12 | from fastapi.routing import APIRoute
+   |
+info: Searched in the following paths during module resolution:
+info:   1. H:\hindsight\hindsight-api-slim (first-party code)
+info:   2. vendored://stdlib (stdlib typeshed stubs vendored by ty)
+info:   3. G:\anaconda3\Lib\site-packages (site-packages)
+info:   4. G:\anaconda3\Lib\site-packages\win32 (editable install)
+info:   5. G:\anaconda3\Lib\site-packages\win32\lib (editable install)
+info:   ... and 1 more paths. Run with `-v` to see all paths.
+info: make sure your Python environment is properly configured: https://docs.astral.sh/ty/modules/#python-environment
+info: rule `unresolved-import` is enabled by default
+
+error[unresolved-import]: Cannot resolve imported module `fastapi.responses`
+  --> hindsight_api\api\taki_configuration_observation.py:11:6
+   |
+ 9 | from fastapi import APIRouter, Depends, Path, Query, Request, Response
+10 | from fastapi.exceptions import RequestValidationError
+11 | from fastapi.responses import JSONResponse
+   |      ^^^^^^^^^^^^^^^^^
+12 | from fastapi.routing import APIRoute
+   |
+info: Searched in the following paths during module resolution:
+info:   1. H:\hindsight\hindsight-api-slim (first-party code)
+info:   2. vendored://stdlib (stdlib typeshed stubs vendored by ty)
+info:   3. G:\anaconda3\Lib\site-packages (site-packages)
+info:   4. G:\anaconda3\Lib\site-packages\win32 (editable install)
+info:   5. G:\anaconda3\Lib\site-packages\win32\lib (editable install)
+info:   ... and 1 more paths. Run with `-v` to see all paths.
+info: make sure your Python environment is properly configured: https://docs.astral.sh/ty/modules/#python-environment
+info: rule `unresolved-import` is enabled by default
+
+error[unresolved-import]: Cannot resolve imported module `fastapi.routing`
+  --> hindsight_api\api\taki_configuration_observation.py:12:6
+   |
+10 | from fastapi.exceptions import RequestValidationError
+11 | from fastapi.responses import JSONResponse
+12 | from fastapi.routing import APIRoute
+   |      ^^^^^^^^^^^^^^^
+13 |
+14 | from hindsight_api.api.dependencies import get_bearer_request_context
+   |
+info: Searched in the following paths during module resolution:
+info:   1. H:\hindsight\hindsight-api-slim (first-party code)
+info:   2. vendored://stdlib (stdlib typeshed stubs vendored by ty)
+info:   3. G:\anaconda3\Lib\site-packages (site-packages)
+info:   4. G:\anaconda3\Lib\site-packages\win32 (editable install)
+info:   5. G:\anaconda3\Lib\site-packages\win32\lib (editable install)
+info:   ... and 1 more paths. Run with `-v` to see all paths.
+info: make sure your Python environment is properly configured: https://docs.astral.sh/ty/modules/#python-environment
+info: rule `unresolved-import` is enabled by default
+
+error[unresolved-import]: Cannot resolve imported module `fastapi`
+  --> hindsight_api\extensions\builtin\taki_memory.py:11:6
+   |
+ 9 | import uuid
+10 |
+11 | from fastapi import APIRouter, Depends, Query
+   |      ^^^^^^^
+12 | from fastapi.responses import JSONResponse
+13 | from pydantic import BaseModel
+   |
+info: Searched in the following paths during module resolution:
+info:   1. H:\hindsight\hindsight-api-slim (first-party code)
+info:   2. vendored://stdlib (stdlib typeshed stubs vendored by ty)
+info:   3. G:\anaconda3\Lib\site-packages (site-packages)
+info:   4. G:\anaconda3\Lib\site-packages\win32 (editable install)
+info:   5. G:\anaconda3\Lib\site-packages\win32\lib (editable install)
+info:   ... and 1 more paths. Run with `-v` to see all paths.
+info: make sure your Python environment is properly configured: https://docs.astral.sh/ty/modules/#python-environment
+info: rule `unresolved-import` is enabled by default
+
+error[unresolved-import]: Cannot resolve imported module `fastapi.responses`
+  --> hindsight_api\extensions\builtin\taki_memory.py:12:6
+   |
+11 | from fastapi import APIRouter, Depends, Query
+12 | from fastapi.responses import JSONResponse
+   |      ^^^^^^^^^^^^^^^^^
+13 | from pydantic import BaseModel
+   |
+info: Searched in the following paths during module resolution:
+info:   1. H:\hindsight\hindsight-api-slim (first-party code)
+info:   2. vendored://stdlib (stdlib typeshed stubs vendored by ty)
+info:   3. G:\anaconda3\Lib\site-packages (site-packages)
+info:   4. G:\anaconda3\Lib\site-packages\win32 (editable install)
+info:   5. G:\anaconda3\Lib\site-packages\win32\lib (editable install)
+info:   ... and 1 more paths. Run with `-v` to see all paths.
+info: make sure your Python environment is properly configured: https://docs.astral.sh/ty/modules/#python-environment
+info: rule `unresolved-import` is enabled by default
+
+error[unresolved-import]: Cannot resolve imported module `asyncpg`
+  --> hindsight_api\extensions\tenant.py:12:12
+   |
+11 | if TYPE_CHECKING:
+12 |     import asyncpg
+   |            ^^^^^^^
+   |
+info: Searched in the following paths during module resolution:
+info:   1. H:\hindsight\hindsight-api-slim (first-party code)
+info:   2. vendored://stdlib (stdlib typeshed stubs vendored by ty)
+info:   3. G:\anaconda3\Lib\site-packages (site-packages)
+info:   4. G:\anaconda3\Lib\site-packages\win32 (editable install)
+info:   5. G:\anaconda3\Lib\site-packages\win32\lib (editable install)
+info:   ... and 1 more paths. Run with `-v` to see all paths.
+info: make sure your Python environment is properly configured: https://docs.astral.sh/ty/modules/#python-environment
+info: rule `unresolved-import` is enabled by default
+
+Found 7 diagnostics

@@ -1,0 +1,42 @@
+
+> hindsight-docs@0.0.0 build
+> node scripts/check-code-parity.mjs && node scripts/check-integration-seo.mjs && node scripts/check-integrations.mjs && node scripts/sync-coding-agents-doc.mjs --check && node scripts/check-templates.mjs && docusaurus build
+
+[code-parity] ✅ All 439 docs files pass 4-tab parity check.
+[integration-seo] ✅ All 59 integration pages have title and description.
+[integrations] ✅ All 59 integration entries have a doc page.
+[integrations] ⚠️  No integration tags found (shallow checkout?). Skipping reverse check — fetch tags (fetch-depth: 0) to enforce in CI.
+[coding-agents] ✅ docs page matches the README.
+[32m✓[0m Template "conversation" — valid
+[32m✓[0m Template "coding-agent" — valid
+[32m✓[0m Template "personal-assistant" — valid
+[32m✓[0m Template "hermes-gateway-bot" — valid
+[32m✓[0m Template "hermes-orchestrator" — valid
+[32m✓[0m Template "customer-support" — valid
+[32m✓[0m Template "research-assistant" — valid
+[32m✓[0m Template "plain-retrieval" — valid
+
+[32mAll 8 templates are valid.[0m
+
+ ------------------------------------------------------------------------------                                                                                                         Update available 3.9.2 → 3.10.2                                                                                                                 To upgrade Docusaurus packages with the latest version, run the                                       following command:                                        `npm i @docusaurus/core@latest @docusaurus/preset-classic@latest                @docusaurus/theme-common@latest @docusaurus/theme-mermaid@latest               @docusaurus/module-type-aliases@latest @docusaurus/tsconfig@latest                                  @docusaurus/types@latest`                                                                                                             ------------------------------------------------------------------------------ 
+
+[INFO] [en] Creating an optimized production build...
+Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[webpackbar] ℹ Compiling Client
+[webpackbar] ℹ Compiling Server
+[webpackbar] ✔ Server: Compiled successfully in 12.54s
+[webpackbar] ✔ Client: Compiled successfully in 31.16s
+[WARNING] Docusaurus found broken anchors!
+
+Please check the pages of your site in the list below, and make sure you don't reference any anchor that does not exist.
+Note: it's possible to ignore broken anchors with the 'onBrokenAnchors' Docusaurus configuration, and let the build pass.
+
+Exhaustive list of all broken anchors found:
+- Broken anchor on source page path = /blog/2026/04/28/version-0-5-5:
+   -> linking to #breaking-change-bank-profile-no-longer-auto-creates-banks (resolved as: /blog/2026/04/28/version-0-5-5#breaking-change-bank-profile-no-longer-auto-creates-banks)
+   -> linking to #mental-models-list-view (resolved as: /blog/2026/04/28/version-0-5-5#mental-models-list-view)
+
+[SUCCESS] Generated static files in "build".
+[INFO] Use `npm run serve` command to test your build locally.

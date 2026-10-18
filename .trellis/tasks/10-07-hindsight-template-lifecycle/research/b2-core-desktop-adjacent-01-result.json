@@ -1,0 +1,18 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "exec",
+    "vitest",
+    "run",
+    "src/windows/home/pages/operations/memory-authority-state.test.ts",
+    "src/windows/home/pages/operations/local-onboarding-card.test.tsx",
+    "--maxWorkers=2",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile.json=H:/TakiAgent/.trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-core-desktop-adjacent-01-vitest.json"
+  ],
+  "cwd": "H:/TakiAgent/apps/desktop",
+  "exitCode": 0,
+  "durationSeconds": 5.698,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-core-desktop-adjacent-01.log"
+}

@@ -1,0 +1,15 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/python.exe",
+    "hindsight-dev/hindsight_dev/generate_openapi.py",
+    "hindsight-docs/static/openapi.json"
+  ],
+  "cwd": "H:/hindsight",
+  "exitCode": 0,
+  "durationSeconds": 28.896,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-openapi-02.log",
+  "sources": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-openapi-02-sources.json",
+  "changedInputs": [],
+  "ownedTemp": "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\openapi-02-8lnvguek",
+  "ownedTempRemoved": true
+}

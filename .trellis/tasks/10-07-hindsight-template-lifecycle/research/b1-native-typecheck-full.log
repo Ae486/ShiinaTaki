@@ -1,0 +1,28 @@
+hindsight_api\engine\cross_encoder.py:1307:20: error[unresolved-import] Cannot resolve imported module `mlx.core`
+hindsight_api\engine\cross_encoder.py:1308:20: error[unresolved-import] Cannot resolve imported module `mlx_lm`
+hindsight_api\engine\jina_mlx_reranker.py:20:16: error[unresolved-import] Cannot resolve imported module `mlx.nn`
+hindsight_api\engine\jina_mlx_reranker.py:26:16: error[unresolved-import] Cannot resolve imported module `mlx.nn`
+hindsight_api\engine\jina_mlx_reranker.py:35:12: error[unresolved-import] Cannot resolve imported module `mlx.core`
+hindsight_api\engine\jina_mlx_reranker.py:93:14: error[unresolved-import] Cannot resolve imported module `mlx_lm`
+hindsight_api\engine\jina_mlx_reranker.py:106:16: error[unresolved-import] Cannot resolve imported module `mlx.core`
+hindsight_api\engine\providers\codex_auth.py:113:21: error[unresolved-attribute] Module `fcntl` has no member `flock`
+hindsight_api\engine\providers\codex_auth.py:113:53: error[unresolved-attribute] Module `fcntl` has no member `LOCK_EX`
+hindsight_api\engine\providers\codex_auth.py:113:69: error[unresolved-attribute] Module `fcntl` has no member `LOCK_NB`
+hindsight_api\engine\providers\codex_auth.py:123:21: error[unresolved-attribute] Module `fcntl` has no member `flock`
+hindsight_api\engine\providers\codex_auth.py:123:53: error[unresolved-attribute] Module `fcntl` has no member `LOCK_UN`
+hindsight_api\engine\providers\llamacpp_llm.py:248:62: error[unresolved-attribute] Module `signal` has no member `SIGKILL`
+hindsight_api\engine\providers\nous_auth.py:136:17: error[unresolved-attribute] Module `fcntl` has no member `flock`
+hindsight_api\engine\providers\nous_auth.py:136:49: error[unresolved-attribute] Module `fcntl` has no member `LOCK_EX`
+hindsight_api\engine\providers\nous_auth.py:136:65: error[unresolved-attribute] Module `fcntl` has no member `LOCK_NB`
+hindsight_api\engine\providers\nous_auth.py:146:17: error[unresolved-attribute] Module `fcntl` has no member `flock`
+hindsight_api\engine\providers\nous_auth.py:146:49: error[unresolved-attribute] Module `fcntl` has no member `LOCK_UN`
+hindsight_api\metrics.py:737:26: error[unresolved-attribute] Object of type `<module 'resource'> | None` has no attribute `getrusage`
+hindsight_api\metrics.py:737:50: error[unresolved-attribute] Object of type `<module 'resource'> | None` has no attribute `RUSAGE_SELF`
+hindsight_api\metrics.py:746:26: error[unresolved-attribute] Object of type `<module 'resource'> | None` has no attribute `getrusage`
+hindsight_api\metrics.py:746:50: error[unresolved-attribute] Object of type `<module 'resource'> | None` has no attribute `RUSAGE_SELF`
+hindsight_api\metrics.py:749:20: error[unresolved-attribute] Module `os` has no member `uname`
+hindsight_api\metrics.py:764:34: error[unresolved-attribute] Object of type `<module 'resource'> | None` has no attribute `getrlimit`
+hindsight_api\metrics.py:764:58: error[unresolved-attribute] Object of type `<module 'resource'> | None` has no attribute `RLIMIT_NOFILE`
+hindsight_api\worker\poller.py:1577:21: error[unresolved-attribute] Module `resource` has no member `getrusage`
+hindsight_api\worker\poller.py:1577:40: error[unresolved-attribute] Module `resource` has no member `RUSAGE_SELF`
+Found 27 diagnostics

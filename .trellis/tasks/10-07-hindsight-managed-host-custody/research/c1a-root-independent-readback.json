@@ -1,0 +1,14 @@
+{
+  "verdict": "C1a SOURCE PASS",
+  "sourceManifest": "c1a-independent-source-hashes.json",
+  "sourceFileCount": 128,
+  "sourceMismatches": [],
+  "reviewFixture": "C:/taki-c1a-fixture-86700c396b3348a7addf83ffc8273674",
+  "reviewFixtureExists": false,
+  "freeBytes": 14580129792,
+  "sourceAndCheckOwner": "c1a_implement",
+  "activeSlice": "C1b",
+  "c1bSourceReleased": true,
+  "overallC1Acceptance": "pending",
+  "platformManualAcceptance": "pending"
+}

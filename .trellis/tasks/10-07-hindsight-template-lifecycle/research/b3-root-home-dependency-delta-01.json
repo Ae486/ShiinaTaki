@@ -1,0 +1,101 @@
+{
+  "checkedAtUtc": "2026-10-09T16:33:44.947811+00:00",
+  "homeRecordedInputCount": 2042,
+  "changedRecordedInputs": [
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-template-backup-attestation.ts",
+      "checkedSha256": "22cd949af7623e8144f6e6eb15678f2ed956cc35350dee7f677fd5d3f738bd7d",
+      "currentSha256": "c55c08860470b3449fdaf21c8ef106cd971bb4a094bd712ef0cd47d486228711",
+      "homeOwned": false
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/index.md",
+      "checkedSha256": "0f30beabef792ff0860ed37a61e100d29759c4725b65e110b5c9a55a41c016cc",
+      "currentSha256": "905cd56824433c3d9a023e9473d84ce09e1e5605519c53d91f83aa4abaa1bf17",
+      "homeOwned": false
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/index.md",
+      "checkedSha256": "9767e6432d78d98e3817fd6d79ffb4784e085103efd8cc223c5c58678d296ec2",
+      "currentSha256": "91a4d7e4958e4b3c517ff38de99707cfee495a1b7b9342466eb17455e5850b60",
+      "homeOwned": false
+    },
+    {
+      "path": "packages/core/src/memory/transitions/index.md",
+      "checkedSha256": "cd227315654acaa860337a1912c831b60a9eea6e79da1e9e9c6e39b25246129a",
+      "currentSha256": "43d4f86ff5e61c153b3ad3dde0356c9017242647a65a54ab9c366538188d534c",
+      "homeOwned": false
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-candidate.ts",
+      "checkedSha256": "1c0a6c56fc315d95e72a5067b8130e9cd2fd7bf0431da4ed21329dba25096e14",
+      "currentSha256": "599006a04cff67cd9034d2a5f3c11fb0e132a2b864010fbb1a095d4edd36129f",
+      "homeOwned": false
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-publication-lease.test.ts",
+      "checkedSha256": "beeaa28b98688254ac40d97748096c7570c38819691c274bbbf462b852319fbb",
+      "currentSha256": "4bafc1f5db851f79864af50c8c7e1e7d379d5574571d5e49c7788fe995c83bbe",
+      "homeOwned": false
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-template-auxiliary.ts",
+      "checkedSha256": "7fb8d90ff068874f756d03c6b39d4b945e2a2fa440d2aeaffe3af873e1d8a727",
+      "currentSha256": "89a7893e463f2170cbc5d83b540af75ba81c78af81baa63eadcb4c0d1b994e7f",
+      "homeOwned": false
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-template-evidence.ts",
+      "checkedSha256": "5055ab70336a5268c374150487107019cff3a66e20a8bd8b2d840882bf3268ac",
+      "currentSha256": "9546639a914e525ca573f5e59b434f75a50291b9a81854688554aba1789f54b3",
+      "homeOwned": false
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-template-observer.ts",
+      "checkedSha256": "537265c05180e3c1c58ac7130cdba5488e64a38af143a0886283954613b541c1",
+      "currentSha256": "4f87ba53d1902800a6511116a1c8bfdc5de7138c51e6d70ad9c41c51c83e8940",
+      "homeOwned": false
+    },
+    {
+      "path": "packages/core/src/testing/hindsight-template-backup-joint-fixture.ts",
+      "checkedSha256": "a5a4f828e27d4cacd23bacdf2639c90125fe2a35084f3adb4f2ce3236ab2cadd",
+      "currentSha256": "36be2414c6c3e77b3420ad66d576e90a4fc50f4cbdb84daf78c675a43d8e6fbf",
+      "homeOwned": false
+    },
+    {
+      "path": "packages/core/src/testing/index.md",
+      "checkedSha256": "b04189155956c227589d74fbb6d87182b86bc197abb773a8ae4bacd946a6254c",
+      "currentSha256": "1c2e563af4d51b48fb9c041193d75ca9c520e2daa20fc5474f79c3dafea927d7",
+      "homeOwned": false
+    },
+    {
+      "path": "packages/shared/src/hindsight-backup-v1-schema.ts",
+      "checkedSha256": "b02e2f52d815db7cae21cac7348751afba969c070cc47f7a77dbeffa05cacfde",
+      "currentSha256": "f70e6d8d7bfeddf99cc0f423ad685f9057633e917b8f38843ddf3fcd09604fb1",
+      "homeOwned": false
+    },
+    {
+      "path": "packages/shared/src/index.md",
+      "checkedSha256": "ddfd212d9f0ca0cd826db1535491e32c17bab49699427c37418dd19521a88c3d",
+      "currentSha256": "8bdb6c56edfaaa6ae5bf3f8e81ec2f01883def10a814b887a114c7ae0324112b",
+      "homeOwned": false
+    }
+  ],
+  "currentCoreRecorderInputsAbsentFromHomeRecorder": [
+    ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-joint-entry.mjs",
+    ".trellis/tasks/10-07-hindsight-template-lifecycle/research/run-b3-core-check.py",
+    ".trellis/tasks/10-07-hindsight-template-lifecycle/research/run-b3-core-source-check.py",
+    "packages/core/src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts",
+    "packages/core/src/memory/transitions/transition-template-observer.test.ts",
+    "packages/core/src/testing/hindsight-template-observation-fixtures.ts",
+    "packages/core/src/testing/memory-transition-template-evidence-fixtures.ts",
+    "packages/core/src/testing/memory-transition-template-fixtures.ts",
+    "packages/core/tsconfig.json",
+    "packages/shared/tsconfig.json",
+    "pnpm-workspace.yaml",
+    "tsconfig.base.json"
+  ],
+  "homeOwnedSourceChanged": false,
+  "interpretation": "Home own source remains separately reviewed. These later Core/Shared dependency changes require future combined verification; no final current-graph Desktop PASS is claimed. Recorder-only entries include pre-existing configuration and helper coverage, so they are not all newly created files.",
+  "wholeStage5BAccepted": false
+}

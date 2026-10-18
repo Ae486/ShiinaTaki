@@ -1,0 +1,18 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/python.exe",
+    "-m",
+    "pytest",
+    "tests/test_go_client_postprocess.py",
+    "tests/test_client_contract_fixtures.py",
+    "tests/test_generate_openapi.py",
+    "-p",
+    "g1_fixture_network_guard",
+    "-q",
+    "--tb=short"
+  ],
+  "cwd": "H:/hindsight/hindsight-dev",
+  "exitCode": 1,
+  "durationSeconds": 43.146,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b1-generator-regression-01.log"
+}

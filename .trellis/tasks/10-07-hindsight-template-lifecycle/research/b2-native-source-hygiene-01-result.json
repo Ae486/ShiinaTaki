@@ -1,0 +1,11 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/python.exe",
+    "-c",
+    "import json,pathlib; r=pathlib.Path(\".trellis/tasks/10-07-hindsight-template-lifecycle/research\"); m=json.loads((r/\"b2-native-source-pre-boundaries-03.json\").read_text(encoding=\"utf-8\")); before=json.loads((r/\"b2-generated-pre-generation.json\").read_text(encoding=\"utf-8\")); after=json.loads((r/\"b2-generated-tested.json\").read_text(encoding=\"utf-8\")); names=set(m[\"changedSinceStart\"])|{p for p in after if not p.startswith(\"rust-build/\") and before.get(p)!=after[p]}; paths=[pathlib.Path(\"H:/hindsight\")/p for p in sorted(names)]+[pathlib.Path(\".trellis/spec/backend/hindsight-template-lifecycle.md\")]; failures={str(p):[n+1 for n,line in enumerate(p.read_text(encoding=\"utf-8\").splitlines()) if line.rstrip(\" \\t\")!=line] for p in paths}; failures={p:lines for p,lines in failures.items() if lines}; bom=[str(p) for p in paths if p.read_bytes().startswith(bytes([239,187,191]))]; print(json.dumps({\"files\":len(paths),\"trailingWhitespace\":failures,\"bom\":bom})); assert not failures and not bom"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "durationSeconds": 0.245,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-native-source-hygiene-01.log"
+}

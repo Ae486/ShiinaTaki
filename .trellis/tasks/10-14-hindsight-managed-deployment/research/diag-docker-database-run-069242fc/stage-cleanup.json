@@ -1,0 +1,23 @@
+{
+  "status": "blocked_for_stage_only",
+  "stage": "G:/TakiAgent-c2a-database/persistence-069242fc-3c26-4413-a767-0d01d819f95e",
+  "stagePreserved": true,
+  "archiveFilesVerified": 53,
+  "resolvedPathVerified": true,
+  "ownerMarkerVerified": true,
+  "noReparsePointsVerified": true,
+  "rejections": [
+    {
+      "action": "Combined verification and PowerShell Remove-Item on diagnostic S",
+      "reason": "blocked by policy",
+      "executionStarted": false
+    },
+    {
+      "action": "Remove-Item -LiteralPath 'G:/TakiAgent-c2a-database/persistence-069242fc-3c26-4413-a767-0d01d819f95e' -Recurse -Force -ErrorAction Stop",
+      "reason": "blocked by policy",
+      "executionStarted": false
+    }
+  ],
+  "furtherDeletionAttempted": false,
+  "otherCleanupVerified": true
+}

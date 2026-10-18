@@ -1,0 +1,28 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "--filter",
+    "@taki/core",
+    "exec",
+    "vitest",
+    "run",
+    "src/memory/hindsight/hindsight-capture-sync.test.ts",
+    "--maxWorkers=1",
+    "--testNamePattern",
+    "\\(D2\\)$",
+    "--testTimeout=30000"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "durationSeconds": 12.795,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-d2-30s-measurement-01.log",
+  "cleanup": {
+    "path": "H:\\TakiAgent\\.trellis\\.runtime\\b3-core-d2-30s-measurement-01-temp",
+    "leftovers": [],
+    "removed": true
+  },
+  "sourceIdentity": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-d2-30s-measurement-01-source.json",
+  "sourceAfter": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-d2-30s-measurement-01-source-after.json",
+  "inputCount": 1599,
+  "sourceMismatches": []
+}

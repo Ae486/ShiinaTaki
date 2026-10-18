@@ -1,0 +1,92 @@
+[
+  {
+    "file": ".trellis/spec/frontend/home-window.md",
+    "bytes": 32286,
+    "sha256": "60bd40e867b6dd8d7eda1650d52ca7d1c734baa9b257d92aa5f03beaa0fd4b8b"
+  },
+  {
+    "file": "apps/desktop/src/lib/index.md",
+    "bytes": 4694,
+    "sha256": "936d1d0a33ee66e1176ce38767bc9e03ea6e195ff4664936a09d43caafcf216d"
+  },
+  {
+    "file": "apps/desktop/src/lib/rpc-deadline.ts",
+    "bytes": 6903,
+    "sha256": "a4597d52ba20a4cadb36b612ac5278d72a4085eae183d8e599bb09bcabfa1857"
+  },
+  {
+    "file": "apps/desktop/src/lib/ws-client-hindsight-configuration.test.ts",
+    "bytes": 3458,
+    "sha256": "8b6ac0d0788d6859365a12d58b70e7bb3b213b3bcd532e803164d26f1ef1ac79"
+  },
+  {
+    "file": "apps/desktop/src/lib/ws-client-hindsight-configuration.ts",
+    "bytes": 1387,
+    "sha256": "079aea008d5727715831e6bc1e75d210daf8d249d57155943f5de5f43492febf"
+  },
+  {
+    "file": "apps/desktop/src/lib/ws-client-methods.ts",
+    "bytes": 12667,
+    "sha256": "a8c96700b7f536cbec497f7ec3f730bbc1e4fcb989349cb5f61625435510538a"
+  },
+  {
+    "file": "apps/desktop/src/lib/ws-client.ts",
+    "bytes": 15543,
+    "sha256": "83e042cf2fcd1bcbb66f98634be7d663cafa9365ca5151a26c042cfc25feb0f0"
+  },
+  {
+    "file": "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-browser-fixture.ts",
+    "bytes": 2826,
+    "sha256": "f0ac91d664716f37a095ad854aeeaa8345b9f5aeaeccf56c60688a5165562487"
+  },
+  {
+    "file": "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-browser.test.ts",
+    "bytes": 9329,
+    "sha256": "0588c56a9e81dc4f7c33e04de7b94494ad18bbfa5aaadd8fcd2874fc9c9b8707"
+  },
+  {
+    "file": "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-card.test.tsx",
+    "bytes": 4361,
+    "sha256": "cb5d63722aaf5c7427b2c879cfd8ef9b53789ffd5b278be538006557dd5d56e0"
+  },
+  {
+    "file": "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-card.tsx",
+    "bytes": 6161,
+    "sha256": "f765dad2a21a0144081dd966ddc8bac647164686c543c1754ad9f393dc3078f6"
+  },
+  {
+    "file": "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-controller.test.ts",
+    "bytes": 8194,
+    "sha256": "4f75225e9578d857b6aeb2844ebc56c7d76128295d1cce794d20e0fe7c154937"
+  },
+  {
+    "file": "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-controller.ts",
+    "bytes": 4752,
+    "sha256": "9c37ec01ae504864a3e503d860e9fafc3598da9310236b8549c164c508a91363"
+  },
+  {
+    "file": "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-state.ts",
+    "bytes": 3826,
+    "sha256": "99e75ad5236d91655c0e619143c30fabfec5f3346939895805d32d7a7d12acde"
+  },
+  {
+    "file": "apps/desktop/src/windows/home/pages/operations/index.md",
+    "bytes": 7856,
+    "sha256": "7ed27f8bd7d9d1fd92267803cccc23212e77aef4b7b0117c79fb3994f851792f"
+  },
+  {
+    "file": "apps/desktop/src/windows/home/pages/operations/operations-page.tsx",
+    "bytes": 3658,
+    "sha256": "93256d9e944e075b120fa82d296eb3588035cfd23428fa71ded5a4fb6f99faaf"
+  },
+  {
+    "file": "apps/desktop/src/windows/home/pages/operations/use-configuration-characters.ts",
+    "bytes": 1250,
+    "sha256": "67227c01567266a8b564572af9bcfa4ead204445d8a50331be6f4e18babffe7c"
+  },
+  {
+    "file": "apps/desktop/src/windows/home/pages/operations/use-hindsight-configuration.ts",
+    "bytes": 2109,
+    "sha256": "e8c8d9ea98f8ff6185e9eb011a96a50618a04e9623eb8c9183a80675f6fdb8d8"
+  }
+]

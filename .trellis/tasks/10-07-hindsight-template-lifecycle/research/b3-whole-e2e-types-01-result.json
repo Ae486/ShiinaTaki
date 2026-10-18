@@ -1,0 +1,21 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "--filter",
+    "@taki/e2e",
+    "typecheck"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "startedAt": "2026-10-12T16:16:55.208829+00:00",
+  "finishedAt": "2026-10-12T16:17:13.022834+00:00",
+  "exitCode": 0,
+  "durationSeconds": 17.813,
+  "inputCount": 2417,
+  "changedInputs": [],
+  "inputManifest": "b3-whole-e2e-types-01-inputs.json",
+  "afterManifest": "b3-whole-e2e-types-01-inputs-after.json",
+  "log": "b3-whole-e2e-types-01.log",
+  "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-whole-checks\\e2e-types-01-21fe6cb201f24136a84635182c1e395c",
+  "temporaryRootRemoved": true,
+  "remainingFixtureEntries": []
+}

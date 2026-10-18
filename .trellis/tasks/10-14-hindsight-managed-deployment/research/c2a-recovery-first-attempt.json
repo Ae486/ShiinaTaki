@@ -1,0 +1,229 @@
+{
+  "version": 1,
+  "createdAt": "2026-10-15T10:26:47.728Z",
+  "reviewer": "/root/c2_design_check",
+  "task": ".trellis/tasks/10-14-hindsight-managed-deployment",
+  "caseId": "f217a02f-f8a5-466f-ab59-0e97940debe0",
+  "result": {
+    "casePassed": false,
+    "launcherExitCode": 1,
+    "launcherElapsedMs": 98478,
+    "fixtureElapsedMs": 97126,
+    "ownedRuntimeCleanup": true,
+    "deploymentReady": false,
+    "classification": "TASK_FIXTURE_LIVE_LOCK_SCAN_CONFLICT",
+    "productionDefectEstablished": false
+  },
+  "evidenceRoot": "G:/TakiAgent-c2a-docker-acceptance/recovery-f217a02f-f8a5-466f-ab59-0e97940debe0",
+  "evidence": [
+    {
+      "file": "recovery.json",
+      "bytes": 182384,
+      "sha256": "22075fc1db3122b682056be6c99dedfb237d606e9ffefbcb46e24ff0c79d3551"
+    },
+    {
+      "file": "launcher-command.json",
+      "bytes": 757,
+      "sha256": "c58d0d76cac1f9d9976c4b5484ec81570932a3c91a7ad88f6f680110606e021c"
+    },
+    {
+      "file": "commands.jsonl",
+      "bytes": 20294,
+      "sha256": "94821254e0853eb0eb6c4db94e09f0a724b42c67f62b8667e517a23c0cd59c80"
+    },
+    {
+      "file": "prepared-inputs.json",
+      "bytes": 3566,
+      "sha256": "dd759c1ca2f9ad04a78f0da635573fd882ace5530c91cc88f3040c4071bdb974"
+    },
+    {
+      "file": "root-post-run-readback.json",
+      "bytes": 2759,
+      "sha256": "c70b7f208b69480d16b4e23545d8e2ea36da119613dc0ff311b9ee4c233626da"
+    }
+  ],
+  "launcherSha256": "f7c907eda8a156da8ca20be9d199c2d6ac5eb35ac84b01625ace6a50f608493e",
+  "failure": {
+    "stage": "final-effect-and-containment-check",
+    "locatedCall": "docker-recovery/run-recovery.ts:536 scanTree()",
+    "controlFlowProof": [
+      "finalEngineEvents and the updated 19-entry execEvidence exist; both are assigned after inspectExecs assertions",
+      "effectCounts is absent; it is assigned immediately after scanTree returns",
+      "the main catch recorded final-effect-and-containment-check, not a cleanup failure"
+    ],
+    "concreteDefect": "scanTree reads every local leaf while the second Shell still holds state/deployment.lock with Windows share mode 0 for the complete owner lifetime",
+    "source": [
+      "docker-recovery/run-recovery.ts:573-583",
+      "apps/desktop/src-tauri/src/hindsight_windows/objects.rs:134-147",
+      "apps/desktop/src-tauri/src/hindsight_windows/deployment.rs:19-51"
+    ],
+    "rawExceptionRetained": false,
+    "precisionLimit": "The failed call is exact. The exclusive-lock read conflict is a source-proven fixture defect in that call. The catch discards errno/path/stack, so the original earliest failing leaf and OS error code are not claimed as captured runtime facts.",
+    "cleanupCorroboration": {
+      "sameScannerAfterReapPassed": true,
+      "files": 827,
+      "bytes": 103461077,
+      "hits": 0,
+      "protectedRootRemoved": true
+    },
+    "priorReview": "The original static PASS missed the live scanner versus exclusive lock interaction; preserve that review as a consumed input."
+  },
+  "independentlyChecked": {
+    "checks": {
+      "exactHeldRequestAndControl": true,
+      "publicUnknown": true,
+      "originalRunUnknownBeforeAndAfter": true,
+      "originalChildIdentityPreserved": true,
+      "originalHelperReaped": true,
+      "newHelperIdentity": true,
+      "persistedInputsControlFlow": true,
+      "originalPlanStepsVolumeContainerPreserved": true,
+      "oldAttemptsUnchanged": true,
+      "freshNativeUnbound": true,
+      "noChildBeforeResume": true,
+      "markerPersistence": true,
+      "freshStartupAttempt": true,
+      "freshCustodyIdentity": true,
+      "stableCatalog": true,
+      "newRunCompleted": true,
+      "repeatedResumeControlFlow": true,
+      "allRetainedScansZero": true,
+      "afterReapLocalScanZero": true
+    },
+    "counts": {
+      "before": {
+        "containerCreate": 1,
+        "containerStart": 1,
+        "restart": 0,
+        "volumeCreate": 1,
+        "execCreate": 10,
+        "submit": 1,
+        "byAction": {
+          "exec_create: /app/api/.venv/bin/python -I -B -m managed_bootstrap.control": 5,
+          "exec_create: /app/api/.venv/bin/python -I -B -m managed_bootstrap.submitter": 1,
+          "exec_create: /app/api/.venv/bin/python -I -B - read": 3,
+          "exec_create: /app/api/.venv/bin/python -I -B -": 1
+        },
+        "since": "2026-10-15T10:14:42.531Z",
+        "until": "2026-10-15T10:15:30.641Z"
+      },
+      "final": {
+        "containerCreate": 1,
+        "containerStart": 2,
+        "restart": 1,
+        "volumeCreate": 1,
+        "execCreate": 19,
+        "submit": 2,
+        "byAction": {
+          "exec_create: /app/api/.venv/bin/python -I -B -m managed_bootstrap.control": 11,
+          "exec_create: /app/api/.venv/bin/python -I -B -m managed_bootstrap.submitter": 2,
+          "exec_create: /app/api/.venv/bin/python -I -B - read": 4,
+          "exec_create: /app/api/.venv/bin/python -I -B -": 1,
+          "exec_create: /app/api/.venv/bin/python -I -B - seed": 1
+        },
+        "since": "2026-10-15T10:14:42.531Z",
+        "until": "2026-10-15T10:15:48.895Z"
+      }
+    },
+    "execFacts": {
+      "count": 19,
+      "allUnique": true,
+      "allNoTty": true,
+      "submits": [
+        {
+          "id": "c284b5a490af5aca34f30ac0db4e5acbee0502aecb2f34f6c4a3866ab16ee105",
+          "exitCode": 0,
+          "tty": false
+        },
+        {
+          "id": "82d256937fad9bd276330ecaed48d9eaa62ba4467f13879641c5485632719a82",
+          "exitCode": 0,
+          "tty": false
+        }
+      ]
+    },
+    "ids": {
+      "deploymentId": "08143c21-4b1a-4c71-96aa-ddccd20ed0fb",
+      "containerId": "75579434fd5b0d0da4f5409848db7152143bd63b76c9f34f57fef75c6c159d11",
+      "imageId": "sha256:2fd9cc463f248d2df88d9d943294c63a94c3f8139c439fb72818d260e4e2edfd",
+      "volume": "taki-c2a-08143c21-4b1a-4c71-96aa-ddccd20ed0fb-data",
+      "oldStartup": "2f4a80ec-2548-414e-9198-e187de1991b3",
+      "newStartup": "96047de8-b418-4978-ae82-1e3d49235c41",
+      "oldChild": {
+        "pid": 49,
+        "startTicks": "646886"
+      },
+      "newChild": {
+        "pid": 85,
+        "startTicks": "650795"
+      },
+      "oldHelper": {
+        "pid": 9560,
+        "parentPid": 27940,
+        "createdAt": "2026-10-15T10:14:47.1746180Z",
+        "executable": "C:\\taki-c2a-docker-recovery-f217a02f-f8a5-466f-ab59-0e97940debe0\\node.exe",
+        "fixedArgvVerified": true
+      },
+      "newHelper": {
+        "pid": 27464,
+        "parentPid": 38976,
+        "createdAt": "2026-10-15T10:15:23.7250030Z",
+        "executable": "C:\\taki-c2a-docker-recovery-f217a02f-f8a5-466f-ab59-0e97940debe0\\node.exe",
+        "fixedArgvVerified": true
+      },
+      "oldCore": 40492,
+      "newCore": 41580,
+      "oldRun": "08143c21-4b1a-4c71-96aa-ddccd20ed0fb",
+      "newRun": "81ccfff0-bdbd-4ff1-95a7-3fab0b6bc8fb",
+      "oldRevision": 13,
+      "newRevision": 24,
+      "markerHash": "eb605de43add7bc273b70a0ab44ae893bcacd60616d88d06d7359df0419c255f"
+    }
+  },
+  "evidenceLimits": [
+    "Event counts refer to the recorded since/until windows and the 19 retained exec metadata entries, not a new query or an exhaustive all-probe transcript.",
+    "Persisted-file hash equality and repeated-call status/registry equality executed successfully by source control flow; their intermediate raw hashes/replies are not all retained.",
+    "The final live local scan did not complete. The successful localFiles record comes from cleanup after the process owners were reaped.",
+    "The original OS error, path and stack were suppressed; this report does not fabricate them.",
+    "No aggregate case acceptance is inferred from preceding passed assertions or successful cleanup."
+  ],
+  "rootReadback": {
+    "source": "root-post-run-readback.json",
+    "engineId": "93e8319e-24b7-4a7d-88f1-60923ad681e0",
+    "checks": {
+      "originalContainersUnchanged": true,
+      "onlyOriginalContainerIds": true,
+      "containerAbsent": true,
+      "volumeAbsent": true,
+      "imageTagAbsent": true,
+      "protectedRootAbsent": true,
+      "trackedProcessesAbsent": true
+    },
+    "reviewerExecutedDocker": false
+  },
+  "minimalNextAction": [
+    "Root preserves this FAIL and its consumed launcher/review hashes before any correction.",
+    "After a separate ownership handoff, remove the redundant pre-reap scanTree call at line 536; retain the mandatory complete scan already performed after stopProcesses/helper reaping and before protected-root removal.",
+    "Keep the production exclusive lock and all containment assertions unchanged; do not suppress file-read errors or skip the lock leaf.",
+    "Review only the changed fixture code and applicable static checks. Any later complete run uses Root's separately frozen fresh token; no run was repeated during this diagnosis."
+  ],
+  "changes": {
+    "newReports": [
+      ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-first-attempt.md",
+      ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-first-attempt.json"
+    ],
+    "fixture": [],
+    "production": [],
+    "rawEvidence": [],
+    "metadata": []
+  },
+  "verification": {
+    "readOnlyEvidenceAnalysis": "PASS",
+    "lint": "NOT_RUN_NO_CODE_EDIT",
+    "typeCheck": "NOT_RUN_NO_CODE_EDIT",
+    "tests": "NOT_RUN",
+    "docker": "NOT_RUN",
+    "build": "NOT_RUN",
+    "gitLifecycle": "NOT_RUN"
+  }
+}

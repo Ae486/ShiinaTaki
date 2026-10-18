@@ -1,0 +1,18 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mH:/TakiAgent/packages/core[39m
+
+ [32m✓[39m src/memory/transitions/transition-template-observer.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 53121[2mms[22m[39m
+     [33m[2m✓[22m[39m requests each Bank's verified receipt and terminal refresh membership without another Bank's IDs [33m 9199[2mms[22m[39m
+     [33m[2m✓[22m[39m freshly compares nonce, source context, complete inventory and every definition facet before reusing a candidate [33m 10868[2mms[22m[39m
+     [33m[2m✓[22m[39m freshly compares saved W2 evidence when a later Bank interrupted preparation [33m 4393[2mms[22m[39m
+     [33m[2m✓[22m[39m accepts fresh observations after compatible transport reconstruction and preserves every original document byte [33m 6410[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses a missing W2 marker even when Native observation claims membership [33m 5313[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses a wrong-request W2 marker even when Native observation claims membership [33m 5402[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses a wrong-target W2 marker even when Native observation claims membership [33m 5686[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses a pending W2 marker even when Native observation claims membership [33m 5845[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m8 passed[39m[22m[90m (8)[39m
+[2m   Start at [22m 00:01:20
+[2m   Duration [22m 67.95s[2m (transform 11.41s, setup 0ms, import 14.34s, tests 53.12s, environment 0ms)[22m
+

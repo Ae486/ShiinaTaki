@@ -1,43 +1,13 @@
-{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Single writer, transactions and immutable evidence."}
-{"file": ".trellis/spec/backend/sqlite-migration-lineage.md", "reason": "Additive migrations against current lineage."}
-{"file": ".trellis/spec/backend/memory-operations.md", "reason": "Existing operation owner and producer outcome attribution."}
-{"file": ".trellis/spec/backend/canonical-local-memory-runtime.md", "reason": "Local writers, custody and runtime lifetime; preserve the documented inventory caveat."}
-{"file": ".trellis/spec/backend/memory-local-cutover-coverage.md", "reason": "Complete source descriptors and initial-epoch restrictions."}
-{"file": ".trellis/spec/backend/memory-current-state-cutover.md", "reason": "D78 native import, maintenance proof and immutable history."}
-{"file": ".trellis/spec/backend/hindsight-application-runtime.md", "reason": "Paired state, Pending, policy and runtime publication."}
-{"file": ".trellis/spec/backend/memory-replica-sync.md", "reason": "Scheduler, exact recovery and guarded checkpoint publication."}
-{"file": ".trellis/spec/backend/memory-hindsight-activation.md", "reason": "Preserve first-activation proof and PR03 custody."}
-{"file": ".trellis/spec/backend/memory-hindsight-lifecycle.md", "reason": "Active Bank readiness, D87 and foreground reconnect."}
-{"file": ".trellis/spec/backend/memory-hindsight-backup.md", "reason": "PR01/PR02, emergency seal, custody and rollback limits."}
-{"file": ".trellis/spec/frontend/reactive-read-models.md", "reason": "Same-Core observation and no write replay after reconnect."}
-{"file": ".trellis/spec/frontend/home-window.md", "reason": "Existing Operations UI and client-generation ownership."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/recovery-2026-09-29.md", "reason": "Restored scope, evidence provenance and prerequisite ownership."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/acceptance-stages-1-2.md", "reason": "Manual sync false-success reproduction and Local inventory caveat."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/acceptance-stage-3.md", "reason": "Cross-history interval defect and bounded backup acceptance."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/stage-4-prerequisites.md", "reason": "Current source seams and missing transition contracts."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/stage-4-runtime-prerequisites.md", "reason": "Required continuation: runtime retirement, queue, incident recovery, ownership and failure matrix."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w0-independent-check.md", "reason": "W0 passed prerequisite contracts and post-commit read-failure fixes; preserve exact request identity."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/historical-conversion-data.md", "reason": "Surviving private D78 data inventory and evidence limitations; never treat it as activated application state."}
-{"file": ".trellis/spec/backend/memory-transitions.md", "reason": "W1 executable transition ownership, queue observations, explicit recovery and proof requirements."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w1-implementation.md", "reason": "W1 integration APIs and verified foundation; native/candidate/runtime boundaries remain W2-W6."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w1-independent-check.md", "reason": "W1 passed durable foundation and exact future COMMIT join; retain checker corrections."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/native-baseline-check.md", "reason": "Verified native offline fixture and Windows canonical generation tooling; original instances untouched."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w2-implementation.md", "reason": "Completed native W2 producer and Core transport APIs; retain original verified evidence and protocol boundaries."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w2-independent-check.md", "reason": "Independent W2 PASS and six repaired boundary classes; consume the final producer contract and actual HTTP evidence."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w3-interface-notes.md", "reason": "Complete closure, original logical identities, Local retirement evidence, unused scopes and W4 COMMIT ownership."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/real-data-reuse-plan.md", "reason": "Owner-required real-data acceptance using previous converted outputs; scoped real LLM calls allowed, corpus reconversion forbidden."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/real-data-reuse-preflight.md", "reason": "Completed isolated native upgrade, genuine copied B4 promotion and D77 projection; preserve originals,21 invalidated units/43259 links and require new actual transition proof in W5."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w3-implementation.md", "reason": "Final W3 candidate/delta/staging APIs and complete source evidence for later wave consumers."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w3-independent-check.md", "reason": "Independent W3 PASS including complete unused-scope SourceSet repair, checked APIs, preservation and W4 COMMIT obligations."}
-{"reason": "W4 atomic publication, custody, runtime lifetime and original queued target receipt contracts; separate file prevents context truncation.", "file": ".trellis/spec/backend/memory-transition-publication.md"}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w4-implementation.md", "reason": "Complete W4 production APIs, actual gate outcomes and final ownership for later consumers."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w4-independent-check.md", "reason": "Complete independently passed W4 contracts, five behavioral repairs, actual verification and exact final source identities."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-implementation-brief.md", "reason": "Active complete W5 healthy production drivers, durable recovery and required native/reused-real-corpus roundtrip."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-native-billing-scope.md", "reason": "Explicit parent-approved native402fail-fast scope, source ownership and offline/owned-PG partial-plan recovery gates."}
-{"file": ".trellis/spec/backend/memory-transition-healthy-drivers.md", "reason": "W5 complete healthy drivers, immutable055/056history, exact partial-maintenance continuation and truthful separate native/real-data gates."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-implementation.md", "reason": "Delivered complete healthy code, exact actual checks/source ownership and explicitly incomplete real-corpus gate."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-independent-check.md", "reason": "Final independent available-check verdict, exact checked source and explicit remaining real-data gate."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-real-resume-handoff.md", "reason": "Current W5 continuation after available checks, original paused request/plan, external readiness and finite-budget prerequisites."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-healthy-final-result-2026-10-06.md", "reason": "Final accepted W5 real healthy journey and source-backed audit corrections; supersedes historical paused-state handoffs. Preserve the stopped predecessor and derive new W6 copies."}
-{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w6-implementation-brief.md", "reason": "Active whole-wave W6 ownership: offline emergency, immutable incident, surviving state/custody, foreign-provider isolation and current D91 paired recovery; parent-owned actual corpus execution."}
-{"file": ".trellis/spec/backend/memory-transition-emergency.md", "reason": "W6 offline authority, immutable uncertainty, original recovery and paired pre-writer contracts."}
+{"file": ".trellis/spec/backend/index.md", "reason": "W9 backend checklist and quality gate; follow linked project conventions."}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Atomic SQLite publication and single-writer constraints."}
+{"file": ".trellis/spec/backend/sqlite-transaction-isolation.md", "reason": "Nested transaction rollback and commit-failure isolation."}
+{"file": ".trellis/spec/backend/memory-transitions.md", "reason": "Exact executor identity, revision CAS and lease expiry revocation."}
+{"file": ".trellis/spec/backend/memory-transition-publication.md", "reason": "Complete synchronous evidence validation and genuine-exhaustion rollback."}
+{"file": ".trellis/spec/backend/memory-transition-healthy-drivers.md", "reason": "Healthy driver clock, lease heartbeat and original-operation recovery."}
+{"file": ".trellis/spec/backend/memory-transition-emergency.md", "reason": "Existing final live-clock/original-executor guard and unchanged emergency contract."}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Meaningful regression fixtures and required Core quality gates."}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Truthful refusal, unknown outcome and preserved error causality."}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Actionable diagnostics without sensitive evidence disclosure."}
+{"file": ".trellis/spec/guides/index.md", "reason": "Applicable cross-layer and source-grounding guides."}
+{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/stage4-review-2026-10-07.md", "reason": "Verified predecessor identity, P2 review finding and historical evidence boundaries."}
+{"file": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/stage4-w9-lease-plan-2026-10-07.md", "reason": "Owner-approved W9 scope, tests, ownership and conditional finite lease extension; no performance work."}

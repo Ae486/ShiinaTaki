@@ -1,0 +1,21 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "--filter",
+    "@taki/desktop",
+    "typecheck"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "startedAt": "2026-10-12T16:12:34.502821+00:00",
+  "finishedAt": "2026-10-12T16:13:34.477455+00:00",
+  "exitCode": 0,
+  "durationSeconds": 59.984,
+  "inputCount": 2417,
+  "changedInputs": [],
+  "inputManifest": "b3-whole-desktop-types-01-inputs.json",
+  "afterManifest": "b3-whole-desktop-types-01-inputs-after.json",
+  "log": "b3-whole-desktop-types-01.log",
+  "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-whole-checks\\desktop-types-01-3fc79ca4d61a4bf291cbc77c7f8b1c20",
+  "temporaryRootRemoved": true,
+  "remainingFixtureEntries": []
+}

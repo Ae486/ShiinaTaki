@@ -1,0 +1,11 @@
+(node:28408) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+H:\TakiAgent\packages\core\src\testing\hindsight-template-backup-joint-fixture.ts:103
+      if (!result.ok) throw new Error(`joint capture refused: ${result.code}`);
+                            ^
+
+Error: joint capture refused: HINDSIGHT_BACKUP_READBACK_MISMATCH
+    at Object.capture (H:\TakiAgent\packages\core\src\testing\hindsight-template-backup-joint-fixture.ts:103:29)
+    at async file:///H:/TakiAgent/.trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-copied-readiness-smoke.mjs:22:19
+
+Node.js v24.18.0

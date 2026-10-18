@@ -1,0 +1,38 @@
+{
+  "ownedSource": "packages/core/src/server/methods/hindsight-template-methods.test.ts",
+  "sha256": "6a72fcfa007e4076af8bba98b14c6e96a6e267ee9c533ee6fe2de05a5b38cf4f",
+  "released": true,
+  "checks": [
+    {
+      "evidence": "b2-operator-methods-01-vitest.json",
+      "exitCode": 1,
+      "collected": 30,
+      "passed": 28,
+      "failed": 2
+    },
+    {
+      "evidence": "b2-operator-methods-02-vitest.json",
+      "exitCode": 0,
+      "collected": 15,
+      "passed": 15,
+      "failed": 0
+    },
+    {
+      "evidence": "b2-operator-methods-03-lint.json",
+      "exitCode": 0
+    }
+  ],
+  "artifacts": {
+    ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-operator-methods-implementation.md": "b5ae7ed952609197c8d7f154e61c7f1e0073aba048aa472abc931922149b59e3",
+    ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-operator-methods-01-vitest.json": "e6b76658059eb326ec9f69a4ad1f2660782dd85367ef68e7eb8f5187949bd08e",
+    ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-operator-methods-01-vitest.log": "2c956c357242dc8b767f0a1de32c99590bcbfb48d5feaa60e57a324de9899dd5",
+    ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-operator-methods-02-vitest.json": "8ee02739f769babab2694a41c8cff4aeb4d14c0ca43f7308ba467bf7eef6eae8",
+    ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-operator-methods-02-vitest.log": "4b2cd73e0dc54b2b81e0533c83ad567936d6c5d8686ba2ff82c621d0f56c8d48",
+    ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-operator-methods-03-lint.json": "5e724cf6f5fafd8929dae2af61b7c544c6d659ab12f85040ddf5f753aa99f951",
+    ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-operator-methods-03-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "remainingGates": [
+    "Unified Core typecheck including the new test file",
+    "Independent B2 review and current-source dependency reconciliation"
+  ]
+}

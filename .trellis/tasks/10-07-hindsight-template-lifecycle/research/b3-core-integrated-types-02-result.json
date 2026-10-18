@@ -1,0 +1,14 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "typecheck"
+  ],
+  "cwd": "H:/TakiAgent/packages/core",
+  "exitCode": 2,
+  "durationSeconds": 31.623,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-integrated-types-02.log",
+  "sourceIdentity": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-integrated-types-02-source.json",
+  "sourceAfter": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-integrated-types-02-source-after.json",
+  "inputCount": 1587,
+  "sourceMismatches": []
+}

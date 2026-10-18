@@ -1,0 +1,16 @@
+{
+  "exitCode": 0,
+  "verified": true,
+  "pid": 31560,
+  "dataDir": "H:\\TakiAgent\\.trellis\\.runtime\\stage5b-core-boot\\owned-3Aj5h4",
+  "port": 5432,
+  "isolated": true,
+  "dotenvLoaded": false,
+  "authenticatedMethods": [
+    "memory.templates.status",
+    "memory.templates.preview",
+    "memory.templates.derived"
+  ],
+  "prohibitedCalls": 0,
+  "originalDeploymentTouched": false
+}

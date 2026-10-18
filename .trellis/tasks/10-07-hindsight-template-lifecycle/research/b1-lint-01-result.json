@@ -1,0 +1,10 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "lint"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "durationSeconds": 75.677,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b1-lint-01.log"
+}

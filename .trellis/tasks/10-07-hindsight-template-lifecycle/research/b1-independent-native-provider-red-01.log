@@ -1,0 +1,90 @@
+Owned fixture: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-26b13d415121
+PostgreSQL: 18.1 ; vector/pg_trgm ready
+Pytest log: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-26b13d415121\pytest.log
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade b5a4c3e2f1d8, b8c9d0e1f2a3 -> c1d2e3f4a5b6, Merge graph_maintenance_queue and vchord_cosine_opclass heads.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade c1d2e3f4a5b6 -> d3e4f5a6b7c8, Add llm_requests table for per-bank LLM request tracing.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade d3e4f5a6b7c8 -> a7b8c9d0e1f2, Move mental-model and observation history into dedicated tables.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade a7b8c9d0e1f2 -> e5f6a7b8c9d0, Add server-side routines for background maintenance sweeps.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade e5f6a7b8c9d0 -> b2d4f6a8c1e3, Repair: install maintenance routines on the ``public`` / base-schema run.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade b2d4f6a8c1e3 -> c9a1b2d3e4f5, Add invalidated_memory_units table for curation (edit/invalidate).
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade c9a1b2d3e4f5 -> c3e5a7b9d1f4, Repair: widen ``*_history.bank_id`` from VARCHAR(64) to TEXT on PostgreSQL.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade c3e5a7b9d1f4 -> a1d3f5b7c9e2, Repair: widen the remaining live ``bank_id`` columns from VARCHAR(64) to TEXT on PostgreSQL.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade a1d3f5b7c9e2 -> 2071c7518f88, Add a composite index on memory_links(bank_id, link_type) (PostgreSQL).
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade a1d3f5b7c9e2 -> d4f6a8c2e1b3, Drop the embedding column from the curation archive (invalidated_memory_units).
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade d4f6a8c2e1b3, 2071c7518f88 -> e1f2a3b4c5d6, Merge two divergent migration heads.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade e1f2a3b4c5d6 -> c7e9f1a3b5d2, Make maintenance routines resilient to schemas that vanish mid-scan.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade c7e9f1a3b5d2 -> f4d1c2b3a5e6, Add server-side routine for cron-scheduled mental model refresh.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade f4d1c2b3a5e6 -> c3f7a1b9d2e4, Backfill search_vector for native-backend observations.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade c3f7a1b9d2e4 -> b57a7c9e0d13, Add bank_stats_cache table for distributed get_bank_stats caching
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade b57a7c9e0d13 -> e7c3a9f1b2d5, Drop the search_vector column from the curation archive (invalidated_memory_units).
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade e7c3a9f1b2d5 -> a8c1e4f7b0d3, Add indexes for terminal cleanup and newest-first operation listing.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade a8c1e4f7b0d3 -> b6d2f8a4c1e7, Install the maintenance discovery routines into the configured schema.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade b6d2f8a4c1e7 -> d7b2f8a1c934, Add the ``schemas_with_expired_operations`` cross-tenant discovery routine.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade d7b2f8a1c934 -> c7d1e9a4b3f2, Add ``causal_links`` to the curation archive (invalidated_memory_units).
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade c7d1e9a4b3f2 -> a1c9e7f3b2d8, Drop observation_history's FK to memory_units.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade a1c9e7f3b2d8 -> a9b8c7d6e5f4, Add knowledge_pages table (knowledge-base hierarchy).
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade a9b8c7d6e5f4 -> e4a7c1b9d2f6, Drop the never-written `access_count` column from memory_units (and its archive).
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade e4a7c1b9d2f6 -> f2a6d8c4b1e9, Repair: drop the stale global memory_units vector index on per-bank backends.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade f2a6d8c4b1e9 -> b3e8d1c6f4a9, Add entities.entity_kind and exclude label entities from the trigram index.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade b3e8d1c6f4a9 -> c4a7e2d9b1f6, Add logical revisions to live and invalidated memory units.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade c4a7e2d9b1f6 -> d5b8f1c3a7e2, Add idempotency receipts for conditional memory mutations.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade d5b8f1c3a7e2 -> e6c9a4f2b8d1, Add PostgreSQL lineage and logical replication journal primitives.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade e6c9a4f2b8d1 -> f7d0a5c3e9b2, Add PostgreSQL materialized logical snapshot metadata and pages.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade f7d0a5c3e9b2 -> a8e1b6d4f0c3, Persist factual native results and exact retain-part publication evidence.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade a8e1b6d4f0c3 -> d78a1c4e6f90, Persist atomic current-state import requests and immutable mappings.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade d78a1c4e6f90 -> d78b2d5e7a01, Persist first-activation candidates, native outcomes, and immutable evidence.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade d78b2d5e7a01 -> d78c3e6f8b12, Coordinate finite cutover work with ordinary native maintenance.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade d78c3e6f8b12 -> d77a4f8c2e10, Preserve original Taki artifacts and a joint native/application change stream.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade d77a4f8c2e10 -> e30a9d7f6c21, Durable all-writer transition ownership independent from finite D78 leases.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade e30a9d7f6c21 -> e40b1e8a7d32, Use existing UUID indexes without changing association publication ownership.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade e40b1e8a7d32 -> e51c2f9a8b43, Add immutable template receipts, child admissions/results and pristine definition proof.
+INFO     hindsight_api.migrations:migrations.py:237 Database migrations completed successfully for schema 'd78_maintenance_e936245df36c472db556a6fc763f46e1'
+INFO     hindsight_api.api:__init__.py:66 HTTP REST API enabled
+------------------------------ Captured log call ------------------------------
+INFO     hindsight_api.engine.memory_engine:memory_engine.py:2900 [REFRESH_MENTAL_MODEL_TASK] Starting for bank_id=template-a93d31c46d93425ca2aedd37284b25cd, mental_model_id=test-model
+INFO     hindsight_api.engine.memory_engine:memory_engine.py:12337 [REFLECT template-17856] Starting agentic reflect for query: First definition...
+INFO     hindsight_api.engine.memory_engine:memory_engine.py:12522 [REFLECT template-17856] Loaded 1 directives
+INFO     hindsight_api.engine.memory_engine:memory_engine.py:12534 [REFLECT template-17856] Bank has 1 mental models
+INFO     hindsight_api.engine.reflect.agent:agent.py:663 [REFLECT template-17908] forced | query='First definition...' | iterations=5 | llm=[agent_1=0ms, agent_2=0ms, agent_3=0ms, agent_4=0ms, final=0ms] (0ms) | tools=[none] (0ms) | answer='mock response' | total=12ms
+INFO     hindsight_api.engine.memory_engine:memory_engine.py:12598 [REFLECT template-17856] Complete: 13 chars, 5 iterations, 0 tool calls | 0.067s
+INFO     hindsight_api.engine.memory_engine:memory_engine.py:2967 [REFRESH_MENTAL_MODEL_TASK] Completed for bank_id=template-a93d31c46d93425ca2aedd37284b25cd, mental_model_id=test-model
+---------------------------- Captured log teardown ----------------------------
+INFO     hindsight_api.engine.memory_engine:memory_engine.py:4458 close() started
+INFO     hindsight_api.engine.db.postgresql:postgresql.py:166 PostgreSQL pool closed
+============================ slowest 10 durations =============================
+24.12s setup    tests/native_results/test_template_independent_refresh.py::test_real_refresh_rechecks_ownership_after_awaits[cutoff]
+7.57s call     tests/native_results/test_template_provider_guard.py::test_real_openai_retry_rechecks_before_second_network_attempt[False]
+7.21s setup    tests/native_results/test_template_independent_refresh.py::test_missing_terminal_unclaimed_and_stripped_children_never_fall_back_to_legacy_execution
+6.87s setup    tests/native_results/test_template_independent_refresh.py::test_structured_provider_is_not_started_after_losing_refresh_ownership[claim]
+6.70s setup    tests/native_results/test_template_independent_refresh.py::test_delta_second_provider_refuses_definition_lost_after_reflect
+6.64s setup    tests/native_results/test_template_independent_refresh.py::test_real_refresh_rechecks_ownership_after_awaits[reflect_preparation]
+6.38s setup    tests/native_results/test_template_independent_backup.py::test_physical_backup_preserves_original_template_receipt_child_and_result
+6.35s setup    tests/native_results/test_template_independent_refresh.py::test_definition_aba_during_embedding_cannot_publish
+6.10s setup    tests/native_results/test_template_independent_routes.py::test_concurrent_same_request_recovers_receipt_before_provider_checks_and_notification_loss
+6.10s setup    tests/native_results/test_template_independent_refresh.py::test_real_refresh_pipeline_publishes_once_and_replays_without_provider
+=========================== short test summary info ===========================
+FAILED tests/native_results/test_template_provider_guard.py::test_guard_runs_after_all_semaphore_waits_in_inherited_task[False-False]
+FAILED tests/native_results/test_template_provider_guard.py::test_guard_runs_after_all_semaphore_waits_in_inherited_task[False-True]
+FAILED tests/native_results/test_template_provider_guard.py::test_guard_runs_after_all_semaphore_waits_in_inherited_task[True-False]
+FAILED tests/native_results/test_template_provider_guard.py::test_guard_runs_after_all_semaphore_waits_in_inherited_task[True-True]
+FAILED tests/native_results/test_template_provider_guard.py::test_real_openai_retry_rechecks_before_second_network_attempt[False]
+FAILED tests/native_results/test_template_provider_guard.py::test_real_openai_retry_rechecks_before_second_network_attempt[True]
+FAILED tests/native_results/test_template_provider_guard.py::test_embedding_guard_refuses_before_executor_submission_and_plain_embedding_still_works
+FAILED tests/native_results/test_template_independent_refresh.py::test_real_refresh_rechecks_ownership_after_awaits[cutoff]
+FAILED tests/native_results/test_template_independent_refresh.py::test_real_refresh_rechecks_ownership_after_awaits[reflect_preparation]
+FAILED tests/native_results/test_template_independent_refresh.py::test_real_refresh_rechecks_ownership_after_awaits[semaphore]
+FAILED tests/native_results/test_template_independent_refresh.py::test_real_refresh_pipeline_publishes_once_and_replays_without_provider
+FAILED tests/native_results/test_template_independent_refresh.py::test_delta_second_provider_refuses_definition_lost_after_reflect
+FAILED tests/native_results/test_template_independent_refresh.py::test_structured_provider_is_not_started_after_losing_refresh_ownership[definition]
+FAILED tests/native_results/test_template_independent_refresh.py::test_structured_provider_is_not_started_after_losing_refresh_ownership[claim]
+FAILED tests/native_results/test_template_independent_backup.py::test_template_backup_inventory_matches_real_schema_and_foreign_key_order
+FAILED tests/native_results/test_template_independent_backup.py::test_physical_backup_preserves_original_template_receipt_child_and_result
+ERROR tests/native_results/test_template_independent_routes.py::test_concurrent_same_request_recovers_receipt_before_provider_checks_and_notification_loss
+============== 16 failed, 8 passed, 1 error in 158.18s (0:02:38) ==============
+{
+    "Fixture":  "taki-hindsight-g1-26b13d415121",
+    "Stopped":  true,
+    "DataRemoved":  true,
+    "RegistryRemoved":  true,
+    "Logs":  "H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-26b13d415121"
+}

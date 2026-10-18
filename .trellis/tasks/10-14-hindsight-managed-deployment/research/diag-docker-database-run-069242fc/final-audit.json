@@ -1,0 +1,277 @@
+{
+  "recordedAt": "2026-10-18T12:58:44.133Z",
+  "caseId": "069242fc-3c26-4413-a767-0d01d819f95e",
+  "stageAbsent": false,
+  "protectedRootAbsent": true,
+  "tagAbsent": true,
+  "ownedContainerAbsent": true,
+  "ownedVolumeAbsent": true,
+  "exactlyEightOriginalContainers": true,
+  "allEightUnchanged": true,
+  "engineIdUnchanged": true,
+  "engine": {
+    "id": "93e8319e-24b7-4a7d-88f1-60923ad681e0",
+    "version": "29.0.1",
+    "time": "2026-10-18T12:58:44.737964307Z"
+  },
+  "originalHashes": [
+    {
+      "name": "run-persistence.ts",
+      "before": "c39fd6e465f922cefd198abe1e6d531d731359f8969b183ae9b5b4d2cf06ee27",
+      "after": "c39fd6e465f922cefd198abe1e6d531d731359f8969b183ae9b5b4d2cf06ee27",
+      "unchanged": true
+    },
+    {
+      "name": "database-read.py",
+      "before": "4bd830c60a4ddecc4e8e7018d2b19eb08093c81fc5d7f3ee0a8ff380178e4271",
+      "after": "4bd830c60a4ddecc4e8e7018d2b19eb08093c81fc5d7f3ee0a8ff380178e4271",
+      "unchanged": true
+    },
+    {
+      "name": "fake_child.py",
+      "before": "9d65b8875e5d798a024dff9b4a182d6cff7bf4b62646954e38cd0c2e12ce3819",
+      "after": "9d65b8875e5d798a024dff9b4a182d6cff7bf4b62646954e38cd0c2e12ce3819",
+      "unchanged": true
+    }
+  ],
+  "originalsUnchanged": true,
+  "archiveVerified": true,
+  "archivedStageFiles": 53,
+  "deltas": [
+    {
+      "name": "/taki-openbili-backend",
+      "before": {
+        "id": "1e389e0a2f95121ca804c186c20916196e9e46f67a7691c3d184404a7292deb8",
+        "name": "/taki-openbili-backend",
+        "status": "running",
+        "startedAt": "2026-10-18T05:55:39.597065125Z"
+      },
+      "after": {
+        "id": "1e389e0a2f95121ca804c186c20916196e9e46f67a7691c3d184404a7292deb8",
+        "name": "/taki-openbili-backend",
+        "status": "running",
+        "startedAt": "2026-10-18T05:55:39.597065125Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true,
+      "statusUnchanged": true
+    },
+    {
+      "name": "/taki-hindsight-api-retest",
+      "before": {
+        "id": "c07d86d32382757d292dd4ebf318e6c44260c817d95f35187663d4d33a26b865",
+        "name": "/taki-hindsight-api-retest",
+        "status": "exited",
+        "startedAt": "2026-08-18T16:47:39.697781196Z"
+      },
+      "after": {
+        "id": "c07d86d32382757d292dd4ebf318e6c44260c817d95f35187663d4d33a26b865",
+        "name": "/taki-hindsight-api-retest",
+        "status": "exited",
+        "startedAt": "2026-08-18T16:47:39.697781196Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true,
+      "statusUnchanged": true
+    },
+    {
+      "name": "/taki-hindsight-api",
+      "before": {
+        "id": "a38b49e64f74ee4fa4f5cf5531e467d74dda2b64dc7e28e78a9bdadd37272519",
+        "name": "/taki-hindsight-api",
+        "status": "exited",
+        "startedAt": "2026-08-18T14:11:54.085514229Z"
+      },
+      "after": {
+        "id": "a38b49e64f74ee4fa4f5cf5531e467d74dda2b64dc7e28e78a9bdadd37272519",
+        "name": "/taki-hindsight-api",
+        "status": "exited",
+        "startedAt": "2026-08-18T14:11:54.085514229Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true,
+      "statusUnchanged": true
+    },
+    {
+      "name": "/redis",
+      "before": {
+        "id": "8f5e4468c3a7c0100330e012fdca3da843abfcc732361b71308f06d6eeada5c2",
+        "name": "/redis",
+        "status": "running",
+        "startedAt": "2026-10-18T04:36:51.09898313Z"
+      },
+      "after": {
+        "id": "8f5e4468c3a7c0100330e012fdca3da843abfcc732361b71308f06d6eeada5c2",
+        "name": "/redis",
+        "status": "running",
+        "startedAt": "2026-10-18T04:36:51.09898313Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true,
+      "statusUnchanged": true
+    },
+    {
+      "name": "/my_pgvector",
+      "before": {
+        "id": "7992fb2bba71e13dc290e305941ded32b9046c1ec4b67a3697863ff79079cf8b",
+        "name": "/my_pgvector",
+        "status": "exited",
+        "startedAt": "2026-04-11T08:18:53.87731237Z"
+      },
+      "after": {
+        "id": "7992fb2bba71e13dc290e305941ded32b9046c1ec4b67a3697863ff79079cf8b",
+        "name": "/my_pgvector",
+        "status": "exited",
+        "startedAt": "2026-04-11T08:18:53.87731237Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true,
+      "statusUnchanged": true
+    },
+    {
+      "name": "/rustfs_loacl",
+      "before": {
+        "id": "ba11af042db0879902996426522611b267f38eab7d21f05e21036929c415cc24",
+        "name": "/rustfs_loacl",
+        "status": "exited",
+        "startedAt": "2026-04-11T08:18:55.176936785Z"
+      },
+      "after": {
+        "id": "ba11af042db0879902996426522611b267f38eab7d21f05e21036929c415cc24",
+        "name": "/rustfs_loacl",
+        "status": "exited",
+        "startedAt": "2026-04-11T08:18:55.176936785Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true,
+      "statusUnchanged": true
+    },
+    {
+      "name": "/rpa-redis",
+      "before": {
+        "id": "9d4fc8fb7a4869ac422d9e78a924b49e698e61a562de3af7576dfd18ef81cd98",
+        "name": "/rpa-redis",
+        "status": "exited",
+        "startedAt": "2026-02-20T17:46:12.832921192Z"
+      },
+      "after": {
+        "id": "9d4fc8fb7a4869ac422d9e78a924b49e698e61a562de3af7576dfd18ef81cd98",
+        "name": "/rpa-redis",
+        "status": "exited",
+        "startedAt": "2026-02-20T17:46:12.832921192Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true,
+      "statusUnchanged": true
+    },
+    {
+      "name": "/arboris-app",
+      "before": {
+        "id": "697330c3cd8966e02d97fa228c5233a0805531bff00275107630e34fadda0b1a",
+        "name": "/arboris-app",
+        "status": "running",
+        "startedAt": "2026-10-18T04:36:51.09648348Z"
+      },
+      "after": {
+        "id": "697330c3cd8966e02d97fa228c5233a0805531bff00275107630e34fadda0b1a",
+        "name": "/arboris-app",
+        "status": "running",
+        "startedAt": "2026-10-18T04:36:51.09648348Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true,
+      "statusUnchanged": true
+    }
+  ],
+  "commands": [
+    {
+      "args": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\diag-docker-database-run-069242fc/client-config",
+        "container",
+        "inspect",
+        "--format",
+        "{\"id\":{{json .Id}},\"name\":{{json .Name}},\"status\":{{json .State.Status}},\"startedAt\":{{json .State.StartedAt}}}",
+        "/taki-openbili-backend",
+        "/taki-hindsight-api-retest",
+        "/taki-hindsight-api",
+        "/redis",
+        "/my_pgvector",
+        "/rustfs_loacl",
+        "/rpa-redis",
+        "/arboris-app"
+      ],
+      "exitCode": 0,
+      "stdout": "{\"id\":\"1e389e0a2f95121ca804c186c20916196e9e46f67a7691c3d184404a7292deb8\",\"name\":\"/taki-openbili-backend\",\"status\":\"running\",\"startedAt\":\"2026-10-18T05:55:39.597065125Z\"}\n{\"id\":\"c07d86d32382757d292dd4ebf318e6c44260c817d95f35187663d4d33a26b865\",\"name\":\"/taki-hindsight-api-retest\",\"status\":\"exited\",\"startedAt\":\"2026-08-18T16:47:39.697781196Z\"}\n{\"id\":\"a38b49e64f74ee4fa4f5cf5531e467d74dda2b64dc7e28e78a9bdadd37272519\",\"name\":\"/taki-hindsight-api\",\"status\":\"exited\",\"startedAt\":\"2026-08-18T14:11:54.085514229Z\"}\n{\"id\":\"8f5e4468c3a7c0100330e012fdca3da843abfcc732361b71308f06d6eeada5c2\",\"name\":\"/redis\",\"status\":\"running\",\"startedAt\":\"2026-10-18T04:36:51.09898313Z\"}\n{\"id\":\"7992fb2bba71e13dc290e305941ded32b9046c1ec4b67a3697863ff79079cf8b\",\"name\":\"/my_pgvector\",\"status\":\"exited\",\"startedAt\":\"2026-04-11T08:18:53.87731237Z\"}\n{\"id\":\"ba11af042db0879902996426522611b267f38eab7d21f05e21036929c415cc24\",\"name\":\"/rustfs_loacl\",\"status\":\"exited\",\"startedAt\":\"2026-04-11T08:18:55.176936785Z\"}\n{\"id\":\"9d4fc8fb7a4869ac422d9e78a924b49e698e61a562de3af7576dfd18ef81cd98\",\"name\":\"/rpa-redis\",\"status\":\"exited\",\"startedAt\":\"2026-02-20T17:46:12.832921192Z\"}\n{\"id\":\"697330c3cd8966e02d97fa228c5233a0805531bff00275107630e34fadda0b1a\",\"name\":\"/arboris-app\",\"status\":\"running\",\"startedAt\":\"2026-10-18T04:36:51.09648348Z\"}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\diag-docker-database-run-069242fc/client-config",
+        "container",
+        "ls",
+        "--all",
+        "--no-trunc",
+        "--format",
+        "{{.ID}}"
+      ],
+      "exitCode": 0,
+      "stdout": "1e389e0a2f95121ca804c186c20916196e9e46f67a7691c3d184404a7292deb8\nc07d86d32382757d292dd4ebf318e6c44260c817d95f35187663d4d33a26b865\na38b49e64f74ee4fa4f5cf5531e467d74dda2b64dc7e28e78a9bdadd37272519\n8f5e4468c3a7c0100330e012fdca3da843abfcc732361b71308f06d6eeada5c2\n7992fb2bba71e13dc290e305941ded32b9046c1ec4b67a3697863ff79079cf8b\nba11af042db0879902996426522611b267f38eab7d21f05e21036929c415cc24\n9d4fc8fb7a4869ac422d9e78a924b49e698e61a562de3af7576dfd18ef81cd98\n697330c3cd8966e02d97fa228c5233a0805531bff00275107630e34fadda0b1a\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\diag-docker-database-run-069242fc/client-config",
+        "volume",
+        "ls",
+        "--filter",
+        "name=taki-c2a-d4866c79-ad74-45c8-9286-0c3299b24fc9-data",
+        "--format",
+        "{{.Name}}"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\diag-docker-database-run-069242fc/client-config",
+        "image",
+        "ls",
+        "--filter",
+        "reference=taki-c2a-db:069242fc-3c26-4413-a767-0d01d819f95e",
+        "--format",
+        "{{.ID}}"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\diag-docker-database-run-069242fc/client-config",
+        "info",
+        "--format",
+        "{\"id\":{{json .ID}},\"version\":{{json .ServerVersion}},\"time\":{{json .SystemTime}}}"
+      ],
+      "exitCode": 0,
+      "stdout": "{\"id\":\"93e8319e-24b7-4a7d-88f1-60923ad681e0\",\"version\":\"29.0.1\",\"time\":\"2026-10-18T12:58:44.737964307Z\"}\n",
+      "stderr": ""
+    }
+  ],
+  "passed": false
+}

@@ -1,0 +1,37 @@
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { STAGE, TOKEN, DOCKER, docker, run, assertFact } from './command-runner.mjs';
+const evidence=JSON.parse(readFileSync(STAGE+'/persistence.json','utf8'));
+const before=JSON.parse(readFileSync(STAGE+'/original-before-containers.json','utf8'));
+const record={recordedAt:new Date().toISOString(),scope:'Independent read-only database-case cleanup verification',caseId:TOKEN,checks:{},failure:null};
+const options={cleanup:true};
+try {
+  assertFact(createHash('sha256').update(readFileSync(DOCKER)).digest('hex')==='0a4d8fe2ab107ceae44ee5f5fc1e1c155790042b7e3d3163826660da882b389d','DOCKER_PIN');
+  const engine=JSON.parse((await docker(['info','--format','{{json .ID}}'],options)).stdout);
+  assertFact(engine==='93e8319e-24b7-4a7d-88f1-60923ad681e0','ENGINE'); record.engineId=engine;
+  const ids=(await docker(['container','ls','--all','--no-trunc','--format','{{.ID}}'],options)).stdout.trim().split(/\r?\n/).filter(Boolean);
+  const format='{"id":{{json .Id}},"name":{{json .Name}},"status":{{json .State.Status}},"startedAt":{{json .State.StartedAt}},"restartPolicy":{{json .HostConfig.RestartPolicy.Name}}}';
+  const after=ids.length?(await docker(['container','inspect','--format',format,...ids],options)).stdout.trim().split(/\r?\n/).map(line=>JSON.parse(line)):[];
+  const sorted=items=>[...items].sort((a,b)=>a.id.localeCompare(b.id));
+  record.checks.originalContainersUnchanged=JSON.stringify(sorted(before))===JSON.stringify(sorted(after));
+  record.checks.onlyOriginalContainerIds=JSON.stringify([...ids].sort())===JSON.stringify(before.map(item=>item.id).sort());
+  record.originalAfter=after;
+  const owned=evidence.cleanupOriginal; assertFact(owned&&/^[0-9a-f]{64}$/.test(owned.containerId)&&/^[0-9a-f-]{36}$/.test(owned.deploymentId),'OWNED_IDENTITIES');
+  record.owned=owned;
+  record.checks.containerAbsent=(await docker(['container','ls','--all','--no-trunc','--filter','id='+owned.containerId,'--format','{{.ID}}'],options)).stdout.trim()==='';
+  record.checks.containerLabelAbsent=(await docker(['container','ls','--all','--filter','label=taki.c2a.deployment='+owned.deploymentId,'--format','{{.ID}}'],options)).stdout.trim()==='';
+  record.checks.volumeAbsent=(await docker(['volume','ls','--filter','name='+owned.volume,'--format','{{.Name}}'],options)).stdout.trim()==='';
+  record.checks.volumeLabelAbsent=(await docker(['volume','ls','--filter','label=taki.c2a.deployment='+owned.deploymentId,'--format','{{.Name}}'],options)).stdout.trim()==='';
+  record.checks.imageTagAbsent=(await docker(['image','ls','--filter','reference=taki-c2a-db:'+TOKEN,'--format','{{.ID}}'],options)).stdout.trim()==='';
+  const protectedRoot='C:/taki-c2a-db-persistence-'+TOKEN;
+  record.checks.protectedRootAbsent=!existsSync(protectedRoot);
+  const tracked=evidence.ownedProcessIds;
+  assertFact(Array.isArray(tracked)&&tracked.every(id=>Number.isSafeInteger(id)&&id>0),'TRACKED_PIDS');
+  const script="$ownedPrefix='"+protectedRoot.replaceAll('/','\\')+"\\'; $tracked=@("+tracked.join(',')+"); $matches=@(Get-CimInstance Win32_Process | Where-Object { $_.ProcessId -ne $PID -and (($tracked -contains $_.ProcessId) -or ($_.ExecutablePath -and $_.ExecutablePath.StartsWith($ownedPrefix,[System.StringComparison]::OrdinalIgnoreCase))) } | Select-Object ProcessId,ParentProcessId,ExecutablePath); ConvertTo-Json -InputObject $matches -Compress";
+  const processResult=await run(process.env.SystemRoot+'/System32/WindowsPowerShell/v1.0/powershell.exe',['-NoProfile','-NonInteractive','-Command',script],{cleanup:true,timeout:15000});
+  record.remainingTrackedOrProtectedProcesses=JSON.parse(processResult.stdout);
+  record.checks.trackedAndProtectedProcessesAbsent=record.remainingTrackedOrProtectedProcesses.length===0;
+  assertFact(Object.values(record.checks).every(value=>value===true),'READBACK_MISMATCH');
+} catch(error) {record.failure=error.message;process.exitCode=1;}
+writeFileSync(STAGE+'/root-post-run-readback.json',JSON.stringify(record,null,2)+'\n',{flag:'wx'});
+console.log(JSON.stringify({checks:record.checks,failure:record.failure,evidence:STAGE+'/root-post-run-readback.json'}));

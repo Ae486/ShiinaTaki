@@ -1,0 +1,11 @@
+{
+  "command": [
+    "C:/Program Files/nodejs/npm.cmd",
+    "run",
+    "build"
+  ],
+  "cwd": "H:/hindsight/hindsight-clients/typescript",
+  "exitCode": 0,
+  "durationSeconds": 13.359,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-sdk-typescript-build-01.log"
+}

@@ -1,0 +1,11 @@
+
+> @taki/core@0.0.0 typecheck H:\TakiAgent\packages\core
+> tsc --noEmit
+
+src/boot/hindsight-template-boot.ts(16,17): error TS4058: Return type of exported function has or is using name 'AbortSignal' from external module "H:/TakiAgent/node_modules/.pnpm/@types+node@24.13.3/node_modules/@types/node/web-globals/abortcontroller" but cannot be named.
+src/memory/hindsight/template-lifecycle/template-execution-service.ts(21,17): error TS4058: Return type of exported function has or is using name 'AbortSignal' from external module "H:/TakiAgent/node_modules/.pnpm/@types+node@24.13.3/node_modules/@types/node/web-globals/abortcontroller" but cannot be named.
+src/memory/hindsight/template-lifecycle/template-lifecycle-fixtures.ts(43,17): error TS4058: Return type of exported function has or is using name 'AbortSignal' from external module "H:/TakiAgent/node_modules/.pnpm/@types+node@24.13.3/node_modules/@types/node/web-globals/abortcontroller" but cannot be named.
+src/memory/hindsight/template-lifecycle/template-lifecycle-service.ts(21,17): error TS4058: Return type of exported function has or is using name 'AbortSignal' from external module "H:/TakiAgent/node_modules/.pnpm/@types+node@24.13.3/node_modules/@types/node/web-globals/abortcontroller" but cannot be named.
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/core@0.0.0 typecheck: `tsc --noEmit`
+Exit status 2

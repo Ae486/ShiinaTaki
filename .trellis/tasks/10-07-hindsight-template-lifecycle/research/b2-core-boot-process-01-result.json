@@ -1,0 +1,11 @@
+{
+  "command": [
+    "node",
+    ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-core-boot-smoke.mjs",
+    "b2-core-boot-01"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "durationSeconds": 5.474,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-core-boot-process-01.log"
+}

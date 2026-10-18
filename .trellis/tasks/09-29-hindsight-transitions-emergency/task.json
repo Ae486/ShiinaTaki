@@ -21,6 +21,6 @@
   "children": [],
   "parent": "08-09-hindsight-memory-provider",
   "relatedFiles": [],
-  "notes": "",
+  "notes": "2026-10-07: Owner requested Stage4 current-source review and downstream planning/dispatch. W8 identities matched (362 Taki, 367 Native sources; 23 overlay/helper and 28 evidence pins). Bounded review found final healthy-publication lease guard gap. Owner approved W9 correctness/regression work and finite lease extension only if necessary for normal completion, without performance optimization. Interrupted execution recovered with no old live child/test process; replacement implementer is completing full-Core verification after 67 adjacent tests and root types/lint pass. Read research/leader-now.md, stage4-w9-lease-plan-2026-10-07.md and w9-recovery-2026-10-07.md. Stage5 implementation awaits W9 independent acceptance; no original-data/model rerun, commit/push/finish/archive.\n2026-10-07 W9 accepted: independent check PASS; final lease guard and regression complete, lease unchanged. Independent20/20, adjacent67/67, types/lint pass. First fullCore3791pass/4test timeouts/1skip retained; exact affected file7/7 after only per-case timeout alignment, accepted composed gate. Stage5 configuration evidence/permission contract research active; B7 remains planning. No commit/archive.",
   "meta": {}
 }

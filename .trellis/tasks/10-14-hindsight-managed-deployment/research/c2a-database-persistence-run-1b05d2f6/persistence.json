@@ -1,0 +1,1177 @@
+{
+  "version": 1,
+  "caseId": "1b05d2f6-494c-4a6d-a601-1e807eca1486",
+  "scope": "admitted-database-persistence",
+  "deploymentReady": false,
+  "evidenceBoundary": "Task database only; Native API/provider, inner ACK loss, daemon restart and C2b remain untested",
+  "inputs": {
+    "launcherSha256": "c39fd6e465f922cefd198abe1e6d531d731359f8969b183ae9b5b4d2cf06ee27",
+    "probeSha256": "4bd830c60a4ddecc4e8e7018d2b19eb08093c81fc5d7f3ee0a8ff380178e4271",
+    "childSha256": "9d65b8875e5d798a024dff9b4a182d6cff7bf4b62646954e38cd0c2e12ce3819",
+    "sourceManifestSha256": "f27379be3b4b5e61e1b2821c2eda2d87bf54e5c2983b034bdb637ee789961ae2"
+  },
+  "installation": {
+    "root": "C:\\taki-c2a-db-persistence-1b05d2f6-494c-4a6d-a601-1e807eca1486",
+    "manifestSha256": "cdc4c08edab0eb68afd2ddc48c0d946ac410a69c75c011c6abfbea3859c66954",
+    "adapterSha256": "58a7b15f048522b9dbac140c9f99539d55bb3f8d28a2fb238f5455745d82dace",
+    "imageId": "sha256:cc83b52be0970d6dc4929786d59ca99fe52a86540c55934797af2f3afba3b8bf"
+  },
+  "localFiles": {
+    "files": 827,
+    "bytes": 103184772,
+    "hits": 0
+  },
+  "engineClock": {
+    "first": "2026-10-18T12:35:23.857459982Z",
+    "last": "2026-10-18T12:35:23.857459982Z"
+  },
+  "lastRegistry": {
+    "deploymentId": "82e5b652-101d-435c-b773-d15f34a28b11",
+    "operationId": "82e5b652-101d-435c-b773-d15f34a28b11",
+    "containerId": "e4e08e884ab0bbb78ec39783f4db584409cef2fc12fdd2db7b0ff3cc40e616cb",
+    "volume": "taki-c2a-82e5b652-101d-435c-b773-d15f34a28b11-data",
+    "configurationDigest": "d78c31a24edbd333d549acc2fa72f3bb35a6297849a7986a09df261a4afd52cf",
+    "steps": {
+      "volume": "verified",
+      "container": "verified",
+      "start": "verified"
+    },
+    "attempts": [
+      {
+        "action": "create",
+        "phase": "admitted",
+        "requestId": "b24eaec0-564d-42d0-8a61-4fc27834bc84",
+        "startupId": null,
+        "runId": "82e5b652-101d-435c-b773-d15f34a28b11",
+        "checkpointId": null,
+        "startupAuthorizationId": null,
+        "custodySnapshotId": "ce14c228-e740-44e6-a822-fafb19c2e86f",
+        "coreAttemptId": "36c70794-73b6-435b-a6e3-cb88baa424ba",
+        "hostAttemptId": "abe76241-4d79-45ba-858e-726b1da4edc7",
+        "effectId": "f349c564-0cbb-49b8-8a2b-36015bea5e12"
+      },
+      {
+        "action": "start",
+        "phase": "admitted",
+        "requestId": "24b57dd4-359a-45d7-aedf-02545af38598",
+        "startupId": null,
+        "runId": "82e5b652-101d-435c-b773-d15f34a28b11",
+        "checkpointId": null,
+        "startupAuthorizationId": null,
+        "custodySnapshotId": "ce14c228-e740-44e6-a822-fafb19c2e86f",
+        "coreAttemptId": "36c70794-73b6-435b-a6e3-cb88baa424ba",
+        "hostAttemptId": "10305d56-91b5-42d5-a812-14c4ab2fafde",
+        "effectId": "a68b3a32-1b9c-47eb-87a3-f671461da733"
+      },
+      {
+        "action": "inject",
+        "phase": "observed",
+        "requestId": "0f40866c-b7b9-4086-baf3-d0617fafcf08",
+        "startupId": "8f2b3d9b-0f7f-4ce9-8d0a-0855875d837b",
+        "runId": "82e5b652-101d-435c-b773-d15f34a28b11",
+        "checkpointId": "9dec0191-64e6-4d97-a216-40c29679de83",
+        "startupAuthorizationId": "8acc1c48-e185-4f01-a3a0-e589192527c0",
+        "custodySnapshotId": "7043edee-fb66-426b-95f5-b9fd3ceeac7a",
+        "coreAttemptId": "36c70794-73b6-435b-a6e3-cb88baa424ba",
+        "hostAttemptId": "62587f36-8306-4d19-864e-47c4e878378c",
+        "effectId": "b8c0ee67-2236-477a-998b-5b87edef8632"
+      }
+    ]
+  },
+  "beforeInjection": {
+    "requestId": "0f40866c-b7b9-4086-baf3-d0617fafcf08",
+    "control": {
+      "runId": "82e5b652-101d-435c-b773-d15f34a28b11",
+      "coreAttemptId": "36c70794-73b6-435b-a6e3-cb88baa424ba",
+      "effectId": "b8c0ee67-2236-477a-998b-5b87edef8632",
+      "operationId": "82e5b652-101d-435c-b773-d15f34a28b11",
+      "attemptId": "62587f36-8306-4d19-864e-47c4e878378c",
+      "targetHostId": "22222222-2222-4222-8222-222222222222",
+      "connectionGeneration": 1,
+      "catalogGeneration": 1,
+      "policyGeneration": 3,
+      "governanceProjection": {
+        "registryRevision": 3,
+        "descriptorRevision": 1,
+        "classifierRevision": 1,
+        "cells": [
+          {
+            "key": "hindsight-deployment:create",
+            "posture": "auto"
+          },
+          {
+            "key": "hindsight-deployment:inject",
+            "posture": "auto"
+          },
+          {
+            "key": "hindsight-deployment:start",
+            "posture": "auto"
+          }
+        ],
+        "digest": "2f26869100d65ffd11d865b2e8060be020032232d38f6cd42aa167c52150c078"
+      },
+      "approvalGeneration": 1,
+      "capabilityId": "hindsight-deployment",
+      "inputDigest": "58b1093765987ae220166cbf2266b4d9990623084eccc36995a03ace2840b18f",
+      "idempotencyKey": "8ef2bb5a-f180-4f93-8389-4bec9654e397",
+      "dispatchedAt": "2026-10-18T12:35:41.233Z",
+      "deadlineAt": "2026-10-18T12:37:11.233Z"
+    },
+    "startupId": "8f2b3d9b-0f7f-4ce9-8d0a-0855875d837b",
+    "containerId": "e4e08e884ab0bbb78ec39783f4db584409cef2fc12fdd2db7b0ff3cc40e616cb",
+    "native": {
+      "version": 1,
+      "state": "waiting-for-credentials",
+      "startupId": "8f2b3d9b-0f7f-4ce9-8d0a-0855875d837b",
+      "configurationDigest": "d78c31a24edbd333d549acc2fa72f3bb35a6297849a7986a09df261a4afd52cf",
+      "deploymentReady": false
+    },
+    "process": {
+      "version": 1,
+      "case_id": "1b05d2f6-494c-4a6d-a601-1e807eca1486",
+      "runtime": {
+        "tmpfs": true,
+        "sockets": {
+          "control.sock": {
+            "uid": 1000,
+            "gid": 1000,
+            "mode": 384
+          },
+          "bootstrap.sock": {
+            "uid": 1000,
+            "gid": 1000,
+            "mode": 384
+          }
+        }
+      },
+      "processes": {
+        "all": [
+          {
+            "pid": 1,
+            "ppid": 0,
+            "pgid": 1,
+            "session": 1,
+            "start_ticks": 2714472,
+            "state": "S",
+            "executable": "/usr/local/bin/python3.11",
+            "argv": [
+              "/app/api/.venv/bin/python",
+              "-I",
+              "-B",
+              "-m",
+              "managed_bootstrap.owner"
+            ]
+          },
+          {
+            "pid": 30,
+            "ppid": 0,
+            "pgid": 30,
+            "session": 30,
+            "start_ticks": 2715087,
+            "state": "R",
+            "executable": "/usr/local/bin/python3.11",
+            "argv": [
+              "/app/api/.venv/bin/python",
+              "-I",
+              "-B",
+              "-"
+            ]
+          }
+        ],
+        "wrappers": [],
+        "postgres": [],
+        "argv_hits": 0
+      },
+      "marker": null,
+      "current": null,
+      "manifest": null,
+      "data_exists": false,
+      "intent_exists": false,
+      "last_stop_raw": null,
+      "last_stop_sha256": null
+    },
+    "captureToReleaseMs": 645
+  },
+  "lastStatus": {
+    "version": 1,
+    "state": "running",
+    "deploymentId": "82e5b652-101d-435c-b773-d15f34a28b11",
+    "operationId": "82e5b652-101d-435c-b773-d15f34a28b11",
+    "configurationDigest": "d78c31a24edbd333d549acc2fa72f3bb35a6297849a7986a09df261a4afd52cf",
+    "containerId": "e4e08e884ab0bbb78ec39783f4db584409cef2fc12fdd2db7b0ff3cc40e616cb",
+    "startupId": "8f2b3d9b-0f7f-4ce9-8d0a-0855875d837b",
+    "attemptId": "62587f36-8306-4d19-864e-47c4e878378c",
+    "deploymentReady": false
+  },
+  "helperCandidates": [
+    {
+      "pid": 72212,
+      "parentPid": 67752,
+      "createdAt": "2026-10-18T12:35:28.6661650Z",
+      "expectedExecutable": true
+    }
+  ],
+  "helperArgvMatched": true,
+  "initialRun": {
+    "runId": "82e5b652-101d-435c-b773-d15f34a28b11",
+    "state": "completed",
+    "outcome": "completed",
+    "activeAttemptId": "36c70794-73b6-435b-a6e3-cb88baa424ba",
+    "idempotencyKey": "hindsight-deployment:start:v1:1b05d2f6-494c-4a6d-a601-1e807eca1486",
+    "triggerRequestId": "1b05d2f6-494c-4a6d-a601-1e807eca1486",
+    "provenance": {
+      "provider": "hindsight-deployment-v1",
+      "triggerRequestId": "1b05d2f6-494c-4a6d-a601-1e807eca1486",
+      "sourceRef": "hindsight-config:d78c31a24edbd333d549acc2fa72f3bb35a6297849a7986a09df261a4afd52cf"
+    },
+    "attempts": [
+      {
+        "attemptId": "36c70794-73b6-435b-a6e3-cb88baa424ba",
+        "state": "completed",
+        "outcome": "completed"
+      }
+    ]
+  },
+  "latestDatabaseRead": {
+    "expectedStartupId": "8f2b3d9b-0f7f-4ce9-8d0a-0855875d837b",
+    "expectedGeneration": 1,
+    "recordedAt": "2026-10-18T12:35:49.233Z",
+    "facts": {
+      "version": 1,
+      "case_id": "1b05d2f6-494c-4a6d-a601-1e807eca1486",
+      "runtime": {
+        "tmpfs": true,
+        "sockets": {
+          "control.sock": {
+            "uid": 1000,
+            "gid": 1000,
+            "mode": 384
+          },
+          "bootstrap.sock": {
+            "uid": 1000,
+            "gid": 1000,
+            "mode": 384
+          }
+        }
+      },
+      "processes": {
+        "all": [
+          {
+            "pid": 1,
+            "ppid": 0,
+            "pgid": 1,
+            "session": 1,
+            "start_ticks": 2714472,
+            "state": "S",
+            "executable": "/usr/local/bin/python3.11",
+            "argv": [
+              "/app/api/.venv/bin/python",
+              "-I",
+              "-B",
+              "-m",
+              "managed_bootstrap.owner"
+            ]
+          },
+          {
+            "pid": 65,
+            "ppid": 1,
+            "pgid": 65,
+            "session": 65,
+            "start_ticks": 2715585,
+            "state": "S",
+            "executable": "/usr/local/bin/python3.11",
+            "argv": [
+              "/app/api/.venv/bin/python",
+              "-I",
+              "-B",
+              "/app/api/.venv/lib/python3.11/site-packages/managed_bootstrap/fake_child.py"
+            ]
+          },
+          {
+            "pid": 89,
+            "ppid": 65,
+            "pgid": 89,
+            "session": 89,
+            "start_ticks": 2715751,
+            "state": "Z",
+            "executable": null,
+            "argv": [
+              ""
+            ]
+          },
+          {
+            "pid": 90,
+            "ppid": 65,
+            "pgid": 90,
+            "session": 90,
+            "start_ticks": 2715752,
+            "state": "Z",
+            "executable": null,
+            "argv": [
+              ""
+            ]
+          },
+          {
+            "pid": 103,
+            "ppid": 0,
+            "pgid": 103,
+            "session": 103,
+            "start_ticks": 2715776,
+            "state": "R",
+            "executable": "/usr/local/bin/python3.11",
+            "argv": [
+              "/app/api/.venv/bin/python",
+              "-I",
+              "-B",
+              "-"
+            ]
+          },
+          {
+            "pid": 110,
+            "ppid": 65,
+            "pgid": 65,
+            "session": 65,
+            "start_ticks": 2715780,
+            "state": "S",
+            "executable": "/home/hindsight/.pg0/.pg0/installation/18.1.0/bin/pg_ctl",
+            "argv": [
+              "/home/hindsight/.pg0/.pg0/installation/18.1.0/bin/pg_ctl",
+              "stop",
+              "-D",
+              "/home/hindsight/.pg0/c2a-db/data",
+              "-m",
+              "fast",
+              "-w",
+              "-t",
+              "15"
+            ]
+          }
+        ],
+        "wrappers": [
+          {
+            "pid": 65,
+            "ppid": 1,
+            "pgid": 65,
+            "session": 65,
+            "start_ticks": 2715585,
+            "state": "S",
+            "executable": "/usr/local/bin/python3.11",
+            "argv": [
+              "/app/api/.venv/bin/python",
+              "-I",
+              "-B",
+              "/app/api/.venv/lib/python3.11/site-packages/managed_bootstrap/fake_child.py"
+            ]
+          }
+        ],
+        "postgres": [],
+        "argv_hits": 0
+      },
+      "marker": {
+        "pid": 65,
+        "startupId": "8f2b3d9b-0f7f-4ce9-8d0a-0855875d837b",
+        "state": "running"
+      },
+      "current": null,
+      "manifest": null,
+      "data_exists": true,
+      "intent_exists": true,
+      "last_stop_raw": null,
+      "last_stop_sha256": null
+    }
+  },
+  "casePassed": false,
+  "failureStage": "first-database-readiness",
+  "failureCode": "UNEXPECTED_FAILURE",
+  "ownedProcessIds": [
+    75304,
+    67752
+  ],
+  "pendingImageTag": null,
+  "pendingRegistry": "C:\\taki-c2a-db-persistence-1b05d2f6-494c-4a6d-a601-1e807eca1486\\state\\deployment.json",
+  "reapedHelpers": [
+    {
+      "pid": 72212,
+      "parentPid": 67752,
+      "createdAt": "2026-10-18T12:35:28.6661650Z",
+      "executable": "C:\\taki-c2a-db-persistence-1b05d2f6-494c-4a6d-a601-1e807eca1486\\node.exe",
+      "fixedArgvVerified": true
+    }
+  ],
+  "cleanupOriginal": {
+    "deploymentId": "82e5b652-101d-435c-b773-d15f34a28b11",
+    "names": {
+      "container": "taki-c2a-82e5b652-101d-435c-b773-d15f34a28b11",
+      "volume": "taki-c2a-82e5b652-101d-435c-b773-d15f34a28b11-data"
+    },
+    "containerId": "e4e08e884ab0bbb78ec39783f4db584409cef2fc12fdd2db7b0ff3cc40e616cb",
+    "volume": "taki-c2a-82e5b652-101d-435c-b773-d15f34a28b11-data"
+  },
+  "failureStop": {
+    "outcome": "retained",
+    "path": "G:\\TakiAgent-c2a-database\\persistence-1b05d2f6-494c-4a6d-a601-1e807eca1486\\failure-stop.json",
+    "bytes": 31832,
+    "sha256": "c8bd0e59d6c269d10566fd2fcf4add54e7dda331d10bd6bde5581099b0438871",
+    "result": {
+      "version": 1,
+      "case_id": "1b05d2f6-494c-4a6d-a601-1e807eca1486",
+      "scope": "admitted-database-fixture",
+      "deploymentReady": false,
+      "first_failure": {
+        "stage": "start_and_sql",
+        "type": "PermissionError",
+        "detail": "operation_failed"
+      },
+      "commands": [
+        {
+          "argv": [
+            "/app/api/.venv/lib/python3.11/site-packages/pg0/bin/pg0",
+            "--version"
+          ],
+          "log": "/home/hindsight/.pg0/tmp/8f2b3d9b-0f7f-4ce9-8d0a-0855875d837b/cli-version.log",
+          "elapsed_seconds": 0.021,
+          "exit_code": 0,
+          "output": "pg0 0.15.0\n"
+        },
+        {
+          "argv": [
+            "/app/api/.venv/lib/python3.11/site-packages/pg0/bin/pg0",
+            "start",
+            "--help"
+          ],
+          "log": "/home/hindsight/.pg0/tmp/8f2b3d9b-0f7f-4ce9-8d0a-0855875d837b/cli-help.log",
+          "elapsed_seconds": 0.021,
+          "exit_code": 0,
+          "output": "Start PostgreSQL server\n\nUsage: pg0 start [OPTIONS]\n\nOptions:\n      --name <NAME>          Instance name (allows running multiple instances) [default: default]\n  -v, --verbose              Enable verbose logging\n  -p, --port <PORT>          Port to listen on (auto-allocates if not specified and default port is in use)\n  -V, --version <VERSION>    PostgreSQL version (must match bundled version) [default: 18.1.0]\n  -d, --data-dir <DATA_DIR>  Data directory (defaults to ~/.pg0/instances/<name>/data)\n  -u, --username <USERNAME>  Username for the database [default: postgres]\n  -P, --password <PASSWORD>  Password for the database [default: postgres]\n  -n, --database <DATABASE>  Database name to create [default: postgres]\n  -c, --config <KEY=VALUE>   PostgreSQL configuration options (can be used multiple times) Example: -c shared_buffers=512MB -c work_mem=128MB\n  -h, --help                 Print help\n"
+        },
+        {
+          "argv": [
+            "/home/hindsight/.pg0/.pg0/installation/18.1.0/bin/postgres",
+            "--version"
+          ],
+          "log": "/home/hindsight/.pg0/tmp/8f2b3d9b-0f7f-4ce9-8d0a-0855875d837b/postgres-version.log",
+          "elapsed_seconds": 0.021,
+          "exit_code": 0,
+          "output": "postgres (PostgreSQL) 18.1\n"
+        },
+        {
+          "argv": [
+            "/home/hindsight/.pg0/.pg0/installation/18.1.0/bin/initdb",
+            "--version"
+          ],
+          "log": "/home/hindsight/.pg0/tmp/8f2b3d9b-0f7f-4ce9-8d0a-0855875d837b/initdb-version.log",
+          "elapsed_seconds": 0.022,
+          "exit_code": 0,
+          "output": "initdb (PostgreSQL) 18.1\n"
+        },
+        {
+          "argv": [
+            "/home/hindsight/.pg0/.pg0/installation/18.1.0/bin/pg_ctl",
+            "--version"
+          ],
+          "log": "/home/hindsight/.pg0/tmp/8f2b3d9b-0f7f-4ce9-8d0a-0855875d837b/pg_ctl-version.log",
+          "elapsed_seconds": 0.021,
+          "exit_code": 0,
+          "output": "pg_ctl (PostgreSQL) 18.1\n"
+        },
+        {
+          "argv": [
+            "/home/hindsight/.pg0/.pg0/installation/18.1.0/bin/pg_controldata",
+            "--version"
+          ],
+          "log": "/home/hindsight/.pg0/tmp/8f2b3d9b-0f7f-4ce9-8d0a-0855875d837b/pg_controldata-version.log",
+          "elapsed_seconds": 0.021,
+          "exit_code": 0,
+          "output": "pg_controldata (PostgreSQL) 18.1\n"
+        },
+        {
+          "argv": [
+            "/home/hindsight/.pg0/.pg0/installation/18.1.0/bin/pg_ctl",
+            "stop",
+            "-D",
+            "/home/hindsight/.pg0/c2a-db/data",
+            "-m",
+            "fast",
+            "-w",
+            "-t",
+            "15"
+          ],
+          "log": "/home/hindsight/.pg0/tmp/8f2b3d9b-0f7f-4ce9-8d0a-0855875d837b/pg_ctl-stop.log",
+          "elapsed_seconds": 0.122,
+          "exit_code": 0,
+          "output": "waiting for server to shut down.... done\nserver stopped\n"
+        },
+        {
+          "argv": [
+            "/home/hindsight/.pg0/.pg0/installation/18.1.0/bin/pg_controldata",
+            "/home/hindsight/.pg0/c2a-db/data"
+          ],
+          "log": "/home/hindsight/.pg0/tmp/8f2b3d9b-0f7f-4ce9-8d0a-0855875d837b/pg_controldata.log",
+          "elapsed_seconds": 0.021,
+          "exit_code": 0,
+          "output": "pg_control version number:            1800\nCatalog version number:               202506291\nDatabase system identifier:           7697985627284971602\nDatabase cluster state:               shut down\npg_control last modified:             Sun Oct 18 12:35:49 2026\nLatest checkpoint location:           0/16ECFE8\nLatest checkpoint's REDO location:    0/16ECFE8\nLatest checkpoint's REDO WAL file:    000000010000000000000001\nLatest checkpoint's TimeLineID:       1\nLatest checkpoint's PrevTimeLineID:   1\nLatest checkpoint's full_page_writes: on\nLatest checkpoint's NextXID:          0:752\nLatest checkpoint's NextOID:          12783\nLatest checkpoint's NextMultiXactId:  1\nLatest checkpoint's NextMultiOffset:  0\nLatest checkpoint's oldestXID:        744\nLatest checkpoint's oldestXID's DB:   1\nLatest checkpoint's oldestActiveXID:  0\nLatest checkpoint's oldestMultiXid:   1\nLatest checkpoint's oldestMulti's DB: 1\nLatest checkpoint's oldestCommitTsXid:0\nLatest checkpoint's newestCommitTsXid:0\nTime of latest checkpoint:            Sun Oct 18 12:35:49 2026\nFake LSN counter for unlogged rels:   0/3E8\nMinimum recovery ending location:     0/0\nMin recovery ending loc's timeline:   0\nBackup start location:                0/0\nBackup end location:                  0/0\nEnd-of-backup record required:        no\nwal_level setting:                    replica\nwal_log_hints setting:                off\nmax_connections setting:              8\nmax_worker_processes setting:         0\nmax_wal_senders setting:              10\nmax_prepared_xacts setting:           0\nmax_locks_per_xact setting:           64\ntrack_commit_timestamp setting:       off\nMaximum data alignment:               8\nDatabase block size:                  8192\nBlocks per segment of large relation: 131072\nWAL block size:                       8192\nBytes per WAL segment:                16777216\nMaximum length of identifiers:        64\nMaximum columns in an index:          32\nMaximum size of a TOAST chunk:        1996\nSize of a large-object chunk:         2048\nDate/time type storage:               64-bit integers\nFloat8 argument passing:              by value\nData page checksum version:           1\nDefault char data signedness:         signed\nMock authentication nonce:            4c257650859dc0db1e8f26802b7761907926f0f4213b603951a537cdd45903d4\n"
+        }
+      ],
+      "raw_tools": {
+        "postgres": {
+          "path": "/home/hindsight/.pg0/.pg0/installation/18.1.0/bin/postgres",
+          "sha256": "c51a24681dd5002766ea2f2081340d894762144a75148f89b3d2b4f98995f46d",
+          "bytes": 11223384,
+          "uid": 1000,
+          "gid": 1000,
+          "mode": "0o755",
+          "readable_executable": true,
+          "parents_traversable": true
+        },
+        "initdb": {
+          "path": "/home/hindsight/.pg0/.pg0/installation/18.1.0/bin/initdb",
+          "sha256": "3ca6d4b1cecbd837ef33320e37ff2ecd1abec29aa052bf04b71991f226d34549",
+          "bytes": 210736,
+          "uid": 1000,
+          "gid": 1000,
+          "mode": "0o755",
+          "readable_executable": true,
+          "parents_traversable": true
+        },
+        "pg_ctl": {
+          "path": "/home/hindsight/.pg0/.pg0/installation/18.1.0/bin/pg_ctl",
+          "sha256": "cda21f47857542878b0c687ece522ef96cafeacd3cc3f1bd2ceebd25d71cc76a",
+          "bytes": 85208,
+          "uid": 1000,
+          "gid": 1000,
+          "mode": "0o755",
+          "readable_executable": true,
+          "parents_traversable": true
+        },
+        "pg_controldata": {
+          "path": "/home/hindsight/.pg0/.pg0/installation/18.1.0/bin/pg_controldata",
+          "sha256": "72d19abe534d1823a02cb2418d57b1b2f815bcc031cbe9c3946d01b2b8f6c499",
+          "bytes": 69816,
+          "uid": 1000,
+          "gid": 1000,
+          "mode": "0o755",
+          "readable_executable": true,
+          "parents_traversable": true
+        }
+      },
+      "reaped": [
+        {
+          "pid": 89,
+          "start_ticks": 2715751,
+          "wait_status": 0,
+          "exit_code": 0
+        },
+        {
+          "pid": 90,
+          "start_ticks": 2715752,
+          "wait_status": 0,
+          "exit_code": 0
+        }
+      ],
+      "signals": [],
+      "storage_peak_bytes": 114079401,
+      "start_dispatches": 1,
+      "startup_id": "8f2b3d9b-0f7f-4ce9-8d0a-0855875d837b",
+      "wrapper_live": {
+        "pid": 65,
+        "state": "R",
+        "ppid": 1,
+        "pgid": 65,
+        "session": 65,
+        "start_ticks": 2715585,
+        "stat": "65 (python) R 1 65 65 0 -1 4194560 3608 0 0 0 7 4 0 0 20 0 1 0 2715585 30498816 5856 18446744073709551615 94309362294784 94309362295125 140733396355728 0 0 0 0 16781312 24578 0 0 0 17 1 0 0 0 0 0 94309362306480 94309362307096 94309787578368 140733396360165 140733396360273 140733396360273 140733396361182 0",
+        "status": "Name:\tpython\nUmask:\t0022\nState:\tR (running)\nTgid:\t65\nNgid:\t0\nPid:\t65\nPPid:\t1\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t64\nGroups:\t1000 \nNStgid:\t65\nNSpid:\t65\nNSpgid:\t65\nNSsid:\t65\nKthread:\t0\nVmPeak:\t   29784 kB\nVmSize:\t   29784 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t   23424 kB\nVmRSS:\t   23424 kB\nRssAnon:\t   13056 kB\nRssFile:\t   10368 kB\nRssShmem:\t       0 kB\nVmData:\t   13736 kB\nVmStk:\t     132 kB\nVmExe:\t       4 kB\nVmLib:\t    8908 kB\nVmPTE:\t      96 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t2/31733\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000001001000\nSigCgt:\t0000000000006002\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t00000000a80425fb\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t2\nSeccomp_filters:\t2\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tf\nCpus_allowed_list:\t0-3\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t21\nnonvoluntary_ctxt_switches:\t1\n",
+        "uid": 1000,
+        "argv": [
+          "/app/api/.venv/bin/python",
+          "-I",
+          "-B",
+          "/app/api/.venv/lib/python3.11/site-packages/managed_bootstrap/fake_child.py"
+        ],
+        "executable": "/usr/local/bin/python3.11"
+      },
+      "generation": 1,
+      "baseline_processes": [
+        {
+          "pid": 1,
+          "state": "S",
+          "ppid": 0,
+          "pgid": 1,
+          "session": 1,
+          "start_ticks": 2714472,
+          "stat": "1 (python) S 0 1 1 0 -1 4194560 3652 0 1 0 16 8 0 0 20 0 4 0 2714472 396546048 3904 18446744073709551615 95880830902272 95880830902613 140733764287184 0 0 0 0 16781312 16386 0 0 0 17 2 0 0 0 0 0 95880830913968 95880830914584 95881002156032 140733764291781 140733764291840 140733764291840 140733764292574 0",
+          "status": "Name:\tpython\nUmask:\t0022\nState:\tS (sleeping)\nTgid:\t1\nNgid:\t0\nPid:\t1\nPPid:\t0\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t64\nGroups:\t1000 \nNStgid:\t1\nNSpid:\t1\nNSpgid:\t1\nNSsid:\t1\nKthread:\t0\nVmPeak:\t  452804 kB\nVmSize:\t  387252 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t   15616 kB\nVmRSS:\t   15616 kB\nRssAnon:\t    9344 kB\nRssFile:\t    6272 kB\nRssShmem:\t       0 kB\nVmData:\t   51792 kB\nVmStk:\t     132 kB\nVmExe:\t       4 kB\nVmLib:\t    4316 kB\nVmPTE:\t     124 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t4\nSigQ:\t2/31733\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000001001000\nSigCgt:\t0000000100004002\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t00000000a80425fb\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t2\nSeccomp_filters:\t2\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tf\nCpus_allowed_list:\t0-3\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t292\nnonvoluntary_ctxt_switches:\t11\n",
+          "uid": 1000,
+          "argv": [
+            "/app/api/.venv/bin/python",
+            "-I",
+            "-B",
+            "-m",
+            "managed_bootstrap.owner"
+          ],
+          "executable": "/usr/local/bin/python3.11"
+        },
+        {
+          "pid": 65,
+          "state": "R",
+          "ppid": 1,
+          "pgid": 65,
+          "session": 65,
+          "start_ticks": 2715585,
+          "stat": "65 (python) R 1 65 65 0 -1 4194560 3608 0 0 0 8 4 0 0 20 0 1 0 2715585 30498816 5856 18446744073709551615 94309362294784 94309362295125 140733396355728 0 0 0 0 16781312 24578 0 0 0 17 1 0 0 0 0 0 94309362306480 94309362307096 94309787578368 140733396360165 140733396360273 140733396360273 140733396361182 0",
+          "status": "Name:\tpython\nUmask:\t0022\nState:\tR (running)\nTgid:\t65\nNgid:\t0\nPid:\t65\nPPid:\t1\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t64\nGroups:\t1000 \nNStgid:\t65\nNSpid:\t65\nNSpgid:\t65\nNSsid:\t65\nKthread:\t0\nVmPeak:\t   29784 kB\nVmSize:\t   29784 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t   23424 kB\nVmRSS:\t   23424 kB\nRssAnon:\t   13056 kB\nRssFile:\t   10368 kB\nRssShmem:\t       0 kB\nVmData:\t   13736 kB\nVmStk:\t     132 kB\nVmExe:\t       4 kB\nVmLib:\t    8908 kB\nVmPTE:\t      96 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t2/31733\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000001001000\nSigCgt:\t0000000000006002\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t00000000a80425fb\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t2\nSeccomp_filters:\t2\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tf\nCpus_allowed_list:\t0-3\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t26\nnonvoluntary_ctxt_switches:\t1\n",
+          "uid": 1000,
+          "argv": [
+            "/app/api/.venv/bin/python",
+            "-I",
+            "-B",
+            "/app/api/.venv/lib/python3.11/site-packages/managed_bootstrap/fake_child.py"
+          ],
+          "executable": "/usr/local/bin/python3.11"
+        }
+      ],
+      "storage_entries": 2518,
+      "pg_log_bytes": 1174,
+      "cli_binary": {
+        "path": "/app/api/.venv/lib/python3.11/site-packages/pg0/bin/pg0",
+        "sha256": "20c65441992d3f1d433c7d5d33a14aba0030c77913beed9c9571e3816ea7f8fb",
+        "bytes": 34205672,
+        "uid": 1000,
+        "gid": 1000,
+        "mode": "0o755",
+        "readable_executable": true,
+        "parents_traversable": true
+      },
+      "start_process_live": {
+        "pid": 68,
+        "state": "R",
+        "ppid": 65,
+        "pgid": 68,
+        "session": 68,
+        "start_ticks": 2715609,
+        "stat": "68 (pg0) R 65 68 68 0 -1 4194560 11 0 0 0 0 0 0 0 20 0 1 0 2715609 34607104 32 18446744073709551615 109225297185152 109225301729040 140735880752352 0 0 0 0 0 0 0 0 0 17 1 0 0 0 0 0 109225301881800 109225301890472 109225677156352 140735880756244 140735880757010 140735880757010 140735880757184 0",
+        "status": "Name:\tpg0\nUmask:\t0022\nState:\tR (running)\nTgid:\t68\nNgid:\t0\nPid:\t68\nPPid:\t65\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t64\nGroups:\t1000 \nNStgid:\t68\nNSpid:\t68\nNSpgid:\t68\nNSsid:\t68\nKthread:\t0\nVmPeak:\t   33796 kB\nVmSize:\t   33796 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t     128 kB\nVmRSS:\t     128 kB\nRssAnon:\t       0 kB\nRssFile:\t     128 kB\nRssShmem:\t       0 kB\nVmData:\t     176 kB\nVmStk:\t     132 kB\nVmExe:\t    4440 kB\nVmLib:\t     168 kB\nVmPTE:\t      36 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t2/31733\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000000000000\nSigCgt:\t0000000000000000\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t00000000a80425fb\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t2\nSeccomp_filters:\t2\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tf\nCpus_allowed_list:\t0-3\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t0\nnonvoluntary_ctxt_switches:\t0\n",
+        "uid": 1000,
+        "argv": [
+          "/app/api/.venv/lib/python3.11/site-packages/pg0/bin/pg0",
+          "start",
+          "--name",
+          "c2a-db",
+          "--version",
+          "18.1.0",
+          "--port",
+          "55432",
+          "--username",
+          "postgres",
+          "--password",
+          "c2a-probe-public-password",
+          "--database",
+          "postgres",
+          "--data-dir",
+          "/home/hindsight/.pg0/c2a-db/data",
+          "-c",
+          "listen_addresses=127.0.0.1",
+          "-c",
+          "unix_socket_directories=/home/hindsight/.pg0/socket",
+          "-c",
+          "shared_buffers=16MB",
+          "-c",
+          "maintenance_work_mem=16MB",
+          "-c",
+          "work_mem=1MB",
+          "-c",
+          "effective_cache_size=64MB",
+          "-c",
+          "max_connections=8",
+          "-c",
+          "max_worker_processes=0",
+          "-c",
+          "max_parallel_workers=0",
+          "-c",
+          "max_parallel_maintenance_workers=0",
+          "-c",
+          "min_wal_size=32MB",
+          "-c",
+          "max_wal_size=64MB",
+          "-c",
+          "fsync=on",
+          "-c",
+          "synchronous_commit=on",
+          "-c",
+          "full_page_writes=on",
+          "-c",
+          "logging_collector=on",
+          "-c",
+          "log_directory=/home/hindsight/.pg0/log",
+          "-c",
+          "log_filename=postgresql.log",
+          "-c",
+          "log_rotation_size=1MB",
+          "-c",
+          "log_statement=none"
+        ],
+        "executable": "/app/api/.venv/lib/python3.11/site-packages/pg0/bin/pg0"
+      },
+      "cli_live": {
+        "pid": 68,
+        "state": "R",
+        "ppid": 65,
+        "pgid": 68,
+        "session": 68,
+        "start_ticks": 2715609,
+        "stat": "68 (pg0) R 65 68 68 0 -1 4194560 11 0 0 0 0 0 0 0 20 0 1 0 2715609 34607104 32 18446744073709551615 109225297185152 109225301729040 140735880752352 0 0 0 0 0 0 0 0 0 17 1 0 0 0 0 0 109225301881800 109225301890472 109225677156352 140735880756244 140735880757010 140735880757010 140735880757184 0",
+        "status": "Name:\tpg0\nUmask:\t0022\nState:\tR (running)\nTgid:\t68\nNgid:\t0\nPid:\t68\nPPid:\t65\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t64\nGroups:\t1000 \nNStgid:\t68\nNSpid:\t68\nNSpgid:\t68\nNSsid:\t68\nKthread:\t0\nVmPeak:\t   33796 kB\nVmSize:\t   33796 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t     128 kB\nVmRSS:\t     128 kB\nRssAnon:\t       0 kB\nRssFile:\t     128 kB\nRssShmem:\t       0 kB\nVmData:\t     176 kB\nVmStk:\t     132 kB\nVmExe:\t    4440 kB\nVmLib:\t     168 kB\nVmPTE:\t      36 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t2/31733\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000000000000\nSigCgt:\t0000000000000000\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t00000000a80425fb\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t2\nSeccomp_filters:\t2\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tf\nCpus_allowed_list:\t0-3\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t0\nnonvoluntary_ctxt_switches:\t0\n",
+        "uid": 1000,
+        "argv": [
+          "/app/api/.venv/lib/python3.11/site-packages/pg0/bin/pg0",
+          "start",
+          "--name",
+          "c2a-db",
+          "--version",
+          "18.1.0",
+          "--port",
+          "55432",
+          "--username",
+          "postgres",
+          "--password",
+          "c2a-probe-public-password",
+          "--database",
+          "postgres",
+          "--data-dir",
+          "/home/hindsight/.pg0/c2a-db/data",
+          "-c",
+          "listen_addresses=127.0.0.1",
+          "-c",
+          "unix_socket_directories=/home/hindsight/.pg0/socket",
+          "-c",
+          "shared_buffers=16MB",
+          "-c",
+          "maintenance_work_mem=16MB",
+          "-c",
+          "work_mem=1MB",
+          "-c",
+          "effective_cache_size=64MB",
+          "-c",
+          "max_connections=8",
+          "-c",
+          "max_worker_processes=0",
+          "-c",
+          "max_parallel_workers=0",
+          "-c",
+          "max_parallel_maintenance_workers=0",
+          "-c",
+          "min_wal_size=32MB",
+          "-c",
+          "max_wal_size=64MB",
+          "-c",
+          "fsync=on",
+          "-c",
+          "synchronous_commit=on",
+          "-c",
+          "full_page_writes=on",
+          "-c",
+          "logging_collector=on",
+          "-c",
+          "log_directory=/home/hindsight/.pg0/log",
+          "-c",
+          "log_filename=postgresql.log",
+          "-c",
+          "log_rotation_size=1MB",
+          "-c",
+          "log_statement=none"
+        ],
+        "executable": "/app/api/.venv/lib/python3.11/site-packages/pg0/bin/pg0"
+      },
+      "cli_exit_code": 0,
+      "sql_client_version": "2.9.11 (dt dec pq3 ext lo64)",
+      "connection_attempts": 1,
+      "sql": {
+        "version": "PostgreSQL 18.1 on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit",
+        "postmaster_start_time": "2026-10-18 12:35:49.256234+00",
+        "backend_pid": 109,
+        "data_directory": "/home/hindsight/.pg0/c2a-db/data",
+        "fsync": "on",
+        "synchronous_commit": "on",
+        "full_page_writes": "on",
+        "port": "55432",
+        "listen_addresses": "127.0.0.1",
+        "unix_socket_directories": "/home/hindsight/.pg0/socket",
+        "system_identifier": "7697985627284971602"
+      },
+      "postmaster_live": {
+        "pid": 89,
+        "state": "S",
+        "ppid": 65,
+        "pgid": 89,
+        "session": 89,
+        "start_ticks": 2715751,
+        "stat": "89 (postgres) S 65 89 89 0 -1 4194304 1694 442 0 0 0 1 0 0 20 0 1 0 2715751 84185088 4480 18446744073709551615 95980996845568 95981002557401 140723443293856 0 0 0 4194304 19935232 84487 1 0 0 17 3 0 0 0 0 0 95981005793168 95981006048088 95981144879104 140723443297130 140723443297835 140723443297835 140723443298237 0",
+        "status": "Name:\tpostgres\nUmask:\t0077\nState:\tS (sleeping)\nTgid:\t89\nNgid:\t0\nPid:\t89\nPPid:\t65\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t1024\nGroups:\t1000 \nNStgid:\t89\nNSpid:\t89\nNSpgid:\t89\nNSsid:\t89\nKthread:\t0\nVmPeak:\t   82212 kB\nVmSize:\t   82212 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t   17920 kB\nVmRSS:\t   17920 kB\nRssAnon:\t    1920 kB\nRssFile:\t   13312 kB\nRssShmem:\t    2688 kB\nVmData:\t    1384 kB\nVmStk:\t     132 kB\nVmExe:\t    5580 kB\nVmLib:\t   11880 kB\nVmPTE:\t     120 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t2/31733\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000400000\nSigIgn:\t0000000181303000\nSigCgt:\t0000000000014a07\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t00000000a80425fb\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t2\nSeccomp_filters:\t2\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tf\nCpus_allowed_list:\t0-3\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t17\nnonvoluntary_ctxt_switches:\t3\n",
+        "uid": 1000,
+        "argv": [
+          "/home/hindsight/.pg0/.pg0/installation/18.1.0/bin/postgres",
+          "-D",
+          "/home/hindsight/.pg0/c2a-db/data",
+          "-F",
+          "-p",
+          "55432",
+          "-c",
+          "log_directory=/home/hindsight/.pg0/log",
+          "-c",
+          "log_filename=postgresql.log",
+          "-c",
+          "unix_socket_directories=/home/hindsight/.pg0/socket",
+          "-c",
+          "fsync=on",
+          "-c",
+          "timezone=UTC",
+          "-c",
+          "work_mem=1MB",
+          "-c",
+          "max_connections=8",
+          "-c",
+          "max_parallel_maintenance_workers=0",
+          "-c",
+          "min_wal_size=32MB",
+          "-c",
+          "log_statement=none",
+          "-c",
+          "synchronous_commit=on",
+          "-c",
+          "effective_cache_size=64MB",
+          "-c",
+          "maintenance_work_mem=16MB",
+          "-c",
+          "max_worker_processes=0",
+          "-c",
+          "listen_addresses=127.0.0.1",
+          "-c",
+          "shared_buffers=16MB",
+          "-c",
+          "log_rotation_age=1d",
+          "-c",
+          "max_parallel_workers=0",
+          "-c",
+          "log_rotation_size=1MB",
+          "-c",
+          "log_timezone=UTC",
+          "-c",
+          "full_page_writes=on",
+          "-c",
+          "logging_collector=on",
+          "-c",
+          "max_wal_size=64MB"
+        ],
+        "executable": "/home/hindsight/.pg0/.pg0/installation/18.1.0/bin/postgres"
+      },
+      "backend_live": {
+        "pid": 109,
+        "state": "S",
+        "ppid": 89,
+        "pgid": 109,
+        "session": 109,
+        "start_ticks": 2715778,
+        "stat": "109 (postgres) S 89 109 109 0 -1 4194368 737 0 0 0 0 0 0 0 20 0 1 0 2715778 86913024 3813 18446744073709551615 95980996845568 95981002557401 140723443293856 0 0 0 4194304 19929088 536896135 1 0 0 17 1 0 0 0 0 0 95981005793168 95981006048088 95981144879104 140723443297130 140723443297835 140723443297835 140723443298237 0",
+        "status": "Name:\tpostgres\nUmask:\t0077\nState:\tS (sleeping)\nTgid:\t109\nNgid:\t0\nPid:\t109\nPPid:\t89\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t64\nGroups:\t1000 \nNStgid:\t109\nNSpid:\t109\nNSpgid:\t109\nNSsid:\t109\nKthread:\t0\nVmPeak:\t   84904 kB\nVmSize:\t   84876 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t   15252 kB\nVmRSS:\t   15252 kB\nRssAnon:\t    2964 kB\nRssFile:\t   10112 kB\nRssShmem:\t    2176 kB\nVmData:\t    3024 kB\nVmStk:\t     132 kB\nVmExe:\t    5580 kB\nVmLib:\t   11880 kB\nVmPTE:\t     124 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t2/31733\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000400000\nSigIgn:\t0000000181301800\nSigCgt:\t0000000020006287\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t00000000a80425fb\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t2\nSeccomp_filters:\t2\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tf\nCpus_allowed_list:\t0-3\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t25\nnonvoluntary_ctxt_switches:\t1\n",
+        "uid": 1000,
+        "argv": [
+          "postgres: postgres postgres 127.0.0.1(36736) idle"
+        ],
+        "executable": "/home/hindsight/.pg0/.pg0/installation/18.1.0/bin/postgres"
+      },
+      "shutdown_processes": [
+        {
+          "pid": 1,
+          "state": "S",
+          "ppid": 0,
+          "pgid": 1,
+          "session": 1,
+          "start_ticks": 2714472,
+          "stat": "1 (python) S 0 1 1 0 -1 4194560 3652 0 1 0 16 8 0 0 20 0 4 0 2714472 396546048 3904 18446744073709551615 95880830902272 95880830902613 140733764287184 0 0 0 0 16781312 16386 0 0 0 17 0 0 0 0 0 0 95880830913968 95880830914584 95881002156032 140733764291781 140733764291840 140733764291840 140733764292574 0",
+          "status": "Name:\tpython\nUmask:\t0022\nState:\tS (sleeping)\nTgid:\t1\nNgid:\t0\nPid:\t1\nPPid:\t0\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t64\nGroups:\t1000 \nNStgid:\t1\nNSpid:\t1\nNSpgid:\t1\nNSsid:\t1\nKthread:\t0\nVmPeak:\t  452804 kB\nVmSize:\t  387252 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t   15616 kB\nVmRSS:\t   15616 kB\nRssAnon:\t    9344 kB\nRssFile:\t    6272 kB\nRssShmem:\t       0 kB\nVmData:\t   51792 kB\nVmStk:\t     132 kB\nVmExe:\t       4 kB\nVmLib:\t    4316 kB\nVmPTE:\t     124 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t4\nSigQ:\t2/31733\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000001001000\nSigCgt:\t0000000100004002\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t00000000a80425fb\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t2\nSeccomp_filters:\t2\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tf\nCpus_allowed_list:\t0-3\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t311\nnonvoluntary_ctxt_switches:\t11\n",
+          "uid": 1000,
+          "argv": [
+            "/app/api/.venv/bin/python",
+            "-I",
+            "-B",
+            "-m",
+            "managed_bootstrap.owner"
+          ],
+          "executable": "/usr/local/bin/python3.11"
+        },
+        {
+          "pid": 65,
+          "state": "R",
+          "ppid": 1,
+          "pgid": 65,
+          "session": 65,
+          "start_ticks": 2715585,
+          "stat": "65 (python) R 1 65 65 0 -1 4194560 6059 30501 77 47 19 15 78 65 20 0 1 0 2715585 62836736 7784 18446744073709551615 94309362294784 94309362295125 140733396355728 0 0 0 0 16781312 24578 0 0 0 17 3 0 0 0 0 0 94309362306480 94309362307096 94309787578368 140733396360165 140733396360273 140733396360273 140733396361182 0",
+          "status": "Name:\tpython\nUmask:\t0022\nState:\tR (running)\nTgid:\t65\nNgid:\t0\nPid:\t65\nPPid:\t1\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t64\nGroups:\t1000 \nNStgid:\t65\nNSpid:\t65\nNSpgid:\t65\nNSsid:\t65\nKthread:\t0\nVmPeak:\t   61364 kB\nVmSize:\t   61364 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t   31136 kB\nVmRSS:\t   31136 kB\nRssAnon:\t   16160 kB\nRssFile:\t   14976 kB\nRssShmem:\t       0 kB\nVmData:\t   16752 kB\nVmStk:\t     132 kB\nVmExe:\t       4 kB\nVmLib:\t   16656 kB\nVmPTE:\t     172 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t2/31733\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000001001000\nSigCgt:\t0000000000006002\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t00000000a80425fb\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t2\nSeccomp_filters:\t2\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tf\nCpus_allowed_list:\t0-3\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t223\nnonvoluntary_ctxt_switches:\t17\n",
+          "uid": 1000,
+          "argv": [
+            "/app/api/.venv/bin/python",
+            "-I",
+            "-B",
+            "/app/api/.venv/lib/python3.11/site-packages/managed_bootstrap/fake_child.py"
+          ],
+          "executable": "/usr/local/bin/python3.11"
+        }
+      ],
+      "shutdown": {
+        "state": "checked",
+        "system_identifier": "7697985627284971602",
+        "elapsed_seconds": 0.144,
+        "postmaster_wait_kind": "adopted",
+        "logger_gone": false,
+        "owned_descendants_remaining": 0
+      },
+      "logs": [
+        {
+          "path": "/home/hindsight/.pg0/tmp/8f2b3d9b-0f7f-4ce9-8d0a-0855875d837b/startup.log",
+          "bytes": 560,
+          "sha256": "5840aa9794d57e9a03bf70918d69afd46eac99e11e4ee790abe3ece08269b983",
+          "output": "Setting up PostgreSQL 18.1.0...\nExtracting bundled PostgreSQL 18.1.0...\nPostgreSQL 18.1.0 extracted successfully.\nInstalling pgvector 0.8.5...\npgvector 0.8.5 installed successfully!\nStarting PostgreSQL on port 55432...\n\nPostgreSQL is running!\n  Instance: c2a-db\n  PID:      89\n  Port:     55432\n  Username: postgres\n  Password: c2a-probe-public-password\n  Database: postgres\n  Data dir: /home/hindsight/.pg0/c2a-db/data\n\nConnection URI: postgresql://postgres:c2a-probe-public-password@127.0.0.1:55432/postgres\n\nUse 'pg0 stop --name c2a-db' to stop the server.\n"
+        },
+        {
+          "path": "/home/hindsight/.pg0/log/postgresql.log",
+          "bytes": 1174,
+          "sha256": "69c81f1fbe8dbb39d8cc994f02a9777c8e2be89a82d41cee8d25a1a8916f0822",
+          "output": "2026-10-18 12:35:49.250 UTC [89] LOG:  starting PostgreSQL 18.1 on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit\n2026-10-18 12:35:49.251 UTC [89] LOG:  listening on IPv4 address \"127.0.0.1\", port 55432\n2026-10-18 12:35:49.254 UTC [89] LOG:  listening on Unix socket \"/home/hindsight/.pg0/socket/.s.PGSQL.55432\"\n2026-10-18 12:35:49.260 UTC [96] LOG:  database system was shut down at 2026-10-18 12:35:49 UTC\n2026-10-18 12:35:49.266 UTC [89] LOG:  database system is ready to accept connections\n2026-10-18 12:35:49.526 UTC [89] LOG:  received fast shutdown request\n2026-10-18 12:35:49.533 UTC [89] LOG:  aborting any active transactions\n2026-10-18 12:35:49.539 UTC [94] LOG:  shutting down\n2026-10-18 12:35:49.541 UTC [94] LOG:  checkpoint starting: shutdown immediate\n2026-10-18 12:35:49.556 UTC [94] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.004 s, sync=0.002 s, total=0.017 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/16ECFE8, redo lsn=0/16ECFE8\n2026-10-18 12:35:49.564 UTC [89] LOG:  database system is shut down\n"
+        }
+      ],
+      "volume_scan": {
+        "entries": 2518,
+        "bytes": 113628636,
+        "link_bytes": 205,
+        "hits": 0,
+        "complete": true,
+        "elapsed_seconds": 0.2
+      },
+      "elapsed_seconds": 2.242,
+      "shutdown_evidence_seconds": 0.349,
+      "hashed_bytes": 45794816,
+      "status": "failed"
+    }
+  },
+  "resourcesRemoved": {
+    "container": "taki-c2a-82e5b652-101d-435c-b773-d15f34a28b11",
+    "volume": "taki-c2a-82e5b652-101d-435c-b773-d15f34a28b11-data"
+  },
+  "imageTagRemoved": "taki-c2a-db:1b05d2f6-494c-4a6d-a601-1e807eca1486",
+  "protectedTreeScannedAfterStop": true,
+  "protectedRootRemoved": true,
+  "ownedRuntimeCleanup": true,
+  "commands": [
+    {
+      "argv": [
+        "image",
+        "inspect",
+        "taki-c2a-db:1b05d2f6-494c-4a6d-a601-1e807eca1486"
+      ],
+      "startedAt": "2026-10-18T12:35:10.680Z",
+      "outcome": "completed",
+      "output": "[\n    {\n        \"Id\": \"sha256:cc83b52be0970d6dc4929786d59ca99fe52a86540c55934797af2f3afba3b8bf\",\n        \"RepoTags\": [\n            \"taki-c2a-db:1b05d2f6-494c-4a6d-a601-1e807eca1486\"\n        ],\n        \"RepoDigests\": [\n            \"taki-c2a-db@sha256:cc83b52be0970d6dc4929786d59ca99fe52a86540c55934797af2f3afba3b8bf\"\n        ],\n        \"Comment\": \"buildkit.dockerfile.v0\",\n        \"Created\": \"2026-10-18T12:35:02.178357608Z\",\n        \"Config\": {\n            \"User\": \"1000:1000\",\n            \"ExposedPorts\": {\n                \"8888/tcp\": {},\n                \"9999/tcp\": {}\n            },\n            \"Env\": [\n                \"PATH=/app/api/.venv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\",\n                \"LANG=C.UTF-8\",\n                \"GPG_KEY=A035C8C19219BA821ECEA86B64E628F8D684696D\",\n                \"PYTHON_VERSION=3.11.16\",\n                \"PYTHON_SHA256=91bcdebfdde239a003ae93738a7fce0f9230fee5c4bc2b86f6e6e8c6f98aabe8\",\n                \"HF_HUB_DOWNLOAD_TIMEOUT=600\",\n                \"HINDSIGHT_API_HOST=0.0.0.0\",\n                \"HINDSIGHT_API_PORT=8888\",\n                \"HINDSIGHT_API_LOG_LEVEL=info\",\n                \"NODE_ENV=production\",\n                \"HINDSIGHT_CP_DATAPLANE_API_URL=http://localhost:8888\",\n                \"HINDSIGHT_ENABLE_API=true\",\n                \"HINDSIGHT_ENABLE_CP=true\",\n                \"PYTHONUNBUFFERED=1\",\n                \"TRANSFORMERS_VERBOSITY=error\",\n                \"HF_HUB_VERBOSITY=error\",\n                \"TOKENIZERS_PARALLELISM=false\"\n            ],\n            \"Entrypoint\": [\n                \"/app/api/.venv/bin/python\",\n                \"-I\",\n                \"-B\",\n                \"-m\",\n                \"managed_bootstrap.owner\"\n            ],\n            \"WorkingDir\": \"/app\",\n            \"Labels\": {\n                \"taki.c2a.fixture\": \"1b05d2f6-494c-4a6d-a601-1e807eca1486\"\n            },\n            \"ArgsEscaped\": true\n        },\n        \"Architecture\": \"amd64\",\n        \"Os\": \"linux\",\n        \"Size\": 1524063138,\n        \"RootFS\": {\n            \"Type\": \"layers\",\n            \"Layers\": [\n                \"sha256:6f94328331290cbd81edab450664d42da7b64c191416c9346cd5d28c84f76035\",\n                \"sha256:275f0a9e4758b8a31c628ab748d8184bd103fb27ec8aeff6b588003a3056d082\",\n                \"sha256:3d7dddf62be3a47f3c072a9dc069ac228beea659375d9fff022792deaaf08d61\",\n                \"sha256:1a8800d1b976e9a254659bbce8213f99d55639c12cc4d2ebecafe95a163797c5\",\n                \"sha256:a1a5d0ec92ff09c6a27534c7c47317bb7a01ad7b9f14bf400b52123f8e306e3e\",\n                \"sha256:299d4347e6df9dfa774bdce3b1364ea95f335a04a8c351c150491360ab4f3246\",\n                \"sha256:0116ab376532749d4f3eca68930fbf1060c0ed4296c4f838fdcf534f45d4f44a\",\n                \"sha256:3d54a5a04ca537494f67c5305cc5b7a0c3d96b557091ecd91cf0508a5e317d93\",\n                \"sha256:b1508537837e0f8b4a39b0449fbc1aee8fe380383d76141d185986e6279f2cfb\",\n                \"sha256:e2457e4909c2bfcc3db0727b12916f8ed543003a7db1cf23be0d988a51698aef\",\n                \"sha256:0f590597ee1734f7f7a71d839891d25009e74e4c7ed7e744b75e6d44fb76d222\",\n                \"sha256:9cabf648e5270b41f20913f5580453321d1ba93e6ac483e49d7f7d2255774dde\",\n                \"sha256:042a4c1216faa59e1c15024330c72ab7adf3f4a342de48a2bfd1483575a921ae\",\n                \"sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef\",\n                \"sha256:172abbb300df922427882ebe7409daed5893f3e4bf54bc8b67939167e406dbe5\",\n                \"sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef\",\n                \"sha256:f21c5e676f9921bdea957f5aa1812135cb72885b155db4c93eb2d461cc7ecfd7\",\n                \"sha256:e9303b93d2c3c387aa4be7e0ba62b06f74c0b426157fb99a62e15c7896cf3757\",\n                \"sha256:37f6b792c034c4798abc88776f50ecd0dea6fa035806c49e3f6d44c1c96bbaab\",\n                \"sha256:2fafe57069de58b2c68024d98e83d29a83a85c66e39bd94b5e072cf1d486025a\",\n                \"sha256:b6bc2c48d58190125a7fa2de3572cc0177f343762e074510ade31a66a93a0238\",\n                \"sha256:f3f1aa8574708f1b202a1e27f94f32c02aca10c5cc27053b87186042651b985e\",\n                \"sha256:629b7cd70b9940caa61558b8c645fee8a453733e5ac5b30f2dbcebd896475892\"\n            ]\n        },\n        \"Metadata\": {\n            \"LastTagTime\": \"2026-10-18T12:35:02.379361283Z\"\n        },\n        \"Descriptor\": {\n            \"mediaType\": \"application/vnd.oci.image.index.v1+json\",\n            \"digest\": \"sha256:cc83b52be0970d6dc4929786d59ca99fe52a86540c55934797af2f3afba3b8bf\",\n            \"size\": 856\n        }\n    }\n]\n",
+      "bytes": 4526,
+      "elapsedMs": 198
+    },
+    {
+      "argv": [
+        "container",
+        "inspect",
+        "e4e08e884ab0bbb78ec39783f4db584409cef2fc12fdd2db7b0ff3cc40e616cb"
+      ],
+      "startedAt": "2026-10-18T12:35:54.156Z",
+      "outcome": "completed",
+      "output": "[\n    {\n        \"Id\": \"e4e08e884ab0bbb78ec39783f4db584409cef2fc12fdd2db7b0ff3cc40e616cb\",\n        \"Created\": \"2026-10-18T12:35:31.641048104Z\",\n        \"Path\": \"/app/api/.venv/bin/python\",\n        \"Args\": [\n            \"-I\",\n            \"-B\",\n            \"-m\",\n            \"managed_bootstrap.owner\"\n        ],\n        \"State\": {\n            \"Status\": \"exited\",\n            \"Running\": false,\n            \"Paused\": false,\n            \"Restarting\": false,\n            \"OOMKilled\": false,\n            \"Dead\": false,\n            \"Pid\": 0,\n            \"ExitCode\": 0,\n            \"Error\": \"\",\n            \"StartedAt\": \"2026-10-18T12:35:34.289543213Z\",\n            \"FinishedAt\": \"2026-10-18T12:35:49.929484549Z\"\n        },\n        \"Image\": \"sha256:cc83b52be0970d6dc4929786d59ca99fe52a86540c55934797af2f3afba3b8bf\",\n        \"ResolvConfPath\": \"/var/lib/docker/containers/e4e08e884ab0bbb78ec39783f4db584409cef2fc12fdd2db7b0ff3cc40e616cb/resolv.conf\",\n        \"HostnamePath\": \"/var/lib/docker/containers/e4e08e884ab0bbb78ec39783f4db584409cef2fc12fdd2db7b0ff3cc40e616cb/hostname\",\n        \"HostsPath\": \"/var/lib/docker/containers/e4e08e884ab0bbb78ec39783f4db584409cef2fc12fdd2db7b0ff3cc40e616cb/hosts\",\n        \"LogPath\": \"/var/lib/docker/containers/e4e08e884ab0bbb78ec39783f4db584409cef2fc12fdd2db7b0ff3cc40e616cb/e4e08e884ab0bbb78ec39783f4db584409cef2fc12fdd2db7b0ff3cc40e616cb-json.log\",\n        \"Name\": \"/taki-c2a-82e5b652-101d-435c-b773-d15f34a28b11\",\n        \"RestartCount\": 0,\n        \"Driver\": \"overlayfs\",\n        \"Platform\": \"linux\",\n        \"MountLabel\": \"\",\n        \"ProcessLabel\": \"\",\n        \"AppArmorProfile\": \"\",\n        \"ExecIDs\": null,\n        \"HostConfig\": {\n            \"Binds\": null,\n            \"ContainerIDFile\": \"\",\n            \"LogConfig\": {\n                \"Type\": \"json-file\",\n                \"Config\": {}\n            },\n            \"NetworkMode\": \"none\",\n            \"PortBindings\": {},\n            \"RestartPolicy\": {\n                \"Name\": \"no\",\n                \"MaximumRetryCount\": 0\n            },\n            \"AutoRemove\": false,\n            \"VolumeDriver\": \"\",\n            \"VolumesFrom\": null,\n            \"ConsoleSize\": [\n                0,\n                0\n            ],\n            \"CapAdd\": null,\n            \"CapDrop\": null,\n            \"CgroupnsMode\": \"private\",\n            \"Dns\": null,\n            \"DnsOptions\": [],\n            \"DnsSearch\": [],\n            \"ExtraHosts\": null,\n            \"GroupAdd\": null,\n            \"IpcMode\": \"private\",\n            \"Cgroup\": \"\",\n            \"Links\": null,\n            \"OomScoreAdj\": 0,\n            \"PidMode\": \"\",\n            \"Privileged\": false,\n            \"PublishAllPorts\": false,\n            \"ReadonlyRootfs\": false,\n            \"SecurityOpt\": null,\n            \"Tmpfs\": {\n                \"/run/taki-hindsight\": \"rw,noexec,nosuid,size=8388608,mode=0700,uid=1000,gid=1000\"\n            },\n            \"UTSMode\": \"\",\n            \"UsernsMode\": \"\",\n            \"ShmSize\": 67108864,\n            \"Runtime\": \"runc\",\n            \"Isolation\": \"\",\n            \"CpuShares\": 0,\n            \"Memory\": 0,\n            \"NanoCpus\": 0,\n            \"CgroupParent\": \"\",\n            \"BlkioWeight\": 0,\n            \"BlkioWeightDevice\": [],\n            \"BlkioDeviceReadBps\": [],\n            \"BlkioDeviceWriteBps\": [],\n            \"BlkioDeviceReadIOps\": [],\n            \"BlkioDeviceWriteIOps\": [],\n            \"CpuPeriod\": 0,\n            \"CpuQuota\": 0,\n            \"CpuRealtimePeriod\": 0,\n            \"CpuRealtimeRuntime\": 0,\n            \"CpusetCpus\": \"\",\n            \"CpusetMems\": \"\",\n            \"Devices\": [],\n            \"DeviceCgroupRules\": null,\n            \"DeviceRequests\": null,\n            \"MemoryReservation\": 0,\n            \"MemorySwap\": 0,\n            \"MemorySwappiness\": null,\n            \"OomKillDisable\": null,\n            \"PidsLimit\": null,\n            \"Ulimits\": [],\n            \"CpuCount\": 0,\n            \"CpuPercent\": 0,\n            \"IOMaximumIOps\": 0,\n            \"IOMaximumBandwidth\": 0,\n            \"Mounts\": [\n                {\n                    \"Type\": \"volume\",\n                    \"Source\": \"taki-c2a-82e5b652-101d-435c-b773-d15f34a28b11-data\",\n                    \"Target\": \"/home/hindsight/.pg0\"\n                }\n            ],\n            \"MaskedPaths\": [\n                \"/proc/acpi\",\n                \"/proc/asound\",\n                \"/proc/interrupts\",\n                \"/proc/kcore\",\n                \"/proc/keys\",\n                \"/proc/latency_stats\",\n                \"/proc/sched_debug\",\n                \"/proc/scsi\",\n                \"/proc/timer_list\",\n                \"/proc/timer_stats\",\n                \"/sys/devices/virtual/powercap\",\n                \"/sys/firmware\"\n            ],\n            \"ReadonlyPaths\": [\n                \"/proc/bus\",\n                \"/proc/fs\",\n                \"/proc/irq\",\n                \"/proc/sys\",\n                \"/proc/sysrq-trigger\"\n            ]\n        },\n        \"GraphDriver\": {\n            \"Data\": null,\n            \"Name\": \"\"\n        },\n        \"Mounts\": [\n            {\n                \"Type\": \"volume\",\n                \"Name\": \"taki-c2a-82e5b652-101d-435c-b773-d15f34a28b11-data\",\n                \"Source\": \"/var/lib/docker/volumes/taki-c2a-82e5b652-101d-435c-b773-d15f34a28b11-data/_data\",\n                \"Destination\": \"/home/hindsight/.pg0\",\n                \"Driver\": \"local\",\n                \"Mode\": \"z\",\n                \"RW\": true,\n                \"Propagation\": \"\"\n            }\n        ],\n        \"Config\": {\n            \"Hostname\": \"e4e08e884ab0\",\n            \"Domainname\": \"\",\n            \"User\": \"1000:1000\",\n            \"AttachStdin\": false,\n            \"AttachStdout\": true,\n            \"AttachStderr\": true,\n            \"ExposedPorts\": {\n                \"8888/tcp\": {},\n                \"9999/tcp\": {}\n            },\n            \"Tty\": false,\n            \"OpenStdin\": false,\n            \"StdinOnce\": false,\n            \"Env\": [\n                \"TAKI_C2A_CONFIGURATION_DIGEST=d78c31a24edbd333d549acc2fa72f3bb35a6297849a7986a09df261a4afd52cf\",\n                \"PATH=/app/api/.venv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\",\n                \"LANG=C.UTF-8\",\n                \"GPG_KEY=A035C8C19219BA821ECEA86B64E628F8D684696D\",\n                \"PYTHON_VERSION=3.11.16\",\n                \"PYTHON_SHA256=91bcdebfdde239a003ae93738a7fce0f9230fee5c4bc2b86f6e6e8c6f98aabe8\",\n                \"HF_HUB_DOWNLOAD_TIMEOUT=600\",\n                \"HINDSIGHT_API_HOST=0.0.0.0\",\n                \"HINDSIGHT_API_PORT=8888\",\n                \"HINDSIGHT_API_LOG_LEVEL=info\",\n                \"NODE_ENV=production\",\n                \"HINDSIGHT_CP_DATAPLANE_API_URL=http://localhost:8888\",\n                \"HINDSIGHT_ENABLE_API=true\",\n                \"HINDSIGHT_ENABLE_CP=true\",\n                \"PYTHONUNBUFFERED=1\",\n                \"TRANSFORMERS_VERBOSITY=error\",\n                \"HF_HUB_VERBOSITY=error\",\n                \"TOKENIZERS_PARALLELISM=false\"\n            ],\n            \"Cmd\": null,\n            \"Image\": \"sha256:cc83b52be0970d6dc4929786d59ca99fe52a86540c55934797af2f3afba3b8bf\",\n            \"Volumes\": null,\n            \"WorkingDir\": \"/app\",\n            \"Entrypoint\": [\n                \"/app/api/.venv/bin/python\",\n                \"-I\",\n                \"-B\",\n                \"-m\",\n                \"managed_bootstrap.owner\"\n            ],\n            \"OnBuild\": null,\n            \"Labels\": {\n                \"taki.c2a.core\": \"11111111-1111-4111-8111-111111111111\",\n                \"taki.c2a.deployment\": \"82e5b652-101d-435c-b773-d15f34a28b11\",\n                \"taki.c2a.fixture\": \"1b05d2f6-494c-4a6d-a601-1e807eca1486\",\n                \"taki.c2a.host\": \"22222222-2222-4222-8222-222222222222\",\n                \"taki.c2a.installation\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\n                \"taki.c2a.plan\": \"98510915d48a2bbb3080a30c4d7cd450e6af7d4c4dee89ab10a9f9b44dd6cb51\",\n                \"taki.c2a.role\": \"container\"\n            },\n            \"StopTimeout\": 1\n        },\n        \"NetworkSettings\": {\n            \"Bridge\": \"\",\n            \"SandboxID\": \"\",\n            \"SandboxKey\": \"\",\n            \"Ports\": {},\n            \"HairpinMode\": false,\n            \"LinkLocalIPv6Address\": \"\",\n            \"LinkLocalIPv6PrefixLen\": 0,\n            \"SecondaryIPAddresses\": null,\n            \"SecondaryIPv6Addresses\": null,\n            \"EndpointID\": \"\",\n            \"Gateway\": \"\",\n            \"GlobalIPv6Address\": \"\",\n            \"GlobalIPv6PrefixLen\": 0,\n            \"IPAddress\": \"\",\n            \"IPPrefixLen\": 0,\n            \"IPv6Gateway\": \"\",\n            \"MacAddress\": \"\",\n            \"Networks\": {\n                \"none\": {\n                    \"IPAMConfig\": null,\n                    \"Links\": null,\n                    \"Aliases\": null,\n                    \"MacAddress\": \"\",\n                    \"DriverOpts\": null,\n                    \"GwPriority\": 0,\n                    \"NetworkID\": \"32c3243c3d6554df3f699ecf7776aa2990d78a69cf5bc9b21b06044b159dd807\",\n                    \"EndpointID\": \"\",\n                    \"Gateway\": \"\",\n                    \"IPAddress\": \"\",\n                    \"IPPrefixLen\": 0,\n                    \"IPv6Gateway\": \"\",\n                    \"GlobalIPv6Address\": \"\",\n                    \"GlobalIPv6PrefixLen\": 0,\n                    \"DNSNames\": null\n                }\n            }\n        },\n        \"ImageManifestDescriptor\": {\n            \"mediaType\": \"application/vnd.oci.image.manifest.v1+json\",\n            \"digest\": \"sha256:fc03b53f9cec7753247f911aa53c503b80e1a5f0a4320746832b9dee7b32936a\",\n            \"size\": 4674,\n            \"platform\": {\n                \"architecture\": \"amd64\",\n                \"os\": \"linux\"\n            }\n        }\n    }\n]\n",
+      "bytes": 9650,
+      "elapsedMs": 149
+    },
+    {
+      "argv": [
+        "cp",
+        "e4e08e884ab0bbb78ec39783f4db584409cef2fc12fdd2db7b0ff3cc40e616cb:/home/hindsight/.pg0/c2a-db/last-stop.json",
+        "G:\\TakiAgent-c2a-database\\persistence-1b05d2f6-494c-4a6d-a601-1e807eca1486\\failure-stop.json"
+      ],
+      "startedAt": "2026-10-18T12:35:54.306Z",
+      "outcome": "completed",
+      "output": "",
+      "bytes": 0,
+      "elapsedMs": 165
+    },
+    {
+      "argv": [
+        "rm",
+        "e4e08e884ab0bbb78ec39783f4db584409cef2fc12fdd2db7b0ff3cc40e616cb"
+      ],
+      "startedAt": "2026-10-18T12:35:54.471Z",
+      "outcome": "completed",
+      "output": "e4e08e884ab0bbb78ec39783f4db584409cef2fc12fdd2db7b0ff3cc40e616cb\n",
+      "bytes": 65,
+      "elapsedMs": 175
+    },
+    {
+      "argv": [
+        "container",
+        "ls",
+        "--all",
+        "--filter",
+        "volume=taki-c2a-82e5b652-101d-435c-b773-d15f34a28b11-data",
+        "--format",
+        "{{.ID}}"
+      ],
+      "startedAt": "2026-10-18T12:35:54.646Z",
+      "outcome": "completed",
+      "output": "",
+      "bytes": 0,
+      "elapsedMs": 148
+    },
+    {
+      "argv": [
+        "volume",
+        "rm",
+        "taki-c2a-82e5b652-101d-435c-b773-d15f34a28b11-data"
+      ],
+      "startedAt": "2026-10-18T12:35:54.794Z",
+      "outcome": "completed",
+      "output": "taki-c2a-82e5b652-101d-435c-b773-d15f34a28b11-data\n",
+      "bytes": 51,
+      "elapsedMs": 236
+    },
+    {
+      "argv": [
+        "image",
+        "inspect",
+        "taki-c2a-db:1b05d2f6-494c-4a6d-a601-1e807eca1486"
+      ],
+      "startedAt": "2026-10-18T12:35:55.647Z",
+      "outcome": "completed",
+      "output": "[\n    {\n        \"Id\": \"sha256:cc83b52be0970d6dc4929786d59ca99fe52a86540c55934797af2f3afba3b8bf\",\n        \"RepoTags\": [\n            \"taki-c2a-db:1b05d2f6-494c-4a6d-a601-1e807eca1486\"\n        ],\n        \"RepoDigests\": [\n            \"taki-c2a-db@sha256:cc83b52be0970d6dc4929786d59ca99fe52a86540c55934797af2f3afba3b8bf\"\n        ],\n        \"Comment\": \"buildkit.dockerfile.v0\",\n        \"Created\": \"2026-10-18T12:35:02.178357608Z\",\n        \"Config\": {\n            \"User\": \"1000:1000\",\n            \"ExposedPorts\": {\n                \"8888/tcp\": {},\n                \"9999/tcp\": {}\n            },\n            \"Env\": [\n                \"PATH=/app/api/.venv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\",\n                \"LANG=C.UTF-8\",\n                \"GPG_KEY=A035C8C19219BA821ECEA86B64E628F8D684696D\",\n                \"PYTHON_VERSION=3.11.16\",\n                \"PYTHON_SHA256=91bcdebfdde239a003ae93738a7fce0f9230fee5c4bc2b86f6e6e8c6f98aabe8\",\n                \"HF_HUB_DOWNLOAD_TIMEOUT=600\",\n                \"HINDSIGHT_API_HOST=0.0.0.0\",\n                \"HINDSIGHT_API_PORT=8888\",\n                \"HINDSIGHT_API_LOG_LEVEL=info\",\n                \"NODE_ENV=production\",\n                \"HINDSIGHT_CP_DATAPLANE_API_URL=http://localhost:8888\",\n                \"HINDSIGHT_ENABLE_API=true\",\n                \"HINDSIGHT_ENABLE_CP=true\",\n                \"PYTHONUNBUFFERED=1\",\n                \"TRANSFORMERS_VERBOSITY=error\",\n                \"HF_HUB_VERBOSITY=error\",\n                \"TOKENIZERS_PARALLELISM=false\"\n            ],\n            \"Entrypoint\": [\n                \"/app/api/.venv/bin/python\",\n                \"-I\",\n                \"-B\",\n                \"-m\",\n                \"managed_bootstrap.owner\"\n            ],\n            \"WorkingDir\": \"/app\",\n            \"Labels\": {\n                \"taki.c2a.fixture\": \"1b05d2f6-494c-4a6d-a601-1e807eca1486\"\n            },\n            \"ArgsEscaped\": true\n        },\n        \"Architecture\": \"amd64\",\n        \"Os\": \"linux\",\n        \"Size\": 1524063138,\n        \"RootFS\": {\n            \"Type\": \"layers\",\n            \"Layers\": [\n                \"sha256:6f94328331290cbd81edab450664d42da7b64c191416c9346cd5d28c84f76035\",\n                \"sha256:275f0a9e4758b8a31c628ab748d8184bd103fb27ec8aeff6b588003a3056d082\",\n                \"sha256:3d7dddf62be3a47f3c072a9dc069ac228beea659375d9fff022792deaaf08d61\",\n                \"sha256:1a8800d1b976e9a254659bbce8213f99d55639c12cc4d2ebecafe95a163797c5\",\n                \"sha256:a1a5d0ec92ff09c6a27534c7c47317bb7a01ad7b9f14bf400b52123f8e306e3e\",\n                \"sha256:299d4347e6df9dfa774bdce3b1364ea95f335a04a8c351c150491360ab4f3246\",\n                \"sha256:0116ab376532749d4f3eca68930fbf1060c0ed4296c4f838fdcf534f45d4f44a\",\n                \"sha256:3d54a5a04ca537494f67c5305cc5b7a0c3d96b557091ecd91cf0508a5e317d93\",\n                \"sha256:b1508537837e0f8b4a39b0449fbc1aee8fe380383d76141d185986e6279f2cfb\",\n                \"sha256:e2457e4909c2bfcc3db0727b12916f8ed543003a7db1cf23be0d988a51698aef\",\n                \"sha256:0f590597ee1734f7f7a71d839891d25009e74e4c7ed7e744b75e6d44fb76d222\",\n                \"sha256:9cabf648e5270b41f20913f5580453321d1ba93e6ac483e49d7f7d2255774dde\",\n                \"sha256:042a4c1216faa59e1c15024330c72ab7adf3f4a342de48a2bfd1483575a921ae\",\n                \"sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef\",\n                \"sha256:172abbb300df922427882ebe7409daed5893f3e4bf54bc8b67939167e406dbe5\",\n                \"sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef\",\n                \"sha256:f21c5e676f9921bdea957f5aa1812135cb72885b155db4c93eb2d461cc7ecfd7\",\n                \"sha256:e9303b93d2c3c387aa4be7e0ba62b06f74c0b426157fb99a62e15c7896cf3757\",\n                \"sha256:37f6b792c034c4798abc88776f50ecd0dea6fa035806c49e3f6d44c1c96bbaab\",\n                \"sha256:2fafe57069de58b2c68024d98e83d29a83a85c66e39bd94b5e072cf1d486025a\",\n                \"sha256:b6bc2c48d58190125a7fa2de3572cc0177f343762e074510ade31a66a93a0238\",\n                \"sha256:f3f1aa8574708f1b202a1e27f94f32c02aca10c5cc27053b87186042651b985e\",\n                \"sha256:629b7cd70b9940caa61558b8c645fee8a453733e5ac5b30f2dbcebd896475892\"\n            ]\n        },\n        \"Metadata\": {\n            \"LastTagTime\": \"2026-10-18T12:35:02.379361283Z\"\n        },\n        \"Descriptor\": {\n            \"mediaType\": \"application/vnd.oci.image.index.v1+json\",\n            \"digest\": \"sha256:cc83b52be0970d6dc4929786d59ca99fe52a86540c55934797af2f3afba3b8bf\",\n            \"size\": 856\n        }\n    }\n]\n",
+      "bytes": 4526,
+      "elapsedMs": 217
+    },
+    {
+      "argv": [
+        "container",
+        "ls",
+        "--all",
+        "--filter",
+        "ancestor=sha256:cc83b52be0970d6dc4929786d59ca99fe52a86540c55934797af2f3afba3b8bf",
+        "--format",
+        "{{.ID}}"
+      ],
+      "startedAt": "2026-10-18T12:35:55.864Z",
+      "outcome": "completed",
+      "output": "",
+      "bytes": 0,
+      "elapsedMs": 166
+    },
+    {
+      "argv": [
+        "image",
+        "rm",
+        "taki-c2a-db:1b05d2f6-494c-4a6d-a601-1e807eca1486"
+      ],
+      "startedAt": "2026-10-18T12:35:56.030Z",
+      "outcome": "completed",
+      "output": "Untagged: taki-c2a-db:1b05d2f6-494c-4a6d-a601-1e807eca1486\nDeleted: sha256:cc83b52be0970d6dc4929786d59ca99fe52a86540c55934797af2f3afba3b8bf\n",
+      "bytes": 140,
+      "elapsedMs": 190
+    },
+    {
+      "argv": [
+        "image",
+        "ls",
+        "--filter",
+        "reference=taki-c2a-db:1b05d2f6-494c-4a6d-a601-1e807eca1486",
+        "--format",
+        "{{.ID}}"
+      ],
+      "startedAt": "2026-10-18T12:35:56.220Z",
+      "outcome": "completed",
+      "output": "",
+      "bytes": 0,
+      "elapsedMs": 154
+    }
+  ],
+  "scans": {
+    "docker-command-1": {
+      "bytes": 4526,
+      "hits": 0
+    },
+    "image-metadata": {
+      "bytes": 4526,
+      "hits": 0
+    },
+    "registry-2": {
+      "bytes": 6788,
+      "hits": 0
+    },
+    "database-read-3": {
+      "bytes": 760,
+      "hits": 0
+    },
+    "status-4": {
+      "bytes": 434,
+      "hits": 0
+    },
+    "registry-5": {
+      "bytes": 9674,
+      "hits": 0
+    },
+    "database-read-6": {
+      "bytes": 1830,
+      "hits": 0
+    },
+    "process-logs": {
+      "bytes": 6616,
+      "hits": 0
+    },
+    "docker-command-2": {
+      "bytes": 9650,
+      "hits": 0
+    },
+    "docker-command-3": {
+      "bytes": 0,
+      "hits": 0
+    },
+    "failure-stop-report": {
+      "bytes": 31832,
+      "hits": 0
+    },
+    "docker-command-4": {
+      "bytes": 65,
+      "hits": 0
+    },
+    "docker-command-5": {
+      "bytes": 0,
+      "hits": 0
+    },
+    "docker-command-6": {
+      "bytes": 51,
+      "hits": 0
+    },
+    "docker-command-7": {
+      "bytes": 4526,
+      "hits": 0
+    },
+    "docker-command-8": {
+      "bytes": 0,
+      "hits": 0
+    },
+    "docker-command-9": {
+      "bytes": 140,
+      "hits": 0
+    },
+    "docker-command-10": {
+      "bytes": 0,
+      "hits": 0
+    },
+    "retained-evidence": {
+      "bytes": 76303,
+      "hits": 0
+    }
+  },
+  "elapsedMs": 52897,
+  "stagingDisposition": "Retained for Root to copy evidence, verify paths, and remove; build cache/VHDX reclamation unclaimed"
+}

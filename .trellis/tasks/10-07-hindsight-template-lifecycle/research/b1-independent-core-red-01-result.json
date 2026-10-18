@@ -1,0 +1,9 @@
+{
+  "command": "pnpm --filter @taki/core exec vitest run src/memory/hindsight/template-lifecycle/template-receipt-guards.test.ts --maxWorkers=2",
+  "cwd": "H:\\TakiAgent",
+  "startedAtUtc": "2026-10-08T05:20:17.3639310Z",
+  "endedAtUtc": "2026-10-08T05:20:21.5056725Z",
+  "elapsedSeconds": 4.1233627,
+  "exitCode": 1,
+  "log": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b1-independent-core-red-01.log"
+}

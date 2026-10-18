@@ -1,0 +1,65 @@
+   Compiling tokio v1.52.3
+   Compiling tokio-util v0.7.18
+   Compiling tokio-native-tls v0.3.1
+   Compiling tower v0.5.3
+   Compiling tokio-stream v0.1.19
+   Compiling tower-http v0.6.11
+   Compiling tokio-test v0.4.5
+   Compiling h2 v0.4.15
+   Compiling hyper v1.10.1
+   Compiling hyper-util v0.1.20
+   Compiling hyper-tls v0.6.0
+   Compiling reqwest v0.12.28
+   Compiling progenitor-client v0.11.2
+   Compiling hindsight-client v0.1.0 (H:\hindsight\hindsight-clients\rust)
+    Finished `release` profile [optimized] target(s) in 1m 11s
+     Running tests\configuration_observation_contract.rs (target\release\deps\configuration_observation_contract-48e5cb350f21cd38.exe)
+
+running 2 tests
+test configuration_errors_do_not_reuse_legacy_reason_types ... ok
+test configuration_observation_preserves_distinct_profile_variants ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\current_state_contract.rs (target\release\deps\current_state_contract-7ebd2aa597e3a801.exe)
+
+running 4 tests
+test incomplete_status_preserves_null_certificate_and_distinct_state_enum ... ok
+test current_state_keeps_safe_integers_nulls_and_typed_metadata ... ok
+test evidence_union_roundtrips_all_declared_variants ... ok
+test observation_scope_union_preserves_each_wire_shape ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\native_result_contract.rs (target\release\deps\native_result_contract-e7a5ade2cda6f2d9.exe)
+
+running 4 tests
+test native_retain_result_accepts_no_mutation ... ok
+test native_status_preserves_nullable_references ... ok
+test native_status_does_not_reuse_operation_or_compatibility_enums ... ok
+test native_manifest_keeps_sha256_validation ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\template_backup_contract.rs (target\release\deps\template_backup_contract-10280affb8380060.exe)
+
+running 2 tests
+test observation_wire_is_lossless_and_v2_rejects_v1 ... ok
+test backup_v2_preserves_selected_original_request_and_unselected_null ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\template_lifecycle_contract.rs (target\release\deps\template_lifecycle_contract-a4506fde40b83011.exe)
+
+running 1 test
+test template_apply_preserves_absence_tombstones_and_nullable_before_images ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\transition_contract.rs (target\release\deps\transition_contract-a530df3be5f4ca98.exe)
+
+running 1 test
+test named_nullable_transition_union_preserves_wire_shape ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

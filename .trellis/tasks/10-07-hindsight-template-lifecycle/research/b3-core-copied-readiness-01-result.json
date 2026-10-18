@@ -1,0 +1,11 @@
+{
+  "command": [
+    "node",
+    "--experimental-transform-types",
+    ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-copied-readiness-smoke.mjs"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "durationSeconds": 10.518,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-copied-readiness-01.log"
+}

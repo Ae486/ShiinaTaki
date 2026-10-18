@@ -1,5 +1,23 @@
 # Memory Operations and Setup - Design Draft
 
+## Current design gate (2026-10-07)
+
+The owner approved proceeding with the presented Stage 5 plan. The 5A child independently passed and released
+its Native/Shared/Core/Home implementation. The reviewed 5B child is active at B1, followed by B2/B3 gates.
+This parent remains the residual planning map; do not use historical prose below to dispatch completed work.
+5C helper/custody design-readiness review is read-only and independent of B1 implementation.
+
+The historical draft below predates Stages 1-4. Its descriptions of missing operation ownership, first activation,
+writer custody, backup and repeated/emergency handoff are superseded by the delivered task specs and
+[current Stage 4 review](../09-29-hindsight-transitions-emergency/research/stage4-review-2026-10-07.md). Reuse those
+owners and contracts; do not create a second scheduler, backup journal or authority runtime.
+
+Stage 4 W9 is independently accepted. Before each Stage 5 implementation, replace the relevant historical
+sections with reviewed current contracts. Distinguish actual deployment-model configuration from stored Taki model hints
+and per-Bank configuration, define independent overlay revisions/preservation, and coordinate candidate upgrade
+with exact Native build/extension gates, historical receipts/baselines and paired recovery. Core stays OS-neutral;
+managed provisioning must not become a prerequisite for an existing instance. This draft is not dispatch-ready.
+
 ## Status and sources
 
 Status: planning, subject to contract/readiness review. The owner approved proceeding after bounded B6 closeout; B7 production

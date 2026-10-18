@@ -1,0 +1,35 @@
+Owned fixture: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-83efe88ff850
+PostgreSQL: 18.1 ; vector/pg_trgm ready
+Pytest log: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-83efe88ff850\pytest.log
+============================= test session starts =============================
+platform win32 -- Python 3.11.5, pytest-9.0.3, pluggy-1.6.0
+rootdir: H:\hindsight\hindsight-api-slim
+configfile: pyproject.toml
+plugins: anyio-4.11.0, langsmith-0.9.1, asyncio-1.3.0, rerunfailures-16.1, timeout-2.4.0, xdist-3.8.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 300.0s
+timeout method: thread
+timeout func_only: False
+
+----------------------------- live log collection -----------------------------
+2026-10-07 22:14:05 - WARNING - LiteLLM - LiteLLM: Failed to fetch remote model cost map from https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json: G1_FIXTURE_EXTERNAL_NETWORK_FORBIDDEN. Falling back to local backup.
+collected 2 items
+
+tests/test_configuration_observation.py::test_version_then_observation_never_initializes_a_store[False] PASSED [ 50%]
+tests/test_configuration_observation.py::test_version_then_observation_never_initializes_a_store[True] PASSED [100%]
+
+============================ slowest 10 durations =============================
+1.30s call     tests/test_configuration_observation.py::test_version_then_observation_never_initializes_a_store[False]
+1.07s call     tests/test_configuration_observation.py::test_version_then_observation_never_initializes_a_store[True]
+0.04s setup    tests/test_configuration_observation.py::test_version_then_observation_never_initializes_a_store[False]
+0.01s setup    tests/test_configuration_observation.py::test_version_then_observation_never_initializes_a_store[True]
+
+(2 durations < 0.005s hidden.  Use -vv to show these durations.)
+============================= 2 passed in 15.38s ==============================
+{
+    "Fixture":  "taki-hindsight-g1-83efe88ff850",
+    "Stopped":  true,
+    "DataRemoved":  true,
+    "RegistryRemoved":  true,
+    "Logs":  "H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-83efe88ff850"
+}

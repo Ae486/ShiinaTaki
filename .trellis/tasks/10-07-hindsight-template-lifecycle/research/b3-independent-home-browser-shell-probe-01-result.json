@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python",
+    ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-browser-launch-probe.py",
+    "headless-shell"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "startedAt": "2026-10-09T14:17:57.702238+00:00",
+  "finishedAt": "2026-10-09T14:18:10.145593+00:00",
+  "exitCode": 0,
+  "durationSeconds": 12.453,
+  "inputManifest": "b3-independent-home-browser-shell-probe-01-inputs.json",
+  "sourceCount": 2042,
+  "changedInputs": [],
+  "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-independent-home\\browser-shell-probe-01-d08b5f93941f4991adb5dbc86e3ac0c5",
+  "temporaryRootRemoved": true,
+  "remainingFixtureEntries": [],
+  "log": "b3-independent-home-browser-shell-probe-01.log"
+}

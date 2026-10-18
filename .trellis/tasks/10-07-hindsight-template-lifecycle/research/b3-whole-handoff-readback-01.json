@@ -1,0 +1,188 @@
+{
+  "checkedAtUtc": "2026-10-13T07:03:39.186896+00:00",
+  "passed": true,
+  "sourceBaseline": {
+    "path": "b3-whole-core-boot-01-inputs-after.json",
+    "bytes": 455139,
+    "sha256": "07990e0b4f4e2386571137acdc7a35ebd35799c98fdffebd76f759f4cec96bbb"
+  },
+  "sourceAcceptance": {
+    "path": "b3-whole-source-readback-01.json",
+    "bytes": 14221,
+    "sha256": "33a121848a66f09fe611ace94d48e557c9af6929490b081fc5b25f6cf54680ad",
+    "sourceChecksPassed": true
+  },
+  "wholeGraph": {
+    "baselineCount": 2417,
+    "currentCount": 2417,
+    "changedInputs": [
+      {
+        "path": "docs/HANDOFF.md",
+        "before": {
+          "path": "docs/HANDOFF.md",
+          "bytes": 66606,
+          "sha256": "146415da326f20f3377a1096e035e616cb786fd5fbc5326bd0cf85e0d1c98974"
+        },
+        "after": {
+          "path": "docs/HANDOFF.md",
+          "bytes": 67767,
+          "sha256": "a3858085806974310898273d2af668fc16221a0111cee7dbfd09971291d5ffb5"
+        }
+      }
+    ],
+    "onlyHandoffDocumentChanged": true
+  },
+  "documents": [
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-whole-acceptance.md",
+      "before": {
+        "bytes": 11820,
+        "sha256": "49c9cf1e9e8ba56495580c5f9d0c1da3b6164760e15291063760bdf2233f1ca1"
+      },
+      "after": {
+        "bytes": 15439,
+        "sha256": "454fa902a5a071ad7a87621f0e6f57cba37b689fd787a800cc0d27338b51daaa"
+      },
+      "utf8WithoutBom": true
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/prd.md",
+      "before": {
+        "bytes": 7485,
+        "sha256": "e6b943cf0c20ba302fcf6237a45ed49088f2a8259e76bd74ca2b6d20332d0c38"
+      },
+      "after": {
+        "bytes": 7581,
+        "sha256": "01a813c3a2fa2692a7bcadcc87d2607dcbd78afd630fc5db42cc0eaad29427e7"
+      },
+      "utf8WithoutBom": true
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/implement.md",
+      "before": {
+        "bytes": 10931,
+        "sha256": "d49397fd645b76fe97cb0e479d2772cdde81ab34bc074649118e457d68894db4"
+      },
+      "after": {
+        "bytes": 12006,
+        "sha256": "69a4d0c261a3f68d964f048b31bcfa12dafdde80f7daaff09d10d055138f32ef"
+      },
+      "utf8WithoutBom": true,
+      "historicalTailPreserved": true
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/task.json",
+      "before": {
+        "bytes": 7700,
+        "sha256": "c619df320a5925d773ecc85107d894dda15435de40484e6b03841c52da3227fa"
+      },
+      "after": {
+        "bytes": 8690,
+        "sha256": "35064793a9453881ec50e907062ea383d76575e692dcea791a6d0af841ad659b"
+      },
+      "utf8WithoutBom": true
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/leader-now.md",
+      "before": {
+        "bytes": 37328,
+        "sha256": "b3a7a92e1fbd243bfb560153fc837f57da4ec3cbcd8f5adc7db9afe4a8105ee3"
+      },
+      "after": {
+        "bytes": 37796,
+        "sha256": "4e1ed2a504fb7154edbce86492792beab438facfab1163f4339f3e3d56d678c9"
+      },
+      "utf8WithoutBom": true,
+      "historicalTailPreserved": true
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-continuation-2026-10-12.md",
+      "before": {
+        "bytes": 6784,
+        "sha256": "19cab8c8e4835db3dc0425e1cc2efbc101c80ef8cfe67b70eabc460f40b46468"
+      },
+      "after": {
+        "bytes": 7778,
+        "sha256": "6dcaa79156417e2bbe1a4987cf2ec26fe1e6827e04ed5b0fe21c7fe872644d0b"
+      },
+      "utf8WithoutBom": true
+    },
+    {
+      "path": "docs/HANDOFF.md",
+      "before": {
+        "bytes": 66606,
+        "sha256": "146415da326f20f3377a1096e035e616cb786fd5fbc5326bd0cf85e0d1c98974"
+      },
+      "after": {
+        "bytes": 67767,
+        "sha256": "a3858085806974310898273d2af668fc16221a0111cee7dbfd09971291d5ffb5"
+      },
+      "utf8WithoutBom": true,
+      "historicalTailPreserved": true
+    }
+  ],
+  "prd": {
+    "automaticCriteria": 11,
+    "checkedCriteria": 11,
+    "acceptanceReportPassRows": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "allElevenPassed": true
+  },
+  "task": {
+    "path": ".trellis/tasks/10-07-hindsight-template-lifecycle",
+    "status": "in_progress",
+    "currentSource": "Current task: .trellis/tasks/10-07-hindsight-template-lifecycle\nSource: session:codex_01a1309f-e374-7241-ab38-4e50f040d985",
+    "bindingUnchanged": true,
+    "fieldsOutsideNotesUnchanged": true,
+    "historicalNotesPreservedAndAppended": true
+  },
+  "repositories": {
+    "taki": {
+      "root": "H:\\TakiAgent",
+      "branch": "main",
+      "head": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a",
+      "statusEntriesBeforeReadbackFile": 1688,
+      "statusSha256": "32a7fc3df2256f025d519f23158c4fa3117bdf5a68d55da4df6daafc3b12e97a",
+      "outsideDocumentStatusSha256": "f83af4663bde37982a8087b596a4fdc3812568bad41536198384a187381ca666",
+      "stagedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "diffCheck": {
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "warning: in the working copy of '.trellis/tasks/08-09-memory-operations-ui/check.jsonl', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of '.trellis/tasks/08-09-memory-operations-ui/implement.jsonl', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of '.trellis/tasks/08-09-memory-operations-ui/task.json', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of '.trellis/tasks/09-29-hindsight-transitions-emergency/check.jsonl', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of '.trellis/tasks/09-29-hindsight-transitions-emergency/design.md', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of '.trellis/tasks/09-29-hindsight-transitions-emergency/implement.md', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of '.trellis/tasks/09-29-hindsight-transitions-emergency/prd.md', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of '.trellis/tasks/09-29-hindsight-transitions-emergency/research/execution-status.md', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'docs/HANDOFF.md', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'packages/core/src/db/index.md', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'packages/core/src/db/migrations/index.md', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'packages/core/src/memory/hindsight-backup/index.md', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'packages/core/src/memory/transitions/index.md', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'packages/core/src/testing/index.md', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'packages/shared/src/index.md', CRLF will be replaced by LF the next time Git touches it\n"
+      },
+      "headAndBranchUnchanged": true,
+      "outsideDocumentStatusUnchanged": true,
+      "stagedDiffUnchanged": true
+    },
+    "native": {
+      "root": "H:\\hindsight",
+      "branch": "main",
+      "head": "eb6413a7f58c4f3f0adb88a33a99516f8707fef7",
+      "statusEntriesBeforeReadbackFile": 313,
+      "statusSha256": "3e51a9e63c22b6785d2e38e6c097705a776794d9baed0077652d9e0d08b2e726",
+      "outsideDocumentStatusSha256": "3e51a9e63c22b6785d2e38e6c097705a776794d9baed0077652d9e0d08b2e726",
+      "stagedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "diffCheck": {
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "warning: in the working copy of '.env.example', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of '.gitattributes', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'TAKI_PATCHES.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/admin/cli.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/admin/taki_backup.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/api/http.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/api/taki_backup.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/engine/memories/__init__.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/engine/reflect/agent.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/engine/replication.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/engine/retain/orchestrator.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/engine/retain/receipt_context.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/engine/taki_compatibility.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/engine/transition_initialization.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/engine/transition_snapshot.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/extensions/builtin/taki_memory.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/extensions/builtin/tenant.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/extensions/tenant.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/worker/poller.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/tests/native_results/test_cutover_compatibility.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/tests/native_results/test_transition_backup.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/tests/test_taki_admin_backup.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/tests/test_taki_extension_contract.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/go/api/openapi.yaml', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/go/api_taki_memory_compatibility.go', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/go/client.go', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/go/model_taki_compatibility_contracts.go', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/python/hindsight_client_api/__init__.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/python/hindsight_client_api/api/__init__.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/python/hindsight_client_api/api/taki_memory_compatibility_api.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/python/hindsight_client_api/models/__init__.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/python/hindsight_client_api/models/taki_compatibility_contracts.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/python/hindsight_client_api/models/taki_compatibility_support.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/typescript/generated/client/client.gen.ts', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/typescript/generated/sdk.gen.ts', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/typescript/generated/types.gen.ts', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-control-plane/bin/cli.js', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-dev/tests/test_client_contract_fixtures.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-docs/docs/developer/admin-cli.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-docs/docs/developer/configuration.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-embed/hindsight_embed/env.example', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'scripts/postprocess-go-client.py', LF will be replaced by CRLF the next time Git touches it\n"
+      },
+      "headAndBranchUnchanged": true,
+      "outsideDocumentStatusUnchanged": true,
+      "stagedDiffUnchanged": true
+    }
+  },
+  "noTestRerunNeeded": true,
+  "scope": "Read-only post-documentation snapshot, Git diff/status and task-binding reconciliation; the only output is this research JSON. No tests, builds, generation, services, source edits, staging, commits or task lifecycle actions. Stop before 5C; installed/manual and original-environment acceptance remain separate."
+}

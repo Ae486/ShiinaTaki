@@ -1,0 +1,86 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ ❯ src/memory/hindsight/template-lifecycle/template-receipt-guards.test.ts (10 tests | 8 failed) 199ms
+     × refuses regressed model evidence without a refresh child 46ms
+     × refuses same-revision-different-payload model evidence without a refresh child 18ms
+     × requires an advanced model revision after a definition change 18ms
+     × refuses regressed directive evidence without a refresh child 18ms
+     × refuses same-revision-different-payload directive evidence without a refresh child 16ms
+     × requires an advanced directive revision after a definition change 23ms
+     × requires exact logical-journal movement for changed=false 12ms
+     × requires exact logical-journal movement for changed=true 12ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/memory/hindsight/template-lifecycle/template-receipt-guards.test.ts > all-resource current evidence independently of refresh children > refuses regressed model evidence without a refresh child
+ FAIL  src/memory/hindsight/template-lifecycle/template-receipt-guards.test.ts > all-resource current evidence independently of refresh children > refuses same-revision-different-payload model evidence without a refresh child
+ FAIL  src/memory/hindsight/template-lifecycle/template-receipt-guards.test.ts > all-resource current evidence independently of refresh children > refuses regressed directive evidence without a refresh child
+ FAIL  src/memory/hindsight/template-lifecycle/template-receipt-guards.test.ts > all-resource current evidence independently of refresh children > refuses same-revision-different-payload directive evidence without a refresh child
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ src/memory/hindsight/template-lifecycle/template-receipt-guards.test.ts:37:66
+     35|       expect(preview.request.refresh).toEqual([]);
+     36|       expect(() => verifyTemplateApplication({ preview, receipt: commi…
+     37|         snapshot: replaceProof(commit.snapshot, kind, proof) })).toThr…
+       |                                                                  ^
+     38|     });
+     39|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  src/memory/hindsight/template-lifecycle/template-receipt-guards.test.ts > all-resource current evidence independently of refresh children > requires an advanced model revision after a definition change
+ FAIL  src/memory/hindsight/template-lifecycle/template-receipt-guards.test.ts > all-resource current evidence independently of refresh children > requires an advanced directive revision after a definition change
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ src/memory/hindsight/template-lifecycle/template-receipt-guards.test.ts:46:114
+     44|       expect(after.definition).not.toEqual(before.definition);
+     45|       expect(() => verifyTemplateApplication({ preview, receipt: commi…
+     46|         snapshot: replaceProof(commit.snapshot, kind, { ...after.proof…
+       |                                                                                                                  ^
+     47|     });
+     48|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  src/memory/hindsight/template-lifecycle/template-receipt-guards.test.ts > all-resource current evidence independently of refresh children > requires exact logical-journal movement for changed=false
+ FAIL  src/memory/hindsight/template-lifecycle/template-receipt-guards.test.ts > all-resource current evidence independently of refresh children > requires exact logical-journal movement for changed=true
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ src/memory/hindsight/template-lifecycle/template-receipt-guards.test.ts:64:94
+     62|       journal_after: commit.receipt.journal_before + (changed ? 0 : 1)…
+     63|     const receipt = { ...commit.receipt, journal_after: body.journal_a…
+     64|     expect(() => verifyTemplateApplication({ preview, receipt, snapsho…
+       |                                                                                              ^
+     65|   });
+     66| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  8 failed | 2 passed (10)
+   Start at  13:20:18
+   Duration  2.34s (transform 1.17s, setup 0ms, import 1.75s, tests 199ms, environment 0ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/hindsight/template-lifecycle/template-receipt-guards.test.ts --maxWorkers=2

@@ -1,0 +1,260 @@
+{
+  "version": 1,
+  "createdAt": "2026-10-15T10:51:16.670Z",
+  "reviewer": "/root/c2_design_check",
+  "task": ".trellis/tasks/10-14-hindsight-managed-deployment",
+  "result": {
+    "runtimeReview": "PASS_SCOPED_R2",
+    "casePassed": true,
+    "launcherExitCode": 0,
+    "launcherElapsedMs": 117079,
+    "fixtureElapsedMs": 116348,
+    "ownedRuntimeCleanup": true,
+    "protectedTreeScannedAfterStop": true,
+    "deploymentReady": false
+  },
+  "caseId": "775da07b-2b69-44a3-868c-2604423dac11",
+  "scope": "One actual fake-credential deployment: exact outer Host completion loss, Core/Shell/helper interruption and original-resource recovery, one original-container restart, explicit fresh-startup resume, bounded scans and owned cleanup.",
+  "evidenceRoot": "G:/TakiAgent-c2a-docker-acceptance/recovery-775da07b-2b69-44a3-868c-2604423dac11",
+  "evidence": [
+    {
+      "file": "recovery.json",
+      "bytes": 183824,
+      "sha256": "c4505082e2b777692cd521b5e38fa3c0c79f464dec963b31e7b9a3de57c2b1f8"
+    },
+    {
+      "file": "launcher-command.json",
+      "bytes": 757,
+      "sha256": "6b332957a46c0d0c24fe0b735a512de42cbf3406b757de66ef9354c0226dcda8"
+    },
+    {
+      "file": "prepared-inputs.json",
+      "bytes": 4166,
+      "sha256": "eeae9b9f85bae894962023dad5c516ec6b0f04eb40c306923dac1d7f7ff04101"
+    },
+    {
+      "file": "commands.jsonl",
+      "bytes": 20183,
+      "sha256": "d2f9aab83faf44f1b965959279723b3c1ce3c095bb4019b30a71c0993ec6a709"
+    },
+    {
+      "file": "root-post-run-readback.json",
+      "bytes": 2759,
+      "sha256": "f69b2c4e69223e864a632f34de4c573ebef3e089ea4b33e079e25411830411e4"
+    },
+    {
+      "file": "original-before-containers.json",
+      "bytes": 1546,
+      "sha256": "c4667b5486b3ab64f761f6393845248518f4178026d162173d4e4d269d8fc079"
+    }
+  ],
+  "reviewedFixtureCopies": [
+    {
+      "file": "reviewed-fixture\\c2a-recovery-r2-review.json",
+      "bytes": 7841,
+      "sha256": "a543cfa455158a2c92296d840e8aad1f2232ab5ebe1e7bd3443d452109883cce"
+    },
+    {
+      "file": "reviewed-fixture\\c2a-recovery-r2-review.md",
+      "bytes": 4194,
+      "sha256": "ef22ac7c923482f9876cd9efc12a9b0172ff7d60bc9233bbbb9302f1822b7352"
+    },
+    {
+      "file": "reviewed-fixture\\c2a-recovery-r2-self-check.json",
+      "bytes": 25449,
+      "sha256": "c9250e0c65792b8656d63a338700665a4f6a781bf9f6d163385c1fb4040fe419"
+    },
+    {
+      "file": "reviewed-fixture\\c2a-recovery-r2-self-check.md",
+      "bytes": 5081,
+      "sha256": "974109fdb4598cce3ceaada4f933d804ca24381d96f90a6f401715d6454df20c"
+    },
+    {
+      "file": "reviewed-fixture\\README.md",
+      "bytes": 9848,
+      "sha256": "9c73c76e240e84e45b98d6872a9e6596f9df7d6e7c12d55d46556d36b9c0e3e4"
+    },
+    {
+      "file": "reviewed-fixture\\recovery-probe.py",
+      "bytes": 5131,
+      "sha256": "e3e49ad25888b34332184775f3193a47ad9e3c0c4943fd08e3dc7b3611119b29"
+    },
+    {
+      "file": "reviewed-fixture\\run-recovery.ts",
+      "bytes": 47588,
+      "sha256": "869146af78a9cde99cf70af2c857049548c3c097aedd09f63c95d779c8d11017"
+    }
+  ],
+  "independentAssessment": {
+    "checks": {
+      "correctR2Case": true,
+      "reviewedInputsMatched": true,
+      "runtimeSourceHashMatchesReview": true,
+      "launcherSuccess": true,
+      "runtimeAndPostStopScanSuccess": true,
+      "noRuntimeFailure": true,
+      "exactLostCompletion": true,
+      "canonicalUnknownPreserved": true,
+      "originalChildSurvived": true,
+      "originalHelperReaped": true,
+      "replacementHelperIdentity": true,
+      "persistedInputsAssertionPassed": true,
+      "originalRegistryFactsPreserved": true,
+      "newWaitingStartupUnbound": true,
+      "noChildBeforeNewAuthority": true,
+      "freshTmpfsAndSameVolumeMarker": true,
+      "freshAuthority": true,
+      "freshCustody": true,
+      "stableCatalog": true,
+      "newStartupRunCompleted": true,
+      "repeatResumeAssertionPassed": true,
+      "allRetainedExecsNoTtyAndSucceeded": true,
+      "zeroSentinelHits": true,
+      "postStopLocalBounds": true,
+      "rootCleanupReadback": true,
+      "originalSevenContainersUnchanged": true,
+      "ownedRemovalErrorsExpected": true,
+      "exactEngine": true,
+      "trackedProcessQueryEmpty": true,
+      "derivedEffectCountsMatch": true,
+      "singleOriginalResourceAcrossEvents": true
+    },
+    "counts": {
+      "before": {
+        "since": "2026-10-15T10:36:02.644Z",
+        "until": "2026-10-15T10:37:03.805Z",
+        "containerIds": [
+          "471463f70caae62d43cb9d7aee396832e0eb6fd7b715d27d6a2300f9134a6b92"
+        ],
+        "volumeIds": [
+          "taki-c2a-6b0cd1fc-c3a5-409c-90cf-edf60132b553-data"
+        ],
+        "containerCreate": 1,
+        "containerStart": 1,
+        "restart": 0,
+        "volumeCreate": 1,
+        "submit": 1,
+        "execCreate": 10
+      },
+      "final": {
+        "since": "2026-10-15T10:36:02.644Z",
+        "until": "2026-10-15T10:37:26.074Z",
+        "containerIds": [
+          "471463f70caae62d43cb9d7aee396832e0eb6fd7b715d27d6a2300f9134a6b92"
+        ],
+        "volumeIds": [
+          "taki-c2a-6b0cd1fc-c3a5-409c-90cf-edf60132b553-data"
+        ],
+        "containerCreate": 1,
+        "containerStart": 2,
+        "restart": 1,
+        "volumeCreate": 1,
+        "submit": 2,
+        "execCreate": 19
+      }
+    },
+    "identities": {
+      "deploymentId": "6b0cd1fc-c3a5-409c-90cf-edf60132b553",
+      "containerId": "471463f70caae62d43cb9d7aee396832e0eb6fd7b715d27d6a2300f9134a6b92",
+      "volume": "taki-c2a-6b0cd1fc-c3a5-409c-90cf-edf60132b553-data",
+      "imageId": "sha256:1ad09a1867b8235b8361d76f477d6fc15e0ffd02d0e7181e60bfce35752d5515",
+      "oldStartup": "3003a557-8c14-4b08-8a15-cc1c84f46376",
+      "newStartup": "ab643a72-373b-4533-a1bd-3110a12044b4",
+      "oldChild": {
+        "pid": 49,
+        "startTicks": "765911"
+      },
+      "newChild": {
+        "pid": 86,
+        "startTicks": "770538"
+      },
+      "oldCore": 41308,
+      "newCore": 38016,
+      "oldHelper": {
+        "pid": 42200,
+        "parentPid": 43760,
+        "createdAt": "2026-10-15T10:36:07.0556780Z",
+        "executable": "C:\\taki-c2a-docker-recovery-775da07b-2b69-44a3-868c-2604423dac11\\node.exe",
+        "fixedArgvVerified": true
+      },
+      "newHelper": {
+        "pid": 42740,
+        "parentPid": 41120,
+        "createdAt": "2026-10-15T10:36:56.4755250Z",
+        "executable": "C:\\taki-c2a-docker-recovery-775da07b-2b69-44a3-868c-2604423dac11\\node.exe",
+        "fixedArgvVerified": true
+      },
+      "newStartupRun": "ce542ff1-8fb3-49ff-8f2a-e8747f5bdc85",
+      "originalRevision": 13,
+      "newRevision": 24,
+      "markerSha256": "959f108818cc716f83093c83f795bf7eb27e22542cfaa5fbca1fa512ca96b237"
+    },
+    "failedChecks": [],
+    "startupReadPolls": {
+      "attempts": 1,
+      "transportFailures": 0
+    },
+    "execCount": 19,
+    "submitExecIds": [
+      "4aa9e8f6f4009655afd9950c7659ed11fecd742e8c052bd0513c16d7620cdd71",
+      "ea74ca94be26dc2feef1f8960de9326c4896108281b1aad90f2f53e4162a708a"
+    ],
+    "rootReadbackRecordedAt": "2026-10-15T10:47:08.776Z"
+  },
+  "scanFacts": {
+    "localFiles": {
+      "files": 827,
+      "bytes": 103461077,
+      "hits": 0
+    },
+    "allRetainedHitCountsZero": true,
+    "postStopFlag": true
+  },
+  "findings": {
+    "fixed": [],
+    "notFixed": [],
+    "conclusion": "No blocker or contradiction found in the scoped retained runtime evidence. No source repair was made during this runtime review."
+  },
+  "factBoundaries": [
+    "Exact Host-to-Core completion loss was exercised; private Native socket ACK loss and inner create/start/submit loss were not.",
+    "Original Run/Attempt outcome_unknown remains historical; successful later observation does not relabel that original outcome.",
+    "The two file markers establish volume persistence and fresh tmpfs, not database correctness or a trusted receipt.",
+    "Counts are derived from the retained resource-scoped event windows and 19 captured exec metadata records; they are not an exhaustive all-probe or daemon transcript.",
+    "Persisted-file equality and repeated-call equality are successful assertions in the hash-bound executed source; some intermediate raw hashes/replies were not independently retained.",
+    "The post-stop complete local scan passed after all process owners were reaped; no lock-file scan exemption was used.",
+    "Root readback confirms the listed original seven containers and exact owned-resource/process absence. R2 staging remains Root-owned pending archive/removal."
+  ],
+  "firstAttempt": {
+    "status": "FAIL_PRESERVED",
+    "archive": "c2a-recovery-first-attempt-evidence.zip",
+    "entries": 72,
+    "sha256": "fb0d5afca5f04df4d800c25d831db49c218a2d3233a07c919f5baa55e11b795d",
+    "verification": "Root-verified archive and historical stage cleanup reused; no R1 rewrite or rehash performed by this review."
+  },
+  "remaining": [
+    "Inner Native ACK loss",
+    "Inner create/start/submit faults",
+    "Custody rotation/unavailability",
+    "Controlled daemon restart",
+    "Actual database shutdown and persistence",
+    "C1 service criteria, C2b and real-model/business-data/manual acceptance"
+  ],
+  "verification": {
+    "runtime": "PASS_FROM_EXISTING_RAW_EVIDENCE",
+    "lint": "REUSED_ACCEPTED_R2_STATIC_PASS",
+    "typeCheck": "REUSED_ACCEPTED_R2_STATIC_PASS",
+    "testsRerunByReviewer": 0,
+    "dockerQueriesByReviewer": 0,
+    "buildsByReviewer": 0,
+    "sourceEdits": 0
+  },
+  "ownership": {
+    "newReports": [
+      ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-runtime-review.md",
+      ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-runtime-review.json"
+    ],
+    "releasedTo": "/root",
+    "rawEvidenceAndArchives": "Root only; untouched"
+  },
+  "next": "Root may archive and verify the R2 evidence, remove only its owned staging, and close this bounded recovery slice before the already-reviewed database prerequisite run. Broader task criteria remain open."
+}

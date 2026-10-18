@@ -1,0 +1,559 @@
+{
+  "activeTask": ".trellis/tasks/10-07-hindsight-template-lifecycle",
+  "owner": "b3_home_runner_complete",
+  "cwd": "H:\\TakiAgent",
+  "head": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a",
+  "releasedAt": "2026-10-11T11:47:34.483926+00:00",
+  "verdict": "scoped_browser_runner_pass",
+  "wholeStage5BAccepted": false,
+  "sourceOwnership": "released; no further source edits or checks active",
+  "heavySlot": "released to root after final lint",
+  "files": [
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-browser.test.ts",
+      "bytes": 9477,
+      "sha256": "d940471919de6fbd40404046b7511ece9da4543bad8353a85c66f00af2cd66dd"
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/memory-transitions-browser.test.ts",
+      "bytes": 11015,
+      "sha256": "fd53090000fba84bbea4d349816ecb29122c1228aade140134e9b14e3b8df5a6"
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/index.md",
+      "bytes": 10164,
+      "sha256": "2e0c96b5357aae39bce4a4fb257f5507a357302f0e88fe2c8d91234baab75444"
+    },
+    {
+      "path": ".trellis/spec/frontend/memory-transitions.md",
+      "bytes": 5616,
+      "sha256": "5ec335ee8613875a2d029c4af115ba78deb10d93662f4cad1966a4c40e8c8ae8"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/run-b3-independent-home-check.py",
+      "bytes": 5745,
+      "sha256": "c9e773e406a016bcea766c43f20cc74d42853e236ad2a1e5a542820ecf3a0fe0"
+    }
+  ],
+  "supportFiles": [
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-home-runner-resume-2026-10-11.md",
+      "bytes": 12729,
+      "sha256": "1e2bab7c2b3fc251b2835a02f5137d3baad01c42a8e9a328b9b79fe21f7b0b3e"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-home-runner-baseline-2026-10-11-01.json",
+      "bytes": 30919,
+      "sha256": "ba616f7d487caed2688b3f588d57c8b07baff6e571fbe353bedd16fb195eaf66"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-home-recorder-baseline-2026-10-11-01.json",
+      "bytes": 5845,
+      "sha256": "02d6048c0d280b8f58a6863c64c1cc16840731bc0e16b8d40f846e5b5f19143c"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-home-w7-diagnostic-source-2026-10-11-01.json",
+      "bytes": 13939,
+      "sha256": "eb879487d6681197f94455094784521af03379b60b79dcadcff7e181b59025ad"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-home-finalization-baseline-2026-10-11-01.json",
+      "bytes": 19541,
+      "sha256": "290c99a15f8080c438fe19deaa2ad908f7bd78b5bad4b75b8b9f52a19ba06397"
+    }
+  ],
+  "checkedDependencySnapshot": "b3-independent-home-resume-final-lint-20261011-01-inputs.json",
+  "verification": {
+    "distinctPassingBrowserFiles": 3,
+    "distinctPassingBrowserTests": 3,
+    "finalLintFiles": 2,
+    "overlappingAttemptsNotSummed": true,
+    "allRunsChangedInputsEmpty": true,
+    "allTemporaryRootsRemoved": true,
+    "retainedConfigurationTemplateReuse": "Root explicitly authorized reuse after final W7-only cleanup; whole graph still belongs to root"
+  },
+  "dependencyDeltaSinceConfigurationTemplateWindow": {
+    "added": [
+      {
+        "path": "packages/core/src/memory/hindsight-backup/hindsight-template-backup-capacity.test.ts",
+        "bytes": 3930,
+        "sha256": "ab5b6b9b9772e2be0dd2867bdde529fc15bc66bd0b02fe260e6b8ad9e260d59d"
+      },
+      {
+        "path": "packages/core/src/memory/transitions/transition-template-scope.test.ts",
+        "bytes": 2910,
+        "sha256": "70dd6380768d73ac15478e10047f66760710dcb0d09d100d8469d257872b0600"
+      }
+    ],
+    "changed": [
+      {
+        "path": "apps/desktop/src/windows/home/pages/operations/index.md",
+        "beforeSha256": "2901ca5ba02a5564fde76fba48f4056d3716634eb142a0382d619182fa580e3b",
+        "afterSha256": "2e0c96b5357aae39bce4a4fb257f5507a357302f0e88fe2c8d91234baab75444"
+      },
+      {
+        "path": "apps/desktop/src/windows/home/pages/operations/memory-transitions-browser.test.ts",
+        "beforeSha256": "49a9009735b8f0d5ea80e26fb53d8c6a33cf7e92a9047947b2ce902a216542bb",
+        "afterSha256": "fd53090000fba84bbea4d349816ecb29122c1228aade140134e9b14e3b8df5a6"
+      },
+      {
+        "path": "packages/core/src/memory/hindsight-backup/hindsight-template-backup-consumers.test.ts",
+        "beforeSha256": "b5ca0801c0a1aa492219bfa8a28ebf5231fe6d0d6434f1410a25fabedb5c8b24",
+        "afterSha256": "66746fd934904e152b30d654c26ac2623064cfcc310ea40102b10b1915ea8c58"
+      },
+      {
+        "path": "packages/core/src/memory/transitions/transition-template-healthy.test.ts",
+        "beforeSha256": "5a8762e5a972d0b34847e341b47cb3a1d08d5ee7e3160018846ffc7f03409988",
+        "afterSha256": "f67f933d4f6150e69b3ed4e20e72d733d72a47e01b130253cc3ce06ee6807b85"
+      },
+      {
+        "path": "packages/core/src/testing/hindsight-template-backup-consumer-fixture.ts",
+        "beforeSha256": "cc09cb340b5fe14b77778b031a587c6c92b3b80cea634408c6df4d971f2afb92",
+        "afterSha256": "4ea138ea64d8ea57f5222e6257bf1bf6e5bdab40a7574eb8da9b03ca337d5f8e"
+      },
+      {
+        "path": "packages/core/src/testing/index.md",
+        "beforeSha256": "1c2e563af4d51b48fb9c041193d75ca9c520e2daa20fc5474f79c3dafea927d7",
+        "afterSha256": "ff33bb4332e250582ea67fcd2f9f2d3bd306e5cfba456201ebe3791baa34e962"
+      }
+    ]
+  },
+  "browserRuntime": {
+    "executable": "G:\\AppDataMove\\ms-playwright\\chromium_headless_shell-1181\\chrome-win\\headless_shell.exe",
+    "sha256": "64316957e2368125e872fe36877e959b37737d862000a7893676db9ad6019455",
+    "version": "139.0.7258.5",
+    "playwrightVersion": "1.54.0",
+    "playwrightDriverVersion": "1.54.1"
+  },
+  "retainedRuns": [
+    {
+      "name": "resume-lint-20261011-01",
+      "command": [
+        "pnpm.cmd",
+        "exec",
+        "eslint",
+        "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-browser.test.ts",
+        "apps/desktop/src/windows/home/pages/operations/memory-transitions-browser.test.ts"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "startedAt": "2026-10-11T11:25:28.425813+00:00",
+      "finishedAt": "2026-10-11T11:25:33.585068+00:00",
+      "exitCode": 0,
+      "durationSeconds": 5.171,
+      "inputManifest": "b3-independent-home-resume-lint-20261011-01-inputs.json",
+      "sourceCount": 2056,
+      "changedInputs": [],
+      "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-independent-home\\resume-lint-20261011-01-d070f4901570424ba14385509ddf2a50",
+      "temporaryRootRemoved": true,
+      "remainingFixtureEntries": [],
+      "log": "b3-independent-home-resume-lint-20261011-01.log"
+    },
+    {
+      "name": "resume-configuration-browser-20261011-01",
+      "command": [
+        "pnpm.cmd",
+        "--filter",
+        "@taki/desktop",
+        "exec",
+        "vitest",
+        "run",
+        "src/windows/home/pages/operations/hindsight-configuration-browser.test.ts",
+        "--maxWorkers=1"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "startedAt": "2026-10-11T11:25:52.277019+00:00",
+      "finishedAt": "2026-10-11T11:26:15.218324+00:00",
+      "exitCode": 0,
+      "durationSeconds": 22.937,
+      "inputManifest": "b3-independent-home-resume-configuration-browser-20261011-01-inputs.json",
+      "sourceCount": 2056,
+      "changedInputs": [],
+      "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-independent-home\\resume-configuration-browser-20261011-01-0603c676fe0b4df8b495fc39a1617242",
+      "temporaryRootRemoved": true,
+      "remainingFixtureEntries": [],
+      "log": "b3-independent-home-resume-configuration-browser-20261011-01.log"
+    },
+    {
+      "name": "resume-transitions-browser-20261011-01",
+      "command": [
+        "pnpm.cmd",
+        "--filter",
+        "@taki/desktop",
+        "exec",
+        "vitest",
+        "run",
+        "src/windows/home/pages/operations/memory-transitions-browser.test.ts",
+        "--maxWorkers=1"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "startedAt": "2026-10-11T11:27:10.385895+00:00",
+      "finishedAt": "2026-10-11T11:27:43.419068+00:00",
+      "exitCode": 1,
+      "durationSeconds": 33.032,
+      "inputManifest": "b3-independent-home-resume-transitions-browser-20261011-01-inputs.json",
+      "sourceCount": 2056,
+      "changedInputs": [],
+      "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-independent-home\\resume-transitions-browser-20261011-01-0323ee3fdb05450ab1644eccbf451e7f",
+      "temporaryRootRemoved": true,
+      "remainingFixtureEntries": [],
+      "log": "b3-independent-home-resume-transitions-browser-20261011-01.log"
+    },
+    {
+      "name": "resume-template-browser-20261011-01",
+      "command": [
+        "pnpm.cmd",
+        "--filter",
+        "@taki/desktop",
+        "exec",
+        "vitest",
+        "run",
+        "src/windows/home/pages/operations/hindsight-template-browser.test.ts",
+        "--maxWorkers=1"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "startedAt": "2026-10-11T11:29:06.650003+00:00",
+      "finishedAt": "2026-10-11T11:29:31.527376+00:00",
+      "exitCode": 0,
+      "durationSeconds": 24.875,
+      "inputManifest": "b3-independent-home-resume-template-browser-20261011-01-inputs.json",
+      "sourceCount": 2056,
+      "changedInputs": [],
+      "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-independent-home\\resume-template-browser-20261011-01-2778123fdcba445db01cf04f425d2eb6",
+      "temporaryRootRemoved": true,
+      "remainingFixtureEntries": [],
+      "log": "b3-independent-home-resume-template-browser-20261011-01.log"
+    },
+    {
+      "name": "resume-transitions-diagnostic-20261011-01",
+      "command": [
+        "pnpm.cmd",
+        "--filter",
+        "@taki/desktop",
+        "exec",
+        "vitest",
+        "run",
+        "src/windows/home/pages/operations/memory-transitions-browser.test.ts",
+        "--maxWorkers=1"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "startedAt": "2026-10-11T11:34:19.866882+00:00",
+      "finishedAt": "2026-10-11T11:34:52.357338+00:00",
+      "exitCode": 1,
+      "durationSeconds": 32.484,
+      "inputManifest": "b3-independent-home-resume-transitions-diagnostic-20261011-01-inputs.json",
+      "sourceCount": 2058,
+      "changedInputs": [],
+      "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-independent-home\\resume-transitions-diagnostic-20261011-01-208d4c49b5f146efacaaf169fa66db43",
+      "temporaryRootRemoved": true,
+      "remainingFixtureEntries": [],
+      "log": "b3-independent-home-resume-transitions-diagnostic-20261011-01.log"
+    },
+    {
+      "name": "resume-transitions-connection-close-20261011-01",
+      "command": [
+        "pnpm.cmd",
+        "--filter",
+        "@taki/desktop",
+        "exec",
+        "vitest",
+        "run",
+        "src/windows/home/pages/operations/memory-transitions-browser.test.ts",
+        "--maxWorkers=1"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "startedAt": "2026-10-11T11:41:15.448163+00:00",
+      "finishedAt": "2026-10-11T11:41:53.098375+00:00",
+      "exitCode": 0,
+      "durationSeconds": 37.656,
+      "inputManifest": "b3-independent-home-resume-transitions-connection-close-20261011-01-inputs.json",
+      "sourceCount": 2058,
+      "changedInputs": [],
+      "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-independent-home\\resume-transitions-connection-close-20261011-01-ef29e755b80c47d285b690440846799b",
+      "temporaryRootRemoved": true,
+      "remainingFixtureEntries": [],
+      "log": "b3-independent-home-resume-transitions-connection-close-20261011-01.log"
+    },
+    {
+      "name": "resume-transitions-final-20261011-01",
+      "command": [
+        "pnpm.cmd",
+        "--filter",
+        "@taki/desktop",
+        "exec",
+        "vitest",
+        "run",
+        "src/windows/home/pages/operations/memory-transitions-browser.test.ts",
+        "--maxWorkers=1"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "startedAt": "2026-10-11T11:43:42.225839+00:00",
+      "finishedAt": "2026-10-11T11:44:19.056478+00:00",
+      "exitCode": 0,
+      "durationSeconds": 36.828,
+      "inputManifest": "b3-independent-home-resume-transitions-final-20261011-01-inputs.json",
+      "sourceCount": 2058,
+      "changedInputs": [],
+      "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-independent-home\\resume-transitions-final-20261011-01-7caf39e5aa2c44b6a6fdb93eeb28e80d",
+      "temporaryRootRemoved": true,
+      "remainingFixtureEntries": [],
+      "log": "b3-independent-home-resume-transitions-final-20261011-01.log"
+    },
+    {
+      "name": "resume-final-lint-20261011-01",
+      "command": [
+        "pnpm.cmd",
+        "exec",
+        "eslint",
+        "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-browser.test.ts",
+        "apps/desktop/src/windows/home/pages/operations/memory-transitions-browser.test.ts"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "startedAt": "2026-10-11T11:44:50.941134+00:00",
+      "finishedAt": "2026-10-11T11:44:55.504033+00:00",
+      "exitCode": 0,
+      "durationSeconds": 4.563,
+      "inputManifest": "b3-independent-home-resume-final-lint-20261011-01-inputs.json",
+      "sourceCount": 2058,
+      "changedInputs": [],
+      "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-independent-home\\resume-final-lint-20261011-01-6ed92189a993497491935fd02e4009bb",
+      "temporaryRootRemoved": true,
+      "remainingFixtureEntries": [],
+      "log": "b3-independent-home-resume-final-lint-20261011-01.log"
+    }
+  ],
+  "evidence": [
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-lint-20261011-01-result.json",
+      "bytes": 826,
+      "sha256": "6759bfea6b787dc5473501939cf91f0e862c2f8d6214989d6927d38aeed8f45f"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-lint-20261011-01-inputs.json",
+      "bytes": 383998,
+      "sha256": "246b0d058ed09648ed76cd580696bad1f2a150c76003302cb583b69aca1a3260"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-lint-20261011-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-configuration-browser-20261011-01-result.json",
+      "bytes": 849,
+      "sha256": "11cf8d8a5ddbf08d6eaec8f5269dfe65e4c3d47a959a3e6ee8d2f54a06ec27de"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-configuration-browser-20261011-01-inputs.json",
+      "bytes": 383998,
+      "sha256": "246b0d058ed09648ed76cd580696bad1f2a150c76003302cb583b69aca1a3260"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-configuration-browser-20261011-01.log",
+      "bytes": 1016,
+      "sha256": "afe6f9015514fad30ef4626f5cfd5d030a61401ea1d477d315a10daaf50ca76b"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-transitions-browser-20261011-01-result.json",
+      "bytes": 838,
+      "sha256": "b6d9598d91a47dd1d9b13f3e9d43ece7feeb3d86d3d9d2a24c25f4dca4f217c0"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-transitions-browser-20261011-01-inputs.json",
+      "bytes": 383998,
+      "sha256": "246b0d058ed09648ed76cd580696bad1f2a150c76003302cb583b69aca1a3260"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-transitions-browser-20261011-01.log",
+      "bytes": 3528,
+      "sha256": "602c4beb0f45d358b5c3bdabdb588f3395262a9509fc3c2895a28c93f989a727"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-template-browser-20261011-01-result.json",
+      "bytes": 829,
+      "sha256": "9b938d92062ebd41f02af823de86833a71772b238175b4296232c8f953a39cb9"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-template-browser-20261011-01-inputs.json",
+      "bytes": 383998,
+      "sha256": "246b0d058ed09648ed76cd580696bad1f2a150c76003302cb583b69aca1a3260"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-template-browser-20261011-01.log",
+      "bytes": 683,
+      "sha256": "58c7e80c24a13c9a5bbee9483cf3aa491af917622555c9ed9c3c3717b9910b19"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-transitions-diagnostic-20261011-01-result.json",
+      "bytes": 847,
+      "sha256": "55cd3bc9d5f4974ef948d03963965fcb7c0ccfbe87714d49292ea7b81d3b2a42"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-transitions-diagnostic-20261011-01-inputs.json",
+      "bytes": 384413,
+      "sha256": "e2eefed8b7d8f12e3ac9678f8dc66e369a98195c83ffc973838c8c47b2ad9852"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-transitions-diagnostic-20261011-01.log",
+      "bytes": 4631,
+      "sha256": "94154b1265154f5a8ae40c3f2c340cd583b7a4ce37f59fa916b841dc06a2a770"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-transitions-connection-close-20261011-01-result.json",
+      "bytes": 865,
+      "sha256": "aa20af30fe610f0b6c2f607b885fcdb35cf5b4a576eef650d1dbbd23fb0e00ec"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-transitions-connection-close-20261011-01-inputs.json",
+      "bytes": 384413,
+      "sha256": "db8eb46e2e1f935a9391e3b2a6af6221e68d59200fe2e7bd4673def2bb547ee7"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-transitions-connection-close-20261011-01.log",
+      "bytes": 994,
+      "sha256": "4fba80ff0de2f12ff84bfe33a0e232d387d471488942c5c8a678547a7de0f545"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-transitions-final-20261011-01-result.json",
+      "bytes": 832,
+      "sha256": "b82efdc4f1c8787b8171dab844b8749f70b9e1e8084c020bd016bfffff523ce6"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-transitions-final-20261011-01-inputs.json",
+      "bytes": 384414,
+      "sha256": "2a59ea8d712f8fe3081c9d46f8a61043e6675dc2499c8d20793d16c5ca2d3457"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-transitions-final-20261011-01.log",
+      "bytes": 994,
+      "sha256": "dfcee8de29615890f7f1e3342b061494d76ed620bf50832dabf87717eb0040c5"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-final-lint-20261011-01-result.json",
+      "bytes": 844,
+      "sha256": "448e892f6ce97d6baed364754d49e3637c97ee532814e2b6b37d3b868ea27c07"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-final-lint-20261011-01-inputs.json",
+      "bytes": 384414,
+      "sha256": "2a59ea8d712f8fe3081c9d46f8a61043e6675dc2499c8d20793d16c5ca2d3457"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-home-resume-final-lint-20261011-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "browserArtifacts": [
+    {
+      "path": ".trellis/tasks/10-07-hindsight-configuration-observation/research/home-browser/0388d5d0-caa4-4ddb-94c3-f83e6c0ac88c/browser-check.py",
+      "bytes": 4035,
+      "sha256": "ac686cc25cd0ede28b32a1a39cb93ecba2650b970c23ce864e88cc1acdee47ea"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-configuration-observation/research/home-browser/0388d5d0-caa4-4ddb-94c3-f83e6c0ac88c/failed-remount.png",
+      "bytes": 50940,
+      "sha256": "f0f2556914152069924b71a530ea582197e20bb10ff276cc8197ae32f2888c90"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-configuration-observation/research/home-browser/0388d5d0-caa4-4ddb-94c3-f83e6c0ac88c/observed.png",
+      "bytes": 52991,
+      "sha256": "31d75cc2a16e1ab37a22233a5f71ef511cacdf8a2720624e238420b963586300"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-configuration-observation/research/home-browser/0388d5d0-caa4-4ddb-94c3-f83e6c0ac88c/result.txt",
+      "bytes": 177,
+      "sha256": "365c807da01f246e4da28a39cb88fb3c8fd7e2eeee05488b885bdaa57a93804a"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-home-browser/b3ca36e5-7fdc-46d7-9941-0fe01316438f/all-bank-preview.png",
+      "bytes": 169539,
+      "sha256": "ddaf868a15abd36e7ddd57954d581b18084383a5d197e1c994c67227c356ff48"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-home-browser/b3ca36e5-7fdc-46d7-9941-0fe01316438f/browser-check.py",
+      "bytes": 10094,
+      "sha256": "2d382f95156955643232141fdf069d574870a49fbb1b8da310b9def0f9906366"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-home-browser/b3ca36e5-7fdc-46d7-9941-0fe01316438f/customization-consequences.png",
+      "bytes": 149709,
+      "sha256": "b2123adae97aec054d65518c92f126849debcbcaccc7b4d3e4f0258b012047ac"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-home-browser/b3ca36e5-7fdc-46d7-9941-0fe01316438f/derived-current-failure.png",
+      "bytes": 102362,
+      "sha256": "df33a21a3c1d864e83230d75f92913635cb394ba87b9f75219587e6a55483865"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-home-browser/b3ca36e5-7fdc-46d7-9941-0fe01316438f/partial-original-plan.png",
+      "bytes": 62925,
+      "sha256": "3949de78d2379572c0c34ed09a4b0c6d9373e257f33f4fae6c65e997dadfa1ee"
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-home-browser/b3ca36e5-7fdc-46d7-9941-0fe01316438f/result.txt",
+      "bytes": 581,
+      "sha256": "25e72649534af80de2a4f41a09415c20ed7d034b18758b0d4074ac252438cea9"
+    },
+    {
+      "path": ".trellis/.runtime/w7-browser-artifacts/9f8bd62d-2a5f-4be8-a491-192e5b25f2b0/browser-check.py",
+      "bytes": 4838,
+      "sha256": "e0de64b7af5ca4de2e197e5e7db2ebd3bdbf5da44bf71ae4171d6ceff1d20c87"
+    },
+    {
+      "path": ".trellis/.runtime/w7-browser-artifacts/8bf08ed5-a95b-4e4b-acfa-171bc1de5411/browser-check.py",
+      "bytes": 5207,
+      "sha256": "27eeb29d08dad8fea0a99b051a262fd8fbb76ad9c077973eee8a446f7fa05026"
+    },
+    {
+      "path": ".trellis/.runtime/w7-browser-artifacts/8bf08ed5-a95b-4e4b-acfa-171bc1de5411/failure.txt",
+      "bytes": 3297,
+      "sha256": "6e4601ab832a54772453bf7dbd0027c3e440c1cc4fae33591221eea99fd07d56"
+    },
+    {
+      "path": ".trellis/.runtime/w7-browser-artifacts/8bf08ed5-a95b-4e4b-acfa-171bc1de5411/http-events.jsonl",
+      "bytes": 4848,
+      "sha256": "593df634950dead62d42e957730b586d7538c3d53e6fe51c2217524e83642d31"
+    },
+    {
+      "path": ".trellis/.runtime/w7-browser-artifacts/5474669c-6170-4e26-928f-ad2fceb51669/browser-check.py",
+      "bytes": 5238,
+      "sha256": "c34c34a3813086cc30be77fb2d5abdf8c803bb4db21ecd4e44835c21623c181c"
+    },
+    {
+      "path": ".trellis/.runtime/w7-browser-artifacts/5474669c-6170-4e26-928f-ad2fceb51669/final.png",
+      "bytes": 176720,
+      "sha256": "fcfd7ab6e683699eee5c73ffb452575fa055f9d64b2ee1836fb6c81c6b519500"
+    },
+    {
+      "path": ".trellis/.runtime/w7-browser-artifacts/5474669c-6170-4e26-928f-ad2fceb51669/http-events.jsonl",
+      "bytes": 6653,
+      "sha256": "574e79ebafefe4617e6bfb5b8dff952750f36ed572f0ababb7b4d18f1b5b5341"
+    },
+    {
+      "path": ".trellis/.runtime/w7-browser-artifacts/5474669c-6170-4e26-928f-ad2fceb51669/result.txt",
+      "bytes": 1421,
+      "sha256": "c06fe7f18907996a1ca258c3a0e393a4a7853bfdf78d9694f6606b0c69bf9e16"
+    },
+    {
+      "path": ".trellis/.runtime/w7-browser-artifacts/c0b2e304-6236-449c-b1e4-8f004071c473/browser-check.py",
+      "bytes": 5019,
+      "sha256": "c48b8db7c8b850cf3d7e221c9a7d2690b4101cff4206fb19b9f821b283cfea13"
+    },
+    {
+      "path": ".trellis/.runtime/w7-browser-artifacts/c0b2e304-6236-449c-b1e4-8f004071c473/final.png",
+      "bytes": 176720,
+      "sha256": "fcfd7ab6e683699eee5c73ffb452575fa055f9d64b2ee1836fb6c81c6b519500"
+    },
+    {
+      "path": ".trellis/.runtime/w7-browser-artifacts/c0b2e304-6236-449c-b1e4-8f004071c473/result.txt",
+      "bytes": 252,
+      "sha256": "1ed920d80361a4a03cf28ea0b33b59497844fd22cc9e6e9aab7941caad198de7"
+    }
+  ],
+  "limitations": [
+    "Full Chromium launch failure remains retained; installed matching Headless Shell is used",
+    "Native/runtime delegates are synthetic; no Native SQL/auth/paired restore acceptance claimed",
+    "No original services/data/secrets/.env/model calls; no dependencies or Git lifecycle changes",
+    "Types/build/whole-5B/installed/manual acceptance remain root or owner gates"
+  ]
+}

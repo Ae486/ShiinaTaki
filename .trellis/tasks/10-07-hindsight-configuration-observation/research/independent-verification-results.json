@@ -1,0 +1,73 @@
+{
+  "verdict": "PASS",
+  "scope": "Stage 5A implementation and isolated fixture acceptance",
+  "checks": [
+    {
+      "name": "Core R1 and real Secret Catalog",
+      "command": "pnpm --filter @taki/core exec vitest run src/memory/hindsight/hindsight-configuration-secret.test.ts src/secrets/secret-catalog-service.test.ts --maxWorkers=2",
+      "cwd": "H:/TakiAgent",
+      "exitCode": 0,
+      "filesPassed": 2,
+      "testsPassed": 17,
+      "log": "independent-core-regression.log"
+    },
+    {
+      "name": "Native R2 full HTTP chain",
+      "command": "H:/hindsight/.venv/Scripts/python.exe .trellis/tasks/09-07-hindsight-recovery-evidence/research/validation/run_isolated_hindsight.py -- tests/test_configuration_observation.py::test_version_then_observation_never_initializes_a_store -q --tb=short",
+      "cwd": "H:/TakiAgent",
+      "exitCode": 0,
+      "testsPassed": 2,
+      "log": "independent-native-regression.log"
+    },
+    {
+      "name": "Root lint",
+      "command": "pnpm lint",
+      "cwd": "H:/TakiAgent",
+      "exitCode": 0,
+      "log": "independent-lint.log"
+    },
+    {
+      "name": "Workspace TypeCheck",
+      "command": "pnpm -r typecheck",
+      "cwd": "H:/TakiAgent",
+      "exitCode": 0,
+      "workspacesPassed": 5,
+      "log": "independent-typecheck.log"
+    },
+    {
+      "name": "Tracked whitespace",
+      "command": "git diff --check",
+      "cwd": "H:/TakiAgent",
+      "exitCode": 0
+    },
+    {
+      "name": "Tracked whitespace",
+      "command": "git diff --check",
+      "cwd": "H:/hindsight",
+      "exitCode": 0
+    }
+  ],
+  "sourceEvidence": "independent-source-verification.json",
+  "generationEvidence": "independent-generation-verification.json",
+  "sourceManifestSha256": "5715247985b6609513a9daf931949a10b8bdf9633f0ecfd9c553f4d8e55e7857",
+  "findingsClosed": ["R1", "R2"],
+  "unfixedFindings": [],
+  "checkerProductionEditsAfterHandoff": false,
+  "fixture": {
+    "name": "taki-hindsight-g1-83efe88ff850",
+    "stopped": true,
+    "dataRemoved": true,
+    "registryRemoved": true,
+    "dotenvLoaded": false,
+    "externalNetworkGuardEnabled": true
+  },
+  "ownedProcessesRunning": false,
+  "ownershipReleased": true,
+  "limits": [
+    "No original-instance deployment, grants or data changes",
+    "No real model calls or successful external network operations",
+    "No installed WebView2/CSP or owner/manual acceptance",
+    "No complete Stage 5 or Stage 6 acceptance",
+    "No Git lifecycle or Trellis task-status changes"
+  ]
+}

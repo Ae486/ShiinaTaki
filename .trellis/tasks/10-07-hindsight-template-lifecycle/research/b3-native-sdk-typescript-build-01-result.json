@@ -1,0 +1,15 @@
+{
+  "command": [
+    "C:/Program Files/nodejs/npm.cmd",
+    "run",
+    "build"
+  ],
+  "cwd": "H:/hindsight/hindsight-clients/typescript",
+  "exitCode": 0,
+  "durationSeconds": 7.727,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-sdk-typescript-build-01.log",
+  "sources": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-sdk-typescript-build-01-sources.json",
+  "changedInputs": [],
+  "ownedTemp": "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\sdk-typescript-build-01-sf2crxs4",
+  "ownedTempRemoved": true
+}

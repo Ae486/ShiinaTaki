@@ -1,0 +1,21 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "exec",
+    "eslint",
+    "."
+  ],
+  "cwd": "H:\\TakiAgent",
+  "startedAt": "2026-10-13T06:19:23.220915+00:00",
+  "finishedAt": "2026-10-13T06:19:55.041524+00:00",
+  "exitCode": 0,
+  "durationSeconds": 31.829,
+  "inputCount": 2417,
+  "changedInputs": [],
+  "inputManifest": "b3-whole-root-lint-01-inputs.json",
+  "afterManifest": "b3-whole-root-lint-01-inputs-after.json",
+  "log": "b3-whole-root-lint-01.log",
+  "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-whole-checks\\root-lint-01-e4730eca6aca42d58cb39490b4f190b0",
+  "temporaryRootRemoved": true,
+  "remainingFixtureEntries": []
+}

@@ -1,0 +1,94 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mH:/TakiAgent/apps/desktop[39m
+
+ [31m❯[39m src/windows/home/pages/operations/hindsight-template-controller.test.ts [2m([22m[2m11 tests[22m[2m | [22m[31m1 failed[39m[2m | [22m[33m10 skipped[39m[2m)[22m[33m 586[2mms[22m[39m
+[31m     [31m×[31m retires consent after observing a same-connection configuration change without losing the draft[39m[33m 584[2mms[22m[39m
+     [2m[90m↓[39m[22m subscribes, reads all Bank consequences before confirmation and submits exactly once
+     [2m[90m↓[39m[22m requires full deletion and provider acknowledgement and preserves user choices after removal
+     [2m[90m↓[39m[22m retires delayed previews/details after draft, scope or connection change
+     [2m[90m↓[39m[22m keeps unsubmitted choices through a client replacement and blocks preview while a resource form is unfinished
+     [2m[90m↓[39m[22m sanitizes a subscription failure through the template formatter without losing read-only status
+     [2m[90m↓[39m[22m refuses corrupt/failed details and expired previews without a submit
+     [2m[90m↓[39m[22m a lost submit acknowledgement and second observer rediscover partial work without replay
+     [2m[90m↓[39m[22m published binding failure recovers only binding and physical reopen keeps original identity
+     [2m[90m↓[39m[22m current derived reads do not promote rollout history and failure clears previous success
+     [2m[90m↓[39m[22m unsupported preview never changes operations or hides an untracked Bank's history boundary
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/windows/home/pages/operations/hindsight-template-controller.test.ts[2m > [22mHome templates through actual authenticated WsClient/Core operations[2m > [22mretires consent after observing a same-connection configuration change without losing the draft
+[31m[1mAssertionError[22m: expected { state: 'ready', …(5) } to be null[39m
+
+[32m- Expected:[39m
+null
+
+[31m+ Received:[39m
+{
+  "banks": [
+    {
+      "canonicalIdentity": "character:taki",
+      "configChanges": 4,
+      "deletions": 0,
+      "directiveChanges": 1,
+      "effectiveDefinitionHash": "f649bac80db14dd5eb56b4716369f9326d1516d45d935fb1809dd03fc3a27724",
+      "enrollment": "reviewed-existing",
+      "expectedSelectionRevision": 0,
+      "modelChanges": 1,
+      "refreshChildren": 0,
+      "scope": "character",
+      "snapshotHash": "f96e37636ce6dfd6a3fb4a30779023d805ee27af5d9505e0128cdb8708cb2048",
+      "target": {
+        "bank_generation": "22222222-2222-4222-8222-222222222222",
+        "bank_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+        "provider_lineage": "11111111-1111-4111-8111-111111111111",
+      },
+      "templateRevision": "taki-bank-v2",
+      "userRevision": 0,
+    },
+    {
+      "canonicalIdentity": "global",
+      "configChanges": 4,
+      "deletions": 0,
+      "directiveChanges": 1,
+      "effectiveDefinitionHash": "fa0ba9ba5ac5d7676d69da3831e653251c0583b130201024ccc7bcceea0e4219",
+      "enrollment": "reviewed-existing",
+      "expectedSelectionRevision": 0,
+      "modelChanges": 1,
+      "refreshChildren": 0,
+      "scope": "global",
+      "snapshotHash": "7fb615f217cedd2988ebe3301be0f2e8d880b6e78aacae90b9d96d6afd40263b",
+      "target": {
+        "bank_generation": "22222222-2222-4222-8222-222222222222",
+        "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+        "provider_lineage": "11111111-1111-4111-8111-111111111111",
+      },
+      "templateRevision": "taki-bank-v2",
+      "userRevision": 0,
+    },
+  ],
+  "changesDefaults": true,
+  "expiresAt": "2026-10-09T12:26:11.861Z",
+  "previewHash": "fd4e00f00e787268563fa5a936b8ca573522074d42817465a7e95f3e80338318",
+  "previewId": "82c5f1f9-c470-48b3-887e-6b2b1aff3198",
+  "state": "ready",
+}
+
+[36m [2m❯[22m src/windows/home/pages/operations/hindsight-template-controller.test.ts:[2m46:31[22m[39m
+    [90m 44|[39m     await t.controller.refresh(); await until(() => !t.state().loading…
+    [90m 45|[39m     expect(t.state().frame?.authority.hindsight?.connection.config).to…
+    [90m 46|[39m     [34mexpect[39m(t[33m.[39m[34mstate[39m()[33m.[39mpreview)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   |[39m                               [31m^[39m
+    [90m 47|[39m     expect(t.state().draft).toEqual(draft); expect(t.state().draftStal…
+    [90m 48|[39m     config[33m.[39m[34mupsert[39m([32m"TAKI_HINDSIGHT_ENABLED"[39m[33m,[39m [35mtrue[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[33m10 skipped[39m[90m (11)[39m
+[2m   Start at [22m 20:21:01
+[2m   Duration [22m 10.41s[2m (transform 7.58s, setup 0ms, import 9.48s, tests 586ms, environment 0ms)[22m
+
+undefined
+H:\TakiAgent\apps\desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/windows/home/pages/operations/hindsight-template-controller.test.ts -t retires consent after observing --maxWorkers=2

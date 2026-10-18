@@ -1,0 +1,117 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { createTemplateHealthyHarness } from "../../testing/memory-transition-template-healthy-fixture.ts";
+import { W3_AT } from "../../testing/memory-transition-candidate-fixtures.ts";
+import { readTransitionAttempt } from "../../db/memory-transition-repo.ts";
+import { readTransitionReceipt } from "../../db/memory-transition-evidence-repo.ts";
+import { readTransitionResolution } from "../../db/memory-transition-recovery-repo.ts";
+import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
+import * as reader from "../../db/memory-transition-publication-reader.ts";
+import * as templates from "./transition-template-state.ts";
+import type { Database } from "../../db/sqlite.ts";
+
+beforeEach(() => { vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(W3_AT); });
+afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
+function state(db: Database) {
+  return Object.fromEntries(db.prepare("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name").all()
+    .map(({ name }) => [String(name), db.prepare(`SELECT * FROM "${String(name).replaceAll('"', '""')}"`).all().map((row) => JSON.stringify(row)).sort()]));
+}
+function histories(db: Database) {
+  return Object.fromEntries(["enrollments", "bases", "users", "selections", "applied", "default_history", "defaults"]
+    .map((table) => [table, db.prepare(`SELECT * FROM hindsight_template_${table}`).all()]));
+}
+
+describe("selected and removed complete Healthy drivers", () => {
+  // Full journeys execute RETURN and REENTRY. Recorded removed-only RETURN
+  // reached 164.3s and removed roundtrips reached 279.0s, so local test budgets
+  // follow the work performed; production clocks, leases and deadlines stay fixed.
+  for (const removed of [false, true]) {
+    it(`preserves full template history across RETURN and REENTRY (removed=${removed})`, async () => {
+      const h = await createTemplateHealthyHarness(removed);
+      try {
+        const original = histories(h.db);
+        for (const kind of ["transition.return-local", "transition.reenter-hindsight"] as const) {
+          const request = await h.request(undefined, kind); expect(request.expected.templates).toBeDefined();
+          const operation = h.owner.submit(request); await h.owner.stop();
+          expect(h.owner.status(operation.operationId), JSON.stringify({ kind, logs: h.records })).toMatchObject({ state: "completed" });
+          expect(readMemoryAuthoritySelection(h.db).mode).toBe(kind === "transition.return-local" ? "canonical-local" : "hindsight");
+          expect(histories(h.db)).toEqual(original);
+          expect(h.db.prepare("PRAGMA foreign_key_check").all()).toEqual([]);
+        }
+        expect(h.observer.requests.length).toBeGreaterThanOrEqual(4);
+      } finally { await h.close(); }
+    }, removed ? 360_000 : 180_000);
+  }
+
+  for (const { removed, kind } of ([false, true] as const).flatMap((removed) =>
+    (["transition.return-local", "transition.reenter-hindsight"] as const).map((kind) => ({ removed, kind })))) {
+    it(`rolls back all selected-history publication state at final lease expiry ('${kind}', removed=${removed})`, async () => {
+      const h = await createTemplateHealthyHarness(removed);
+      try {
+        if (kind === "transition.reenter-hindsight") {
+          const first = h.owner.submit(await h.request()); await h.owner.stop();
+          expect(h.owner.status(first.operationId).state).toBe("completed");
+        }
+        const publish = h.runtime.transitions.publish; const check = templates.assertTransitionTemplatePublication;
+        let before: ReturnType<typeof state> | undefined; let after: ReturnType<typeof state> | undefined;
+        let checked = false; let transitionId = "";
+        vi.spyOn(h.runtime.transitions, "publish").mockImplementationOnce((work) => {
+          transitionId = work.lease.transitionId; before = state(h.db);
+          vi.spyOn(templates, "assertTransitionTemplatePublication").mockImplementation((...args) => {
+            check(...args); checked = true;
+            expect(args[1].evidence.every((entry) => entry.templateBackup?.bank.selected !== null)).toBe(true);
+            h.clock.value = readTransitionAttempt(h.db, transitionId)!.leaseUntil;
+          });
+          try { return publish(work); } finally { after = state(h.db); }
+        });
+        const operation = h.owner.submit(await h.request(undefined, kind)); await h.owner.stop();
+        expect(checked).toBe(true); expect(after).toEqual(before);
+        expect(readTransitionReceipt(h.db, transitionId)).toBeUndefined();
+        expect(h.owner.status(operation.operationId).state).toBe("outcome_unknown");
+      } finally { await h.close(); }
+    }, removed ? (kind === "transition.reenter-hindsight" ? 360_000 : 240_000)
+      : kind === "transition.reenter-hindsight" ? 180_000 : 60_000);
+  }
+
+  for (const { removed, kind, field } of ([false, true] as const).flatMap((removed) =>
+    (["transition.return-local", "transition.reenter-hindsight"] as const).flatMap((kind) =>
+      (["selection", "default", "hold", "incarnation", "scope"] as const).map((field) => ({ removed, kind, field }))))) {
+    it(`refuses '${field}' drift after complete '${kind}' readback (removed=${removed}) with atomic rollback`, async () => {
+      const h = await createTemplateHealthyHarness(removed);
+      try {
+        if (kind === "transition.reenter-hindsight") {
+          const first = h.owner.submit(await h.request()); await h.owner.stop();
+          expect(h.owner.status(first.operationId).state).toBe("completed");
+        }
+        const read = reader.readVerifiedTransitionPublication; const publish = h.runtime.transitions.publish;
+        let injected = false; let before: ReturnType<typeof state> | undefined; let after: ReturnType<typeof state> | undefined;
+        vi.spyOn(h.runtime.transitions, "publish").mockImplementationOnce((work) => {
+          before = state(h.db);
+          vi.spyOn(reader, "readVerifiedTransitionPublication").mockImplementation((...args) => {
+            const result = read(...args);
+            // Faults deliberately simulate storage damage at the final boundary. Drop
+            // only the fixture's protecting trigger; rollback must restore DDL and rows.
+            if (field === "selection") { h.db.exec("DROP TRIGGER hindsight_template_applied_no_delete"); h.db.exec("DELETE FROM hindsight_template_applied"); }
+            if (field === "default") { h.db.exec("DROP TRIGGER hindsight_template_defaults_no_delete"); h.db.exec("DELETE FROM hindsight_template_defaults"); }
+            if (field === "hold") { h.db.exec("DROP TRIGGER hindsight_template_hold_step"); h.db.exec("UPDATE hindsight_template_holds SET state='active',publication_id=NULL WHERE rowid=(SELECT min(rowid) FROM hindsight_template_holds)"); }
+            if (field === "incarnation") { h.db.exec("DROP TRIGGER hindsight_template_enrollments_immutable_update"); h.db.exec("UPDATE hindsight_template_enrollments SET bank_generation='33333333-3333-4333-8333-333333333333'"); }
+            if (field === "scope") { h.db.exec("DROP TRIGGER hindsight_template_enrollments_immutable_update"); h.db.exec("UPDATE hindsight_template_enrollments SET canonical_identity='character:wrong' WHERE scope_kind='character'"); }
+            injected = true; return result;
+          });
+          try { return publish(work); } finally { after = state(h.db); }
+        });
+        const operation = h.owner.submit(await h.request(undefined, kind)); await h.owner.stop();
+        expect(injected).toBe(true); expect(after).toEqual(before);
+        const outcome = h.owner.status(operation.operationId);
+        if (kind === "transition.return-local") {
+          // RETURN retains its live lease and can prove source abort; prepared REENTRY stays unresolved.
+          expect(outcome).toMatchObject({ state: "failed", result: { kind: "transition", receiptId: null,
+            authorityCommitted: false, runtime: "source", queue: "settled", outcome: "failed",
+            errorCode: "MEMORY_TRANSITION_UNAVAILABLE" } });
+          expect(readTransitionResolution(h.db, operation.operationId)).toMatchObject({ result: outcome.result,
+            release: { disposition: "source-aborted" } });
+        } else expect(outcome.state).toBe("outcome_unknown");
+      } finally { await h.close(); }
+    }, removed ? (kind === "transition.reenter-hindsight" ? 360_000 : 240_000)
+      : kind === "transition.reenter-hindsight" ? 180_000 : 60_000);
+  }
+});

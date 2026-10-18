@@ -1,0 +1,22 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "--filter",
+    "@taki/core",
+    "run",
+    "typecheck"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "startedAt": "2026-10-13T06:14:44.584837+00:00",
+  "finishedAt": "2026-10-13T06:15:24.039181+00:00",
+  "exitCode": 0,
+  "durationSeconds": 39.454,
+  "inputCount": 2417,
+  "changedInputs": [],
+  "inputManifest": "b3-whole-core-healthy-capture-typecheck-01-inputs.json",
+  "afterManifest": "b3-whole-core-healthy-capture-typecheck-01-inputs-after.json",
+  "log": "b3-whole-core-healthy-capture-typecheck-01.log",
+  "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-whole-checks\\core-healthy-capture-typecheck-01-a2979d31fbbb4ae9b3ad04a5f58e11fc",
+  "temporaryRootRemoved": true,
+  "remainingFixtureEntries": []
+}

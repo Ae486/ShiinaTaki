@@ -1,0 +1,20 @@
+
+> @taki/core@0.0.0 test H:\TakiAgent\packages\core
+> vitest run "--maxWorkers=2" "--reporter=verbose" "src/memory/transitions/transition-emergency-context.test.ts"
+
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ ✓ src/memory/transitions/transition-emergency-context.test.ts > independent synchronous emergency evidence > deduplicates expensive immutable work within candidate without a verdict cache 7335ms
+ ✓ src/memory/transitions/transition-emergency-context.test.ts > independent synchronous emergency evidence > deduplicates expensive immutable work within proof without a verdict cache 5806ms
+ ✓ src/memory/transitions/transition-emergency-context.test.ts > independent synchronous emergency evidence > deduplicates expensive immutable work within publication without a verdict cache 5744ms
+ ✓ src/memory/transitions/transition-emergency-context.test.ts > independent synchronous emergency evidence > rejects forged objects, cross-database and expired contexts and isolates body bytes and Maps 5576ms
+ ✓ src/memory/transitions/transition-emergency-context.test.ts > independent synchronous emergency evidence > rereads surviving SQL bytes and identity even when a pure projection already exists 5721ms
+ ✓ src/memory/transitions/transition-emergency-context.test.ts > independent synchronous emergency evidence > keys pure projection by full mappings and explicit policy Map entries rather than {} 5329ms
+ ✓ src/memory/transitions/transition-emergency-context.test.ts > independent synchronous emergency evidence > opens a fresh emergency context for each observer read and still checks mutable publication joins 6169ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  18:41:19
+   Duration  52.88s (transform 8.87s, setup 0ms, import 10.84s, tests 41.68s, environment 0ms)
+

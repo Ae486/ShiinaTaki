@@ -1,0 +1,29 @@
+{
+  "checkedAtUtc": "2026-10-07T14:22:14.458349+00:00",
+  "manifest": "implementation-source-identities.json",
+  "manifestSha256": "5715247985b6609513a9daf931949a10b8bdf9633f0ecfd9c553f4d8e55e7857",
+  "repositories": [
+    {
+      "root": "H:\\TakiAgent",
+      "expectedHead": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a",
+      "actualHead": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a",
+      "matched": 59,
+      "mismatch": [],
+      "preservedCount": 10,
+      "preservedMismatch": [],
+      "bomFailures": [],
+      "newFileWhitespace": []
+    },
+    {
+      "root": "H:\\hindsight",
+      "expectedHead": "eb6413a7f58c4f3f0adb88a33a99516f8707fef7",
+      "actualHead": "eb6413a7f58c4f3f0adb88a33a99516f8707fef7",
+      "matched": 66,
+      "mismatch": [],
+      "preservedCount": 9,
+      "preservedMismatch": [],
+      "bomFailures": [],
+      "newFileWhitespace": []
+    }
+  ]
+}

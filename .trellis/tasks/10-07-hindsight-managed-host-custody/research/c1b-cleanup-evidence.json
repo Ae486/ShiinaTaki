@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-10-13T11:38:39.7612724Z",
+  "tempRoot": "G:\\Temp\\",
+  "directoryPattern": "taki-c1b-*",
+  "matchedDirectories": [],
+  "fixtureProcessMatches": [],
+  "removalDuringReadback": false,
+  "processTestCleanup": "Every executed ProcessTests.tearDown waits for the exact owned PIDs, closes streams and cleans its TemporaryDirectory.",
+  "linuxRuntimeExecuted": false,
+  "command": "$ErrorActionPreference = 'Stop'\n$fixtureTempRoot = [System.IO.Path]::GetTempPath()\n$directories = @(Get-ChildItem -LiteralPath $fixtureTempRoot -Directory -Filter 'taki-c1b-*' -ErrorAction Stop | ForEach-Object { [pscustomobject]@{ path = $_.FullName; markerPresent = Test-Path -LiteralPath (Join-Path $_.FullName 'C1B_FAKE_ONLY') } })\n$processes = @(Get-CimInstance -ClassName Win32_Process -Filter \"Name = 'python.exe' AND (CommandLine LIKE '%pipe_bootstrap.py%' OR CommandLine LIKE '%pipe_submitter.py%' OR CommandLine LIKE '%fixed_consumer.py%' OR CommandLine LIKE '%unix_bootstrap.py%' OR CommandLine LIKE '%unix_submitter.py%')\" -OperationTimeoutSec 10 | Select-Object ProcessId, ParentProcessId, ExecutablePath)\n[pscustomobject]@{ checkedAt = [DateTime]::UtcNow.ToString('o'); tempRoot = $fixtureTempRoot; directoryPattern = 'taki-c1b-*'; matchedDirectories = $directories; fixtureProcessMatches = $processes; removalDuringReadback = $false; processTestCleanup = 'Every executed ProcessTests.tearDown waits for the exact owned PIDs, closes streams and cleans its TemporaryDirectory.'; linuxRuntimeExecuted = $false } | ConvertTo-Json -Depth 5",
+  "exitCode": 0,
+  "limitations": [
+    "Readback is scoped to this agent's fake fixture directory prefix and fixed Python fixture names.",
+    "Linux suite was not run; no Linux process cleanup claim is made."
+  ]
+}

@@ -1,0 +1,25 @@
+
+> takiagent@0.0.0 typecheck H:\TakiAgent
+> pnpm -r --parallel typecheck
+
+Scope: 5 of 6 workspace projects
+apps/cli typecheck$ tsc --noEmit
+apps/desktop typecheck$ tsc --noEmit
+e2e typecheck$ tsc --noEmit
+packages/core typecheck$ tsc --noEmit
+packages/shared typecheck$ tsc --noEmit
+apps/cli typecheck: Done
+e2e typecheck: Done
+packages/shared typecheck: Done
+apps/desktop typecheck: Done
+packages/core typecheck: src/memory/hindsight/hindsight-configuration-service.test.ts(43,30): error TS2550: Property 'withResolvers' does not exist on type 'PromiseConstructor'. Do you need to change your target library? Try changing the 'lib' compiler option to 'es2024' or later.
+packages/core typecheck: src/memory/hindsight/hindsight-configuration-service.test.ts(44,29): error TS2550: Property 'withResolvers' does not exist on type 'PromiseConstructor'. Do you need to change your target library? Try changing the 'lib' compiler option to 'es2024' or later.
+packages/core typecheck: src/memory/hindsight/hindsight-configuration-service.test.ts(95,29): error TS2550: Property 'withResolvers' does not exist on type 'PromiseConstructor'. Do you need to change your target library? Try changing the 'lib' compiler option to 'es2024' or later.
+packages/core typecheck: src/memory/hindsight/hindsight-configuration-service.test.ts(95,76): error TS2550: Property 'withResolvers' does not exist on type 'PromiseConstructor'. Do you need to change your target library? Try changing the 'lib' compiler option to 'es2024' or later.
+packages/core typecheck: src/server/methods/hindsight-configuration-methods.test.ts(39,37): error TS2345: Argument of type '{ deviceRegistry: DeviceRegistry; connectionRegistry: ConnectionRegistry; trustLoopbackOperator: true; onPairingCode: () => undefined; }' is not assignable to parameter of type 'ConnectMethodDeps'.
+packages/core typecheck:   Property 'onAutoTrust' is missing in type '{ deviceRegistry: DeviceRegistry; connectionRegistry: ConnectionRegistry; trustLoopbackOperator: true; onPairingCode: () => undefined; }' but required in type 'ConnectMethodDeps'.
+packages/core typecheck: Failed
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/core@0.0.0 typecheck: `tsc --noEmit`
+Exit status 2
+ ELIFECYCLE  Command failed with exit code 2.

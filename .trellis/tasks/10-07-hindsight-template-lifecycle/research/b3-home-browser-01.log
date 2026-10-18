@@ -1,0 +1,59 @@
+
+ RUN  v4.1.10 H:/TakiAgent/apps/desktop
+
+ ❯ src/windows/home/pages/operations/hindsight-template-browser.test.ts (1 test | 1 failed) 76996ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/windows/home/pages/operations/hindsight-template-browser.test.ts > completes integrated Operations preview, partial recovery, independent customization, derived observation and removal
+Error: Command failed: G:/anaconda3/python.exe H:\TakiAgent\.trellis\tasks\10-07-hindsight-template-lifecycle\research\b3-home-browser\4389bddd-b539-447a-835b-38ee0fbed65a\browser-check.py http://127.0.0.1:5173 G:/AppDataMove/ms-playwright/chromium-1181/chrome-win/chrome.exe H:\TakiAgent\.trellis\tasks\10-07-hindsight-template-lifecycle\research\b3-home-browser\4389bddd-b539-447a-835b-38ee0fbed65a
+Traceback (most recent call last):
+  File "H:\TakiAgent\.trellis\tasks\10-07-hindsight-template-lifecycle\research\b3-home-browser\4389bddd-b539-447a-835b-38ee0fbed65a\browser-check.py", line 48, in <module>
+    b.get_by_label('模板管理范围').select_option(bank_ids[0])
+  File "G:\Roaming\Python\Python312\site-packages\playwright\sync_api\_generated.py", line 17512, in select_option
+    self._sync(
+  File "G:\Roaming\Python\Python312\site-packages\playwright\_impl\_sync_base.py", line 115, in _sync
+    return task.result()
+           ^^^^^^^^^^^^^
+  File "G:\Roaming\Python\Python312\site-packages\playwright\_impl\_locator.py", line 579, in select_option
+    return await self._frame.select_option(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Roaming\Python\Python312\site-packages\playwright\_impl\_frame.py", line 763, in select_option
+    return await self._channel.send("selectOption", self._timeout, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Roaming\Python\Python312\site-packages\playwright\_impl\_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Roaming\Python\Python312\site-packages\playwright\_impl\_connection.py", line 558, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Locator.select_option: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("section").filter(has=get_by_role("heading", name="Hindsight 模板与用户定制", exact=True)).get_by_label("模板管理范围")
+    - locator resolved to <select aria-label="模板管理范围" class="ml-2 max-w-full rounded border border-border bg-surface p-2">…</select>
+  - attempting select option action
+    2 × waiting for element to be visible and enabled
+      - did not find some options
+    - retrying select option action
+    - waiting 20ms
+    2 × waiting for element to be visible and enabled
+      - did not find some options
+    - retrying select option action
+      - waiting 100ms
+    58 × waiting for element to be visible and enabled
+       - did not find some options
+     - retrying select option action
+       - waiting 500ms
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+   × completes integrated Operations preview, partial recovery, independent customization, derived observation and removal 76992ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  18:48:56
+   Duration  94.64s (transform 12.26s, setup 0ms, import 17.29s, tests 77.00s, environment 0ms)
+
+undefined
+H:\TakiAgent\apps\desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/windows/home/pages/operations/hindsight-template-browser.test.ts --maxWorkers=1

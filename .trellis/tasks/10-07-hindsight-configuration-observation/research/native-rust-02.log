@@ -1,0 +1,19 @@
+   Compiling progenitor-client v0.11.2
+   Compiling hindsight-client v0.1.0 (H:\hindsight\hindsight-clients\rust)
+error: failed to run custom build command for `hindsight-client v0.1.0 (H:\hindsight\hindsight-clients\rust)`
+
+Caused by:
+  process didn't exit successfully: `H:\hindsight\hindsight-clients\rust\target\release\build\hindsight-client-36712b6fcbb0f91f\build-script-build` (exit code: 101)
+  --- stdout
+  cargo:rerun-if-changed=../../hindsight-docs/static/openapi.json
+  cargo:rerun-if-changed=build.rs
+
+  --- stderr
+  Converting OpenAPI 3.1 to 3.0 for compatibility...
+  Filtering out endpoint with multipart/form-data: /v1/default/banks/{bank_id}/document-transfer
+  Filtering out endpoint with multipart/form-data: /v1/default/banks/{bank_id}/files/retain
+
+  thread 'main' (8996) panicked at C:\Users\55473\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\progenitor-impl-0.11.2\src\method.rs:1211:9:
+  assertion failed: response_types.len() <= 1
+  note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+warning: build failed, waiting for other jobs to finish...

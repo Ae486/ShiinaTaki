@@ -1,0 +1,22 @@
+{
+  "startedAt": "2026-10-18T13:11:35.858Z",
+  "program": "C:/Program Files/nodejs/node.exe",
+  "args": [
+    "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/docker-database-run-b5c5fb7f/run-persistence.ts",
+    "--execute-approved-persistence"
+  ],
+  "environmentKeys": [
+    "SystemRoot",
+    "TEMP",
+    "TMP",
+    "WS_NO_BUFFER_UTIL",
+    "WS_NO_UTF_8_VALIDATE"
+  ],
+  "timeoutMs": 1200000,
+  "stdout": "{\"caseId\":\"b5c5fb7f-cd8a-402a-bd11-92839d191e98\",\"passed\":true,\"ownedRuntimeCleanup\":true,\"evidence\":\"G:\\\\TakiAgent-c2a-database\\\\persistence-b5c5fb7f-cd8a-402a-bd11-92839d191e98\\\\persistence.json\",\"deploymentReady\":false}\n",
+  "stderr": "",
+  "failure": null,
+  "exitCode": 0,
+  "signal": null,
+  "elapsedMs": 79204
+}

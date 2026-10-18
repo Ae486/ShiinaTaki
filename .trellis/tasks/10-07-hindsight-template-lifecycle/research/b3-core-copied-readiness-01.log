@@ -1,0 +1,3 @@
+(node:18620) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"state":"ready","version":2,"receipts":[{"scope":"character","count":3,"selected":"none"},{"scope":"global","count":1,"selected":"taki-bank-v2"}],"requestOperationCount":4,"boundary":"real Core operation/publication/copy; deterministic Native receipt and runtime delegates; no HTTP/physical Native restore claim"}

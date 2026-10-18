@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "pnpm",
+    "--filter",
+    "@taki/shared",
+    "typecheck"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "inputManifest": "b2-core-read-check-input-02.json",
+  "startedAt": "2026-10-08T12:54:51.4614797Z",
+  "finishedAt": "2026-10-08T12:55:02.8973741Z",
+  "exit": 0
+}

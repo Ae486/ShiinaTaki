@@ -1,0 +1,186 @@
+{
+  "version": 1,
+  "recordedAt": "2026-10-14T15:43:21.335Z",
+  "reviewer": "/root/c2_design_check",
+  "task": ".trellis/tasks/10-14-hindsight-managed-deployment",
+  "verdict": "PASS_STATIC_ONLY",
+  "scope": "One prepared first admitted real-Docker fake-consumer case; no execution authorization or runtime acceptance.",
+  "initialFiles": [
+    {
+      "file": "README.md",
+      "bytes": 11626,
+      "sha256": "d4e567a16c73cccf00241e6cc7508e19529952a2a02de545f2daa637b30c68d9"
+    },
+    {
+      "file": "run-first-case.ts",
+      "bytes": 23198,
+      "sha256": "351ed671d36d7e08f226096d8a6762c8402e0d24b36d4e7ece0f9683a40b7802"
+    },
+    {
+      "file": "base-probe.py",
+      "bytes": 1438,
+      "sha256": "a6d0548b53bf557157590cc87edb1f30ff190fa5813edf0a477a3ba399b6c021"
+    },
+    {
+      "file": "container-scan.py",
+      "bytes": 2074,
+      "sha256": "6344d9bc7151c0ae8d755f44267aeec35693a1ddfda21a387c20098a4916ec10"
+    },
+    {
+      "file": "preparation-check.json",
+      "bytes": 2976,
+      "sha256": "68f4c32dee404b13c9639f9ef859807048fc0eda47c606d0212c15becca6c09d"
+    }
+  ],
+  "finalFiles": [
+    {
+      "file": "README.md",
+      "bytes": 12909,
+      "lines": 180,
+      "sha256": "a3ada14fe6cb928924b99936a63820a11af96dc3327f16ca0888c4f6d87ca92c"
+    },
+    {
+      "file": "run-first-case.ts",
+      "bytes": 24820,
+      "lines": 342,
+      "sha256": "532f800475d8ed9bf14809865e247c805ac8e81dc3109c88b196e04d6bad013e"
+    },
+    {
+      "file": "base-probe.py",
+      "bytes": 1438,
+      "lines": 46,
+      "sha256": "a6d0548b53bf557157590cc87edb1f30ff190fa5813edf0a477a3ba399b6c021"
+    },
+    {
+      "file": "container-scan.py",
+      "bytes": 2289,
+      "lines": 62,
+      "sha256": "cd5eab55311c699c7ef153c1dac036e18d961021028db2942b4a9b376a03a3c0"
+    },
+    {
+      "file": "preparation-check.json",
+      "bytes": 2976,
+      "lines": 90,
+      "sha256": "68f4c32dee404b13c9639f9ef859807048fc0eda47c606d0212c15becca6c09d"
+    }
+  ],
+  "changedFiles": [
+    "README.md",
+    "run-first-case.ts",
+    "container-scan.py"
+  ],
+  "preservedPreparationCheck": {
+    "file": "preparation-check.json",
+    "bytes": 2976,
+    "lines": 90,
+    "sha256": "68f4c32dee404b13c9639f9ef859807048fc0eda47c606d0212c15becca6c09d"
+  },
+  "checks": [
+    {
+      "name": "node-syntax",
+      "cwd": "H:/TakiAgent",
+      "command": "& 'C:/Program Files/nodejs/node.exe' --check .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/run-first-case.ts",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "name": "python-ast",
+      "cwd": "H:/TakiAgent",
+      "command": "python -X utf8 -c 'import ast,json,pathlib; root=pathlib.Path(\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance\"); files=[\"base-probe.py\",\"container-scan.py\"]; [ast.parse((root/name).read_text(encoding=\"utf-8\"),filename=name) for name in files]; print(json.dumps({\"ast\":\"pass\",\"files\":files,\"modulesExecuted\":False}))'",
+      "exitCode": 0,
+      "output": "{\"ast\": \"pass\", \"files\": [\"base-probe.py\", \"container-scan.py\"], \"modulesExecuted\": false}\r\n"
+    },
+    {
+      "name": "scoped-eslint",
+      "cwd": "H:/TakiAgent",
+      "command": "& 'G:/Roaming/npm/pnpm.cmd' exec eslint --no-ignore .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/run-first-case.ts",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "name": "single-entry-no-emit",
+      "cwd": "H:/TakiAgent",
+      "command": "& 'C:/Program Files/nodejs/node.exe' --input-type=module -e 'import ts from \"typescript\"; import fs from \"node:fs\"; const file=\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/run-first-case.ts\"; const base=JSON.parse(fs.readFileSync(\"tsconfig.base.json\",\"utf8\")); const parsed=ts.convertCompilerOptionsFromJson(base.compilerOptions,process.cwd()); const program=ts.createProgram([file],{...parsed.options,noEmit:true,incremental:false}); const errors=[...parsed.errors,...ts.getPreEmitDiagnostics(program)]; console.log(JSON.stringify({entry:file,noEmit:true,diagnostics:errors.map(d=>({file:d.file?.fileName,line:d.file&&d.start!==undefined?d.file.getLineAndCharacterOfPosition(d.start).line+1:undefined,code:d.code,message:ts.flattenDiagnosticMessageText(d.messageText,\"\\n\")}))})); process.exitCode=errors.length?1:0;'",
+      "exitCode": 0,
+      "output": "{\"entry\":\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/run-first-case.ts\",\"noEmit\":true,\"diagnostics\":[]}\n"
+    }
+  ],
+  "finalHashCommand": "python -X utf8 -c 'import hashlib,json,pathlib; root=pathlib.Path(\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance\"); files=[\"README.md\",\"run-first-case.ts\",\"base-probe.py\",\"container-scan.py\",\"preparation-check.json\"]; print(json.dumps([{\"file\":name,\"bytes\":len((root/name).read_bytes()),\"lines\":len((root/name).read_text(encoding=\"utf-8\").splitlines()),\"sha256\":hashlib.sha256((root/name).read_bytes()).hexdigest()} for name in files],indent=2))'",
+  "findingsFixed": [
+    {
+      "id": "F1",
+      "priority": "P1",
+      "file": "run-first-case.ts",
+      "issue": "The prerequisite applied production single-link fileDigest to the accepted Cargo Shell binary, whose current filesystem link count is 2.",
+      "fix": "Use ordinary byte SHA-256 only for public pinned tool binaries; copied-install verification and all production checks remain unchanged."
+    },
+    {
+      "id": "F2",
+      "priority": "P2",
+      "file": "run-first-case.ts",
+      "issue": "tail=100 silently truncated log coverage, and raw non-TTY multiplex framing could split a sentinel across frames.",
+      "fix": "Request all bounded logs; validate/decode eight-byte Engine frames and reassemble stdout/stderr separately before scanning. Use the standard Windows named-pipe literal for the fixed Engine read."
+    },
+    {
+      "id": "F3",
+      "priority": "P2",
+      "file": "run-first-case.ts",
+      "issue": "Final-scan/cleanup failure could retain casePassed=true, and partial failures lacked explicit registry/resource references; successive waits did not share the claimed case budget.",
+      "fix": "Cleanup failures also fail the case; preserve the registry path and original derived resource names before effect cleanup when readable. Unknown external IDs remain retained, not adopted. Explicit CLI/Engine/RPC waits share the five-minute case budget, with a separate cleanup budget and phase capacity checks."
+    },
+    {
+      "id": "F4",
+      "priority": "P2",
+      "file": "container-scan.py",
+      "issue": "The marker was read before the scan's size/type checks and without a byte cap.",
+      "fix": "Require a regular marker and read at most 1025 bytes, rejecting anything over 1024 before JSON parsing."
+    },
+    {
+      "id": "F5",
+      "priority": "P2",
+      "file": "README.md",
+      "issue": "The blanket cleared child environment also appeared to cover Rust/MSVC compilation and could prevent local toolchain/linker resolution.",
+      "fix": "Document the compiler-only use of the existing Rust/MSVC toolchain with required search variables and fixture TEMP/TMP; Docker/application children retain their cleared environment. No new wrapper or install."
+    }
+  ],
+  "findingsNotFixed": [],
+  "reviewedContracts": [
+    "deploymentFixture contributes generated fake data and registration scaffolding only; its synthetic invocation/custody helpers are not dispatched.",
+    "The actual registration keeps the fixed endpoint and overrides the Docker binary/hash/version/engine and prepared image; Core constructs the original real Run/plan.",
+    "The real operator/Core/Rust/copied Host/FixedDockerAdapter path performs admission, checkpoint, independent grant and private delivery.",
+    "Same-key repeat and explicit original observation compare the same IDs, attempts and steps; engine events/exec metadata establish the actual create/start/submit evidence.",
+    "Cleanup verifies the original registry, labels/engine/image/resource identity, stopped container and unmounted volume; absent durable external IDs are retained for Root rather than guessed.",
+    "Scanning covers only the stated bounded metadata/logs/new fixture files/new volume/argv, without child environment or full image/writable-layer coverage.",
+    "The cached-base probe remains conditional and its internals have not been verified by this static review."
+  ],
+  "runtimePrerequisites": [
+    "Separate explicit approval for the named probe/build/container/volume resources and cleanup; existing three running containers and daemon remain untouched.",
+    "Recheck fixed Docker binary/engine, built-in default docker builder/plugin/endpoint and the exact cached base ID; no bootstrap, alternate builder or download.",
+    "The fixed read-only base probe must report compatible=true for the exact Python/venv/dotenv 1.2.2, UID/GID and empty owned volume seed; stop on failure.",
+    "One approved local-only build using the unchanged pinned recipe and eleven package modules must produce the expected labelled immutable image ID.",
+    "Resolve the existing Rust/MSVC toolchain for only the tiny fake-key adapter, pin its source/output and stop if unavailable without installing.",
+    "Create only the new marked staging/root, retain baseline capacity and input pins, and enforce README resource/time bounds before one guarded launcher execution."
+  ],
+  "execution": {
+    "dockerCalls": 0,
+    "wslCalls": 0,
+    "imageOrBinaryBuilds": 0,
+    "appOrServiceStarts": 0,
+    "behaviorTests": 0,
+    "productionSourceEdits": 0,
+    "acceptedSourceEvidenceEdits": 0
+  },
+  "cleanup": {
+    "reviewCreatedRuntimeRoots": [],
+    "reviewOwnedLiveProcesses": [],
+    "disposition": "Only task-local fixture files and this review/evidence were changed."
+  },
+  "limits": [
+    "No runtime PASS claimed",
+    "Accepted C2a SOURCE PASS and 182-case evidence not rerun or edited",
+    "No actual base compatibility/build/download proof yet",
+    "No helper/ACK/daemon/container restart, database, C2b, C3 or manual acceptance"
+  ],
+  "ownership": "Fixture directory, review artifacts and static check slot released to Root."
+}
+

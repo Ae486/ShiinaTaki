@@ -1,0 +1,90 @@
+Owned fixture: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-af55690d1ba5
+PostgreSQL: 18.1 ; vector/pg_trgm ready
+Pytest log: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-af55690d1ba5\pytest.log
+INFO     hindsight_api.api:__init__.py:66 HTTP REST API enabled
+---------------------------- Captured stderr call -----------------------------
+Traceback (most recent call last):
+  File "H:\hindsight\hindsight-api-slim\hindsight_api\engine\memory_engine.py", line 3033, in execute_task
+    await self._handle_batch_retain(task_dict)
+  File "H:\hindsight\hindsight-api-slim\hindsight_api\engine\memory_engine.py", line 2568, in _handle_batch_retain
+    await self.retain_batch_async(
+  File "H:\hindsight\hindsight-api-slim\hindsight_api\engine\memory_engine.py", line 145, in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "H:\hindsight\hindsight-api-slim\hindsight_api\engine\transition_writers.py", line 242, in wrapped
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "H:\hindsight\hindsight-api-slim\hindsight_api\engine\memory_engine.py", line 4793, in retain_batch_async
+    tracked = await native_receipt_execution.run(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "H:\hindsight\hindsight-api-slim\hindsight_api\engine\retain\receipt_context.py", line 508, in run
+    _, sub_usage, _ = await engine._retain_batch_async_internal(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "H:\hindsight\hindsight-api-slim\tests\native_results\helpers.py", line 92, in interrupted
+    raise RuntimeError("owned interruption after a committed outer slice")
+RuntimeError: owned interruption after a committed outer slice
+------------------------------ Captured log call ------------------------------
+INFO     hindsight_api.config_resolver:config_resolver.py:557 Updated bank config for taki-hs-v1-c-bac49d230884f967e5dbb72aaca2e1cc: ['entity_labels', 'retain_extraction_mode']
+INFO     hindsight_api.engine.memory_engine:memory_engine.py:18041 Created parent operation 90193993-7240-4035-8c12-24634dfc1b77 with 1 child sub-batch(es)
+INFO     hindsight_api.config_resolver:config_resolver.py:557 Updated bank config for taki-hs-v1-c-bac49d230884f967e5dbb72aaca2e1cc: ['entity_labels']
+INFO     hindsight_api.engine.memory_engine:memory_engine.py:2534 [BATCH_RETAIN_TASK] Starting background batch retain for bank_id=taki-hs-v1-c-bac49d230884f967e5dbb72aaca2e1cc, 1 items, operation_id=2d4efcc1-8762-4ea1-8c4a-e6546b572574
+WARNING  hindsight_api.engine.db_utils:db_utils.py:166 [DB POOL] Slow acquire: 0.204s
+INFO     hindsight_api.engine.retain.orchestrator:orchestrator.py:1888 [streaming] Phase 1 (entity resolution): 0.231s
+INFO     hindsight_api.engine.retain.orchestrator:orchestrator.py:2090 [streaming] Phase 2 (write txn): 0.109s
+INFO     hindsight_api.engine.retain.orchestrator:orchestrator.py:2114 [streaming] Consumer batch 1 total (excluding fire-and-forget): 0.343s
+INFO     hindsight_api.engine.retain.orchestrator:orchestrator.py:1331 [streaming] Final ANN chunk 1/1: 1 links in 0.027s
+INFO     hindsight_api.engine.retain.orchestrator:orchestrator.py:2399 
+============================================================
+RETAIN_BATCH START: taki-hs-v1-c-bac49d230884f967e5dbb72aaca2e1cc
+Batch size: 1 content items, 32 chars
+============================================================
+[streaming] 1 chunks, batch_size 100 — 1 batch
+  Extract facts: 1 facts, 1 chunks from 1 contents in 0.010s
+  Generate embeddings: 1 embeddings in 0.001s
+[streaming] Consumer batch 1: processing 1 facts from 1 chunks
+[streaming] Document source tracked (full content)
+  Store chunks: 1 chunks in 0.011s
+  Insert facts: 1 units in 0.000s
+  Insert unit_entities: 1 pairs in 0.014s
+  Temporal links: 0 links in 0.003s
+  Semantic links: skipped (deferred to final ANN pass)
+  Causal links: 0 links in 0.000s
+[streaming] Checkpoint: 1 facts committed, ANN pass next
+[streaming] Final ANN: loaded 1 units with embeddings in 0.003s
+      [8.1] ANN search (Phase 1): 1 units → 1 links in 0.013s
+[streaming] Final ANN: 1 total semantic links
+[streaming] Final ANN pass: 0.031s for 1 units
+============================================================
+STREAMING RETAIN COMPLETE: 1 units across 1 batches in 0.415s
+Document: source
+============================================================
+ERROR    hindsight_api.engine.memory_engine:memory_engine.py:3089 Task execution failed: batch_retain, error: owned interruption after a committed outer slice
+INFO     hindsight_api.engine.memory_engine:memory_engine.py:3497 Marked async operation as failed: 2d4efcc1-8762-4ea1-8c4a-e6546b572574
+INFO     hindsight_api.engine.memory_engine:memory_engine.py:3915 Updated parent operation 90193993-7240-4035-8c12-24634dfc1b77 to status 'failed' (all children done)
+---------------------------- Captured log teardown ----------------------------
+INFO     hindsight_api.engine.memory_engine:memory_engine.py:4458 close() started
+INFO     hindsight_api.engine.db.postgresql:postgresql.py:166 PostgreSQL pool closed
+============================ slowest 10 durations =============================
+15.64s setup    tests/native_results/test_template_label_extraction.py::test_actual_extraction_paths_require_one_exact_scalar_and_keep_filtered_id_alignment[ordinary]
+6.73s setup    tests/native_results/test_template_label_recovery.py::test_public_tracked_retain_cannot_supply_private_frozen_settings
+6.66s setup    tests/native_results/test_template_label_extraction.py::test_caller_entities_tags_metadata_and_collapsed_or_chunk_modes_remain_neutral
+6.36s setup    tests/native_results/test_template_label_lifecycle.py::test_extra_payload_change_refuses_bookkeeping_reproof_and_rolls_back_atomically
+6.20s setup    tests/native_results/test_template_label_recovery.py::test_tracked_retain_restart_cannot_upgrade_original_fallback_or_legacy_plan[fallback]
+6.20s setup    tests/native_results/test_template_label_lifecycle.py::test_group_drift_is_coherent_and_evidence_read_never_ensures_state
+6.12s setup    tests/native_results/test_template_label_recovery.py::test_tracked_retain_restart_cannot_upgrade_original_fallback_or_legacy_plan[successful]
+5.96s setup    tests/native_results/test_template_label_extraction.py::test_actual_extraction_paths_require_one_exact_scalar_and_keep_filtered_id_alignment[batch-api]
+5.85s setup    tests/native_results/test_template_label_recovery.py::test_tracked_retain_restart_cannot_upgrade_original_fallback_or_legacy_plan[group-drift]
+5.84s setup    tests/native_results/test_template_label_lifecycle.py::test_failed_bookkeeping_reproof_and_unchanged_payload_append_are_distinct
+=========================== short test summary info ===========================
+FAILED tests/native_results/test_template_label_recovery.py::test_tracked_retain_restart_cannot_upgrade_original_fallback_or_legacy_plan[successful]
+FAILED tests/native_results/test_template_label_recovery.py::test_tracked_retain_restart_cannot_upgrade_original_fallback_or_legacy_plan[fallback]
+FAILED tests/native_results/test_template_label_recovery.py::test_tracked_retain_restart_cannot_upgrade_original_fallback_or_legacy_plan[legacy]
+FAILED tests/native_results/test_template_label_recovery.py::test_tracked_retain_restart_cannot_upgrade_original_fallback_or_legacy_plan[group-drift]
+================== 4 failed, 10 passed in 122.76s (0:02:02) ===================
+{
+    "Fixture":  "taki-hindsight-g1-af55690d1ba5",
+    "Stopped":  true,
+    "DataRemoved":  true,
+    "RegistryRemoved":  true,
+    "Logs":  "H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-af55690d1ba5"
+}

@@ -1,0 +1,10 @@
+{
+  "command": [
+    "node",
+    ".trellis/tasks/10-07-hindsight-template-lifecycle/research/build-b3-shared-fixture.mjs"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "durationSeconds": 0.799,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-shared-fixture-01.log"
+}

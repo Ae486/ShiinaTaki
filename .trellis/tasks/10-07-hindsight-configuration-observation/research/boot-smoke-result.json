@@ -1,0 +1,12 @@
+{
+  "exitCode": 0,
+  "dataDir": "H:\\TakiAgent\\.trellis\\.runtime\\stage5a-boot\\owned-WUBwFV",
+  "isolated": true,
+  "dotenvLoaded": false,
+  "authenticatedMethods": [
+    "status",
+    "observe"
+  ],
+  "prohibitedCalls": 0,
+  "originalDeploymentTouched": false
+}

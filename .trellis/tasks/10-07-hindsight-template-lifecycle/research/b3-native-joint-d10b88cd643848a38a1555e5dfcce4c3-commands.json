@@ -1,0 +1,36 @@
+{
+  "commands": [
+    {
+      "mode": "seed",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "--experimental-transform-types",
+        "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-joint-entry.mjs",
+        "seed"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "exitCode": 0,
+      "timedOut": false,
+      "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-joint-d10b88cd643848a38a1555e5dfcce4c3-1-seed.log",
+      "stdoutSha256": "19290359104ff2be5466fb5d8cf3176fee3e7bd0dacf6fe2b4e1887a1c82e4e6",
+      "stderrSha256": "ad00f6a98f646c77e9d36d692115708ed41c81bc29a3eef1283c85f478ae8e49"
+    },
+    {
+      "mode": "prepare",
+      "argv": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "--experimental-transform-types",
+        "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-joint-entry.mjs",
+        "prepare",
+        "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\joint-05-xc4y15yx\\pytest-of-unknown\\pytest-0\\test_actual_core_native_pair_r0\\2-prepare.json",
+        "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\joint-05-xc4y15yx\\pytest-of-unknown\\pytest-0\\test_actual_core_native_pair_r0\\prepared"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "exitCode": 0,
+      "timedOut": false,
+      "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-joint-d10b88cd643848a38a1555e5dfcce4c3-2-prepare.log",
+      "stdoutSha256": "304d4fc15473066722b10119eb41835ed95690e182b2a93d8252a642a86450d4",
+      "stderrSha256": "4485765864b42af0c14d9131137918413a656194b43dc36c5033642fc2f1807e"
+    }
+  ]
+}

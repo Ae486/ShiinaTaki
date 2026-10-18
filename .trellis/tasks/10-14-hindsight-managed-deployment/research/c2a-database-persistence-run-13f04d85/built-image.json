@@ -1,0 +1,17 @@
+{
+  "id": "sha256:53f3be182e02deaab48d20ee424b440b5200b1aac3373e920a6e54d9fe296226",
+  "user": "1000:1000",
+  "entrypoint": [
+    "/app/api/.venv/bin/python",
+    "-I",
+    "-B",
+    "-m",
+    "managed_bootstrap.owner"
+  ],
+  "labels": {
+    "taki.c2a.fixture": "13f04d85-ee84-408e-890c-88922e36c69e"
+  },
+  "tags": [
+    "taki-c2a-db:13f04d85-ee84-408e-890c-88922e36c69e"
+  ]
+}

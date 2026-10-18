@@ -1,0 +1,10 @@
+{
+  "command": [
+    "G:/Git/bin/bash.exe",
+    "scripts/generate-clients.sh"
+  ],
+  "cwd": "H:/hindsight",
+  "exitCode": 0,
+  "durationSeconds": 121.822,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-native-clients-02.log"
+}

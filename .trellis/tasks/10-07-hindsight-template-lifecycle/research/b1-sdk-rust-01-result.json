@@ -1,0 +1,23 @@
+{
+  "command": [
+    "C:/Users/55473/.cargo/bin/cargo.exe",
+    "test",
+    "--release",
+    "--locked",
+    "--offline",
+    "--test",
+    "native_result_contract",
+    "--test",
+    "current_state_contract",
+    "--test",
+    "transition_contract",
+    "--test",
+    "configuration_observation_contract",
+    "--test",
+    "template_lifecycle_contract"
+  ],
+  "cwd": "H:/hindsight/hindsight-clients/rust",
+  "exitCode": 0,
+  "durationSeconds": 157.893,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b1-sdk-rust-01.log"
+}

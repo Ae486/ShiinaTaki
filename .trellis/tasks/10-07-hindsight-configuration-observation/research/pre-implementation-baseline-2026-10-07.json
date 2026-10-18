@@ -1,0 +1,419 @@
+[
+  {
+    "root": "H:\\TakiAgent",
+    "head": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a",
+    "files": [
+      {
+        "status": " M",
+        "path": ".trellis/spec/backend/memory-transition-publication.md",
+        "sha256": "2bffa64a6c0d93aaaee3dfa8d0a2a89bb05d8f0bb3534cea703f6fd2d0c11c8d"
+      },
+      {
+        "status": " M",
+        "path": ".trellis/tasks/08-09-memory-operations-ui/check.jsonl",
+        "sha256": "52bd7dd9793c086b3b7ea925af425931ab1bd9efdbb20336e68881e021747ade"
+      },
+      {
+        "status": " M",
+        "path": ".trellis/tasks/08-09-memory-operations-ui/design.md",
+        "sha256": "ccb0d8a34105edd5347a7f82098a72bc51e6b008dcea004419bb579724f3c513"
+      },
+      {
+        "status": " M",
+        "path": ".trellis/tasks/08-09-memory-operations-ui/implement.jsonl",
+        "sha256": "b8a7be624464b3e3a3347443a3aa1f1bae0e71a5ab88758f9c5d6835153b5809"
+      },
+      {
+        "status": " M",
+        "path": ".trellis/tasks/08-09-memory-operations-ui/implement.md",
+        "sha256": "f882592a6e44ecbc173bce45fb825442096a87efbb38e626cde9dcb67d4d9398"
+      },
+      {
+        "status": " M",
+        "path": ".trellis/tasks/08-09-memory-operations-ui/prd.md",
+        "sha256": "21b430e9a9fc49ba9818ccf0c549dc128cead0019293457e6fa6968371081867"
+      },
+      {
+        "status": " M",
+        "path": ".trellis/tasks/08-09-memory-operations-ui/task.json",
+        "sha256": "49f6c0b189eb1e450b6b3f574350e784a653259eed46a0ce530c458f2c2c923d"
+      },
+      {
+        "status": " M",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/check.jsonl",
+        "sha256": "a71f11b0d4515e84b6ab260a787f163f4fec931116139692358634a95dec8133"
+      },
+      {
+        "status": " M",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/design.md",
+        "sha256": "7d00cb756538b1e41f42729c7b56f093b2caa27c6f088f5c646181db02918392"
+      },
+      {
+        "status": " M",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/implement.jsonl",
+        "sha256": "04932cebec0f4fcd8152d5f079cf134573a0d7fb0777589a37cb63532b5e7074"
+      },
+      {
+        "status": " M",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/implement.md",
+        "sha256": "1f0d7d0ac4baeb3ae708c76179329596fccdf7b5bd6e72dc88668e8a611d31e9"
+      },
+      {
+        "status": " M",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/prd.md",
+        "sha256": "06d264e81f951f0d21235dc67d86d8ea4799ed7e7725dd54924adb07061952ad"
+      },
+      {
+        "status": " M",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/execution-status.md",
+        "sha256": "864960180fa851d5d9fed245360e2e6b5bb124fd6d2c706890b4e1c212284d41"
+      },
+      {
+        "status": " M",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/leader-now.md",
+        "sha256": "70b6506482cc72efbcab058264455e86328324a7a13211a01e3ac9130d86f0c7"
+      },
+      {
+        "status": " M",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/task.json",
+        "sha256": "7ad3e247e4024aa29f5f584900dc54bf622108fd2c0a01d7238f45e54da95b95"
+      },
+      {
+        "status": " M",
+        "path": "docs/HANDOFF.md",
+        "sha256": "61c3207d28a52ec45178e7f75874b780ca2e03ff413e260ee52b1f3b96b68f11"
+      },
+      {
+        "status": " M",
+        "path": "packages/core/src/db/index.md",
+        "sha256": "73a59e78aca908dbab47abffcd21009b984c90eb191638328c8b577a2895b420"
+      },
+      {
+        "status": " M",
+        "path": "packages/core/src/db/memory-transition-publication-repo.ts",
+        "sha256": "bf032ab13bab8f86e5111bce8ecec2bff699bec9f07e1bccdf69ad25b1816dbd"
+      },
+      {
+        "status": " M",
+        "path": "packages/core/src/memory/transitions/index.md",
+        "sha256": "cd227315654acaa860337a1912c831b60a9eea6e79da1e9e9c6e39b25246129a"
+      },
+      {
+        "status": " M",
+        "path": "packages/core/src/memory/transitions/transition-emergency-context.test.ts",
+        "sha256": "732fb08ee15764e1154d67c5f08d802e556d9dfdfae4791c7680520312645462"
+      },
+      {
+        "status": " M",
+        "path": "packages/core/src/memory/transitions/transition-evidence-context.test.ts",
+        "sha256": "af93f235a1d97ae4bf24b0943bda7ac6650c20842a6ed9350848267f725e60dc"
+      },
+      {
+        "status": " M",
+        "path": "packages/core/src/memory/transitions/transition-healthy-execution.ts",
+        "sha256": "3235ba06bf4d4d20581448921f6f169a3bb2b17cbb0f22bf551a6a705cdfc60a"
+      },
+      {
+        "status": " M",
+        "path": "packages/core/src/testing/index.md",
+        "sha256": "8d1ce4af1e35fbb611871acd4092fe6c3ae7ee20092cab2455df78730ae8efc3"
+      },
+      {
+        "status": " M",
+        "path": "packages/core/src/testing/memory-transition-cycle-fixtures.ts",
+        "sha256": "503b3d4e76e50b1edd07c697b65951ab6934813e6b5f8f765fe0a9d08c2f541d"
+      },
+      {
+        "status": " M",
+        "path": "packages/core/src/testing/memory-transition-publication-fixtures.ts",
+        "sha256": "ff293dca369746e5219d84081e7cbcb80f454edc1c9ef5ec9a94865aefdd756d"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/stage4-review-2026-10-07.md",
+        "sha256": "d70bc6d3d64bf6ee163accb3d92a6a5d396f625b7aefc78ec517784f72dfb346"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/stage4-w9-lease-plan-2026-10-07.md",
+        "sha256": "9e97f969260a84a8ebdc3d64e4fc69b8619ddd32f930ac06c901e2dda3133806"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/stage5-configuration-contract-2026-10-07.md",
+        "sha256": "d0736e25f80d361d2873b417d3943ab0a2377babb95e913ce0068333fa1972a0"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/stage5-readiness-2026-10-07.md",
+        "sha256": "e4690ac5b46f1c14ee75aa4ccdd3dfb83ef0caf61ba3528d9e5e077dfde09c6d"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-adjacent-2026-10-07.log",
+        "sha256": "1be6311d6cb9d9e1b4f41fc749a403890b8a708cdfd86889e6a71ab9c7e3e53c"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-emergency-context-before-2026-10-07.json",
+        "sha256": "b36a862ace832013b35630a28b91caf30ab0aae54b6d5362d81953be7f6842cc"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-evidence-identities-2026-10-07.json",
+        "sha256": "c2349b3d17b14724d34469bac679b0ed41b59eb67b246da611f31ba3435969ec"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-final-identity-result-2026-10-07.json",
+        "sha256": "4000ef46dc0290791270b4f0073781de56a6163ad5d0b8eb4c79daafd1ca8c5c"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-green-focused-2026-10-07.log",
+        "sha256": "86b321c847b8a719e8a98d2eed0bf3154f2b4bfa9d24e5ab05f904c31a7dba5e"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-implementation.md",
+        "sha256": "33134460912be60b5237aabc53744647ac0aedd541e8cf5bf1abb4da9f8470d4"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-independent-check.md",
+        "sha256": "5919fea89f48892d2d8d8ab951097ae3ec94a6c84d98f47ca8e056592a5728af"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-independent-diff-check-2026-10-07.log",
+        "sha256": "455e3009c67335e394be3337a2d1bdb4dcb3c5ce5cbc5ae6abee6a7c611f6337"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-independent-diff-check-result-2026-10-07.json",
+        "sha256": "538fd6e47c194090f05596cb010b7ef300cb7b6edc03ce39b1eac8570de9e06a"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-independent-identities-before-2026-10-07.json",
+        "sha256": "9e81694977100e4ffae3f88ab59987f08ccce19d530d5857abb2c8c199bcf1b6"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-independent-identities-final-2026-10-07.json",
+        "sha256": "7fe0a30c452116391ebfde4ba2845767137a136595973b82e0b5665955d7019f"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-independent-regression-2026-10-07.log",
+        "sha256": "9b1845e43168282c64a65ba72ce678ff539602f4759973e169da1544e7208a92"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-independent-regression-result-2026-10-07.json",
+        "sha256": "75d0f78fc1858b6d1c05356a4a54b6443e6e191bea6861c4c127b107ae0fe093"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-lint-2026-10-07.log",
+        "sha256": "8fa30d82a7bf469d96bec57bcd44ac76d20a8e5b9ee39d7cc1f310c77501b676"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-pre-core-source-identities-2026-10-07.json",
+        "sha256": "3e4c164bb8315d3ca5228a0569bafee3f1b016b0402ebda25c20e8930b7711e7"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-2026-10-07.md",
+        "sha256": "103cacaa0397da0ee5804e073d1ff87574803c1b07a88cee22728c04c70850f0"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-adjacent-2026-10-07.log",
+        "sha256": "be2e039ce6f891d2ee1624fd782d826e864a2eaf9f14491d9f2713b07fdfdbb4"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-adjacent-result-2026-10-07.json",
+        "sha256": "de8338e35a9338bc5ef9e98233dc187e24903846fdd5957d8efc4cb80b8c9e97"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-core-2026-10-07.log",
+        "sha256": "efcc3e64b462c7e4013484f420e32d47cc67b03aa3164c10181e8e5350263535"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-core-result-2026-10-07.json",
+        "sha256": "700e9fde5cf3c70d389305d24874244e06a53cac28d510bfd987dac1e68e1fd2"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-diff-check-2026-10-07.log",
+        "sha256": "cfbf4d6ee711f3e7e500a6333c716bc9037802ddfc252b4c0962e58f65a2fdc2"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-diff-check-result-2026-10-07.json",
+        "sha256": "5d68683ed50bd5932d77d7e8be215c88dac8f5ac546f1f92294986f5a2ae0ee4"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-emergency-context-2026-10-07.log",
+        "sha256": "5dc9b52149eeecbd7ca94ae9ba5429461996d6e68008d3374f809f132a2ceb23"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-emergency-context-result-2026-10-07.json",
+        "sha256": "968dcfb4785e472a92a29240abebe76fd668bf7d2781380849c325f5bbd16086"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-final-diff-check-2026-10-07.log",
+        "sha256": "cfbf4d6ee711f3e7e500a6333c716bc9037802ddfc252b4c0962e58f65a2fdc2"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-final-diff-check-result-2026-10-07.json",
+        "sha256": "a5211beb47930d8ffe10cbf35ce14eddb607f9052ded2d6b3f31511b2c50e8f7"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-final-file-lint-2026-10-07.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-final-file-lint-result-2026-10-07.json",
+        "sha256": "75a4baee8983041ddd295cdf0fdb6a9e85200e8d46dbcb43dd971176fa5b1dbb"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-lint-2026-10-07.log",
+        "sha256": "8fa30d82a7bf469d96bec57bcd44ac76d20a8e5b9ee39d7cc1f310c77501b676"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-lint-result-2026-10-07.json",
+        "sha256": "aadae41bf32e577e15a153c016571ce99de263090c3773fbf4dfab1fde5f9e27"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-typecheck-2026-10-07.log",
+        "sha256": "efc92176e9e0c6cb83a6c7f28b35c2ec545c659a3ee7bfe9a394dc17fed1e8e3"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-typecheck-result-2026-10-07.json",
+        "sha256": "b3a8e12541f34054a0cc4ad7bf5791da9b89f76d212db4fe1ef54cbe8d14ecb6"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-red-final-lease-2026-10-07.log",
+        "sha256": "c6016437c0c6b5a209c889d4a31fe85840d4790f6bd87234cdf17592a65fa4b9"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-red-identities-2026-10-07.json",
+        "sha256": "7fc08f4b609eda84f8d3625a7dc32571d7e5805fc787e51ada6c63c33ebfb23d"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-source-identities-2026-10-07.json",
+        "sha256": "4fe7f2868c0c6e6422525468c2e3a4ebd41526cd4cabede94f431a1ec53fd1e4"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-typecheck-2026-10-07.log",
+        "sha256": "053c25284b9ea0e412b32435dedc21788c2af60a169c41deb9348b62d3d47107"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/10-07-hindsight-configuration-observation/check.jsonl",
+        "sha256": "f6dd0067b74089861654fe04424100509f1ce81bcd3b417be3ae4a3facdd16b0"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/10-07-hindsight-configuration-observation/design.md",
+        "sha256": "b6a293948af026e621d7244ad538a5ff9c3865fba7a136f7eb2150aa518551e2"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/10-07-hindsight-configuration-observation/implement.jsonl",
+        "sha256": "f6dd0067b74089861654fe04424100509f1ce81bcd3b417be3ae4a3facdd16b0"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/10-07-hindsight-configuration-observation/implement.md",
+        "sha256": "1c09edcdc3e970c0d86f642d9344e617748abe1490e9967338bb33ac623df719"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/10-07-hindsight-configuration-observation/prd.md",
+        "sha256": "fe5681e5be00ce48cf1b3437a579ef0a534fd03e2a0f181ef0d6067df13d0bfc"
+      },
+      {
+        "status": "??",
+        "path": ".trellis/tasks/10-07-hindsight-configuration-observation/task.json",
+        "sha256": "d6f682f98e14d4ef3ed54a1f527ff31c6e030ff60d92884cae93b3ca63e3b4aa"
+      },
+      {
+        "status": "??",
+        "path": "packages/core/src/memory/transitions/transition-healthy-publication-lease.test.ts",
+        "sha256": "beeaa28b98688254ac40d97748096c7570c38819691c274bbbf462b852319fbb"
+      }
+    ]
+  },
+  {
+    "root": "H:\\hindsight",
+    "head": "eb6413a7f58c4f3f0adb88a33a99516f8707fef7",
+    "files": [
+      {
+        "status": " M",
+        "path": "hindsight-api-slim/hindsight_api/engine/db/base.py",
+        "sha256": "fe4864744f0ebfbe016f1854fea94267b19ed4d6dda8990dc9c5721d8c73fd41"
+      },
+      {
+        "status": " M",
+        "path": "hindsight-api-slim/hindsight_api/engine/db/ops.py",
+        "sha256": "55d11dad0d97cebf999ecda3f9cfa04b52c8aa2aa81a0ed2887efbf6f7ddecef"
+      },
+      {
+        "status": " M",
+        "path": "hindsight-api-slim/hindsight_api/engine/db/ops_postgresql.py",
+        "sha256": "8db6fc6d4a0c62e6c2c880283ee5e7b69ed4b4dd4d2f8733eedfa9be52c26cbd"
+      },
+      {
+        "status": " M",
+        "path": "hindsight-api-slim/hindsight_api/engine/db/oracle.py",
+        "sha256": "44c884fa188162be7dbbe05921122911387dc829e41ca7dd0a503ff830e2f31a"
+      },
+      {
+        "status": " M",
+        "path": "hindsight-api-slim/hindsight_api/extensions/builtin/supabase_tenant.py",
+        "sha256": "98bcd7352e56aa6bac3b39e8bc7be2da8bdfdb545ee866ed9b9c2e35529e8853"
+      },
+      {
+        "status": " M",
+        "path": "hindsight-api-slim/tests/conftest.py",
+        "sha256": "43e932d4239dadee446d25e3c48c6ad15c77eec4b4ea616e48194e5048e4ea4a"
+      },
+      {
+        "status": " M",
+        "path": "hindsight-api-slim/tests/test_supabase_tenant.py",
+        "sha256": "5c2b88465977eae691c7b40aadf5f14243c92e4e1ea1b308ed3425c7e8335eb5"
+      },
+      {
+        "status": " M",
+        "path": "hindsight-clients/typescript/generated/client/client.gen.ts",
+        "sha256": "af4e40b6f3dcc7d853e9a214ba90a6d25ca21b1f5188c941c347a78aa28cac7f"
+      },
+      {
+        "status": " M",
+        "path": "hindsight-control-plane/bin/cli.js",
+        "sha256": "ce3ccd97b3759b2a0848221a9487de67178ce640d1ddc324a3043f7507655ef2"
+      }
+    ]
+  }
+]

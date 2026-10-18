@@ -1,0 +1,44 @@
+{
+  "fixtureRoot": "C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674",
+  "checkedAt": "2026-10-13T10:40:31.9417315Z",
+  "build": "taki-hindsight-host-c1-v1",
+  "platform": "win32",
+  "architecture": "x64",
+  "manifestFileCount": 794,
+  "actualPayloadFileCount": 795,
+  "manifestSha256": "6aaba2c416d0038c521c3d6a7d2042d5116dd1787bdf7a957e2473a1333607a4",
+  "manifestMatchesRegistration": true,
+  "manifestEntryHashMismatches": [],
+  "registrationSha256": "74ced2e55ec69a3148570f505a25cbcf74d9fae1e6431129ece8e00d05997609",
+  "runtime": {
+    "matchesRegistration": true,
+    "sha256": "9a4eb5f1c29c6a2e93852ead46b999e284a6a5ca8bab4d4e241d587d025a52de",
+    "version": "v24.18.0",
+    "path": "C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674\\node.exe"
+  },
+  "fakeAdapter": {
+    "matchesRegistration": true,
+    "sha256": "f0601fc8b83a6bf7936f680c69ab7a393f7f995773a6a7b2d458eb2b16c1d17a",
+    "path": "C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674\\payload\\bin\\taki-secret-key.exe"
+  },
+  "dependencyVersions": {
+    "libsodium": "0.8.4",
+    "libsodium-wrappers": "0.8.4",
+    "json-rpc-2.0": "1.7.1",
+    "ws": "8.21.0",
+    "zod": "4.4.3"
+  },
+  "catalogSha256": "b823a1d2422bc13f14efafb5e0773ecdd3af9112e4c930bf09ab2f07d6420f6f",
+  "catalogUnchanged": true,
+  "preloadFileAbsent": true,
+  "fixtureProcesses": [],
+  "reparsePoints": [
+    {
+      "FullName": "C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674\\catalog-junction",
+      "LinkType": "Junction",
+      "Target": "C:\\taki-c1a-fixture-86700c396b3348a7addf83ffc8273674\\fake-core-data"
+    }
+  ],
+  "originalPermissionsChanged": false,
+  "originalDataTouched": false
+}

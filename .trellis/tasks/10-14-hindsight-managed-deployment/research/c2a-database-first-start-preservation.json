@@ -1,0 +1,140 @@
+{
+  "version": 1,
+  "recordedAt": "2026-10-15T19:16:26.3464827+08:00",
+  "scope": "C2a offline database first-start prerequisite",
+  "token": "fd3e5b9c-c0f8-4fd8-b1d1-17a8dd1cce7e",
+  "staging": "G:/TakiAgent-c2a-database/first-fd3e5b9c-c0f8-4fd8-b1d1-17a8dd1cce7e",
+  "archive": "c2a-database-first-start-evidence.zip",
+  "archiveBytes": 78887,
+  "archiveSha256": "82ba7698993d50f1295c8a7aa322044b6501f7cda16d102ed6cc1ead5aa09f26",
+  "files": [
+    {
+      "path": ".c2a-db-first-owner",
+      "bytes": 36,
+      "sha256": "52ce96f106c02c9d971dccc0181846693c55466a209628ea6c07cc5f4c74f6aa"
+    },
+    {
+      "path": "baseline.json",
+      "bytes": 108,
+      "sha256": "fa070d6dc8ab41fe840c56a759b9ac232c0751c2427978cf7bf958ba5b0f4a42"
+    },
+    {
+      "path": "c2a-database-extraction-runtime-review.json",
+      "bytes": 22940,
+      "sha256": "5020811efbae7a33ab7ce3ec0033dea6a65b6b620ccc092c9278b76c3ab65ff3"
+    },
+    {
+      "path": "c2a-database-extraction-runtime-review.md",
+      "bytes": 10247,
+      "sha256": "0c2f6d0d5664899ae59ef141fb6a262d25bca386e8323b52427e0720e529583c"
+    },
+    {
+      "path": "command-runner.mjs",
+      "bytes": 3233,
+      "sha256": "92cc067e25aff35c1ce4e260d380170f3cc5235123fe28c46402409c05dfddd7"
+    },
+    {
+      "path": "commands.jsonl",
+      "bytes": 44255,
+      "sha256": "52fcf316fb5d4c72f8422ed93da4360395960da7dc5be04a6cf661a0569f49d0"
+    },
+    {
+      "path": "first-start-command.json",
+      "bytes": 20137,
+      "sha256": "6721a2f8113f2ba737880c32ffb07063f51ed7f4472fe4e4d52aa3c52a422d34"
+    },
+    {
+      "path": "first-start-result.json",
+      "bytes": 8201,
+      "sha256": "2db443fb5b74d9ed0b98ebddda6156cfce75e0fcb20d0cf24b485bea0ac2557d"
+    },
+    {
+      "path": "first-start-runtime.json",
+      "bytes": 20851,
+      "sha256": "9c3666b38752f715d7624b96ec1bbf57d0b18857757ef861930f9d4c44cd0962"
+    },
+    {
+      "path": "first-start.started",
+      "bytes": 24,
+      "sha256": "fcf747b4b06391c7b0e8b4f125cf6d583aca09968046b4c673c0743d383a7566"
+    },
+    {
+      "path": "input-manifest.json",
+      "bytes": 1819,
+      "sha256": "0569c35fce38fc6433179a22ff10fb944520865bee6ddc9f43ccff73e04e2af3"
+    },
+    {
+      "path": "original-after-containers.json",
+      "bytes": 1546,
+      "sha256": "c4667b5486b3ab64f761f6393845248518f4178026d162173d4e4d269d8fc079"
+    },
+    {
+      "path": "original-before-containers.json",
+      "bytes": 1546,
+      "sha256": "c4667b5486b3ab64f761f6393845248518f4178026d162173d4e4d269d8fc079"
+    },
+    {
+      "path": "resource-identities.json",
+      "bytes": 370,
+      "sha256": "bc7663b8b8963b23ea1960c472788d5f0659e1850c7e6ca6d967676d021bf184"
+    },
+    {
+      "path": "reviewed-inputs/c2a-database-extraction-implementation-review.json",
+      "bytes": 10107,
+      "sha256": "7923d547692c959e61826d8a17e7cab3a27afbbcf49ca6206cc2598cf91025fe"
+    },
+    {
+      "path": "reviewed-inputs/c2a-database-extraction-implementation-review.md",
+      "bytes": 5924,
+      "sha256": "0b736a67552dba7ba439c3963d2df58d0974c9cb0d26e2246ceacd5077270125"
+    },
+    {
+      "path": "reviewed-inputs/c2a-database-extraction-plan.md",
+      "bytes": 15266,
+      "sha256": "9996da457893c5bc42505f3aad234ff3937e47c8ef0bd2c7ae84c14fa9b0aa1d"
+    },
+    {
+      "path": "reviewed-inputs/c2a-database-extraction-review.md",
+      "bytes": 6695,
+      "sha256": "d013bdf26592630cabe80bc71e1774c62281c0dd653e9955e31a6d0a8089958c"
+    },
+    {
+      "path": "reviewed-inputs/c2a-database-extraction-self-check.json",
+      "bytes": 23269,
+      "sha256": "1f4385ff6f14449f7f8822b586bf0b60dd99e22fe7f4eca006386a5640baf9da"
+    },
+    {
+      "path": "reviewed-inputs/first-start.py",
+      "bytes": 28600,
+      "sha256": "7d1ee67f7b3027da781795e365b58a9cb93f847cdba7cc31425f05030d2f7ff6"
+    },
+    {
+      "path": "reviewed-inputs/README.md",
+      "bytes": 12772,
+      "sha256": "c304db7acf32830bea23d98b00a45941ff19f0b76a9bde705ce6c1c9ba176e05"
+    },
+    {
+      "path": "run-first-start.mjs",
+      "bytes": 11249,
+      "sha256": "08036c099c53e7d58c39f40c649e2930d7930d2a16eb93b54964d4b82acc569a"
+    },
+    {
+      "path": "run.started",
+      "bytes": 24,
+      "sha256": "d5eb2790155db28a73a53dbf549715e8c439ed78109c792d9e25b71562f0b59e"
+    },
+    {
+      "path": "runtime-prerequisites.json",
+      "bytes": 404,
+      "sha256": "d45ceb0d6d8da73f5909dbbcdc7ae841fe3c1aa6e16a37265d657b24fa4902cb"
+    }
+  ],
+  "logicalStagingBytes": 249623.0,
+  "passed": true,
+  "acceptance": "prerequisite_only",
+  "containerRemoved": true,
+  "volumeRemoved": true,
+  "originalContainersUnchanged": true,
+  "stagingRemoved": true,
+  "stagingRemovedAt": "2026-10-15T19:16:26.4072996+08:00"
+}

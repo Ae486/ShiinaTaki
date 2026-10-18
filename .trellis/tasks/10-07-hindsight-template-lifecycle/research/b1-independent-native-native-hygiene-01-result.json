@@ -1,0 +1,31 @@
+{
+  "command": [
+    "git",
+    "diff",
+    "--check",
+    "--",
+    "TAKI_PATCHES.md",
+    "hindsight-api-slim/hindsight_api/engine/template_definitions.py",
+    "hindsight-api-slim/hindsight_api/engine/template_provider_guard.py",
+    "hindsight-api-slim/hindsight_api/engine/template_refresh.py",
+    "hindsight-api-slim/hindsight_api/engine/memory_engine.py",
+    "hindsight-api-slim/hindsight_api/engine/llm_wrapper.py",
+    "hindsight-api-slim/hindsight_api/engine/reflect/agent.py",
+    "hindsight-api-slim/hindsight_api/engine/retain/embedding_utils.py",
+    "hindsight-api-slim/hindsight_api/engine/transition_snapshot.py",
+    "hindsight-api-slim/hindsight_api/admin/cli.py",
+    "hindsight-api-slim/tests/native_results/template_validation_cases.json",
+    "hindsight-api-slim/tests/native_results/test_template_independent_wire.py",
+    "hindsight-api-slim/tests/native_results/test_template_independent_refresh.py",
+    "hindsight-api-slim/tests/native_results/test_template_independent_routes.py",
+    "hindsight-api-slim/tests/native_results/test_template_independent_backup.py",
+    "hindsight-api-slim/tests/native_results/test_template_independent_auxiliary.py",
+    "hindsight-api-slim/tests/native_results/test_template_provider_guard.py",
+    "hindsight-api-slim/tests/native_results/test_transition_backup.py",
+    "hindsight-api-slim/tests/test_taki_extension_contract.py"
+  ],
+  "cwd": "H:/hindsight",
+  "exitCode": 0,
+  "durationSeconds": 0.164,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b1-independent-native-native-hygiene-01.log"
+}

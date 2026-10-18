@@ -1,0 +1,8 @@
+warning: in the working copy of 'packages/core/src/db/index.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'packages/core/src/db/migrations/index-list.test.ts', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'packages/core/src/db/migrations/index.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'packages/core/src/db/migrations/lineage-reopen-matrix.test.ts', CRLF will be replaced by LF the next time Git touches it
+
+Scoped git diff --check: exit 0.
+All 30 owned files: strict UTF-8, no BOM, no trailing spaces or tabs.
+All 59 historical production migration files: tracked and no diff against HEAD.

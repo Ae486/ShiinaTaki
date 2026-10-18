@@ -1,0 +1,8 @@
+{
+  "kind": "read-only retained HTTP exchange audit",
+  "exitCode": 1,
+  "failure": "AssertionError: expected each completion log row ordinal to equal its line number",
+  "cause": "The transport assigns ordinals at request admission and appends rows at asynchronous completion.",
+  "diagnosis": "All 200 request ordinals are unique and complete; no row-key mismatch. Completion order is legitimately different.",
+  "sourceChanged": false
+}

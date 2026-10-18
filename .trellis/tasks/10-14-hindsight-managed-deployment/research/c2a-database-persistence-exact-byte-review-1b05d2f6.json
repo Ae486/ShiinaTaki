@@ -1,0 +1,1476 @@
+{
+  "version": 1,
+  "recordedAt": "2026-10-18T12:05:23.587Z",
+  "reviewer": "/root (independent of the submitted code)",
+  "task": ".trellis/tasks/10-14-hindsight-managed-deployment",
+  "caseId": "1b05d2f6-494c-4a6d-a601-1e807eca1486",
+  "phaseA": {
+    "verdict": "FAIL",
+    "findingCount": 1,
+    "findings": [
+      {
+        "id": "A3-INVALID-ENGINE-TIME",
+        "severity": "blocking for the Phase A gate",
+        "file": "docker-database/run-persistence.ts",
+        "lineStart": 120,
+        "lineEnd": 121,
+        "title": "Malformed RFC3339 calendar/time values are accepted",
+        "requirement": "Malformed Engine time must throw; never fall back to host clock.",
+        "actual": "The extracted unmodified helper returns 2026-02-30T00:00:00Z, 2026-02-29T00:00:00Z, and 2026-10-18T24:00:00Z. The digit-only shape check and finite Date.parse accept overflow dates/hour 24.",
+        "impact": "These invalid strings can reach both Docker event --since/--until arguments instead of failing at engineTime(). This violates the explicit review gate; it is not evidence of a live Engine emitting such timestamps or a new persistence failure.",
+        "recommendation": "Validate calendar and time ranges without allowing Date.parse normalization; retain the original validated RFC3339Nano string and the existing budgets/failure codes. Fixtures were not edited."
+      }
+    ],
+    "fixtureChecks": [
+      {
+        "path": "H:/TakiAgent/.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/run-persistence.ts",
+        "bytes": 56090,
+        "sha256": "b3736ef4cd510023434ea8f0864296f2970fec02892543af370a324595ec6f76",
+        "expectedSha256": "b3736ef4cd510023434ea8f0864296f2970fec02892543af370a324595ec6f76",
+        "hashMatches": true,
+        "caseLine": 32,
+        "changedLines": [
+          32
+        ],
+        "newTokenOccurrences": 1,
+        "staleTokenOccurrences": 0,
+        "normalizedPreTokenSha256": "c35ccae8cd1253845e06e9e37fd5a339b4d79a629da967fc5dd6f10b0ce68d53",
+        "preTokenPin": "c35ccae8cd1253845e06e9e37fd5a339b4d79a629da967fc5dd6f10b0ce68d53",
+        "preTokenMatches": true,
+        "archivedComparison": "Compared separately after reversing only the Engine-clock repair",
+        "diff": "-const CASE = \"13f04d85-ee84-408e-890c-88922e36c69e\";\n+const CASE = \"1b05d2f6-494c-4a6d-a601-1e807eca1486\";"
+      },
+      {
+        "path": "H:/TakiAgent/.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/database-read.py",
+        "bytes": 6084,
+        "sha256": "4bd830c60a4ddecc4e8e7018d2b19eb08093c81fc5d7f3ee0a8ff380178e4271",
+        "expectedSha256": "4bd830c60a4ddecc4e8e7018d2b19eb08093c81fc5d7f3ee0a8ff380178e4271",
+        "hashMatches": true,
+        "caseLine": 18,
+        "changedLines": [
+          18
+        ],
+        "newTokenOccurrences": 1,
+        "staleTokenOccurrences": 0,
+        "normalizedPreTokenSha256": "0ad82eb436c9c4389852c07ddb7c28eed6e9b5cd59740fb71c1ebb42db243419",
+        "preTokenPin": "0ad82eb436c9c4389852c07ddb7c28eed6e9b5cd59740fb71c1ebb42db243419",
+        "preTokenMatches": true,
+        "archivedComparison": {
+          "sha256": "0ad82eb436c9c4389852c07ddb7c28eed6e9b5cd59740fb71c1ebb42db243419",
+          "equal": true
+        },
+        "diff": "-CASE = \"13f04d85-ee84-408e-890c-88922e36c69e\"\n+CASE = \"1b05d2f6-494c-4a6d-a601-1e807eca1486\""
+      },
+      {
+        "path": "H:/TakiAgent/.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/fake_child.py",
+        "bytes": 44233,
+        "sha256": "9d65b8875e5d798a024dff9b4a182d6cff7bf4b62646954e38cd0c2e12ce3819",
+        "expectedSha256": "9d65b8875e5d798a024dff9b4a182d6cff7bf4b62646954e38cd0c2e12ce3819",
+        "hashMatches": true,
+        "caseLine": 23,
+        "changedLines": [
+          23
+        ],
+        "newTokenOccurrences": 1,
+        "staleTokenOccurrences": 0,
+        "normalizedPreTokenSha256": "427bc9e824e4a1dacadf29acca4d0e57faed1800a41972eb4c7797fc5b974800",
+        "preTokenPin": "427bc9e824e4a1dacadf29acca4d0e57faed1800a41972eb4c7797fc5b974800",
+        "preTokenMatches": true,
+        "archivedComparison": {
+          "sha256": "427bc9e824e4a1dacadf29acca4d0e57faed1800a41972eb4c7797fc5b974800",
+          "equal": true
+        },
+        "diff": "-CASE = \"13f04d85-ee84-408e-890c-88922e36c69e\"\n+CASE = \"1b05d2f6-494c-4a6d-a601-1e807eca1486\""
+      }
+    ],
+    "clockRepair": {
+      "source": "async function engineTime(): Promise<string> {\n  requireFact(fixture);\n  const value = (await dockerExchange(fixture.deploymentRegistration, {\n    argv: [\"info\", \"--format\", \"{{.SystemTime}}\"],\n    signal: AbortSignal.timeout(budget(10_000)), maxBytes: 4096,\n  })).toString(\"utf8\").trim();\n  // Preserve Engine RFC3339Nano precision; the Windows clock can exclude completed Engine events.\n  requireFact(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?(?:Z|[+-]\\d{2}:\\d{2})$/.test(value)\n    && Number.isFinite(Date.parse(value)));\n  return value;\n}",
+      "sourceSha256": "f3a8066e49362f9eb90de45d30a83ac6afba376cd0f10ecfe74c502512eac87e",
+      "beforeReconstruction": {
+        "bytes": 55442,
+        "sha256": "951de1587a37a0dba96fbf76bf029943128c9e80fc7ea1aa5dfe888fff470d25",
+        "matchesArchivedBytes": true
+      },
+      "scopeProof": "Normalize only CASE, remove exactly the helper and two report lines, restore the two previous host-clock expressions; the complete bytes equal the archived failed launcher. No assertion threshold, existing budget, retry, or failure-code change.",
+      "since": {
+        "file": "docker-database/run-persistence.ts",
+        "line": 605,
+        "source": "await engineTime()"
+      },
+      "until": {
+        "line": 336,
+        "source": "await engineTime()"
+      },
+      "containerQuery": 338,
+      "volumeQuery": 367,
+      "bothQueriesShareSameSinceUntil": true,
+      "hostClockFallback": false,
+      "fractionalPrecision": "Original 1-9 digits and UTC offset retained; trim removes only surrounding whitespace.",
+      "helperBudgetMs": 10000,
+      "helperMaxBytes": 4096
+    },
+    "nativeChecks": [
+      {
+        "path": "H:/hindsight/docker/standalone/Dockerfile.c2a-fake",
+        "bytes": 555,
+        "sha256": "2be1279ef4621f5d42397879fab2e436d780224eb3c02d591180faf9e9a9fcff",
+        "pinMatches": true
+      },
+      {
+        "path": "H:/hindsight/docker/standalone/managed_bootstrap/__init__.py",
+        "bytes": 80,
+        "sha256": "cbf487cffc9c62b5c6fe61f32d80070b5843f70f966c5fca163c675e21ddbf1d",
+        "pinMatches": true
+      },
+      {
+        "path": "H:/hindsight/docker/standalone/managed_bootstrap/bootstrap.py",
+        "bytes": 6323,
+        "sha256": "b8331bd8c9645d265578ed65f9f77402f170813f20d1d2683b5aa0a7d0768101",
+        "pinMatches": true
+      },
+      {
+        "path": "H:/hindsight/docker/standalone/managed_bootstrap/control.py",
+        "bytes": 5593,
+        "sha256": "c75dcdf2285df614c4836dab4898a2980a2a1e8e4572862861596ab244f39d5e",
+        "pinMatches": true
+      },
+      {
+        "path": "H:/hindsight/docker/standalone/managed_bootstrap/fake_child.py",
+        "bytes": 2073,
+        "sha256": "8d2267eb2b5af484179a7e8b2c301e067fe59197d63d91178415873ed7c96e93",
+        "pinMatches": true
+      },
+      {
+        "path": "H:/hindsight/docker/standalone/managed_bootstrap/fake_consumer.py",
+        "bytes": 4302,
+        "sha256": "52b3d0664b06ef82dca4765d2c08e820c16c2af5e2814a02f98fe08f8e220eb3",
+        "pinMatches": true
+      },
+      {
+        "path": "H:/hindsight/docker/standalone/managed_bootstrap/owner.py",
+        "bytes": 2460,
+        "sha256": "5b10f9f09def8ff985c96fed56c31f4ec4976f684d7e3b044fdc8a66afb38acc",
+        "pinMatches": true
+      },
+      {
+        "path": "H:/hindsight/docker/standalone/managed_bootstrap/owner_protocol.py",
+        "bytes": 3199,
+        "sha256": "cd9cdbea572354dbbc1200098d9edfe9280679c2b346a67c1326a795b01c1804",
+        "pinMatches": true
+      },
+      {
+        "path": "H:/hindsight/docker/standalone/managed_bootstrap/protocol.py",
+        "bytes": 13320,
+        "sha256": "074247650a31cfc47a1931ef6c7b258aa6f1d3a649bbb792ff2878257f6f8b88",
+        "pinMatches": true
+      },
+      {
+        "path": "H:/hindsight/docker/standalone/managed_bootstrap/submitter.py",
+        "bytes": 4913,
+        "sha256": "5a6ad60266066d1cff2559d46c6b2b15d4a93cf882de1e487790ad0fb6863c4a",
+        "pinMatches": true
+      },
+      {
+        "path": "H:/hindsight/docker/standalone/managed_bootstrap/supervision.py",
+        "bytes": 4552,
+        "sha256": "ff768434e0cef9eb2b6996351ba31e1dedede95211809d2ab8e8d09b5d9a5064",
+        "pinMatches": true
+      },
+      {
+        "path": "H:/hindsight/docker/standalone/managed_bootstrap/unix_socket.py",
+        "bytes": 9434,
+        "sha256": "08b6e604211d19e31ad61782c96b91a004277b37c31d6e9a0bdfdda681cd7725",
+        "pinMatches": true
+      }
+    ],
+    "acceptedSourceManifest": {
+      "path": "H:/TakiAgent/.trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-implementation-source-manifest.json",
+      "bytes": 108542,
+      "sha256": "f27379be3b4b5e61e1b2821c2eda2d87bf54e5c2983b034bdb637ee789961ae2",
+      "entries": 109,
+      "allPinsMatch": true,
+      "files": [
+        {
+          "path": "H:/TakiAgent/apps/desktop/src-tauri/src/capabilities_impl.rs",
+          "bytes": 10420,
+          "sha256": "99442b7e647da6912aebc9655d8db4bf5e776f48488b8b1f6b7a730806f33bcb",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/desktop/src-tauri/src/gate/governance.rs",
+          "bytes": 23114,
+          "sha256": "2a7241b4e2ec2ca2ff29d7c3408a5205b5f78700f4e7bb68640b4071bd9c6a06",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/desktop/src-tauri/src/gate/index.md",
+          "bytes": 992,
+          "sha256": "7ce9a10ddfd71c780c1378e3aa70b77fefc21f756394fb3a4b282e2b86fcc2fd",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/desktop/src-tauri/src/hindsight_checkpoint_relay.rs",
+          "bytes": 5885,
+          "sha256": "d20ba15076be0d77435679042385ce389e7cd178d1e60d7df7492f5e7cd5142f",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/desktop/src-tauri/src/hindsight_deployment.rs",
+          "bytes": 2582,
+          "sha256": "7642250cc41b2b29b9a97aa619b8d9b04bd31053793bd5542c3341a56774dbda",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/desktop/src-tauri/src/hindsight_deployment_protocol.rs",
+          "bytes": 17503,
+          "sha256": "9f1ad51b2bc9649b706849ed030585068c23259e01c5856c1c8b13aae47bd278",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/desktop/src-tauri/src/hindsight_windows.rs",
+          "bytes": 564,
+          "sha256": "e5399c7336c6da467b4646d89fc458a89ee1b1aebdb293f38d9b37f2170f20ac",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/desktop/src-tauri/src/hindsight_windows/deployment.rs",
+          "bytes": 9261,
+          "sha256": "f1467d3b7e86781426f0cd799ec76a68bbc9d5ad9d0e37ff4dccab708b192dc6",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/desktop/src-tauri/src/hindsight_windows/index.md",
+          "bytes": 1324,
+          "sha256": "eb4cd56d2521d64ddb89199106750969078ef32556e9811aab57c7a127492126",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/desktop/src-tauri/src/hindsight_windows/objects.rs",
+          "bytes": 11590,
+          "sha256": "1fc4409da7ef6e456a2a985d5558fbe6d0eea667cca2c3eaccb70df8d9575a97",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/desktop/src-tauri/src/hindsight_windows/process.rs",
+          "bytes": 7508,
+          "sha256": "3c6537bf881d5d5382615190c2071ba29a02f9f2c26501b9d3df75a1dc556675",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/desktop/src-tauri/src/hindsight_windows/resident.rs",
+          "bytes": 5413,
+          "sha256": "d3bf9d870b165b5867aba6808f7e0f7284b8cd5fab39c1a710c4cc03ff0e3c26",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/desktop/src-tauri/src/hindsight_windows/tests.rs",
+          "bytes": 13362,
+          "sha256": "d63c5f2d359e637e6f50f925b2c452494ac1f474b87311330d260f87f977611c",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/desktop/src-tauri/src/host_session.rs",
+          "bytes": 27179,
+          "sha256": "93f263a2108728cd0280fe958024c2f8bfe2ef4ef4d9fc8e3957d7709010224b",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/desktop/src-tauri/src/index.md",
+          "bytes": 3743,
+          "sha256": "4acfde60dcc5d0c5073c2a3f4186348fdb9758ee252eca5a8ce4219bbefc5f8e",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/desktop/src-tauri/src/lib.rs",
+          "bytes": 7477,
+          "sha256": "0168b01e95aba413397bbb06ef08ec1a2c2391e2a2c4acb86696e181f378b7cb",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/desktop/src-tauri/src/node.rs",
+          "bytes": 16283,
+          "sha256": "bbb4457f67fd95927ac60e75f04bb6894bf10d467ccb6148b43c485f04115758",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/desktop/src-tauri/src/protocol.rs",
+          "bytes": 17275,
+          "sha256": "c414332c41ca2e3f25181f9f32c9fd11f71e1d25c638e20123729b9338a7a9aa",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/desktop/src-tauri/src/ws_client.rs",
+          "bytes": 45223,
+          "sha256": "be37caa10783f7ab5e9e76146ecc9e47ac5e4b368b06b7260ca58271e6a59dc5",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/README.md",
+          "bytes": 15254,
+          "sha256": "1275e9c42067c12a8de1c4c65a98c0e511f258baf4ddce2991f7f25087185063",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/src/catalog-selection.ts",
+          "bytes": 3389,
+          "sha256": "29dcaff7274e624d5360e289702cd40ed828eb10b87ba4094bfc0cda203d75d4",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/src/deployment-core.test.ts",
+          "bytes": 26574,
+          "sha256": "e0aaaca7e10fdfc64d44cf4b923fd4f9362558032f146c3da789fcc1557231f5",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/src/deployment-error.ts",
+          "bytes": 759,
+          "sha256": "1ece2518e8336c2949a2390a584eb5f5b596766ce6b18699192c146824c9eec5",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/src/deployment-host.ts",
+          "bytes": 3443,
+          "sha256": "be96cf9ec0d9018b6fc594ea4ed754fc8c9f724de9eec429d7aa407c13104697",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/src/deployment-injection.ts",
+          "bytes": 6488,
+          "sha256": "5e95d37677a70a014512cf84452d6b25f9d9949a9519677a2eb5addaae434b50",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/src/deployment-installed.test.ts",
+          "bytes": 4101,
+          "sha256": "dd8f2acc33c54dc0c079793d8648e427a32bd622455c7c7d74e554d5158d8b9c",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/src/deployment-owner.test.ts",
+          "bytes": 9576,
+          "sha256": "bf8d3bc5222dae18c411e3b0d77bf05879a884157b2959b76ea26099048a6ccc",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/src/deployment-owner.ts",
+          "bytes": 14228,
+          "sha256": "9a4998b184b439d9ae469f6bbcdfa12e7f7bc161b2bdefc9d3be1aef81f1fe4d",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/src/deployment-registration.ts",
+          "bytes": 2334,
+          "sha256": "a64a259fe49eeb3091fea61fb9fa58d81b58d2f97767c63554569113bba2a6b7",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/src/deployment-registry.test.ts",
+          "bytes": 2886,
+          "sha256": "890c3948288154940275956dbda84b331f30a465464eb0a866d7e84a65bf83fc",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/src/deployment-registry.ts",
+          "bytes": 5258,
+          "sha256": "18edaefcc3ff2e50916611a300f82589784ac0460363c4c93835c92c29f8d2cf",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/src/deployment-test-fixtures.ts",
+          "bytes": 7060,
+          "sha256": "426467c932ecaf4a9916ea731f9f2711872449304c75d1b968a927d5cba954f9",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/src/docker-adapter.test.ts",
+          "bytes": 5183,
+          "sha256": "5ea80625b5687b72a4781f61b1bc145c170fc385eb107dbf59c92a6d20c8028f",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/src/docker-adapter.ts",
+          "bytes": 9843,
+          "sha256": "645719dfecd52de481f032826e7f535455a057ed06e321843f78151f373bbe88",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/src/docker-process.ts",
+          "bytes": 2166,
+          "sha256": "3979f4c2276ffd3ede148209cceb5fcd47689216437eacfaf052aeb7e592c5d8",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/src/index.md",
+          "bytes": 2654,
+          "sha256": "bf1b60bbf047d7e434f6b658d977e854f96571289bfb2267623e29fda9dc58b4",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/src/main.ts",
+          "bytes": 3942,
+          "sha256": "d731296bf79ecd44ddd9116b501292bd49baa41899e7615762da3625c8a36186",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/src/prepare-custody.ts",
+          "bytes": 2847,
+          "sha256": "f9939f3332645eb00f5ae92c0ca8a36389be853bebbc3854a93f74b447837129",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-child.ts",
+          "bytes": 4122,
+          "sha256": "0e211359cff053541421fa49df8d1b34d03f60c4a7bf85df1cd6bb6c170397ca",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-docker-fixture.ts",
+          "bytes": 6756,
+          "sha256": "cac05d8ba8b65ff4d5cca3acfbbef27a2ddc8615e352e787b6f43cb703e7c19b",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-installed-fixture.ts",
+          "bytes": 8916,
+          "sha256": "521c67c0e6405cfd080c04443f5ff7b73656ef741a63a6b0a671d5bbe3256382",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-process-fixture.ts",
+          "bytes": 10376,
+          "sha256": "a5aed879c170d9b9ee766207e1e7ece2615407eab12ea1f3da4c658e084a6534",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/apps/hindsight-host/test-fixtures/fake-docker.rs",
+          "bytes": 2015,
+          "sha256": "9141d591948648ca0938bd9fca9b4cc40b617473969e0bffc45d1238a54e7247",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/boot/hindsight-deployment-boot.ts",
+          "bytes": 3508,
+          "sha256": "e9c5d842e9d6fe90b69dae74b7aa037454d54da82307e72da5b12914e884fb86",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/boot/index.md",
+          "bytes": 2114,
+          "sha256": "da6b95fc8a65965c02b8148f8d1d77b951d9b3cfb8844be79f4537ee0962f119",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/capabilities/capability-broker-state.ts",
+          "bytes": 7504,
+          "sha256": "7db1e0adf4f2435f9272d0a561aefc5ce99099501788535c977ce37312548d61",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/capabilities/capability-broker.ts",
+          "bytes": 10082,
+          "sha256": "e6e6b3c70f8311fdc71225086be271a81e283b3c725d977ae211195fe251e6d1",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/capabilities/capability-challenge.ts",
+          "bytes": 14124,
+          "sha256": "f737cd0650aa41401454e03a2bdb51d841815f64b2b188a7937c4938b6ff1ca1",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/capabilities/capability-observers.ts",
+          "bytes": 1234,
+          "sha256": "d55138cb4a66b8d9aa04601921be9e661f20482bcec013575f7c6f4d324edbd7",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/capabilities/hindsight-deployment-outcome.ts",
+          "bytes": 2246,
+          "sha256": "f778824877a051fab5ba78f465e3f5e31c1c7931d9930265883407ed561b5167",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/capabilities/hindsight-injection-checkpoint.ts",
+          "bytes": 3886,
+          "sha256": "d8088d0e06bfe9711e065f61b6ab7314f4957f77bd063530a42ae31516c1a9a1",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/capabilities/index.md",
+          "bytes": 3241,
+          "sha256": "36944c89222742a1307e3199d0ade042dae6addd4df6e811b316aba55b8cf5fe",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/capabilities/route-capability.test.ts",
+          "bytes": 3418,
+          "sha256": "995569876cfd8a0a79c911c9f7248766c8c518f9981d92991c07ad090d6ad0e4",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/capabilities/route-capability.ts",
+          "bytes": 6472,
+          "sha256": "dbcdbcd9dcaeb02ecd000b4983468b4726c36751cb8474f68c7371b56abd1b19",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/db/index.md",
+          "bytes": 22142,
+          "sha256": "b8d5516d40e30d628cad25666862d629027df6c9fe9543b18cdc90cb2dec2fd2",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/db/run-repo.ts",
+          "bytes": 22823,
+          "sha256": "7836712577f00a29c2ae210a6b9cab065c9d778d819f11fc14577bf6d1b35b51",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/harness/index.md",
+          "bytes": 643,
+          "sha256": "648a2c59aed7fd0405ef2ff82e86112c0c84a2b3baead5194ce01d969b395f54",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/harness/run-service.ts",
+          "bytes": 6975,
+          "sha256": "0f5ed3014645cd3648fbf4c31acdd40cc49f07ae8f54dda52c18210a22c0a60e",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/index.md",
+          "bytes": 3857,
+          "sha256": "a7cf013ab4d8670950424e2507a98fe5cadb7d69c34332995c22326390c4dada",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/main.ts",
+          "bytes": 42890,
+          "sha256": "e1286ed20bb938db4ac10d42d36d8664b44aefff4a65f1aab75c8af7894f4de7",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/memory/hindsight/hindsight-custody-owner.ts",
+          "bytes": 8628,
+          "sha256": "f6aa22f2c718b28bc987c2ff7edc25b8f4217ce748ae2a03fc09835cf3e603ec",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/memory/hindsight/hindsight-deployment-owner.ts",
+          "bytes": 15832,
+          "sha256": "d86ec69cd94c999361ba7a7ed50b13c63af2db7483545cf8e6a46db94af75b97",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/memory/hindsight/index.md",
+          "bytes": 20381,
+          "sha256": "6ee3db31a475adafcac0b1cc58a20de795d8c06b56683a1df8e31df7b2f70982",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/server/methods/hindsight-deployment-checkpoint.ts",
+          "bytes": 1438,
+          "sha256": "e100a104cd547e3f603fe99135fed90bbdc22360f491f47e11b6ea9f6fde0cc8",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/server/methods/index.md",
+          "bytes": 8666,
+          "sha256": "4dffcad523c654a0e5869b682db7c1dad4cd1ce89949bc05426bbd94f7b6a18d",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/testing/capability-tool-harness.ts",
+          "bytes": 4896,
+          "sha256": "6f03a2d39c60b142e8c4f594a3a794ca6b31a3476a63255328dc6ead1c64894d",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/testing/index.md",
+          "bytes": 8213,
+          "sha256": "d309b08aa397a3bcf3e4deb7ac856db05128951efad6d20b69309f51768893bc",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/core/src/testing/run-service-stub.ts",
+          "bytes": 3405,
+          "sha256": "8e54da437d74fb3edf7da74359177a78670b4419416a2aaf9feae1310f443d72",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-checkpoint-result.granted.valid.json",
+          "bytes": 1193,
+          "sha256": "25ba315f468622337e4150c4bf2eb0858715436013ce918b46e64c9d5cac54a6",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-checkpoint-result.permit-selection.invalid.json",
+          "bytes": 749,
+          "sha256": "75187759863e94c3afb282d1b8f3a2758986642b99f2bd37359b943fa7e6c9bb",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-checkpoint-result.refused.valid.json",
+          "bytes": 69,
+          "sha256": "edf2ee759c690921aae49f9a1e8eea7cf3f2e8f224589b39e44f8f95a4c44148",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-checkpoint.authorization.invalid.json",
+          "bytes": 1852,
+          "sha256": "b235d633435bc4a62df8556a476c85af38c17d0c57025106e1479ab7346c3113",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-checkpoint.current.valid.json",
+          "bytes": 1826,
+          "sha256": "91ee71cb63482789905bb61e7fb0070ccb37ececbf0bb889c3fc50ee7970a4e2",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-effect.command.invalid.json",
+          "bytes": 2905,
+          "sha256": "fc838b322f836068f1a393c9d04a90c29c59de373140bf82206bcd2bdd858323",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-effect.containerId.invalid.json",
+          "bytes": 2816,
+          "sha256": "8507062501b0f4d3a9ae97af0ee6c4bb9309068133506d7dc9d386802a2630bd",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-effect.create.valid.json",
+          "bytes": 2736,
+          "sha256": "42362247876bc367e4c5bbbb635afb3f185c000a95fa50ba8f3da305b42fd294",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-effect.custody-input-configurationDigest.invalid.json",
+          "bytes": 2878,
+          "sha256": "628937351b9145341abefab6a475160d125e4e29d7338c38efe799892d56c3b7",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-effect.inject.valid.json",
+          "bytes": 2878,
+          "sha256": "f4cf3911f2fd4c86970ce25a8f41cfa4f498ee98c94f53c295286405d186de2c",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-effect.plan-operationId.invalid.json",
+          "bytes": 2878,
+          "sha256": "f8177f826acbcbea4357d1a38e4512edc10ad9b15fe35f354ebf2920c8955e4a",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-effect.start.valid.json",
+          "bytes": 2821,
+          "sha256": "af7e62b826d0b1d999bcf1bb0f17122f91067cb41e99b76777b7b3873b438b89",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-invocation.authorization.invalid.json",
+          "bytes": 4611,
+          "sha256": "07a8981b76d3cd2009e657123f633a008617c72d0ad7f3b58189405dde261070",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-invocation.control-effectId.invalid.json",
+          "bytes": 4551,
+          "sha256": "eb10c81d23f7df19a011f2b06d5e98741565c4766e6ea420e1210679df832eaf",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-invocation.input-startupId.invalid.json",
+          "bytes": 4551,
+          "sha256": "4f546030eb050f71a157ff7e32fa8e99ac615d4cd98764d8288501be52fc7f68",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-invocation.windows.valid.json",
+          "bytes": 4585,
+          "sha256": "4470341ad8c8b7792176cb3c8028f1ed1736350d62f74ab57a7279bbfdf0f86a",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-observe.original.valid.json",
+          "bytes": 81,
+          "sha256": "892b35319f2fb81efdb12dd94c47d2ab5f83c7bd2012d1eca456575a56cfbfa9",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-registration.docker-endpoint.invalid.json",
+          "bytes": 765,
+          "sha256": "9d76a79dac940adba4c0a69bb790a67d87fb7645523a17b2cd9420a8268eaa9d",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-registration.windows.valid.json",
+          "bytes": 786,
+          "sha256": "aae5d7090318bac90d54b180025943dfbd97ca6659f1c5a15059ad1e7f6cb91c",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-status.attemptId.invalid.json",
+          "bytes": 449,
+          "sha256": "53c64c1d457b9965cf0658eead35774acffd497c9901931b7387ddabb39266cc",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-status.deploymentReady.invalid.json",
+          "bytes": 482,
+          "sha256": "cc2798a75b1f81ebce9c73571abd0e9fcc66fdb527409a67440a73332d86c7c2",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-status.missing.valid.json",
+          "bytes": 115,
+          "sha256": "372527e0c3fc1b2e6a51c53be839a94598927f9313265c0d1abb29a05f181323",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-status.reason.invalid.json",
+          "bytes": 502,
+          "sha256": "c735c7e43f5cf9a4a197fe23cc0ab9cb6d1939899ede25f35f647f110e2bf633",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-status.running.valid.json",
+          "bytes": 483,
+          "sha256": "640f4650d4a6abcc3a897f516cbfa4d688211982c668495c23b889cc7968fe83",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/package.json",
+          "bytes": 1008,
+          "sha256": "5c9c02488a860aec82063dd3cca9a9fcb1b5db27a7aef7fb3d282906d9f90754",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/src/governance-registry.test.ts",
+          "bytes": 2185,
+          "sha256": "f585ac136f78a1fc0b7b5cf02b6c2cd8979304cb7b2d94ad39813deba83457e2",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/src/governance-registry.ts",
+          "bytes": 8808,
+          "sha256": "c2593dfc1451213c03e705be355f3bdc9cdc09f005802b9ec9b0d25ef4689de9",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/src/hindsight-deployment-schema.test.ts",
+          "bytes": 2748,
+          "sha256": "605c174d7c3f67822de845aa3829c1b7c75f9c6b15a57376fb1dea11966069e8",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/src/hindsight-deployment-schema.ts",
+          "bytes": 9323,
+          "sha256": "8f15f0719b9ade574f41799ea29febfcd718e1743667daf2c21666b127b4f8a0",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/src/index.md",
+          "bytes": 17440,
+          "sha256": "f4bd6b6306b35773ef1cecd1b3f05316357b18c783594bdeb2bb32c7b3807e78",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/TakiAgent/packages/shared/src/protocol-fixtures.test.ts",
+          "bytes": 6347,
+          "sha256": "bea30d6b97d83422ef7388e9a695ea4ef2f4da566453ade856037146f63cb167",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/hindsight/docker/standalone/Dockerfile.c2a-fake",
+          "bytes": 555,
+          "sha256": "2be1279ef4621f5d42397879fab2e436d780224eb3c02d591180faf9e9a9fcff",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/hindsight/docker/standalone/managed_bootstrap/README.md",
+          "bytes": 10367,
+          "sha256": "8aa9ed8e28f6e72181baf16bb44b55948429f6bab90414d64bed04ce27217129",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/hindsight/docker/standalone/managed_bootstrap/control.py",
+          "bytes": 5593,
+          "sha256": "c75dcdf2285df614c4836dab4898a2980a2a1e8e4572862861596ab244f39d5e",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/hindsight/docker/standalone/managed_bootstrap/fake_child.py",
+          "bytes": 2073,
+          "sha256": "8d2267eb2b5af484179a7e8b2c301e067fe59197d63d91178415873ed7c96e93",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/hindsight/docker/standalone/managed_bootstrap/fake_consumer.py",
+          "bytes": 4302,
+          "sha256": "52b3d0664b06ef82dca4765d2c08e820c16c2af5e2814a02f98fe08f8e220eb3",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/hindsight/docker/standalone/managed_bootstrap/owner.py",
+          "bytes": 2460,
+          "sha256": "5b10f9f09def8ff985c96fed56c31f4ec4976f684d7e3b044fdc8a66afb38acc",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/hindsight/docker/standalone/managed_bootstrap/owner_protocol.py",
+          "bytes": 3199,
+          "sha256": "cd9cdbea572354dbbc1200098d9edfe9280679c2b346a67c1326a795b01c1804",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/hindsight/docker/standalone/managed_bootstrap/unix_socket.py",
+          "bytes": 9434,
+          "sha256": "08b6e604211d19e31ad61782c96b91a004277b37c31d6e9a0bdfdda681cd7725",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/hindsight/docker/standalone/tests/fixtures/c2a_pipe_owner.py",
+          "bytes": 2094,
+          "sha256": "99bb3ccbd6a1821ee57282d1fc4a9567b0fc71d423639d140a0be8702c66a5b8",
+          "pinMatches": true
+        },
+        {
+          "path": "H:/hindsight/docker/standalone/tests/test_c2a_bootstrap_owner.py",
+          "bytes": 5808,
+          "sha256": "3a7db96bba885c19a66e6f0634b7872116c28a3a29fea3d1efe8108b59a3295c",
+          "pinMatches": true
+        }
+      ]
+    },
+    "expectedContext": {
+      "allocated": false,
+      "entryCount": 12,
+      "sha256": "a20096ec28ce8181ba0b1e52375a99701abae7fafa5c40234607d773ca015a54",
+      "matchesPin": true,
+      "entries": [
+        {
+          "path": "docker/standalone/Dockerfile.c2a-fake",
+          "bytes": 555,
+          "sha256": "2be1279ef4621f5d42397879fab2e436d780224eb3c02d591180faf9e9a9fcff"
+        },
+        {
+          "path": "docker/standalone/managed_bootstrap/__init__.py",
+          "bytes": 80,
+          "sha256": "cbf487cffc9c62b5c6fe61f32d80070b5843f70f966c5fca163c675e21ddbf1d"
+        },
+        {
+          "path": "docker/standalone/managed_bootstrap/bootstrap.py",
+          "bytes": 6323,
+          "sha256": "b8331bd8c9645d265578ed65f9f77402f170813f20d1d2683b5aa0a7d0768101"
+        },
+        {
+          "path": "docker/standalone/managed_bootstrap/control.py",
+          "bytes": 5593,
+          "sha256": "c75dcdf2285df614c4836dab4898a2980a2a1e8e4572862861596ab244f39d5e"
+        },
+        {
+          "path": "docker/standalone/managed_bootstrap/fake_child.py",
+          "bytes": 44233,
+          "sha256": "9d65b8875e5d798a024dff9b4a182d6cff7bf4b62646954e38cd0c2e12ce3819"
+        },
+        {
+          "path": "docker/standalone/managed_bootstrap/fake_consumer.py",
+          "bytes": 4302,
+          "sha256": "52b3d0664b06ef82dca4765d2c08e820c16c2af5e2814a02f98fe08f8e220eb3"
+        },
+        {
+          "path": "docker/standalone/managed_bootstrap/owner.py",
+          "bytes": 2460,
+          "sha256": "5b10f9f09def8ff985c96fed56c31f4ec4976f684d7e3b044fdc8a66afb38acc"
+        },
+        {
+          "path": "docker/standalone/managed_bootstrap/owner_protocol.py",
+          "bytes": 3199,
+          "sha256": "cd9cdbea572354dbbc1200098d9edfe9280679c2b346a67c1326a795b01c1804"
+        },
+        {
+          "path": "docker/standalone/managed_bootstrap/protocol.py",
+          "bytes": 13320,
+          "sha256": "074247650a31cfc47a1931ef6c7b258aa6f1d3a649bbb792ff2878257f6f8b88"
+        },
+        {
+          "path": "docker/standalone/managed_bootstrap/submitter.py",
+          "bytes": 4913,
+          "sha256": "5a6ad60266066d1cff2559d46c6b2b15d4a93cf882de1e487790ad0fb6863c4a"
+        },
+        {
+          "path": "docker/standalone/managed_bootstrap/supervision.py",
+          "bytes": 4552,
+          "sha256": "ff768434e0cef9eb2b6996351ba31e1dedede95211809d2ab8e8d09b5d9a5064"
+        },
+        {
+          "path": "docker/standalone/managed_bootstrap/unix_socket.py",
+          "bytes": 9434,
+          "sha256": "08b6e604211d19e31ad61782c96b91a004277b37c31d6e9a0bdfdda681cd7725"
+        }
+      ]
+    },
+    "identity": {
+      "verdict": "PASS",
+      "token": "1b05d2f6-494c-4a6d-a601-1e807eca1486",
+      "staging": "G:/TakiAgent-c2a-database/persistence-1b05d2f6-494c-4a6d-a601-1e807eca1486",
+      "protectedRoot": "C:/taki-c2a-db-persistence-1b05d2f6-494c-4a6d-a601-1e807eca1486",
+      "imageTag": "taki-c2a-db:1b05d2f6-494c-4a6d-a601-1e807eca1486",
+      "imageLabel": "taki.c2a.fixture=1b05d2f6-494c-4a6d-a601-1e807eca1486",
+      "launcherLines": [
+        32,
+        35,
+        36,
+        37,
+        47,
+        133,
+        200,
+        397,
+        406,
+        419,
+        454,
+        743,
+        753,
+        765,
+        775,
+        784
+      ],
+      "readerLines": [
+        18,
+        122,
+        150
+      ],
+      "childLines": [
+        23,
+        32,
+        34,
+        198,
+        447,
+        454,
+        463,
+        476,
+        748,
+        766,
+        778
+      ],
+      "readmeTreatment": "The frozen README still documents the old token. The current user instruction explicitly binds every Stage 3 command to T; the launcher derives paths/tag and validates the case label. README was not edited."
+    }
+  },
+  "validation": {
+    "method": "Extracted only engineTime from the hash-verified launcher; removed only its TypeScript return annotation; executed in node:vm with a fixed byte-returning dockerExchange stub, requireFact stub and unchanged budget limit. No launcher import, main, Docker call, build, Python execution, or runtime resource.",
+    "node": {
+      "path": "C:\\Program Files\\nodejs\\node.exe",
+      "bytes": 92534088,
+      "sha256": "9a4eb5f1c29c6a2e93852ead46b999e284a6a5ca8bab4d4e241d587d025a52de",
+      "version": "v24.18.0",
+      "pinMatches": true
+    },
+    "cases": [
+      {
+        "input": "2026-10-18T12:49:45.123456789Z\n",
+        "expected": "return",
+        "outcome": "return",
+        "value": "2026-10-18T12:49:45.123456789Z",
+        "passed": true,
+        "dateParseIso": "2026-10-18T12:49:45.123Z",
+        "calls": [
+          {
+            "argv": [
+              "info",
+              "--format",
+              "{{.SystemTime}}"
+            ],
+            "maxBytes": 4096
+          }
+        ]
+      },
+      {
+        "input": "2026-10-18T12:49:45.123456789+08:00",
+        "expected": "return",
+        "outcome": "return",
+        "value": "2026-10-18T12:49:45.123456789+08:00",
+        "passed": true,
+        "dateParseIso": "2026-10-18T04:49:45.123Z",
+        "calls": [
+          {
+            "argv": [
+              "info",
+              "--format",
+              "{{.SystemTime}}"
+            ],
+            "maxBytes": 4096
+          }
+        ]
+      },
+      {
+        "input": "2024-02-29T12:00:00.000000001Z",
+        "expected": "return",
+        "outcome": "return",
+        "value": "2024-02-29T12:00:00.000000001Z",
+        "passed": true,
+        "dateParseIso": "2024-02-29T12:00:00.000Z",
+        "calls": [
+          {
+            "argv": [
+              "info",
+              "--format",
+              "{{.SystemTime}}"
+            ],
+            "maxBytes": 4096
+          }
+        ]
+      },
+      {
+        "input": "not-a-time",
+        "expected": "throw",
+        "outcome": "throw",
+        "error": "C2A_CHECK_FAILED",
+        "passed": true,
+        "dateParseIso": null,
+        "calls": [
+          {
+            "argv": [
+              "info",
+              "--format",
+              "{{.SystemTime}}"
+            ],
+            "maxBytes": 4096
+          }
+        ]
+      },
+      {
+        "input": "2026-13-01T00:00:00Z",
+        "expected": "throw",
+        "outcome": "throw",
+        "error": "C2A_CHECK_FAILED",
+        "passed": true,
+        "dateParseIso": null,
+        "calls": [
+          {
+            "argv": [
+              "info",
+              "--format",
+              "{{.SystemTime}}"
+            ],
+            "maxBytes": 4096
+          }
+        ]
+      },
+      {
+        "input": "2026-02-30T00:00:00Z",
+        "expected": "throw",
+        "outcome": "return",
+        "value": "2026-02-30T00:00:00Z",
+        "passed": false,
+        "dateParseIso": "2026-03-02T00:00:00.000Z",
+        "calls": [
+          {
+            "argv": [
+              "info",
+              "--format",
+              "{{.SystemTime}}"
+            ],
+            "maxBytes": 4096
+          }
+        ]
+      },
+      {
+        "input": "2026-02-29T00:00:00Z",
+        "expected": "throw",
+        "outcome": "return",
+        "value": "2026-02-29T00:00:00Z",
+        "passed": false,
+        "dateParseIso": "2026-03-01T00:00:00.000Z",
+        "calls": [
+          {
+            "argv": [
+              "info",
+              "--format",
+              "{{.SystemTime}}"
+            ],
+            "maxBytes": 4096
+          }
+        ]
+      },
+      {
+        "input": "2026-10-18T24:00:00Z",
+        "expected": "throw",
+        "outcome": "return",
+        "value": "2026-10-18T24:00:00Z",
+        "passed": false,
+        "dateParseIso": "2026-10-19T00:00:00.000Z",
+        "calls": [
+          {
+            "argv": [
+              "info",
+              "--format",
+              "{{.SystemTime}}"
+            ],
+            "maxBytes": 4096
+          }
+        ]
+      },
+      {
+        "input": "2026-10-18T12:49:45.1234567890Z",
+        "expected": "throw",
+        "outcome": "throw",
+        "error": "C2A_CHECK_FAILED",
+        "passed": true,
+        "dateParseIso": "2026-10-18T12:49:45.123Z",
+        "calls": [
+          {
+            "argv": [
+              "info",
+              "--format",
+              "{{.SystemTime}}"
+            ],
+            "maxBytes": 4096
+          }
+        ]
+      }
+    ]
+  },
+  "priorEvidence": {
+    "root": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e",
+    "fileCount": 60,
+    "sha256": "21c84dda4748957ce70e89eee685f2312c267eb681e78aa47a1e61807695e124",
+    "inventory": [
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/.c2a-docker-owner",
+        "bytes": 36,
+        "sha256": "bdb61657ee46e79598c8b31d8762e571c4aeb65f81dae3a161e1be2d12023f16"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/adapter-build.json",
+        "bytes": 1371,
+        "sha256": "e0e42054e954f33a7c187c589f9a6c930143f9dd930a010dd2426e81125a8c57"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/base-probe.json",
+        "bytes": 316,
+        "sha256": "819eca37907fa96577bcafca977d41304c16e1a14a782205b8170f874d944d5a"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/baseline.json",
+        "bytes": 104,
+        "sha256": "2c43296728925d9b6c61fa704991b76663aff87019e625fa6b8440b6393aa9a8"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/build-command.json",
+        "bytes": 3555,
+        "sha256": "2a7b68cdc86131a935daefbd313ce341108831ee56542cc023b36be1f1a0b271"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/build-config/buildx/.buildNodeID",
+        "bytes": 16,
+        "sha256": "c20560d975f1e5ef963f0bef095004e42a0b86d7bf41ddce97d0245dda54c08a"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/build-config/buildx/.lock",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/build-config/buildx/activity/default",
+        "bytes": 20,
+        "sha256": "118107037cca1db6f410011b77de76576bf7bba2031eb36b97b23bf1cb4103b9"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/build-config/buildx/current",
+        "bytes": 76,
+        "sha256": "ad4436223bfadf60e9921a9be166da1d9c454921db007f16b8f21e5553cde791"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/build-config/buildx/refs/default/default/enj5zv97c6elqdfc8i4h3ztkz",
+        "bytes": 266,
+        "sha256": "690aab76d8e9f4a4a97cc35809172c04d5f3f6e7a9da9509c8e96170ddaf5ac8"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/build-config/config.json",
+        "bytes": 81,
+        "sha256": "c61bdfa290e9f2f08d80543aae256794d0e8bf61333cf7a3479b3ef52add6b1d"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/build.started",
+        "bytes": 24,
+        "sha256": "c8a8942e98635f1e088c7b90b22fe4c319abb33ae03590154c823b41b8b4f0c6"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/built-image.json",
+        "bytes": 379,
+        "sha256": "b882e1ef5a1df055c682529ad0add7e8c7fe696f913e471120cd5576781afa69"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/command-runner.mjs",
+        "bytes": 3022,
+        "sha256": "478f7b51f300bb1df7165407141e1f21328d36a7189a44ee180680a80aa1f812"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/commands.jsonl",
+        "bytes": 94038,
+        "sha256": "f9689b13644554adc0393ff162967308befd1e00ace2cf4503ecddfc5dba1cc4"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/context/docker/standalone/Dockerfile.c2a-fake",
+        "bytes": 555,
+        "sha256": "2be1279ef4621f5d42397879fab2e436d780224eb3c02d591180faf9e9a9fcff"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/context/docker/standalone/managed_bootstrap/bootstrap.py",
+        "bytes": 6323,
+        "sha256": "b8331bd8c9645d265578ed65f9f77402f170813f20d1d2683b5aa0a7d0768101"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/context/docker/standalone/managed_bootstrap/control.py",
+        "bytes": 5593,
+        "sha256": "c75dcdf2285df614c4836dab4898a2980a2a1e8e4572862861596ab244f39d5e"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/context/docker/standalone/managed_bootstrap/fake_child.py",
+        "bytes": 44233,
+        "sha256": "427bc9e824e4a1dacadf29acca4d0e57faed1800a41972eb4c7797fc5b974800"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/context/docker/standalone/managed_bootstrap/fake_consumer.py",
+        "bytes": 4302,
+        "sha256": "52b3d0664b06ef82dca4765d2c08e820c16c2af5e2814a02f98fe08f8e220eb3"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/context/docker/standalone/managed_bootstrap/owner.py",
+        "bytes": 2460,
+        "sha256": "5b10f9f09def8ff985c96fed56c31f4ec4976f684d7e3b044fdc8a66afb38acc"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/context/docker/standalone/managed_bootstrap/owner_protocol.py",
+        "bytes": 3199,
+        "sha256": "cd9cdbea572354dbbc1200098d9edfe9280679c2b346a67c1326a795b01c1804"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/context/docker/standalone/managed_bootstrap/protocol.py",
+        "bytes": 13320,
+        "sha256": "074247650a31cfc47a1931ef6c7b258aa6f1d3a649bbb792ff2878257f6f8b88"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/context/docker/standalone/managed_bootstrap/submitter.py",
+        "bytes": 4913,
+        "sha256": "5a6ad60266066d1cff2559d46c6b2b15d4a93cf882de1e487790ad0fb6863c4a"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/context/docker/standalone/managed_bootstrap/supervision.py",
+        "bytes": 4552,
+        "sha256": "ff768434e0cef9eb2b6996351ba31e1dedede95211809d2ab8e8d09b5d9a5064"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/context/docker/standalone/managed_bootstrap/unix_socket.py",
+        "bytes": 9434,
+        "sha256": "08b6e604211d19e31ad61782c96b91a004277b37c31d6e9a0bdfdda681cd7725"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/context/docker/standalone/managed_bootstrap/__init__.py",
+        "bytes": 80,
+        "sha256": "cbf487cffc9c62b5c6fe61f32d80070b5843f70f966c5fca163c675e21ddbf1d"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/failure-stop.json",
+        "bytes": 58258,
+        "sha256": "3cc8fded9aa77058602e4e072063cf82cd45d1eaf18fcc4d61173590d6275a5c"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/fake-key-adapter.exe",
+        "bytes": 155648,
+        "sha256": "922f70f128e074b8043b959c6dd047e4eab7c6f6a337eeb16f2d102cebf74fe3"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/fake-key-adapter.pdb",
+        "bytes": 1314816,
+        "sha256": "0f8e8966554784487ca3c8431612b8122fb8e50896c7016fd4c3bbb1e2bbed7b"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/final-stop.json",
+        "bytes": 58258,
+        "sha256": "3cc8fded9aa77058602e4e072063cf82cd45d1eaf18fcc4d61173590d6275a5c"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/first-stop.json",
+        "bytes": 59299,
+        "sha256": "38ec2dcc0071385d36a9c8aefaf8cfc177a261e29093cb54a4e3926735bbcaf3"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/image-id.txt",
+        "bytes": 71,
+        "sha256": "282b9bd9296229d7008a19479dd417b5aac48fe3aaf02bfbbd1aa14b67c4288f"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/launch-persistence.mjs",
+        "bytes": 1039,
+        "sha256": "d455bf466b308dccbf5be3f81d2c5d6f2aecaeedd6a27b1b1eb912ed2d7a2c8c"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/launcher-command.json",
+        "bytes": 762,
+        "sha256": "99a202ae5851b6fc8063868e7dd1ab360ee71cee3ccab73039914042e48551a9"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/original-before-containers.json",
+        "bytes": 1546,
+        "sha256": "c4667b5486b3ab64f761f6393845248518f4178026d162173d4e4d269d8fc079"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/persistence.json",
+        "bytes": 607940,
+        "sha256": "c186c99560ea0a7bf5f2961efebb74132c2e8ab3e1b7dfdce58517424f38f7f5"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/persistence.started",
+        "bytes": 24,
+        "sha256": "40c8727035a97e70d437c5e048d6963e74e3798e971440830263683d7966a485"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/prepare-persistence.mjs",
+        "bytes": 6068,
+        "sha256": "42e030f64a51ea27d456ccda3ee7673db7ec1ec633b88dd13baa187d9711943a"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/prepared-inputs.json",
+        "bytes": 16362,
+        "sha256": "bcbd675c74a88c9cd778708675cb769524479c2838fb64b221c0b18775317119"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/readback-persistence.mjs",
+        "bytes": 4218,
+        "sha256": "580099516b8a8bca3f976501eb233612f012cd347bcef662d1ce7f449e358d8b"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/recover-event-evidence.mjs",
+        "bytes": 6102,
+        "sha256": "3ee3840da4877e1972db3f0733f7655e5c3690c24340d77afeb7d8414facdf9d"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/reused-base-probe.json",
+        "bytes": 518,
+        "sha256": "dd71d8cccb2ba9d6f64caae18384f4084609ab587030d7eb66e215ca83febb52"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/reviewed-fixture/c2a-database-persistence-design-review.md",
+        "bytes": 4868,
+        "sha256": "bade2cab57318c88d19b5f66684f3a708fee2e3349f2c543874db3b2f1be628a"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/reviewed-fixture/c2a-database-persistence-first-attempt-diagnosis.md",
+        "bytes": 9567,
+        "sha256": "dff5c47fb35994e1758917b8fed93ab1b3b02111901ca56915d61f61cc0be076"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/reviewed-fixture/c2a-database-persistence-plan.md",
+        "bytes": 26961,
+        "sha256": "186f60061a4ecd7ac26443f90c079225c3bc9efb782f27227b50763ff0088e4c"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/reviewed-fixture/c2a-database-persistence-r2-review.json",
+        "bytes": 16689,
+        "sha256": "8bbc575c2c78f3b47e7bfb4eb0efce81e3f9269436f5cd47fbb5c38348f80f2b"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/reviewed-fixture/c2a-database-persistence-r2-review.md",
+        "bytes": 8246,
+        "sha256": "adb534e1b3796e10bb7fad3eec026be3ec1ece7a8960a377a8647175c0bd6a2c"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/reviewed-fixture/c2a-database-persistence-r2-self-check.json",
+        "bytes": 11785,
+        "sha256": "33e734d05e75f3631a44b363f801a0c3e7f3a8091bc403ca8b88a17cba9b5f49"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/reviewed-fixture/c2a-database-persistence-r2-self-check.md",
+        "bytes": 5150,
+        "sha256": "88f25c4e31ddf4eafaecca68ed7817753f2269de61d94458798b96118c733196"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/reviewed-fixture/c2a-database-persistence-self-check.json",
+        "bytes": 25243,
+        "sha256": "13706e83e2c733114a66e1246df20752acb42adffdc3376bbaf702c81598c72d"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/reviewed-fixture/c2a-implementation-source-manifest.json",
+        "bytes": 108542,
+        "sha256": "f27379be3b4b5e61e1b2821c2eda2d87bf54e5c2983b034bdb637ee789961ae2"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/reviewed-fixture/docker-database/database-read.py",
+        "bytes": 6084,
+        "sha256": "0ad82eb436c9c4389852c07ddb7c28eed6e9b5cd59740fb71c1ebb42db243419"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/reviewed-fixture/docker-database/fake_child.py",
+        "bytes": 44233,
+        "sha256": "427bc9e824e4a1dacadf29acca4d0e57faed1800a41972eb4c7797fc5b974800"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/reviewed-fixture/docker-database/README.md",
+        "bytes": 22962,
+        "sha256": "ffd27eba8edae875cdd8f8a84beea17e4dc1385e180c879fba7388816181419a"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/reviewed-fixture/docker-database/run-persistence.ts",
+        "bytes": 55442,
+        "sha256": "951de1587a37a0dba96fbf76bf029943128c9e80fc7ea1aa5dfe888fff470d25"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/root-event-recovery.json",
+        "bytes": 94113,
+        "sha256": "cc226df30e739ec3ee1f9514b8ce3815a1fa3290b06d8210545cbea03520a23e"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/root-post-run-readback.json",
+        "bytes": 2672,
+        "sha256": "a754467a25ee3ba88fb1e0e3325db982b692fdcc1c0f8d7ac2f9561ccbccbf27"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/root-preparation-check.json",
+        "bytes": 1342,
+        "sha256": "adaee7647e2bf340e00c427f7b8500b9d681ff4d2e59e7bca30b612a843b0c69"
+      },
+      {
+        "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/runtime-prerequisites.json",
+        "bytes": 2387,
+        "sha256": "9942543cab12e2c7a9c7ea0d2e7cace217b7c958bd8c323d9bf0952559ea6bc9"
+      }
+    ],
+    "readOnly": true
+  },
+  "phaseB": {
+    "status": "NOT_STARTED_PHASE_A_FAIL",
+    "buildInvocations": 0,
+    "launcherInvocations": 0,
+    "dockerCommands": 0,
+    "imageId": null,
+    "launcherJson": null,
+    "casePassed": null,
+    "eventCounts": null,
+    "submitCount": null,
+    "execMetadata": null,
+    "finalStop": null,
+    "engineClockVsWindows": null,
+    "cleanup": "Not applicable: no experiment resources created.",
+    "sevenContainerComparison": "Not measured: Phase B preflight did not begin. No Docker command or workload mutation was performed.",
+    "freeSpaceDeltas": null,
+    "tokenConsumed": false
+  },
+  "mutationScope": {
+    "sourceFilesModified": false,
+    "gitWrites": false,
+    "daemonOperations": false,
+    "unrelatedContainerOperations": false,
+    "priorEvidenceModified": false,
+    "reportFiles": [
+      "c2a-database-persistence-exact-byte-review-1b05d2f6.json",
+      "c2a-database-persistence-exact-byte-review-1b05d2f6.md",
+      "c2a-database-persistence-r2-self-check.json",
+      "c2a-database-persistence-r2-self-check.md"
+    ]
+  }
+}

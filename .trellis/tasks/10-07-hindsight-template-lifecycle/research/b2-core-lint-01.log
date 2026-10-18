@@ -1,0 +1,25 @@
+
+H:\TakiAgent\packages\core\src\memory\hindsight\hindsight-memory-subsystem.ts
+  48:8  error  Function 'createHindsightMemorySubsystem' has too many lines (54). Maximum allowed is 50  max-lines-per-function
+
+H:\TakiAgent\packages\core\src\memory\hindsight\hindsight-runtime-connection.ts
+  63:8  error  Function 'createHindsightRuntimeConnection' has too many lines (55). Maximum allowed is 50  max-lines-per-function
+
+H:\TakiAgent\packages\core\src\memory\hindsight\template-lifecycle\template-execution-reads.ts
+  29:51  error  '_request' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+H:\TakiAgent\packages\core\src\memory\hindsight\template-lifecycle\template-execution-service.ts
+  21:8  error  Function 'createTemplateExecutionService' has too many lines (52). Maximum allowed is 50  max-lines-per-function
+
+H:\TakiAgent\packages\core\src\memory\hindsight\template-lifecycle\template-lifecycle-fixtures.ts
+  33:8  error  Function 'templateLifecycleFixture' has too many lines (78). Maximum allowed is 50  max-lines-per-function
+
+H:\TakiAgent\packages\core\src\memory\hindsight\template-lifecycle\template-native-fixtures.ts
+   26:8   error  Function 'templateNativeFixture' has too many lines (60). Maximum allowed is 50  max-lines-per-function
+  119:27  error  '_hash' is assigned a value but never used                                       @typescript-eslint/no-unused-vars
+
+H:\TakiAgent\packages\core\src\memory\hindsight\template-lifecycle\template-provision.test.ts
+  213:29  error  '_hash' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+✖ 8 problems (8 errors, 0 warnings)
+

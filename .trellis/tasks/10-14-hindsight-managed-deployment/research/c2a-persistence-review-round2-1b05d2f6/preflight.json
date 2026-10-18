@@ -1,0 +1,193 @@
+{
+  "recordedAt": "2026-10-18T12:17:20.267Z",
+  "caseId": "1b05d2f6-494c-4a6d-a601-1e807eca1486",
+  "commands": [
+    {
+      "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "args": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:/TakiAgent-c2a-database/persistence-1b05d2f6-494c-4a6d-a601-1e807eca1486/client-config",
+        "info",
+        "--format",
+        "{\"id\":{{json .ID}},\"os\":{{json .OSType}},\"architecture\":{{json .Architecture}},\"version\":{{json .ServerVersion}},\"time\":{{json .SystemTime}}}"
+      ],
+      "stdout": "{\"id\":\"93e8319e-24b7-4a7d-88f1-60923ad681e0\",\"os\":\"linux\",\"architecture\":\"x86_64\",\"version\":\"29.0.1\",\"time\":\"2026-10-18T12:17:20.098681161Z\"}\n",
+      "stderr": "",
+      "failure": null,
+      "startedAt": "2026-10-18T12:17:20.476Z",
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 196
+    },
+    {
+      "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "args": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:/TakiAgent-c2a-database/persistence-1b05d2f6-494c-4a6d-a601-1e807eca1486/client-config",
+        "image",
+        "inspect",
+        "--format",
+        "{\"id\":{{json .Id}},\"os\":{{json .Os}},\"architecture\":{{json .Architecture}},\"volumes\":{{json (index .Config \"Volumes\")}}}",
+        "taki-hindsight-api:local"
+      ],
+      "stdout": "{\"id\":\"sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db\",\"os\":\"linux\",\"architecture\":\"amd64\",\"volumes\":null}\n",
+      "stderr": "",
+      "failure": null,
+      "startedAt": "2026-10-18T12:17:20.673Z",
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 209
+    },
+    {
+      "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "args": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:/TakiAgent-c2a-database/persistence-1b05d2f6-494c-4a6d-a601-1e807eca1486/client-config",
+        "image",
+        "ls",
+        "--filter",
+        "reference=taki-c2a-db:1b05d2f6-494c-4a6d-a601-1e807eca1486",
+        "--format",
+        "{{.ID}}"
+      ],
+      "stdout": "",
+      "stderr": "",
+      "failure": null,
+      "startedAt": "2026-10-18T12:17:20.883Z",
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 147
+    },
+    {
+      "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "args": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:/TakiAgent-c2a-database/persistence-1b05d2f6-494c-4a6d-a601-1e807eca1486/client-config",
+        "container",
+        "ls",
+        "--all",
+        "--no-trunc",
+        "--format",
+        "{{.ID}}"
+      ],
+      "stdout": "1e389e0a2f95121ca804c186c20916196e9e46f67a7691c3d184404a7292deb8\nc07d86d32382757d292dd4ebf318e6c44260c817d95f35187663d4d33a26b865\na38b49e64f74ee4fa4f5cf5531e467d74dda2b64dc7e28e78a9bdadd37272519\n8f5e4468c3a7c0100330e012fdca3da843abfcc732361b71308f06d6eeada5c2\n7992fb2bba71e13dc290e305941ded32b9046c1ec4b67a3697863ff79079cf8b\nba11af042db0879902996426522611b267f38eab7d21f05e21036929c415cc24\n9d4fc8fb7a4869ac422d9e78a924b49e698e61a562de3af7576dfd18ef81cd98\n697330c3cd8966e02d97fa228c5233a0805531bff00275107630e34fadda0b1a\n",
+      "stderr": "",
+      "failure": null,
+      "startedAt": "2026-10-18T12:17:21.030Z",
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 191
+    }
+  ],
+  "pins": [
+    {
+      "path": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "sha256": "0a4d8fe2ab107ceae44ee5f5fc1e1c155790042b7e3d3163826660da882b389d",
+      "expected": "0a4d8fe2ab107ceae44ee5f5fc1e1c155790042b7e3d3163826660da882b389d"
+    },
+    {
+      "path": "C:/Program Files/nodejs/node.exe",
+      "sha256": "9a4eb5f1c29c6a2e93852ead46b999e284a6a5ca8bab4d4e241d587d025a52de",
+      "expected": "9a4eb5f1c29c6a2e93852ead46b999e284a6a5ca8bab4d4e241d587d025a52de"
+    },
+    {
+      "path": "H:/TakiAgent/apps/desktop/src-tauri/target/debug/taki-node.exe",
+      "sha256": "1ed31593324eaea703590e6dd12b348dfe99c38c7530207b12c89300e8a582c9",
+      "expected": "1ed31593324eaea703590e6dd12b348dfe99c38c7530207b12c89300e8a582c9"
+    }
+  ],
+  "checks": [
+    {
+      "name": "STAGE_ABSENT",
+      "pass": true
+    },
+    {
+      "name": "PROTECTED_ROOT_ABSENT",
+      "pass": true
+    },
+    {
+      "name": "PIN:C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "pass": true
+    },
+    {
+      "name": "PIN:C:/Program Files/nodejs/node.exe",
+      "pass": true
+    },
+    {
+      "name": "PIN:H:/TakiAgent/apps/desktop/src-tauri/target/debug/taki-node.exe",
+      "pass": true
+    },
+    {
+      "name": "G_FREE_20_GIB",
+      "pass": true
+    },
+    {
+      "name": "C_FREE_1_GIB",
+      "pass": true
+    },
+    {
+      "name": "DOCKER:info",
+      "pass": true
+    },
+    {
+      "name": "ENGINE_IDENTITY",
+      "pass": true
+    },
+    {
+      "name": "DOCKER:image",
+      "pass": true
+    },
+    {
+      "name": "BASE_IMAGE",
+      "pass": true
+    },
+    {
+      "name": "DOCKER:image",
+      "pass": true
+    },
+    {
+      "name": "TAG_ABSENT",
+      "pass": true
+    },
+    {
+      "name": "DOCKER:container",
+      "pass": true
+    },
+    {
+      "name": "SEVEN_EXISTING_CONTAINERS",
+      "pass": false
+    }
+  ],
+  "failure": "SEVEN_EXISTING_CONTAINERS",
+  "freeSpace": {
+    "gFree": 138496225280,
+    "cFree": 25589501952
+  },
+  "engine": {
+    "id": "93e8319e-24b7-4a7d-88f1-60923ad681e0",
+    "os": "linux",
+    "architecture": "x86_64",
+    "version": "29.0.1",
+    "time": "2026-10-18T12:17:20.098681161Z"
+  },
+  "clock": {
+    "windowsBefore": "2026-10-18T12:17:20.476Z",
+    "windowsAfter": "2026-10-18T12:17:20.672Z",
+    "engine": "2026-10-18T12:17:20.098681161Z"
+  },
+  "image": {
+    "id": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+    "os": "linux",
+    "architecture": "amd64",
+    "volumes": null
+  },
+  "finishedAt": "2026-10-18T12:17:21.222Z"
+}

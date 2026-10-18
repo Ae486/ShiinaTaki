@@ -1,0 +1,41 @@
+{
+  "startedAt": "2026-10-15T12:47:47.966Z",
+  "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+  "args": [
+    "--host",
+    "npipe:////./pipe/dockerDesktopLinuxEngine",
+    "--config",
+    "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/build-config",
+    "buildx",
+    "build",
+    "--builder",
+    "default",
+    "--pull=false",
+    "--network=none",
+    "--load",
+    "--progress=plain",
+    "--build-arg",
+    "NATIVE_IMAGE=taki-hindsight-api:local",
+    "--label",
+    "taki.c2a.fixture=13f04d85-ee84-408e-890c-88922e36c69e",
+    "--iidfile",
+    "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/image-id.txt",
+    "--tag",
+    "taki-c2a-db:13f04d85-ee84-408e-890c-88922e36c69e",
+    "--file",
+    "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/context/docker/standalone/Dockerfile.c2a-fake",
+    "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/context"
+  ],
+  "environmentKeys": [
+    "SystemRoot",
+    "TEMP",
+    "TMP"
+  ],
+  "timeoutMs": 600000,
+  "stdout": "",
+  "stderr": "#0 building with \"default\" instance using docker driver\n\n#1 [internal] load build definition from Dockerfile.c2a-fake\n#1 transferring dockerfile: 603B 0.0s done\n#1 WARN: InvalidDefaultArgInFrom: Default value for ARG ${NATIVE_IMAGE} results in empty or invalid base image name (line 4)\n#1 DONE 0.1s\n\n#2 [internal] load metadata for docker.io/library/taki-hindsight-api:local\n#2 DONE 0.1s\n\n#3 [internal] load .dockerignore\n#3 transferring context: 2B done\n#3 DONE 0.0s\n\n#4 [internal] load build context\n#4 DONE 0.0s\n\n#5 [1/3] FROM docker.io/library/taki-hindsight-api:local@sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db\n#5 resolve docker.io/library/taki-hindsight-api:local@sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db 0.0s done\n#5 DONE 0.0s\n\n#4 [internal] load build context\n#4 transferring context: 99.41kB 0.0s done\n#4 DONE 0.1s\n\n#5 [1/3] FROM docker.io/library/taki-hindsight-api:local@sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db\n#5 CACHED\n\n#6 [2/3] COPY docker/standalone/managed_bootstrap /app/c2a/managed_bootstrap\n#6 DONE 0.1s\n\n#7 [3/3] RUN /app/api/.venv/bin/python -I -B -c \"import pathlib,shutil,sysconfig; shutil.copytree('/app/c2a/managed_bootstrap', pathlib.Path(sysconfig.get_path('purelib'))/'managed_bootstrap')\"\n#7 DONE 0.5s\n\n#8 exporting to image\n#8 exporting layers\n#8 exporting layers 0.2s done\n#8 exporting manifest sha256:54fcc310d8f942cee04865f8e1d65621115f8c03763e34cebe09b56539b59459 0.0s done\n#8 exporting config sha256:c27f73bad61a65c91bc92aea26c95977b023a8b388322036b46b764a5ccd0ccb 0.0s done\n#8 exporting attestation manifest sha256:b633ff09e7f524561b41c465a6981e9519682dd17742aa475a281f340424c510 0.0s done\n#8 exporting manifest list sha256:53f3be182e02deaab48d20ee424b440b5200b1aac3373e920a6e54d9fe296226\n#8 exporting manifest list sha256:53f3be182e02deaab48d20ee424b440b5200b1aac3373e920a6e54d9fe296226 0.0s done\n#8 naming to docker.io/library/taki-c2a-db:13f04d85-ee84-408e-890c-88922e36c69e done\n#8 unpacking to docker.io/library/taki-c2a-db:13f04d85-ee84-408e-890c-88922e36c69e 0.1s done\n#8 DONE 0.5s\n\n \u001b[33m1 warning found (use docker --debug to expand):\n\u001b[0m - InvalidDefaultArgInFrom: Default value for ARG ${NATIVE_IMAGE} results in empty or invalid base image name (line 4)\n",
+  "failure": null,
+  "exitCode": 0,
+  "signal": null,
+  "elapsedMs": 2453
+}

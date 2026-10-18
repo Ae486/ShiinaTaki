@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "scope": "read-only-builder-prerequisite",
+  "status": "available-built-in-driver-observed",
+  "facts": {
+    "name": "default",
+    "driver": "docker",
+    "node": "default",
+    "nodeCount": 1,
+    "status": "running",
+    "buildkitVersion": "v0.25.2",
+    "displayedEndpoint": "default",
+    "resolvedEndpoint": "npipe:////./pipe/dockerDesktopLinuxEngine",
+    "buildxVersion": "v0.29.1-desktop.1"
+  },
+  "inspection": {
+    "scope": "read-only-existing-builder-metadata",
+    "startedAt": "2026-10-14T14:55:14.233Z",
+    "elapsedMs": 503,
+    "binaries": {
+      "client": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "clientSha256": "0a4d8fe2ab107ceae44ee5f5fc1e1c155790042b7e3d3163826660da882b389d",
+      "plugin": "C:/Program Files/Docker/Docker/resources/cli-plugins/docker-buildx.exe",
+      "pluginSha256": "c8d20cd80c940cf866717dd938eca50dbe588e06e0c0ced5a9d97b06b27bf8a7",
+      "pluginBytes": 70768560
+    },
+    "argv": [
+      "--host",
+      "npipe:////./pipe/dockerDesktopLinuxEngine",
+      "--config",
+      "G:/TakiAgent-c2a-docker-acceptance/2026-10-14-builder-readonly-r1/builder-config",
+      "buildx",
+      "inspect"
+    ],
+    "config": {
+      "cliPluginsExtraDirs": [
+        "C:/Program Files/Docker/Docker/resources/cli-plugins"
+      ]
+    },
+    "exitCode": 0,
+    "signal": null,
+    "errorCode": null,
+    "stdout": "Name:   default\nDriver: docker\n\nNodes:\nName:             default\nEndpoint:         default\nStatus:           running\nBuildKit version: v0.25.2\nPlatforms:        linux/amd64, linux/amd64/v2, linux/amd64/v3, linux/arm64, linux/riscv64, linux/ppc64le, linux/s390x, linux/arm/v7, linux/arm/v6\nLabels:\n org.mobyproject.buildkit.worker.containerd.namespace: moby\n org.mobyproject.buildkit.worker.containerd.uuid:      4707fb8c-2f6e-4519-a576-0bd47876dc6d\n org.mobyproject.buildkit.worker.executor:             containerd\n org.mobyproject.buildkit.worker.hostname:             docker-desktop\n org.mobyproject.buildkit.worker.moby.host-gateway-ip: 192.168.65.254\n org.mobyproject.buildkit.worker.network:              host\n org.mobyproject.buildkit.worker.selinux.enabled:      false\n org.mobyproject.buildkit.worker.snapshotter:          overlayfs\nDevices:\n Name:                  docker.com/gpu=webgpu\n Automatically allowed: false\nGC Policy rule#0:\n All:            false\n Filters:        type==source.local,type==exec.cachemount,type==source.git.checkout\n Keep Duration:  48h0m0s\n Max Used Space: 2.764GiB\nGC Policy rule#1:\n All:            false\n Keep Duration:  1440h0m0s\n Reserved Space: 20GiB\nGC Policy rule#2:\n All:            false\n Reserved Space: 20GiB\nGC Policy rule#3:\n All:            true\n Reserved Space: 20GiB\n",
+    "stderr": "",
+    "bootstrap": false,
+    "builds": 0,
+    "containersCreated": 0
+  },
+  "endpointResolution": {
+    "scope": "read-only-effective-default-endpoint",
+    "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+    "argv": [
+      "--host",
+      "npipe:////./pipe/dockerDesktopLinuxEngine",
+      "--config",
+      "G:/TakiAgent-c2a-docker-acceptance/2026-10-14-builder-readonly-r1/builder-config",
+      "context",
+      "inspect",
+      "--format",
+      "{{json .Endpoints.docker.Host}}",
+      "default"
+    ],
+    "startedAt": "2026-10-14T14:56:46.59Z",
+    "elapsedMs": 137,
+    "exitCode": 0,
+    "stdout": "\"npipe:////./pipe/dockerDesktopLinuxEngine\"\n",
+    "stderr": "",
+    "resolvedEndpoint": "npipe:////./pipe/dockerDesktopLinuxEngine"
+  },
+  "buildClientConfig": {
+    "cliPluginsExtraDirs": [
+      "C:/Program Files/Docker/Docker/resources/cli-plugins"
+    ]
+  },
+  "runtimeClientConfigRemainsEmpty": true,
+  "initialFailures": [
+    "Empty isolated config does not discover the installed Buildx plugin.",
+    "Pinned Buildx inspect does not support --format; plain inspect succeeds."
+  ],
+  "builds": 0,
+  "bootstrap": false,
+  "containersCreated": 0,
+  "limits": [
+    "Actual cached base filesystem/venv/UID/volume layout unverified.",
+    "No image build or dependency/network download was run.",
+    "Selected builder/cache facts must still be checked immediately before any approved build."
+  ],
+  "archive": {
+    "path": "c2a-docker-builder-evidence.zip",
+    "bytes": 5864,
+    "sha256": "5fb1f4c5a55872cd3876f7b5252970b1d9f3ef93b4c989d83bb77589856f0f16",
+    "entries": [
+      {
+        "path": ".c2a-preflight-owned",
+        "bytes": 32,
+        "sha256": "9847f6c6f7641ecd11c431882e28c96df7843b0e1ec2b58c977f28aaf81c9ec1"
+      },
+      {
+        "path": "binaries.json",
+        "bytes": 364,
+        "sha256": "318d16064d13b950bc670721b1fa20d17fcaa5c81955755a6bc121aecfa4800b"
+      },
+      {
+        "path": "builder-config/buildx/.lock",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "builder-config/buildx/current",
+        "bytes": 76,
+        "sha256": "ad4436223bfadf60e9921a9be166da1d9c454921db007f16b8f21e5553cde791"
+      },
+      {
+        "path": "builder-config/config.json",
+        "bytes": 81,
+        "sha256": "c61bdfa290e9f2f08d80543aae256794d0e8bf61333cf7a3479b3ef52add6b1d"
+      },
+      {
+        "path": "builder-controlled-config.json",
+        "bytes": 1138,
+        "sha256": "58e594bdac6cd63cf055f7156a8af7c23cbf7c0eebe4ed247fde35bbe89be0f8"
+      },
+      {
+        "path": "builder-plain.json",
+        "bytes": 2336,
+        "sha256": "10a7f024310e0cb42fdddb156e62e7b28c3aaf1f5c1737e3a247d07f8aa3ccaf"
+      },
+      {
+        "path": "builder.json",
+        "bytes": 1012,
+        "sha256": "683e2c8335bbfb46550a81b448cb15c37619efc3514eacb861fb7936f3a4f429"
+      },
+      {
+        "path": "default-endpoint.json",
+        "bytes": 635,
+        "sha256": "115a4bd965b8dad38096f9204f0ae1a421b1ca11cd96cfc165525c4999ae708f"
+      },
+      {
+        "path": "plugin-discovery.json",
+        "bytes": 4965,
+        "sha256": "c1296fde5b532d3ec6d9cd1db5eb2d20bd98060c60cb9f3a71972f8bc900687f"
+      }
+    ]
+  },
+  "cleanup": {
+    "state": "complete",
+    "completedAt": "2026-10-14T15:00:52.1938246Z",
+    "removedRoot": "G:\\TakiAgent-c2a-docker-acceptance\\2026-10-14-builder-readonly-r1",
+    "logicalBytesRemoved": 10639.0,
+    "daemonInterrupted": false,
+    "containerMutations": 0
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "runs": [
+    {"fixture": "taki-hindsight-g1-9e0fb97426fd", "exitCode": 1, "passed": 2, "failed": 4, "reason": "Positional keyword-only transition_writer_scope calls", "stopped": true, "dataRemoved": true, "registryRemoved": true},
+    {"fixture": "taki-hindsight-g1-f89640374012", "exitCode": 0, "passed": 8, "failed": 0, "seconds": 87.45, "stopped": true, "dataRemoved": true, "registryRemoved": true},
+    {"fixture": "taki-hindsight-g1-f109eb31cc07", "exitCode": 1, "passed": 35, "failed": 2, "seconds": 341.61, "reason": "Fault injector quote mismatch and old build/contract expectations", "stopped": true, "dataRemoved": true, "registryRemoved": true},
+    {"fixture": "taki-hindsight-g1-537efb2670f5", "exitCode": 0, "passed": 3, "failed": 0, "seconds": 43.60, "stopped": true, "dataRemoved": true, "registryRemoved": true}
+  ],
+  "logRoot": ".trellis/.runtime/g1-validation",
+  "countsOverlap": true,
+  "fullPackageWindowsTy": {"exitCode": 1, "existingDiagnostics": 27, "newDiagnostics": 0, "log": "b1-native-typecheck-full.log"},
+  "scopedLinuxTy": {"exitCode": 0, "productionFiles": 19, "result": "b1-native-ty-scoped-01-result.json"},
+  "independentCheck": "not_dispatched"
+}

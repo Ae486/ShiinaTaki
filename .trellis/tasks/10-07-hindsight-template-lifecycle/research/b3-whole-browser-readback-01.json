@@ -1,0 +1,129 @@
+{
+  "checkedAtUtc": "2026-10-13T06:36:03.478005+00:00",
+  "desktopGate": "b3-whole-desktop-tests-01-result.json",
+  "scenarios": [
+    {
+      "scenario": "configuration",
+      "result": {
+        "verdict": "CONFIGURATION_HOME_PASS",
+        "twoObservers": true,
+        "reconnect": true,
+        "remount": true,
+        "expired": true,
+        "denied": true,
+        "failureClearsMatch": true,
+        "pageErrors": []
+      },
+      "artifacts": [
+        {
+          "path": ".trellis/tasks/10-07-hindsight-configuration-observation/research/home-browser/fbb9e4f4-9d26-42e0-aaa6-a824ba1c25be/browser-check.py",
+          "bytes": 4035,
+          "sha256": "ac686cc25cd0ede28b32a1a39cb93ecba2650b970c23ce864e88cc1acdee47ea"
+        },
+        {
+          "path": ".trellis/tasks/10-07-hindsight-configuration-observation/research/home-browser/fbb9e4f4-9d26-42e0-aaa6-a824ba1c25be/failed-remount.png",
+          "bytes": 50951,
+          "sha256": "24cdc83db3f9a5d9c978effc6fe1d5a9494b06953148e31cc1dcabeae12bbb18"
+        },
+        {
+          "path": ".trellis/tasks/10-07-hindsight-configuration-observation/research/home-browser/fbb9e4f4-9d26-42e0-aaa6-a824ba1c25be/observed.png",
+          "bytes": 52991,
+          "sha256": "31d75cc2a16e1ab37a22233a5f71ef511cacdf8a2720624e238420b963586300"
+        },
+        {
+          "path": ".trellis/tasks/10-07-hindsight-configuration-observation/research/home-browser/fbb9e4f4-9d26-42e0-aaa6-a824ba1c25be/result.txt",
+          "bytes": 177,
+          "sha256": "365c807da01f246e4da28a39cb88fb3c8fd7e2eeee05488b885bdaa57a93804a"
+        }
+      ]
+    },
+    {
+      "scenario": "template",
+      "result": {
+        "verdict": "TEMPLATE_HOME_PASS",
+        "browserExecutable": "G:/AppDataMove/ms-playwright/chromium_headless_shell-1181/chrome-win/headless_shell.exe",
+        "browserVersion": "139.0.7258.5",
+        "submits": 4,
+        "originalOperationId": "25f9244d-06e3-4dff-9abe-686dc023930e",
+        "twoObservers": true,
+        "lostAck": true,
+        "initiatorClosedDuringPartial": true,
+        "reconnect": true,
+        "remount": true,
+        "explicitEqualValueSurvivesRemoval": true,
+        "unsavedFormBlocksPreview": true,
+        "unsavedFormSurvivesReconnect": true,
+        "escapeFromDetailsRestoresFocus": true,
+        "derivedFailureClearsSuccess": true,
+        "pageErrors": []
+      },
+      "artifacts": [
+        {
+          "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-home-browser/883a3a08-4f59-492a-9b4d-ee9058eaee15/all-bank-preview.png",
+          "bytes": 169491,
+          "sha256": "4aa3d6498f8c992019a71b5a509eae2ec5d638af0a022226a9180187a3c23f88"
+        },
+        {
+          "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-home-browser/883a3a08-4f59-492a-9b4d-ee9058eaee15/browser-check.py",
+          "bytes": 10094,
+          "sha256": "2d382f95156955643232141fdf069d574870a49fbb1b8da310b9def0f9906366"
+        },
+        {
+          "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-home-browser/883a3a08-4f59-492a-9b4d-ee9058eaee15/customization-consequences.png",
+          "bytes": 149744,
+          "sha256": "f06f449a3e31c67d14763e1e487b074f9a990f540926e06db18b7dfa75923e41"
+        },
+        {
+          "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-home-browser/883a3a08-4f59-492a-9b4d-ee9058eaee15/derived-current-failure.png",
+          "bytes": 102634,
+          "sha256": "bd5bdc608f2d74c14c4cc71136a57cbe4d9285e3688fe332c225315cd3d50461"
+        },
+        {
+          "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-home-browser/883a3a08-4f59-492a-9b4d-ee9058eaee15/partial-original-plan.png",
+          "bytes": 62925,
+          "sha256": "3949de78d2379572c0c34ed09a4b0c6d9373e257f33f4fae6c65e997dadfa1ee"
+        },
+        {
+          "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-home-browser/883a3a08-4f59-492a-9b4d-ee9058eaee15/result.txt",
+          "bytes": 581,
+          "sha256": "6707feb38117f43a2baa993e571306b604b72e496aa0febee11cb2a7155ad008"
+        }
+      ]
+    },
+    {
+      "scenario": "transitions",
+      "result": {
+        "verdict": "W7_BROWSER_PASS",
+        "submitCount": 3,
+        "originalOperationId": "a410dab9-ad1f-4d72-bbf0-cbd5c5078df2",
+        "lostAckClientSeconds": 2.0,
+        "initiatorClosedWhileRunning": true,
+        "nativeUnchangedDuringEmergency": true,
+        "pageErrors": []
+      },
+      "artifacts": [
+        {
+          "path": ".trellis/.runtime/w7-browser-artifacts/a106ecb4-443f-4de5-a735-d60319bad7bd/browser-check.py",
+          "bytes": 5019,
+          "sha256": "c48b8db7c8b850cf3d7e221c9a7d2690b4101cff4206fb19b9f821b283cfea13"
+        },
+        {
+          "path": ".trellis/.runtime/w7-browser-artifacts/a106ecb4-443f-4de5-a735-d60319bad7bd/final.png",
+          "bytes": 176720,
+          "sha256": "fcfd7ab6e683699eee5c73ffb452575fa055f9d64b2ee1836fb6c81c6b519500"
+        },
+        {
+          "path": ".trellis/.runtime/w7-browser-artifacts/a106ecb4-443f-4de5-a735-d60319bad7bd/result.txt",
+          "bytes": 237,
+          "sha256": "ddf2c07d12a04769595800400ee3e6242e69699ca56175519522c14533c28167"
+        }
+      ]
+    }
+  ],
+  "rootVisualInspection": [
+    "template/customization-consequences.png",
+    "transitions/final.png"
+  ],
+  "visualConclusion": "Controls, independent customization and generation consent are legible; current Local emergency outcome is distinct from superseded historical transitions.",
+  "scope": "Actual Headless Shell automation and two root-reviewed screenshots; installed WebView2 and owner manual acceptance remain excluded."
+}

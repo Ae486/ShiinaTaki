@@ -1,0 +1,34 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend architecture and applicable source/check routing"}
+{"file": ".trellis/spec/backend/directory-structure.md", "reason": "Module placement and single-owner boundaries"}
+{"file": ".trellis/spec/backend/hindsight-host-custody.md", "reason": "Accepted C1 authority, custody, private protocol and evidence limits"}
+{"file": ".trellis/spec/backend/host-operation-lifecycle.md", "reason": "Authenticated Host generations and original unknown-outcome recovery"}
+{"file": ".trellis/spec/backend/permission-authorization.md", "reason": "Canonical exact effect admission and one-use policy enforcement"}
+{"file": ".trellis/spec/backend/secret-catalog.md", "reason": "Core sole writer and protected read-only Host custody"}
+{"file": ".trellis/spec/backend/server-push-and-connection-auth.md", "reason": "Actual Host/control transport and connection provenance"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Bounded sanitized errors and cancellation"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Safe non-secret diagnostics"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Changed-scope tests, style and ownership requirements"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Core/Host/helper/Native data-flow contracts"}
+{"file": ".trellis/spec/guides/source-grounding-guide.md", "reason": "Resolve missing contracts through named current sources"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "Reuse current C1 mechanisms without speculative abstractions"}
+{"file": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/c2-next-slice-readiness-2026-10-14.md", "reason": "Approved executable C2a scope and verified producer seams"}
+{"file": ".trellis/tasks/10-07-hindsight-managed-host-custody/design.md", "reason": "Frozen C1 contract and distinct C2a/C2b downstream gates"}
+{"file": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/leader-now.md", "reason": "Accepted prior evidence and actual Ubuntu preflight limit"}
+{"file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-contract-design.md", "reason": "Frozen C2a topology, exact authority, resource recovery and source acceptance contract"}
+{"file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-design-review.md", "reason": "Independent design PASS and mandatory R1 durable idempotency/R2 pre-delivery fake-only resolutions"}
+{"file": ".trellis/spec/backend/hindsight-managed-deployment.md", "reason": "C2a executable API, durable admission, private delivery and final settlement contract; no new scope"}
+{"file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-readiness.md", "reason": "Minimal disposable database fixture and observed prerequisite boundaries"}
+{"file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-design-review.md", "reason": "Accepted task-only DB contract and bounded metadata probe"}
+{"file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-plan.md", "reason": "Actual Docker fault and original-resource recovery sequence"}
+{"file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-design-review.md", "reason": "Accepted reconnect unknown-outcome and fresh identity clarifications"}
+{"file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-extraction-plan.md", "reason": "Frozen offline first-start and checked PostgreSQL shutdown experiment"}
+{"file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-extraction-review.md", "reason": "Independent design PASS with shared deadlines and live process identity bindings"}
+{"file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-first-attempt.md", "reason": "Preserved failed recovery and the narrow live-lock scan-order correction"}
+{"file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-readiness.md", "reason": "Actual setup consumer and missing producer-bound service evidence"}
+{"file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-persistence-plan.md", "reason": "Admitted PostgreSQL child and same-volume logged-data restart case"}
+{"file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-persistence-design-review.md", "reason": "Accepted pause deadline, retained first-stop bytes and small streaming checks"}
+{"file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-extraction-runtime-review.md", "reason": "Actual bundled tools, detached process topology, SQL and checked shutdown evidence"}
+{"file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-native-producer-readiness.md", "reason": "Actual API, offline assets and definition-only managed setup prerequisite"}
+{"file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-persistence-first-attempt-diagnosis.md", "reason": "R1 source-established fixture phase mismatch and bounded retained evidence; no SQL acceptance"}
+{"file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/leader-now.md", "reason": "Current ownership, accepted evidence and mandatory direct full C2b plan read beyond the 32 KiB injection cap"}
+{"file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-design-r2-review.md", "reason": "Accepted pre-plan capsule transfer and offline-image then real-producer gating"}

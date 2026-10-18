@@ -1,0 +1,23 @@
+{
+  "checkedAtUtc": "2026-10-08T15:01:49.184133+00:00",
+  "manifests": [
+    {
+      "file": "b2-core-source-current-03.json",
+      "sha256": "aa8d99aa1a1a81177d9aaa34a5119fd477120c9454f4b9a2572161c11ba815e2",
+      "entries": 101
+    },
+    {
+      "file": "b2-core-read-check-input-05.json",
+      "sha256": "45edda42becf7fb3f1539164a0e1e75d65b50a58bc21472f22b99d695c529d6d",
+      "entries": 1550
+    },
+    {
+      "file": "b2-core-consumer-check-input-01.json",
+      "sha256": "aa7603e776b07ae6e197ec4d6e4bcfde2c68ae35c32882352623694f025d4ef7",
+      "entries": 391
+    }
+  ],
+  "uniquePaths": 1953,
+  "mismatches": [],
+  "scope": "Core implementation and input identity readback; independent Core review remains pending"
+}

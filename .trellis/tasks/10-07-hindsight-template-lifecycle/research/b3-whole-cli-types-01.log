@@ -1,0 +1,4 @@
+
+> @taki/cli@0.0.0 typecheck H:\TakiAgent\apps\cli
+> tsc --noEmit
+

@@ -1,0 +1,806 @@
+{
+  "recordedAt": "2026-10-18T13:00:29.878325+00:00",
+  "caseId": "069242fc-3c26-4413-a767-0d01d819f95e",
+  "verdict": "PASS_NO_PERMISSIONERROR_REPRODUCED",
+  "buildCount": 1,
+  "launcherCount": 1,
+  "launcherExitCode": 0,
+  "launcherElapsedMs": 78535,
+  "launcherDeadlineMs": 1200000,
+  "launcherEnvironmentKeys": [
+    "SystemRoot",
+    "TEMP",
+    "TMP",
+    "WS_NO_BUFFER_UTIL",
+    "WS_NO_UTF_8_VALIDATE"
+  ],
+  "buildImageId": "sha256:5658ce3fbafa2dab191d8996a9b48444b7db4813638260608fca5be32ee4a1fd",
+  "casePassed": true,
+  "runtimeCleanupPassed": true,
+  "requestedCleanupComplete": false,
+  "exceptionCapture": {
+    "exceptionType": null,
+    "message": null,
+    "traceback": null,
+    "errno": null,
+    "strerror": null,
+    "filename": null,
+    "failingPid": null,
+    "failingState": null,
+    "failingUid": null,
+    "failingCallSite": null,
+    "diag_errors": null,
+    "reason": "Both generation reports have first_failure=null; fail() did not export any diagnostic error record. No failure data was captured."
+  },
+  "generations": [
+    {
+      "first_failure": null,
+      "status": "stopped",
+      "generation": 1,
+      "baselineProcesses": [
+        {
+          "pid": 1,
+          "state": "S",
+          "uid": 1000,
+          "argv": [
+            "/app/api/.venv/bin/python",
+            "-I",
+            "-B",
+            "-m",
+            "managed_bootstrap.owner"
+          ]
+        },
+        {
+          "pid": 56,
+          "state": "S",
+          "uid": 1000,
+          "argv": [
+            "/app/api/.venv/bin/python",
+            "-I",
+            "-B",
+            "-m",
+            "managed_bootstrap.submitter"
+          ]
+        },
+        {
+          "pid": 65,
+          "state": "R",
+          "uid": 1000,
+          "argv": [
+            "/app/api/.venv/bin/python",
+            "-I",
+            "-B",
+            "/app/api/.venv/lib/python3.11/site-packages/managed_bootstrap/fake_child.py"
+          ]
+        }
+      ],
+      "postmasterPid": 89,
+      "backendPid": 103,
+      "loggerPid": 90,
+      "sqlReadyElapsedSeconds": 1.598,
+      "sqlClientVersion": "2.9.11 (dt dec pq3 ext lo64)",
+      "sqlSettings": {
+        "version": "PostgreSQL 18.1 on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit",
+        "data_directory": "/home/hindsight/.pg0/c2a-db/data",
+        "fsync": "on",
+        "synchronous_commit": "on",
+        "full_page_writes": "on",
+        "port": "55432",
+        "listen_addresses": "127.0.0.1",
+        "unix_socket_directories": "/home/hindsight/.pg0/socket"
+      },
+      "shutdown": {
+        "state": "checked",
+        "system_identifier": "7697990749572636754",
+        "elapsed_seconds": 0.223,
+        "postmaster_wait_kind": "adopted",
+        "logger_gone": true,
+        "owned_descendants_remaining": 0
+      }
+    },
+    {
+      "first_failure": null,
+      "status": "stopped",
+      "generation": 2,
+      "baselineProcesses": [
+        {
+          "pid": 1,
+          "state": "S",
+          "uid": 1000,
+          "argv": [
+            "/app/api/.venv/bin/python",
+            "-I",
+            "-B",
+            "-m",
+            "managed_bootstrap.owner"
+          ]
+        },
+        {
+          "pid": 83,
+          "state": "S",
+          "uid": 1000,
+          "argv": [
+            "/app/api/.venv/bin/python",
+            "-I",
+            "-B",
+            "-m",
+            "managed_bootstrap.submitter"
+          ]
+        },
+        {
+          "pid": 92,
+          "state": "R",
+          "uid": 1000,
+          "argv": [
+            "/app/api/.venv/bin/python",
+            "-I",
+            "-B",
+            "/app/api/.venv/lib/python3.11/site-packages/managed_bootstrap/fake_child.py"
+          ]
+        }
+      ],
+      "postmasterPid": 98,
+      "backendPid": 108,
+      "loggerPid": 99,
+      "sqlReadyElapsedSeconds": 0.091,
+      "sqlClientVersion": "2.9.11 (dt dec pq3 ext lo64)",
+      "sqlSettings": {
+        "version": "PostgreSQL 18.1 on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit",
+        "data_directory": "/home/hindsight/.pg0/c2a-db/data",
+        "fsync": "on",
+        "synchronous_commit": "on",
+        "full_page_writes": "on",
+        "port": "55432",
+        "listen_addresses": "127.0.0.1",
+        "unix_socket_directories": "/home/hindsight/.pg0/socket"
+      },
+      "shutdown": {
+        "state": "checked",
+        "system_identifier": "7697990749572636754",
+        "elapsed_seconds": 0.221,
+        "postmaster_wait_kind": "direct",
+        "logger_gone": true,
+        "owned_descendants_remaining": 0
+      }
+    }
+  ],
+  "comparison": {
+    "priorFirstGeneration": {
+      "first_failure": null,
+      "status": "stopped",
+      "generation": 1,
+      "baselineProcesses": [
+        {
+          "pid": 1,
+          "state": "S",
+          "uid": 1000,
+          "argv": [
+            "/app/api/.venv/bin/python",
+            "-I",
+            "-B",
+            "-m",
+            "managed_bootstrap.owner"
+          ]
+        },
+        {
+          "pid": 56,
+          "state": "S",
+          "uid": 1000,
+          "argv": [
+            "/app/api/.venv/bin/python",
+            "-I",
+            "-B",
+            "-m",
+            "managed_bootstrap.submitter"
+          ]
+        },
+        {
+          "pid": 65,
+          "state": "R",
+          "uid": 1000,
+          "argv": [
+            "/app/api/.venv/bin/python",
+            "-I",
+            "-B",
+            "/app/api/.venv/lib/python3.11/site-packages/managed_bootstrap/fake_child.py"
+          ]
+        }
+      ],
+      "postmasterPid": 89,
+      "backendPid": 103,
+      "loggerPid": 90,
+      "sqlReadyElapsedSeconds": 1.798,
+      "sqlClientVersion": "2.9.11 (dt dec pq3 ext lo64)",
+      "sqlSettings": {
+        "version": "PostgreSQL 18.1 on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit",
+        "data_directory": "/home/hindsight/.pg0/c2a-db/data",
+        "fsync": "on",
+        "synchronous_commit": "on",
+        "full_page_writes": "on",
+        "port": "55432",
+        "listen_addresses": "127.0.0.1",
+        "unix_socket_directories": "/home/hindsight/.pg0/socket"
+      },
+      "shutdown": {
+        "state": "checked",
+        "system_identifier": "7696875817889218642",
+        "elapsed_seconds": 0.177,
+        "postmaster_wait_kind": "adopted",
+        "logger_gone": true,
+        "owned_descendants_remaining": 0
+      }
+    },
+    "failedFirstGeneration": {
+      "first_failure": {
+        "stage": "start_and_sql",
+        "type": "PermissionError",
+        "detail": "operation_failed"
+      },
+      "status": "failed",
+      "generation": 1,
+      "baselineProcesses": [
+        {
+          "pid": 1,
+          "state": "S",
+          "uid": 1000,
+          "argv": [
+            "/app/api/.venv/bin/python",
+            "-I",
+            "-B",
+            "-m",
+            "managed_bootstrap.owner"
+          ]
+        },
+        {
+          "pid": 65,
+          "state": "R",
+          "uid": 1000,
+          "argv": [
+            "/app/api/.venv/bin/python",
+            "-I",
+            "-B",
+            "/app/api/.venv/lib/python3.11/site-packages/managed_bootstrap/fake_child.py"
+          ]
+        }
+      ],
+      "postmasterPid": 89,
+      "backendPid": 109,
+      "loggerPid": null,
+      "sqlReadyElapsedSeconds": null,
+      "sqlClientVersion": "2.9.11 (dt dec pq3 ext lo64)",
+      "sqlSettings": {
+        "version": "PostgreSQL 18.1 on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit",
+        "data_directory": "/home/hindsight/.pg0/c2a-db/data",
+        "fsync": "on",
+        "synchronous_commit": "on",
+        "full_page_writes": "on",
+        "port": "55432",
+        "listen_addresses": "127.0.0.1",
+        "unix_socket_directories": "/home/hindsight/.pg0/socket"
+      },
+      "shutdown": {
+        "state": "checked",
+        "system_identifier": "7697985627284971602",
+        "elapsed_seconds": 0.144,
+        "postmaster_wait_kind": "adopted",
+        "logger_gone": false,
+        "owned_descendants_remaining": 0
+      }
+    },
+    "diagnosticFirstGeneration": {
+      "first_failure": null,
+      "status": "stopped",
+      "generation": 1,
+      "baselineProcesses": [
+        {
+          "pid": 1,
+          "state": "S",
+          "uid": 1000,
+          "argv": [
+            "/app/api/.venv/bin/python",
+            "-I",
+            "-B",
+            "-m",
+            "managed_bootstrap.owner"
+          ]
+        },
+        {
+          "pid": 56,
+          "state": "S",
+          "uid": 1000,
+          "argv": [
+            "/app/api/.venv/bin/python",
+            "-I",
+            "-B",
+            "-m",
+            "managed_bootstrap.submitter"
+          ]
+        },
+        {
+          "pid": 65,
+          "state": "R",
+          "uid": 1000,
+          "argv": [
+            "/app/api/.venv/bin/python",
+            "-I",
+            "-B",
+            "/app/api/.venv/lib/python3.11/site-packages/managed_bootstrap/fake_child.py"
+          ]
+        }
+      ],
+      "postmasterPid": 89,
+      "backendPid": 103,
+      "loggerPid": 90,
+      "sqlReadyElapsedSeconds": 1.598,
+      "sqlClientVersion": "2.9.11 (dt dec pq3 ext lo64)",
+      "sqlSettings": {
+        "version": "PostgreSQL 18.1 on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit",
+        "data_directory": "/home/hindsight/.pg0/c2a-db/data",
+        "fsync": "on",
+        "synchronous_commit": "on",
+        "full_page_writes": "on",
+        "port": "55432",
+        "listen_addresses": "127.0.0.1",
+        "unix_socket_directories": "/home/hindsight/.pg0/socket"
+      },
+      "shutdown": {
+        "state": "checked",
+        "system_identifier": "7697990749572636754",
+        "elapsed_seconds": 0.223,
+        "postmaster_wait_kind": "adopted",
+        "logger_gone": true,
+        "owned_descendants_remaining": 0
+      }
+    },
+    "inputs": [
+      {
+        "source": "G:\\TakiAgent-c2a-database\\persistence-13f04d85-ee84-408e-890c-88922e36c69e\\first-stop.json",
+        "retainedCopy": "comparison-inputs/prior-13f04d85-first-stop.json",
+        "sha256": "38ec2dcc0071385d36a9c8aefaf8cfc177a261e29093cb54a4e3926735bbcaf3"
+      },
+      {
+        "source": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\c2a-database-persistence-run-1b05d2f6\\failure-stop.json",
+        "retainedCopy": "comparison-inputs/failed-1b05d2f6-failure-stop.json",
+        "sha256": "c8bd0e59d6c269d10566fd2fcf4add54e7dda331d10bd6bde5581099b0438871"
+      }
+    ],
+    "contextFiles": [
+      {
+        "path": "docker/standalone/Dockerfile.c2a-fake",
+        "archivedSha256": "2be1279ef4621f5d42397879fab2e436d780224eb3c02d591180faf9e9a9fcff",
+        "diagnosticSha256": "2be1279ef4621f5d42397879fab2e436d780224eb3c02d591180faf9e9a9fcff",
+        "unchanged": true
+      },
+      {
+        "path": "docker/standalone/managed_bootstrap/__init__.py",
+        "archivedSha256": "cbf487cffc9c62b5c6fe61f32d80070b5843f70f966c5fca163c675e21ddbf1d",
+        "diagnosticSha256": "cbf487cffc9c62b5c6fe61f32d80070b5843f70f966c5fca163c675e21ddbf1d",
+        "unchanged": true
+      },
+      {
+        "path": "docker/standalone/managed_bootstrap/bootstrap.py",
+        "archivedSha256": "b8331bd8c9645d265578ed65f9f77402f170813f20d1d2683b5aa0a7d0768101",
+        "diagnosticSha256": "b8331bd8c9645d265578ed65f9f77402f170813f20d1d2683b5aa0a7d0768101",
+        "unchanged": true
+      },
+      {
+        "path": "docker/standalone/managed_bootstrap/control.py",
+        "archivedSha256": "c75dcdf2285df614c4836dab4898a2980a2a1e8e4572862861596ab244f39d5e",
+        "diagnosticSha256": "c75dcdf2285df614c4836dab4898a2980a2a1e8e4572862861596ab244f39d5e",
+        "unchanged": true
+      },
+      {
+        "path": "docker/standalone/managed_bootstrap/fake_child.py",
+        "archivedSha256": "9d65b8875e5d798a024dff9b4a182d6cff7bf4b62646954e38cd0c2e12ce3819",
+        "diagnosticSha256": "928055b53bf5bc65f79279906b6a418b39f08dd5868237afa22d5da0fcfcfb9d",
+        "unchanged": false
+      },
+      {
+        "path": "docker/standalone/managed_bootstrap/fake_consumer.py",
+        "archivedSha256": "52b3d0664b06ef82dca4765d2c08e820c16c2af5e2814a02f98fe08f8e220eb3",
+        "diagnosticSha256": "52b3d0664b06ef82dca4765d2c08e820c16c2af5e2814a02f98fe08f8e220eb3",
+        "unchanged": true
+      },
+      {
+        "path": "docker/standalone/managed_bootstrap/owner.py",
+        "archivedSha256": "5b10f9f09def8ff985c96fed56c31f4ec4976f684d7e3b044fdc8a66afb38acc",
+        "diagnosticSha256": "5b10f9f09def8ff985c96fed56c31f4ec4976f684d7e3b044fdc8a66afb38acc",
+        "unchanged": true
+      },
+      {
+        "path": "docker/standalone/managed_bootstrap/owner_protocol.py",
+        "archivedSha256": "cd9cdbea572354dbbc1200098d9edfe9280679c2b346a67c1326a795b01c1804",
+        "diagnosticSha256": "cd9cdbea572354dbbc1200098d9edfe9280679c2b346a67c1326a795b01c1804",
+        "unchanged": true
+      },
+      {
+        "path": "docker/standalone/managed_bootstrap/protocol.py",
+        "archivedSha256": "074247650a31cfc47a1931ef6c7b258aa6f1d3a649bbb792ff2878257f6f8b88",
+        "diagnosticSha256": "074247650a31cfc47a1931ef6c7b258aa6f1d3a649bbb792ff2878257f6f8b88",
+        "unchanged": true
+      },
+      {
+        "path": "docker/standalone/managed_bootstrap/submitter.py",
+        "archivedSha256": "5a6ad60266066d1cff2559d46c6b2b15d4a93cf882de1e487790ad0fb6863c4a",
+        "diagnosticSha256": "5a6ad60266066d1cff2559d46c6b2b15d4a93cf882de1e487790ad0fb6863c4a",
+        "unchanged": true
+      },
+      {
+        "path": "docker/standalone/managed_bootstrap/supervision.py",
+        "archivedSha256": "ff768434e0cef9eb2b6996351ba31e1dedede95211809d2ab8e8d09b5d9a5064",
+        "diagnosticSha256": "ff768434e0cef9eb2b6996351ba31e1dedede95211809d2ab8e8d09b5d9a5064",
+        "unchanged": true
+      },
+      {
+        "path": "docker/standalone/managed_bootstrap/unix_socket.py",
+        "archivedSha256": "08b6e604211d19e31ad61782c96b91a004277b37c31d6e9a0bdfdda681cd7725",
+        "diagnosticSha256": "08b6e604211d19e31ad61782c96b91a004277b37c31d6e9a0bdfdda681cd7725",
+        "unchanged": true
+      }
+    ],
+    "sameSqlSettings": true,
+    "engineAndBase": {
+      "failed": {
+        "caseId": "1b05d2f6-494c-4a6d-a601-1e807eca1486",
+        "baseline": {
+          "recordedAt": "2026-10-18T12:29:53.942Z",
+          "gFree": 138496249856,
+          "cFree": 25590050816,
+          "hFree": 2377773056
+        },
+        "engineBefore": {
+          "value": {
+            "id": "93e8319e-24b7-4a7d-88f1-60923ad681e0",
+            "os": "linux",
+            "architecture": "x86_64",
+            "version": "29.0.1",
+            "time": "2026-10-18T12:29:54.613326017Z"
+          },
+          "windowsBefore": "2026-10-18T12:29:53.943Z",
+          "windowsAfter": "2026-10-18T12:29:54.113Z"
+        },
+        "base": {
+          "id": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+          "os": "linux",
+          "architecture": "amd64",
+          "volumes": null
+        },
+        "containers": [
+          {
+            "id": "1e389e0a2f95121ca804c186c20916196e9e46f67a7691c3d184404a7292deb8",
+            "name": "/taki-openbili-backend",
+            "status": "running",
+            "startedAt": "2026-10-18T05:55:39.597065125Z"
+          },
+          {
+            "id": "c07d86d32382757d292dd4ebf318e6c44260c817d95f35187663d4d33a26b865",
+            "name": "/taki-hindsight-api-retest",
+            "status": "exited",
+            "startedAt": "2026-08-18T16:47:39.697781196Z"
+          },
+          {
+            "id": "a38b49e64f74ee4fa4f5cf5531e467d74dda2b64dc7e28e78a9bdadd37272519",
+            "name": "/taki-hindsight-api",
+            "status": "exited",
+            "startedAt": "2026-08-18T14:11:54.085514229Z"
+          },
+          {
+            "id": "8f5e4468c3a7c0100330e012fdca3da843abfcc732361b71308f06d6eeada5c2",
+            "name": "/redis",
+            "status": "running",
+            "startedAt": "2026-10-18T04:36:51.09898313Z"
+          },
+          {
+            "id": "7992fb2bba71e13dc290e305941ded32b9046c1ec4b67a3697863ff79079cf8b",
+            "name": "/my_pgvector",
+            "status": "exited",
+            "startedAt": "2026-04-11T08:18:53.87731237Z"
+          },
+          {
+            "id": "ba11af042db0879902996426522611b267f38eab7d21f05e21036929c415cc24",
+            "name": "/rustfs_loacl",
+            "status": "exited",
+            "startedAt": "2026-04-11T08:18:55.176936785Z"
+          },
+          {
+            "id": "9d4fc8fb7a4869ac422d9e78a924b49e698e61a562de3af7576dfd18ef81cd98",
+            "name": "/rpa-redis",
+            "status": "exited",
+            "startedAt": "2026-02-20T17:46:12.832921192Z"
+          },
+          {
+            "id": "697330c3cd8966e02d97fa228c5233a0805531bff00275107630e34fadda0b1a",
+            "name": "/arboris-app",
+            "status": "running",
+            "startedAt": "2026-10-18T04:36:51.09648348Z"
+          }
+        ],
+        "rootsAbsent": true,
+        "tagAbsent": true
+      },
+      "diagnostic": {
+        "caseId": "069242fc-3c26-4413-a767-0d01d819f95e",
+        "baseline": {
+          "recordedAt": "2026-10-18T12:54:42.398Z",
+          "gFree": 138392891392,
+          "cFree": 25586364416,
+          "hFree": 2373308416
+        },
+        "engineBefore": {
+          "value": {
+            "id": "93e8319e-24b7-4a7d-88f1-60923ad681e0",
+            "os": "linux",
+            "architecture": "x86_64",
+            "version": "29.0.1",
+            "time": "2026-10-18T12:54:42.155234572Z"
+          },
+          "windowsBefore": "2026-10-18T12:54:42.399Z",
+          "windowsAfter": "2026-10-18T12:54:42.567Z"
+        },
+        "base": {
+          "id": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+          "os": "linux",
+          "architecture": "amd64",
+          "volumes": null
+        },
+        "containers": [
+          {
+            "id": "1e389e0a2f95121ca804c186c20916196e9e46f67a7691c3d184404a7292deb8",
+            "name": "/taki-openbili-backend",
+            "status": "running",
+            "startedAt": "2026-10-18T05:55:39.597065125Z"
+          },
+          {
+            "id": "c07d86d32382757d292dd4ebf318e6c44260c817d95f35187663d4d33a26b865",
+            "name": "/taki-hindsight-api-retest",
+            "status": "exited",
+            "startedAt": "2026-08-18T16:47:39.697781196Z"
+          },
+          {
+            "id": "a38b49e64f74ee4fa4f5cf5531e467d74dda2b64dc7e28e78a9bdadd37272519",
+            "name": "/taki-hindsight-api",
+            "status": "exited",
+            "startedAt": "2026-08-18T14:11:54.085514229Z"
+          },
+          {
+            "id": "8f5e4468c3a7c0100330e012fdca3da843abfcc732361b71308f06d6eeada5c2",
+            "name": "/redis",
+            "status": "running",
+            "startedAt": "2026-10-18T04:36:51.09898313Z"
+          },
+          {
+            "id": "7992fb2bba71e13dc290e305941ded32b9046c1ec4b67a3697863ff79079cf8b",
+            "name": "/my_pgvector",
+            "status": "exited",
+            "startedAt": "2026-04-11T08:18:53.87731237Z"
+          },
+          {
+            "id": "ba11af042db0879902996426522611b267f38eab7d21f05e21036929c415cc24",
+            "name": "/rustfs_loacl",
+            "status": "exited",
+            "startedAt": "2026-04-11T08:18:55.176936785Z"
+          },
+          {
+            "id": "9d4fc8fb7a4869ac422d9e78a924b49e698e61a562de3af7576dfd18ef81cd98",
+            "name": "/rpa-redis",
+            "status": "exited",
+            "startedAt": "2026-02-20T17:46:12.832921192Z"
+          },
+          {
+            "id": "697330c3cd8966e02d97fa228c5233a0805531bff00275107630e34fadda0b1a",
+            "name": "/arboris-app",
+            "status": "running",
+            "startedAt": "2026-10-18T04:36:51.09648348Z"
+          }
+        ],
+        "rootsAbsent": true,
+        "tagAbsent": true
+      }
+    }
+  },
+  "mechanism": {
+    "confirmed": "The reviewed process scan reads /proc entries non-atomically and only catches FileNotFoundError in process_identity; PermissionError from any read propagates.",
+    "unconfirmed": "The original failing syscall, target PID and target lifecycle are still unknown. A procfs permission/identity transition during short-lived process execution is a candidate; exit alone must not be asserted to cause this EACCES.",
+    "whyEarlierRunDidNotFail": "Unknown. Observable scheduling differences support a timing-sensitive candidate but do not establish its mechanism."
+  },
+  "cleanup": {
+    "status": "blocked_for_stage_only",
+    "stage": "G:/TakiAgent-c2a-database/persistence-069242fc-3c26-4413-a767-0d01d819f95e",
+    "stagePreserved": true,
+    "archiveFilesVerified": 53,
+    "resolvedPathVerified": true,
+    "ownerMarkerVerified": true,
+    "noReparsePointsVerified": true,
+    "rejections": [
+      {
+        "action": "Combined verification and PowerShell Remove-Item on diagnostic S",
+        "reason": "blocked by policy",
+        "executionStarted": false
+      },
+      {
+        "action": "Remove-Item -LiteralPath 'G:/TakiAgent-c2a-database/persistence-069242fc-3c26-4413-a767-0d01d819f95e' -Recurse -Force -ErrorAction Stop",
+        "reason": "blocked by policy",
+        "executionStarted": false
+      }
+    ],
+    "furtherDeletionAttempted": false,
+    "otherCleanupVerified": true
+  },
+  "eightContainerDeltas": [
+    {
+      "name": "/taki-openbili-backend",
+      "before": {
+        "id": "1e389e0a2f95121ca804c186c20916196e9e46f67a7691c3d184404a7292deb8",
+        "name": "/taki-openbili-backend",
+        "status": "running",
+        "startedAt": "2026-10-18T05:55:39.597065125Z"
+      },
+      "after": {
+        "id": "1e389e0a2f95121ca804c186c20916196e9e46f67a7691c3d184404a7292deb8",
+        "name": "/taki-openbili-backend",
+        "status": "running",
+        "startedAt": "2026-10-18T05:55:39.597065125Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true,
+      "statusUnchanged": true
+    },
+    {
+      "name": "/taki-hindsight-api-retest",
+      "before": {
+        "id": "c07d86d32382757d292dd4ebf318e6c44260c817d95f35187663d4d33a26b865",
+        "name": "/taki-hindsight-api-retest",
+        "status": "exited",
+        "startedAt": "2026-08-18T16:47:39.697781196Z"
+      },
+      "after": {
+        "id": "c07d86d32382757d292dd4ebf318e6c44260c817d95f35187663d4d33a26b865",
+        "name": "/taki-hindsight-api-retest",
+        "status": "exited",
+        "startedAt": "2026-08-18T16:47:39.697781196Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true,
+      "statusUnchanged": true
+    },
+    {
+      "name": "/taki-hindsight-api",
+      "before": {
+        "id": "a38b49e64f74ee4fa4f5cf5531e467d74dda2b64dc7e28e78a9bdadd37272519",
+        "name": "/taki-hindsight-api",
+        "status": "exited",
+        "startedAt": "2026-08-18T14:11:54.085514229Z"
+      },
+      "after": {
+        "id": "a38b49e64f74ee4fa4f5cf5531e467d74dda2b64dc7e28e78a9bdadd37272519",
+        "name": "/taki-hindsight-api",
+        "status": "exited",
+        "startedAt": "2026-08-18T14:11:54.085514229Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true,
+      "statusUnchanged": true
+    },
+    {
+      "name": "/redis",
+      "before": {
+        "id": "8f5e4468c3a7c0100330e012fdca3da843abfcc732361b71308f06d6eeada5c2",
+        "name": "/redis",
+        "status": "running",
+        "startedAt": "2026-10-18T04:36:51.09898313Z"
+      },
+      "after": {
+        "id": "8f5e4468c3a7c0100330e012fdca3da843abfcc732361b71308f06d6eeada5c2",
+        "name": "/redis",
+        "status": "running",
+        "startedAt": "2026-10-18T04:36:51.09898313Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true,
+      "statusUnchanged": true
+    },
+    {
+      "name": "/my_pgvector",
+      "before": {
+        "id": "7992fb2bba71e13dc290e305941ded32b9046c1ec4b67a3697863ff79079cf8b",
+        "name": "/my_pgvector",
+        "status": "exited",
+        "startedAt": "2026-04-11T08:18:53.87731237Z"
+      },
+      "after": {
+        "id": "7992fb2bba71e13dc290e305941ded32b9046c1ec4b67a3697863ff79079cf8b",
+        "name": "/my_pgvector",
+        "status": "exited",
+        "startedAt": "2026-04-11T08:18:53.87731237Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true,
+      "statusUnchanged": true
+    },
+    {
+      "name": "/rustfs_loacl",
+      "before": {
+        "id": "ba11af042db0879902996426522611b267f38eab7d21f05e21036929c415cc24",
+        "name": "/rustfs_loacl",
+        "status": "exited",
+        "startedAt": "2026-04-11T08:18:55.176936785Z"
+      },
+      "after": {
+        "id": "ba11af042db0879902996426522611b267f38eab7d21f05e21036929c415cc24",
+        "name": "/rustfs_loacl",
+        "status": "exited",
+        "startedAt": "2026-04-11T08:18:55.176936785Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true,
+      "statusUnchanged": true
+    },
+    {
+      "name": "/rpa-redis",
+      "before": {
+        "id": "9d4fc8fb7a4869ac422d9e78a924b49e698e61a562de3af7576dfd18ef81cd98",
+        "name": "/rpa-redis",
+        "status": "exited",
+        "startedAt": "2026-02-20T17:46:12.832921192Z"
+      },
+      "after": {
+        "id": "9d4fc8fb7a4869ac422d9e78a924b49e698e61a562de3af7576dfd18ef81cd98",
+        "name": "/rpa-redis",
+        "status": "exited",
+        "startedAt": "2026-02-20T17:46:12.832921192Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true,
+      "statusUnchanged": true
+    },
+    {
+      "name": "/arboris-app",
+      "before": {
+        "id": "697330c3cd8966e02d97fa228c5233a0805531bff00275107630e34fadda0b1a",
+        "name": "/arboris-app",
+        "status": "running",
+        "startedAt": "2026-10-18T04:36:51.09648348Z"
+      },
+      "after": {
+        "id": "697330c3cd8966e02d97fa228c5233a0805531bff00275107630e34fadda0b1a",
+        "name": "/arboris-app",
+        "status": "running",
+        "startedAt": "2026-10-18T04:36:51.09648348Z"
+      },
+      "idUnchanged": true,
+      "startTimeUnchanged": true,
+      "statusUnchanged": true
+    }
+  ],
+  "originalHashes": [
+    {
+      "name": "run-persistence.ts",
+      "before": "c39fd6e465f922cefd198abe1e6d531d731359f8969b183ae9b5b4d2cf06ee27",
+      "after": "c39fd6e465f922cefd198abe1e6d531d731359f8969b183ae9b5b4d2cf06ee27",
+      "unchanged": true
+    },
+    {
+      "name": "database-read.py",
+      "before": "4bd830c60a4ddecc4e8e7018d2b19eb08093c81fc5d7f3ee0a8ff380178e4271",
+      "after": "4bd830c60a4ddecc4e8e7018d2b19eb08093c81fc5d7f3ee0a8ff380178e4271",
+      "unchanged": true
+    },
+    {
+      "name": "fake_child.py",
+      "before": "9d65b8875e5d798a024dff9b4a182d6cff7bf4b62646954e38cd0c2e12ce3819",
+      "after": "9d65b8875e5d798a024dff9b4a182d6cff7bf4b62646954e38cd0c2e12ce3819",
+      "unchanged": true
+    }
+  ],
+  "evidence": [
+    "persistence.json",
+    "first-stop.json",
+    "final-stop.json",
+    "diagnostic-manifest.json",
+    "context-manifest.json",
+    "stage-archive-manifest.json",
+    "final-audit.json",
+    "stage-cleanup.json",
+    "commands.jsonl"
+  ]
+}

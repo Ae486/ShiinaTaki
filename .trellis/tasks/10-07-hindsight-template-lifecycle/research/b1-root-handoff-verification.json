@@ -1,0 +1,97 @@
+{
+  "scope": "Source and evidence handoff readback only; no independent B1 review.",
+  "sourceManifest": {
+    "bytes": 127442,
+    "sha256": "0035fe442960cdf5083985f3d1216b1d02b10aaa0adf86ecd93ef22b9a5fb567",
+    "path": "b1-final-source.json"
+  },
+  "repositories": [
+    {
+      "root": "H:\\TakiAgent",
+      "count": 101,
+      "mismatches": [],
+      "expectedHead": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a",
+      "actualHead": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a"
+    },
+    {
+      "root": "H:\\hindsight",
+      "count": 201,
+      "mismatches": [],
+      "expectedHead": "eb6413a7f58c4f3f0adb88a33a99516f8707fef7",
+      "actualHead": "eb6413a7f58c4f3f0adb88a33a99516f8707fef7"
+    }
+  ],
+  "evidence": {
+    "count": 76,
+    "mismatches": [],
+    "note": "All 76 evidence identities matched before the leader's stop-state documentation update. b1-batch-handoff.md is intentionally updated afterward; implementation source and other retained evidence remain frozen."
+  },
+  "core": {
+    "count": 25,
+    "mismatches": []
+  },
+  "sharedConsumers": {
+    "count": 3,
+    "mismatches": []
+  },
+  "generated": {
+    "beforeCount": 906,
+    "afterCount": 906,
+    "byteChanges": [],
+    "current": {
+      "count": 906,
+      "mismatches": []
+    },
+    "logicalPathNote": "rust-build/hindsight_client_generated.rs resolves to the single release/build/hindsight-client-*/out output, as specified by pin-b1-generated.py."
+  },
+  "sdkEvidenceReuse": {
+    "changedPaths": 408,
+    "changedOutsideGo": []
+  },
+  "openapi": {
+    "bytes": 1034830,
+    "sha256": "8d49efa07c17b9694354259ac9e7795a8c0c824ec6a7b0119947d85f791b012f"
+  },
+  "fixtureCleanup": [
+    {
+      "fixture": "taki-hindsight-g1-9e0fb97426fd",
+      "stopped": true,
+      "dataRemoved": true,
+      "registryRemoved": true
+    },
+    {
+      "fixture": "taki-hindsight-g1-f89640374012",
+      "stopped": true,
+      "dataRemoved": true,
+      "registryRemoved": true
+    },
+    {
+      "fixture": "taki-hindsight-g1-f109eb31cc07",
+      "stopped": true,
+      "dataRemoved": true,
+      "registryRemoved": true
+    },
+    {
+      "fixture": "taki-hindsight-g1-537efb2670f5",
+      "stopped": true,
+      "dataRemoved": true,
+      "registryRemoved": true
+    }
+  ],
+  "legacyV1": {
+    "bytes": 6401,
+    "sha256": "9d1f05100444af6c03f319df98cb04bfcf5bfe2504d0c059f2731ee531346952"
+  },
+  "verifiedAtUtc": "2026-10-08 04:42:31 UTC",
+  "handoffOnly": true,
+  "ownedAgents": {
+    "checkedBy": "collaboration.list_agents",
+    "runningChildren": 0,
+    "completed": [
+      "/root/stage5a_implement",
+      "/root/stage5b_composition_implement",
+      "/root/stage5b_design_review"
+    ]
+  },
+  "validationProcessState": "Both implementation owners reported all owned validation/generation sessions returned; all retained final checks have actual exit codes. No further workload dispatched."
+}

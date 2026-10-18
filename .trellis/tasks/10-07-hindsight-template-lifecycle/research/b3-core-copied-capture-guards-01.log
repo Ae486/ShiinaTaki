@@ -1,0 +1,156 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mH:/TakiAgent/packages/core[39m
+
+ [31m❯[39m src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts [2m([22m[2m9 tests[22m[2m | [22m[31m9 failed[39m[2m)[22m[33m 32111[2mms[22m[39m
+[31m     [31m×[31m uses the actual joint publication and copy path for removed overlays and complete user-owned models[39m[33m 7537[2mms[22m[39m
+[31m     [31m×[31m refuses a compatibility-only connection before taking any Core copy[39m[33m 2449[2mms[22m[39m
+[31m     [31m×[31m rejects a copied connection revision changed after admission but before backupTo[39m[33m 2911[2mms[22m[39m
+[31m     [31m×[31m refuses 'connection revision' drift after backupTo completes[39m[33m 3291[2mms[22m[39m
+[31m     [31m×[31m refuses 'configuration fingerprint' drift after backupTo completes[39m[33m 3105[2mms[22m[39m
+[31m     [31m×[31m refuses 'reviewed deployment mode' drift after backupTo completes[39m[33m 3040[2mms[22m[39m
+[31m     [31m×[31m refuses 'raw Bank setup' drift after backupTo completes[39m[33m 3038[2mms[22m[39m
+[31m     [31m×[31m rechecks the complete connection at 'capturing-native' before dispatch or staging[39m[33m 3380[2mms[22m[39m
+[31m     [31m×[31m rechecks the complete connection at 'sealing' before dispatch or staging[39m[33m 3357[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 9 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts[2m > [22mtemplate-capable capture preserves the admitted configured connection[2m > [22muses the actual joint publication and copy path for removed overlays and complete user-owned models
+[31m[1mError[22m: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[36m [2m❯[22m src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts:[2m56:3[22m[39m
+    [90m 54|[39m
+    [90m 55|[39m describe("template-capable capture preserves the admitted configured c…
+    [90m 56|[39m   it("uses the actual joint publication and copy path for removed over…
+    [90m   |[39m   [31m^[39m
+    [90m 57|[39m     [35mconst[39m h [33m=[39m [35mawait[39m [34mharness[39m()[33m;[39m
+    [90m 58|[39m     [35mconst[39m status [33m=[39m [35mawait[39m h[33m.[39mjoint[33m.[39m[34mprepare[39m([32m"removed"[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts[2m > [22mtemplate-capable capture preserves the admitted configured connection[2m > [22mrefuses a compatibility-only connection before taking any Core copy
+[31m[1mAssertionError[22m: expected { ok: false, …(2) } to deeply equal { ok: false, …(1) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[2m    "code": "HINDSIGHT_BACKUP_READBACK_MISMATCH",[22m
+[31m+   "mismatch": null,[39m
+[2m    "ok": false,[22m
+[2m  }[22m
+
+[36m [2m❯[22m expectRefusal src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts:[2m46:19[22m[39m
+    [90m 44|[39m
+    [90m 45|[39m async function expectRefusal(h: Awaited<ReturnType<typeof harness>>, o…
+    [90m 46|[39m   [34mexpect[39m(outcome)[33m.[39m[34mtoEqual[39m({ ok[33m:[39m [35mfalse[39m[33m,[39m code })[33m;[39m
+    [90m   |[39m                   [31m^[39m
+    [90m 47|[39m   [34mexpect[39m(h[33m.[39msnapshot)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m 48|[39m   [34mexpect[39m([35mawait[39m h[33m.[39mjoint[33m.[39mstore[33m.[39m[34mlist[39m())[33m.[39m[34mtoEqual[39m([])[33m;[39m
+[90m [2m❯[22m src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts:[2m79:11[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts[2m > [22mtemplate-capable capture preserves the admitted configured connection[2m > [22mrejects a copied connection revision changed after admission but before backupTo
+[31m[1mAssertionError[22m: expected { ok: false, …(2) } to deeply equal { ok: false, …(1) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[2m    "code": "HINDSIGHT_BACKUP_TEMPLATE_UNPROVEN",[22m
+[31m+   "mismatch": null,[39m
+[2m    "ok": false,[22m
+[2m  }[22m
+
+[36m [2m❯[22m expectRefusal src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts:[2m46:19[22m[39m
+    [90m 44|[39m
+    [90m 45|[39m async function expectRefusal(h: Awaited<ReturnType<typeof harness>>, o…
+    [90m 46|[39m   [34mexpect[39m(outcome)[33m.[39m[34mtoEqual[39m({ ok[33m:[39m [35mfalse[39m[33m,[39m code })[33m;[39m
+    [90m   |[39m                   [31m^[39m
+    [90m 47|[39m   [34mexpect[39m(h[33m.[39msnapshot)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m 48|[39m   [34mexpect[39m([35mawait[39m h[33m.[39mjoint[33m.[39mstore[33m.[39m[34mlist[39m())[33m.[39m[34mtoEqual[39m([])[33m;[39m
+[90m [2m❯[22m src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts:[2m90:11[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts[2m > [22mtemplate-capable capture preserves the admitted configured connection[2m > [22mrefuses 'connection revision' drift after backupTo completes
+[41m[1m FAIL [22m[49m src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts[2m > [22mtemplate-capable capture preserves the admitted configured connection[2m > [22mrefuses 'reviewed deployment mode' drift after backupTo completes
+[41m[1m FAIL [22m[49m src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts[2m > [22mtemplate-capable capture preserves the admitted configured connection[2m > [22mrefuses 'raw Bank setup' drift after backupTo completes
+[31m[1mAssertionError[22m: expected { ok: false, …(2) } to deeply equal { ok: false, …(1) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[2m    "code": "HINDSIGHT_BACKUP_TEMPLATE_UNPROVEN",[22m
+[31m+   "mismatch": null,[39m
+[2m    "ok": false,[22m
+[2m  }[22m
+
+[36m [2m❯[22m expectRefusal src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts:[2m46:19[22m[39m
+    [90m 44|[39m
+    [90m 45|[39m async function expectRefusal(h: Awaited<ReturnType<typeof harness>>, o…
+    [90m 46|[39m   [34mexpect[39m(outcome)[33m.[39m[34mtoEqual[39m({ ok[33m:[39m [35mfalse[39m[33m,[39m code })[33m;[39m
+    [90m   |[39m                   [31m^[39m
+    [90m 47|[39m   [34mexpect[39m(h[33m.[39msnapshot)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m 48|[39m   [34mexpect[39m([35mawait[39m h[33m.[39mjoint[33m.[39mstore[33m.[39m[34mlist[39m())[33m.[39m[34mtoEqual[39m([])[33m;[39m
+[90m [2m❯[22m src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts:[2m110:11[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts[2m > [22mtemplate-capable capture preserves the admitted configured connection[2m > [22mrefuses 'configuration fingerprint' drift after backupTo completes
+[31m[1mAssertionError[22m: expected { ok: false, …(2) } to deeply equal { ok: false, …(1) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[2m    "code": "HINDSIGHT_BACKUP_READBACK_MISMATCH",[22m
+[31m+   "mismatch": null,[39m
+[2m    "ok": false,[22m
+[2m  }[22m
+
+[36m [2m❯[22m expectRefusal src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts:[2m46:19[22m[39m
+    [90m 44|[39m
+    [90m 45|[39m async function expectRefusal(h: Awaited<ReturnType<typeof harness>>, o…
+    [90m 46|[39m   [34mexpect[39m(outcome)[33m.[39m[34mtoEqual[39m({ ok[33m:[39m [35mfalse[39m[33m,[39m code })[33m;[39m
+    [90m   |[39m                   [31m^[39m
+    [90m 47|[39m   [34mexpect[39m(h[33m.[39msnapshot)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m 48|[39m   [34mexpect[39m([35mawait[39m h[33m.[39mjoint[33m.[39mstore[33m.[39m[34mlist[39m())[33m.[39m[34mtoEqual[39m([])[33m;[39m
+[90m [2m❯[22m src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts:[2m110:11[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts[2m > [22mtemplate-capable capture preserves the admitted configured connection[2m > [22mrechecks the complete connection at 'capturing-native' before dispatch or staging
+[41m[1m FAIL [22m[49m src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts[2m > [22mtemplate-capable capture preserves the admitted configured connection[2m > [22mrechecks the complete connection at 'sealing' before dispatch or staging
+[31m[1mAssertionError[22m: expected { ok: false, …(2) } to deeply equal { ok: false, …(1) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[2m    "code": "HINDSIGHT_BACKUP_TEMPLATE_UNPROVEN",[22m
+[31m+   "mismatch": null,[39m
+[2m    "ok": false,[22m
+[2m  }[22m
+
+[36m [2m❯[22m expectRefusal src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts:[2m46:19[22m[39m
+    [90m 44|[39m
+    [90m 45|[39m async function expectRefusal(h: Awaited<ReturnType<typeof harness>>, o…
+    [90m 46|[39m   [34mexpect[39m(outcome)[33m.[39m[34mtoEqual[39m({ ok[33m:[39m [35mfalse[39m[33m,[39m code })[33m;[39m
+    [90m   |[39m                   [31m^[39m
+    [90m 47|[39m   [34mexpect[39m(h[33m.[39msnapshot)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m 48|[39m   [34mexpect[39m([35mawait[39m h[33m.[39mjoint[33m.[39mstore[33m.[39m[34mlist[39m())[33m.[39m[34mtoEqual[39m([])[33m;[39m
+[90m [2m❯[22m src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts:[2m121:11[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m9 failed[39m[22m[90m (9)[39m
+[2m   Start at [22m 22:42:45
+[2m   Duration [22m 46.01s[2m (transform 10.75s, setup 0ms, import 13.42s, tests 32.11s, environment 0ms)[22m
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts --maxWorkers=2

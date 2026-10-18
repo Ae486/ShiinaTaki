@@ -1,0 +1,2481 @@
+{
+  "version": 1,
+  "recordedAt": "2026-10-14T13:39:21.236928+00:00",
+  "task": "H:/TakiAgent/.trellis/tasks/10-14-hindsight-managed-deployment",
+  "verdict": "implementer-self-check-complete-independent-source-review-pending",
+  "deploymentReady": false,
+  "comparison": "Per-file baseline captured before C2a edits; includes pre-existing dirty source. This is not a diff against Git HEAD.",
+  "baseline": {
+    "path": "G:/Temp/taki-c2a-source-20261014-impl/baseline.json",
+    "sha256": "1bac2d220ad7d4a31e090e55159452875efddc042db097b543aa0222f0e66a04",
+    "entries": 113,
+    "sourceEntries": 111,
+    "excludedTaskArtifacts": [
+      "H:/TakiAgent/.trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-implementation-self-check.md",
+      "H:/TakiAgent/.trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-implementation-source-manifest.json"
+    ],
+    "unchangedSourceEntries": [
+      "H:/TakiAgent/packages/core/src/boot/hindsight-custody-boot.ts",
+      "H:/TakiAgent/packages/core/src/memory/hindsight/hindsight-deployment-owner.test.ts"
+    ]
+  },
+  "repositories": [
+    {
+      "name": "TakiAgent",
+      "root": "H:/TakiAgent",
+      "branch": "main",
+      "head": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a"
+    },
+    {
+      "name": "hindsight",
+      "root": "H:/hindsight",
+      "branch": "main",
+      "head": "eb6413a7f58c4f3f0adb88a33a99516f8707fef7"
+    }
+  ],
+  "changedFileCount": 109,
+  "changedFilesByRepository": {
+    "TakiAgent": 99,
+    "hindsight": 10
+  },
+  "changes": {
+    "modified": 45,
+    "added": 64
+  },
+  "sourceTextCheck": "UTF-8 without BOM; no introduced trailing whitespace; preserved baseline copy hashes match",
+  "sourceTreeSha256": "b0e7896be6c5e49c7d588fb59a537787c1614c6bc302cacda30372c001eca2f9",
+  "files": [
+    {
+      "repository": "TakiAgent",
+      "path": "apps/desktop/src-tauri/src/capabilities_impl.rs",
+      "absolutePath": "H:/TakiAgent/apps/desktop/src-tauri/src/capabilities_impl.rs",
+      "change": "modified",
+      "beforeSha256": "5fbbcee8dfe764a1648ba316b913cf9df36a5a22a9471c06dba2a3c93c7b1912",
+      "afterSha256": "99442b7e647da6912aebc9655d8db4bf5e776f48488b8b1f6b7a730806f33bcb",
+      "bytes": 10420,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/apps/desktop/src-tauri/src/capabilities_impl.rs"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/desktop/src-tauri/src/gate/governance.rs",
+      "absolutePath": "H:/TakiAgent/apps/desktop/src-tauri/src/gate/governance.rs",
+      "change": "modified",
+      "beforeSha256": "45bc6b4b3f50e138d1a8722e66bb45c121b48b3ebe87efe44235b4a8d515c358",
+      "afterSha256": "2a7241b4e2ec2ca2ff29d7c3408a5205b5f78700f4e7bb68640b4071bd9c6a06",
+      "bytes": 23114,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/apps/desktop/src-tauri/src/gate/governance.rs"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/desktop/src-tauri/src/gate/index.md",
+      "absolutePath": "H:/TakiAgent/apps/desktop/src-tauri/src/gate/index.md",
+      "change": "modified",
+      "beforeSha256": "0ae8354d67ba0a483772fcf0a6eb472b7ed36297bf9f6ef1d21a4e740cde2dcb",
+      "afterSha256": "7ce9a10ddfd71c780c1378e3aa70b77fefc21f756394fb3a4b282e2b86fcc2fd",
+      "bytes": 992,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/apps/desktop/src-tauri/src/gate/index.md"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/desktop/src-tauri/src/hindsight_checkpoint_relay.rs",
+      "absolutePath": "H:/TakiAgent/apps/desktop/src-tauri/src/hindsight_checkpoint_relay.rs",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "d20ba15076be0d77435679042385ce389e7cd178d1e60d7df7492f5e7cd5142f",
+      "bytes": 5885,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/desktop/src-tauri/src/hindsight_deployment.rs",
+      "absolutePath": "H:/TakiAgent/apps/desktop/src-tauri/src/hindsight_deployment.rs",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "7642250cc41b2b29b9a97aa619b8d9b04bd31053793bd5542c3341a56774dbda",
+      "bytes": 2582,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/desktop/src-tauri/src/hindsight_deployment_protocol.rs",
+      "absolutePath": "H:/TakiAgent/apps/desktop/src-tauri/src/hindsight_deployment_protocol.rs",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "9f1ad51b2bc9649b706849ed030585068c23259e01c5856c1c8b13aae47bd278",
+      "bytes": 17503,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/desktop/src-tauri/src/hindsight_windows.rs",
+      "absolutePath": "H:/TakiAgent/apps/desktop/src-tauri/src/hindsight_windows.rs",
+      "change": "modified",
+      "beforeSha256": "0f84a00f4e7b2238ec16273950a06696ae93ce79432eba7a6e8d31273ad5d053",
+      "afterSha256": "e5399c7336c6da467b4646d89fc458a89ee1b1aebdb293f38d9b37f2170f20ac",
+      "bytes": 564,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/apps/desktop/src-tauri/src/hindsight_windows.rs"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/desktop/src-tauri/src/hindsight_windows/deployment.rs",
+      "absolutePath": "H:/TakiAgent/apps/desktop/src-tauri/src/hindsight_windows/deployment.rs",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "f1467d3b7e86781426f0cd799ec76a68bbc9d5ad9d0e37ff4dccab708b192dc6",
+      "bytes": 9261,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/desktop/src-tauri/src/hindsight_windows/index.md",
+      "absolutePath": "H:/TakiAgent/apps/desktop/src-tauri/src/hindsight_windows/index.md",
+      "change": "modified",
+      "beforeSha256": "fc167f01e59d49e2a2e3cdc020c1dc5aa388c17011d4ef8d1c99e99db0edbf09",
+      "afterSha256": "eb4cd56d2521d64ddb89199106750969078ef32556e9811aab57c7a127492126",
+      "bytes": 1324,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/apps/desktop/src-tauri/src/hindsight_windows/index.md"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/desktop/src-tauri/src/hindsight_windows/objects.rs",
+      "absolutePath": "H:/TakiAgent/apps/desktop/src-tauri/src/hindsight_windows/objects.rs",
+      "change": "modified",
+      "beforeSha256": "6984657c0c0c1a06e48b65bdcbc06697ad44dfe9bfa36d5cf3ec76ee8c0cec48",
+      "afterSha256": "1fc4409da7ef6e456a2a985d5558fbe6d0eea667cca2c3eaccb70df8d9575a97",
+      "bytes": 11590,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/apps/desktop/src-tauri/src/hindsight_windows/objects.rs"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/desktop/src-tauri/src/hindsight_windows/process.rs",
+      "absolutePath": "H:/TakiAgent/apps/desktop/src-tauri/src/hindsight_windows/process.rs",
+      "change": "modified",
+      "beforeSha256": "65475767ab3fa2fc186765e8d765bf1c5dc1ba31de81819601695e9e21cf2cbf",
+      "afterSha256": "3c6537bf881d5d5382615190c2071ba29a02f9f2c26501b9d3df75a1dc556675",
+      "bytes": 7508,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/apps/desktop/src-tauri/src/hindsight_windows/process.rs"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/desktop/src-tauri/src/hindsight_windows/resident.rs",
+      "absolutePath": "H:/TakiAgent/apps/desktop/src-tauri/src/hindsight_windows/resident.rs",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "d3bf9d870b165b5867aba6808f7e0f7284b8cd5fab39c1a710c4cc03ff0e3c26",
+      "bytes": 5413,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/desktop/src-tauri/src/hindsight_windows/tests.rs",
+      "absolutePath": "H:/TakiAgent/apps/desktop/src-tauri/src/hindsight_windows/tests.rs",
+      "change": "modified",
+      "beforeSha256": "ebe1d39bb14df763db625bd77bbc9cb26c4a8726a5a5b33e454423e3925573f3",
+      "afterSha256": "d63c5f2d359e637e6f50f925b2c452494ac1f474b87311330d260f87f977611c",
+      "bytes": 13362,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/apps/desktop/src-tauri/src/hindsight_windows/tests.rs"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/desktop/src-tauri/src/host_session.rs",
+      "absolutePath": "H:/TakiAgent/apps/desktop/src-tauri/src/host_session.rs",
+      "change": "modified",
+      "beforeSha256": "bdc38ccbeb4ab31a966d08265626aba0bfb6e9034843f60b4c39da74941a119a",
+      "afterSha256": "93f263a2108728cd0280fe958024c2f8bfe2ef4ef4d9fc8e3957d7709010224b",
+      "bytes": 27179,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/apps/desktop/src-tauri/src/host_session.rs"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/desktop/src-tauri/src/index.md",
+      "absolutePath": "H:/TakiAgent/apps/desktop/src-tauri/src/index.md",
+      "change": "modified",
+      "beforeSha256": "f5981c17be3cf5a555e6efa895c9d941ee64094255ea882d1a6b0c583bd5c045",
+      "afterSha256": "4acfde60dcc5d0c5073c2a3f4186348fdb9758ee252eca5a8ce4219bbefc5f8e",
+      "bytes": 3743,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/apps/desktop/src-tauri/src/index.md"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/desktop/src-tauri/src/lib.rs",
+      "absolutePath": "H:/TakiAgent/apps/desktop/src-tauri/src/lib.rs",
+      "change": "modified",
+      "beforeSha256": "72ef31e56f214cbf8d96d12d502172298a5f88664dc73038af3b44d45babc540",
+      "afterSha256": "0168b01e95aba413397bbb06ef08ec1a2c2391e2a2c4acb86696e181f378b7cb",
+      "bytes": 7477,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/apps/desktop/src-tauri/src/lib.rs"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/desktop/src-tauri/src/node.rs",
+      "absolutePath": "H:/TakiAgent/apps/desktop/src-tauri/src/node.rs",
+      "change": "modified",
+      "beforeSha256": "69e0eb33376ee3d200817cfe24b09a69469545217ce4d8bf545863038397583e",
+      "afterSha256": "bbb4457f67fd95927ac60e75f04bb6894bf10d467ccb6148b43c485f04115758",
+      "bytes": 16283,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/apps/desktop/src-tauri/src/node.rs"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/desktop/src-tauri/src/protocol.rs",
+      "absolutePath": "H:/TakiAgent/apps/desktop/src-tauri/src/protocol.rs",
+      "change": "modified",
+      "beforeSha256": "6cdb30d4b22a3e17de8b2de3c3d190a452e46689e4e2ca27ab7af3412bf3325f",
+      "afterSha256": "c414332c41ca2e3f25181f9f32c9fd11f71e1d25c638e20123729b9338a7a9aa",
+      "bytes": 17275,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/apps/desktop/src-tauri/src/protocol.rs"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/desktop/src-tauri/src/ws_client.rs",
+      "absolutePath": "H:/TakiAgent/apps/desktop/src-tauri/src/ws_client.rs",
+      "change": "modified",
+      "beforeSha256": "f566ec0d8f608e2e70a8b9446115b1689da72512ae359e1b70be1430552e9728",
+      "afterSha256": "be37caa10783f7ab5e9e76146ecc9e47ac5e4b368b06b7260ca58271e6a59dc5",
+      "bytes": 45223,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/apps/desktop/src-tauri/src/ws_client.rs"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/README.md",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/README.md",
+      "change": "modified",
+      "beforeSha256": "2bfad9ef4a27efd80c60b92a56577d217a3f79a2caddcd87321d00d5c088c7d3",
+      "afterSha256": "1275e9c42067c12a8de1c4c65a98c0e511f258baf4ddce2991f7f25087185063",
+      "bytes": 15254,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/apps/hindsight-host/README.md"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/src/catalog-selection.ts",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/src/catalog-selection.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "29dcaff7274e624d5360e289702cd40ed828eb10b87ba4094bfc0cda203d75d4",
+      "bytes": 3389,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/src/deployment-core.test.ts",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/src/deployment-core.test.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "e0aaaca7e10fdfc64d44cf4b923fd4f9362558032f146c3da789fcc1557231f5",
+      "bytes": 26574,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/src/deployment-error.ts",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/src/deployment-error.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "1ece2518e8336c2949a2390a584eb5f5b596766ce6b18699192c146824c9eec5",
+      "bytes": 759,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/src/deployment-host.ts",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/src/deployment-host.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "be96cf9ec0d9018b6fc594ea4ed754fc8c9f724de9eec429d7aa407c13104697",
+      "bytes": 3443,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/src/deployment-injection.ts",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/src/deployment-injection.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "5e95d37677a70a014512cf84452d6b25f9d9949a9519677a2eb5addaae434b50",
+      "bytes": 6488,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/src/deployment-installed.test.ts",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/src/deployment-installed.test.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "dd8f2acc33c54dc0c079793d8648e427a32bd622455c7c7d74e554d5158d8b9c",
+      "bytes": 4101,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/src/deployment-owner.test.ts",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/src/deployment-owner.test.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "bf8d3bc5222dae18c411e3b0d77bf05879a884157b2959b76ea26099048a6ccc",
+      "bytes": 9576,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/src/deployment-owner.ts",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/src/deployment-owner.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "9a4998b184b439d9ae469f6bbcdfa12e7f7bc161b2bdefc9d3be1aef81f1fe4d",
+      "bytes": 14228,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/src/deployment-registration.ts",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/src/deployment-registration.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "a64a259fe49eeb3091fea61fb9fa58d81b58d2f97767c63554569113bba2a6b7",
+      "bytes": 2334,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/src/deployment-registry.test.ts",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/src/deployment-registry.test.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "890c3948288154940275956dbda84b331f30a465464eb0a866d7e84a65bf83fc",
+      "bytes": 2886,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/src/deployment-registry.ts",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/src/deployment-registry.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "18edaefcc3ff2e50916611a300f82589784ac0460363c4c93835c92c29f8d2cf",
+      "bytes": 5258,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/src/deployment-test-fixtures.ts",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/src/deployment-test-fixtures.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "426467c932ecaf4a9916ea731f9f2711872449304c75d1b968a927d5cba954f9",
+      "bytes": 7060,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/src/docker-adapter.test.ts",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/src/docker-adapter.test.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "5ea80625b5687b72a4781f61b1bc145c170fc385eb107dbf59c92a6d20c8028f",
+      "bytes": 5183,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/src/docker-adapter.ts",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/src/docker-adapter.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "645719dfecd52de481f032826e7f535455a057ed06e321843f78151f373bbe88",
+      "bytes": 9843,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/src/docker-process.ts",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/src/docker-process.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "3979f4c2276ffd3ede148209cceb5fcd47689216437eacfaf052aeb7e592c5d8",
+      "bytes": 2166,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/src/index.md",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/src/index.md",
+      "change": "modified",
+      "beforeSha256": "710c32d6e5d4487b7a8d77ab81156ab048c851f3ab454270b71940fb22e4ad6e",
+      "afterSha256": "bf1b60bbf047d7e434f6b658d977e854f96571289bfb2267623e29fda9dc58b4",
+      "bytes": 2654,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/apps/hindsight-host/src/index.md"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/src/main.ts",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/src/main.ts",
+      "change": "modified",
+      "beforeSha256": "c5bd8c3c41dd2bcbef22fe60bc8e968028e3308e926e7eecdd9fd4bc2bc6c2b3",
+      "afterSha256": "d731296bf79ecd44ddd9116b501292bd49baa41899e7615762da3625c8a36186",
+      "bytes": 3942,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/apps/hindsight-host/src/main.ts"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/src/prepare-custody.ts",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/src/prepare-custody.ts",
+      "change": "modified",
+      "beforeSha256": "3ba9073c1e9f6e11d56812e0fde6fe0a00f919c644dd6ad929ebe468099037df",
+      "afterSha256": "f9939f3332645eb00f5ae92c0ca8a36389be853bebbc3854a93f74b447837129",
+      "bytes": 2847,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/apps/hindsight-host/src/prepare-custody.ts"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/test-fixtures/deployment-child.ts",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-child.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "0e211359cff053541421fa49df8d1b34d03f60c4a7bf85df1cd6bb6c170397ca",
+      "bytes": 4122,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/test-fixtures/deployment-docker-fixture.ts",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-docker-fixture.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "cac05d8ba8b65ff4d5cca3acfbbef27a2ddc8615e352e787b6f43cb703e7c19b",
+      "bytes": 6756,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/test-fixtures/deployment-installed-fixture.ts",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-installed-fixture.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "521c67c0e6405cfd080c04443f5ff7b73656ef741a63a6b0a671d5bbe3256382",
+      "bytes": 8916,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/test-fixtures/deployment-process-fixture.ts",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-process-fixture.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "a5aed879c170d9b9ee766207e1e7ece2615407eab12ea1f3da4c658e084a6534",
+      "bytes": 10376,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "apps/hindsight-host/test-fixtures/fake-docker.rs",
+      "absolutePath": "H:/TakiAgent/apps/hindsight-host/test-fixtures/fake-docker.rs",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "9141d591948648ca0938bd9fca9b4cc40b617473969e0bffc45d1238a54e7247",
+      "bytes": 2015,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/boot/hindsight-deployment-boot.ts",
+      "absolutePath": "H:/TakiAgent/packages/core/src/boot/hindsight-deployment-boot.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "e9c5d842e9d6fe90b69dae74b7aa037454d54da82307e72da5b12914e884fb86",
+      "bytes": 3508,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/boot/index.md",
+      "absolutePath": "H:/TakiAgent/packages/core/src/boot/index.md",
+      "change": "modified",
+      "beforeSha256": "b0b348bda6df0a9589dba59a179097f99402086b3190b24cb9c94df8e0c6252c",
+      "afterSha256": "da6b95fc8a65965c02b8148f8d1d77b951d9b3cfb8844be79f4537ee0962f119",
+      "bytes": 2114,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/core/src/boot/index.md"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/capabilities/capability-broker-state.ts",
+      "absolutePath": "H:/TakiAgent/packages/core/src/capabilities/capability-broker-state.ts",
+      "change": "modified",
+      "beforeSha256": "68151427a0bb448ac27a86085d38ef5d6a1c19825778859872849414a09f56cd",
+      "afterSha256": "7db1e0adf4f2435f9272d0a561aefc5ce99099501788535c977ce37312548d61",
+      "bytes": 7504,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/core/src/capabilities/capability-broker-state.ts"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/capabilities/capability-broker.ts",
+      "absolutePath": "H:/TakiAgent/packages/core/src/capabilities/capability-broker.ts",
+      "change": "modified",
+      "beforeSha256": "f1bb1b5fe4eae0611c91a10bf8b300d78745c8330f951fed4c00877171d89f31",
+      "afterSha256": "e6e6b3c70f8311fdc71225086be271a81e283b3c725d977ae211195fe251e6d1",
+      "bytes": 10082,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/core/src/capabilities/capability-broker.ts"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/capabilities/capability-challenge.ts",
+      "absolutePath": "H:/TakiAgent/packages/core/src/capabilities/capability-challenge.ts",
+      "change": "modified",
+      "beforeSha256": "3c1a9f9228efd04ab36ea4983965c97890c46a09d231c1cfa096e7dbbc669d2f",
+      "afterSha256": "f737cd0650aa41401454e03a2bdb51d841815f64b2b188a7937c4938b6ff1ca1",
+      "bytes": 14124,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/core/src/capabilities/capability-challenge.ts"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/capabilities/capability-observers.ts",
+      "absolutePath": "H:/TakiAgent/packages/core/src/capabilities/capability-observers.ts",
+      "change": "modified",
+      "beforeSha256": "44ee724f68cc7382e9c05b8e0c24c4eeaa1d94acaca6d52123a6b884f13e019c",
+      "afterSha256": "d55138cb4a66b8d9aa04601921be9e661f20482bcec013575f7c6f4d324edbd7",
+      "bytes": 1234,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/core/src/capabilities/capability-observers.ts"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/capabilities/hindsight-deployment-outcome.ts",
+      "absolutePath": "H:/TakiAgent/packages/core/src/capabilities/hindsight-deployment-outcome.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "f778824877a051fab5ba78f465e3f5e31c1c7931d9930265883407ed561b5167",
+      "bytes": 2246,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/capabilities/hindsight-injection-checkpoint.ts",
+      "absolutePath": "H:/TakiAgent/packages/core/src/capabilities/hindsight-injection-checkpoint.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "d8088d0e06bfe9711e065f61b6ab7314f4957f77bd063530a42ae31516c1a9a1",
+      "bytes": 3886,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/capabilities/index.md",
+      "absolutePath": "H:/TakiAgent/packages/core/src/capabilities/index.md",
+      "change": "modified",
+      "beforeSha256": "b69e6d74c8df96b017b664fb5a81304a149caf1fb6964628e92dc2864a75a359",
+      "afterSha256": "36944c89222742a1307e3199d0ade042dae6addd4df6e811b316aba55b8cf5fe",
+      "bytes": 3241,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/core/src/capabilities/index.md"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/capabilities/route-capability.test.ts",
+      "absolutePath": "H:/TakiAgent/packages/core/src/capabilities/route-capability.test.ts",
+      "change": "modified",
+      "beforeSha256": "20cc9061b03db642f004a52acb9ffb1d2b2b060aca542b59225f47ca9fd8f31f",
+      "afterSha256": "995569876cfd8a0a79c911c9f7248766c8c518f9981d92991c07ad090d6ad0e4",
+      "bytes": 3418,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/core/src/capabilities/route-capability.test.ts"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/capabilities/route-capability.ts",
+      "absolutePath": "H:/TakiAgent/packages/core/src/capabilities/route-capability.ts",
+      "change": "modified",
+      "beforeSha256": "770dc6bb59fcb1d4f5d1cee7e888feb258f0a590c1c181c36b2f54ae86de6279",
+      "afterSha256": "dbcdbcd9dcaeb02ecd000b4983468b4726c36751cb8474f68c7371b56abd1b19",
+      "bytes": 6472,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/core/src/capabilities/route-capability.ts"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/db/index.md",
+      "absolutePath": "H:/TakiAgent/packages/core/src/db/index.md",
+      "change": "modified",
+      "beforeSha256": "17e9a12442bd6f6cdb62aa397c2e9bc1c8802525667c13966d1d3b12214eb904",
+      "afterSha256": "b8d5516d40e30d628cad25666862d629027df6c9fe9543b18cdc90cb2dec2fd2",
+      "bytes": 22142,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/core/src/db/index.md"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/db/run-repo.ts",
+      "absolutePath": "H:/TakiAgent/packages/core/src/db/run-repo.ts",
+      "change": "modified",
+      "beforeSha256": "20cd32f4afcd516710c5cd54c47e16797916f82332421c8f9dbcd5336c76381e",
+      "afterSha256": "7836712577f00a29c2ae210a6b9cab065c9d778d819f11fc14577bf6d1b35b51",
+      "bytes": 22823,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/core/src/db/run-repo.ts"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/harness/index.md",
+      "absolutePath": "H:/TakiAgent/packages/core/src/harness/index.md",
+      "change": "modified",
+      "beforeSha256": "100811b3db94a54faa4e0e9d2b1cf5e57597c3b46e2300ee96d23a79afe68a25",
+      "afterSha256": "648a2c59aed7fd0405ef2ff82e86112c0c84a2b3baead5194ce01d969b395f54",
+      "bytes": 643,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/core/src/harness/index.md"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/harness/run-service.ts",
+      "absolutePath": "H:/TakiAgent/packages/core/src/harness/run-service.ts",
+      "change": "modified",
+      "beforeSha256": "ec3eadfa8d880976a7dce8f61e8f0bea9d32c579cb85bfe004c90b3df66530ba",
+      "afterSha256": "0f5ed3014645cd3648fbf4c31acdd40cc49f07ae8f54dda52c18210a22c0a60e",
+      "bytes": 6975,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/core/src/harness/run-service.ts"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/index.md",
+      "absolutePath": "H:/TakiAgent/packages/core/src/index.md",
+      "change": "modified",
+      "beforeSha256": "542307488b2f6ee5f866d0e6289d3d9b02db4c24c2d5acf25ff48a40a3629fd4",
+      "afterSha256": "a7cf013ab4d8670950424e2507a98fe5cadb7d69c34332995c22326390c4dada",
+      "bytes": 3857,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/core/src/index.md"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/main.ts",
+      "absolutePath": "H:/TakiAgent/packages/core/src/main.ts",
+      "change": "modified",
+      "beforeSha256": "9605d537efb96fc1b05846ebabb9aa781e6be66724318e441a27e2a5fe178630",
+      "afterSha256": "e1286ed20bb938db4ac10d42d36d8664b44aefff4a65f1aab75c8af7894f4de7",
+      "bytes": 42890,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/core/src/main.ts"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/memory/hindsight/hindsight-custody-owner.ts",
+      "absolutePath": "H:/TakiAgent/packages/core/src/memory/hindsight/hindsight-custody-owner.ts",
+      "change": "modified",
+      "beforeSha256": "41c47558bbb203dfe7224dc68ed104e8be8397da66cd0e9583cbb045f80c1651",
+      "afterSha256": "f6aa22f2c718b28bc987c2ff7edc25b8f4217ce748ae2a03fc09835cf3e603ec",
+      "bytes": 8628,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/core/src/memory/hindsight/hindsight-custody-owner.ts"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/memory/hindsight/hindsight-deployment-owner.ts",
+      "absolutePath": "H:/TakiAgent/packages/core/src/memory/hindsight/hindsight-deployment-owner.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "d86ec69cd94c999361ba7a7ed50b13c63af2db7483545cf8e6a46db94af75b97",
+      "bytes": 15832,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/memory/hindsight/index.md",
+      "absolutePath": "H:/TakiAgent/packages/core/src/memory/hindsight/index.md",
+      "change": "modified",
+      "beforeSha256": "3c853d99ffd65e663a4fef26e6bb132ec51674f8b2c38d86e8439ad16c7c4067",
+      "afterSha256": "6ee3db31a475adafcac0b1cc58a20de795d8c06b56683a1df8e31df7b2f70982",
+      "bytes": 20381,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/core/src/memory/hindsight/index.md"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/server/methods/hindsight-deployment-checkpoint.ts",
+      "absolutePath": "H:/TakiAgent/packages/core/src/server/methods/hindsight-deployment-checkpoint.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "e100a104cd547e3f603fe99135fed90bbdc22360f491f47e11b6ea9f6fde0cc8",
+      "bytes": 1438,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/server/methods/index.md",
+      "absolutePath": "H:/TakiAgent/packages/core/src/server/methods/index.md",
+      "change": "modified",
+      "beforeSha256": "9aef733e9bf1d631348828c63f4bc76eba396c536d30e8f450b57455d2fddebb",
+      "afterSha256": "4dffcad523c654a0e5869b682db7c1dad4cd1ce89949bc05426bbd94f7b6a18d",
+      "bytes": 8666,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/core/src/server/methods/index.md"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/testing/capability-tool-harness.ts",
+      "absolutePath": "H:/TakiAgent/packages/core/src/testing/capability-tool-harness.ts",
+      "change": "modified",
+      "beforeSha256": "a89a26c2df16ac877a7770bdec22e3311c6bd00837a92822843166e5e7ad525e",
+      "afterSha256": "6f03a2d39c60b142e8c4f594a3a794ca6b31a3476a63255328dc6ead1c64894d",
+      "bytes": 4896,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/core/src/testing/capability-tool-harness.ts"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/testing/index.md",
+      "absolutePath": "H:/TakiAgent/packages/core/src/testing/index.md",
+      "change": "modified",
+      "beforeSha256": "fa396c8a3346efb2cfcfabe416ccfadb5ca52307dd0565197b3902a0a1f24cea",
+      "afterSha256": "d309b08aa397a3bcf3e4deb7ac856db05128951efad6d20b69309f51768893bc",
+      "bytes": 8213,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/core/src/testing/index.md"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/core/src/testing/run-service-stub.ts",
+      "absolutePath": "H:/TakiAgent/packages/core/src/testing/run-service-stub.ts",
+      "change": "modified",
+      "beforeSha256": "4a7db430e5ce66e734124fdfa86b6f1f539e239f6a3f2b3140e7d0a41e6209f0",
+      "afterSha256": "8e54da437d74fb3edf7da74359177a78670b4419416a2aaf9feae1310f443d72",
+      "bytes": 3405,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/core/src/testing/run-service-stub.ts"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-checkpoint-result.granted.valid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-checkpoint-result.granted.valid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "25ba315f468622337e4150c4bf2eb0858715436013ce918b46e64c9d5cac54a6",
+      "bytes": 1193,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-checkpoint-result.permit-selection.invalid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-checkpoint-result.permit-selection.invalid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "75187759863e94c3afb282d1b8f3a2758986642b99f2bd37359b943fa7e6c9bb",
+      "bytes": 749,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-checkpoint-result.refused.valid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-checkpoint-result.refused.valid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "edf2ee759c690921aae49f9a1e8eea7cf3f2e8f224589b39e44f8f95a4c44148",
+      "bytes": 69,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-checkpoint.authorization.invalid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-checkpoint.authorization.invalid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "b235d633435bc4a62df8556a476c85af38c17d0c57025106e1479ab7346c3113",
+      "bytes": 1852,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-checkpoint.current.valid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-checkpoint.current.valid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "91ee71cb63482789905bb61e7fb0070ccb37ececbf0bb889c3fc50ee7970a4e2",
+      "bytes": 1826,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-effect.command.invalid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-effect.command.invalid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "fc838b322f836068f1a393c9d04a90c29c59de373140bf82206bcd2bdd858323",
+      "bytes": 2905,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-effect.containerId.invalid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-effect.containerId.invalid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "8507062501b0f4d3a9ae97af0ee6c4bb9309068133506d7dc9d386802a2630bd",
+      "bytes": 2816,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-effect.create.valid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-effect.create.valid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "42362247876bc367e4c5bbbb635afb3f185c000a95fa50ba8f3da305b42fd294",
+      "bytes": 2736,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-effect.custody-input-configurationDigest.invalid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-effect.custody-input-configurationDigest.invalid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "628937351b9145341abefab6a475160d125e4e29d7338c38efe799892d56c3b7",
+      "bytes": 2878,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-effect.inject.valid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-effect.inject.valid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "f4cf3911f2fd4c86970ce25a8f41cfa4f498ee98c94f53c295286405d186de2c",
+      "bytes": 2878,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-effect.plan-operationId.invalid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-effect.plan-operationId.invalid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "f8177f826acbcbea4357d1a38e4512edc10ad9b15fe35f354ebf2920c8955e4a",
+      "bytes": 2878,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-effect.start.valid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-effect.start.valid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "af7e62b826d0b1d999bcf1bb0f17122f91067cb41e99b76777b7b3873b438b89",
+      "bytes": 2821,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-invocation.authorization.invalid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-invocation.authorization.invalid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "07a8981b76d3cd2009e657123f633a008617c72d0ad7f3b58189405dde261070",
+      "bytes": 4611,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-invocation.control-effectId.invalid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-invocation.control-effectId.invalid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "eb10c81d23f7df19a011f2b06d5e98741565c4766e6ea420e1210679df832eaf",
+      "bytes": 4551,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-invocation.input-startupId.invalid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-invocation.input-startupId.invalid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "4f546030eb050f71a157ff7e32fa8e99ac615d4cd98764d8288501be52fc7f68",
+      "bytes": 4551,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-invocation.windows.valid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-invocation.windows.valid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "4470341ad8c8b7792176cb3c8028f1ed1736350d62f74ab57a7279bbfdf0f86a",
+      "bytes": 4585,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-observe.original.valid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-observe.original.valid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "892b35319f2fb81efdb12dd94c47d2ab5f83c7bd2012d1eca456575a56cfbfa9",
+      "bytes": 81,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-registration.docker-endpoint.invalid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-registration.docker-endpoint.invalid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "9d76a79dac940adba4c0a69bb790a67d87fb7645523a17b2cd9420a8268eaa9d",
+      "bytes": 765,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-registration.windows.valid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-registration.windows.valid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "aae5d7090318bac90d54b180025943dfbd97ca6659f1c5a15059ad1e7f6cb91c",
+      "bytes": 786,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-status.attemptId.invalid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-status.attemptId.invalid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "53c64c1d457b9965cf0658eead35774acffd497c9901931b7387ddabb39266cc",
+      "bytes": 449,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-status.deploymentReady.invalid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-status.deploymentReady.invalid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "cc2798a75b1f81ebce9c73571abd0e9fcc66fdb527409a67440a73332d86c7c2",
+      "bytes": 482,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-status.missing.valid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-status.missing.valid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "372527e0c3fc1b2e6a51c53be839a94598927f9313265c0d1abb29a05f181323",
+      "bytes": 115,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-status.reason.invalid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-status.reason.invalid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "c735c7e43f5cf9a4a197fe23cc0ab9cb6d1939899ede25f35f647f110e2bf633",
+      "bytes": 502,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/fixtures/protocol/hindsight-deployment-status.running.valid.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/fixtures/protocol/hindsight-deployment-status.running.valid.json",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "640f4650d4a6abcc3a897f516cbfa4d688211982c668495c23b889cc7968fe83",
+      "bytes": 483,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/package.json",
+      "absolutePath": "H:/TakiAgent/packages/shared/package.json",
+      "change": "modified",
+      "beforeSha256": "e40df88d2ae09ffa1bbba37456531fae10bcd5d025e2dce95d3d7c0b75b6b796",
+      "afterSha256": "5c9c02488a860aec82063dd3cca9a9fcb1b5db27a7aef7fb3d282906d9f90754",
+      "bytes": 1008,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/shared/package.json"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/src/governance-registry.test.ts",
+      "absolutePath": "H:/TakiAgent/packages/shared/src/governance-registry.test.ts",
+      "change": "modified",
+      "beforeSha256": "2a051cc6718fb6ffa2e5b662b7eaedf76ffd2db70820c20c1deea194d5ddb538",
+      "afterSha256": "f585ac136f78a1fc0b7b5cf02b6c2cd8979304cb7b2d94ad39813deba83457e2",
+      "bytes": 2185,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/shared/src/governance-registry.test.ts"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/src/governance-registry.ts",
+      "absolutePath": "H:/TakiAgent/packages/shared/src/governance-registry.ts",
+      "change": "modified",
+      "beforeSha256": "e0188f572847a7329d3bb479b783cec652e1ae3add994e25df6d3415055e4ff1",
+      "afterSha256": "c2593dfc1451213c03e705be355f3bdc9cdc09f005802b9ec9b0d25ef4689de9",
+      "bytes": 8808,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/shared/src/governance-registry.ts"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/src/hindsight-deployment-schema.test.ts",
+      "absolutePath": "H:/TakiAgent/packages/shared/src/hindsight-deployment-schema.test.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "605c174d7c3f67822de845aa3829c1b7c75f9c6b15a57376fb1dea11966069e8",
+      "bytes": 2748,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/src/hindsight-deployment-schema.ts",
+      "absolutePath": "H:/TakiAgent/packages/shared/src/hindsight-deployment-schema.ts",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "8f15f0719b9ade574f41799ea29febfcd718e1743667daf2c21666b127b4f8a0",
+      "bytes": 9323,
+      "baselineCopy": null
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/src/index.md",
+      "absolutePath": "H:/TakiAgent/packages/shared/src/index.md",
+      "change": "modified",
+      "beforeSha256": "83ee8b1819987f4f71f69a1b645b9ca58cb74b4c6b4d063639b96d26e352af18",
+      "afterSha256": "f4bd6b6306b35773ef1cecd1b3f05316357b18c783594bdeb2bb32c7b3807e78",
+      "bytes": 17440,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/shared/src/index.md"
+    },
+    {
+      "repository": "TakiAgent",
+      "path": "packages/shared/src/protocol-fixtures.test.ts",
+      "absolutePath": "H:/TakiAgent/packages/shared/src/protocol-fixtures.test.ts",
+      "change": "modified",
+      "beforeSha256": "82918774e536b5f959e2e3df7ed9afa441ebfce292e6d8abfe37e5207d7394ec",
+      "afterSha256": "bea30d6b97d83422ef7388e9a695ea4ef2f4da566453ade856037146f63cb167",
+      "bytes": 6347,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/TakiAgent/packages/shared/src/protocol-fixtures.test.ts"
+    },
+    {
+      "repository": "hindsight",
+      "path": "docker/standalone/Dockerfile.c2a-fake",
+      "absolutePath": "H:/hindsight/docker/standalone/Dockerfile.c2a-fake",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "2be1279ef4621f5d42397879fab2e436d780224eb3c02d591180faf9e9a9fcff",
+      "bytes": 555,
+      "baselineCopy": null
+    },
+    {
+      "repository": "hindsight",
+      "path": "docker/standalone/managed_bootstrap/README.md",
+      "absolutePath": "H:/hindsight/docker/standalone/managed_bootstrap/README.md",
+      "change": "modified",
+      "beforeSha256": "fd0f09737f67dbee7839c378e0331affed008b870aa34819ab9e3c1005fe8a56",
+      "afterSha256": "8aa9ed8e28f6e72181baf16bb44b55948429f6bab90414d64bed04ce27217129",
+      "bytes": 10367,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/hindsight/docker/standalone/managed_bootstrap/README.md"
+    },
+    {
+      "repository": "hindsight",
+      "path": "docker/standalone/managed_bootstrap/control.py",
+      "absolutePath": "H:/hindsight/docker/standalone/managed_bootstrap/control.py",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "c75dcdf2285df614c4836dab4898a2980a2a1e8e4572862861596ab244f39d5e",
+      "bytes": 5593,
+      "baselineCopy": null
+    },
+    {
+      "repository": "hindsight",
+      "path": "docker/standalone/managed_bootstrap/fake_child.py",
+      "absolutePath": "H:/hindsight/docker/standalone/managed_bootstrap/fake_child.py",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "8d2267eb2b5af484179a7e8b2c301e067fe59197d63d91178415873ed7c96e93",
+      "bytes": 2073,
+      "baselineCopy": null
+    },
+    {
+      "repository": "hindsight",
+      "path": "docker/standalone/managed_bootstrap/fake_consumer.py",
+      "absolutePath": "H:/hindsight/docker/standalone/managed_bootstrap/fake_consumer.py",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "52b3d0664b06ef82dca4765d2c08e820c16c2af5e2814a02f98fe08f8e220eb3",
+      "bytes": 4302,
+      "baselineCopy": null
+    },
+    {
+      "repository": "hindsight",
+      "path": "docker/standalone/managed_bootstrap/owner.py",
+      "absolutePath": "H:/hindsight/docker/standalone/managed_bootstrap/owner.py",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "5b10f9f09def8ff985c96fed56c31f4ec4976f684d7e3b044fdc8a66afb38acc",
+      "bytes": 2460,
+      "baselineCopy": null
+    },
+    {
+      "repository": "hindsight",
+      "path": "docker/standalone/managed_bootstrap/owner_protocol.py",
+      "absolutePath": "H:/hindsight/docker/standalone/managed_bootstrap/owner_protocol.py",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "cd9cdbea572354dbbc1200098d9edfe9280679c2b346a67c1326a795b01c1804",
+      "bytes": 3199,
+      "baselineCopy": null
+    },
+    {
+      "repository": "hindsight",
+      "path": "docker/standalone/managed_bootstrap/unix_socket.py",
+      "absolutePath": "H:/hindsight/docker/standalone/managed_bootstrap/unix_socket.py",
+      "change": "modified",
+      "beforeSha256": "a972e2a68f2fbf16c836425bb0f07da0d83886e218eedc0588eadd92351463a7",
+      "afterSha256": "08b6e604211d19e31ad61782c96b91a004277b37c31d6e9a0bdfdda681cd7725",
+      "bytes": 9434,
+      "baselineCopy": "G:/Temp/taki-c2a-source-20261014-impl/baseline/H/hindsight/docker/standalone/managed_bootstrap/unix_socket.py"
+    },
+    {
+      "repository": "hindsight",
+      "path": "docker/standalone/tests/fixtures/c2a_pipe_owner.py",
+      "absolutePath": "H:/hindsight/docker/standalone/tests/fixtures/c2a_pipe_owner.py",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "99bb3ccbd6a1821ee57282d1fc4a9567b0fc71d423639d140a0be8702c66a5b8",
+      "bytes": 2094,
+      "baselineCopy": null
+    },
+    {
+      "repository": "hindsight",
+      "path": "docker/standalone/tests/test_c2a_bootstrap_owner.py",
+      "absolutePath": "H:/hindsight/docker/standalone/tests/test_c2a_bootstrap_owner.py",
+      "change": "added",
+      "beforeSha256": null,
+      "afterSha256": "3a7db96bba885c19a66e6f0634b7872116c28a3a29fea3d1efe8108b59a3295c",
+      "bytes": 5808,
+      "baselineCopy": null
+    }
+  ],
+  "checksJsonl": {
+    "path": "G:/Temp/taki-c2a-source-20261014-impl/checks.jsonl",
+    "sha256": "637a2aa6a13378dd157506f1883d6027e23df20f3071dfd36f855127b19a10e6",
+    "records": 54
+  },
+  "checks": [
+    {
+      "name": "shared-types-1",
+      "started": "2026-10-14T11:33:51.0392102Z",
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\shared-types-1.log",
+      "cwd": "H:\\TakiAgent",
+      "arguments": [
+        "--filter",
+        "@taki/shared",
+        "typecheck"
+      ],
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "seconds": 7.190916,
+      "exitCode": 0,
+      "logSha256": "f9e1326358c4b06cc9030a0db5e834bd737e52677aa159683b70c68a9b6631b2",
+      "logFileState": "retained"
+    },
+    {
+      "exitCode": 2,
+      "arguments": [
+        "--filter",
+        "@taki/core",
+        "typecheck"
+      ],
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "cwd": "H:\\TakiAgent",
+      "seconds": 30.0630296,
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\core-types-1.log",
+      "name": "core-types-1",
+      "started": "2026-10-14T11:34:58.6340639Z",
+      "logSha256": "bd4bc253d0796ecc69a6677b01e15096c5154367173a7e3281f10cc55f1ea8dc",
+      "logFileState": "retained"
+    },
+    {
+      "seconds": 7.099318,
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "arguments": [
+        "--filter",
+        "@taki/hindsight-host",
+        "typecheck"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\host-types-1.log",
+      "name": "host-types-1",
+      "started": "2026-10-14T11:36:16.2272029Z",
+      "exitCode": 2,
+      "logSha256": "60ea37eeee5b74f45ca43406aedab6e91fc5bdce30a3f1e96f4e0f54d6c59fcd",
+      "logFileState": "retained"
+    },
+    {
+      "exitCode": 0,
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\rust-hindsight-1.log",
+      "arguments": [
+        "test",
+        "--manifest-path",
+        "apps/desktop/src-tauri/Cargo.toml",
+        "--lib",
+        "hindsight",
+        "--",
+        "--test-threads=1"
+      ],
+      "seconds": 28.7894917,
+      "cwd": "H:\\TakiAgent",
+      "program": "cargo",
+      "name": "rust-hindsight-1",
+      "started": "2026-10-14T11:43:16.8275459Z",
+      "logSha256": "c1144ccb34716a26407ffc79cdc8a8a28788f8de9168265deb7ec1a773fef5bf",
+      "logFileState": "retained"
+    },
+    {
+      "cwd": "H:\\TakiAgent",
+      "exitCode": 1,
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "arguments": [
+        "--filter",
+        "@taki/shared",
+        "exec",
+        "vitest",
+        "run",
+        "src/hindsight-deployment-schema.test.ts",
+        "src/protocol-fixtures.test.ts",
+        "src/governance-registry.test.ts",
+        "--maxWorkers=2"
+      ],
+      "seconds": 2.9912927,
+      "name": "shared-c2-protocol-1",
+      "started": "2026-10-14T11:55:03.4603575Z",
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\shared-c2-protocol-1.log",
+      "logSha256": "a20d0f944a9b3b1d9f818d512237af548d30f49e1ccd5c4beffeb3dc85878f8f",
+      "logFileState": "retained"
+    },
+    {
+      "cwd": "H:\\TakiAgent",
+      "seconds": 1.1300317,
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\fixture-key-build.log",
+      "program": "rustc",
+      "exitCode": 0,
+      "arguments": [
+        "--edition=2021",
+        "-C",
+        "debuginfo=0",
+        "apps/hindsight-host/test-fixtures/fake-key-adapter.rs",
+        "-o",
+        "G:/Temp/taki-c2a-source-20261014-impl/fake-key-adapter.exe"
+      ],
+      "name": "fixture-key-build",
+      "started": "2026-10-14T12:00:49.7245230Z",
+      "logSha256": null,
+      "logFileState": "legacy-wrapper-created-no-file-for-silent-command"
+    },
+    {
+      "started": "2026-10-14T12:03:04.2454343Z",
+      "cwd": "H:\\TakiAgent",
+      "arguments": [
+        "--filter",
+        "@taki/hindsight-host",
+        "exec",
+        "vitest",
+        "run",
+        "src/deployment-owner.test.ts",
+        "--maxWorkers=1",
+        "--testTimeout=20000"
+      ],
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "name": "host-c2-process-1",
+      "seconds": 58.4163125,
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\host-c2-process-1.log",
+      "exitCode": 1,
+      "logSha256": "a8f9f32b9870b710198ae72f321db880109dcd957b54ddf44bb00b4509ab17d5",
+      "logFileState": "retained"
+    },
+    {
+      "name": "native-c2-1",
+      "exitCode": 1,
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\native-c2-1.log",
+      "started": "2026-10-14T12:04:23.4793109Z",
+      "cwd": "H:\\hindsight",
+      "seconds": 5.6888805,
+      "arguments": [
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "docker/standalone/tests",
+        "-p",
+        "test_c2a_bootstrap_owner.py",
+        "-v"
+      ],
+      "program": "H:/hindsight/.venv/Scripts/python.exe",
+      "logSha256": "4e215d133442f2d331a9c3963eac2d88e9ed79ef58666e0e11e1b689889cb71b",
+      "logFileState": "retained"
+    },
+    {
+      "name": "native-c2-2",
+      "started": "2026-10-14T12:09:09.3984979Z",
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\native-c2-2.log",
+      "arguments": [
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "docker/standalone/tests",
+        "-p",
+        "test_c2a_bootstrap_owner.py",
+        "-v"
+      ],
+      "exitCode": 0,
+      "program": "H:/hindsight/.venv/Scripts/python.exe",
+      "seconds": 3.2010494,
+      "cwd": "H:\\hindsight",
+      "logSha256": "90ad0f326b2a3ab828cd536bfc9fa89b9dbd94379f0d89a4b41a7fae09ef3e9d",
+      "logFileState": "retained"
+    },
+    {
+      "seconds": 39.6998948,
+      "started": "2026-10-14T12:13:05.8912872Z",
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "name": "host-c2-process-2",
+      "arguments": [
+        "--filter",
+        "@taki/hindsight-host",
+        "exec",
+        "vitest",
+        "run",
+        "src/deployment-owner.test.ts",
+        "--maxWorkers=1",
+        "--testTimeout=20000"
+      ],
+      "exitCode": 0,
+      "cwd": "H:\\TakiAgent",
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\host-c2-process-2.log",
+      "logSha256": "2f1b8f3b20d58b9610e6824b05a5ba34772c0fde8716e0021fafb05ce500bc40",
+      "logFileState": "retained"
+    },
+    {
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\core-types-2.log",
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "started": "2026-10-14T12:17:17.2369592Z",
+      "cwd": "H:\\TakiAgent",
+      "seconds": 29.5780092,
+      "name": "core-types-2",
+      "arguments": [
+        "--filter",
+        "@taki/core",
+        "typecheck"
+      ],
+      "exitCode": 2,
+      "logSha256": "1b58201d7deab6943fd52f94bad7156837cf29e0492b66eedae5fbd0d403f09b",
+      "logFileState": "retained"
+    },
+    {
+      "seconds": 22.5194837,
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\core-c2-process-1.log",
+      "arguments": [
+        "--filter",
+        "@taki/hindsight-host",
+        "exec",
+        "vitest",
+        "run",
+        "src/deployment-core.test.ts",
+        "--maxWorkers=1",
+        "--testTimeout=20000"
+      ],
+      "exitCode": 1,
+      "started": "2026-10-14T12:20:28.0984421Z",
+      "cwd": "H:\\TakiAgent",
+      "name": "core-c2-process-1",
+      "logSha256": "207918c772218f3de620d343091a8c534bf1b7d019d54f755975f0ecde8c4db2",
+      "logFileState": "retained"
+    },
+    {
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\core-c2-process-2.log",
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "started": "2026-10-14T12:23:12.3080822Z",
+      "seconds": 23.4507502,
+      "name": "core-c2-process-2",
+      "exitCode": 0,
+      "arguments": [
+        "--filter",
+        "@taki/hindsight-host",
+        "exec",
+        "vitest",
+        "run",
+        "src/deployment-core.test.ts",
+        "--maxWorkers=1",
+        "--testTimeout=20000"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "logSha256": "57ac6c4a23ed0f0d6b302293dba66e73551396605e1f8c78b346bb975340ed69",
+      "logFileState": "retained"
+    },
+    {
+      "exitCode": 101,
+      "program": "cargo",
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\rust-c2-node-build-1.log",
+      "seconds": 1.3768856,
+      "cwd": "H:\\TakiAgent",
+      "arguments": [
+        "build",
+        "--manifest-path",
+        "apps/desktop/src-tauri/Cargo.toml",
+        "--bin",
+        "taki-node"
+      ],
+      "name": "rust-c2-node-build-1",
+      "started": "2026-10-14T12:32:48.6633530Z",
+      "logSha256": "d4756cedd8fb396ce52c12def654c80405a5981088e3199bdbf34a7e8bcb4e07",
+      "logFileState": "retained"
+    },
+    {
+      "program": "cargo",
+      "name": "rust-c2-node-build-2",
+      "seconds": 27.6156362,
+      "started": "2026-10-14T12:33:30.2261672Z",
+      "exitCode": 0,
+      "cwd": "H:\\TakiAgent",
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\rust-c2-node-build-2.log",
+      "arguments": [
+        "build",
+        "--manifest-path",
+        "apps/desktop/src-tauri/Cargo.toml",
+        "--bin",
+        "taki-node"
+      ],
+      "logSha256": "75e8c87615e7f76474c8a0fee895efeb52daa254fc671a4d5613878297295fff",
+      "logFileState": "retained"
+    },
+    {
+      "name": "c2-installed-1",
+      "cwd": "H:\\TakiAgent",
+      "arguments": [
+        "--filter",
+        "@taki/hindsight-host",
+        "exec",
+        "vitest",
+        "run",
+        "src/deployment-installed.test.ts",
+        "--maxWorkers=1"
+      ],
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\c2-installed-1.log",
+      "exitCode": 1,
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "seconds": 21.7254386,
+      "started": "2026-10-14T12:35:25.5029683Z",
+      "logSha256": "0690b9c74cb0cea0ccf3e7894d6937793cccefe337f23e6a392e81c22e5d3285",
+      "logFileState": "retained"
+    },
+    {
+      "exitCode": 1,
+      "name": "c2-installed-2",
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\c2-installed-2.log",
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "seconds": 19.6064497,
+      "started": "2026-10-14T12:42:12.3577418Z",
+      "cwd": "H:\\TakiAgent",
+      "arguments": [
+        "--filter",
+        "@taki/hindsight-host",
+        "exec",
+        "vitest",
+        "run",
+        "src/deployment-installed.test.ts",
+        "--maxWorkers=1"
+      ],
+      "logSha256": "11f4dfccb253f560b87e611b0fb677d02bb9cd5112f22924a619ca5f642985bd",
+      "logFileState": "retained"
+    },
+    {
+      "seconds": 36.2161355,
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\c2-installed-3.log",
+      "started": "2026-10-14T12:44:24.1423283Z",
+      "arguments": [
+        "--filter",
+        "@taki/hindsight-host",
+        "exec",
+        "vitest",
+        "run",
+        "src/deployment-installed.test.ts",
+        "--maxWorkers=1"
+      ],
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "exitCode": 0,
+      "name": "c2-installed-3",
+      "cwd": "H:\\TakiAgent",
+      "logSha256": "2398f76b0892fa9f3162a06ee4d5aaadbda138ea36fed8cdd21e2bd4285e9449",
+      "logFileState": "retained"
+    },
+    {
+      "cwd": "H:\\TakiAgent",
+      "seconds": 64.9071361,
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\c2-core-host-regression-3.log",
+      "arguments": [
+        "--filter",
+        "@taki/hindsight-host",
+        "exec",
+        "vitest",
+        "run",
+        "src/deployment-core.test.ts",
+        "src/deployment-owner.test.ts",
+        "--maxWorkers=1",
+        "--testTimeout=20000"
+      ],
+      "started": "2026-10-14T12:46:01.1615916Z",
+      "name": "c2-core-host-regression-3",
+      "exitCode": 1,
+      "logSha256": "286a1749914ae6413d2ca55fc7afca34b895225b0d546350a7fc2c3a40c0adc2",
+      "logFileState": "retained"
+    },
+    {
+      "arguments": [
+        "--filter",
+        "@taki/hindsight-host",
+        "typecheck"
+      ],
+      "started": "2026-10-14T12:48:03.9232890Z",
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\host-types-2.log",
+      "seconds": 7.8812583,
+      "exitCode": 0,
+      "cwd": "H:\\TakiAgent",
+      "name": "host-types-2",
+      "logSha256": "438425c13e8beb30e625e77e6bcec6f645aacd80394f9c7515d8609a30730400",
+      "logFileState": "retained"
+    },
+    {
+      "started": "2026-10-14T12:51:18.4433077Z",
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\rust-c2-lib-tests-2.log",
+      "seconds": 15.0666218,
+      "exitCode": 0,
+      "program": "cargo",
+      "name": "rust-c2-lib-tests-2",
+      "cwd": "H:\\TakiAgent",
+      "arguments": [
+        "test",
+        "--manifest-path",
+        "apps/desktop/src-tauri/Cargo.toml",
+        "--lib"
+      ],
+      "logSha256": "25b17e82cd3b5761b5669d141e7493dc4ed755a332b500037a66aa3dd8316e6c",
+      "logFileState": "retained"
+    },
+    {
+      "started": "2026-10-14T12:52:41.3057262Z",
+      "seconds": 13.4490405,
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\rust-c2-clippy-1.log",
+      "program": "cargo",
+      "cwd": "H:\\TakiAgent",
+      "arguments": [
+        "clippy",
+        "--manifest-path",
+        "apps/desktop/src-tauri/Cargo.toml",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "name": "rust-c2-clippy-1",
+      "exitCode": 101,
+      "logSha256": "43d91a72c677ddc2f619ba5a918da7da393e256e2552709ae643864282bbffea",
+      "logFileState": "retained"
+    },
+    {
+      "seconds": 5.5278178,
+      "name": "c2-ts-lint-1",
+      "arguments": [
+        "exec",
+        "eslint",
+        "H:/TakiAgent/packages/shared/src/hindsight-deployment-schema.ts",
+        "H:/TakiAgent/packages/shared/src/governance-registry.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-registry.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-error.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/docker-adapter.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/docker-process.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/catalog-selection.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/prepare-custody.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-owner.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-injection.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-host.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-registration.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/main.ts",
+        "H:/TakiAgent/packages/core/src/db/run-repo.ts",
+        "H:/TakiAgent/packages/core/src/harness/run-service.ts",
+        "H:/TakiAgent/packages/core/src/memory/hindsight/hindsight-custody-owner.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/capability-observers.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/route-capability.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/capability-broker.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/capability-broker-state.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/capability-challenge.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/hindsight-injection-checkpoint.ts",
+        "H:/TakiAgent/packages/core/src/server/methods/hindsight-deployment-checkpoint.ts",
+        "H:/TakiAgent/packages/core/src/memory/hindsight/hindsight-deployment-owner.ts",
+        "H:/TakiAgent/packages/core/src/boot/hindsight-deployment-boot.ts",
+        "H:/TakiAgent/packages/core/src/main.ts",
+        "H:/TakiAgent/packages/core/src/testing/run-service-stub.ts",
+        "H:/TakiAgent/packages/core/src/testing/capability-tool-harness.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/route-capability.test.ts",
+        "H:/TakiAgent/packages/shared/src/protocol-fixtures.test.ts",
+        "H:/TakiAgent/packages/shared/src/hindsight-deployment-schema.test.ts",
+        "H:/TakiAgent/packages/shared/src/governance-registry.test.ts",
+        "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-child.ts",
+        "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-process-fixture.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-owner.test.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-test-fixtures.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/hindsight-deployment-outcome.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-core.test.ts",
+        "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-docker-fixture.ts",
+        "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-installed-fixture.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-installed.test.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/docker-adapter.test.ts"
+      ],
+      "started": "2026-10-14T12:53:22.8637395Z",
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "cwd": "H:\\TakiAgent",
+      "exitCode": 1,
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\c2-ts-lint-1.log",
+      "logSha256": "46cb2605d7ecb3715114b921b498f4dd0efbd9972256aafbd11645c37a80cffd",
+      "logFileState": "retained"
+    },
+    {
+      "cwd": "H:\\hindsight",
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\native-c2-ruff-1.log",
+      "started": "2026-10-14T12:54:14.4476962Z",
+      "program": "H:/hindsight/.venv/Scripts/ruff.exe",
+      "name": "native-c2-ruff-1",
+      "exitCode": 1,
+      "arguments": [
+        "check",
+        "H:/hindsight/docker/standalone/managed_bootstrap/owner.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/control.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/owner_protocol.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/fake_consumer.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/fake_child.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/unix_socket.py",
+        "H:/hindsight/docker/standalone/tests/fixtures/c2a_pipe_owner.py",
+        "H:/hindsight/docker/standalone/tests/test_c2a_bootstrap_owner.py"
+      ],
+      "seconds": 0.2284731,
+      "logSha256": "9eb7775542b464f182e7b3b35e29508c6c8cd676ebb62ac14cac9a9033f80864",
+      "logFileState": "retained"
+    },
+    {
+      "exitCode": 0,
+      "started": "2026-10-14T12:54:45.9605903Z",
+      "name": "native-c2-ruff-fix-1",
+      "arguments": [
+        "check",
+        "--fix",
+        "H:/hindsight/docker/standalone/managed_bootstrap/owner.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/control.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/owner_protocol.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/fake_consumer.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/fake_child.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/unix_socket.py",
+        "H:/hindsight/docker/standalone/tests/fixtures/c2a_pipe_owner.py",
+        "H:/hindsight/docker/standalone/tests/test_c2a_bootstrap_owner.py"
+      ],
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\native-c2-ruff-fix-1.log",
+      "seconds": 0.1315376,
+      "program": "H:/hindsight/.venv/Scripts/ruff.exe",
+      "cwd": "H:\\hindsight",
+      "logSha256": "2908db4cb9b02d6a2cb4e220dd425c224bd687a533712c8c898de975c9e12b82",
+      "logFileState": "retained"
+    },
+    {
+      "exitCode": 0,
+      "started": "2026-10-14T12:54:46.1358265Z",
+      "name": "native-c2-format-1",
+      "arguments": [
+        "format",
+        "H:/hindsight/docker/standalone/managed_bootstrap/owner.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/control.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/owner_protocol.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/fake_consumer.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/fake_child.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/unix_socket.py",
+        "H:/hindsight/docker/standalone/tests/fixtures/c2a_pipe_owner.py",
+        "H:/hindsight/docker/standalone/tests/test_c2a_bootstrap_owner.py"
+      ],
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\native-c2-format-1.log",
+      "seconds": 0.0765711,
+      "program": "H:/hindsight/.venv/Scripts/ruff.exe",
+      "cwd": "H:\\hindsight",
+      "logSha256": "4f5eda22f7a6ff04959ff177a7204708623226a6390c17725d1fe76dc439cdf9",
+      "logFileState": "retained"
+    },
+    {
+      "exitCode": 1,
+      "started": "2026-10-14T12:54:46.2231992Z",
+      "name": "native-c2-ty-1",
+      "arguments": [
+        "check",
+        "--python",
+        "H:/hindsight/.venv",
+        "--extra-search-path",
+        "docker/standalone",
+        "--extra-search-path",
+        "docker/standalone/tests",
+        "H:/hindsight/docker/standalone/managed_bootstrap/owner.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/control.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/owner_protocol.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/fake_consumer.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/fake_child.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/unix_socket.py",
+        "H:/hindsight/docker/standalone/tests/fixtures/c2a_pipe_owner.py",
+        "H:/hindsight/docker/standalone/tests/test_c2a_bootstrap_owner.py"
+      ],
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\native-c2-ty-1.log",
+      "seconds": 0.295182,
+      "program": "H:/hindsight/.venv/Scripts/ty.exe",
+      "cwd": "H:\\hindsight",
+      "logSha256": "33f358f59d6cb25eeb8b2faa216feeaa0f0977fdea5297f56568ca56440087dc",
+      "logFileState": "retained"
+    },
+    {
+      "seconds": 4.3095339,
+      "exitCode": 0,
+      "name": "c2-ts-lint-2",
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "arguments": [
+        "exec",
+        "eslint",
+        "H:/TakiAgent/packages/shared/src/hindsight-deployment-schema.ts",
+        "H:/TakiAgent/packages/shared/src/governance-registry.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-registry.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-error.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/docker-adapter.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/docker-process.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/catalog-selection.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/prepare-custody.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-owner.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-injection.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-host.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-registration.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/main.ts",
+        "H:/TakiAgent/packages/core/src/db/run-repo.ts",
+        "H:/TakiAgent/packages/core/src/harness/run-service.ts",
+        "H:/TakiAgent/packages/core/src/memory/hindsight/hindsight-custody-owner.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/capability-observers.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/route-capability.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/capability-broker.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/capability-broker-state.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/capability-challenge.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/hindsight-injection-checkpoint.ts",
+        "H:/TakiAgent/packages/core/src/server/methods/hindsight-deployment-checkpoint.ts",
+        "H:/TakiAgent/packages/core/src/memory/hindsight/hindsight-deployment-owner.ts",
+        "H:/TakiAgent/packages/core/src/boot/hindsight-deployment-boot.ts",
+        "H:/TakiAgent/packages/core/src/main.ts",
+        "H:/TakiAgent/packages/core/src/testing/run-service-stub.ts",
+        "H:/TakiAgent/packages/core/src/testing/capability-tool-harness.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/route-capability.test.ts",
+        "H:/TakiAgent/packages/shared/src/protocol-fixtures.test.ts",
+        "H:/TakiAgent/packages/shared/src/hindsight-deployment-schema.test.ts",
+        "H:/TakiAgent/packages/shared/src/governance-registry.test.ts",
+        "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-child.ts",
+        "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-process-fixture.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-owner.test.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-test-fixtures.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/hindsight-deployment-outcome.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-core.test.ts",
+        "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-docker-fixture.ts",
+        "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-installed-fixture.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-installed.test.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/docker-adapter.test.ts"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\c2-ts-lint-2.log",
+      "started": "2026-10-14T12:55:26.2494113Z",
+      "logSha256": null,
+      "logFileState": "legacy-wrapper-created-no-file-for-silent-command"
+    },
+    {
+      "seconds": 0.2417446,
+      "name": "native-c2-ty-2",
+      "program": "H:/hindsight/.venv/Scripts/ty.exe",
+      "started": "2026-10-14T12:56:03.1974961Z",
+      "cwd": "H:\\hindsight",
+      "exitCode": 0,
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\native-c2-ty-2.log",
+      "arguments": [
+        "check",
+        "--python",
+        "H:/hindsight/.venv",
+        "--python-platform",
+        "linux",
+        "--extra-search-path",
+        "docker/standalone",
+        "--extra-search-path",
+        "docker/standalone/tests",
+        "H:/hindsight/docker/standalone/managed_bootstrap/owner.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/control.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/owner_protocol.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/fake_consumer.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/fake_child.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/unix_socket.py",
+        "H:/hindsight/docker/standalone/tests/fixtures/c2a_pipe_owner.py",
+        "H:/hindsight/docker/standalone/tests/test_c2a_bootstrap_owner.py"
+      ],
+      "logSha256": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0",
+      "logFileState": "retained"
+    },
+    {
+      "seconds": 0.0765997,
+      "name": "native-c2-ruff-2",
+      "program": "H:/hindsight/.venv/Scripts/ruff.exe",
+      "started": "2026-10-14T12:56:03.5025495Z",
+      "cwd": "H:\\hindsight",
+      "exitCode": 0,
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\native-c2-ruff-2.log",
+      "arguments": [
+        "check",
+        "H:/hindsight/docker/standalone/managed_bootstrap/owner.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/control.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/owner_protocol.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/fake_consumer.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/fake_child.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/unix_socket.py",
+        "H:/hindsight/docker/standalone/tests/fixtures/c2a_pipe_owner.py",
+        "H:/hindsight/docker/standalone/tests/test_c2a_bootstrap_owner.py"
+      ],
+      "logSha256": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0",
+      "logFileState": "retained"
+    },
+    {
+      "seconds": 0.0670865,
+      "name": "native-c2-format-check-2",
+      "program": "H:/hindsight/.venv/Scripts/ruff.exe",
+      "started": "2026-10-14T12:56:03.5899019Z",
+      "cwd": "H:\\hindsight",
+      "exitCode": 0,
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\native-c2-format-check-2.log",
+      "arguments": [
+        "format",
+        "--check",
+        "H:/hindsight/docker/standalone/managed_bootstrap/owner.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/control.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/owner_protocol.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/fake_consumer.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/fake_child.py",
+        "H:/hindsight/docker/standalone/managed_bootstrap/unix_socket.py",
+        "H:/hindsight/docker/standalone/tests/fixtures/c2a_pipe_owner.py",
+        "H:/hindsight/docker/standalone/tests/test_c2a_bootstrap_owner.py"
+      ],
+      "logSha256": "3fa62c94b1301255f0c64c429c668a4fabc4cb9d3848edb2790b607266d16092",
+      "logFileState": "retained"
+    },
+    {
+      "arguments": [
+        "clippy",
+        "--manifest-path",
+        "apps/desktop/src-tauri/Cargo.toml",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "seconds": 12.2444526,
+      "exitCode": 0,
+      "cwd": "H:\\TakiAgent",
+      "name": "rust-c2-clippy-2",
+      "program": "cargo",
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\rust-c2-clippy-2.log",
+      "started": "2026-10-14T12:56:04.7077374Z",
+      "logSha256": "abc30dd802f8e4f55b1f6b60a2d53a177f2ff9b91bf8187a641c7429589e0301",
+      "logFileState": "retained"
+    },
+    {
+      "started": "2026-10-14T12:58:36.2824732Z",
+      "arguments": [
+        "--filter",
+        "@taki/core",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\core-types-3.log",
+      "cwd": "H:\\TakiAgent",
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "seconds": 42.6968238,
+      "name": "core-types-3",
+      "logSha256": "200b048828a3070d7e0970f063d8183336d03cbcf6006207a3c20ec524ac82c4",
+      "logFileState": "retained"
+    },
+    {
+      "cwd": "H:\\TakiAgent",
+      "name": "c2-core-adapter-regression-4",
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "exitCode": 0,
+      "seconds": 26.5312758,
+      "started": "2026-10-14T13:01:31.9570202Z",
+      "arguments": [
+        "--filter",
+        "@taki/hindsight-host",
+        "exec",
+        "vitest",
+        "run",
+        "src/deployment-core.test.ts",
+        "src/docker-adapter.test.ts",
+        "src/deployment-registry.test.ts",
+        "--maxWorkers=1",
+        "--testTimeout=20000"
+      ],
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\c2-core-adapter-regression-4.log",
+      "logSha256": "c2592fa64ca1c3966925ae276d22ced233d1b965489112c81c873ef8ff34c170",
+      "logFileState": "retained"
+    },
+    {
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "started": "2026-10-14T13:04:19.4432218Z",
+      "arguments": [
+        "--filter",
+        "@taki/shared",
+        "typecheck"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "exitCode": 0,
+      "name": "shared-c2-types-2",
+      "seconds": 9.308026,
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\shared-c2-types-2.log",
+      "logSha256": "f9e1326358c4b06cc9030a0db5e834bd737e52677aa159683b70c68a9b6631b2",
+      "logFileState": "retained"
+    },
+    {
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "started": "2026-10-14T13:04:28.8501285Z",
+      "arguments": [
+        "--filter",
+        "@taki/shared",
+        "exec",
+        "vitest",
+        "run",
+        "src/hindsight-deployment-schema.test.ts",
+        "src/protocol-fixtures.test.ts",
+        "src/governance-registry.test.ts",
+        "--maxWorkers=1"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "exitCode": 0,
+      "name": "shared-c2-protocol-2",
+      "seconds": 3.280007,
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\shared-c2-protocol-2.log",
+      "logSha256": "9203256a4e249b5ae752857c6b08ec7ce023b47ad48e982636caec305eee0ed0",
+      "logFileState": "retained"
+    },
+    {
+      "arguments": [
+        "--filter",
+        "@taki/core",
+        "exec",
+        "vitest",
+        "run",
+        "src/capabilities/capability-broker.test.ts",
+        "src/capabilities/capability-challenge.test.ts",
+        "src/capabilities/route-capability.test.ts",
+        "src/memory/hindsight/hindsight-custody-owner.test.ts",
+        "src/secrets/catalog-custody.test.ts",
+        "--maxWorkers=1"
+      ],
+      "started": "2026-10-14T13:06:12.2432790Z",
+      "cwd": "H:\\TakiAgent",
+      "exitCode": 0,
+      "seconds": 13.869683,
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\core-c2-broker-compatibility-1.log",
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "name": "core-c2-broker-compatibility-1",
+      "logSha256": "73e78797d447cc30a9b606544d46fffca7dc2db40b28d099ba8d293cbce20a7f",
+      "logFileState": "retained"
+    },
+    {
+      "exitCode": 0,
+      "seconds": 3.2323676,
+      "name": "native-c2-process-final",
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\native-c2-process-final.log",
+      "started": "2026-10-14T13:07:22.6210410Z",
+      "cwd": "H:\\hindsight",
+      "arguments": [
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "docker/standalone/tests",
+        "-p",
+        "test_c2a_bootstrap_owner.py",
+        "-v"
+      ],
+      "program": "H:/hindsight/.venv/Scripts/python.exe",
+      "logSha256": "c110ed303973c21776322d9ceda61e3de8eb193957162002b3f1c6f8c5bbb6bc",
+      "logFileState": "retained"
+    },
+    {
+      "arguments": [
+        "test",
+        "--manifest-path",
+        "apps/desktop/src-tauri/Cargo.toml",
+        "--lib",
+        "hindsight"
+      ],
+      "seconds": 16.891899,
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\rust-c2-focused-final.log",
+      "program": "cargo",
+      "name": "rust-c2-focused-final",
+      "started": "2026-10-14T13:08:05.7860085Z",
+      "cwd": "H:\\TakiAgent",
+      "exitCode": 0,
+      "logSha256": "03e9d7d06b56a7570b996849100a6a419fca627af5189f8550ff8052797a3d80",
+      "logFileState": "retained"
+    },
+    {
+      "arguments": [
+        "test",
+        "--manifest-path",
+        "apps/desktop/src-tauri/Cargo.toml",
+        "--lib",
+        "protocol::tests::golden_fixtures_parse_reject_and_round_trip"
+      ],
+      "seconds": 1.2962875,
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\rust-c2-wire-final.log",
+      "program": "cargo",
+      "name": "rust-c2-wire-final",
+      "started": "2026-10-14T13:08:22.9011154Z",
+      "cwd": "H:\\TakiAgent",
+      "exitCode": 0,
+      "logSha256": "1207d52121d850b4531d57bff98ccb09ea4ea1657230d7eb7fb5722e0bc1aa1f",
+      "logFileState": "retained"
+    },
+    {
+      "arguments": [
+        "build",
+        "--manifest-path",
+        "apps/desktop/src-tauri/Cargo.toml",
+        "--bin",
+        "taki-node"
+      ],
+      "seconds": 21.0585967,
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\rust-c2-node-build-final.log",
+      "program": "cargo",
+      "name": "rust-c2-node-build-final",
+      "started": "2026-10-14T13:08:24.2130117Z",
+      "cwd": "H:\\TakiAgent",
+      "exitCode": 0,
+      "logSha256": "ca57b46240b6338d6ec094050a29c5a78a7a50a304f23fb8cfd3f0a0993551ba",
+      "logFileState": "retained"
+    },
+    {
+      "started": "2026-10-14T13:10:26.0083117Z",
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "exitCode": 1,
+      "cwd": "H:\\TakiAgent",
+      "seconds": 39.2287595,
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\c2-installed-final.log",
+      "arguments": [
+        "--filter",
+        "@taki/hindsight-host",
+        "exec",
+        "vitest",
+        "run",
+        "src/deployment-installed.test.ts",
+        "--maxWorkers=1"
+      ],
+      "name": "c2-installed-final",
+      "logSha256": "74fe88c4bfc484d0536d50222577e8ddf216e9830e020418ed9455a5a6a08b1e",
+      "logFileState": "retained"
+    },
+    {
+      "seconds": 8.2525465,
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\host-c2-types-final.log",
+      "name": "host-c2-types-final",
+      "exitCode": 0,
+      "started": "2026-10-14T13:12:53.0960533Z",
+      "cwd": "H:\\TakiAgent",
+      "arguments": [
+        "--filter",
+        "@taki/hindsight-host",
+        "typecheck"
+      ],
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "logSha256": "438425c13e8beb30e625e77e6bcec6f645aacd80394f9c7515d8609a30730400",
+      "logFileState": "retained"
+    },
+    {
+      "seconds": 4.9802573,
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\c2-ts-lint-final.log",
+      "name": "c2-ts-lint-final",
+      "exitCode": 0,
+      "started": "2026-10-14T13:13:01.4288138Z",
+      "cwd": "H:\\TakiAgent",
+      "arguments": [
+        "exec",
+        "eslint",
+        "H:/TakiAgent/packages/shared/src/hindsight-deployment-schema.ts",
+        "H:/TakiAgent/packages/shared/src/governance-registry.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-registry.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-error.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/docker-adapter.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/docker-process.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/catalog-selection.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/prepare-custody.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-owner.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-injection.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-host.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-registration.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/main.ts",
+        "H:/TakiAgent/packages/core/src/db/run-repo.ts",
+        "H:/TakiAgent/packages/core/src/harness/run-service.ts",
+        "H:/TakiAgent/packages/core/src/memory/hindsight/hindsight-custody-owner.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/capability-observers.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/route-capability.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/capability-broker.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/capability-broker-state.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/capability-challenge.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/hindsight-injection-checkpoint.ts",
+        "H:/TakiAgent/packages/core/src/server/methods/hindsight-deployment-checkpoint.ts",
+        "H:/TakiAgent/packages/core/src/memory/hindsight/hindsight-deployment-owner.ts",
+        "H:/TakiAgent/packages/core/src/boot/hindsight-deployment-boot.ts",
+        "H:/TakiAgent/packages/core/src/main.ts",
+        "H:/TakiAgent/packages/core/src/testing/run-service-stub.ts",
+        "H:/TakiAgent/packages/core/src/testing/capability-tool-harness.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/route-capability.test.ts",
+        "H:/TakiAgent/packages/shared/src/protocol-fixtures.test.ts",
+        "H:/TakiAgent/packages/shared/src/hindsight-deployment-schema.test.ts",
+        "H:/TakiAgent/packages/shared/src/governance-registry.test.ts",
+        "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-child.ts",
+        "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-process-fixture.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-owner.test.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-test-fixtures.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/hindsight-deployment-outcome.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-core.test.ts",
+        "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-docker-fixture.ts",
+        "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-installed-fixture.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-installed.test.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/docker-adapter.test.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-registry.test.ts"
+      ],
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "logSha256": null,
+      "logFileState": "legacy-wrapper-created-no-file-for-silent-command"
+    },
+    {
+      "seconds": 59.7740963,
+      "name": "c2-installed-final-2",
+      "arguments": [
+        "--filter",
+        "@taki/hindsight-host",
+        "exec",
+        "vitest",
+        "run",
+        "src/deployment-installed.test.ts",
+        "src/deployment-core.test.ts",
+        "--maxWorkers=1",
+        "--testTimeout=20000"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "exitCode": 0,
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\c2-installed-final-2.log",
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "started": "2026-10-14T13:15:49.6561612Z",
+      "logSha256": "c787887f058511f9fcb0e821b2d2eaa9f2a35c5060453df652d1a16ef28dea40",
+      "logFileState": "retained"
+    },
+    {
+      "started": "2026-10-14T13:24:19.9852864Z",
+      "exitCode": 0,
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "cwd": "H:\\TakiAgent",
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\host-c2-types-final-2.log",
+      "name": "host-c2-types-final-2",
+      "seconds": 8.1435991,
+      "arguments": [
+        "--filter",
+        "@taki/hindsight-host",
+        "typecheck"
+      ],
+      "logSha256": "438425c13e8beb30e625e77e6bcec6f645aacd80394f9c7515d8609a30730400",
+      "logFileState": "retained"
+    },
+    {
+      "name": "c2-ts-lint-final-2",
+      "exitCode": 0,
+      "cwd": "H:\\TakiAgent",
+      "started": "2026-10-14T13:24:39.6923731Z",
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "seconds": 6.2773662,
+      "arguments": [
+        "exec",
+        "eslint",
+        "H:/TakiAgent/packages/shared/src/hindsight-deployment-schema.ts",
+        "H:/TakiAgent/packages/shared/src/governance-registry.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-registry.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-error.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/docker-adapter.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/docker-process.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/catalog-selection.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/prepare-custody.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-owner.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-injection.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-host.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-registration.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/main.ts",
+        "H:/TakiAgent/packages/core/src/db/run-repo.ts",
+        "H:/TakiAgent/packages/core/src/harness/run-service.ts",
+        "H:/TakiAgent/packages/core/src/memory/hindsight/hindsight-custody-owner.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/capability-observers.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/route-capability.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/capability-broker.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/capability-broker-state.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/capability-challenge.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/hindsight-injection-checkpoint.ts",
+        "H:/TakiAgent/packages/core/src/server/methods/hindsight-deployment-checkpoint.ts",
+        "H:/TakiAgent/packages/core/src/memory/hindsight/hindsight-deployment-owner.ts",
+        "H:/TakiAgent/packages/core/src/boot/hindsight-deployment-boot.ts",
+        "H:/TakiAgent/packages/core/src/main.ts",
+        "H:/TakiAgent/packages/core/src/testing/run-service-stub.ts",
+        "H:/TakiAgent/packages/core/src/testing/capability-tool-harness.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/route-capability.test.ts",
+        "H:/TakiAgent/packages/shared/src/protocol-fixtures.test.ts",
+        "H:/TakiAgent/packages/shared/src/hindsight-deployment-schema.test.ts",
+        "H:/TakiAgent/packages/shared/src/governance-registry.test.ts",
+        "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-child.ts",
+        "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-process-fixture.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-owner.test.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-test-fixtures.ts",
+        "H:/TakiAgent/packages/core/src/capabilities/hindsight-deployment-outcome.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-core.test.ts",
+        "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-docker-fixture.ts",
+        "H:/TakiAgent/apps/hindsight-host/test-fixtures/deployment-installed-fixture.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-installed.test.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/docker-adapter.test.ts",
+        "H:/TakiAgent/apps/hindsight-host/src/deployment-registry.test.ts"
+      ],
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\c2-ts-lint-final-2.log",
+      "logSha256": null,
+      "logFileState": "legacy-wrapper-created-no-file-for-silent-command"
+    },
+    {
+      "exitCode": 0,
+      "cwd": "H:\\TakiAgent",
+      "name": "taki-c2-diff-final",
+      "started": "2026-10-14T13:25:37.8810132Z",
+      "seconds": 0.5155036,
+      "arguments": [
+        "diff",
+        "--check"
+      ],
+      "program": "git",
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\taki-c2-diff-final.log",
+      "logSha256": "4f63e184b0d7717f29fc1cd4457e90a2c1686b09b157f30a2807e02f50927b33",
+      "logFileState": "retained"
+    },
+    {
+      "program": "git",
+      "arguments": [
+        "diff",
+        "--check"
+      ],
+      "cwd": "H:\\hindsight",
+      "started": "2026-10-14T13:25:39.5338868Z",
+      "seconds": 0.7471662,
+      "exitCode": 0,
+      "name": "native-c2-diff-final",
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\native-c2-diff-final.log",
+      "logSha256": "79eb4a18718f67b9ca3956a664b0d1785686495686ab5137a678e193029db28c",
+      "logFileState": "retained"
+    },
+    {
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\rust-c2-clippy-drop-order.log",
+      "started": "2026-10-14T13:29:05.6438240Z",
+      "program": "cargo",
+      "seconds": 10.1953669,
+      "arguments": [
+        "clippy",
+        "--manifest-path",
+        "apps/desktop/src-tauri/Cargo.toml",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "name": "rust-c2-clippy-drop-order",
+      "exitCode": 0,
+      "logSha256": "7f0c91f19ce77732244cf172c7d923e562f0eb504ca482c60d04a351d737bc76",
+      "logFileState": "retained"
+    },
+    {
+      "seconds": 20.1295873,
+      "arguments": [
+        "build",
+        "--manifest-path",
+        "apps/desktop/src-tauri/Cargo.toml",
+        "--bin",
+        "taki-node"
+      ],
+      "exitCode": 0,
+      "program": "cargo",
+      "name": "rust-c2-node-build-drop-order",
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\rust-c2-node-build-drop-order.log",
+      "cwd": "H:\\TakiAgent",
+      "started": "2026-10-14T13:29:55.9577258Z",
+      "logSha256": "24b2d8955f55af06b2cbb76d9ac01eb822135b78a9e3d070b1c3583d97f38c3d",
+      "logFileState": "retained"
+    },
+    {
+      "name": "rust-c2-focused-drop-order",
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\rust-c2-focused-drop-order.log",
+      "program": "cargo",
+      "arguments": [
+        "test",
+        "--manifest-path",
+        "apps/desktop/src-tauri/Cargo.toml",
+        "--lib",
+        "hindsight"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "started": "2026-10-14T13:31:58.5343019Z",
+      "seconds": 12.3564354,
+      "exitCode": 0,
+      "logSha256": "ccfd3e9ddf201dc40eaf38261f75dd0eb372641175ec3521e90c05452b14501d",
+      "logFileState": "retained"
+    },
+    {
+      "started": "2026-10-14T13:32:58.9836963Z",
+      "arguments": [
+        "--filter",
+        "@taki/hindsight-host",
+        "exec",
+        "vitest",
+        "run",
+        "src/deployment-installed.test.ts",
+        "--maxWorkers=1",
+        "--testTimeout=20000"
+      ],
+      "cwd": "H:\\TakiAgent",
+      "program": "G:/Roaming/npm/pnpm.cmd",
+      "exitCode": 0,
+      "name": "c2-installed-drop-order",
+      "seconds": 36.0900626,
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\c2-installed-drop-order.log",
+      "logSha256": "71639e79371603cae15ffbddc4a057b41d92ceadbd70ab0e16e11c03aedc53d2",
+      "logFileState": "retained"
+    },
+    {
+      "log": "G:\\Temp\\taki-c2a-source-20261014-impl\\c2-source-text-final.log",
+      "exitCode": 0,
+      "cwd": "H:\\TakiAgent",
+      "name": "c2-source-text-final",
+      "started": "2026-10-14T13:39:19.2405399Z",
+      "arguments": [
+        "G:/Temp/taki-c2a-source-20261014-impl/finalize-evidence.py",
+        "--check-source-text"
+      ],
+      "seconds": 0.542281,
+      "program": "python",
+      "logSha256": "bda52df0791253010bf0a332623126050d6f79925d28a5ad4fad5dff0e68bc38",
+      "logFileState": "retained"
+    }
+  ],
+  "installedFixture": {
+    "path": "G:/Temp/taki-c2a-source-20261014-impl/taki-c2a-fixture-5010ba6e-0e22-406e-9da4-35fbc11e768c.json",
+    "sha256": "57da9f007a9c03f3017cee97d2dd1077b93ec47b793c6fc7dc82e565c77b8eaf",
+    "engine": "substituted-private-pipe",
+    "result": {
+      "version": 1,
+      "state": "running",
+      "deploymentId": "b8645c0b-689c-4a25-af6b-1a384bfd7020",
+      "operationId": "b8645c0b-689c-4a25-af6b-1a384bfd7020",
+      "configurationDigest": "d78c31a24edbd333d549acc2fa72f3bb35a6297849a7986a09df261a4afd52cf",
+      "containerId": "e20dcc11f9c43c101e692348dde15d86b06b090bfe1d5f2e850a54879e03f51a",
+      "startupId": "a706acfb-2267-419b-8821-67e14b0f6716",
+      "attemptId": "c3e7a698-ba2a-47a7-a149-fa8d6afc9290",
+      "deploymentReady": false
+    },
+    "counts": {
+      "createVolume": 1,
+      "createContainer": 1,
+      "startContainer": 1,
+      "authorize": 1,
+      "submit": 1,
+      "submitBytes": 1301,
+      "status": 3
+    },
+    "pids": [
+      30068
+    ],
+    "ownedCleanup": true,
+    "manifestSha256": "6862de6c33a7fb226fe4de16bda409640ada33a06860049cdeee5c5863a737e4",
+    "runtimeSha256": "9a4eb5f1c29c6a2e93852ead46b999e284a6a5ca8bab4d4e241d587d025a52de",
+    "nodeSha256": "1ed31593324eaea703590e6dd12b348dfe99c38c7530207b12c89300e8a582c9",
+    "fakeDockerSha256": "4d8503d8acfb1e2e96bf8df58e7f28b520119168476820d1b9752549e5d3fb63"
+  },
+  "cleanup": {
+    "path": "G:/Temp/taki-c2a-source-20261014-impl/owned-resources-final.json",
+    "sha256": "f8876edb0e5a37bfc8cf329b17d2b703b2d2aac570e8f4da444b445879deb0ad",
+    "inventory": {
+      "recordedAt": "2026-10-14T13:36:43.2774065Z",
+      "protectedFixtureRoots": [],
+      "fixtureProcesses": [],
+      "retainedStagingRoot": "G:/Temp/taki-c2a-source-20261014-impl",
+      "retainedDirectories": [
+        {
+          "path": "G:\\Temp\\taki-c2a-source-20261014-impl\\baseline",
+          "files": 46,
+          "bytes": 449547.0
+        },
+        {
+          "path": "G:\\Temp\\taki-c2a-source-20261014-impl\\c2a-debug-br7prqzg",
+          "files": 1,
+          "bytes": 87.0
+        },
+        {
+          "path": "G:\\Temp\\taki-c2a-source-20261014-impl\\node-compile-cache",
+          "files": 1443,
+          "bytes": 9721684.0
+        }
+      ],
+      "retainedTopLevelFiles": 68,
+      "retainedTopLevelBytes": 1711745.0,
+      "capacity": [
+        {
+          "Name": "C",
+          "Free": 27771817984,
+          "Used": 346919321600
+        },
+        {
+          "Name": "G",
+          "Free": 146004840448,
+          "Used": 644466270208
+        },
+        {
+          "Name": "H",
+          "Free": 13105487872,
+          "Used": 196609404928
+        }
+      ],
+      "disposition": "Keep baseline, fake adapter, logs, replay inputs, compile cache and the small historical diagnostic marker for Root and independent acceptance. No shared cache or target cleanup."
+    }
+  },
+  "retainedReplayInputs": [
+    {
+      "path": "G:/Temp/taki-c2a-source-20261014-impl/baseline.py",
+      "sha256": "f3c8a6d6ad17a305b9300211930aac462326aaff1ff484a06e7d31473831152f"
+    },
+    {
+      "path": "G:/Temp/taki-c2a-source-20261014-impl/run-check.ps1",
+      "sha256": "9f2aa48e188455cd3ae7391add71bc7be421060379f42e45cffbd794a9f60ec4"
+    },
+    {
+      "path": "G:/Temp/taki-c2a-source-20261014-impl/changed-ts.json",
+      "sha256": "58d2b5b2d4fe293e83a772a997a66104789c2b6ac6e655aa5982739cd19c62db"
+    },
+    {
+      "path": "G:/Temp/taki-c2a-source-20261014-impl/changed-py.json",
+      "sha256": "55ac0118e6d6ee01012ad26c90d3934f51e9f0667e545dc698879531fa0ec594"
+    },
+    {
+      "path": "G:/Temp/taki-c2a-source-20261014-impl/fake-key-adapter.exe",
+      "sha256": "aa5f1a16b1f4f893db9d135610f4a6ec787a5fea1efa9eae36ac9fb34d1ca4b1"
+    },
+    {
+      "path": "G:/Temp/taki-c2a-source-20261014-impl/finalize-evidence.py",
+      "sha256": "c94841268662f5b106f913aa1e0aeed7ae92330be3d92fe6016d5070edae873a"
+    },
+    {
+      "path": "H:/TakiAgent/apps/hindsight-host/test-fixtures/fake-key-adapter.rs",
+      "sha256": "50f17ba43882725d5e23884ffafd121f03f4e4deec4977a9cea2c25ef76b14be"
+    }
+  ],
+  "limits": [
+    "substituted engine; no actual Docker or database",
+    "Windows process proof; no new Linux control-socket execution",
+    "no real Catalog/keyring/data/models",
+    "no C2b trusted deployment receipt",
+    "no C3 provider/model acceptance",
+    "baseline and replay resources retained for independent acceptance"
+  ]
+}

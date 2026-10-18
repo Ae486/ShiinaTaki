@@ -1,0 +1,21 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "exec",
+    "eslint",
+    "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-browser.test.ts",
+    "apps/desktop/src/windows/home/pages/operations/memory-transitions-browser.test.ts"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "startedAt": "2026-10-11T11:44:50.941134+00:00",
+  "finishedAt": "2026-10-11T11:44:55.504033+00:00",
+  "exitCode": 0,
+  "durationSeconds": 4.563,
+  "inputManifest": "b3-independent-home-resume-final-lint-20261011-01-inputs.json",
+  "sourceCount": 2058,
+  "changedInputs": [],
+  "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-independent-home\\resume-final-lint-20261011-01-6ed92189a993497491935fd02e4009bb",
+  "temporaryRootRemoved": true,
+  "remainingFixtureEntries": [],
+  "log": "b3-independent-home-resume-final-lint-20261011-01.log"
+}

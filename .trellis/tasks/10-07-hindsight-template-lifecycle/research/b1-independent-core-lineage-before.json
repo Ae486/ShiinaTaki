@@ -1,0 +1,26 @@
+{
+  "generatedAtUtc": "2026-10-08T05:39:33.8196727Z",
+  "scope": "Root-authorized adjacent full-registry lineage test repair",
+  "files": [
+    {
+      "path": "packages/core/src/db/migrations/041-canonical-memory-maintenance.test.ts",
+      "sha256": "03f5d3376382ee73c3b90ed7fe20fc4b8892f0061852265e2daeb765b89de4ce",
+      "bytes": 14584
+    },
+    {
+      "path": "packages/core/src/db/migrations/053-memory-transition-candidates.test.ts",
+      "sha256": "9b693a0eb4aacd458df5079dbe72a7ce4bd0fdf7a313907dade106bfac4a0ace",
+      "bytes": 2699
+    },
+    {
+      "path": "packages/core/src/db/migrations/054-memory-transition-publication.test.ts",
+      "sha256": "9b2ddf22d35dd22c7646b12add23c7c71b1c984889c4f35632ccbd9ebe409d47",
+      "bytes": 6143
+    },
+    {
+      "path": "packages/core/src/db/migrations/lineage-reopen-matrix.test.ts",
+      "sha256": "5037f2e6b8802d38a818fe409712a908c97104e8037376cfee399dbd919dad07",
+      "bytes": 24298
+    }
+  ]
+}

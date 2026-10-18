@@ -1,0 +1,76 @@
+
+> @taki/core@0.0.0 test H:\TakiAgent\packages\core
+> vitest run "--maxWorkers=2"
+
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ ❯ src/memory/transitions/transition-emergency-context.test.ts (7 tests | 4 failed) 37763ms
+     × rejects forged objects, cross-database and expired contexts and isolates body bytes and Maps 5115ms
+     × rereads surviving SQL bytes and identity even when a pure projection already exists 5076ms
+     × keys pure projection by full mappings and explicit policy Map entries rather than {} 5253ms
+     × opens a fresh emergency context for each observer read and still checks mutable publication joins 5136ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/memory/transitions/transition-emergency-context.test.ts > independent synchronous emergency evidence > rejects forged objects, cross-database and expired contexts and isolates body bytes and Maps
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/memory/transitions/transition-emergency-context.test.ts:49:3
+     47|   }, 30_000);
+     48|
+     49|   it("rejects forged objects, cross-database and expired contexts and …
+       |   ^
+     50|     const f = await createEmergencyCandidateFixture(); const other = o…
+     51|     let saved: TransitionEvidenceContext | undefined;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/memory/transitions/transition-emergency-context.test.ts > independent synchronous emergency evidence > rereads surviving SQL bytes and identity even when a pure projection already exists
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/memory/transitions/transition-emergency-context.test.ts:70:3
+     68|   });
+     69|
+     70|   it("rereads surviving SQL bytes and identity even when a pure projec…
+       |   ^
+     71|     const f = await createEmergencyCandidateFixture();
+     72|     try {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/memory/transitions/transition-emergency-context.test.ts > independent synchronous emergency evidence > keys pure projection by full mappings and explicit policy Map entries rather than {}
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/memory/transitions/transition-emergency-context.test.ts:94:3
+     92|   });
+     93|
+     94|   it("keys pure projection by full mappings and explicit policy Map en…
+       |   ^
+     95|     const f = await createEmergencyCandidateFixture();
+     96|     try {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/memory/transitions/transition-emergency-context.test.ts > independent synchronous emergency evidence > opens a fresh emergency context for each observer read and still checks mutable publication joins
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/memory/transitions/transition-emergency-context.test.ts:120:3
+    118|   });
+    119|
+    120|   it("opens a fresh emergency context for each observer read and still…
+       |   ^
+    121|     const f = await createEmergencyCandidateFixture(); const observer …
+    122|     try {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed | 490 passed (491)
+      Tests  4 failed | 3791 passed | 1 skipped (3796)
+   Start at  18:24:54
+   Duration  856.42s (transform 38.49s, setup 0ms, import 332.51s, tests 1203.51s, environment 67ms)
+
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/core@0.0.0 test: `vitest run "--maxWorkers=2"`
+Exit status 1

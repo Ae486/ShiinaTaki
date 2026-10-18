@@ -1,0 +1,129 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.5, pytest-9.0.3, pluggy-1.6.0
+rootdir: H:\hindsight\hindsight-clients\python
+configfile: pyproject.toml
+plugins: anyio-4.11.0, langsmith-0.9.1, asyncio-1.3.0, rerunfailures-16.1, timeout-2.4.0, xdist-3.8.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 120.0s
+timeout method: thread
+timeout func_only: False
+collected 102 items
+
+tests/test_bank_config_update_payload.py::test_update_bank_config_can_set_retain_structured_chunk_size PASSED [  0%]
+tests/test_bank_config_update_payload.py::test_update_bank_config_omits_retain_structured_chunk_size_when_unset PASSED [  1%]
+tests/test_bank_config_update_payload.py::test_update_bank_config_forwards_recall_pipeline_toggles PASSED [  2%]
+tests/test_bank_config_update_payload.py::test_create_bank_forwards_recall_pipeline_toggles PASSED [  3%]
+tests/test_bank_config_update_payload.py::test_create_bank_omits_recall_pipeline_toggles_when_unset PASSED [  4%]
+tests/test_configuration_observation.py::test_observation_round_trip PASSED [  5%]
+tests/test_configuration_observation.py::test_observation_error[not_authorized] PASSED [  6%]
+tests/test_configuration_observation.py::test_observation_error[unavailable] PASSED [  7%]
+tests/test_configuration_observation.py::test_observation_error[invalid_request] PASSED [  8%]
+tests/test_current_state_contract.py::test_generated_current_state_models_preserve_the_complete_wire[document-CurrentStateDocument] PASSED [  9%]
+tests/test_current_state_contract.py::test_generated_current_state_models_preserve_the_complete_wire[memory_unit-CurrentStateMemoryUnit] PASSED [ 10%]
+tests/test_current_state_contract.py::test_generated_current_state_models_preserve_the_complete_wire[transfer_request-CurrentStateTransferRequest] PASSED [ 11%]
+tests/test_current_state_contract.py::test_generated_current_state_models_preserve_the_complete_wire[transfer_result-CurrentStateTransferResult] PASSED [ 12%]
+tests/test_current_state_contract.py::test_generated_current_state_models_preserve_the_complete_wire[incomplete_status-CutoverVerificationStatus] PASSED [ 13%]
+tests/test_current_state_contract.py::test_generated_current_state_models_preserve_the_complete_wire[evidence_page-CutoverEvidencePage] PASSED [ 14%]
+tests/test_current_state_contract.py::test_generated_observation_scope_union_preserves_each_wire_shape[document-CurrentStateDocument-None] PASSED [ 15%]
+tests/test_current_state_contract.py::test_generated_observation_scope_union_preserves_each_wire_shape[document-CurrentStateDocument-per_tag] PASSED [ 16%]
+tests/test_current_state_contract.py::test_generated_observation_scope_union_preserves_each_wire_shape[document-CurrentStateDocument-combined] PASSED [ 17%]
+tests/test_current_state_contract.py::test_generated_observation_scope_union_preserves_each_wire_shape[document-CurrentStateDocument-all_combinations] PASSED [ 18%]
+tests/test_current_state_contract.py::test_generated_observation_scope_union_preserves_each_wire_shape[document-CurrentStateDocument-shared] PASSED [ 19%]
+tests/test_current_state_contract.py::test_generated_observation_scope_union_preserves_each_wire_shape[document-CurrentStateDocument-scope5] PASSED [ 20%]
+tests/test_current_state_contract.py::test_generated_observation_scope_union_preserves_each_wire_shape[document-CurrentStateDocument-scope6] PASSED [ 21%]
+tests/test_current_state_contract.py::test_generated_observation_scope_union_preserves_each_wire_shape[memory_unit-CurrentStateMemoryUnit-None] PASSED [ 22%]
+tests/test_current_state_contract.py::test_generated_observation_scope_union_preserves_each_wire_shape[memory_unit-CurrentStateMemoryUnit-per_tag] PASSED [ 23%]
+tests/test_current_state_contract.py::test_generated_observation_scope_union_preserves_each_wire_shape[memory_unit-CurrentStateMemoryUnit-combined] PASSED [ 24%]
+tests/test_current_state_contract.py::test_generated_observation_scope_union_preserves_each_wire_shape[memory_unit-CurrentStateMemoryUnit-all_combinations] PASSED [ 25%]
+tests/test_current_state_contract.py::test_generated_observation_scope_union_preserves_each_wire_shape[memory_unit-CurrentStateMemoryUnit-shared] PASSED [ 26%]
+tests/test_current_state_contract.py::test_generated_observation_scope_union_preserves_each_wire_shape[memory_unit-CurrentStateMemoryUnit-scope5] PASSED [ 27%]
+tests/test_current_state_contract.py::test_generated_observation_scope_union_preserves_each_wire_shape[memory_unit-CurrentStateMemoryUnit-scope6] PASSED [ 28%]
+tests/test_current_state_contract.py::test_generated_recall_keeps_nested_json_types_and_literal_keys PASSED [ 29%]
+tests/test_current_state_contract.py::test_evidence_union_selects_each_declared_variant_and_rejects_unknown PASSED [ 30%]
+tests/test_disposition_traits_compatibility.py::test_disposition_traits_remains_shared_by_requests_and_responses PASSED [ 31%]
+tests/test_knowledge_base_mapping.py::test_create_page_maps_every_option PASSED [ 32%]
+tests/test_knowledge_base_mapping.py::test_create_page_threads_trigger_fields PASSED [ 33%]
+tests/test_knowledge_base_mapping.py::test_update_node_sends_only_provided_fields PASSED [ 34%]
+tests/test_knowledge_base_mapping.py::test_update_node_sends_explicit_null_parent PASSED [ 35%]
+tests/test_knowledge_base_mapping.py::test_update_node_maps_page_options PASSED [ 36%]
+tests/test_knowledge_base_mapping.py::test_search_forwards_query_and_limit PASSED [ 37%]
+tests/test_knowledge_base_mapping.py::test_create_folder_maps_parent PASSED [ 38%]
+tests/test_mental_model_query_mapping.py::test_list_forwards_every_supported_query_option PASSED [ 39%]
+tests/test_mental_model_query_mapping.py::test_list_defaults_leave_controls_unset PASSED [ 40%]
+tests/test_mental_model_query_mapping.py::test_list_tags_only_shape_preserved PASSED [ 41%]
+tests/test_mental_model_query_mapping.py::test_get_forwards_detail PASSED [ 42%]
+tests/test_mental_model_query_mapping.py::test_get_defaults_leave_detail_unset PASSED [ 43%]
+tests/test_native_result_mapping.py::test_async_wrappers_preserve_original_body_identity_and_page_reference PASSED [ 44%]
+tests/test_native_result_mapping.py::test_sync_wrapper_uses_same_tracked_request_without_native_resubmission PASSED [ 45%]
+tests/test_native_result_mapping.py::test_generated_status_nullable_fields_roundtrip[None] PASSED [ 46%]
+tests/test_native_result_mapping.py::test_generated_status_nullable_fields_roundtrip[receipt_not_found] PASSED [ 47%]
+tests/test_native_result_mapping.py::test_generated_mutation_and_reference_keep_nullable_document_ids PASSED [ 48%]
+tests/test_native_result_mapping.py::test_generated_request_reconstruction_preserves_omission_and_explicit_null[from_dict] PASSED [ 49%]
+tests/test_native_result_mapping.py::test_generated_request_reconstruction_preserves_omission_and_explicit_null[<lambda>] PASSED [ 50%]
+tests/test_native_result_mapping.py::test_generated_required_nullable_status_fields_must_not_be_invented[request_hash] PASSED [ 50%]
+tests/test_native_result_mapping.py::test_generated_required_nullable_status_fields_must_not_be_invented[progress] PASSED [ 51%]
+tests/test_native_result_mapping.py::test_generated_required_nullable_status_fields_must_not_be_invented[result] PASSED [ 52%]
+tests/test_prompt_formatting.py::test_to_prompt_string_facts_only PASSED [ 53%]
+tests/test_prompt_formatting.py::test_to_prompt_string_with_chunks PASSED [ 54%]
+tests/test_prompt_formatting.py::test_to_prompt_string_with_entities PASSED [ 55%]
+tests/test_prompt_formatting.py::test_to_prompt_string_with_chunks_and_entities PASSED [ 56%]
+tests/test_prompt_formatting.py::test_to_prompt_string_empty_results PASSED [ 57%]
+tests/test_prompt_formatting.py::test_to_prompt_string_chunk_id_not_in_chunks PASSED [ 58%]
+tests/test_recall_min_scores.py::test_recall_threads_min_scores PASSED   [ 59%]
+tests/test_recall_min_scores.py::test_recall_min_scores_defaults_none PASSED [ 60%]
+tests/test_recall_min_scores.py::test_recall_min_scores_rejects_unknown_key PASSED [ 61%]
+tests/test_recall_prefer_observations.py::test_recall_threads_prefer_observations PASSED [ 62%]
+tests/test_recall_prefer_observations.py::test_recall_prefer_observations_defaults_false PASSED [ 63%]
+tests/test_reflect_include_tool_calls.py::test_areflect_no_includes_by_default PASSED [ 64%]
+tests/test_reflect_include_tool_calls.py::test_areflect_include_tool_calls_sets_trace_request PASSED [ 65%]
+tests/test_reflect_include_tool_calls.py::test_areflect_include_tool_call_output_false PASSED [ 66%]
+tests/test_reflect_include_tool_calls.py::test_areflect_facts_and_tool_calls_combine PASSED [ 67%]
+tests/test_reflect_include_tool_calls.py::test_areflect_tool_call_output_ignored_without_tool_calls PASSED [ 68%]
+tests/test_reflect_include_tool_calls.py::test_reflect_sync_forwards_include_tool_calls PASSED [ 69%]
+tests/test_reflect_response_parsing.py::test_parse_v4_format_with_empty_based_on PASSED [ 70%]
+tests/test_reflect_response_parsing.py::test_parse_v4_format_with_null_based_on PASSED [ 71%]
+tests/test_reflect_response_parsing.py::test_parse_v4_format_with_populated_based_on PASSED [ 72%]
+tests/test_reflect_response_parsing.py::test_parse_v3_format_with_empty_list_fails PASSED [ 73%]
+tests/test_reflect_response_parsing.py::test_parse_missing_based_on_field PASSED [ 74%]
+tests/test_rest_lazy_session.py::test_rest_client_defers_aiohttp_session_until_async_use PASSED [ 75%]
+tests/test_retain_async_kwarg.py::test_aretain_forwards_retain_async_default PASSED [ 76%]
+tests/test_retain_async_kwarg.py::test_aretain_forwards_retain_async_true PASSED [ 77%]
+tests/test_retain_async_kwarg.py::test_aretain_forwards_operation_id PASSED [ 78%]
+tests/test_retain_async_kwarg.py::test_retain_forwards_retain_async_default PASSED [ 79%]
+tests/test_retain_async_kwarg.py::test_retain_forwards_retain_async_true PASSED [ 80%]
+tests/test_retain_async_kwarg.py::test_retain_forwards_operation_id PASSED [ 81%]
+tests/test_retain_async_kwarg.py::test_retain_batch_forwards_operation_id PASSED [ 82%]
+tests/test_retain_async_kwarg.py::test_aretain_batch_sets_operation_id_on_request PASSED [ 83%]
+tests/test_retain_async_kwarg.py::test_aretain_batch_omits_operation_id_by_default PASSED [ 84%]
+tests/test_retain_async_kwarg.py::test_aretain_batch_omits_operation_id_for_sync_retain PASSED [ 85%]
+tests/test_retain_async_kwarg.py::test_retain_preserves_legacy_batch_override_for_default_call PASSED [ 86%]
+tests/test_retain_async_kwarg.py::test_retain_batch_preserves_legacy_async_override_for_default_call PASSED [ 87%]
+tests/test_retain_async_kwarg.py::test_aretain_preserves_legacy_batch_override_for_default_call PASSED [ 88%]
+tests/test_retain_async_kwarg.py::test_retain_warns_once_when_operation_id_dropped_on_sync PASSED [ 89%]
+tests/test_retain_async_kwarg.py::test_aretain_batch_warns_when_operation_id_dropped_on_sync PASSED [ 90%]
+tests/test_retain_async_kwarg.py::test_aretain_does_not_warn_when_operation_id_used_on_async PASSED [ 91%]
+tests/test_retain_async_kwarg.py::test_retain_does_not_warn_by_default PASSED [ 92%]
+tests/test_retain_request_async.py::test_retain_request_async_true_serialized PASSED [ 93%]
+tests/test_retain_request_async.py::test_retain_request_async_false_serialized PASSED [ 94%]
+tests/test_retain_request_async.py::test_retain_request_default_is_sync PASSED [ 95%]
+tests/test_retain_request_async.py::test_retain_request_async_json_roundtrip PASSED [ 96%]
+tests/test_transition_contract.py::test_generated_transition_union_does_not_introduce_a_root_property PASSED [ 97%]
+tests/test_transition_contract.py::test_generated_application_error_union_preserves_native_fence PASSED [ 98%]
+tests/test_version.py::test_aget_version_delegates_to_monitoring_api PASSED [ 99%]
+tests/test_version.py::test_get_version_delegates_to_monitoring_api PASSED [100%]
+
+============================== warnings summary ===============================
+tests/test_retain_async_kwarg.py::test_aretain_batch_omits_operation_id_for_sync_retain
+  H:\hindsight\hindsight-clients\python\tests\test_retain_async_kwarg.py:141: UserWarning: operation_id is ignored for synchronous retain; pass retain_async=True to enable idempotent retries.
+    await client.aretain_batch("bank", [{"content": "content"}], operation_id=OPERATION_ID)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================ slowest 10 durations =============================
+1.23s call     tests/test_rest_lazy_session.py::test_rest_client_defers_aiohttp_session_until_async_use
+0.01s call     tests/test_configuration_observation.py::test_observation_round_trip
+0.01s call     tests/test_current_state_contract.py::test_evidence_union_selects_each_declared_variant_and_rejects_unknown
+0.01s call     tests/test_native_result_mapping.py::test_async_wrappers_preserve_original_body_identity_and_page_reference
+0.01s call     tests/test_current_state_contract.py::test_generated_current_state_models_preserve_the_complete_wire[evidence_page-CutoverEvidencePage]
+
+(5 durations < 0.005s hidden.  Use -vv to show these durations.)
+======================= 102 passed, 1 warning in 15.69s =======================

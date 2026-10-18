@@ -1,0 +1,9 @@
+
+ RUN  v4.1.10 H:/TakiAgent/apps/desktop
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  19:00:28
+   Duration  45.64s (transform 10.88s, setup 0ms, import 13.45s, tests 31.85s, environment 0ms)
+

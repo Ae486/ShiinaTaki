@@ -1,0 +1,44 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ ❯ src/memory/hindsight/hindsight-template-binding.test.ts (13 tests | 1 failed) 5212ms
+     × preserves an original curated policy before considering an extracted label 255ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/memory/hindsight/hindsight-template-binding.test.ts > first-binding label preload and durable policy publication > preserves an original curated policy before considering an extracted label
+ZodError: [
+  {
+    "code": "custom",
+    "path": [
+      "original_record",
+      "unit",
+      "tags"
+    ],
+    "message": "record requires exactly one matching Taki layer tag"
+  }
+]
+ ❯ memoryBody src/memory/hindsight/hindsight-application-binding-context.ts:102:50
+    100|     assertHindsightApplicationOriginalBinding(original, work.native.ve…
+    101|     requireHindsightPolicyOwnership(policyContext, original.value.poli…
+    102|     const body = TakiApplicationMemoryBodySchema.parse({ policy_basis:…
+       |                                                  ^
+    103|       provenance: original.value.provenance, original_record: original…
+    104|       source_artifacts: sourceArtifacts, assessment: { state: "not_req…
+ ❯ hindsightApplicationBindingBody src/memory/hindsight/hindsight-application-binding-context.ts:57:116
+ ❯ Object.body src/memory/hindsight/hindsight-application-binding-runner.ts:102:26
+ ❯ Object.create src/memory/hindsight/hindsight-application-binding-runner.ts:162:26
+ ❯ Object.prepare src/memory/hindsight/hindsight-application-writer.ts:32:23
+ ❯ commit src/memory/hindsight/hindsight-application-binding-runner.ts:159:35
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 65 passed (66)
+   Start at  17:10:18
+   Duration  10.25s (transform 5.61s, setup 0ms, import 7.65s, tests 5.51s, environment 0ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/hindsight/hindsight-template-label-evidence.test.ts src/memory/hindsight/hindsight-template-binding.test.ts --maxWorkers 2

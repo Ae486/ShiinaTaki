@@ -1,0 +1,196 @@
+{
+  "version": 1,
+  "createdAt": "2026-10-15T10:42:17.503Z",
+  "reviewer": "/root/c2_design_check",
+  "task": ".trellis/tasks/10-14-hindsight-managed-deployment",
+  "result": {
+    "independentImplementationReview": "PASS_AFTER_ONE_LOCAL_FIX",
+    "release": "READY_FOR_ROOT_ONCE_ONLY_EXECUTION",
+    "runtime": "NOT_RUN",
+    "deploymentReady": false
+  },
+  "plan": {
+    "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-extraction-plan.md",
+    "sha256": "9996da457893c5bc42505f3aad234ff3937e47c8ef0bd2c7ae84c14fa9b0aa1d"
+  },
+  "acceptedDesignReview": {
+    "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-extraction-review.md",
+    "sha256": "d013bdf26592630cabe80bc71e1774c62281c0dd653e9955e31a6d0a8089958c"
+  },
+  "inputsBeforeReview": [
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/first-start.py",
+      "bytes": 28431,
+      "sha256": "e0aaea3533f3810d7e3004e7fb21f3ed1459de809d56b997011b7ea14b370027"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/README.md",
+      "bytes": 12772,
+      "sha256": "c304db7acf32830bea23d98b00a45941ff19f0b76a9bde705ce6c1c9ba176e05"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-extraction-self-check.json",
+      "bytes": 18568,
+      "sha256": "ee92357a10f5bf9e606c48638d6686e79e8e86a48fb3722f92906acae6d8d0c0"
+    }
+  ],
+  "releasedInputs": [
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/first-start.py",
+      "bytes": 28600,
+      "sha256": "7d1ee67f7b3027da781795e365b58a9cb93f847cdba7cc31425f05030d2f7ff6"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/README.md",
+      "bytes": 12772,
+      "sha256": "c304db7acf32830bea23d98b00a45941ff19f0b76a9bde705ce6c1c9ba176e05"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-extraction-self-check.json",
+      "bytes": 23269,
+      "sha256": "1f4385ff6f14449f7f8822b586bf0b60dd99e22fe7f4eca006386a5640baf9da"
+    }
+  ],
+  "findings": {
+    "fixed": [
+      {
+        "file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/first-start.py",
+        "line": 267,
+        "issue": "The command failure was first recorded only by main after the utility finally cleanup; a second kill/reap/log-read error could replace the original cause.",
+        "fix": "Add an except block that calls the existing first-write-only fail(error) and re-raises before finally. Four lines added; no command, process, deadline, path, output bound or startup/stop sequence changed."
+      }
+    ],
+    "notFixed": []
+  },
+  "contractReview": [
+    {
+      "contract": "One offline first start",
+      "result": "PASS",
+      "evidence": "prepare/start use the pinned CLI, fixed literal argv, one start_dispatches increment and one Popen for start. No pg0 wrapper/API import, startup retry, Docker call or mutation selector exists."
+    },
+    {
+      "contract": "Environment and paths",
+      "result": "PASS",
+      "evidence": "prepare clears inherited environment before psycopg2 import. HOME, explicit Q/A paths, empty PATH, locale/time/temp/socket/log settings and raw LD_LIBRARY_PATH match the accepted plan. The owned empty seed and fixed PID 1/UID/GID are required before writes."
+    },
+    {
+      "contract": "Effective shared deadlines",
+      "result": "PASS",
+      "evidence": "Handlers are installed before prepare. Monotonic phase/operation/whole deadlines and periodic SIGALRM govern startup, commands, async SQL polling and file/hash work; startup is 60 seconds, stop/reap/control 25 seconds and payload 180 seconds. README also requires Root's independent attach/cleanup bounds."
+    },
+    {
+      "contract": "Live process and SQL evidence",
+      "result": "PASS",
+      "evidence": "CLI proc facts are captured immediately after Popen and before wait. Async SQL uses one explicit connection/query with bounded connect/poll and server statement timeout. Backend-to-postmaster identity is read while the connection is live; actual PID/start ticks/executable, data directory, settings, metadata and cluster identifier must agree."
+    },
+    {
+      "contract": "Exact raw tools",
+      "result": "PASS",
+      "evidence": "Only the four fixed extracted utility paths are accepted as regular, resolved executable ELF files with bounded streamed hashes and version output; SQL/tools must report PostgreSQL 18.1. No path search, download or alternate version exists."
+    },
+    {
+      "contract": "Checked stop and reap",
+      "result": "PASS",
+      "evidence": "The original postmaster identity/PID file is revalidated; one raw pg_ctl fast stop is followed by actual zero-exit reaping, absent PID file and no remaining descendants, then pg_controldata shut-down state and matching identifier under one deadline. pg_ctl waits on PID-file disappearance, and the supervisor separately proves real exit/reap."
+    },
+    {
+      "contract": "Failure/evidence/cleanup boundary",
+      "result": "PASS_AFTER_FIX",
+      "evidence": "The reviewer records the original utility exception before finally cleanup can replace it. Existing fail() remains first-write only; cleanup/forced utility termination, omitted logs and output bounds cannot clear failure. Docker resource cleanup remains Root-owned and documented with exact identity checks."
+    }
+  ],
+  "verification": {
+    "initialInputBinding": {
+      "suppliedSourceHash": true,
+      "suppliedReadmeHash": true,
+      "suppliedSelfCheckHash": true,
+      "finalChecksAllPass": true,
+      "sourceAndReadmeBinding": true,
+      "planHashMatchesAccepted": true,
+      "designReviewHashMatchesAccepted": true,
+      "utf8NoBom": true
+    },
+    "syntax": "PASS_FRESH_AST_AND_IN_MEMORY_COMPILE",
+    "lint": "PASS_FRESH_RUFF_E_F_I",
+    "format": "PASS_FRESH_RUFF_FORMAT_CHECK",
+    "typeCheck": "NOT_APPLICABLE_PYTHON_FIXTURE",
+    "behaviorTests": "NOT_RUN",
+    "targetLinuxRuntime": "NOT_RUN",
+    "affectedChecks": [
+      {
+        "index": 0,
+        "command": "& 'G:/anaconda3/python.exe' -I -B -c 'import ast,pathlib,sys; p=pathlib.Path(\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/first-start.py\"); data=p.read_bytes(); ast.parse(data, filename=str(p)); compile(data,str(p),\"exec\"); print(\"Python \" + sys.version.split()[0]); print(\"AST and in-memory compile passed; target not executed\")'",
+        "cwd": "H:/TakiAgent",
+        "startedAt": "2026-10-15T10:39:57.692Z",
+        "result": {
+          "chunk_id": "fee333",
+          "wall_time_seconds": 0.4874566,
+          "exit_code": 0,
+          "original_token_count": 18,
+          "output": "Python 3.12.7\r\nAST and in-memory compile passed; target not executed\r\n"
+        }
+      },
+      {
+        "index": 1,
+        "command": "& 'G:/Roaming/Python/Python312/Scripts/ruff.exe' check --isolated --no-cache --select E,F,I --line-length 100 '.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/first-start.py'",
+        "cwd": "H:/TakiAgent",
+        "startedAt": "2026-10-15T10:39:57.692Z",
+        "result": {
+          "chunk_id": "976e20",
+          "wall_time_seconds": 0.3264644,
+          "exit_code": 0,
+          "original_token_count": 5,
+          "output": "All checks passed!\n"
+        }
+      },
+      {
+        "index": 2,
+        "command": "& 'G:/Roaming/Python/Python312/Scripts/ruff.exe' format --isolated --check --line-length 100 '.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/first-start.py'",
+        "cwd": "H:/TakiAgent",
+        "startedAt": "2026-10-15T10:39:57.692Z",
+        "result": {
+          "chunk_id": "432129",
+          "wall_time_seconds": 0.4040286,
+          "exit_code": 0,
+          "original_token_count": 7,
+          "output": "1 file already formatted\n"
+        }
+      }
+    ]
+  },
+  "supportingSource": {
+    "url": "https://raw.githubusercontent.com/postgres/postgres/REL_18_1/src/bin/pg_ctl/pg_ctl.c",
+    "bytes": 64118,
+    "sha256": "41cfc7187149b0c810524d644e80eb5c1ca41ab86fc99bca8833118ef0a5fea0",
+    "lines": "713-743",
+    "use": "Read-only corroboration that pg_ctl's wait accepts PID-file disappearance; the fixture independently requires zero-exit postmaster reaping. No PostgreSQL binary was run."
+  },
+  "preservation": {
+    "selfCheck": "Updated current source binding/checks; preserved initial failures, original implementer checks/readback and previous file hashes under reviewer_followup.",
+    "readme": "Unchanged",
+    "probe": "Unchanged and not rerun",
+    "recoveryAndR1": "Untouched",
+    "productionAndMetadata": "Untouched",
+    "specSync": "Not required for this task-only failure-recording repair."
+  },
+  "ownership": {
+    "state": "released-to-root",
+    "files": [
+      ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/first-start.py",
+      ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/README.md",
+      ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-extraction-self-check.json"
+    ],
+    "newReports": [
+      ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-extraction-implementation-review.md",
+      ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-extraction-implementation-review.json"
+    ]
+  },
+  "next": "Root may freeze fresh exact resource identifiers and execute the documented fixed-image stdin payload once after the recovery slot is closed. Pass requires actual SQL/raw-tool/process/control-state evidence plus owned cleanup.",
+  "remaining": [
+    "Actual bundled tool availability and offline first start",
+    "Linux PID-1/process/SQL/shutdown behavior",
+    "Task-specific admitted database child and original-volume restart/persistence",
+    "C2b, Native API/provider, C1 service and manual acceptance"
+  ],
+  "noRuntimeActionsByReviewer": true
+}

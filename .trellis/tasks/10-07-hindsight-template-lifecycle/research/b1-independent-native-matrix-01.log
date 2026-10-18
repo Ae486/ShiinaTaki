@@ -1,0 +1,36 @@
+Owned fixture: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-da81fad5d7e5
+PostgreSQL: 18.1 ; vector/pg_trgm ready
+Pytest log: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-da81fad5d7e5\pytest.log
+ImportError while loading conftest 'H:\hindsight\hindsight-api-slim\tests\conftest.py'.
+tests\conftest.py:57: in <module>
+    from hindsight_api import LLMConfig, LocalSTEmbeddings, MemoryEngine, RequestContext
+hindsight_api\__init__.py:15: in <module>
+    from .engine.cross_encoder import CrossEncoderModel, LocalSTCrossEncoder, RemoteTEICrossEncoder
+hindsight_api\engine\__init__.py:13: in <module>
+    from .llm_wrapper import LLMConfig
+hindsight_api\engine\llm_wrapper.py:40: in <module>
+    from .template_provider_guard import assert_template_provider_call
+hindsight_api\engine\template_provider_guard.py:14: in <module>
+    from .template_models import TemplateError
+hindsight_api\engine\template_models.py:9: in <module>
+    from .template_definitions import (
+hindsight_api\engine\template_definitions.py:11: in <module>
+    from .transfer.current_state_schema import _binary64_json
+hindsight_api\engine\transfer\__init__.py:16: in <module>
+    from .importer import BankImportResult, ImportResult, import_bank, import_documents
+hindsight_api\engine\transfer\importer.py:25: in <module>
+    from ..retain import bank_utils, chunk_storage, embedding_processing, fact_storage, link_utils, orchestrator
+hindsight_api\engine\retain\__init__.py:14: in <module>
+    from . import (
+hindsight_api\engine\retain\chunk_storage.py:12: in <module>
+    from ..memory_engine import fq_table
+hindsight_api\engine\memory_engine.py:430: in <module>
+    from .llm_wrapper import LLMConfig, requires_api_key, sanitize_llm_output, sanitize_text
+E   ImportError: cannot import name 'LLMConfig' from partially initialized module 'hindsight_api.engine.llm_wrapper' (most likely due to a circular import) (H:\hindsight\hindsight-api-slim\hindsight_api\engine\llm_wrapper.py)
+{
+    "Fixture":  "taki-hindsight-g1-da81fad5d7e5",
+    "Stopped":  true,
+    "DataRemoved":  true,
+    "RegistryRemoved":  true,
+    "Logs":  "H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-da81fad5d7e5"
+}

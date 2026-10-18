@@ -1,0 +1,596 @@
+{
+  "version": 1,
+  "date": "2026-10-15",
+  "task": ".trellis/tasks/10-14-hindsight-managed-deployment",
+  "reviewer": "/root/c2_design_check",
+  "decision": "PASS",
+  "scope": "SCOPED_STATIC_IMPLEMENTATION_REVIEW",
+  "findingsFixed": [],
+  "findingsNotFixed": [],
+  "implementationChanged": false,
+  "reviewedFixtureFiles": [
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/fake_child.py",
+      "bytes": 44233,
+      "sha256": "4c1f401e9d1e43a8dcdc3c241cb74a05b892a53e57be958bd3096725a16c171c"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/database-read.py",
+      "bytes": 6084,
+      "sha256": "b3dd31c1c527850d188a1f09213756cefef8cd511266275fb0c47d342b322c3f"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/run-persistence.ts",
+      "bytes": 51340,
+      "sha256": "46a1b0b3f13816bbd56b46b1c279724ef7e52bdf75453d7addd8eda6cb01f7b0"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/README.md",
+      "bytes": 21343,
+      "sha256": "e2ef5c3b316e15226fb56f091e06c728511a251824a5ad23420ff5d7ebe1b12f",
+      "utf8Bom": false
+    }
+  ],
+  "designInputs": [
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-persistence-plan.md",
+      "bytes": 26961,
+      "sha256": "186f60061a4ecd7ac26443f90c079225c3bc9efb782f27227b50763ff0088e4c",
+      "utf8Bom": false,
+      "crlfPairs": 0
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-persistence-design-review.md",
+      "bytes": 4868,
+      "sha256": "bade2cab57318c88d19b5f66684f3a708fee2e3349f2c543874db3b2f1be628a",
+      "utf8Bom": false,
+      "crlfPairs": 0
+    }
+  ],
+  "originalSelfCheck": [
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-persistence-self-check.md",
+      "bytes": 6693,
+      "sha256": "7591e5f503dffa5226350a2423f950ff02bbc74ba873202048e40ad36e405a36",
+      "utf8Bom": false
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-persistence-self-check.json",
+      "bytes": 25243,
+      "sha256": "13706e83e2c733114a66e1246df20752acb42adffdc3376bbaf702c81598c72d",
+      "utf8Bom": false
+    }
+  ],
+  "preservedPrerequisites": [
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/first-start.py",
+      "bytes": 28600,
+      "sha256": "7d1ee67f7b3027da781795e365b58a9cb93f847cdba7cc31425f05030d2f7ff6",
+      "utf8Bom": false,
+      "crlfPairs": 0
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/probe-runtime.py",
+      "bytes": 10310,
+      "sha256": "57d79748edba8100576eaf79f1090fecb6c2e227563d7522dadf22eead0afd13",
+      "utf8Bom": false,
+      "crlfPairs": 0
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts",
+      "bytes": 47588,
+      "sha256": "869146af78a9cde99cf70af2c857049548c3c097aedd09f63c95d779c8d11017",
+      "utf8Bom": false,
+      "crlfPairs": 0
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/recovery-probe.py",
+      "bytes": 5131,
+      "sha256": "e3e49ad25888b34332184775f3193a47ad9e3c0c4943fd08e3dc7b3611119b29",
+      "utf8Bom": false,
+      "crlfPairs": 0
+    }
+  ],
+  "originalNativeContext": [
+    {
+      "path": "H:/hindsight/docker/standalone/Dockerfile.c2a-fake",
+      "bytes": 555,
+      "sha256": "2be1279ef4621f5d42397879fab2e436d780224eb3c02d591180faf9e9a9fcff",
+      "utf8Bom": false,
+      "crlfPairs": 0
+    },
+    {
+      "path": "H:/hindsight/docker/standalone/managed_bootstrap/__init__.py",
+      "bytes": 80,
+      "sha256": "cbf487cffc9c62b5c6fe61f32d80070b5843f70f966c5fca163c675e21ddbf1d",
+      "utf8Bom": false,
+      "crlfPairs": 0
+    },
+    {
+      "path": "H:/hindsight/docker/standalone/managed_bootstrap/bootstrap.py",
+      "bytes": 6323,
+      "sha256": "b8331bd8c9645d265578ed65f9f77402f170813f20d1d2683b5aa0a7d0768101",
+      "utf8Bom": false,
+      "crlfPairs": 0
+    },
+    {
+      "path": "H:/hindsight/docker/standalone/managed_bootstrap/control.py",
+      "bytes": 5593,
+      "sha256": "c75dcdf2285df614c4836dab4898a2980a2a1e8e4572862861596ab244f39d5e",
+      "utf8Bom": false,
+      "crlfPairs": 0
+    },
+    {
+      "path": "H:/hindsight/docker/standalone/managed_bootstrap/fake_child.py",
+      "bytes": 2073,
+      "sha256": "8d2267eb2b5af484179a7e8b2c301e067fe59197d63d91178415873ed7c96e93",
+      "utf8Bom": false,
+      "crlfPairs": 0
+    },
+    {
+      "path": "H:/hindsight/docker/standalone/managed_bootstrap/fake_consumer.py",
+      "bytes": 4302,
+      "sha256": "52b3d0664b06ef82dca4765d2c08e820c16c2af5e2814a02f98fe08f8e220eb3",
+      "utf8Bom": false,
+      "crlfPairs": 0
+    },
+    {
+      "path": "H:/hindsight/docker/standalone/managed_bootstrap/owner.py",
+      "bytes": 2460,
+      "sha256": "5b10f9f09def8ff985c96fed56c31f4ec4976f684d7e3b044fdc8a66afb38acc",
+      "utf8Bom": false,
+      "crlfPairs": 0
+    },
+    {
+      "path": "H:/hindsight/docker/standalone/managed_bootstrap/owner_protocol.py",
+      "bytes": 3199,
+      "sha256": "cd9cdbea572354dbbc1200098d9edfe9280679c2b346a67c1326a795b01c1804",
+      "utf8Bom": false,
+      "crlfPairs": 0
+    },
+    {
+      "path": "H:/hindsight/docker/standalone/managed_bootstrap/protocol.py",
+      "bytes": 13320,
+      "sha256": "074247650a31cfc47a1931ef6c7b258aa6f1d3a649bbb792ff2878257f6f8b88",
+      "utf8Bom": false,
+      "crlfPairs": 0
+    },
+    {
+      "path": "H:/hindsight/docker/standalone/managed_bootstrap/submitter.py",
+      "bytes": 4913,
+      "sha256": "5a6ad60266066d1cff2559d46c6b2b15d4a93cf882de1e487790ad0fb6863c4a",
+      "utf8Bom": false,
+      "crlfPairs": 0
+    },
+    {
+      "path": "H:/hindsight/docker/standalone/managed_bootstrap/supervision.py",
+      "bytes": 4552,
+      "sha256": "ff768434e0cef9eb2b6996351ba31e1dedede95211809d2ab8e8d09b5d9a5064",
+      "utf8Bom": false,
+      "crlfPairs": 0
+    },
+    {
+      "path": "H:/hindsight/docker/standalone/managed_bootstrap/unix_socket.py",
+      "bytes": 9434,
+      "sha256": "08b6e604211d19e31ad61782c96b91a004277b37c31d6e9a0bdfdda681cd7725",
+      "utf8Bom": false,
+      "crlfPairs": 0
+    }
+  ],
+  "finalBuildContext": [
+    {
+      "contextPath": "docker/standalone/Dockerfile.c2a-fake",
+      "source": "H:/hindsight/docker/standalone/Dockerfile.c2a-fake",
+      "bytes": 555,
+      "sha256": "2be1279ef4621f5d42397879fab2e436d780224eb3c02d591180faf9e9a9fcff"
+    },
+    {
+      "contextPath": "docker/standalone/managed_bootstrap/__init__.py",
+      "source": "H:/hindsight/docker/standalone/managed_bootstrap/__init__.py",
+      "bytes": 80,
+      "sha256": "cbf487cffc9c62b5c6fe61f32d80070b5843f70f966c5fca163c675e21ddbf1d"
+    },
+    {
+      "contextPath": "docker/standalone/managed_bootstrap/bootstrap.py",
+      "source": "H:/hindsight/docker/standalone/managed_bootstrap/bootstrap.py",
+      "bytes": 6323,
+      "sha256": "b8331bd8c9645d265578ed65f9f77402f170813f20d1d2683b5aa0a7d0768101"
+    },
+    {
+      "contextPath": "docker/standalone/managed_bootstrap/control.py",
+      "source": "H:/hindsight/docker/standalone/managed_bootstrap/control.py",
+      "bytes": 5593,
+      "sha256": "c75dcdf2285df614c4836dab4898a2980a2a1e8e4572862861596ab244f39d5e"
+    },
+    {
+      "contextPath": "docker/standalone/managed_bootstrap/fake_child.py",
+      "source": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/fake_child.py",
+      "bytes": 44233,
+      "sha256": "4c1f401e9d1e43a8dcdc3c241cb74a05b892a53e57be958bd3096725a16c171c",
+      "substitution": "Only this staged module replaces its unchanged original Native source."
+    },
+    {
+      "contextPath": "docker/standalone/managed_bootstrap/fake_consumer.py",
+      "source": "H:/hindsight/docker/standalone/managed_bootstrap/fake_consumer.py",
+      "bytes": 4302,
+      "sha256": "52b3d0664b06ef82dca4765d2c08e820c16c2af5e2814a02f98fe08f8e220eb3"
+    },
+    {
+      "contextPath": "docker/standalone/managed_bootstrap/owner.py",
+      "source": "H:/hindsight/docker/standalone/managed_bootstrap/owner.py",
+      "bytes": 2460,
+      "sha256": "5b10f9f09def8ff985c96fed56c31f4ec4976f684d7e3b044fdc8a66afb38acc"
+    },
+    {
+      "contextPath": "docker/standalone/managed_bootstrap/owner_protocol.py",
+      "source": "H:/hindsight/docker/standalone/managed_bootstrap/owner_protocol.py",
+      "bytes": 3199,
+      "sha256": "cd9cdbea572354dbbc1200098d9edfe9280679c2b346a67c1326a795b01c1804"
+    },
+    {
+      "contextPath": "docker/standalone/managed_bootstrap/protocol.py",
+      "source": "H:/hindsight/docker/standalone/managed_bootstrap/protocol.py",
+      "bytes": 13320,
+      "sha256": "074247650a31cfc47a1931ef6c7b258aa6f1d3a649bbb792ff2878257f6f8b88"
+    },
+    {
+      "contextPath": "docker/standalone/managed_bootstrap/submitter.py",
+      "source": "H:/hindsight/docker/standalone/managed_bootstrap/submitter.py",
+      "bytes": 4913,
+      "sha256": "5a6ad60266066d1cff2559d46c6b2b15d4a93cf882de1e487790ad0fb6863c4a"
+    },
+    {
+      "contextPath": "docker/standalone/managed_bootstrap/supervision.py",
+      "source": "H:/hindsight/docker/standalone/managed_bootstrap/supervision.py",
+      "bytes": 4552,
+      "sha256": "ff768434e0cef9eb2b6996351ba31e1dedede95211809d2ab8e8d09b5d9a5064"
+    },
+    {
+      "contextPath": "docker/standalone/managed_bootstrap/unix_socket.py",
+      "source": "H:/hindsight/docker/standalone/managed_bootstrap/unix_socket.py",
+      "bytes": 9434,
+      "sha256": "08b6e604211d19e31ad61782c96b91a004277b37c31d6e9a0bdfdda681cd7725"
+    }
+  ],
+  "acceptedProductionSourceManifest": {
+    "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-implementation-source-manifest.json",
+    "bytes": 108542,
+    "sha256": "f27379be3b4b5e61e1b2821c2eda2d87bf54e5c2983b034bdb637ee789961ae2",
+    "utf8Bom": false,
+    "entries": 109,
+    "manifestFileHashVerified": true,
+    "perEntryLiveRehashPerformedByThisReview": false,
+    "boundary": "Accepted unchanged source evidence is reused; the launcher rechecks each entry before provision. No source matrix is rerun."
+  },
+  "verifiedInputBindings": [
+    {
+      "path": "H:/hindsight/docker/standalone/Dockerfile.c2a-fake",
+      "bytes": 555,
+      "sha256": "2be1279ef4621f5d42397879fab2e436d780224eb3c02d591180faf9e9a9fcff"
+    },
+    {
+      "path": "H:/hindsight/docker/standalone/managed_bootstrap/__init__.py",
+      "bytes": 80,
+      "sha256": "cbf487cffc9c62b5c6fe61f32d80070b5843f70f966c5fca163c675e21ddbf1d"
+    },
+    {
+      "path": "H:/hindsight/docker/standalone/managed_bootstrap/bootstrap.py",
+      "bytes": 6323,
+      "sha256": "b8331bd8c9645d265578ed65f9f77402f170813f20d1d2683b5aa0a7d0768101"
+    },
+    {
+      "path": "H:/hindsight/docker/standalone/managed_bootstrap/control.py",
+      "bytes": 5593,
+      "sha256": "c75dcdf2285df614c4836dab4898a2980a2a1e8e4572862861596ab244f39d5e"
+    },
+    {
+      "path": "H:/hindsight/docker/standalone/managed_bootstrap/fake_child.py",
+      "bytes": 2073,
+      "sha256": "8d2267eb2b5af484179a7e8b2c301e067fe59197d63d91178415873ed7c96e93"
+    },
+    {
+      "path": "H:/hindsight/docker/standalone/managed_bootstrap/fake_consumer.py",
+      "bytes": 4302,
+      "sha256": "52b3d0664b06ef82dca4765d2c08e820c16c2af5e2814a02f98fe08f8e220eb3"
+    },
+    {
+      "path": "H:/hindsight/docker/standalone/managed_bootstrap/owner.py",
+      "bytes": 2460,
+      "sha256": "5b10f9f09def8ff985c96fed56c31f4ec4976f684d7e3b044fdc8a66afb38acc"
+    },
+    {
+      "path": "H:/hindsight/docker/standalone/managed_bootstrap/owner_protocol.py",
+      "bytes": 3199,
+      "sha256": "cd9cdbea572354dbbc1200098d9edfe9280679c2b346a67c1326a795b01c1804"
+    },
+    {
+      "path": "H:/hindsight/docker/standalone/managed_bootstrap/protocol.py",
+      "bytes": 13320,
+      "sha256": "074247650a31cfc47a1931ef6c7b258aa6f1d3a649bbb792ff2878257f6f8b88"
+    },
+    {
+      "path": "H:/hindsight/docker/standalone/managed_bootstrap/submitter.py",
+      "bytes": 4913,
+      "sha256": "5a6ad60266066d1cff2559d46c6b2b15d4a93cf882de1e487790ad0fb6863c4a"
+    },
+    {
+      "path": "H:/hindsight/docker/standalone/managed_bootstrap/supervision.py",
+      "bytes": 4552,
+      "sha256": "ff768434e0cef9eb2b6996351ba31e1dedede95211809d2ab8e8d09b5d9a5064"
+    },
+    {
+      "path": "H:/hindsight/docker/standalone/managed_bootstrap/unix_socket.py",
+      "bytes": 9434,
+      "sha256": "08b6e604211d19e31ad61782c96b91a004277b37c31d6e9a0bdfdda681cd7725"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/fake_child.py",
+      "bytes": 44233,
+      "sha256": "4c1f401e9d1e43a8dcdc3c241cb74a05b892a53e57be958bd3096725a16c171c"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/database-read.py",
+      "bytes": 6084,
+      "sha256": "b3dd31c1c527850d188a1f09213756cefef8cd511266275fb0c47d342b322c3f"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/run-persistence.ts",
+      "bytes": 51340,
+      "sha256": "46a1b0b3f13816bbd56b46b1c279724ef7e52bdf75453d7addd8eda6cb01f7b0"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-persistence-plan.md",
+      "bytes": 26961,
+      "sha256": "186f60061a4ecd7ac26443f90c079225c3bc9efb782f27227b50763ff0088e4c"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-persistence-design-review.md",
+      "bytes": 4868,
+      "sha256": "bade2cab57318c88d19b5f66684f3a708fee2e3349f2c543874db3b2f1be628a"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/first-start.py",
+      "bytes": 28600,
+      "sha256": "7d1ee67f7b3027da781795e365b58a9cb93f847cdba7cc31425f05030d2f7ff6"
+    }
+  ],
+  "checks": [
+    {
+      "name": "python-ast-and-memory-compile",
+      "command": "& 'G:/anaconda3/python.exe' -I -B -c 'import ast,pathlib,sys; root=pathlib.Path(\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database\"); [(ast.parse((root/name).read_bytes(),filename=str(root/name)),compile((root/name).read_bytes(),str(root/name),\"exec\")) for name in (\"fake_child.py\",\"database-read.py\")]; print(\"AST and in-memory compile PASS, Python \"+sys.version.split()[0])'",
+      "exitCode": 0,
+      "output": "AST and in-memory compile PASS, Python 3.12.7\r\n",
+      "initialElapsedMs": 1690,
+      "chunkId": "ab9804"
+    },
+    {
+      "name": "ruff",
+      "command": "& 'G:/Roaming/Python/Python312/Scripts/ruff.exe' check --isolated --no-cache --select E,F,I --line-length 100 '.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/fake_child.py' '.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/database-read.py'",
+      "exitCode": 0,
+      "output": "All checks passed!\n",
+      "initialElapsedMs": 1529,
+      "chunkId": "36c0fc"
+    },
+    {
+      "name": "ruff-format",
+      "command": "& 'G:/Roaming/Python/Python312/Scripts/ruff.exe' format --isolated --no-cache --check --line-length 100 '.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/fake_child.py' '.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/database-read.py'",
+      "exitCode": 0,
+      "output": "2 files already formatted\n",
+      "initialElapsedMs": 1539,
+      "chunkId": "907a16"
+    },
+    {
+      "name": "node-syntax",
+      "command": "& 'C:/Program Files/nodejs/node.exe' --check .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/run-persistence.ts",
+      "exitCode": 0,
+      "output": "",
+      "initialElapsedMs": 1596,
+      "chunkId": "42d177"
+    },
+    {
+      "name": "eslint",
+      "command": "& 'G:/Roaming/npm/pnpm.cmd' exec eslint --no-ignore .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/run-persistence.ts --max-warnings 0",
+      "exitCode": 0,
+      "output": "",
+      "initialElapsedMs": 6908,
+      "chunkId": "91ac5e"
+    },
+    {
+      "name": "typescript-no-emit",
+      "command": "& 'C:/Program Files/nodejs/node.exe' --input-type=module -e 'import ts from \"typescript\"; import fs from \"node:fs\"; const file=\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/run-persistence.ts\"; const base=JSON.parse(fs.readFileSync(\"tsconfig.base.json\",\"utf8\")); const parsed=ts.convertCompilerOptionsFromJson(base.compilerOptions,process.cwd()); const program=ts.createProgram([file],{...parsed.options,noEmit:true,incremental:false}); const errors=[...parsed.errors,...ts.getPreEmitDiagnostics(program)]; console.log(JSON.stringify({entry:file,noEmit:true,diagnostics:errors.map(d=>({file:d.file?.fileName,line:d.file&&d.start!==undefined?d.file.getLineAndCharacterOfPosition(d.start).line+1:undefined,code:d.code,message:ts.flattenDiagnosticMessageText(d.messageText,\"\\n\")}))})); process.exitCode=errors.length?1:0;'",
+      "exitCode": 0,
+      "output": "{\"entry\":\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/run-persistence.ts\",\"noEmit\":true,\"diagnostics\":[]}\n",
+      "initialElapsedMs": 10969,
+      "initialSessionId": 54968,
+      "completionChunkId": "f3184a"
+    },
+    {
+      "name": "stream-hits-four-cases",
+      "command": "@'\nimport importlib.util, json, pathlib, tempfile\npath=pathlib.Path(\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/fake_child.py\")\nspec=importlib.util.spec_from_file_location(\"c2a_database_static\",path)\nmodule=importlib.util.module_from_spec(spec)\nspec.loader.exec_module(module)\nsentinel=b\"C2A_FAKE_\"+b\"a\"*64\ncases=[(\"no-match\",b\"x\"*350,0),(\"whole-chunk\",sentinel+b\"x\"*150,1),(\"split-boundary\",b\"x\"*110+sentinel+b\"x\"*150,1),(\"overlap-no-double-count\",b\"x\"*55+sentinel+b\"x\"*150,1)]\nresults=[]\nfor name,data,expected in cases:\n    calls=[0]\n    def guard(): calls[0]+=1\n    with tempfile.TemporaryFile(prefix=\"c2a-db-stream-\",dir=\"G:/\") as stream:\n        stream.write(data);stream.seek(0)\n        actual=module.stream_hits(stream,guard,chunk_size=128)\n    assert actual=={\"bytes\":len(data),\"hits\":expected},(name,actual)\n    assert calls[0]>0\n    results.append({\"name\":name,\"bytes\":len(data),\"hits\":actual[\"hits\"],\"guard_calls\":calls[0],\"passed\":True})\nprint(json.dumps({\"scope\":\"actual stream_hits only; four auto-removed synthetic G files; no runtime main\",\"results\":results}))\n'@ | & 'G:/anaconda3/python.exe' -I -B -",
+      "exitCode": 0,
+      "output": "{\"scope\": \"actual stream_hits only; four auto-removed synthetic G files; no runtime main\", \"results\": [{\"name\": \"no-match\", \"bytes\": 350, \"hits\": 0, \"guard_calls\": 3, \"passed\": true}, {\"name\": \"whole-chunk\", \"bytes\": 223, \"hits\": 1, \"guard_calls\": 2, \"passed\": true}, {\"name\": \"split-boundary\", \"bytes\": 333, \"hits\": 1, \"guard_calls\": 3, \"passed\": true}, {\"name\": \"overlap-no-double-count\", \"bytes\": 278, \"hits\": 1, \"guard_calls\": 3, \"passed\": true}]}\r\n",
+      "initialElapsedMs": 1885,
+      "chunkId": "2980e8"
+    }
+  ],
+  "verification": {
+    "lint": "PASS",
+    "typeCheck": "PASS",
+    "tests": "PASS_4_SCANNER_CASES",
+    "pythonSyntax": "PASS",
+    "nodeSyntax": "PASS",
+    "build": "NOT_RUN",
+    "application": "NOT_RUN",
+    "dockerOrWsl": "NOT_RUN",
+    "databaseRuntime": "NOT_RUN",
+    "deploymentReady": false,
+    "c2bReadiness": "NOT_ESTABLISHED"
+  },
+  "contractChecks": [
+    {
+      "name": "two_generations_without_reseed",
+      "file": "research/docker-database/fake_child.py",
+      "lineRanges": [
+        [
+          435,
+          477
+        ],
+        [
+          536,
+          601
+        ],
+        [
+          730,
+          797
+        ]
+      ],
+      "status": "SOURCE_CHECKED"
+    },
+    {
+      "name": "fake_containment_and_wrapper_liveness",
+      "file": "research/docker-database/fake_child.py",
+      "lineRanges": [
+        [
+          372,
+          434
+        ]
+      ],
+      "status": "SOURCE_CHECKED"
+    },
+    {
+      "name": "direct_and_adopted_reaping",
+      "file": "research/docker-database/fake_child.py",
+      "lineRanges": [
+        [
+          621,
+          643
+        ],
+        [
+          710,
+          729
+        ],
+        [
+          816,
+          942
+        ]
+      ],
+      "status": "SOURCE_CHECKED"
+    },
+    {
+      "name": "one_stop_scan_report_deadline",
+      "file": "research/docker-database/fake_child.py",
+      "lineRanges": [
+        [
+          220,
+          247
+        ],
+        [
+          849,
+          857
+        ],
+        [
+          945,
+          1037
+        ]
+      ],
+      "status": "SOURCE_CHECKED"
+    },
+    {
+      "name": "held_original_execute_capture_deadline",
+      "file": "research/docker-database/run-persistence.ts",
+      "lineRanges": [
+        [
+          434,
+          489
+        ]
+      ],
+      "status": "SOURCE_CHECKED"
+    },
+    {
+      "name": "first_stop_raw_before_resume",
+      "file": "research/docker-database/run-persistence.ts",
+      "lineRanges": [
+        [
+          510,
+          536
+        ]
+      ],
+      "status": "SOURCE_CHECKED"
+    },
+    {
+      "name": "final_fixed_cp",
+      "file": "research/docker-database/run-persistence.ts",
+      "lineRanges": [
+        [
+          577,
+          584
+        ]
+      ],
+      "status": "SOURCE_CHECKED"
+    },
+    {
+      "name": "original_resource_fresh_authority_and_effect_counts",
+      "file": "research/docker-database/run-persistence.ts",
+      "lineRanges": [
+        [
+          278,
+          334
+        ],
+        [
+          527,
+          588
+        ]
+      ],
+      "status": "SOURCE_CHECKED"
+    },
+    {
+      "name": "exact_owned_cleanup",
+      "file": "research/docker-database/run-persistence.ts",
+      "lineRanges": [
+        [
+          635,
+          684
+        ]
+      ],
+      "status": "SOURCE_CHECKED"
+    }
+  ],
+  "scopeBindings": {
+    "caseId": "20d996bf-64b6-47c7-908d-730ebdb371c4",
+    "staging": "G:/TakiAgent-c2a-database/persistence-20d996bf-64b6-47c7-908d-730ebdb371c4",
+    "protectedRoot": "C:/taki-c2a-db-persistence-20d996bf-64b6-47c7-908d-730ebdb371c4",
+    "imageTag": "taki-c2a-db:20d996bf-64b6-47c7-908d-730ebdb371c4",
+    "createdRuntimeRoots": false,
+    "recipeChange": "Only staged managed_bootstrap/fake_child.py; original Native files stay untouched",
+    "productionReadiness": false
+  },
+  "specSync": {
+    "required": false,
+    "reason": "Task-only fixtures and README; no production schema, platform, template or public contract change."
+  },
+  "runtimeCriteriaRemaining": [
+    "Actual held injection observes Native waiting and no DB before one unchanged release.",
+    "One pg0 first start commits generated logged data; one raw existing-cluster restart reads it without reseeding.",
+    "Actual adopted/direct child ownership and clean reaping under the unchanged Native supervisor.",
+    "Each full stop/control/volume-scan/report completes within the original 25-second budget.",
+    "Actual original resource/event/no-TTY counts, private fake-value containment and exact owned cleanup.",
+    "Root compares unrelated-workload baseline and preserves, hashes, verifies and removes only the marked S."
+  ],
+  "excludedClaims": [
+    "Native API readiness",
+    "C2b trusted reference or positive setup",
+    "inner Native ACK loss",
+    "shared-daemon restart",
+    "real model application",
+    "owner manual acceptance"
+  ],
+  "reviewerWrites": [
+    ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-persistence-implementation-review.md",
+    ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-persistence-implementation-review.json"
+  ],
+  "environmentNotes": [
+    "python3 resolved to the Windows Store alias; the existing G:/anaconda3/python.exe was used without PATH or dependency changes."
+  ],
+  "release": "Root may prepare once from the bound files and perform the already authorized sequence. No runtime/staging resource was created by this reviewer."
+}
+

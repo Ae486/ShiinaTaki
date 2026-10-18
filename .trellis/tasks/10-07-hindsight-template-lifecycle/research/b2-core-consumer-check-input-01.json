@@ -1,0 +1,1962 @@
+{
+  "createdAt": "2026-10-08T14:42:10.721548+00:00",
+  "head": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a",
+  "sharedCoreInput": "b2-core-read-check-input-05.json",
+  "typeInputs": [
+    {
+      "file": "apps/cli/package.json",
+      "sha256": "136ede9fe0fbd6da80c019b4584fa18ebf6d8fed7b166caa54dc49f5d2070935",
+      "bytes": 390
+    },
+    {
+      "file": "apps/cli/src/approval-controller.test.ts",
+      "sha256": "e0e97f1bdaff35ebf4c15ea9cd59dac44a448cd39d5db168edb6bcd1a148fbbd",
+      "bytes": 4566
+    },
+    {
+      "file": "apps/cli/src/approval-controller.ts",
+      "sha256": "c36df765ae59f80534859655070ee26cfb95a6597834d50e121c7cca62152a90",
+      "bytes": 8806
+    },
+    {
+      "file": "apps/cli/src/approval-prompt.test.ts",
+      "sha256": "6921d5089926bd984c91f39c9c73d843b547cb7300080b669f1c679d812cbd88",
+      "bytes": 2825
+    },
+    {
+      "file": "apps/cli/src/approval-prompt.ts",
+      "sha256": "c6c1c6866324a78d19367c762f3febcfb0fb1c42260bececf062a38ee1ca0e4d",
+      "bytes": 2605
+    },
+    {
+      "file": "apps/cli/src/chat-client.test.ts",
+      "sha256": "f57edf8bd974c7d396ed85813b4909cec94c10e07ed962190fc8bef35df6675b",
+      "bytes": 11655
+    },
+    {
+      "file": "apps/cli/src/chat-client.ts",
+      "sha256": "381368c936047c45ebc6799b54c3173e84d812d8b6517e640ba2526c102f3a59",
+      "bytes": 8095
+    },
+    {
+      "file": "apps/cli/src/device-identity.test.ts",
+      "sha256": "6a90041d3bfdbfd26d4548ef80e467a70f4f0a0092ddc183e242e459d9e898ba",
+      "bytes": 1355
+    },
+    {
+      "file": "apps/cli/src/device-identity.ts",
+      "sha256": "abe9da8aa4a74d1f5338daf0b4271876e12c185c3d9ccfaa17a099a2694e447c",
+      "bytes": 2584
+    },
+    {
+      "file": "apps/cli/src/main.ts",
+      "sha256": "164a9ce3282f90c2f47459e403ee7fa6bbc0faa81d72393faf7f80dee7ae40cc",
+      "bytes": 8339
+    },
+    {
+      "file": "apps/cli/src/operator-call.test.ts",
+      "sha256": "0321eaca35ccb4fc0962d9acff33db3b89e9f7fe3c16b64f853e0b3b58aed2e9",
+      "bytes": 5404
+    },
+    {
+      "file": "apps/cli/src/operator-call.ts",
+      "sha256": "cdafd5a24c4af0e65616ba8a5b8145e5a0689fc91985dc7d41ec432337b2ce51",
+      "bytes": 3993
+    },
+    {
+      "file": "apps/cli/src/recent-history.test.ts",
+      "sha256": "b180b8b3c680f9e07783984cd5d845ead53daf99b3a91bab6525e4c13db9fb3b",
+      "bytes": 1965
+    },
+    {
+      "file": "apps/cli/src/recent-history.ts",
+      "sha256": "45459445a74e50766b479e9ea182237d07e530e94f623b3dbbd651578c545344",
+      "bytes": 1258
+    },
+    {
+      "file": "apps/cli/src/repl.test.ts",
+      "sha256": "ecd7fbf8a897ce629caf504b32d1fa76268c2f4208c2cf4ed678118db2ab70c8",
+      "bytes": 2790
+    },
+    {
+      "file": "apps/cli/src/repl.ts",
+      "sha256": "0840f33f3669b2128d927b625a62a5650264f8950bac109b59fae4f54bdf9dc6",
+      "bytes": 4605
+    },
+    {
+      "file": "apps/cli/src/secret-commands.test.ts",
+      "sha256": "7451409c6553fdd51656fd1e8faeb8f877798837f64c5ba0faafbffa2ad2d7b7",
+      "bytes": 5519
+    },
+    {
+      "file": "apps/cli/src/secret-commands.ts",
+      "sha256": "a13acaa0555cfc95874560c1bd6bc8e427b7c08193506e66616c13dc07b75196",
+      "bytes": 5190
+    },
+    {
+      "file": "apps/cli/tsconfig.json",
+      "sha256": "5d55968a4469d42400fa28d467b8676953140f3f737130e3f54661079deefac5",
+      "bytes": 141
+    },
+    {
+      "file": "apps/desktop/package.json",
+      "sha256": "239ffae1178ca129834b9cdf8828f32a30cf9511592f59a9cb765be8ccc60e59",
+      "bytes": 839
+    },
+    {
+      "file": "apps/desktop/src/app.tsx",
+      "sha256": "b39dc5907ddbdf801a74b12fbb35ffa9c26247abf7f5d6029ad877a8c577c3e3",
+      "bytes": 2593
+    },
+    {
+      "file": "apps/desktop/src/components/approval/approval-dialog-controller.test.ts",
+      "sha256": "4257d7fbc589a53908370351dbd5fe22b254f4b0658111f2e472a4dab5d3eb5d",
+      "bytes": 8658
+    },
+    {
+      "file": "apps/desktop/src/components/approval/approval-dialog-controller.ts",
+      "sha256": "1edd8fdb1100678b7d2b72cfb878049c208c0ea74901734750eaa975633eef87",
+      "bytes": 10034
+    },
+    {
+      "file": "apps/desktop/src/components/approval/approval-dialog.test.tsx",
+      "sha256": "1a2dd8ded0f502aa9013827dce33304b661e03c10f589edde1c316b33ac56574",
+      "bytes": 2463
+    },
+    {
+      "file": "apps/desktop/src/components/approval/approval-dialog.tsx",
+      "sha256": "8b7dcd19108a86ed52ecd1430b2c6e9365783a04cca4c4372539e8503f86d5e3",
+      "bytes": 4869
+    },
+    {
+      "file": "apps/desktop/src/components/approval/use-approval-dialog.tsx",
+      "sha256": "5808e684f62c36cea5574fa506d82d8211ddf7199757e5d730ff5716d243e0c6",
+      "bytes": 1899
+    },
+    {
+      "file": "apps/desktop/src/components/connection-status/connection-status.test.tsx",
+      "sha256": "ebb507c18d9e60f87125e47ba0de27c448e0b8ca72feb65dc3ae095d956a1783",
+      "bytes": 1532
+    },
+    {
+      "file": "apps/desktop/src/components/connection-status/connection-status.tsx",
+      "sha256": "cb9988fb46efb40c1e990612762f28ad8807d8f8100e5d32eef1b9570141beb4",
+      "bytes": 1608
+    },
+    {
+      "file": "apps/desktop/src/components/toast/toast-host.tsx",
+      "sha256": "f71c68a3bd5c625325b54f084b67cbdde9ae70d930a37052c8ccfb48e8b1e01f",
+      "bytes": 4040
+    },
+    {
+      "file": "apps/desktop/src/components/toast/toast-store.test.ts",
+      "sha256": "03cb4720055fa21e80d020c66c811086a34d07eef3fb39c447d78b097453007e",
+      "bytes": 1765
+    },
+    {
+      "file": "apps/desktop/src/components/toast/toast-store.ts",
+      "sha256": "a931586c173759a10f073cbab7575fa2d7cf27f5ac1da2bcd06b25847b35f66e",
+      "bytes": 1594
+    },
+    {
+      "file": "apps/desktop/src/components/ui/copyable-row.test.tsx",
+      "sha256": "be888536b1425fcfce0d8fbe6b825d5d6796f80cc12807568f63b5160466e0b4",
+      "bytes": 1502
+    },
+    {
+      "file": "apps/desktop/src/components/ui/copyable-row.tsx",
+      "sha256": "93984de7d961f8ea31fe20cec2444a068c51f502c60b5ad459077911e91dfd7e",
+      "bytes": 3142
+    },
+    {
+      "file": "apps/desktop/src/components/ui/dialog.test.tsx",
+      "sha256": "05ea95d3cb2d7563bef8ac59d28cb8e7ce947b00ce7d528eee4eb891c0bba8e3",
+      "bytes": 2199
+    },
+    {
+      "file": "apps/desktop/src/components/ui/dialog.tsx",
+      "sha256": "c6195c607f8cf5feae21bfba2792fff1c49d0b59a1ad440cf37475eda25e96bd",
+      "bytes": 4512
+    },
+    {
+      "file": "apps/desktop/src/components/ui/empty-state.test.tsx",
+      "sha256": "1c5464e2f0cc205b0713e1c34f43c529f1ceed94a6e3011ff562eaff19f21219",
+      "bytes": 1142
+    },
+    {
+      "file": "apps/desktop/src/components/ui/empty-state.tsx",
+      "sha256": "eb80e635174d5f4d48aeaec398da2e52ba5e6012d3f4b61d86416a13dc0737ea",
+      "bytes": 1080
+    },
+    {
+      "file": "apps/desktop/src/components/ui/feedback-line.test.tsx",
+      "sha256": "7556bfc57fe8242827626324dec6da5c3741e001103f359bf945018c1dcefb28",
+      "bytes": 1460
+    },
+    {
+      "file": "apps/desktop/src/components/ui/feedback-line.tsx",
+      "sha256": "dbdc3f85ae83b5364effc38ef20741c5453c292117425e00b993ac85c15ac956",
+      "bytes": 1738
+    },
+    {
+      "file": "apps/desktop/src/components/ui/field.test.tsx",
+      "sha256": "c3b601a833aabd330f12afab90eadf1489ea3e0706aa17bb44444b9149011f03",
+      "bytes": 1930
+    },
+    {
+      "file": "apps/desktop/src/components/ui/field.tsx",
+      "sha256": "d36035bd8b73d0500301c93f16e9f8adbf9089a75787e9d45eb4278e06a91bb2",
+      "bytes": 1857
+    },
+    {
+      "file": "apps/desktop/src/components/ui/icon-button.test.tsx",
+      "sha256": "b14fc24f16ea3269c29410778378e7453a59e92ca4a6a03c4431549b173edffc",
+      "bytes": 1354
+    },
+    {
+      "file": "apps/desktop/src/components/ui/icon-button.tsx",
+      "sha256": "d15ffe0019ce1226992a383974d60aa32671d2ea18b4b92a58090e6b2fad085e",
+      "bytes": 1796
+    },
+    {
+      "file": "apps/desktop/src/components/ui/master-detail.test.tsx",
+      "sha256": "e11bd2c7e5bdd633309793511fa56e2afeb693b8466e3cd4cc02c2c0472e43e1",
+      "bytes": 1553
+    },
+    {
+      "file": "apps/desktop/src/components/ui/master-detail.tsx",
+      "sha256": "12cff4fbeedae87e6d1fbc9dffc494ec4d9d1681968066811e7f2941e4d6b678",
+      "bytes": 1401
+    },
+    {
+      "file": "apps/desktop/src/components/ui/selection-tile.test.tsx",
+      "sha256": "5039b9d43ce957230acba779d2f14ca2dfca563b582fb2823a47d05c062c9f97",
+      "bytes": 2202
+    },
+    {
+      "file": "apps/desktop/src/components/ui/selection-tile.tsx",
+      "sha256": "3cc40a55cbe5dc48f90d304211f68f03a6ba4d774d4f2ab1f71ece724b219638",
+      "bytes": 2464
+    },
+    {
+      "file": "apps/desktop/src/components/ui/skeleton.test.tsx",
+      "sha256": "a6a7142fd494ca11db9b002be15eab7a5a6afe0b4620ad2cd8cfcb8e32d12a8a",
+      "bytes": 1037
+    },
+    {
+      "file": "apps/desktop/src/components/ui/skeleton.tsx",
+      "sha256": "dc4054664ef4aaca9e59e66606b874d1c510307257a33be8859f6e48da2e2187",
+      "bytes": 1160
+    },
+    {
+      "file": "apps/desktop/src/features/character-import/use-character-import.ts",
+      "sha256": "17283c409b06ed514d24700f7fd95039bd201403c342063455cb0054b05f9cfa",
+      "bytes": 2899
+    },
+    {
+      "file": "apps/desktop/src/features/character-import/use-costume-switch.test.ts",
+      "sha256": "1f633966e3c8e80783a18f287264ba152f4bb31e1640d05b45e9946db2836a4c",
+      "bytes": 2864
+    },
+    {
+      "file": "apps/desktop/src/features/character-import/use-costume-switch.ts",
+      "sha256": "c58e9ae34b9f6ae704f9f4e27e282e4dadf30e03e61bb8ef22278bb0a89acd5f",
+      "bytes": 9862
+    },
+    {
+      "file": "apps/desktop/src/features/chat-bubble/chat-bubble-enter.test.ts",
+      "sha256": "1e0a06a288aa52532ce1702eeaecb38dea72704cff44cf5a15b9d5c8fd249766",
+      "bytes": 1155
+    },
+    {
+      "file": "apps/desktop/src/features/chat-bubble/chat-bubble-readiness.test.ts",
+      "sha256": "8f2a1a1ab93a97574348ed4f5323c3daf370200999e564d971d960e80f7d8928",
+      "bytes": 546
+    },
+    {
+      "file": "apps/desktop/src/features/chat-bubble/chat-bubble-store.test.ts",
+      "sha256": "4388da3b77beabe58b40e2570e314bf9ea6d18d35d8a7f86eaf0552063eb033d",
+      "bytes": 1536
+    },
+    {
+      "file": "apps/desktop/src/features/chat-bubble/chat-bubble-store.ts",
+      "sha256": "fee873267bbea91871eab32e35a8d20609e12e34215718b3ea6a42876d543bbe",
+      "bytes": 1687
+    },
+    {
+      "file": "apps/desktop/src/features/chat-bubble/chat-bubble.tsx",
+      "sha256": "995bc0a3741079dba238577c6645033a4028948bdedaed2f3865e3dc3ee517d1",
+      "bytes": 7165
+    },
+    {
+      "file": "apps/desktop/src/features/chat-bubble/use-chat-bubble.ts",
+      "sha256": "8271180a621ef37ea7233086bd17cf677616d3578c64bb926cf6329316da218c",
+      "bytes": 2948
+    },
+    {
+      "file": "apps/desktop/src/features/operation-wheel/operation-wheel.test.tsx",
+      "sha256": "9d8c6d855447b4e464c2c2e3db3f93ac4c48d8716dc9f71aa67e261975a22a6c",
+      "bytes": 2078
+    },
+    {
+      "file": "apps/desktop/src/features/operation-wheel/operation-wheel.tsx",
+      "sha256": "67b12c178166f02f787a37e58611873ec1a849e1d7c8d665a474d2351e012e4e",
+      "bytes": 3851
+    },
+    {
+      "file": "apps/desktop/src/features/operation-wheel/use-wheel-dismiss.ts",
+      "sha256": "7f16bfbf0c6d0109c6a998d56232c9f827c92d1c0fd9fa249ebaf12e5c9b8cc3",
+      "bytes": 900
+    },
+    {
+      "file": "apps/desktop/src/features/operation-wheel/wheel-dismiss.test.ts",
+      "sha256": "2323f0274b72b53bd3f777dedb53cd2bb75574d06a7eaa3657412e94b743a5d3",
+      "bytes": 3186
+    },
+    {
+      "file": "apps/desktop/src/features/operation-wheel/wheel-dismiss.ts",
+      "sha256": "b248814feef463edae8491edc73f84d58ece1cafcba0635c672fb4deda532afa",
+      "bytes": 2214
+    },
+    {
+      "file": "apps/desktop/src/features/operation-wheel/wheel-items.test.ts",
+      "sha256": "18d9819f2a99b44cfda12876d6fe06eb56e875b1776f67ff4a46333d5707f131",
+      "bytes": 2179
+    },
+    {
+      "file": "apps/desktop/src/features/operation-wheel/wheel-items.ts",
+      "sha256": "01a4c3574e73a80a1f329918f5d7e39e93ec093bc8a877934dce05461f397700",
+      "bytes": 1989
+    },
+    {
+      "file": "apps/desktop/src/features/operation-wheel/wheel-placement.test.ts",
+      "sha256": "1d637ebde11dc0e072633b2cc66ec50582ef5cca0e1fe75296e30a7f3c60b7ef",
+      "bytes": 1598
+    },
+    {
+      "file": "apps/desktop/src/features/operation-wheel/wheel-placement.ts",
+      "sha256": "3dfbb45739863e8b2150aa97f3759f335a0d37426f7426b91929fe896a13501d",
+      "bytes": 1045
+    },
+    {
+      "file": "apps/desktop/src/features/operation-wheel/wheel-summon.test.ts",
+      "sha256": "62a2fe1eee61156690dc3700308855f456806b3aece9329dea4854cfdbf2c3e8",
+      "bytes": 2195
+    },
+    {
+      "file": "apps/desktop/src/features/operation-wheel/wheel-summon.ts",
+      "sha256": "ac0a19d585772f5ec847b70865580a6b9bef1ff2e682dfa63d3ae7cdc7968f60",
+      "bytes": 1297
+    },
+    {
+      "file": "apps/desktop/src/hooks/use-operator-connection.ts",
+      "sha256": "21bcd856e37e3c6c00fae131f0dd4f442df6f64c17748fec8fe97db400b49b15",
+      "bytes": 2988
+    },
+    {
+      "file": "apps/desktop/src/lib/active-character.ts",
+      "sha256": "73855518014f6dc30e480b961981db4fedeeb154546770a76549b579452f73c3",
+      "bytes": 433
+    },
+    {
+      "file": "apps/desktop/src/lib/cache-persist.test.ts",
+      "sha256": "ef5812f0f99f5d367b2921078284e171319d37d23fdf2a408cdc4ef589780d0e",
+      "bytes": 4645
+    },
+    {
+      "file": "apps/desktop/src/lib/cache-persist.ts",
+      "sha256": "0157ec918dbb4187a5be3482f3e5bd380cbb984f80917c5e5535c98d9c2c07b2",
+      "bytes": 3346
+    },
+    {
+      "file": "apps/desktop/src/lib/cached-fetch-state.test.ts",
+      "sha256": "8f1a408255f5014e5825f0a1ba58c9002c174096307538b389e657edd68caa52",
+      "bytes": 2766
+    },
+    {
+      "file": "apps/desktop/src/lib/cached-fetch-state.ts",
+      "sha256": "1e0fc8f6aee89850e0b78a6902b8433ce7eb56debd7f13b70e02f89e4b776aaf",
+      "bytes": 1990
+    },
+    {
+      "file": "apps/desktop/src/lib/character-asset-url.test.ts",
+      "sha256": "5be672bd81a95d59c2c22880a2a6168ce84b8c40f214d74058d2836f690f59c3",
+      "bytes": 4672
+    },
+    {
+      "file": "apps/desktop/src/lib/character-asset-url.ts",
+      "sha256": "aad6cf2bf97dd8a4962e2c7a4118f239ea2f4b00739bbd8fb4e22a8469642545",
+      "bytes": 5825
+    },
+    {
+      "file": "apps/desktop/src/lib/connection-generation-controller.test.ts",
+      "sha256": "5e663560791572943109ec93ab728a488c1b05dcdc17a6b2f5b388119bf26e9a",
+      "bytes": 12132
+    },
+    {
+      "file": "apps/desktop/src/lib/connection-generation-controller.ts",
+      "sha256": "bbd0ad923188a6f605f7e49554993996e091488cac6574585cc7fb0539867c05",
+      "bytes": 9345
+    },
+    {
+      "file": "apps/desktop/src/lib/connection-status.test.ts",
+      "sha256": "09d70867eacdba50d1c68aa702921bae8b5511b4da01e97b0531caf10f9d2366",
+      "bytes": 955
+    },
+    {
+      "file": "apps/desktop/src/lib/connection-status.ts",
+      "sha256": "a51f2e3714b9b601bb1679072b9c374fee5f8abd53629af6898fbf438c3f9b9f",
+      "bytes": 1365
+    },
+    {
+      "file": "apps/desktop/src/lib/costume-report-sync.test.ts",
+      "sha256": "57fe4218e7299b2678c209ddc0b077944c4e4e2899b537c7378021b7bbaf5f93",
+      "bytes": 1523
+    },
+    {
+      "file": "apps/desktop/src/lib/costume-report-sync.ts",
+      "sha256": "01b37a785e0d391ecd8c408307a1c56d5ec21bdbb28dff59f09ffd9a2e458dc1",
+      "bytes": 3034
+    },
+    {
+      "file": "apps/desktop/src/lib/costume-switch-attempt.test.ts",
+      "sha256": "1a173ceb3d941bf176fa9500f6c2cb5ca27b5ebb59d77d8b05c5e2396c9505ab",
+      "bytes": 13993
+    },
+    {
+      "file": "apps/desktop/src/lib/costume-switch-attempt.ts",
+      "sha256": "c30176a44f670db1ff630a14671d8df184755b3a7217d118f03630062b9615b5",
+      "bytes": 8907
+    },
+    {
+      "file": "apps/desktop/src/lib/costume-switch-event.test.ts",
+      "sha256": "89f48b5fcf6c0b34940d29e2a790f9ea7d442b1cdb67739fcac8c525c709f766",
+      "bytes": 3903
+    },
+    {
+      "file": "apps/desktop/src/lib/costume-switch-event.ts",
+      "sha256": "3ca4511c0acb60697068cf732196ceb82be8f0db941003ea2ce4f98a0d71ee1e",
+      "bytes": 4887
+    },
+    {
+      "file": "apps/desktop/src/lib/device-identity.test.ts",
+      "sha256": "04e470e31a0b9de13f59c5142e655713af574b74a60a37639c229d799fc2e8b6",
+      "bytes": 1689
+    },
+    {
+      "file": "apps/desktop/src/lib/device-identity.ts",
+      "sha256": "dd055e162602d368d900a7f36d3120c042c8ad9310dd73fe64e0271b29f07213",
+      "bytes": 2909
+    },
+    {
+      "file": "apps/desktop/src/lib/icons/alert-triangle-icon.tsx",
+      "sha256": "cf5f112fa29efed85c79176a57fd795973070cbb3d9c7398721092d1dc537eba",
+      "bytes": 636
+    },
+    {
+      "file": "apps/desktop/src/lib/icons/chat-icon.tsx",
+      "sha256": "88f5a3b6ad8d3c036838a1b9c9f4f7243c24c0163c51ec605dfa0eb1f3c70312",
+      "bytes": 664
+    },
+    {
+      "file": "apps/desktop/src/lib/icons/check-icon.tsx",
+      "sha256": "3af48fe559143429a45dd9966df633a4c1e61ebed0d90f1cacadd10045c39c60",
+      "bytes": 458
+    },
+    {
+      "file": "apps/desktop/src/lib/icons/chevron-down-icon.tsx",
+      "sha256": "cc607eb70842c9f415d84586cf7c0ff6f39ed26029dd89fc1f36e392e756651c",
+      "bytes": 477
+    },
+    {
+      "file": "apps/desktop/src/lib/icons/copy-icon.tsx",
+      "sha256": "7b9f7fefcb5ebcd7fbd106deda3658ac609390a36e4baede1435d878fcbd2f4e",
+      "bytes": 615
+    },
+    {
+      "file": "apps/desktop/src/lib/icons/costume-icon.tsx",
+      "sha256": "0bc85a28ebc8c561475a1d2e2d7846e6e19a6c263fcf153fc0703d20acda6f81",
+      "bytes": 534
+    },
+    {
+      "file": "apps/desktop/src/lib/icons/external-link-icon.tsx",
+      "sha256": "3faae46bac8874d56121e99089feb6f4da0efc1a5b7c49bfa7eeee654f18eddf",
+      "bytes": 694
+    },
+    {
+      "file": "apps/desktop/src/lib/icons/glyph.tsx",
+      "sha256": "ea0baf0c631fdc94c44b33b63d2f0182c102d8a62ddcac3006c0d151a16c4eba",
+      "bytes": 1065
+    },
+    {
+      "file": "apps/desktop/src/lib/icons/home-icon.tsx",
+      "sha256": "b04ce4a25bb0490bb0797be81ef774169005e8bf2e5d957718834ffb623313d7",
+      "bytes": 557
+    },
+    {
+      "file": "apps/desktop/src/lib/icons/icons.test.tsx",
+      "sha256": "e6dcc91b78e8fc3b8b3c3fdc82a3b9afdc87526cf27d5ec72b49aaa5676fe947",
+      "bytes": 2283
+    },
+    {
+      "file": "apps/desktop/src/lib/icons/image-off-icon.tsx",
+      "sha256": "b63f061158164783cff482b47faff239724ead8d3949bc530fdb58fa907783dd",
+      "bytes": 675
+    },
+    {
+      "file": "apps/desktop/src/lib/icons/image-plus-icon.tsx",
+      "sha256": "1cf94fec55b04e445c6d71ee3f3f9236ad848b42c75e7ae6f290c1c359ffb280",
+      "bytes": 632
+    },
+    {
+      "file": "apps/desktop/src/lib/icons/mcp-icon.tsx",
+      "sha256": "203cbf3738af4a9d400b2233cf438e33c5070b0c3ed725a396a4cce46ec616b8",
+      "bytes": 613
+    },
+    {
+      "file": "apps/desktop/src/lib/icons/operations-icon.tsx",
+      "sha256": "1d6f507fd742a24c154d8c5a2020c4c1ae8f26d35bdd0b2dd801d4b063ea9149",
+      "bytes": 581
+    },
+    {
+      "file": "apps/desktop/src/lib/icons/perception-icon.tsx",
+      "sha256": "ca17854e698dc6437028f40d7a11a6ea0bd6969e9cbde332068c9651464bdb4e",
+      "bytes": 572
+    },
+    {
+      "file": "apps/desktop/src/lib/icons/settings-icon.tsx",
+      "sha256": "c821fd0b549d81c8e5c2901b44660229b421601ef747154dc5340d58aec3365e",
+      "bytes": 640
+    },
+    {
+      "file": "apps/desktop/src/lib/icons/skill-icon.tsx",
+      "sha256": "19c812ad6387abb087344842bd2ab0fdd41687d5111a0d3667490e013ca7c178",
+      "bytes": 495
+    },
+    {
+      "file": "apps/desktop/src/lib/icons/tool-icon.tsx",
+      "sha256": "7548ded3429a72a6aaa6a2e88407602b003b3b2ee47e0dd0dd00e3ab98aefb79",
+      "bytes": 712
+    },
+    {
+      "file": "apps/desktop/src/lib/icons/x-icon.tsx",
+      "sha256": "c6ac96ac856621cb737abb7216a9d669952465aaef65e2aa4421b337d8ea2c50",
+      "bytes": 489
+    },
+    {
+      "file": "apps/desktop/src/lib/last-costume.test.ts",
+      "sha256": "717f06eb9c8a2497731d355e742c8045e26e87dccdec0bc8e8d9e7624c251cad",
+      "bytes": 1396
+    },
+    {
+      "file": "apps/desktop/src/lib/last-costume.ts",
+      "sha256": "32807defd3227df93734991e2fb2cb1cf7fbb28e7500d6970fa9c44039da9870",
+      "bytes": 883
+    },
+    {
+      "file": "apps/desktop/src/lib/open-home-window.test.ts",
+      "sha256": "a3918ced4c4613bf287a15eb0b2894f2e3f24be8301371ce93c058bde58a1c17",
+      "bytes": 3248
+    },
+    {
+      "file": "apps/desktop/src/lib/open-home-window.ts",
+      "sha256": "ef73fe97bae0a45710f32dc49a7a13afc9e448d55f6534b9a6b0c9f6a07e511f",
+      "bytes": 2062
+    },
+    {
+      "file": "apps/desktop/src/lib/operator-auth.test.ts",
+      "sha256": "c63e0d210ee0b5c47178c1dbe6eff5e9ee7175ab59301004fd3f35fdee675e64",
+      "bytes": 2259
+    },
+    {
+      "file": "apps/desktop/src/lib/operator-auth.ts",
+      "sha256": "86b9420b8a49760baa65ab5f9c6930d09d983bd92f789e9765896b0aa0a03f04",
+      "bytes": 1395
+    },
+    {
+      "file": "apps/desktop/src/lib/presentation-gate.test.ts",
+      "sha256": "34d6ca24d281e808bb0c001a9dbda63e71680984852154cf0eb4ebbc4cb888b6",
+      "bytes": 1291
+    },
+    {
+      "file": "apps/desktop/src/lib/presentation-gate.ts",
+      "sha256": "c3e673d61ea918a2bc3a147134b58462b104ffd053d8d335da99d2e01c0d8cb1",
+      "bytes": 1832
+    },
+    {
+      "file": "apps/desktop/src/lib/promise-timeout.ts",
+      "sha256": "f9d1146bd048058a70dad51676e45e887c0afd5f32120d8a7dc9fb2fc10f1a8c",
+      "bytes": 892
+    },
+    {
+      "file": "apps/desktop/src/lib/rpc-deadline.test.ts",
+      "sha256": "cbc68ade37ce377825335708c81381f550de607586496092073de19c7fe9d00f",
+      "bytes": 5387
+    },
+    {
+      "file": "apps/desktop/src/lib/rpc-deadline.ts",
+      "sha256": "a4597d52ba20a4cadb36b612ac5278d72a4085eae183d8e599bb09bcabfa1857",
+      "bytes": 6903
+    },
+    {
+      "file": "apps/desktop/src/lib/timing-policy-sync.test.ts",
+      "sha256": "91b2e1055b4aebdff4d3ca63da0d159307bc0b6c4af83860d3b00eab66444c97",
+      "bytes": 2844
+    },
+    {
+      "file": "apps/desktop/src/lib/timing-policy-sync.ts",
+      "sha256": "0d8921a459c91c0ad2234044aad64c84604d2042eccd2fb1917debcc21ec39d9",
+      "bytes": 2345
+    },
+    {
+      "file": "apps/desktop/src/lib/timing-policy.test.ts",
+      "sha256": "1caacf050804c57c0d6534602d40c500e3cf7d9b3da349f68c3f88b3ac7a4cbb",
+      "bytes": 2152
+    },
+    {
+      "file": "apps/desktop/src/lib/timing-policy.ts",
+      "sha256": "11f4efeb94f4c51c0b706206ea06d4ed4a0b31cc2fdd756e6199710075a00255",
+      "bytes": 1367
+    },
+    {
+      "file": "apps/desktop/src/lib/use-cached-fetch.ts",
+      "sha256": "6a574680b064bc92638c8f39bdf57e5269c8ca64a5f105d6fb22044b2a545c81",
+      "bytes": 2991
+    },
+    {
+      "file": "apps/desktop/src/lib/use-tauri-event.ts",
+      "sha256": "ea0c55c4ebc221df05bfd8c7b94fd76a725f0880c4c1342f04a487b82e67bcdb",
+      "bytes": 1193
+    },
+    {
+      "file": "apps/desktop/src/lib/ws-client-hindsight-configuration.test.ts",
+      "sha256": "8b6ac0d0788d6859365a12d58b70e7bb3b213b3bcd532e803164d26f1ef1ac79",
+      "bytes": 3458
+    },
+    {
+      "file": "apps/desktop/src/lib/ws-client-hindsight-configuration.ts",
+      "sha256": "079aea008d5727715831e6bc1e75d210daf8d249d57155943f5de5f43492febf",
+      "bytes": 1387
+    },
+    {
+      "file": "apps/desktop/src/lib/ws-client-memory-onboarding.ts",
+      "sha256": "bdf24ead3230d226d79c5cf509b5c1984c452b2f503c594d6f840492403fe44e",
+      "bytes": 2531
+    },
+    {
+      "file": "apps/desktop/src/lib/ws-client-memory-operations.ts",
+      "sha256": "27d897c7f64ae5bbaf9cf09bbc4adcce8cce7554974f0e0c6c347f1dfa946d5c",
+      "bytes": 4673
+    },
+    {
+      "file": "apps/desktop/src/lib/ws-client-methods.ts",
+      "sha256": "a8c96700b7f536cbec497f7ec3f730bbc1e4fcb989349cb5f61625435510538a",
+      "bytes": 12667
+    },
+    {
+      "file": "apps/desktop/src/lib/ws-client-routes.ts",
+      "sha256": "f1b8f761ed181ad604694a2f548ed1ee1fea06210c967bc375e2000797881054",
+      "bytes": 12155
+    },
+    {
+      "file": "apps/desktop/src/lib/ws-client-transitions.test.ts",
+      "sha256": "9334c14af04e58a9b149910111887a2adaf4a27024a6ae0923c5d5683f25116b",
+      "bytes": 3855
+    },
+    {
+      "file": "apps/desktop/src/lib/ws-client.test.ts",
+      "sha256": "6dc76780342626157a0fbd5e44a148c23adab44d9fc63fe1d84f608be64d5a43",
+      "bytes": 28091
+    },
+    {
+      "file": "apps/desktop/src/lib/ws-client.ts",
+      "sha256": "83e042cf2fcd1bcbb66f98634be7d663cafa9365ca5151a26c042cfc25feb0f0",
+      "bytes": 15543
+    },
+    {
+      "file": "apps/desktop/src/lib/ws-transport.ts",
+      "sha256": "7825b1e016206bf8bf0a3d1aab06f532d5f8c5d0b54d35f8d83983016261898a",
+      "bytes": 1226
+    },
+    {
+      "file": "apps/desktop/src/main.tsx",
+      "sha256": "0585935666d7ab7f5dc845720307a34bf74f3e01437f010a4368ba70f432f918",
+      "bytes": 310
+    },
+    {
+      "file": "apps/desktop/src/renderer/alpha-mask-source.ts",
+      "sha256": "202fa35bae983962b40a36a63134f5f5cda81a5ef9420ed9091198d736532b97",
+      "bytes": 2819
+    },
+    {
+      "file": "apps/desktop/src/renderer/alpha-mask.test.ts",
+      "sha256": "683ec8c2e28f0f69f2d67c6e32f2e730c41c44cacf4a31e42aa2154732fc346d",
+      "bytes": 2847
+    },
+    {
+      "file": "apps/desktop/src/renderer/alpha-mask.ts",
+      "sha256": "6e0f007059481e8b905b0b888b7346f75e0d46a98ffe21dac6009959db1803a8",
+      "bytes": 2306
+    },
+    {
+      "file": "apps/desktop/src/renderer/frame-gated-refresher.test.ts",
+      "sha256": "94f338032bd251cc369764bad95482da10a05ec89533e145f4c59c0ce8063a51",
+      "bytes": 2197
+    },
+    {
+      "file": "apps/desktop/src/renderer/frame-gated-refresher.ts",
+      "sha256": "4b5b4e0a05e88e85487599fd5a2fab7b801bc3fa483c059459b99451eb0c2603",
+      "bytes": 1649
+    },
+    {
+      "file": "apps/desktop/src/renderer/live2d/avatar-commands.test.ts",
+      "sha256": "190de17a116561afe29a11c4f54ba972f6ece867c25b7321b6f0be3ee1f7efd1",
+      "bytes": 4550
+    },
+    {
+      "file": "apps/desktop/src/renderer/live2d/avatar-commands.ts",
+      "sha256": "d597b1bf88c1fddb7bb2129cb152789eac55146269388512cc037f1786ea605b",
+      "bytes": 2350
+    },
+    {
+      "file": "apps/desktop/src/renderer/live2d/avatar-controller.ts",
+      "sha256": "6e2c9cedf89e9de4f676f814abcf051893b99a481713b48d39e34bac9c08d0ee",
+      "bytes": 2182
+    },
+    {
+      "file": "apps/desktop/src/renderer/live2d/click-presets.ts",
+      "sha256": "6515776c103b775b38710b92543ee64253debaab20fd38c0c460fe298e0920c9",
+      "bytes": 1496
+    },
+    {
+      "file": "apps/desktop/src/renderer/live2d/click-reactions.test.ts",
+      "sha256": "9a1791dbbd4924e48498d3c28cadd8d246038bf0dd6526a1256abffd93daae5c",
+      "bytes": 3386
+    },
+    {
+      "file": "apps/desktop/src/renderer/live2d/click-reactions.ts",
+      "sha256": "12c43208daf7217414b42e9856e64b131c104708330d7ae1d36d778f29e61227",
+      "bytes": 1999
+    },
+    {
+      "file": "apps/desktop/src/renderer/live2d/click-regions.test.ts",
+      "sha256": "b9bd744c5599958cd590b056355a48734742931c4d0c9e7d5757f24af345454d",
+      "bytes": 1218
+    },
+    {
+      "file": "apps/desktop/src/renderer/live2d/click-regions.ts",
+      "sha256": "c863eb494201248c04748b61d9fa61f43f3c6addb042f9fbc4bcb7cbb116277e",
+      "bytes": 1368
+    },
+    {
+      "file": "apps/desktop/src/renderer/live2d/costume-switch.test.ts",
+      "sha256": "573189c1e17c80d74a8673372a7f8dc5fe417bc5846ad8be066b053e6f477d49",
+      "bytes": 4557
+    },
+    {
+      "file": "apps/desktop/src/renderer/live2d/costume-switch.ts",
+      "sha256": "b56dccf7d1f79e637276c308dfcd49f4033f9adab2631192b8e7c1cfc88884fc",
+      "bytes": 3129
+    },
+    {
+      "file": "apps/desktop/src/renderer/live2d/emotion-resolver.test.ts",
+      "sha256": "1acbbb62386d438b8864eda25569b0ba62bfb7aa241f4937541bea7694f9402f",
+      "bytes": 1669
+    },
+    {
+      "file": "apps/desktop/src/renderer/live2d/emotion-resolver.ts",
+      "sha256": "3b27fb3f6b154e80b2bfb7324444161a294ea95bfab66b7efab8adfba00bea94",
+      "bytes": 1950
+    },
+    {
+      "file": "apps/desktop/src/renderer/live2d/gaze.test.ts",
+      "sha256": "3feb85858b3e62b5bb731da32ea122fd23968ed5f016015563cf1ef371ea0d81",
+      "bytes": 1348
+    },
+    {
+      "file": "apps/desktop/src/renderer/live2d/gaze.ts",
+      "sha256": "c2866669b5a3ea3046893e4fbebe20d1ca7aa872448ab95dad46d1d21671671a",
+      "bytes": 1760
+    },
+    {
+      "file": "apps/desktop/src/renderer/live2d/idle-motion.test.ts",
+      "sha256": "9f655e450e986c231fe2ebe3a3a2cbd599450b4b60980369627f33f74ea93fd4",
+      "bytes": 4983
+    },
+    {
+      "file": "apps/desktop/src/renderer/live2d/idle-motion.ts",
+      "sha256": "850c732354dd77775f1b54655149b17382b33e3f0328316994a818860d1b8839",
+      "bytes": 4820
+    },
+    {
+      "file": "apps/desktop/src/renderer/live2d/load-character-model.ts",
+      "sha256": "bda34be582ce5d2d56f6135428f37a62ad9a86a103550ab4e57eff111d59532c",
+      "bytes": 4551
+    },
+    {
+      "file": "apps/desktop/src/renderer/live2d/model-vocabulary.test.ts",
+      "sha256": "a97bb08157a5a32622a0abd9b1fd0ee132cebc1cdb9df3c441f6e1707676e91b",
+      "bytes": 1810
+    },
+    {
+      "file": "apps/desktop/src/renderer/live2d/model-vocabulary.ts",
+      "sha256": "78b2ce4fdb99d3e68f0b14f66d8a7c0c26af670bf8afe55fa40d0d5686ef2a03",
+      "bytes": 1528
+    },
+    {
+      "file": "apps/desktop/src/renderer/live2d/proximity-reaction.test.ts",
+      "sha256": "97cef581ee26509a8160f650eba4d49f3e89964b6f2e4e7a47cde6746c3ab880",
+      "bytes": 3782
+    },
+    {
+      "file": "apps/desktop/src/renderer/live2d/proximity-reaction.ts",
+      "sha256": "5a584fa07764aa8bbbefc5f2f980dc3030e58e37b94b076756aff9ec1b4e6e77",
+      "bytes": 3242
+    },
+    {
+      "file": "apps/desktop/src/renderer/live2d/settings-prune.test.ts",
+      "sha256": "9533a2f3357559b23471bf5b51bb3541f40d553a3d252dfa934f15b47d7edb3a",
+      "bytes": 4270
+    },
+    {
+      "file": "apps/desktop/src/renderer/live2d/settings-prune.ts",
+      "sha256": "55b38e1f30fdc48b90b6f28cab9310f9f0d31a7dea38acfd8862cc93e418246b",
+      "bytes": 4550
+    },
+    {
+      "file": "apps/desktop/src/renderer/pet-scene.test.ts",
+      "sha256": "0b947d15377d4b98b7fddd89ad63b138b9be4cac2a6613675fa82c00ae0cd3ff",
+      "bytes": 8976
+    },
+    {
+      "file": "apps/desktop/src/renderer/pet-scene.ts",
+      "sha256": "bc5d3bbe0289b4bbc413b03cc8ecc0684ce4fc82fff758be31b2089a791c81b7",
+      "bytes": 13914
+    },
+    {
+      "file": "apps/desktop/src/renderer/render-governor.test.ts",
+      "sha256": "c2d769bf715d52c89894ffe589d28ff9d5ffaace08f77d9ae9f43533d99ea2b3",
+      "bytes": 3063
+    },
+    {
+      "file": "apps/desktop/src/renderer/render-governor.ts",
+      "sha256": "51cbbd5b2122e7606fcc5a5d300661b0ea1d070d80be56f683f803fed3ca0fa6",
+      "bytes": 2635
+    },
+    {
+      "file": "apps/desktop/src/renderer/spike/create-stage.ts",
+      "sha256": "c2b1fa27024e4c902f8278e9eef827be8308007881f1e79a755e0d4508b360fd",
+      "bytes": 990
+    },
+    {
+      "file": "apps/desktop/src/renderer/spike/param-probe.ts",
+      "sha256": "ffd11e7180ad5ef1e0ede879aea0dbb03998f71015fba21963c3b57b0d4530f6",
+      "bytes": 1800
+    },
+    {
+      "file": "apps/desktop/src/renderer/spike/probe-model.ts",
+      "sha256": "d3aca03bd105e5fa7733851472bdcac95fa099b763d69f783dd5cf2a47ac36e1",
+      "bytes": 4857
+    },
+    {
+      "file": "apps/desktop/src/renderer/spike/run-spike.ts",
+      "sha256": "3db156dc68fb4afd1d0a6d57389675ab6d8e9d63fd17343d19f59d3d81ba92b4",
+      "bytes": 2847
+    },
+    {
+      "file": "apps/desktop/src/renderer/spike/spike-status.ts",
+      "sha256": "d8cb999890cb3a47cef2e0bb8a36d78468525706f65eeaf6fb2fdd297bda85f8",
+      "bytes": 1243
+    },
+    {
+      "file": "apps/desktop/src/renderer/stage.ts",
+      "sha256": "1c2ecee0f47f5a016669a2b788146d14c01ae2b2582ceb5bb59b3e1edc576738",
+      "bytes": 1692
+    },
+    {
+      "file": "apps/desktop/src/renderer/state-machine.test.ts",
+      "sha256": "93ad53ed201216636cdb4b10f0242d051aab267febcea830388862996b8b5150",
+      "bytes": 1947
+    },
+    {
+      "file": "apps/desktop/src/renderer/state-machine.ts",
+      "sha256": "1ac833250229ba2e2d3cebf987a376c5c41413a6d6b1397d744d9890da454c65",
+      "bytes": 1644
+    },
+    {
+      "file": "apps/desktop/src/stores/avatar-store.ts",
+      "sha256": "602b7bd2e56d108349ff5a876f603ea4f4b5cdc3701ddd97a066c4b5eba802bf",
+      "bytes": 801
+    },
+    {
+      "file": "apps/desktop/src/stores/connection-store.ts",
+      "sha256": "b226bb7bc2f7be16ea5b5fdeee1a0a597c7175459483b3b36cd28db14959cb38",
+      "bytes": 1071
+    },
+    {
+      "file": "apps/desktop/src/stores/interaction-store.ts",
+      "sha256": "7d391ecdebccac35c0d72075f8343bbffb69c29ace579f9ff5dbbcc3d1f0bf99",
+      "bytes": 1643
+    },
+    {
+      "file": "apps/desktop/src/vite-env.d.ts",
+      "sha256": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5",
+      "bytes": 38
+    },
+    {
+      "file": "apps/desktop/src/windows/home/action-button.tsx",
+      "sha256": "4744c07f2b36a15094db5063eb5cafcaca3207b2aca71cf5288b7c050ddd1c5c",
+      "bytes": 2391
+    },
+    {
+      "file": "apps/desktop/src/windows/home/badge.tsx",
+      "sha256": "273e717c57db6f9c543a12ae1a0251ace21c6c08f501d3d1dcef654a5b529941",
+      "bytes": 1069
+    },
+    {
+      "file": "apps/desktop/src/windows/home/boot-page.ts",
+      "sha256": "9d721dfa193b4f54c53580dc2d65a2a0eb67d5cd21d3de18a7a184d4c746ecc3",
+      "bytes": 636
+    },
+    {
+      "file": "apps/desktop/src/windows/home/default-page-id.ts",
+      "sha256": "d4499e7da041768fc585590e42a29dba6c2f86ed794c3988ae1f1a4420a8d0cf",
+      "bytes": 399
+    },
+    {
+      "file": "apps/desktop/src/windows/home/extension-convergence-controller.test.ts",
+      "sha256": "577a8bf6f44c665ef26c6273084c452bc060d21288f6829165707683b3d89d73",
+      "bytes": 1492
+    },
+    {
+      "file": "apps/desktop/src/windows/home/extension-convergence-controller.ts",
+      "sha256": "0dc4a5ebb34412923014a3c6e4775e492fa452e89167a97137beb7542289d64b",
+      "bytes": 2533
+    },
+    {
+      "file": "apps/desktop/src/windows/home/extension-convergence.test.tsx",
+      "sha256": "2044257df0b84dedcf19a220361343658456fa4dbfa23adb4be8619d29fbeaff",
+      "bytes": 1018
+    },
+    {
+      "file": "apps/desktop/src/windows/home/extension-convergence.tsx",
+      "sha256": "95a60b3d59212cdc1f966f607c7c24d0987f848ceb28a7e1a152c80ea1d5d3d3",
+      "bytes": 2887
+    },
+    {
+      "file": "apps/desktop/src/windows/home/home-action-readiness.test.tsx",
+      "sha256": "085804cebaa4c91b501ebafc28698cc1eb1e59421a96e28148ec4d8e0fc32372",
+      "bytes": 3174
+    },
+    {
+      "file": "apps/desktop/src/windows/home/home-client-context.ts",
+      "sha256": "9a7eb9e26735680ccb2e5e0e50060b516f95417870c30e622c8f50bed7eaa289",
+      "bytes": 1121
+    },
+    {
+      "file": "apps/desktop/src/windows/home/home-navigation.test.ts",
+      "sha256": "61261e149a608f931e18dac21181c4c527f1b37f6b63f57d2ae6b755cc326328",
+      "bytes": 2853
+    },
+    {
+      "file": "apps/desktop/src/windows/home/home-shell.test.tsx",
+      "sha256": "7ae3a0671eb621617267e5cbd4f16949d571267ce70cbea918561dfa49acc448",
+      "bytes": 2239
+    },
+    {
+      "file": "apps/desktop/src/windows/home/home-shell.tsx",
+      "sha256": "dbf3d6c386193753e64c9d2049d6db9f0f3a65362690cc97265099ef7f12fd3f",
+      "bytes": 6189
+    },
+    {
+      "file": "apps/desktop/src/windows/home/home-store.ts",
+      "sha256": "92d64466c80db5d5728aeba0d0f68fd44e4904affc31f1e71ed65983cdc90b3f",
+      "bytes": 711
+    },
+    {
+      "file": "apps/desktop/src/windows/home/main.tsx",
+      "sha256": "488138a105568208b604445649def148d753c95a76674a2e4c62df880c65732b",
+      "bytes": 865
+    },
+    {
+      "file": "apps/desktop/src/windows/home/navigation-boundary.test.ts",
+      "sha256": "535542aa34092d39cc67435c859f2c0112a649138dfe9c0660220ba4dc1cd91d",
+      "bytes": 812
+    },
+    {
+      "file": "apps/desktop/src/windows/home/page-card.tsx",
+      "sha256": "787b3c336a4a44a2a0d0e4e9adcaa23623d9249b7c7b5a987820a2620173c170",
+      "bytes": 1801
+    },
+    {
+      "file": "apps/desktop/src/windows/home/page-chrome.tsx",
+      "sha256": "fcf13b7fed63f95cb3201aa7dd872c7416581fa75f6c84474d932bbbc5bfae64",
+      "bytes": 2056
+    },
+    {
+      "file": "apps/desktop/src/windows/home/page-visibility-store.ts",
+      "sha256": "1a2574db3b4e93b5cea769b373d2384fd57311d7246ce0d08efdadecb6df8c6b",
+      "bytes": 1359
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages.ts",
+      "sha256": "b8e16453690965c0c5073d89cdebd9a42db0aafa4f8c76d3d95e165cefff7dbd",
+      "bytes": 2960
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/chat-client-context.ts",
+      "sha256": "c77aa7f537c344f0d7640ff44fba46d27a70880144033f4aed9bc9b163c16947",
+      "bytes": 708
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/chat-delta-coalescer.test.ts",
+      "sha256": "36ef4c421908312461e426f5c6e167e583cfad70805c6691629706b841e925c8",
+      "bytes": 4876
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/chat-delta-coalescer.ts",
+      "sha256": "28cb65b4235dd87a493c7ffba86a026ac2b86186c7b87395ec7adf974d8c1da7",
+      "bytes": 2419
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/chat-page.tsx",
+      "sha256": "d25028d9fadb843ae66cfc565a941ef779badca2b09191ca5ecba36e55a8d3ff",
+      "bytes": 1887
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/chat-timeline-store.test.ts",
+      "sha256": "612495b9f3c5a2c3500f8b5c7aeb74bbd73358cb45fefbdb86d3df82de5d6667",
+      "bytes": 12070
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/chat-timeline-store.ts",
+      "sha256": "b2821edfbec8a2c99a2b6925fdd87209576187c2f81c268cbb61b23be8c65fdd",
+      "bytes": 7760
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/composer.test.ts",
+      "sha256": "48e5cf9c0ddad52f87cf5b9f04c8ccfec3d8b97add817781081a01b98ef1b1ed",
+      "bytes": 696
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/composer.tsx",
+      "sha256": "755e118b437746d7c83ee63b4d2b2684ad32e106fe1fc081c8fd5a6c39da1ae3",
+      "bytes": 5844
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/date-group.test.ts",
+      "sha256": "501bca94c0a5da720530488cdc324f7b3ebf72a5409077026b16893a69946c98",
+      "bytes": 2068
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/date-group.ts",
+      "sha256": "3f53c2ef7d5c88e108a3f77cae4c39a7a940ee9cff611db57bf955c1489f000f",
+      "bytes": 1420
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/image-attach-decode.test.ts",
+      "sha256": "f8b861772349349efa20f3a4b0b2672ad9add519e250ad60fddd0666195cf808",
+      "bytes": 1259
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/image-attach-decode.ts",
+      "sha256": "8956462a48b4ed236d031f0e78afe1f55f6b7edfd8df4c98ed4f62d14b7d916b",
+      "bytes": 1718
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/image-attachment.tsx",
+      "sha256": "8068903e328eb73308b3f9da7cf3a9dfd762b8addad1e7b1ca9787173b058851",
+      "bytes": 1338
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/markdown-view.test.tsx",
+      "sha256": "1476258cdc923695e5d10282364699c2fdf9f20ac514e843bb5862f4b5ac4ca7",
+      "bytes": 2265
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/markdown-view.tsx",
+      "sha256": "27e38f885072dc9320d137372c79d2a1676611e33aa25baea0e55085e7e8b9a0",
+      "bytes": 1858
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/restore-chat-timeline.test.ts",
+      "sha256": "763ed44882dec5d770e21c738280288bfc140226c167b9d3f78c0969a4a1ada8",
+      "bytes": 4405
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/restore-chat-timeline.ts",
+      "sha256": "6c35f6c8f9c4467684f6a40a4fd869625e89fbd06f6dd2a9d5594c3932e4b0c0",
+      "bytes": 1879
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/timeline-message.tsx",
+      "sha256": "d1033c498a4f699a53c6a0581b6a212d0391857af1083170e3ce6f5c20b6e4e4",
+      "bytes": 2645
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/timeline-view.tsx",
+      "sha256": "582120864f11aeada765cbc7a1e6acd0e35960796809c9fda72f9b95bf0fdc40",
+      "bytes": 4478
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/tool-card.tsx",
+      "sha256": "3585a6c889c0901eed7e234ca22df16573567b2b364b351b93007ecee2268535",
+      "bytes": 1486
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/use-attachment-image.test.ts",
+      "sha256": "41aba51d655d0f724b89c03bd968e9d2c11c6d5a3db19daa44512bf5b0ce3b1e",
+      "bytes": 5519
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/use-attachment-image.ts",
+      "sha256": "bbbf2726fd45b06bcbbff1dac851f8cd6c60d4f3f00d70ab02c01bc894862c0d",
+      "bytes": 3386
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/use-chat-connection.ts",
+      "sha256": "8fd93a914a2d7de26366b266a88e8e99c7c3668f370f7ff8c71b72e820cdf056",
+      "bytes": 936
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/use-chat-timeline.ts",
+      "sha256": "91c1decdb78e0b222c137edc5ee70df0afdd481148666687390acb72320e0f08",
+      "bytes": 7496
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/use-image-attach.ts",
+      "sha256": "453823ce70ba36f4339931713fcbe148aefb9254f659fd494200b026d74c5309",
+      "bytes": 4604
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/chat/use-timeline-scroll.ts",
+      "sha256": "78c7527a62d728b37fed15ce03c1bd0ae6db9ca93eb66e3883d50d075da98df7",
+      "bytes": 3402
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/costume/costume-page.tsx",
+      "sha256": "4e0bade21cf0abcbca10d906c1cffe2f16bb69b007053f77a2e1bb91b8be1454",
+      "bytes": 5071
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/costume/costume-result-deadline.test.ts",
+      "sha256": "3011907b0092a04c4a4f63d064f63e0be06cde5dc22f3eab0c2ae88b9f85e624",
+      "bytes": 1050
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/costume/costume-result-deadline.ts",
+      "sha256": "9cda224cd0b319d44e74b717a9e8da18f2b232c04231047c64164c35eb016bd2",
+      "bytes": 725
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/costume/costume-row.test.tsx",
+      "sha256": "92469cb8786b303a0fd51516918662b5eabbc53cb0479ee74db45d322802ea10",
+      "bytes": 2416
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/costume/costume-row.tsx",
+      "sha256": "212094fd63b7db0b306aea1c2e8a60ef2dd6bea846b55a5d9b8b288a80f92d4a",
+      "bytes": 2033
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/costume/costume-select-state.test.ts",
+      "sha256": "510648568de0b6306aaa2ffdcc005e3f63bf9f33317caf02f35644738dcc47cd",
+      "bytes": 7116
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/costume/costume-select-state.ts",
+      "sha256": "cbd56020989bc0b09e4bd6eab506fc4433b1744cba72063d1261b49c88cdff63",
+      "bytes": 4131
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/costume/costume-view.test.ts",
+      "sha256": "e36b8eff9b6705d331e438219dff7ec3a898d1ef1a1d5f1b2faf636b35fe3cf6",
+      "bytes": 2401
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/costume/costume-view.ts",
+      "sha256": "ee21b043fe1bc6678194008785a5d3fc91e75baf2f5912433571f94c36d04951",
+      "bytes": 1937
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/costume/use-costume-page.ts",
+      "sha256": "af7f2b7472289fd8d8084b9df1837bd4098afe5c6f7e182f9a31ac14bdc514af",
+      "bytes": 4841
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/mcp/mcp-components.test.tsx",
+      "sha256": "066e6e5c1729514eb8565de6daee13330544986ddbf271912f70784b2de7c3e3",
+      "bytes": 5025
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/mcp/mcp-controller.test.ts",
+      "sha256": "514608326ce9657a39e5fd0f3fb0b9a13aad6ad7c4f37aee18dc2841d0fad51f",
+      "bytes": 8903
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/mcp/mcp-controller.ts",
+      "sha256": "51e704b65f1743102d120960469bf277015a1891c73a65d89c8b87c0df21b7a1",
+      "bytes": 9235
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/mcp/mcp-labels.ts",
+      "sha256": "afacb1954fe0c5dd97b420b1129e182d9d0c13140281bc2b0a6d3413a7e05dbb",
+      "bytes": 2290
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/mcp/mcp-no-cache.test.ts",
+      "sha256": "735f14e407b8af95ef8978c84105ba31ce225000f40cd6c8d3a4cb61b4c541bf",
+      "bytes": 1290
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/mcp/mcp-page.tsx",
+      "sha256": "d9f37d3afe95d285197ebc38a0d4d44d2f4e73a780ece9707a8ca1925f0fb9fe",
+      "bytes": 11242
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/mcp/mcp-server-card.tsx",
+      "sha256": "530e8916ac077efd1ed261299cc957766a4203e7a22c300da227bd7c3c2e7597",
+      "bytes": 4823
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/mcp/mcp-server-editor.tsx",
+      "sha256": "25e53c0f2a36a4a02d84c5e60e6798eb4605fdc00a38c74ddd47c5303a4ee23f",
+      "bytes": 6457
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/mcp/mcp-server-list.tsx",
+      "sha256": "6884636c7f3639a238f85fbed88c43751dc7cb57c401428aa5af82724bc21fb0",
+      "bytes": 1683
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/mcp/mcp-state.test.ts",
+      "sha256": "cdd5428c0b5a505e33673539b1e3d60cb086d02423ef7590a8ff8a3a3fec116d",
+      "bytes": 6550
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/mcp/mcp-state.ts",
+      "sha256": "d5050839100cf3852fb45370c7bcfde0427a8f5c0d3d924ae56e135a6421eae5",
+      "bytes": 10593
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/mcp/use-mcp.ts",
+      "sha256": "26f71f9ddeab728741ccf45b7d7142bf2bae20b0ae8255c8cb1b3272858c5f55",
+      "bytes": 3587
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/monitor/monitor-controller.test.ts",
+      "sha256": "0573703b5ba3949deec3b371a106e3ddce36b3ca2843f84c25e4efc00bdda058",
+      "bytes": 7698
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/monitor/monitor-controller.ts",
+      "sha256": "c594ea1801723b62117c4f87c0fbf7d3ff2dbe7ed2f5995f3586e0170a09b7f6",
+      "bytes": 13775
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/monitor/monitor-labels.test.ts",
+      "sha256": "ea22bc4e373fad66ff658b444688f92653780b4f461196225ee4dc46d151a8f5",
+      "bytes": 1660
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/monitor/monitor-labels.ts",
+      "sha256": "6f7413107071d5589aa5037c6659de634d933b116dd793600c1e37084543d166",
+      "bytes": 1861
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/monitor/monitor-layout.tsx",
+      "sha256": "23efe4db34ef74e4f4297e3e45c0dbce5f848eab156bdb85bfa51c785cccc727",
+      "bytes": 4820
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/monitor/monitor-page.tsx",
+      "sha256": "e0f39240edd60209e773b57cd58e08f8efcc8221bf9ba784f9d2232ccebd144d",
+      "bytes": 11523
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/monitor/monitor-view.test.tsx",
+      "sha256": "48fbee71ed551c004855d5156cc4630e2fddae6b8172ad6c59831e9e3d9b04f4",
+      "bytes": 1678
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/monitor/monitor-view.tsx",
+      "sha256": "bd2562ddc6cc8b8a66caba85013757244c96435931eb96b5315ef85076b77ead",
+      "bytes": 2350
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/monitor/use-trajectory-follow.ts",
+      "sha256": "01e5158ec9faeb15c63610eb1c079ad7a54850b81d44e7ae925ff48449ae374f",
+      "bytes": 2412
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/hindsight-activation-actions.test.ts",
+      "sha256": "5d4d4323290ff9da42c248cce8f838dd35c09ef020a2de3988b70f030ad3fe22",
+      "bytes": 15733
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/hindsight-activation-actions.ts",
+      "sha256": "4116aee77ca1daad9c7ec12eec714dcc6246c5115e1cd9da83d0cfa539331d7e",
+      "bytes": 4515
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/hindsight-activation-card.test.tsx",
+      "sha256": "eccf5036807fb6ffc481a18ac8a4a2ecd87e1c199ee97145d382bffad12826b6",
+      "bytes": 8591
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/hindsight-activation-card.tsx",
+      "sha256": "684fc4a56dd92627dd994e0e9ba22d6a9ae631fdd128ed5d9cc4c2b922882332",
+      "bytes": 4805
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/hindsight-activation-fixtures.ts",
+      "sha256": "f9416e86d6e6bf26b0b232e0cee8d2ac9c3d0840b789d49b64422dae29708755",
+      "bytes": 8743
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/hindsight-activation-state.test.ts",
+      "sha256": "4e6a0adf49199c64b41716f8301a67b8c61ef4d9385d442096054dbd90e8dec9",
+      "bytes": 8444
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/hindsight-activation-state.ts",
+      "sha256": "7798bd8f0046cc6843f6d84bf647c04852820198e1ce70e24e63dacb9c083c6a",
+      "bytes": 10865
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-browser-fixture.ts",
+      "sha256": "f0ac91d664716f37a095ad854aeeaa8345b9f5aeaeccf56c60688a5165562487",
+      "bytes": 2826
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-browser.test.ts",
+      "sha256": "0588c56a9e81dc4f7c33e04de7b94494ad18bbfa5aaadd8fcd2874fc9c9b8707",
+      "bytes": 9329
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-card.test.tsx",
+      "sha256": "cb5d63722aaf5c7427b2c879cfd8ef9b53789ffd5b278be538006557dd5d56e0",
+      "bytes": 4361
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-card.tsx",
+      "sha256": "f765dad2a21a0144081dd966ddc8bac647164686c543c1754ad9f393dc3078f6",
+      "bytes": 6161
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-controller.test.ts",
+      "sha256": "4f75225e9578d857b6aeb2844ebc56c7d76128295d1cce794d20e0fe7c154937",
+      "bytes": 8194
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-controller.ts",
+      "sha256": "9c37ec01ae504864a3e503d860e9fafc3598da9310236b8549c164c508a91363",
+      "bytes": 4752
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/hindsight-configuration-state.ts",
+      "sha256": "99e75ad5236d91655c0e619143c30fabfec5f3346939895805d32d7a7d12acde",
+      "bytes": 3826
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/local-onboarding-actions.ts",
+      "sha256": "46038574fd48adc5dd1a88baa52bc489147ae0e270fd3f00d45ff68352f94152",
+      "bytes": 2368
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/local-onboarding-card.test.tsx",
+      "sha256": "0dfb89fdfe56a8e48eeaee3a95e9b75cd7d105edfc9b04ad62b39de14266567a",
+      "bytes": 9030
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/local-onboarding-card.tsx",
+      "sha256": "e02846a72ac171220950934e0be4e8641592a7194948dd0ed6110d38c89b6cc3",
+      "bytes": 8554
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/local-onboarding-controller.test.ts",
+      "sha256": "fcce7842ee94129d523b2d698a06710bd90ee4d4b7a781a52dbac8e2a24de18d",
+      "bytes": 16280
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/local-onboarding-controller.ts",
+      "sha256": "6e94020a1feacdd8ac18c7d7341602c332c06bcdd7e4f836691821ec0e341f35",
+      "bytes": 10497
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/local-onboarding-exceptions.tsx",
+      "sha256": "5826bf8f2c3af51171d1b8acbb313ff728e0d5c01f622f017c432bfe5de2e600",
+      "bytes": 3477
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/local-onboarding-fixtures.ts",
+      "sha256": "bb20be0dcd0f0352c91fcca50e375dcab0e8b2882b567a50f35b40e26cc0380b",
+      "bytes": 2435
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/local-onboarding-state.ts",
+      "sha256": "16b7b8a5d38a1800a06e40560a8195e3550be6cdee720783dec088498bb2dd4d",
+      "bytes": 3780
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-authority-card.test.tsx",
+      "sha256": "47515811f2eb79101c01ca6a417ea7b1021e0771083c043f6de248b7c3f8b9a2",
+      "bytes": 6480
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-authority-card.tsx",
+      "sha256": "2382bcd6f2092a7ac2d4b70a909fcb911edc2b55341f6a25cdef12195a48edeb",
+      "bytes": 5538
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-authority-fixtures.ts",
+      "sha256": "5d2a24a3ad4fa24ad8d68f3bf19ed4d4032038d6dbff2902900463189fdc5246",
+      "bytes": 6949
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-authority-state.test.ts",
+      "sha256": "4889d6a040b8e5a527a9670c25a3ec1ac404c9e411080af2d5463d3ba8c87092",
+      "bytes": 5346
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-authority-state.ts",
+      "sha256": "20e140b6a45b615af3bb3dfe006b4d018be078d39bf81a4cff72da15d8e71a9e",
+      "bytes": 6357
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-hindsight-backup-block.test.tsx",
+      "sha256": "393a502150356ba3268598cb067d2b16a5d8b3fcdf0f84c594351e8bf0db3b93",
+      "bytes": 4579
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-hindsight-backup-block.tsx",
+      "sha256": "0b209e57cd38bb0563734b3e88c753882300d36ce9e493ed1cef28e05185e5be",
+      "bytes": 3886
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-hindsight-backup-fixtures.ts",
+      "sha256": "b5d6267db4ccc1214a2615d9468ea1c77055e4fc38a84f9d90cb81fa89642d2b",
+      "bytes": 4997
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-hindsight-backup-state.test.ts",
+      "sha256": "3c85e487095fa72bc1cf8d27a12f64c14aaaecda54535e204fc4bdd5f10ce711",
+      "bytes": 11371
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-hindsight-backup-state.ts",
+      "sha256": "84d0d6bb2e38d0a456eac11cdcd3f336814bc6ec5087d0a71bb4b7952d777c5e",
+      "bytes": 10591
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-hindsight-lifecycle-block.test.tsx",
+      "sha256": "549a1f5324b06f4116f704438ddf84979e4bd771105e14a7c241d523de8e90bf",
+      "bytes": 2538
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-hindsight-lifecycle-block.tsx",
+      "sha256": "05108da20f2d6557bbc19345dcbd9c7fbe6f4fca04782e29d7ce0378dfbefda6",
+      "bytes": 1898
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-hindsight-lifecycle-state.test.ts",
+      "sha256": "f8e9d4f0eae4d7c9cb85888a5ab35e5c8ed76ce93809d77a73eacb65eea883c2",
+      "bytes": 6340
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-hindsight-lifecycle-state.ts",
+      "sha256": "645a704203a79407d6e3fa8a9a4b38b71ad8c6ff8db1e135516d6055f265ab49",
+      "bytes": 3586
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-operations-controller.test.ts",
+      "sha256": "de7c9c888380696e85ba5ebadfba37933f6c7c69bd22123c7520821e44ed5e10",
+      "bytes": 5432
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-operations-controller.ts",
+      "sha256": "2d2f807a10f4f331873d4f55aa0d475d9e5eb696b022604e37d054251f7909c1",
+      "bytes": 8102
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-transition-confirmation.tsx",
+      "sha256": "0f4fdb1f3f61a43e6fe65236ed956804f8b9455ffc42c7072b0507712dbbc3cf",
+      "bytes": 3090
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-transition-disclosure.tsx",
+      "sha256": "2da65d95b6743b085d271d85aea923d5bd2de744a9410e82451751bba4c0108d",
+      "bytes": 2061
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-transition-progress.tsx",
+      "sha256": "b10b73b8cd2e977354aa2bbf328c301f915b8bdd990b1ef61539728e63d5d016",
+      "bytes": 3336
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-transition-state.ts",
+      "sha256": "e39a91f7c229e5306f9409e865f6f4ccb24c856f2b7c0715432db03bdbe27584",
+      "bytes": 6008
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-transitions-browser.test.ts",
+      "sha256": "0c469ac14262e39dd6beec3333ab143fd2d4d6c8f0083b89a9a5cceb4ba1be67",
+      "bytes": 10579
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-transitions-card.test.tsx",
+      "sha256": "a3619f78eb3798e4f58f96689ee69f0b75cd66d13fa9523a95d9e610dabcfab1",
+      "bytes": 4190
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-transitions-card.tsx",
+      "sha256": "db6f944dd180758bf89139ffac085e2d8077cf4d3140c04082cbb7864a04a465",
+      "bytes": 3203
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-transitions-controller.test.ts",
+      "sha256": "6b3938d775a129afa4f5d8960e61349ff8253d165a861574c8bcf5ed550184d4",
+      "bytes": 6602
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/memory-transitions-controller.ts",
+      "sha256": "e1ac26918f967cba2c23b4b1aa6817829a1132ad1e08f78c922d11ae307cf668",
+      "bytes": 5036
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/operations-page.tsx",
+      "sha256": "93256d9e944e075b120fa82d296eb3588035cfd23428fa71ded5a4fb6f99faaf",
+      "bytes": 3658
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/operations-state.test.ts",
+      "sha256": "43a8245e3de66f59f43b64d04a18a63b4cbe42486ed3a623d67ffd489900538b",
+      "bytes": 3317
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/operations-state.ts",
+      "sha256": "5e517448b4fb92f2664afa5121836e17c8fe890e3070c1e865dd54d1a9069efa",
+      "bytes": 2796
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/storage-card.tsx",
+      "sha256": "02854799750b45a83af6ce7ca84ecc23173526362720a2e8273f4564bbbb033a",
+      "bytes": 2542
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/use-configuration-characters.ts",
+      "sha256": "67227c01567266a8b564572af9bcfa4ead204445d8a50331be6f4e18babffe7c",
+      "bytes": 1250
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/use-hindsight-activation.ts",
+      "sha256": "db83733a656ba315b2a2e3c3a6ffdacf2254d877375597671cfa2fef4dbe00d7",
+      "bytes": 2910
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/use-hindsight-configuration.ts",
+      "sha256": "e8c8d9ea98f8ff6185e9eb011a96a50618a04e9623eb8c9183a80675f6fdb8d8",
+      "bytes": 2109
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/use-local-onboarding.ts",
+      "sha256": "ad332ca1b2161406789007bc8901759f8076c1bd92d301fad07795c2e386710c",
+      "bytes": 1919
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/use-media-clear.ts",
+      "sha256": "a7e64e9b1c55486bc2bfbdb86190f004933c6ce7a57213816a918b5c20e4c911",
+      "bytes": 1974
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/use-memory-operations.ts",
+      "sha256": "43f07c3c2be6457cc96d30cc9f3b8e3d7c6376b1889eefa8d6c0041db7fc7352",
+      "bytes": 3522
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/use-memory-transitions.ts",
+      "sha256": "6cf256a5b1cea59f0da641702f0efea5ac716df2414f3950c18cfa11791440ca",
+      "bytes": 1209
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/operations/use-operations.ts",
+      "sha256": "8639c4d98d91c783ffce73cdc7c9bf230ccfff0c75faa30dd991c004095d0032",
+      "bytes": 3467
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/perception/pause-controls.tsx",
+      "sha256": "6f7bc0b744904c5154bb2bd6d81ba7404ed2e9677c3b2890ff90392e03517e9f",
+      "bytes": 1707
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/perception/perception-page.tsx",
+      "sha256": "a704730fcca8506438a5d068073a1b894e3a958a9a28683d48e58fdaf428e830",
+      "bytes": 2995
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/perception/perception-view.test.ts",
+      "sha256": "991b04b72e4b64d9191861017ebbdcd41eddaecf0dde6789d0efa6f0309eca31",
+      "bytes": 2297
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/perception/perception-view.ts",
+      "sha256": "aa750fd18d37841a67b3ed5339941a6e78786a0c14cafcddd3bf20ef2b5d2029",
+      "bytes": 2201
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/perception/use-perception.test.ts",
+      "sha256": "62bae8e54cdf51df8961234c1c93aa7d3ca1ac5a7eae67c8e22f215cbfcbc0fa",
+      "bytes": 1119
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/perception/use-perception.ts",
+      "sha256": "c231fa051f0553a49cdacb29ee4277563f665dcdb09f50d52908887486f72c56",
+      "bytes": 3745
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/approval-decisions-controller.test.ts",
+      "sha256": "8d237f2b48920a323083d271fd3c045f7c07ce3ad1bb5a37e16addbce954f8f3",
+      "bytes": 3241
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/approval-decisions-controller.ts",
+      "sha256": "4c26e2b779ed4902631b053d4c9de34f5739fc1879e8d7f2e061e96871dc037a",
+      "bytes": 3758
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/approval-decisions-section.tsx",
+      "sha256": "189ceffbb6f3debf7f92598a58aab9a5db6d84a0bd1380abbf2554f906f6cc3c",
+      "bytes": 3177
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/config-gate.test.ts",
+      "sha256": "e9e8aeda040c8b5d445f4e8a27dbfc8b55fc29e1c651e408e92aa394e2acf5a6",
+      "bytes": 3286
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/config-gate.ts",
+      "sha256": "50dda264d98bfdca126a493a0b54c53bda64d625c4756c1240a3ab1576ecfaca",
+      "bytes": 1890
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/config-groups.test.ts",
+      "sha256": "da2433491306cda1f9b6a94c043104de5f2f42aa08d54234517e149cf4d324dd",
+      "bytes": 3504
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/config-groups.ts",
+      "sha256": "3322891dba6a481dee368532491a9c1bd19ea757692aff7246332e52818ddd14",
+      "bytes": 6780
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/config-state.test.ts",
+      "sha256": "ae7be1df901a89c32bb93a45724f7da61ae7fe5054eb3969c6281ad0c9d27fd0",
+      "bytes": 3300
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/config-state.ts",
+      "sha256": "dd63c21ca4b589ae030ba5e850bb052a2fee46b70642b943ccb9e4b9758f6235",
+      "bytes": 2923
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/knob-editor.test.ts",
+      "sha256": "c5f31e33d173c2f9b8dbeb448dd9f3baffbac9f0b2144ae69eae54757d25f271",
+      "bytes": 3396
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/knob-editor.ts",
+      "sha256": "daf79c7a79876c26a781294b09d2122b77b997e05fc32fc6c18e4bba29e4740c",
+      "bytes": 3090
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/knob-field.test.tsx",
+      "sha256": "13587332e9404e4b50dc20c942a71875da3bafbbb17f0152376f5537360102d2",
+      "bytes": 1498
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/knob-field.tsx",
+      "sha256": "2dd94854cca7a4ab66a084240befa96f02578dae465d6d8adbf758b1909aa074",
+      "bytes": 4487
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/knob-input.tsx",
+      "sha256": "2097482aa5c0d54358c7d1d9a7007dc4bc0ea705faab6ed646d891a4929576f5",
+      "bytes": 3050
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/permission-cell-row.tsx",
+      "sha256": "e1247d62ea74585beeb724840bcc3360bb48935f94a2ea701195dffa1579c55b",
+      "bytes": 5122
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/permission-cells-card.tsx",
+      "sha256": "85a96046387272c3cae9edc93b24b104525f1152944f1fc066b59ebdc6f4022e",
+      "bytes": 2567
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/permission-components.test.tsx",
+      "sha256": "a488b767a21b8ae1d65f794f43ab6e841e11a39ffef817622d33ecf7c24855a8",
+      "bytes": 2134
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/permission-controller.test.ts",
+      "sha256": "3f619a4ddf2ab3291a192d4f084889309d8521da1dc466c1bf57bdf877956062",
+      "bytes": 6966
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/permission-controller.ts",
+      "sha256": "e1600b10d0c2b873c012c817a32b5171777e2b19b7f2daff9522ef3b6bf3ac5c",
+      "bytes": 5035
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/permission-level-card.tsx",
+      "sha256": "8d8c51e87375f97804482100843a91aea13737ce41fcc20f979c8654b7e7852c",
+      "bytes": 2227
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/permission-no-cache.test.ts",
+      "sha256": "f1c2a8a01f4bdb2574052f4a097ab10ade01a0c9f6896f18db99052db2e0fab3",
+      "bytes": 1083
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/permission-section.tsx",
+      "sha256": "15a287bbfca6039bf2886db27b4c0a0a6878fe77c9c21862a93e276b749f1ccc",
+      "bytes": 2530
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/permission-state.test.ts",
+      "sha256": "9e4d4219c08de9b76feae0dca4ee1a599798afd3d1eeab2da1919a2c8491e7dc",
+      "bytes": 3864
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/permission-state.ts",
+      "sha256": "7fd2bdaa59ef8ccea4626d21f4e4e48b0c7482a9a8768008ff32623f09414397",
+      "bytes": 6020
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/settings-page.tsx",
+      "sha256": "9d511ee0901e2eb4a13e022aec4eb27c181bcfc9e59dfd4552a425c092a44551",
+      "bytes": 4194
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/use-config.ts",
+      "sha256": "15928fcdf15a325ee5946220487b62c8fc138359298575e1459d62ca758bb950",
+      "bytes": 5376
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/settings/use-permissions.ts",
+      "sha256": "c6592b64167d9c19968121b75a30df18e8698b2b8840cf999c7ef35e4b1900b9",
+      "bytes": 3013
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/skills/skill-card.tsx",
+      "sha256": "259680874787db8c32967a6faeaf844b31d157dfd0a75c6db427cf991bf6fa53",
+      "bytes": 6199
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/skills/skill-import-files.test.ts",
+      "sha256": "0842a6a2859a40edb8f0e1f96d989581a4ac54e4d11a5ab2d895710a911b6476",
+      "bytes": 1593
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/skills/skill-import-files.ts",
+      "sha256": "9fd7078f72194db0f9779456ad5ef2807382f3f11f4c85e3a764d0ebaa5c7f81",
+      "bytes": 1822
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/skills/skill-labels.ts",
+      "sha256": "64b50134a202b444a5b6f96ff111fca11d3bb73e9feb95ad11edc0a349dcd25f",
+      "bytes": 1883
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/skills/skills-controller.test.ts",
+      "sha256": "840248e1d209f0cb64a19cad3ac885b2790b879384d6c9475240384e890f13fb",
+      "bytes": 4871
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/skills/skills-controller.ts",
+      "sha256": "f629d7b2fef4beb85ab1a399c9dbeb73d747057be4d492248f9f00e639bc9356",
+      "bytes": 5011
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/skills/skills-list.tsx",
+      "sha256": "f11d58ef2ddb0451af34dc756fb707b5174829480e9b792809c1341c846c3dac",
+      "bytes": 1597
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/skills/skills-no-cache.test.ts",
+      "sha256": "503723fddd1172f32e1a822279a3950616fd65fe9e1e99b22d73088e9682e3ef",
+      "bytes": 443
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/skills/skills-page.test.tsx",
+      "sha256": "2149033f83bb9fd062a421a260551489ae9476ef72c8b373e9a68da56c61c544",
+      "bytes": 4375
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/skills/skills-page.tsx",
+      "sha256": "27b0f31c3a85fdcb0a61a24ead536d4facce05644d1b37429f3ea3609f786044",
+      "bytes": 8633
+    },
+    {
+      "file": "apps/desktop/src/windows/home/pages/skills/use-skills.ts",
+      "sha256": "27bde2fd80b43eaa5f72d4d198983eefc132ef7a278800ef8697b77b6bc71674",
+      "bytes": 870
+    },
+    {
+      "file": "apps/desktop/src/windows/home/use-home-connection.ts",
+      "sha256": "66ae5e80a42ffd8d548934d4cc44839bf632c76d0b0e5cba970d17b4ec0cd38e",
+      "bytes": 917
+    },
+    {
+      "file": "apps/desktop/src/windows/home/use-home-navigate-event.ts",
+      "sha256": "e8085120ac1b03fb8a18827d2d522e87bc293cf892049ee4c46772914ddfaedf",
+      "bytes": 1163
+    },
+    {
+      "file": "apps/desktop/src/windows/home/visited-page-ids.ts",
+      "sha256": "5bdef615a02a907e3fb0d5bdc0328036e82b422543d0dbf1bb643778595e7ca6",
+      "bytes": 575
+    },
+    {
+      "file": "apps/desktop/src/windows/pet/click-through-toggle.test.ts",
+      "sha256": "61934c6e0d6aa69073ae83da27641662881c03bdb557ec26ba56d42dcf917daa",
+      "bytes": 2062
+    },
+    {
+      "file": "apps/desktop/src/windows/pet/click-through-toggle.ts",
+      "sha256": "7a88b364de6162bfed4a34312ee0ba7be18864d9d97eb89fc711c6ee2f1c2873",
+      "bytes": 1766
+    },
+    {
+      "file": "apps/desktop/src/windows/pet/costume-report.test.ts",
+      "sha256": "068e0e92e3158f285756c905fec4dfda54200a5ac285183d9d8a2187a97afd0c",
+      "bytes": 4227
+    },
+    {
+      "file": "apps/desktop/src/windows/pet/costume-report.ts",
+      "sha256": "9b8156a60d125041027e2cea2449b6ae2404bbe38ca58fe27a0063e6e6c4b241",
+      "bytes": 3031
+    },
+    {
+      "file": "apps/desktop/src/windows/pet/cursor-poll.test.ts",
+      "sha256": "01217a5fa5e688c1077db2a450670f6b4c05e699d8b6ed777334f8ee5192359f",
+      "bytes": 1977
+    },
+    {
+      "file": "apps/desktop/src/windows/pet/cursor-poll.ts",
+      "sha256": "2fb63845fbbca357df939a289ddfdfd1c3bf474811ec4301c84d296085c9431b",
+      "bytes": 3001
+    },
+    {
+      "file": "apps/desktop/src/windows/pet/initial-costume-promotion.test.ts",
+      "sha256": "ea7e767866a37c659324d9dc20c40b4a9b466d8a34e62313c2c8ee85ed125b4d",
+      "bytes": 4655
+    },
+    {
+      "file": "apps/desktop/src/windows/pet/initial-costume-promotion.ts",
+      "sha256": "04c68560b4f7d902b58d934d09c8bfdfc606a3ec45020e0d3795dbf20c63935a",
+      "bytes": 4894
+    },
+    {
+      "file": "apps/desktop/src/windows/pet/main.tsx",
+      "sha256": "871319229b08b11397205fd6fb6684f9c241966c2f57a9d7fd01144e85f21618",
+      "bytes": 699
+    },
+    {
+      "file": "apps/desktop/src/windows/pet/pet-stage.tsx",
+      "sha256": "19b376c1db35c73b11183dbfec1e0e0cece6d748b1e4a6c0652fefac2f95fd1f",
+      "bytes": 4060
+    },
+    {
+      "file": "apps/desktop/src/windows/pet/restore-pet-connection.test.ts",
+      "sha256": "5a6629ecb9be1f746583d46c9eb64f73b0d9437e13770e28441b69102edfe5a6",
+      "bytes": 8089
+    },
+    {
+      "file": "apps/desktop/src/windows/pet/restore-pet-connection.ts",
+      "sha256": "e57ae32f50a995c9d87886277b0b3761175b9ea93be13cf0fabe714244fc1396",
+      "bytes": 2489
+    },
+    {
+      "file": "apps/desktop/src/windows/pet/use-click-through.ts",
+      "sha256": "c10fc8c458c5d36118e9152541e139dc37ea04fcd33d3f9d9dfabe2c85e917a4",
+      "bytes": 9888
+    },
+    {
+      "file": "apps/desktop/src/windows/pet/use-core-connection.ts",
+      "sha256": "14fe0c6bc29519f1d8c2bf75cdf95fe8ff56fe301ed51781ab81d75ffa51e266",
+      "bytes": 1321
+    },
+    {
+      "file": "apps/desktop/src/windows/pet/use-costume-switch-event.ts",
+      "sha256": "91b83b11269cf8ea345500ee5ef9f3c5d4ae54415824938474a1f1a649e84a79",
+      "bytes": 3865
+    },
+    {
+      "file": "apps/desktop/src/windows/pet/use-drag-release-guard.ts",
+      "sha256": "b45c8211b23f66de21fe99e47230d22afcd748dcf6f1e4742f271a609b25eef3",
+      "bytes": 1122
+    },
+    {
+      "file": "apps/desktop/src/windows/pet/use-initial-costume.ts",
+      "sha256": "95a821624172cce7922bae20dcace4bfde7e979b522e9a8ca49201a91ae433c2",
+      "bytes": 3028
+    },
+    {
+      "file": "apps/desktop/src/windows/pet/use-pet-click.ts",
+      "sha256": "bd1cd0ebf7fe3b7c5c276baea1aed4b8aaf2878b1e201911f5e0edf3390a3e81",
+      "bytes": 1449
+    },
+    {
+      "file": "apps/desktop/src/windows/pet/use-pet-drag.test.tsx",
+      "sha256": "06380e05c9d4221a80037fe75c430f330ce6a6d064bba69bfc6263397b2ef615",
+      "bytes": 3745
+    },
+    {
+      "file": "apps/desktop/src/windows/pet/use-pet-drag.ts",
+      "sha256": "d22ced41265c7d113a7e7fa03d779c755f660cf4efe6532212c54e9a9171eb12",
+      "bytes": 3555
+    },
+    {
+      "file": "apps/desktop/src/windows/pet/use-pet-scene.ts",
+      "sha256": "598467410211eaeb1bbbce99851fa894d7b388a4cd02804414fa1d67f5732626",
+      "bytes": 3241
+    },
+    {
+      "file": "apps/desktop/src/windows/pet/use-render-governor.ts",
+      "sha256": "89d3fda5b8da757ef1c189753d3dbf2526a50a32bcbb511e13c0ae7d2dee0d44",
+      "bytes": 1375
+    },
+    {
+      "file": "apps/desktop/src/windows/spike/main.ts",
+      "sha256": "b5fc54e3ea0be77ab2bbfc78202833db298ef8854d3b2b4a9fcc181bd3f7e98d",
+      "bytes": 2244
+    },
+    {
+      "file": "apps/desktop/tsconfig.json",
+      "sha256": "418e6e4a3f9c79f92f3264d576934becc0f6bf54083984ca5c8d9620f33bb441",
+      "bytes": 347
+    },
+    {
+      "file": "apps/desktop/vite.config.ts",
+      "sha256": "a66183ca32ab5c4771165f971fdf864cd5591f2cb37c99badb088b2d2afe3ac7",
+      "bytes": 2961
+    },
+    {
+      "file": "package.json",
+      "sha256": "c750fa708ebf4a515eae464529c1538a3b62ec23d484b2af73796f1e5dd3f4da",
+      "bytes": 773
+    },
+    {
+      "file": "pnpm-lock.yaml",
+      "sha256": "493b757a8c9c55d867a7eb824fad3013dabdc64b8b02a2bdcc13d788f373d1b6",
+      "bytes": 127438
+    },
+    {
+      "file": "tsconfig.base.json",
+      "sha256": "63794054710ad226227b68493a3cb5c957dfbd694a48f950b7eaf554b1972098",
+      "bytes": 518
+    }
+  ]
+}

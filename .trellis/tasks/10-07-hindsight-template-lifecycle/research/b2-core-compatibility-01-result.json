@@ -1,0 +1,22 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "exec",
+    "vitest",
+    "run",
+    "src/memory/hindsight/template-lifecycle/template-runtime-selection.test.ts",
+    "src/memory/hindsight-runtime-composition.test.ts",
+    "src/memory/hindsight-unbound-run.test.ts",
+    "src/memory/hindsight/hindsight-runtime-lifetime.test.ts",
+    "src/memory/operations/memory-hindsight-lifecycle-status.test.ts",
+    "src/memory/transitions/transition-emergency-admission.test.ts",
+    "--maxWorkers=2",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile.json=H:/TakiAgent/.trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-core-compatibility-01-vitest.json"
+  ],
+  "cwd": "H:/TakiAgent/packages/core",
+  "exitCode": 0,
+  "durationSeconds": 76.251,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-core-compatibility-01.log"
+}

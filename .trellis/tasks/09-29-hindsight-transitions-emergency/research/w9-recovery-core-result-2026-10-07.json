@@ -1,0 +1,6 @@
+{
+  "command": "pnpm --filter @taki/core test --maxWorkers=2",
+  "finishedAt": "2026-10-07T10:39:12.0040708Z",
+  "startedAt": "2026-10-07T10:24:53.0803135Z",
+  "exitCode": 1
+}

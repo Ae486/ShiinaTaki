@@ -1,0 +1,12 @@
+{
+  "checkedAtUtc": "2026-10-08T14:06:43.858313+00:00",
+  "manifest": "b2-independent-native-source-reviewed-final-01.json",
+  "manifestSha256": "96bfcd500d5b29230bb248dbf5ce3996f85a399d3bb131764ed66125127ec284",
+  "nativeFiles": 242,
+  "coreLabelFiles": 7,
+  "generatedFiles": 912,
+  "lifecycleSpecMatched": true,
+  "rustGeneratedActualPath": "H:\\hindsight\\hindsight-clients\\rust\\target\\release\\build\\hindsight-client-bdb67ae8d29b8761\\out\\hindsight_client_generated.rs",
+  "mismatches": [],
+  "scope": "Current released Native and label evidence only; not Core or combined B2 acceptance"
+}

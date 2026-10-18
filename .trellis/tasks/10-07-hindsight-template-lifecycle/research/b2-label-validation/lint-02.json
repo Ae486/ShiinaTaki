@@ -1,0 +1,19 @@
+{
+  "command": "pnpm exec eslint packages/core/src/memory/hindsight/hindsight-template-label-evidence.ts packages/core/src/memory/hindsight/hindsight-template-label-evidence.test.ts packages/core/src/memory/hindsight/hindsight-template-binding.test.ts packages/core/src/memory/hindsight/hindsight-application-binding-runner.ts packages/core/src/memory/hindsight/hindsight-application-binding-context.ts packages/core/src/testing/hindsight-template-exchange-fixture.ts packages/core/src/testing/hindsight-template-native-consumer.fixture.ts",
+  "exitCode": 0,
+  "endedAt": "2026-10-08T10:03:12.2217597+00:00",
+  "cwd": "H:/TakiAgent",
+  "startedAt": "2026-10-08T10:03:08.3714911+00:00",
+  "argv": [
+    "exec",
+    "eslint",
+    "packages/core/src/memory/hindsight/hindsight-template-label-evidence.ts",
+    "packages/core/src/memory/hindsight/hindsight-template-label-evidence.test.ts",
+    "packages/core/src/memory/hindsight/hindsight-template-binding.test.ts",
+    "packages/core/src/memory/hindsight/hindsight-application-binding-runner.ts",
+    "packages/core/src/memory/hindsight/hindsight-application-binding-context.ts",
+    "packages/core/src/testing/hindsight-template-exchange-fixture.ts",
+    "packages/core/src/testing/hindsight-template-native-consumer.fixture.ts"
+  ],
+  "executable": "pnpm"
+}

@@ -1,0 +1,26 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/python.exe",
+    ".trellis/tasks/09-07-hindsight-recovery-evidence/research/validation/run_isolated_hindsight.py",
+    "--allow-http-fixture",
+    "--",
+    "tests/native_results/test_template_independent_routes.py",
+    "tests/native_results/test_template_lifecycle.py::test_definition_only_routes_atomic_receipt_and_replay",
+    "tests/native_results/test_template_lifecycle.py::test_cas_one_effective_winner_and_true_noops",
+    "tests/native_results/test_template_lifecycle.py::test_auth_and_field_hook_exception_refuse_before_mutation",
+    "tests/native_results/test_template_backup.py::test_actual_observation_hashes_full_projection_and_reads_without_effects",
+    "tests/native_results/test_template_backup.py::test_real_auth_configuration_and_query_failures_are_sanitized[field]",
+    "tests/native_results/test_template_backup_transport.py::test_route_c_same_snapshot_uses_real_service_resolver_and_archive_proof",
+    "tests/native_results/test_template_backup_transport.py::test_managed_cli_uses_actual_observer_with_filesystem_route_off_and_own_snapshot",
+    "-q",
+    "--tb=short"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "durationSeconds": 245.126,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-independent-config-visibility-green-01.log",
+  "sources": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-independent-config-visibility-green-01-sources.json",
+  "changedInputs": [],
+  "ownedTemp": "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\independent-config-visibility-green-01-0rhjz76h",
+  "ownedTempRemoved": true
+}

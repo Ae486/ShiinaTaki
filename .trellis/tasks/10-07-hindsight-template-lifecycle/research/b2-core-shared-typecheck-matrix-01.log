@@ -1,0 +1,4 @@
+
+> @taki/shared@0.0.0 typecheck H:\TakiAgent\packages\shared
+> tsc --noEmit
+

@@ -1,0 +1,47 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mH:/TakiAgent/apps/desktop[39m
+
+ [31m❯[39m src/windows/home/pages/operations/hindsight-template-browser.test.ts [2m([22m[2m1 test[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 3036[2mms[22m[39m
+[31m   [31m×[31m completes integrated Operations preview, partial recovery, independent customization, derived observation and removal[39m[33m 3034[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/windows/home/pages/operations/hindsight-template-browser.test.ts[2m > [22mcompletes integrated Operations preview, partial recovery, independent customization, derived observation and removal
+[31m[1mError[22m[39m: Command failed: G:/anaconda3/python.exe H:\TakiAgent\.trellis\tasks\10-07-hindsight-template-lifecycle\research\b3-home-browser\9111fdf2-b2dc-4b93-965e-040770558ae7\browser-check.py http://127.0.0.1:5173 G:/AppDataMove/ms-playwright/chromium-1181/chrome-win/chrome.exe H:\TakiAgent\.trellis\tasks\10-07-hindsight-template-lifecycle\research\b3-home-browser\9111fdf2-b2dc-4b93-965e-040770558ae7
+Traceback (most recent call last):
+  File "H:\TakiAgent\.trellis\tasks\10-07-hindsight-template-lifecycle\research\b3-home-browser\9111fdf2-b2dc-4b93-965e-040770558ae7\browser-check.py", line 7, in <module>
+    browser=p.chromium.launch(executable_path=chromium,headless=True)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Roaming\Python\Python312\site-packages\playwright\sync_api\_generated.py", line 14494, in launch
+    self._sync(
+  File "G:\Roaming\Python\Python312\site-packages\playwright\_impl\_sync_base.py", line 115, in _sync
+    return task.result()
+           ^^^^^^^^^^^^^
+  File "G:\Roaming\Python\Python312\site-packages\playwright\_impl\_browser_type.py", line 98, in launch
+    await self._channel.send(
+  File "G:\Roaming\Python\Python312\site-packages\playwright\_impl\_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\Roaming\Python\Python312\site-packages\playwright\_impl\_connection.py", line 558, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TargetClosedError: BrowserType.launch: Target page, context or browser has been closed
+Browser logs:
+
+<launching> G:\AppDataMove\ms-playwright\chromium-1181\chrome-win\chrome.exe --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AcceptCHFrame,AutoExpandDetailsElement,AvoidUnnecessaryBeforeUnloadCheckSync,CertificateTransparencyComponentUpdater,DestroyProfileOnBrowserClose,DialMediaRouteProvider,ExtensionManifestV2Disabled,GlobalMediaControls,HttpsUpgrades,ImprovedCookieControls,LazyFrameLoading,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --enable-automation --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=H:\TakiAgent\.trellis\.runtime\b3-independent-home\browser-green-02-9dccd9a0cae74ecd893a7f9b65369a2f\playwright_chromiumdev_profile-fwImyo --remote-debugging-pipe --no-startup-window
+<launched> pid=38052
+Call log:
+  - <launching> G:\AppDataMove\ms-playwright\chromium-1181\chrome-win\chrome.exe --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AcceptCHFrame,AutoExpandDetailsElement,AvoidUnnecessaryBeforeUnloadCheckSync,CertificateTransparencyComponentUpdater,DestroyProfileOnBrowserClose,DialMediaRouteProvider,ExtensionManifestV2Disabled,GlobalMediaControls,HttpsUpgrades,ImprovedCookieControls,LazyFrameLoading,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --enable-automation --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=H:\TakiAgent\.trellis\.runtime\b3-independent-home\browser-green-02-9dccd9a0cae74ecd893a7f9b65369a2f\playwright_chromiumdev_profile-fwImyo --remote-debugging-pipe --no-startup-window
+  - <launched> pid=38052
+
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m   Start at [22m 21:30:56
+[2m   Duration [22m 11.46s[2m (transform 6.16s, setup 0ms, import 8.11s, tests 3.04s, environment 0ms)[22m
+
+undefined
+H:\TakiAgent\apps\desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/windows/home/pages/operations/hindsight-template-browser.test.ts --maxWorkers=1

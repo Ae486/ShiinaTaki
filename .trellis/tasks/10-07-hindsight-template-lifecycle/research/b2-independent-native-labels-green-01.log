@@ -1,0 +1,90 @@
+Owned fixture: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-13244e200dfa
+PostgreSQL: 18.1 ; vector/pg_trgm ready
+Pytest log: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-13244e200dfa\pytest.log
+2026-10-08 20:01:47 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/f8f111ea-ba08-4db2-b68c-aa82c7299b72
+2026-10-08 20:01:47 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/44513055-2e7d-455a-83a0-c6b04368a011
+2026-10-08 20:01:47 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/ff5a0393-391d-471b-90b2-36b65a79f06a
+2026-10-08 20:01:47 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/be19d1c0-4459-4e00-993d-44df47599050
+2026-10-08 20:01:47 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/f4c56c44-4b20-4035-8e4e-f63ea9c5861b
+2026-10-08 20:01:47 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/c5aab861-85c5-4626-b1e5-a5fa8a3796de
+2026-10-08 20:01:48 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/f8f111ea-ba08-4db2-b68c-aa82c7299b72/parts/0
+2026-10-08 20:01:48 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/ff5a0393-391d-471b-90b2-36b65a79f06a/parts/0
+2026-10-08 20:01:48 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/44513055-2e7d-455a-83a0-c6b04368a011/parts/0
+2026-10-08 20:01:48 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/be19d1c0-4459-4e00-993d-44df47599050/parts/0
+2026-10-08 20:01:48 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/f4c56c44-4b20-4035-8e4e-f63ea9c5861b/parts/0
+2026-10-08 20:01:48 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/c5aab861-85c5-4626-b1e5-a5fa8a3796de/parts/0
+2026-10-08 20:01:48 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/282fe28e-ea37-45a3-9c63-88464e2ff8a8
+2026-10-08 20:01:48 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/282fe28e-ea37-45a3-9c63-88464e2ff8a8/parts/0
+2026-10-08 20:01:50 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/dbef337f-62a7-4b37-8de3-fb7d889a3fc1
+2026-10-08 20:01:50 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/dbef337f-62a7-4b37-8de3-fb7d889a3fc1/parts/0
+2026-10-08 20:01:50 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/changes
+2026-10-08 20:01:50 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/changes/1/pages/0
+2026-10-08 20:01:50 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/6a258936-c172-470c-8512-4ec9c76f9d05
+2026-10-08 20:01:50 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/6a258936-c172-470c-8512-4ec9c76f9d05/parts/0
+2026-10-08 20:01:52 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/7fd00d01-3e65-4c5b-b08c-a64f08f3730a
+2026-10-08 20:01:52 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/7fd00d01-3e65-4c5b-b08c-a64f08f3730a/parts/0
+2026-10-08 20:01:52 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/changes
+2026-10-08 20:01:52 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/changes/2/pages/0
+2026-10-08 20:01:52 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/8ed219b7-d94c-4b14-89f7-15ccf5b3b7a3
+2026-10-08 20:01:52 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/8ed219b7-d94c-4b14-89f7-15ccf5b3b7a3/parts/0
+2026-10-08 20:01:54 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/7aa431bf-d68d-43b7-a6df-6b01ea80a786
+2026-10-08 20:01:54 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/7aa431bf-d68d-43b7-a6df-6b01ea80a786/parts/0
+2026-10-08 20:01:54 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/changes
+2026-10-08 20:01:54 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/changes/3/pages/0
+2026-10-08 20:01:54 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/4199c025-cfd7-4ae8-9fee-440c73e9ab24
+2026-10-08 20:01:54 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/4199c025-cfd7-4ae8-9fee-440c73e9ab24/parts/0
+2026-10-08 20:01:56 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/a534a2f2-b803-414d-941b-4ec82ffb58b7
+2026-10-08 20:01:56 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/a534a2f2-b803-414d-941b-4ec82ffb58b7/parts/0
+2026-10-08 20:01:56 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/changes
+2026-10-08 20:01:56 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/changes/4/pages/0
+2026-10-08 20:01:57 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/84b33497-5109-408b-a9a7-8eaee63c5b57
+2026-10-08 20:01:57 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/84b33497-5109-408b-a9a7-8eaee63c5b57/parts/0
+2026-10-08 20:01:58 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/896cc794-4e73-4dcf-a405-97a984517085
+2026-10-08 20:01:58 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/896cc794-4e73-4dcf-a405-97a984517085/parts/0
+2026-10-08 20:01:58 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/changes
+2026-10-08 20:01:58 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/changes/5/pages/0
+2026-10-08 20:01:59 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/fb07f1b9-8906-48c1-a69f-c8e944931fcd
+2026-10-08 20:01:59 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/fb07f1b9-8906-48c1-a69f-c8e944931fcd/parts/0
+2026-10-08 20:02:00 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/bc6aeaec-1083-473a-a20f-6a3eba6f76a8
+2026-10-08 20:02:00 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/bc6aeaec-1083-473a-a20f-6a3eba6f76a8/parts/0
+2026-10-08 20:02:00 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/changes
+2026-10-08 20:02:00 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/changes/6/pages/0
+2026-10-08 20:02:01 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/05749d77-bb4a-4f4d-8006-9031b79facd1
+2026-10-08 20:02:01 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/bodies/05749d77-bb4a-4f4d-8006-9031b79facd1/parts/0
+2026-10-08 20:02:01 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes
+2026-10-08 20:02:02 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-4ddf9be4536f313a9567d6e50c408890/application-state/changes
+PASSED                                                                   [100%]
+------------------------------ live log teardown ------------------------------
+2026-10-08 20:02:02 - INFO - hindsight_api.engine.memory_engine - close() started
+2026-10-08 20:02:02 - INFO - hindsight_api.engine.db.postgresql - PostgreSQL pool closed
+
+
+============================== warnings summary ===============================
+tests/native_results/test_template_label_runtime_consumer.py::test_real_native_labels_reach_core_binding_and_survive_sqlite_reopen
+  H:\hindsight\.venv\Lib\site-packages\websockets\legacy\__init__.py:6: DeprecationWarning: websockets.legacy is deprecated; see https://websockets.readthedocs.io/en/stable/howto/upgrade.html for upgrade instructions
+    warnings.warn(  # deprecated in 14.0 - 2024-11-09
+
+tests/native_results/test_template_label_runtime_consumer.py::test_real_native_labels_reach_core_binding_and_survive_sqlite_reopen
+  H:\hindsight\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py:17: DeprecationWarning: websockets.server.WebSocketServerProtocol is deprecated
+    from websockets.server import WebSocketServerProtocol
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================ slowest 10 durations =============================
+33.82s call     tests/native_results/test_template_label_runtime_consumer.py::test_real_native_labels_reach_core_binding_and_survive_sqlite_reopen
+12.77s call     tests/native_results/test_template_label_recovery.py::test_tracked_retain_restart_cannot_upgrade_original_fallback_or_legacy_plan[legacy]
+11.22s setup    tests/native_results/test_template_labels.py::test_label_sidecar_migration_and_read_only_empty_result
+11.20s call     tests/native_results/test_template_label_recovery.py::test_tracked_retain_restart_cannot_upgrade_original_fallback_or_legacy_plan[bank-malformed]
+11.17s call     tests/native_results/test_template_label_recovery.py::test_tracked_retain_restart_cannot_upgrade_original_fallback_or_legacy_plan[group-drift]
+11.10s call     tests/native_results/test_template_label_recovery.py::test_tracked_retain_restart_cannot_upgrade_original_fallback_or_legacy_plan[malformed]
+11.08s call     tests/native_results/test_template_label_recovery.py::test_tracked_retain_restart_cannot_upgrade_original_fallback_or_legacy_plan[successful]
+10.82s call     tests/native_results/test_template_label_recovery.py::test_tracked_retain_restart_cannot_upgrade_original_fallback_or_legacy_plan[bank-json-failure]
+10.70s call     tests/native_results/test_template_label_recovery.py::test_tracked_retain_restart_cannot_upgrade_original_fallback_or_legacy_plan[bank-fallback]
+10.46s call     tests/native_results/test_template_label_recovery.py::test_tracked_retain_restart_cannot_upgrade_original_fallback_or_legacy_plan[fallback]
+================= 36 passed, 2 warnings in 312.41s (0:05:12) ==================
+{
+    "Fixture":  "taki-hindsight-g1-13244e200dfa",
+    "Stopped":  true,
+    "DataRemoved":  true,
+    "RegistryRemoved":  true,
+    "Logs":  "H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-13244e200dfa"
+}

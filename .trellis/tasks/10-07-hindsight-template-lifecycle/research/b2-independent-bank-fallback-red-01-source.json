@@ -1,0 +1,17 @@
+{
+  "capturedAtUtc": "2026-10-08T11:53:57.0396554Z",
+  "repository": "H:/hindsight",
+  "release": "b2-native-source-final-01.json",
+  "files": [
+    {
+      "path": "hindsight-api-slim/hindsight_api/config_resolver.py",
+      "bytes": 35662,
+      "sha256": "f7ac0444812b95accea3b65f4d4adbceb69f1a456ad0ae700d2d4e9bbb0d5d3f"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_template_label_recovery.py",
+      "bytes": 10472,
+      "sha256": "80dbf1eefc258833eef63491163172690019fc94f3fc91ff35039b68978ab2b6"
+    }
+  ]
+}

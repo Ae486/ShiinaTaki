@@ -1,0 +1,17 @@
+{
+  "command": [
+    "H:/TakiAgent/.trellis/.runtime/g1-toolchain/go/go/bin/gofmt.exe",
+    "-w",
+    "hindsight-clients/go/template_backup_test.go"
+  ],
+  "cwd": "H:/hindsight",
+  "exitCode": 0,
+  "durationSeconds": 1.752,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-sdk-go-format-01.log",
+  "sources": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-sdk-go-format-01-sources.json",
+  "changedInputs": [
+    "H:\\hindsight\\hindsight-clients\\go\\template_backup_test.go"
+  ],
+  "ownedTemp": "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\sdk-go-format-01-qyiwyqgn",
+  "ownedTempRemoved": true
+}

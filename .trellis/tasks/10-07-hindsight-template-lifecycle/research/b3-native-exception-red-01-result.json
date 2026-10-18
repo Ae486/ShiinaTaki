@@ -1,0 +1,19 @@
+{
+  "command": [
+    "H:\\hindsight\\.venv\\Scripts\\python.exe",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-07-hindsight-recovery-evidence\\research\\validation\\run_isolated_hindsight.py",
+    "--allow-http-fixture",
+    "--",
+    "tests/native_results/test_template_backup_transport.py::test_v2_copy_failure_is_sanitized_by_route_and_cli",
+    "-q",
+    "--tb=short"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "exitCode": 1,
+  "durationSeconds": 119.519,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-exception-red-01.log",
+  "sources": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-exception-red-01-sources.json",
+  "changedInputs": [],
+  "ownedTemp": "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\exception-red-01-ictbf__y",
+  "ownedTempRemoved": true
+}

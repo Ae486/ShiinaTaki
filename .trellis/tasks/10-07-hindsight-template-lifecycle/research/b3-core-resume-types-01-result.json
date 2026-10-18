@@ -1,0 +1,21 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "--filter",
+    "@taki/core",
+    "typecheck"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 2,
+  "durationSeconds": 26.967,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-resume-types-01.log",
+  "cleanup": {
+    "path": "H:\\TakiAgent\\.trellis\\.runtime\\b3-core-resume-types-01-temp",
+    "leftovers": [],
+    "removed": true
+  },
+  "sourceIdentity": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-resume-types-01-source.json",
+  "sourceAfter": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-resume-types-01-source-after.json",
+  "inputCount": 1599,
+  "sourceMismatches": []
+}

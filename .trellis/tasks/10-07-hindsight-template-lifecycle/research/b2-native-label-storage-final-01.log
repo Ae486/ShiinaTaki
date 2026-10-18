@@ -1,0 +1,90 @@
+Owned fixture: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-2bd4e39be3ff
+PostgreSQL: 18.1 ; vector/pg_trgm ready
+Pytest log: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-2bd4e39be3ff\pytest.log
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[c7d1e9a4b3f2_add_archive_causal_links.py] SKIPPED [ 79%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[c7e9f1a3b5d2_maintenance_routines_skip_vanished_schemas.py] SKIPPED [ 79%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[c8e5f2a3b4d1_add_retain_params_to_documents.py] SKIPPED [ 80%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[c9a1b2d3e4f5_add_invalidated_memory_units.py] SKIPPED [ 80%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[d2e3f4a5b6c7_add_memory_links_expansion_indexes.py] SKIPPED [ 80%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[d3e4f5a6b7c8_add_llm_requests_table.py] SKIPPED [ 81%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[d4e5f6g7h8i9_gin_source_memory_ids_fastupdate_off.py] SKIPPED [ 81%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[d4f6a8c2e1b3_drop_archive_embedding_column.py] SKIPPED [ 81%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[d5b8f1c3a7e2_add_memory_mutation_receipts.py] SKIPPED [ 82%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[d5e6f7a8b9c0_add_bank_internal_id_and_per_bank_hnsw.py] SKIPPED [ 82%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[d5y6z7a8b9c0_backfill_mental_models_subtype.py] SKIPPED [ 82%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[d6e7f8a9b0c1_drop_documents_metadata_column.py] SKIPPED [ 83%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[d77a4f8c2e10_add_application_state.py] SKIPPED [ 83%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[d78a1c4e6f90_add_current_state_transfers.py] SKIPPED [ 83%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[d78b2d5e7a01_add_cutover_verification.py] SKIPPED [ 83%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[d78c3e6f8b12_add_bank_maintenance_ownership.py] SKIPPED [ 84%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[d7b2f8a1c934_add_schemas_with_expired_operations_routine.py] SKIPPED [ 84%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[d9f6a3b4c5e2_rename_bank_to_interactions.py] SKIPPED [ 84%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[e0a1b2c3d4e5_disposition_to_3_traits.py] SKIPPED [ 85%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[e1b2c3d4f5a6_drop_unused_indexes.py] SKIPPED [ 85%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[e1f2a3b4c5d6_merge_heads_embedding_drop_and_links_index.py] SKIPPED [ 85%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[e30a9d7f6c21_add_transition_publication_fences.py] SKIPPED [ 86%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[e40b1e8a7d32_optimize_transition_association_lookup.py] SKIPPED [ 86%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[e4a7c1b9d2f6_drop_memory_units_access_count.py] SKIPPED [ 86%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[e4f5a6b7c8d9_add_webhooks_tables.py] SKIPPED [ 87%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[e51c2f9a8b43_add_template_lifecycle.py] SKIPPED [ 87%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[e5f6a7b8c9d0_add_maintenance_routines.py] SKIPPED [ 87%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[e5f6g7h8i9j0_cascade_delete_ops_on_bank_delete.py] SKIPPED [ 87%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[e62a3d0b9c54_add_template_label_provenance.py] SKIPPED [ 88%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[e6c9a4f2b8d1_add_replication_journal.py] SKIPPED [ 88%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[e7c3a9f1b2d5_drop_archive_search_vector_column.py] SKIPPED [ 88%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[e9b2c7d1f3a4_drop_entity_memory_links.py] SKIPPED [ 89%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[f1a2b3c4d5e6_add_memory_links_composite_index.py] SKIPPED [ 89%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[f2a6d8c4b1e9_drop_stale_global_memory_units_vector_index.py] SKIPPED [ 89%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[f4d1c2b3a5e6_add_scheduled_mental_model_refresh_routine.py] SKIPPED [ 90%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[f6g7h8i9j0k1_chunk_fk_cascade_delete.py] SKIPPED [ 90%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[f7d0a5c3e9b2_add_replication_logical_snapshots.py] SKIPPED [ 90%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[f7g8h9i0j1k2_add_webhook_http_config.py] SKIPPED [ 91%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[g2a3b4c5d6e7_add_tags_column.py] SKIPPED [ 91%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[g2h3i4j5k6l7_remove_opinion_fact_type.py] SKIPPED [ 91%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[g7h8i9j0k1l2_backsweep_orphan_observations.py] SKIPPED [ 91%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[h3c4d5e6f7g8_mental_models_v4.py] SKIPPED [ 92%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[h3i4j5k6l7m8_merge_heads_and_add_unit_entities_index.py] SKIPPED [ 92%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[i4d5e6f7g8h9_delete_opinions.py] SKIPPED [ 92%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[i4j5k6l7m8n9_add_cancelled_status_to_async_operations.py] SKIPPED [ 93%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[j5e6f7g8h9i0_mental_model_versions.py] SKIPPED [ 93%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[k6f7g8h9i0j1_add_directive_subtype.py] SKIPPED [ 93%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[k6l7m8n9o0p1_create_observation_sources_table.py] SKIPPED [ 94%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[l7g8h9i0j1k2_add_worker_columns.py] SKIPPED [ 94%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[m3rg3h3ad5f6_merge_deferrable_fk_and_cooccurrence_backfill.py] SKIPPED [ 94%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[m8h9i0j1k2l3_mental_model_id_to_text.py] SKIPPED [ 95%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[n9i0j1k2l3m4_learnings_and_pinned_reflections.py] SKIPPED [ 95%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[o0j1k2l3m4n5_migrate_mental_models_data.py] SKIPPED [ 95%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[o1a2b3c4d5e6_oracle_baseline.py] SKIPPED [ 95%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[p1k2l3m4n5o6_new_knowledge_architecture.py] SKIPPED [ 96%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[p4q5r6s7t8u9_configurable_bm25_language.py] SKIPPED [ 96%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[q2l3m4n5o6p7_fix_mental_model_fact_type.py] SKIPPED [ 96%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[r3m4n5o6p7q8_add_reflect_response_to_reflections.py] SKIPPED [ 97%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[rename_personality_to_disposition.py] SKIPPED [ 97%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[s4n5o6p7q8r9_add_consolidated_at_to_memory_units.py] SKIPPED [ 97%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[t5o6p7q8r9s0_rename_mental_models_to_observations.py] SKIPPED [ 98%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[u6p7q8r9s0t1_mental_models_text_id.py] SKIPPED [ 98%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[v7q8r9s0t1u2_add_max_tokens_to_mental_models.py] SKIPPED [ 98%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[w8r9s0t1u2v3_fix_mental_models_pk_isolation.py] SKIPPED [ 99%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[x9s0t1u2v3w4_add_bank_config_column.py] SKIPPED [ 99%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[y0t1u2v3w4x5_add_result_metadata_gin_index.py] SKIPPED [ 99%]
+tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[z1u2v3w4x5y6_add_observation_tags_to_memory_units.py] SKIPPED [100%]
+
+============================ slowest 10 durations =============================
+10.29s setup    tests/native_results/test_template_label_storage.py::test_real_sidecar_guards_gate_capability_and_payload_hash_is_not_revision_only
+4.22s setup    tests/native_results/test_template_independent_auxiliary.py::test_old_transition_schema_remains_usable_but_partial_template_inventory_refuses
+3.92s setup    tests/native_results/test_template_independent_auxiliary.py::test_template_receipts_children_and_results_are_in_the_real_auxiliary_witness
+1.60s call     tests/native_results/test_template_independent_auxiliary.py::test_template_receipts_children_and_results_are_in_the_real_auxiliary_witness
+1.25s call     tests/native_results/test_template_independent_auxiliary.py::test_old_transition_schema_remains_usable_but_partial_template_inventory_refuses
+0.80s call     tests/native_results/test_template_label_storage.py::test_real_sidecar_guards_gate_capability_and_payload_hash_is_not_revision_only
+0.21s teardown tests/native_results/test_template_independent_auxiliary.py::test_template_receipts_children_and_results_are_in_the_real_auxiliary_witness
+0.20s teardown tests/native_results/test_template_label_storage.py::test_real_sidecar_guards_gate_capability_and_payload_hash_is_not_revision_only
+0.19s teardown tests/native_results/test_template_independent_auxiliary.py::test_old_transition_schema_remains_usable_but_partial_template_inventory_refuses
+0.01s call     tests/test_migration_shape.py::test_migration_concurrently_ddl_runs_in_autocommit_block[5a366d414dce_initial_schema.py]
+====================== 217 passed, 107 skipped in 25.86s ======================
+{
+    "Fixture":  "taki-hindsight-g1-2bd4e39be3ff",
+    "Stopped":  true,
+    "DataRemoved":  true,
+    "RegistryRemoved":  true,
+    "Logs":  "H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-2bd4e39be3ff"
+}

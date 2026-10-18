@@ -1,0 +1,35 @@
+{
+  "run": "A",
+  "caseId": "b5c5fb7f-cd8a-402a-bd11-92839d191e98",
+  "sourceCaseId": "1b05d2f6-494c-4a6d-a601-1e807eca1486",
+  "copyPath": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-database-run-b5c5fb7f",
+  "diagnosticHashes": {
+    "run-persistence.ts": "c18c81a43f824b65802cdce7bcc900029eb3806225923d4c45ddbc3c1de56eca",
+    "database-read.py": "03895f6f4efd670eb323fd5b0935d6233445ae68252e9c6dfe8b3a0a39d56b21",
+    "fake_child.py": "f76cfbd0eec0a8614c16ba947939dd13367163e84c9ff1c584476711814c6180"
+  },
+  "files": [
+    {
+      "file": "run-persistence.ts",
+      "originalSha256": "c39fd6e465f922cefd198abe1e6d531d731359f8969b183ae9b5b4d2cf06ee27",
+      "copySha256": "c18c81a43f824b65802cdce7bcc900029eb3806225923d4c45ddbc3c1de56eca",
+      "bytes": 56502,
+      "tokenOnly": true
+    },
+    {
+      "file": "database-read.py",
+      "originalSha256": "4bd830c60a4ddecc4e8e7018d2b19eb08093c81fc5d7f3ee0a8ff380178e4271",
+      "copySha256": "03895f6f4efd670eb323fd5b0935d6233445ae68252e9c6dfe8b3a0a39d56b21",
+      "bytes": 6084,
+      "tokenOnly": true
+    },
+    {
+      "file": "fake_child.py",
+      "originalSha256": "9d65b8875e5d798a024dff9b4a182d6cff7bf4b62646954e38cd0c2e12ce3819",
+      "copySha256": "f76cfbd0eec0a8614c16ba947939dd13367163e84c9ff1c584476711814c6180",
+      "bytes": 44233,
+      "tokenOnly": true
+    }
+  ],
+  "importRoot": "H:\\TakiAgent"
+}

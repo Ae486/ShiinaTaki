@@ -1,0 +1,291 @@
+ M .trellis/spec/backend/index.md
+ M .trellis/spec/backend/memory-hindsight-backup.md
+ M .trellis/spec/backend/memory-transition-healthy-drivers.md
+ M .trellis/spec/backend/memory-transition-publication.md
+ M .trellis/spec/backend/quality-guidelines.md
+ M .trellis/spec/backend/secret-catalog.md
+ M .trellis/spec/frontend/home-window.md
+ M .trellis/spec/frontend/memory-transitions.md
+ M .trellis/tasks/08-09-memory-operations-ui/check.jsonl
+ M .trellis/tasks/08-09-memory-operations-ui/design.md
+ M .trellis/tasks/08-09-memory-operations-ui/implement.jsonl
+ M .trellis/tasks/08-09-memory-operations-ui/implement.md
+ M .trellis/tasks/08-09-memory-operations-ui/prd.md
+ M .trellis/tasks/08-09-memory-operations-ui/task.json
+ M .trellis/tasks/09-29-hindsight-transitions-emergency/check.jsonl
+ M .trellis/tasks/09-29-hindsight-transitions-emergency/design.md
+ M .trellis/tasks/09-29-hindsight-transitions-emergency/implement.jsonl
+ M .trellis/tasks/09-29-hindsight-transitions-emergency/implement.md
+ M .trellis/tasks/09-29-hindsight-transitions-emergency/prd.md
+ M .trellis/tasks/09-29-hindsight-transitions-emergency/research/execution-status.md
+ M .trellis/tasks/09-29-hindsight-transitions-emergency/research/leader-now.md
+ M .trellis/tasks/09-29-hindsight-transitions-emergency/task.json
+ M CLAUDE.md
+ M apps/desktop/src/lib/index.md
+ M apps/desktop/src/lib/rpc-deadline.ts
+ M apps/desktop/src/lib/ws-client-methods.ts
+ M apps/desktop/src/lib/ws-client.ts
+ M apps/desktop/src/windows/home/pages/operations/index.md
+ M apps/desktop/src/windows/home/pages/operations/local-onboarding-card.tsx
+ M apps/desktop/src/windows/home/pages/operations/memory-authority-state.ts
+ M apps/desktop/src/windows/home/pages/operations/memory-hindsight-backup-state.test.ts
+ M apps/desktop/src/windows/home/pages/operations/memory-hindsight-backup-state.ts
+ M apps/desktop/src/windows/home/pages/operations/memory-operations-controller.test.ts
+ M apps/desktop/src/windows/home/pages/operations/memory-operations-controller.ts
+ M apps/desktop/src/windows/home/pages/operations/memory-transitions-browser.test.ts
+ M apps/desktop/src/windows/home/pages/operations/operations-page.tsx
+ M docs/HANDOFF.md
+ M eslint.config.js
+ M packages/core/src/boot/hindsight-lifecycle-boot.ts
+ M packages/core/src/boot/index.md
+ M packages/core/src/config/config-subscriptions.ts
+ M packages/core/src/config/index.md
+ M packages/core/src/db/index.md
+ M packages/core/src/db/memory-transition-candidate-repo.ts
+ M packages/core/src/db/memory-transition-emergency-quarantine.ts
+ M packages/core/src/db/memory-transition-publication-proof.ts
+ M packages/core/src/db/memory-transition-publication-repo.ts
+ M packages/core/src/db/migrations/041-canonical-memory-maintenance.test.ts
+ M packages/core/src/db/migrations/053-memory-transition-candidates.test.ts
+ M packages/core/src/db/migrations/054-memory-transition-publication.test.ts
+ M packages/core/src/db/migrations/index-list.test.ts
+ M packages/core/src/db/migrations/index-list.ts
+ M packages/core/src/db/migrations/index.md
+ M packages/core/src/db/migrations/lineage-reopen-matrix.test.ts
+ M packages/core/src/db/pending-memory-repo.test.ts
+ M packages/core/src/db/scheduled-task-repo.test.ts
+ M packages/core/src/index.md
+ M packages/core/src/main.ts
+ M packages/core/src/memory/hindsight-backup/hindsight-backup-admit.ts
+ M packages/core/src/memory/hindsight-backup/hindsight-backup-archive.ts
+ M packages/core/src/memory/hindsight-backup/hindsight-backup-fixtures.ts
+ M packages/core/src/memory/hindsight-backup/hindsight-backup-identity.ts
+ M packages/core/src/memory/hindsight-backup/hindsight-backup-native-route.test.ts
+ M packages/core/src/memory/hindsight-backup/hindsight-backup-native-route.ts
+ M packages/core/src/memory/hindsight-backup/hindsight-backup-pair.ts
+ M packages/core/src/memory/hindsight-backup/hindsight-backup-receipts.test.ts
+ M packages/core/src/memory/hindsight-backup/hindsight-backup-receipts.ts
+ M packages/core/src/memory/hindsight-backup/hindsight-backup-restore.ts
+ M packages/core/src/memory/hindsight-backup/hindsight-backup-service.ts
+ M packages/core/src/memory/hindsight-backup/hindsight-backup-store.ts
+ M packages/core/src/memory/hindsight-backup/hindsight-backup-verify.ts
+ M packages/core/src/memory/hindsight-backup/hindsight-emergency-snapshot.ts
+ M packages/core/src/memory/hindsight-backup/index.md
+ M packages/core/src/memory/hindsight-lifecycle/hindsight-lifecycle-context.ts
+ M packages/core/src/memory/hindsight-lifecycle/hindsight-lifecycle-provision.ts
+ M packages/core/src/memory/hindsight-lifecycle/hindsight-lifecycle-reads.ts
+ M packages/core/src/memory/hindsight-lifecycle/hindsight-lifecycle-revalidate.ts
+ M packages/core/src/memory/hindsight-lifecycle/hindsight-lifecycle-service.ts
+ M packages/core/src/memory/hindsight-lifecycle/index.md
+ M packages/core/src/memory/hindsight-runtime-binding.ts
+ M packages/core/src/memory/hindsight-unbound-run.ts
+ M packages/core/src/memory/hindsight/hindsight-application-binding-context.ts
+ M packages/core/src/memory/hindsight/hindsight-application-binding-runner.ts
+ M packages/core/src/memory/hindsight/hindsight-application-capability.ts
+ M packages/core/src/memory/hindsight/hindsight-backup-client.ts
+ M packages/core/src/memory/hindsight/hindsight-capture-sync.test.ts
+ M packages/core/src/memory/hindsight/hindsight-client.ts
+ M packages/core/src/memory/hindsight/hindsight-compatibility-service.ts
+ M packages/core/src/memory/hindsight/hindsight-contracts.ts
+ M packages/core/src/memory/hindsight/hindsight-memory-subsystem.ts
+ M packages/core/src/memory/hindsight/hindsight-pending-recovery-runner.ts
+ M packages/core/src/memory/hindsight/hindsight-policy-curator-fixtures.ts
+ M packages/core/src/memory/hindsight/hindsight-runtime-connection.ts
+ M packages/core/src/memory/hindsight/hindsight-runtime-state.ts
+ M packages/core/src/memory/hindsight/hindsight-transition-capability.ts
+ M packages/core/src/memory/hindsight/index.md
+ M packages/core/src/memory/index.md
+ M packages/core/src/memory/operations/index.md
+ M packages/core/src/memory/operations/memory-authority-status.ts
+ M packages/core/src/memory/operations/memory-hindsight-lifecycle-status.ts
+ M packages/core/src/memory/operations/memory-operation-contract.ts
+ M packages/core/src/memory/operations/memory-operation-kind-bank.ts
+ M packages/core/src/memory/operations/memory-operation-kinds.ts
+ M packages/core/src/memory/operations/memory-operation-service.ts
+ M packages/core/src/memory/runtime-composition.ts
+ M packages/core/src/memory/runtime-selector.ts
+ M packages/core/src/memory/transitions/index.md
+ M packages/core/src/memory/transitions/transition-current-identity.ts
+ M packages/core/src/memory/transitions/transition-emergency-context.test.ts
+ M packages/core/src/memory/transitions/transition-evidence-context.test.ts
+ M packages/core/src/memory/transitions/transition-final-mapping.ts
+ M packages/core/src/memory/transitions/transition-healthy-candidate.ts
+ M packages/core/src/memory/transitions/transition-healthy-execution.ts
+ M packages/core/src/memory/transitions/transition-healthy-service.ts
+ M packages/core/src/memory/transitions/transition-native-evidence.ts
+ M packages/core/src/secrets/index.md
+ M packages/core/src/secrets/secret-catalog-service.test.ts
+ M packages/core/src/secrets/secret-catalog-service.ts
+ M packages/core/src/server/methods/index.md
+ M packages/core/src/testing/hindsight-runtime-composition-fixtures.ts
+ M packages/core/src/testing/index.md
+ M packages/core/src/testing/memory-transition-cycle-fixtures.ts
+ M packages/core/src/testing/memory-transition-healthy-fixtures.ts
+ M packages/core/src/testing/memory-transition-publication-fixtures.ts
+ M packages/shared/src/hindsight-backup-schema.ts
+ M packages/shared/src/hindsight-connection-schema.ts
+ M packages/shared/src/hindsight-json-schema.ts
+ M packages/shared/src/index.md
+ M packages/shared/src/index.ts
+ M packages/shared/src/memory-authority-status-schema.ts
+ M packages/shared/src/memory-hindsight-lifecycle-schema.ts
+ M packages/shared/src/memory-operation-schema.ts
+ M packages/shared/src/memory-transition-candidate-schema.ts
+ M packages/shared/src/memory-transition-emergency-schema.ts
+ M packages/shared/src/memory-transition-schema.ts
+?? .trellis/spec/backend/hindsight-configuration-observation.md
+?? .trellis/spec/backend/hindsight-template-lifecycle.md
+?? .trellis/tasks/08-09-memory-operations-ui/research/
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/stage4-review-2026-10-07.md
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/stage4-w9-lease-plan-2026-10-07.md
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/stage5-configuration-contract-2026-10-07.md
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/stage5-readiness-2026-10-07.md
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-adjacent-2026-10-07.log
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-emergency-context-before-2026-10-07.json
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-evidence-identities-2026-10-07.json
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-final-identity-result-2026-10-07.json
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-green-focused-2026-10-07.log
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-implementation.md
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-independent-check.md
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-independent-diff-check-2026-10-07.log
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-independent-diff-check-result-2026-10-07.json
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-independent-identities-before-2026-10-07.json
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-independent-identities-final-2026-10-07.json
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-independent-regression-2026-10-07.log
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-independent-regression-result-2026-10-07.json
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-lint-2026-10-07.log
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-pre-core-source-identities-2026-10-07.json
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-2026-10-07.md
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-adjacent-2026-10-07.log
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-adjacent-result-2026-10-07.json
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-core-2026-10-07.log
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-core-result-2026-10-07.json
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-diff-check-2026-10-07.log
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-diff-check-result-2026-10-07.json
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-emergency-context-2026-10-07.log
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-emergency-context-result-2026-10-07.json
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-final-diff-check-2026-10-07.log
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-final-diff-check-result-2026-10-07.json
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-final-file-lint-2026-10-07.log
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-final-file-lint-result-2026-10-07.json
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-lint-2026-10-07.log
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-lint-result-2026-10-07.json
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-typecheck-2026-10-07.log
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-typecheck-result-2026-10-07.json
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-red-final-lease-2026-10-07.log
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-red-identities-2026-10-07.json
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-source-identities-2026-10-07.json
+?? .trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-typecheck-2026-10-07.log
+?? .trellis/tasks/10-07-hindsight-configuration-observation/
+?? .trellis/tasks/10-07-hindsight-managed-host-custody/
+?? .trellis/tasks/10-07-hindsight-template-lifecycle/
+?? apps/desktop/src/lib/ws-client-hindsight-configuration.test.ts
+?? apps/desktop/src/lib/ws-client-hindsight-configuration.ts
+?? apps/desktop/src/lib/ws-client-hindsight-templates.test.ts
+?? apps/desktop/src/lib/ws-client-hindsight-templates.ts
+?? apps/desktop/src/windows/home/pages/operations/hindsight-configuration-browser-fixture.ts
+?? apps/desktop/src/windows/home/pages/operations/hindsight-configuration-browser.test.ts
+?? apps/desktop/src/windows/home/pages/operations/hindsight-configuration-card.test.tsx
+?? apps/desktop/src/windows/home/pages/operations/hindsight-configuration-card.tsx
+?? apps/desktop/src/windows/home/pages/operations/hindsight-configuration-controller.test.ts
+?? apps/desktop/src/windows/home/pages/operations/hindsight-configuration-controller.ts
+?? apps/desktop/src/windows/home/pages/operations/hindsight-configuration-state.ts
+?? apps/desktop/src/windows/home/pages/operations/hindsight-template-browser.test.ts
+?? apps/desktop/src/windows/home/pages/operations/hindsight-template-card.tsx
+?? apps/desktop/src/windows/home/pages/operations/hindsight-template-controller.test.ts
+?? apps/desktop/src/windows/home/pages/operations/hindsight-template-controller.ts
+?? apps/desktop/src/windows/home/pages/operations/hindsight-template-editor.tsx
+?? apps/desktop/src/windows/home/pages/operations/hindsight-template-plan.tsx
+?? apps/desktop/src/windows/home/pages/operations/hindsight-template-preview.tsx
+?? apps/desktop/src/windows/home/pages/operations/hindsight-template-resource-editor.tsx
+?? apps/desktop/src/windows/home/pages/operations/hindsight-template-resource-form.test.ts
+?? apps/desktop/src/windows/home/pages/operations/hindsight-template-resource-form.tsx
+?? apps/desktop/src/windows/home/pages/operations/hindsight-template-state.ts
+?? apps/desktop/src/windows/home/pages/operations/hindsight-template-test-fixture.ts
+?? apps/desktop/src/windows/home/pages/operations/use-configuration-characters.ts
+?? apps/desktop/src/windows/home/pages/operations/use-hindsight-configuration.ts
+?? apps/desktop/src/windows/home/pages/operations/use-hindsight-templates.ts
+?? packages/core/src/boot/hindsight-configuration-boot.ts
+?? packages/core/src/boot/hindsight-template-boot.ts
+?? packages/core/src/db/hindsight-template-emergency-evidence.ts
+?? packages/core/src/db/migrations/058-hindsight-template-overlays.test.ts
+?? packages/core/src/db/migrations/058-hindsight-template-overlays.ts
+?? packages/core/src/db/migrations/059-hindsight-template-execution.test.ts
+?? packages/core/src/db/migrations/059-hindsight-template-execution.ts
+?? packages/core/src/memory/hindsight-backup/hindsight-backup-capture-connection.ts
+?? packages/core/src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts
+?? packages/core/src/memory/hindsight-backup/hindsight-backup-capture-state.ts
+?? packages/core/src/memory/hindsight-backup/hindsight-backup-copied-identity.ts
+?? packages/core/src/memory/hindsight-backup/hindsight-backup-copy-readback.ts
+?? packages/core/src/memory/hindsight-backup/hindsight-backup-json.ts
+?? packages/core/src/memory/hindsight-backup/hindsight-backup-manifest.ts
+?? packages/core/src/memory/hindsight-backup/hindsight-backup-preflight-operator.ts
+?? packages/core/src/memory/hindsight-backup/hindsight-backup-preflight.ts
+?? packages/core/src/memory/hindsight-backup/hindsight-backup-staging.ts
+?? packages/core/src/memory/hindsight-backup/hindsight-template-backup-attestation.ts
+?? packages/core/src/memory/hindsight-backup/hindsight-template-backup-capacity.test.ts
+?? packages/core/src/memory/hindsight-backup/hindsight-template-backup-consumers.test.ts
+?? packages/core/src/memory/hindsight-backup/hindsight-template-backup-execution.ts
+?? packages/core/src/memory/hindsight-backup/hindsight-template-backup-history.ts
+?? packages/core/src/memory/hindsight-backup/hindsight-template-backup-integrity.ts
+?? packages/core/src/memory/hindsight-backup/hindsight-template-backup-observer.ts
+?? packages/core/src/memory/hindsight-backup/hindsight-template-backup-pair.ts
+?? packages/core/src/memory/hindsight-backup/hindsight-template-backup-publication.ts
+?? packages/core/src/memory/hindsight/hindsight-configuration-client.ts
+?? packages/core/src/memory/hindsight/hindsight-configuration-comparison.ts
+?? packages/core/src/memory/hindsight/hindsight-configuration-compatibility.test.ts
+?? packages/core/src/memory/hindsight/hindsight-configuration-context.test.ts
+?? packages/core/src/memory/hindsight/hindsight-configuration-context.ts
+?? packages/core/src/memory/hindsight/hindsight-configuration-secret.test.ts
+?? packages/core/src/memory/hindsight/hindsight-configuration-service.test.ts
+?? packages/core/src/memory/hindsight/hindsight-configuration-service.ts
+?? packages/core/src/memory/hindsight/hindsight-template-backup-capability.ts
+?? packages/core/src/memory/hindsight/hindsight-template-binding.test.ts
+?? packages/core/src/memory/hindsight/hindsight-template-capability.ts
+?? packages/core/src/memory/hindsight/hindsight-template-client.ts
+?? packages/core/src/memory/hindsight/hindsight-template-compatibility.test.ts
+?? packages/core/src/memory/hindsight/hindsight-template-label-evidence.test.ts
+?? packages/core/src/memory/hindsight/hindsight-template-label-evidence.ts
+?? packages/core/src/memory/hindsight/template-lifecycle/
+?? packages/core/src/memory/operations/memory-operation-kind-template.ts
+?? packages/core/src/memory/operations/memory-operation-template-guard.ts
+?? packages/core/src/memory/transitions/transition-healthy-publication-lease.test.ts
+?? packages/core/src/memory/transitions/transition-template-auxiliary.ts
+?? packages/core/src/memory/transitions/transition-template-evidence.ts
+?? packages/core/src/memory/transitions/transition-template-healthy.test.ts
+?? packages/core/src/memory/transitions/transition-template-observer.test.ts
+?? packages/core/src/memory/transitions/transition-template-observer.ts
+?? packages/core/src/memory/transitions/transition-template-scope.test.ts
+?? packages/core/src/memory/transitions/transition-template-state.ts
+?? packages/core/src/server/methods/hindsight-configuration-methods.test.ts
+?? packages/core/src/server/methods/hindsight-configuration-methods.ts
+?? packages/core/src/server/methods/hindsight-template-methods.test.ts
+?? packages/core/src/server/methods/hindsight-template-methods.ts
+?? packages/core/src/testing/hindsight-configuration-fixture.ts
+?? packages/core/src/testing/hindsight-template-backup-consumer-fixture.ts
+?? packages/core/src/testing/hindsight-template-backup-joint-fixture.ts
+?? packages/core/src/testing/hindsight-template-exchange-fixture.ts
+?? packages/core/src/testing/hindsight-template-native-consumer.fixture.ts
+?? packages/core/src/testing/hindsight-template-observation-fixtures.ts
+?? packages/core/src/testing/memory-transition-template-evidence-fixtures.ts
+?? packages/core/src/testing/memory-transition-template-fixtures.ts
+?? packages/core/src/testing/memory-transition-template-healthy-fixture.ts
+?? packages/shared/src/fixtures/
+?? packages/shared/src/hindsight-backup-v1-schema.ts
+?? packages/shared/src/hindsight-backup-v2-schema.ts
+?? packages/shared/src/hindsight-configuration-observation-schema.test.ts
+?? packages/shared/src/hindsight-configuration-observation-schema.ts
+?? packages/shared/src/hindsight-template-backup-attestation-schema.ts
+?? packages/shared/src/hindsight-template-backup-encoding.ts
+?? packages/shared/src/hindsight-template-backup-schema.test.ts
+?? packages/shared/src/hindsight-template-backup-schema.ts
+?? packages/shared/src/hindsight-template-definition-schema.ts
+?? packages/shared/src/hindsight-template-encoding.ts
+?? packages/shared/src/hindsight-template-schema.test.ts
+?? packages/shared/src/hindsight-template-schema.ts
+?? packages/shared/src/hindsight-template-validation.test.ts
+?? packages/shared/src/memory-template-derived-schema.ts
+?? packages/shared/src/memory-template-operation-schema.ts
+?? packages/shared/src/memory-template-schema.ts
+?? packages/shared/src/memory-template-user-schema.ts
+?? packages/shared/src/memory-transition-template-schema.ts

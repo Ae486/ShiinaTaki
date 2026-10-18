@@ -1,0 +1,22 @@
+
+> @vectorize-io/hindsight-client@0.9.0 build
+> tsup
+
+CLI Building entry: src/index.ts
+CLI Using tsconfig: tsconfig.json
+CLI tsup v8.5.1
+CLI Using tsup config: H:\hindsight\hindsight-clients\typescript\tsup.config.ts
+CLI Target: es2020
+CLI Cleaning output folder
+CJS Build start
+ESM Build start
+ESM dist\index.mjs     83.57 KB
+ESM dist\index.mjs.map 228.02 KB
+ESM ⚡️ Build success in 60ms
+CJS dist\index.js     84.69 KB
+CJS dist\index.js.map 228.09 KB
+CJS ⚡️ Build success in 62ms
+DTS Build start
+DTS ⚡️ Build success in 9546ms
+DTS dist\index.d.ts  435.91 KB
+DTS dist\index.d.mts 435.91 KB

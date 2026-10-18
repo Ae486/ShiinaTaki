@@ -1,0 +1,5 @@
+{"state":"admitted","backupId":"274dd996-d802-485b-ac57-b789fbfe838e","corePath":"H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\joint-06-brotbpbk\\pytest-of-unknown\\pytest-0\\test_actual_core_native_pair_r0\\admitted\\backups\\274dd996-d802-485b-ac57-b789fbfe838e\\core.sqlite","manifestPath":"H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\joint-06-brotbpbk\\pytest-of-unknown\\pytest-0\\test_actual_core_native_pair_r0\\admitted\\backups\\274dd996-d802-485b-ac57-b789fbfe838e\\manifest.json","nativePath":"H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\joint-06-brotbpbk\\pytest-of-unknown\\pytest-0\\test_actual_core_native_pair_r0\\admitted\\backups\\274dd996-d802-485b-ac57-b789fbfe838e\\native.zip"}
+
+--- stderr ---
+(node:35552) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node.EXE --trace-warnings ...` to show where the warning was created)

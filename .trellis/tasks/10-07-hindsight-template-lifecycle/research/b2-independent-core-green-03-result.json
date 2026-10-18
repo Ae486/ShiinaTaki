@@ -1,0 +1,17 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "exec",
+    "vitest",
+    "run",
+    "H:/TakiAgent/packages/core/src/memory/hindsight/template-lifecycle/template-rollout.test.ts",
+    "--maxWorkers=2",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile.json=H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research/b2-independent-core-green-03-vitest.json"
+  ],
+  "cwd": "H:/TakiAgent/packages/core",
+  "exitCode": 0,
+  "durationSeconds": 30.711,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-independent-core-green-03.log"
+}

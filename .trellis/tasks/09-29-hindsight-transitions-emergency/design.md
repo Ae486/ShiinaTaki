@@ -8,6 +8,12 @@ this document owns the proposed contracts. Existing first-activation and backup 
 
 ## 1. Decisions and boundary
 
+2026-10-07 continuation: [W9 final lease guard](research/stage4-w9-lease-plan-2026-10-07.md) supplements this design.
+Healthy publication must perform a final live-clock check of the original executor and exact post-write revision
+after complete read-back and before transaction return. Genuine expiry rolls back the entire Core publication;
+it does not become a committed authority followed by a late lease refusal. The owner approved this amendment on
+2026-10-07, including a consistent finite lease extension if functional verification demonstrates it is necessary.
+
 1. Extend the existing Core operation service, scheduler, provider clients, canonical stores and runtime owner.
    Introduce transition-specific durable state where necessary; do not build another sync engine or UI ledger.
 2. Healthy return, healthy re-entry and emergency takeover are distinct operator requests in one exclusive

@@ -1,0 +1,83 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ ❯ src/memory/hindsight/template-lifecycle/template-runtime-control.test.ts (4 tests | 1 failed) 3172ms
+     × retires the complete published scheduler and keeps unbound captures/status explicitly held 439ms
+ ❯ src/memory/hindsight/template-lifecycle/template-rollout.test.ts (7 tests | 2 failed) 9285ms
+     × recovers a partial two-Bank rollout after physical SQLite reopen using the original requests 564ms
+     × recovers a committed Apply whose reply was lost without repeating either Native mutation 419ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/memory/hindsight/template-lifecycle/template-rollout.test.ts > original-plan template rollout and publication > recovers a partial two-Bank rollout after physical SQLite reopen using the original requests
+AssertionError: expected { …(12) } to match object { state: 'outcome_unknown', …(1) }
+(22 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "result": {
+-     "appliedBanks": 1,
+-     "outcome": "partial",
++     "appliedBanks": 0,
++     "outcome": "outcome_unknown",
+      "totalBanks": 2,
+    },
+    "state": "outcome_unknown",
+  }
+
+ ❯ src/memory/hindsight/template-lifecycle/template-rollout.test.ts:23:23
+     21|     const plan = f.plan(original);
+     22|     const oldResult = f.owner.status(original.operationId);
+     23|     expect(oldResult).toMatchObject({ state: "outcome_unknown", result…
+       |                       ^
+     24|     expect(readTemplateHold(f.db, plan.planId)?.state).toBe("active");
+     25|     expect(f.service.status().previewAvailable).toBe(false);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/memory/hindsight/template-lifecycle/template-rollout.test.ts > original-plan template rollout and publication > recovers a committed Apply whose reply was lost without repeating either Native mutation
+AssertionError: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ src/memory/hindsight/template-lifecycle/template-rollout.test.ts:49:36
+     47|     const original = f.owner.submit(await f.request()); await f.owner.…
+     48|     const plan = f.plan(original);
+     49|     expect(f.native.receipts.size).toBe(2);
+       |                                    ^
+     50|     expect(f.db.prepare("SELECT * FROM hindsight_template_bank_receipt…
+     51|     const originalRequests = plan.banks.map((bank) => bank.preview.req…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/memory/hindsight/template-lifecycle/template-runtime-control.test.ts > durable hold through actual Hindsight runtime owners > retires the complete published scheduler and keeps unbound captures/status explicitly held
+AssertionError: expected 'published' to be 'rebound' // Object.is equality
+
+Expected: "rebound"
+Received: "published"
+
+ ❯ src/memory/hindsight/template-lifecycle/template-runtime-control.test.ts:67:62
+     65|     expect(model.doGenerateCalls).toHaveLength(0);
+     66|     f.owner.cancel(operation.operationId);
+     67|     expect(runtime.recoverHindsightBinding("epoch").binding).toBe("reb…
+       |                                                              ^
+     68|     expect(runtime.operations()).not.toBeNull();
+     69|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  2 failed | 4 passed (6)
+      Tests  3 failed | 44 passed (47)
+   Start at  19:02:29
+   Duration  38.05s (transform 13.76s, setup 0ms, import 23.58s, tests 48.91s, environment 1ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/hindsight/template-lifecycle/template-lifecycle-service.test.ts src/memory/hindsight/template-lifecycle/template-rollout.test.ts src/memory/hindsight/template-lifecycle/template-provision.test.ts src/memory/hindsight/template-lifecycle/template-runtime-control.test.ts src/memory/hindsight/template-lifecycle/template-executor-store.test.ts src/db/migrations/059-hindsight-template-execution.test.ts --maxWorkers=2

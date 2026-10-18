@@ -1,0 +1,6 @@
+{
+  "command": "pnpm --filter @taki/core exec vitest run src/memory/hindsight/hindsight-template-label-evidence.test.ts src/memory/hindsight/hindsight-template-binding.test.ts --maxWorkers 2",
+  "endedAt": "2026-10-08T09:10:29.5444734+00:00",
+  "exitCode": 1,
+  "startedAt": "2026-10-08T09:10:17.3923676+00:00"
+}

@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-10-13T12:03:55.6222190Z",
+  "tempRoot": "G:\\Temp",
+  "fixtureSource": "H:\\hindsight\\docker\\standalone\\tests\\fixtures\\",
+  "matchedDirectories": [],
+  "fixtureProcessMatches": [],
+  "removalDuringReadback": false,
+  "cargoTargetRetained": true,
+  "hFreeBytes": 14581972992,
+  "exitCode": 0,
+  "toolChunk": "c959eb",
+  "linuxTestsExecuted": false,
+  "linuxFixtureResourcesCreated": false,
+  "linuxResourceEvidence": "The only Ubuntu commands discovered interpreters and read standard-library/runtime metadata. No C1b test or fixture-creation command ran.",
+  "wslStateAfterPreflight": "  NAME              STATE           VERSION\n\n* Ubuntu-22.04      Stopped         2\n\n  docker-desktop    Stopped         2\n\n\r\n",
+  "ubuntuTerminatedByReviewer": false,
+  "dockerStarted": false,
+  "originalDataTouched": false,
+  "originalCredentialsTouched": false,
+  "originalPermissionsChanged": false,
+  "command": "$ErrorActionPreference = 'Stop'\n$fixtureTempRoot = 'G:\\Temp'\n$fixtureSource = 'H:\\hindsight\\docker\\standalone\\tests\\fixtures\\'\n$directories = @(Get-ChildItem -LiteralPath $fixtureTempRoot -Directory -Filter 'taki-c1b-*' -ErrorAction Stop | ForEach-Object { [PSCustomObject]@{ path = $_.FullName; markerPresent = Test-Path -LiteralPath (Join-Path $_.FullName 'C1B_FAKE_ONLY') } })\n$processes = @(Get-CimInstance -ClassName Win32_Process -Filter \"Name = 'python.exe'\" -OperationTimeoutSec 10 | Where-Object { $_.CommandLine -and $_.CommandLine.Replace('/', '\\').Contains($fixtureSource) } | Select-Object ProcessId, ParentProcessId, ExecutablePath)\n[PSCustomObject]@{ checkedAt = [DateTime]::UtcNow.ToString('o'); tempRoot = $fixtureTempRoot; fixtureSource = $fixtureSource; matchedDirectories = $directories; fixtureProcessMatches = $processes; removalDuringReadback = $false; cargoTargetRetained = (Test-Path -LiteralPath 'apps/desktop/src-tauri/target' -PathType Container); hFreeBytes = (Get-PSDrive -Name H).Free } | ConvertTo-Json -Depth 5\nif ($directories.Count -ne 0 -or $processes.Count -ne 0) { exit 1 }"
+}

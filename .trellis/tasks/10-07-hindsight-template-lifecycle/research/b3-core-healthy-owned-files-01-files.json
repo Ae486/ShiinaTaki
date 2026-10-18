@@ -1,0 +1,542 @@
+{
+  "files": [
+    {
+      "path": ".trellis/spec/backend/memory-hindsight-backup.md",
+      "sha256": "d545ccb9873baba4161e7044ba230c0d51ce80f246621c01b6259195473b32d9",
+      "bytes": 24621,
+      "untracked": false
+    },
+    {
+      "path": ".trellis/spec/backend/memory-transition-healthy-drivers.md",
+      "sha256": "4b658bb5062dc2e8ab50c946f7fba5f76e86182daf4d40fe8b1a193993036708",
+      "bytes": 25100,
+      "untracked": false
+    },
+    {
+      "path": ".trellis/spec/backend/memory-transition-publication.md",
+      "sha256": "890777711a57a7c34bfa655599270b544838477a753403f728f2e588f4e60858",
+      "bytes": 16875,
+      "untracked": false
+    },
+    {
+      "path": ".trellis/spec/backend/quality-guidelines.md",
+      "sha256": "79240c31ae2db03707ef98853c770cc9edc5748e1320a4ce1eabe711a7fa374d",
+      "bytes": 15772,
+      "untracked": false
+    },
+    {
+      "path": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-core-implementation.md",
+      "sha256": "5fea12ffafcb94d77765d8078e10fa27f76bc90e711f61e74e82c6e14d74e4a0",
+      "bytes": 12085,
+      "untracked": true
+    },
+    {
+      "path": "CLAUDE.md",
+      "sha256": "1f24dc603bba70220f69fb294bf77f358b52cb5d16fdbe1bc5853613ea9832be",
+      "bytes": 11228,
+      "untracked": false
+    },
+    {
+      "path": "eslint.config.js",
+      "sha256": "ab81a826df00f2691e74242ada2043663da1eda23ed9d6cc69afb2cb79a7c3da",
+      "bytes": 3865,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/db/index.md",
+      "sha256": "17e9a12442bd6f6cdb62aa397c2e9bc1c8802525667c13966d1d3b12214eb904",
+      "bytes": 22243,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-candidate-repo.ts",
+      "sha256": "b7d9ac8d804bf611bb652f3ec313ba47aa39eae72d5d9692817d86d74f0c0dd4",
+      "bytes": 11914,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-publication-proof.ts",
+      "sha256": "70a528953d92197f7fce03ec4a9f9019c0797a10fc82f9f177d06639e23bf2c3",
+      "bytes": 9735,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-publication-repo.ts",
+      "sha256": "9498a3f7ba4a739e349fcfadf2cdc38a15e2cb4c95a721513243a71fc26cb7a0",
+      "bytes": 10168,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-admit.ts",
+      "sha256": "a980c319816f73bacaa484da02066daa9c63f001628da2958e4e9f87d823b24a",
+      "bytes": 4907,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-archive.ts",
+      "sha256": "e93baaf6c44108ed0e2a2a3b19ded1a0f025422443ac9e9f1e8a86e006e154e8",
+      "bytes": 5871,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-capture-connection.ts",
+      "sha256": "c60ee8b0fd0652eeababebf94805f2a0e422daa8b4f8106408d4e3df70dca86e",
+      "bytes": 1849,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-capture-state.test.ts",
+      "sha256": "d24369c85dfec5ad7a20b0807435cf0d1b1e71c6ee86746f95bf2a1cf60c89fb",
+      "bytes": 7911,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-capture-state.ts",
+      "sha256": "1f21ca860400e24ee84fd0ed8262fbcc129e9142af16dfb21030f54bc39aa34d",
+      "bytes": 3263,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-copied-identity.ts",
+      "sha256": "cd81ec8fecb539699902da6f01c1d2136d1257c87b15c3ef83a0c8d67553758c",
+      "bytes": 3828,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-copy-readback.ts",
+      "sha256": "92f24ec7e2dd7643c86901cf98586d0bf935de865c006c154b0c6cfd9fa66d7a",
+      "bytes": 2231,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-fixtures.ts",
+      "sha256": "0390ae2e07ddf4893863cfd1edd1f6c6f5274eb3aa2f3497142e73a7be7c47fa",
+      "bytes": 3370,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-identity.ts",
+      "sha256": "528ab1c23a02e3338a7c7649ffe9005735035ef09bfa9815d5cf7e41e300a00e",
+      "bytes": 4339,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-json.ts",
+      "sha256": "a6105a691901323cb0673d4a50baeea2d571c14b5efb3dfc6e708825b8874b19",
+      "bytes": 2420,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-manifest.ts",
+      "sha256": "7671622e8d422a6e81ad6d550ed69445943b6771990be9bf8941a122ff2f0781",
+      "bytes": 1570,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-native-route.ts",
+      "sha256": "32bd710db159fc99855c64fce7ea27324e3ff02c53932ce0637d72682b06132a",
+      "bytes": 4893,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-pair.ts",
+      "sha256": "01c0e8b51f221cb7434c49571ddc17429f716a5659ee761f1adc342c103ee59f",
+      "bytes": 4413,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-preflight-operator.ts",
+      "sha256": "cacd399b3712091a6a32230d3e3db86cb32ea48d150ddd54954f53f760ab111a",
+      "bytes": 1897,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-preflight.ts",
+      "sha256": "2eb62d3e872ca8c4f1a2d19ae35bfb1653e56b3890be94317cdb52b03d620558",
+      "bytes": 2873,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-receipts.ts",
+      "sha256": "b0931d0e198a2042d320beb3d6e48f3648183f260dd5fef2521ef27310887446",
+      "bytes": 6120,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-restore.ts",
+      "sha256": "41bd340320a4d870419d9cc3fce8f418d607f2bf506f2bb07b46c435848b3d43",
+      "bytes": 4962,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-service.ts",
+      "sha256": "0a0e3d873c68de7ee42bf83778c128c3b45b02b2e5e6e603082eb9d67b43d42c",
+      "bytes": 16019,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-staging.ts",
+      "sha256": "b587db78d7b8e33e2f6f16561811ea04814e7a0ae094eeffe53dabedc155a8c3",
+      "bytes": 1823,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-store.ts",
+      "sha256": "2698c9bd5344c43407f33bab5c11cd062dd18d7234e75d79cce29e4d25185317",
+      "bytes": 19372,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-verify.ts",
+      "sha256": "89ad6a6468e614e8c868a947d34beb7f042dc1e47adb117a5fe407ed6cc7d1d5",
+      "bytes": 7802,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-emergency-snapshot.ts",
+      "sha256": "780a49b98b8a769aaa2b5328b31ca6af9bd2d9ca702104e630fe572897ff532c",
+      "bytes": 7834,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-template-backup-attestation.ts",
+      "sha256": "c55c08860470b3449fdaf21c8ef106cd971bb4a094bd712ef0cd47d486228711",
+      "bytes": 9471,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-template-backup-execution.ts",
+      "sha256": "6b96519d34faf32374fc093761dceca7c4a1e8749e07e998a8af4e159044cfd3",
+      "bytes": 10012,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-template-backup-history.ts",
+      "sha256": "928f7fd4ce998868ca90510e638c553e3bcf9e708949e1d24ce55297fd09a396",
+      "bytes": 6392,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-template-backup-integrity.ts",
+      "sha256": "4157c76a4ab3d6d90de0bc9ba4c32d361a792795145dfe74661b143a495d09fa",
+      "bytes": 2618,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-template-backup-observer.ts",
+      "sha256": "576acb4d55bba798a6ab5508683a1675c0b3c3624a5c83bcef7acc004159d246",
+      "bytes": 3508,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-template-backup-pair.ts",
+      "sha256": "2cd7372dd35ffddb9a33812acdfc99231f93dbbe6e7be493a5520708d1bfe9a6",
+      "bytes": 4491,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-template-backup-publication.ts",
+      "sha256": "e3376b84e7902e9f3dff3269085dcb038ab3f776fdf3dc60af64e48980320ee2",
+      "bytes": 3944,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/index.md",
+      "sha256": "905cd56824433c3d9a023e9473d84ce09e1e5605519c53d91f83aa4abaa1bf17",
+      "bytes": 7348,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-backup-client.ts",
+      "sha256": "fbd93f009f8a4278ec75130b24868d1ddb963dcb2407980f69e973a704734ad2",
+      "bytes": 8190,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-client.ts",
+      "sha256": "3acf1e69d4a35dff72d92142d60ed977223f0642f2f39625966f090860867de1",
+      "bytes": 21587,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-compatibility-service.ts",
+      "sha256": "d09808bb06e2ec5c43de731171ba6b182e7454d65dbf0000d0bec193a4ec187e",
+      "bytes": 7342,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-contracts.ts",
+      "sha256": "bf18ff0e6cf7ef48f1ad92e139cdcf3239f95e951a275e5ec8bfb83727b7d25a",
+      "bytes": 5842,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-template-backup-capability.ts",
+      "sha256": "ad8743dd0d47fd95a7f0912fc5e3b91f3f71587fa73d68e4948a53cd1303e019",
+      "bytes": 1089,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/index.md",
+      "sha256": "9767e6432d78d98e3817fd6d79ffb4784e085103efd8cc223c5c58678d296ec2",
+      "bytes": 19801,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/transitions/index.md",
+      "sha256": "43d4f86ff5e61c153b3ad3dde0356c9017242647a65a54ab9c366538188d534c",
+      "bytes": 7969,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-current-identity.ts",
+      "sha256": "fe4d9331baa0248cd1a724d9413814bc101c0f18f4a4f0fffe36c62ef28cc0a3",
+      "bytes": 12894,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-emergency-context.test.ts",
+      "sha256": "732fb08ee15764e1154d67c5f08d802e556d9dfdfae4791c7680520312645462",
+      "bytes": 11225,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-evidence-context.test.ts",
+      "sha256": "af93f235a1d97ae4bf24b0943bda7ac6650c20842a6ed9350848267f725e60dc",
+      "bytes": 8940,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-final-mapping.ts",
+      "sha256": "84cea077b89fde543a2a09e74abe126d0c022f30c16751e3b20610200a7bfe96",
+      "bytes": 14124,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-candidate.ts",
+      "sha256": "599006a04cff67cd9034d2a5f3c11fb0e132a2b864010fbb1a095d4edd36129f",
+      "bytes": 7285,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-execution.ts",
+      "sha256": "3235ba06bf4d4d20581448921f6f169a3bb2b17cbb0f22bf551a6a705cdfc60a",
+      "bytes": 18773,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-publication-lease.test.ts",
+      "sha256": "4bafc1f5db851f79864af50c8c7e1e7d379d5574571d5e49c7788fe995c83bbe",
+      "bytes": 11517,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-service.ts",
+      "sha256": "c8dbfbb0ad294e037f43a053c9528b63ead28ef003f9c8c7d0e6dda00b9b4065",
+      "bytes": 10537,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-native-evidence.ts",
+      "sha256": "0513b7b3b3d3a87c9f39359c65b7aa319e89e62334f918d7e23e3f441d847500",
+      "bytes": 10238,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-template-auxiliary.ts",
+      "sha256": "89a7893e463f2170cbc5d83b540af75ba81c78af81baa63eadcb4c0d1b994e7f",
+      "bytes": 8403,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-template-evidence.ts",
+      "sha256": "9546639a914e525ca573f5e59b434f75a50291b9a81854688554aba1789f54b3",
+      "bytes": 5072,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-template-observer.test.ts",
+      "sha256": "bd13208d478cf8afdb3f608743186ec60a63066aecdd22a629a5d9bbde2b84b4",
+      "bytes": 7994,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-template-observer.ts",
+      "sha256": "4f87ba53d1902800a6511116a1c8bfdc5de7138c51e6d70ad9c41c51c83e8940",
+      "bytes": 5170,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-template-state.ts",
+      "sha256": "447476ef3648e2fe943b8b2993f360b64b21b821fca9b2642eb7cefc5698cb60",
+      "bytes": 8035,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/testing/hindsight-template-backup-joint-fixture.ts",
+      "sha256": "36be2414c6c3e77b3420ad66d576e90a4fc50f4cbdb84daf78c675a43d8e6fbf",
+      "bytes": 10390,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/testing/hindsight-template-native-consumer.fixture.ts",
+      "sha256": "f2ce07c91d28f5fc0fc27deeca322746693652ba261250d8ac58978b32240b3b",
+      "bytes": 6542,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/testing/hindsight-template-observation-fixtures.ts",
+      "sha256": "262bf428fb6f9dc0556e158d8a10fc9c900d511d73a00ae248d6e344f21154d6",
+      "bytes": 5637,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/testing/index.md",
+      "sha256": "1c2e563af4d51b48fb9c041193d75ca9c520e2daa20fc5474f79c3dafea927d7",
+      "bytes": 7835,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/testing/memory-transition-cycle-fixtures.ts",
+      "sha256": "503b3d4e76e50b1edd07c697b65951ab6934813e6b5f8f765fe0a9d08c2f541d",
+      "bytes": 11938,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/testing/memory-transition-publication-fixtures.ts",
+      "sha256": "ff293dca369746e5219d84081e7cbcb80f454edc1c9ef5ec9a94865aefdd756d",
+      "bytes": 7972,
+      "untracked": false
+    },
+    {
+      "path": "packages/core/src/testing/memory-transition-template-evidence-fixtures.ts",
+      "sha256": "f7e4d2f327753017611e736b90822e9505d57939b5496ebce17879c938b8aad5",
+      "bytes": 7039,
+      "untracked": true
+    },
+    {
+      "path": "packages/core/src/testing/memory-transition-template-fixtures.ts",
+      "sha256": "0befd646ac5672265f0eeb5602c1c7692de3f355b2243a30f5a5fb1d1196603a",
+      "bytes": 7408,
+      "untracked": true
+    },
+    {
+      "path": "packages/shared/src/hindsight-backup-schema.ts",
+      "sha256": "e5b3c457c1109773cf020e671a08290d8c2178b254dabbae28290669298e7db9",
+      "bytes": 9817,
+      "untracked": false
+    },
+    {
+      "path": "packages/shared/src/hindsight-backup-v1-schema.ts",
+      "sha256": "b02e2f52d815db7cae21cac7348751afba969c070cc47f7a77dbeffa05cacfde",
+      "bytes": 10788,
+      "untracked": true
+    },
+    {
+      "path": "packages/shared/src/hindsight-backup-v2-schema.ts",
+      "sha256": "533bfd8c38e9ea010736bc08a73db198f97a57a3a15891c741339fff58be6fc1",
+      "bytes": 8874,
+      "untracked": true
+    },
+    {
+      "path": "packages/shared/src/hindsight-connection-schema.ts",
+      "sha256": "fa36e0afa3c9754f104b29e56d2f5150385f792582bbd6032217e94c3325f43f",
+      "bytes": 8136,
+      "untracked": false
+    },
+    {
+      "path": "packages/shared/src/hindsight-json-schema.ts",
+      "sha256": "837c4c5329c69ce9ff75d0cc3ac47a3542452520a54bac1f379f170b9a467f14",
+      "bytes": 2707,
+      "untracked": false
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-backup-attestation-schema.ts",
+      "sha256": "a61557e17223987b62911c6475fc9f55796e3c0825de97638fb2fe9638cdd377",
+      "bytes": 2729,
+      "untracked": true
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-backup-encoding.ts",
+      "sha256": "7de6f70feb5d072119bdcfe82547015c3128b44b9d11b7f109066b3d0114d8f4",
+      "bytes": 5110,
+      "untracked": true
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-backup-schema.test.ts",
+      "sha256": "2bb0c82bc6c2d797129facfdb798de87a1a04c1f749544143ebc61ef7660e2c2",
+      "bytes": 12535,
+      "untracked": true
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-backup-schema.ts",
+      "sha256": "dcec35b94c796eced78669fe8e054f8a94ac730d89b12289b4d39b12ca59ac6b",
+      "bytes": 3518,
+      "untracked": true
+    },
+    {
+      "path": "packages/shared/src/index.md",
+      "sha256": "ddfd212d9f0ca0cd826db1535491e32c17bab49699427c37418dd19521a88c3d",
+      "bytes": 16391,
+      "untracked": false
+    },
+    {
+      "path": "packages/shared/src/index.ts",
+      "sha256": "a9f2f10989cd58a42f0d3fe216cc33066c25778ec44bc869e40164ea20020357",
+      "bytes": 60522,
+      "untracked": false
+    },
+    {
+      "path": "packages/shared/src/memory-transition-candidate-schema.ts",
+      "sha256": "5f00db24246362c185feec89f62b61b253963fdf175af357be11af645ec09bf0",
+      "bytes": 9046,
+      "untracked": false
+    },
+    {
+      "path": "packages/shared/src/memory-transition-emergency-schema.ts",
+      "sha256": "85ee1e57404af8aee63690469c983357c7fd54ab24a2e4e402d10a9ee1f3f9a2",
+      "bytes": 5404,
+      "untracked": false
+    },
+    {
+      "path": "packages/shared/src/memory-transition-schema.ts",
+      "sha256": "7318281afc50db47c565c00601c6213b5b7ef642aca30530a25e100506662735",
+      "bytes": 12760,
+      "untracked": false
+    },
+    {
+      "path": "packages/shared/src/memory-transition-template-schema.ts",
+      "sha256": "fd00bdfeb4bac1f4568f67a5bd8294eff065b0f887d74fafca21b779bb091298",
+      "bytes": 1883,
+      "untracked": true
+    }
+  ],
+  "sourceComparisons": {
+    "healthy-template-green-01": [
+      "packages/core/src/testing/hindsight-template-observation-fixtures.ts"
+    ],
+    "healthy-legacy-reuse-01": [
+      "packages/core/src/testing/hindsight-template-observation-fixtures.ts"
+    ],
+    "healthy-offline-w6-01": [
+      "packages/core/src/testing/hindsight-template-observation-fixtures.ts"
+    ],
+    "healthy-template-types-02": [],
+    "healthy-owned-lint-01": [],
+    "healthy-observer-final-01": []
+  },
+  "issues": [
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-template-backup-capability.ts",
+      "issue": "missing-index-entry"
+    },
+    {
+      "path": "packages/shared/src/hindsight-backup-v1-schema.ts",
+      "issue": "new-blank-line-at-eof"
+    },
+    {
+      "path": "packages/shared/src/memory-transition-template-schema.ts",
+      "issue": "missing-index-entry"
+    }
+  ]
+}

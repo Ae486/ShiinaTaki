@@ -1,0 +1,90 @@
+Owned fixture: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-fc68cd43fab5
+PostgreSQL: 18.1 ; vector/pg_trgm ready
+Pytest log: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-fc68cd43fab5\pytest.log
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade k6l7m8n9o0p1 -> o1a2b3c4d5e6, oracle_baseline
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade o1a2b3c4d5e6 -> b5d4e3f2a1c9, Backfill entity_cooccurrences.last_cooccurred from memory_units event time
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade o1a2b3c4d5e6 -> 9f8e7d6c5b4a, Make memory_links.from_unit_id and memory_links.to_unit_id FKs deferrable.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade 9f8e7d6c5b4a, b5d4e3f2a1c9 -> m3rg3h3ad5f6, Merge divergent heads from deferrable FK and cooccurrence backfill
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade m3rg3h3ad5f6 -> 86f7a033d372, Repair mental_models.subtype on databases stuck at m3rg3h3ad5f6
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade 86f7a033d372 -> b8c9d0e1f2a3, Re-create vchord vector indexes with vector_cosine_ops
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade 86f7a033d372 -> p4q5r6s7t8u9, Drop GENERATED expression on tsvector search_vector columns.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade p4q5r6s7t8u9 -> e1b2c3d4f5a6, Drop indexes that are unused or redundant with composite indexes.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade e1b2c3d4f5a6 -> e9b2c7d1f3a4, Drop materialized entity rows from memory_links.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade e9b2c7d1f3a4 -> b5a4c3e2f1d8, Add graph_maintenance_queue table
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade b5a4c3e2f1d8, b8c9d0e1f2a3 -> c1d2e3f4a5b6, Merge graph_maintenance_queue and vchord_cosine_opclass heads.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade c1d2e3f4a5b6 -> d3e4f5a6b7c8, Add llm_requests table for per-bank LLM request tracing.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade d3e4f5a6b7c8 -> a7b8c9d0e1f2, Move mental-model and observation history into dedicated tables.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade a7b8c9d0e1f2 -> e5f6a7b8c9d0, Add server-side routines for background maintenance sweeps.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade e5f6a7b8c9d0 -> b2d4f6a8c1e3, Repair: install maintenance routines on the ``public`` / base-schema run.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade b2d4f6a8c1e3 -> c9a1b2d3e4f5, Add invalidated_memory_units table for curation (edit/invalidate).
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade c9a1b2d3e4f5 -> c3e5a7b9d1f4, Repair: widen ``*_history.bank_id`` from VARCHAR(64) to TEXT on PostgreSQL.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade c3e5a7b9d1f4 -> a1d3f5b7c9e2, Repair: widen the remaining live ``bank_id`` columns from VARCHAR(64) to TEXT on PostgreSQL.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade a1d3f5b7c9e2 -> 2071c7518f88, Add a composite index on memory_links(bank_id, link_type) (PostgreSQL).
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade a1d3f5b7c9e2 -> d4f6a8c2e1b3, Drop the embedding column from the curation archive (invalidated_memory_units).
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade d4f6a8c2e1b3, 2071c7518f88 -> e1f2a3b4c5d6, Merge two divergent migration heads.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade e1f2a3b4c5d6 -> c7e9f1a3b5d2, Make maintenance routines resilient to schemas that vanish mid-scan.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade c7e9f1a3b5d2 -> f4d1c2b3a5e6, Add server-side routine for cron-scheduled mental model refresh.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade f4d1c2b3a5e6 -> c3f7a1b9d2e4, Backfill search_vector for native-backend observations.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade c3f7a1b9d2e4 -> b57a7c9e0d13, Add bank_stats_cache table for distributed get_bank_stats caching
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade b57a7c9e0d13 -> e7c3a9f1b2d5, Drop the search_vector column from the curation archive (invalidated_memory_units).
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade e7c3a9f1b2d5 -> a8c1e4f7b0d3, Add indexes for terminal cleanup and newest-first operation listing.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade a8c1e4f7b0d3 -> b6d2f8a4c1e7, Install the maintenance discovery routines into the configured schema.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade b6d2f8a4c1e7 -> d7b2f8a1c934, Add the ``schemas_with_expired_operations`` cross-tenant discovery routine.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade d7b2f8a1c934 -> c7d1e9a4b3f2, Add ``causal_links`` to the curation archive (invalidated_memory_units).
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade c7d1e9a4b3f2 -> a1c9e7f3b2d8, Drop observation_history's FK to memory_units.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade a1c9e7f3b2d8 -> a9b8c7d6e5f4, Add knowledge_pages table (knowledge-base hierarchy).
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade a9b8c7d6e5f4 -> e4a7c1b9d2f6, Drop the never-written `access_count` column from memory_units (and its archive).
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade e4a7c1b9d2f6 -> f2a6d8c4b1e9, Repair: drop the stale global memory_units vector index on per-bank backends.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade f2a6d8c4b1e9 -> b3e8d1c6f4a9, Add entities.entity_kind and exclude label entities from the trigram index.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade b3e8d1c6f4a9 -> c4a7e2d9b1f6, Add logical revisions to live and invalidated memory units.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade c4a7e2d9b1f6 -> d5b8f1c3a7e2, Add idempotency receipts for conditional memory mutations.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade d5b8f1c3a7e2 -> e6c9a4f2b8d1, Add PostgreSQL lineage and logical replication journal primitives.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade e6c9a4f2b8d1 -> f7d0a5c3e9b2, Add PostgreSQL materialized logical snapshot metadata and pages.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade f7d0a5c3e9b2 -> a8e1b6d4f0c3, Persist factual native results and exact retain-part publication evidence.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade a8e1b6d4f0c3 -> d78a1c4e6f90, Persist atomic current-state import requests and immutable mappings.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade d78a1c4e6f90 -> d78b2d5e7a01, Persist first-activation candidates, native outcomes, and immutable evidence.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade d78b2d5e7a01 -> d78c3e6f8b12, Coordinate finite cutover work with ordinary native maintenance.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade d78c3e6f8b12 -> d77a4f8c2e10, Preserve original Taki artifacts and a joint native/application change stream.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade d77a4f8c2e10 -> e30a9d7f6c21, Durable all-writer transition ownership independent from finite D78 leases.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade e30a9d7f6c21 -> e40b1e8a7d32, Use existing UUID indexes without changing association publication ownership.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade e40b1e8a7d32 -> e51c2f9a8b43, Add immutable template receipts, child admissions/results and pristine definition proof.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade e51c2f9a8b43 -> e62a3d0b9c54, Bind private structured-label origins to exact current Native unit versions.
+INFO     hindsight_api.migrations:migrations.py:237 Database migrations completed successfully for schema 'd78_maintenance_ef5bbfda7dfd4d33b42b70f5e293aa1f'
+------------------------------ Captured log call ------------------------------
+INFO     hindsight_api.api:__init__.py:66 HTTP REST API enabled
+INFO     hindsight_api.engine.memory_engine:memory_engine.py:2928 [REFRESH_MENTAL_MODEL_TASK] Starting for bank_id=taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71, mental_model_id=user-travel-notes
+INFO     hindsight_api.engine.memory_engine:memory_engine.py:12365 [REFLECT taki-hs--6781] Starting agentic reflect for query: Summarize only explicit travel plans...., tags=['user-owned', 'travel'] (all_strict)
+INFO     hindsight_api.engine.reflect.agent:agent.py:666 [REFLECT taki-hs--6806] forced | query='Summarize only explicit travel plans....' | iterations=5 | llm=[agent_1=15ms, agent_2=14ms, agent_3=17ms, agent_4=16ms, final=13ms] (75ms) | tools=[none] (0ms) | answer='Generated by the real refresh pipeline' | total=83ms
+INFO     hindsight_api.engine.memory_engine:memory_engine.py:12626 [REFLECT taki-hs--6781] Complete: 38 chars, 5 iterations, 0 tool calls | 0.108s
+INFO     hindsight_api.engine.memory_engine:memory_engine.py:2995 [REFRESH_MENTAL_MODEL_TASK] Completed for bank_id=taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71, mental_model_id=user-travel-notes
+---------------------------- Captured log teardown ----------------------------
+INFO     hindsight_api.engine.memory_engine:memory_engine.py:4486 close() started
+INFO     hindsight_api.engine.db.postgresql:postgresql.py:166 PostgreSQL pool closed
+============================== warnings summary ===============================
+tests/native_results/test_template_backup_pair.py::test_actual_core_native_pair_restores_and_refuses_current_drift[customized]
+  H:\hindsight\.venv\Lib\site-packages\websockets\legacy\__init__.py:6: DeprecationWarning: websockets.legacy is deprecated; see https://websockets.readthedocs.io/en/stable/howto/upgrade.html for upgrade instructions
+    warnings.warn(  # deprecated in 14.0 - 2024-11-09
+
+tests/native_results/test_template_backup_pair.py::test_actual_core_native_pair_restores_and_refuses_current_drift[customized]
+  H:\hindsight\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py:17: DeprecationWarning: websockets.server.WebSocketServerProtocol is deprecated
+    from websockets.server import WebSocketServerProtocol
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================ slowest 10 durations =============================
+16.17s call     tests/native_results/test_template_backup_pair.py::test_actual_core_native_pair_restores_and_refuses_current_drift[removed]
+14.24s call     tests/native_results/test_template_backup_pair.py::test_actual_core_native_pair_restores_and_refuses_current_drift[customized]
+9.16s setup    tests/native_results/test_template_backup_pair.py::test_actual_core_native_pair_restores_and_refuses_current_drift[customized]
+2.79s setup    tests/native_results/test_template_backup_pair.py::test_actual_core_native_pair_restores_and_refuses_current_drift[removed]
+0.21s teardown tests/native_results/test_template_backup_pair.py::test_actual_core_native_pair_restores_and_refuses_current_drift[customized]
+0.21s teardown tests/native_results/test_template_backup_pair.py::test_actual_core_native_pair_restores_and_refuses_current_drift[removed]
+=========================== short test summary info ===========================
+FAILED tests/native_results/test_template_backup_pair.py::test_actual_core_native_pair_restores_and_refuses_current_drift[customized]
+FAILED tests/native_results/test_template_backup_pair.py::test_actual_core_native_pair_restores_and_refuses_current_drift[removed]
+======================= 2 failed, 2 warnings in 46.38s ========================
+{
+    "Fixture":  "taki-hindsight-g1-fc68cd43fab5",
+    "Stopped":  true,
+    "DataRemoved":  true,
+    "RegistryRemoved":  true,
+    "Logs":  "H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-fc68cd43fab5"
+}

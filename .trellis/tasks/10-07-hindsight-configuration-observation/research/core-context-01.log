@@ -1,0 +1,122 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ ❯ src/memory/hindsight/hindsight-configuration-context.test.ts (1 test | 1 failed) 652ms
+   × captures actual pinned Bank identity and rejects config ABA, secret, setup and epoch changes 650ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/memory/hindsight/hindsight-configuration-context.test.ts > captures actual pinned Bank identity and rejects config ABA, secret, setup and epoch changes
+ZodError: [
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "compatibility",
+      "baseApiVersion"
+    ],
+    "message": "Invalid input: expected string, received undefined"
+  },
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "compatibility",
+      "compatibilityVersion"
+    ],
+    "message": "Invalid input: expected string, received undefined"
+  },
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "compatibility",
+      "compatibilityBuild"
+    ],
+    "message": "Invalid input: expected string, received undefined"
+  },
+  {
+    "code": "invalid_value",
+    "values": [
+      "postgresql",
+      "oracle",
+      "unknown"
+    ],
+    "path": [
+      "compatibility",
+      "databaseDialect"
+    ],
+    "message": "Invalid option: expected one of \"postgresql\"|\"oracle\"|\"unknown\""
+  },
+  {
+    "code": "invalid_value",
+    "values": [
+      "sql_rows",
+      "alternative_store",
+      "unknown"
+    ],
+    "path": [
+      "compatibility",
+      "storageMode"
+    ],
+    "message": "Invalid option: expected one of \"sql_rows\"|\"alternative_store\"|\"unknown\""
+  },
+  {
+    "expected": "object",
+    "code": "invalid_type",
+    "path": [
+      "compatibility",
+      "support"
+    ],
+    "message": "Invalid input: expected object, received undefined"
+  },
+  {
+    "expected": "number",
+    "code": "invalid_type",
+    "path": [
+      "compatibility",
+      "journalVersion"
+    ],
+    "message": "Invalid input: expected number, received undefined"
+  },
+  {
+    "expected": "number",
+    "code": "invalid_type",
+    "path": [
+      "compatibility",
+      "snapshotVersion"
+    ],
+    "message": "Invalid input: expected number, received undefined"
+  },
+  {
+    "expected": "object",
+    "code": "invalid_type",
+    "path": [
+      "compatibility",
+      "contracts"
+    ],
+    "message": "Invalid input: expected object, received undefined"
+  }
+]
+ ❯ parseRow src/db/hindsight-connection-repo.ts:38:39
+     36| function parseRow(row: unknown, banks: HindsightSetupSnapshot["banks"]…
+     37|   const value = row as Record<string, unknown>;
+     38|   return HindsightSetupSnapshotSchema.parse({
+       |                                       ^
+     39|     revision: value.revision,
+     40|     phase: value.phase,
+ ❯ Object.read src/db/hindsight-connection-repo.ts:26:27
+ ❯ readHindsightConfigurationContext src/memory/hindsight/hindsight-configuration-context.ts:43:56
+ ❯ src/memory/hindsight/hindsight-configuration-context.test.ts:20:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  21:23:04
+   Duration  10.35s (transform 7.37s, setup 0ms, import 9.33s, tests 652ms, environment 0ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/hindsight/hindsight-configuration-context.test.ts --maxWorkers=2

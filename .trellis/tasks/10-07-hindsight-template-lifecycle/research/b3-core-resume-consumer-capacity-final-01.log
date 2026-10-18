@@ -1,0 +1,40 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mH:/TakiAgent/packages/core[39m
+
+ [31m❯[39m src/memory/hindsight-backup/hindsight-template-backup-capacity.test.ts [2m([22m[2m1 test[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1488[2mms[22m[39m
+[31m   [31m×[31m isolates actual backup.capture 256/257 and template-aware Healthy identity 1024/1025 capacities[39m[33m 1485[2mms[22m[39m
+ [32m✓[39m src/memory/hindsight-backup/hindsight-template-backup-consumers.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 114498[2mms[22m[39m
+     [33m[2m✓[22m[39m route-c capture and native-host verify enforce the same selected inventory and full projection [33m 16265[2mms[22m[39m
+     [33m[2m✓[22m[39m actual unknown dispatch and missing hold evidence both refuse capture without clearing the original plan [33m 5418[2mms[22m[39m
+     [33m[2m✓[22m[39m captures, admits, verifies and restores unselected history before the explicit stopped-writer trap [33m 1230[2mms[22m[39m
+     [33m[2m✓[22m[39m captures, admits, verifies and restores selected history before the explicit stopped-writer trap [33m 11873[2mms[22m[39m
+     [33m[2m✓[22m[39m captures, admits, verifies and restores removed history before the explicit stopped-writer trap [33m 18454[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses changed staged request and copied SQLite even if their metadata is consistently repinned [33m 6473[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps historical admit/verify independent of today's resolver, and refuses fresh target drift before writer start [33m 31275[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects independently changed ZIP proof inventory and incarnation without consuming the staged copy [33m 11417[2mms[22m[39m
+     [33m[2m✓[22m[39m historical verify and direct restore reread corrupt or missing nonselected history despite repinned file digests [33m 12090[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/memory/hindsight-backup/hindsight-template-backup-capacity.test.ts[2m > [22misolates actual backup.capture 256/257 and template-aware Healthy identity 1024/1025 capacities
+[31m[1mError[22m: joint capture refused: HINDSIGHT_BACKUP_CORE_CAPTURE_FAILED[39m
+[36m [2m❯[22m Object.capture src/testing/hindsight-template-backup-joint-fixture.ts:[2m108:29[22m[39m
+    [90m106|[39m         runtime: { ...fixture.live, scheduler: { started: () => false,…
+    [90m107|[39m           writeFence: { quiesce: async () => undefined, release: () =>…
+    [90m108|[39m       if (!result.ok) throw new Error(`joint capture refused: ${result…
+    [90m   |[39m                             [31m^[39m
+    [90m109|[39m       [35mconst[39m staged [33m=[39m [35mawait[39m store[33m.[39m[34mreadStaged[39m(backupId)[33m;[39m
+    [90m110|[39m       if (staged?.request.version !== 2) throw new Error("joint captur…
+[90m [2m❯[22m src/memory/hindsight-backup/hindsight-template-backup-capacity.test.ts:[2m46:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m9 passed[39m[22m[90m (10)[39m
+[2m   Start at [22m 23:18:08
+[2m   Duration [22m 130.86s[2m (transform 23.98s, setup 0ms, import 30.94s, tests 115.99s, environment 1ms)[22m
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/hindsight-backup/hindsight-template-backup-consumers.test.ts src/memory/hindsight-backup/hindsight-template-backup-capacity.test.ts --maxWorkers=2

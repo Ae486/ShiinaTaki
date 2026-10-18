@@ -1,0 +1,18 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/ruff.exe",
+    "format",
+    "--check",
+    "tests/native_results/template_backup_joint_helpers.py",
+    "tests/native_results/test_template_backup_pair.py",
+    "H:/TakiAgent/.trellis/tasks/10-07-hindsight-template-lifecycle/research/run-b3-native-check.py"
+  ],
+  "cwd": "H:/hindsight/hindsight-api-slim",
+  "exitCode": 0,
+  "durationSeconds": 0.29,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-resume-format-check-03.log",
+  "sources": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-resume-format-check-03-sources.json",
+  "changedInputs": [],
+  "ownedTemp": "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\resume-format-check-03-3jwqnv7p",
+  "ownedTempRemoved": true
+}

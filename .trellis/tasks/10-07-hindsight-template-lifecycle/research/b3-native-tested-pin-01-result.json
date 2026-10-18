@@ -1,0 +1,16 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/python.exe",
+    "H:/TakiAgent/.trellis/tasks/10-07-hindsight-template-lifecycle/research/pin-b3-generated.py",
+    "tested-01",
+    "generated-02"
+  ],
+  "cwd": "H:/hindsight",
+  "exitCode": 0,
+  "durationSeconds": 1.12,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-tested-pin-01.log",
+  "sources": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-tested-pin-01-sources.json",
+  "changedInputs": [],
+  "ownedTemp": "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\tested-pin-01-2etajrxy",
+  "ownedTempRemoved": true
+}

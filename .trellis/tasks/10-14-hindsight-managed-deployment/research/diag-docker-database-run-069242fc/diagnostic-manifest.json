@@ -1,0 +1,45 @@
+{
+  "caseId": "069242fc-3c26-4413-a767-0d01d819f95e",
+  "sourceCaseId": "1b05d2f6-494c-4a6d-a601-1e807eca1486",
+  "diagnosticDirectory": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\diag-docker-database",
+  "evidenceDirectory": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\diag-docker-database-run-069242fc",
+  "stage": "G:/TakiAgent-c2a-database/persistence-069242fc-3c26-4413-a767-0d01d819f95e",
+  "protectedRoot": "C:/taki-c2a-db-persistence-069242fc-3c26-4413-a767-0d01d819f95e",
+  "imageTag": "taki-c2a-db:069242fc-3c26-4413-a767-0d01d819f95e",
+  "originalHashes": {
+    "run-persistence.ts": "c39fd6e465f922cefd198abe1e6d531d731359f8969b183ae9b5b4d2cf06ee27",
+    "database-read.py": "4bd830c60a4ddecc4e8e7018d2b19eb08093c81fc5d7f3ee0a8ff380178e4271",
+    "fake_child.py": "9d65b8875e5d798a024dff9b4a182d6cff7bf4b62646954e38cd0c2e12ce3819"
+  },
+  "diagnosticHashes": {
+    "run-persistence.ts": "60bf61f26bed0fc4c3a7c874c2b40b0c8480359d9be236f8a04f02185f91d7a2",
+    "database-read.py": "2407be676ca83e59d9564a23be96e42643869b765bd76ce0efaeb882c71f58ee",
+    "fake_child.py": "928055b53bf5bc65f79279906b6a418b39f08dd5868237afa22d5da0fcfcfb9d"
+  },
+  "validation": {
+    "originalHashesMatch": true,
+    "launcherAndProbeTokenOnly": true,
+    "childReversibleInstrumentationOnly": true,
+    "pythonAstAndCompile": true,
+    "runtimeNotExecuted": true,
+    "noProcRereadInInstrumentation": true
+  },
+  "instrumentationReplacements": [
+    {
+      "before": "import time\n",
+      "after": "import time\nimport traceback\n"
+    },
+    {
+      "before": "ROOT = Path(\"/home/hindsight/.pg0\")\n",
+      "after": "DIAG_ERRORS = []\n\nROOT = Path(\"/home/hindsight/.pg0\")\n"
+    },
+    {
+      "before": "    except FileNotFoundError:\n        return None\n\n\nclass DatabaseChild:",
+      "after": "    except FileNotFoundError:\n        return None\n    except PermissionError:\n        # Preserve only already-read facts; do not retry /proc reads or mask the error.\n        if len(DIAG_ERRORS) < 8:\n            partial = dict(locals().get(\"identity\", {}))\n            if \"raw_stat\" in locals():\n                partial.setdefault(\"stat\", raw_stat.strip())\n            if \"fields\" in locals():\n                partial.setdefault(\"state\", fields[0])\n            if \"status\" in locals():\n                partial.setdefault(\"status\", status)\n            DIAG_ERRORS.append({\n                \"pid\": pid,\n                \"directory\": str(directory),\n                \"partial_identity\": partial,\n            })\n        raise\n\n\nclass DatabaseChild:"
+    },
+    {
+      "before": "            \"detail\": str(error)[:512] if isinstance(error, Refusal) else \"operation_failed\",\n        }\n        if self.result[\"first_failure\"] is None:",
+      "after": "            \"detail\": str(error)[:512] if isinstance(error, Refusal) else \"operation_failed\",\n            \"traceback\": traceback.format_exc()[-2000:],\n            \"diag_errors\": list(DIAG_ERRORS),\n        }\n        if isinstance(error, OSError):\n            failure.update(errno=error.errno, strerror=error.strerror, filename=error.filename)\n        if self.result[\"first_failure\"] is None:"
+    }
+  ]
+}

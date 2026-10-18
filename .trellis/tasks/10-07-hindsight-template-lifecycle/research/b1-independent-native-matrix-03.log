@@ -1,0 +1,90 @@
+Owned fixture: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-befa9df1db23
+PostgreSQL: 18.1 ; vector/pg_trgm ready
+Pytest log: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-befa9df1db23\pytest.log
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade a3b4c5d6e7f8, c8e5f2a3b4d1 -> c2d3e4f5g6h7, Add audit_log table for feature usage tracking.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade c2d3e4f5g6h7, c5d6e7f8a9b0 -> d6e7f8a9b0c1, Drop unused metadata column from documents table
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade d6e7f8a9b0c1 -> 2eee35aa3cfc, Recreate entities trigram index on LOWER(canonical_name) for case-insensitive matching
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade 2eee35aa3cfc -> a4b5c6d7e8f9, Fix per-bank vector indexes to match configured extension
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade a4b5c6d7e8f9, g2h3i4j5k6l7 -> h3i4j5k6l7m8, Merge 3 migration heads and add unit_entities composite index
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade z1u2v3w4x5y6 -> a2v3w4x5y6z7, Add last_refreshed_source_query column to mental_models
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade a2v3w4x5y6z7 -> b3w4x5y6z7a8, Add structured_content JSONB column to mental_models
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade b3w4x5y6z7a8 -> c4x5y6z7a8b9, backsweep_orphan_observations_v2
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade c4x5y6z7a8b9, h3i4j5k6l7m8 -> 8c6fa6f7230b, Merge divergent migration heads for v0.5.3
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade 8c6fa6f7230b -> d5y6z7a8b9c0, Backfill mental_models.subtype for databases that ran h3c4d5e6f7g8 before the fix
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade d5y6z7a8b9c0 -> i4j5k6l7m8n9, Add 'cancelled' to async_operations status check constraint
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade i4j5k6l7m8n9 -> k6l7m8n9o0p1, No-op: observation_sources table is Oracle-only
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade k6l7m8n9o0p1 -> o1a2b3c4d5e6, oracle_baseline
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade o1a2b3c4d5e6 -> b5d4e3f2a1c9, Backfill entity_cooccurrences.last_cooccurred from memory_units event time
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade o1a2b3c4d5e6 -> 9f8e7d6c5b4a, Make memory_links.from_unit_id and memory_links.to_unit_id FKs deferrable.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade 9f8e7d6c5b4a, b5d4e3f2a1c9 -> m3rg3h3ad5f6, Merge divergent heads from deferrable FK and cooccurrence backfill
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade m3rg3h3ad5f6 -> 86f7a033d372, Repair mental_models.subtype on databases stuck at m3rg3h3ad5f6
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade 86f7a033d372 -> b8c9d0e1f2a3, Re-create vchord vector indexes with vector_cosine_ops
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade 86f7a033d372 -> p4q5r6s7t8u9, Drop GENERATED expression on tsvector search_vector columns.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade p4q5r6s7t8u9 -> e1b2c3d4f5a6, Drop indexes that are unused or redundant with composite indexes.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade e1b2c3d4f5a6 -> e9b2c7d1f3a4, Drop materialized entity rows from memory_links.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade e9b2c7d1f3a4 -> b5a4c3e2f1d8, Add graph_maintenance_queue table
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade b5a4c3e2f1d8, b8c9d0e1f2a3 -> c1d2e3f4a5b6, Merge graph_maintenance_queue and vchord_cosine_opclass heads.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade c1d2e3f4a5b6 -> d3e4f5a6b7c8, Add llm_requests table for per-bank LLM request tracing.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade d3e4f5a6b7c8 -> a7b8c9d0e1f2, Move mental-model and observation history into dedicated tables.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade a7b8c9d0e1f2 -> e5f6a7b8c9d0, Add server-side routines for background maintenance sweeps.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade e5f6a7b8c9d0 -> b2d4f6a8c1e3, Repair: install maintenance routines on the ``public`` / base-schema run.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade b2d4f6a8c1e3 -> c9a1b2d3e4f5, Add invalidated_memory_units table for curation (edit/invalidate).
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade c9a1b2d3e4f5 -> c3e5a7b9d1f4, Repair: widen ``*_history.bank_id`` from VARCHAR(64) to TEXT on PostgreSQL.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade c3e5a7b9d1f4 -> a1d3f5b7c9e2, Repair: widen the remaining live ``bank_id`` columns from VARCHAR(64) to TEXT on PostgreSQL.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade a1d3f5b7c9e2 -> 2071c7518f88, Add a composite index on memory_links(bank_id, link_type) (PostgreSQL).
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade a1d3f5b7c9e2 -> d4f6a8c2e1b3, Drop the embedding column from the curation archive (invalidated_memory_units).
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade d4f6a8c2e1b3, 2071c7518f88 -> e1f2a3b4c5d6, Merge two divergent migration heads.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade e1f2a3b4c5d6 -> c7e9f1a3b5d2, Make maintenance routines resilient to schemas that vanish mid-scan.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade c7e9f1a3b5d2 -> f4d1c2b3a5e6, Add server-side routine for cron-scheduled mental model refresh.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade f4d1c2b3a5e6 -> c3f7a1b9d2e4, Backfill search_vector for native-backend observations.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade c3f7a1b9d2e4 -> b57a7c9e0d13, Add bank_stats_cache table for distributed get_bank_stats caching
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade b57a7c9e0d13 -> e7c3a9f1b2d5, Drop the search_vector column from the curation archive (invalidated_memory_units).
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade e7c3a9f1b2d5 -> a8c1e4f7b0d3, Add indexes for terminal cleanup and newest-first operation listing.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade a8c1e4f7b0d3 -> b6d2f8a4c1e7, Install the maintenance discovery routines into the configured schema.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade b6d2f8a4c1e7 -> d7b2f8a1c934, Add the ``schemas_with_expired_operations`` cross-tenant discovery routine.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade d7b2f8a1c934 -> c7d1e9a4b3f2, Add ``causal_links`` to the curation archive (invalidated_memory_units).
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade c7d1e9a4b3f2 -> a1c9e7f3b2d8, Drop observation_history's FK to memory_units.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade a1c9e7f3b2d8 -> a9b8c7d6e5f4, Add knowledge_pages table (knowledge-base hierarchy).
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade a9b8c7d6e5f4 -> e4a7c1b9d2f6, Drop the never-written `access_count` column from memory_units (and its archive).
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade e4a7c1b9d2f6 -> f2a6d8c4b1e9, Repair: drop the stale global memory_units vector index on per-bank backends.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade f2a6d8c4b1e9 -> b3e8d1c6f4a9, Add entities.entity_kind and exclude label entities from the trigram index.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade b3e8d1c6f4a9 -> c4a7e2d9b1f6, Add logical revisions to live and invalidated memory units.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade c4a7e2d9b1f6 -> d5b8f1c3a7e2, Add idempotency receipts for conditional memory mutations.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade d5b8f1c3a7e2 -> e6c9a4f2b8d1, Add PostgreSQL lineage and logical replication journal primitives.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade e6c9a4f2b8d1 -> f7d0a5c3e9b2, Add PostgreSQL materialized logical snapshot metadata and pages.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade f7d0a5c3e9b2 -> a8e1b6d4f0c3, Persist factual native results and exact retain-part publication evidence.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade a8e1b6d4f0c3 -> d78a1c4e6f90, Persist atomic current-state import requests and immutable mappings.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade d78a1c4e6f90 -> d78b2d5e7a01, Persist first-activation candidates, native outcomes, and immutable evidence.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade d78b2d5e7a01 -> d78c3e6f8b12, Coordinate finite cutover work with ordinary native maintenance.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade d78c3e6f8b12 -> d77a4f8c2e10, Preserve original Taki artifacts and a joint native/application change stream.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade d77a4f8c2e10 -> e30a9d7f6c21, Durable all-writer transition ownership independent from finite D78 leases.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade e30a9d7f6c21 -> e40b1e8a7d32, Use existing UUID indexes without changing association publication ownership.
+2026-10-08 15:07:55 - INFO - alembic.runtime.migration - Running upgrade e40b1e8a7d32 -> e51c2f9a8b43, Add immutable template receipts, child admissions/results and pristine definition proof.
+2026-10-08 15:07:55 - INFO - hindsight_api.migrations - Database migrations completed successfully for schema 'd78_maintenance_f32e1142234b47ddaf6877c9633edb7a'
+-------------------------------- live log call --------------------------------
+2026-10-08 15:08:03 - WARNING - hindsight_api.engine.db_utils - [DB POOL] Slow acquire: 0.288s
+PASSED                                                                   [100%]
+------------------------------ live log teardown ------------------------------
+2026-10-08 15:08:05 - INFO - hindsight_api.engine.memory_engine - close() started
+2026-10-08 15:08:05 - INFO - hindsight_api.engine.db.postgresql - PostgreSQL pool closed
+
+
+============================ slowest 10 durations =============================
+16.01s setup    tests/native_results/test_template_lifecycle.py::test_definition_only_routes_atomic_receipt_and_replay
+15.37s call     tests/native_results/test_transition_backup.py::test_offline_restore_preserves_retired_quarantine_and_trigger_rollback
+9.24s call     tests/native_results/test_transition_baseline_reads.py::test_ordinary_and_optimized_baseline_have_identical_complete_hashes
+7.39s call     tests/native_results/test_transition_initialization.py::test_initialization_history_and_original_birth_survive_physical_restore
+6.57s setup    tests/native_results/test_template_independent_refresh.py::test_delta_second_provider_refuses_definition_lost_after_reflect
+6.57s setup    tests/native_results/test_template_lifecycle.py::test_snapshot_missing_identity_stays_read_only_and_bounds_reject
+6.49s setup    tests/native_results/test_template_independent_refresh.py::test_worker_rejects_aba_and_content_drift_before_any_provider[definition_aba]
+6.48s setup    tests/native_results/test_template_independent_refresh.py::test_real_refresh_rechecks_ownership_after_awaits[cutoff]
+6.48s setup    tests/native_results/test_template_independent_refresh.py::test_missing_terminal_unclaimed_and_stripped_children_never_fall_back_to_legacy_execution
+6.47s setup    tests/native_results/test_template_independent_routes.py::test_invalid_cron_and_auth_hooks_refuse_before_template_effects
+======================= 166 passed in 509.88s (0:08:29) =======================
+{
+    "Fixture":  "taki-hindsight-g1-befa9df1db23",
+    "Stopped":  true,
+    "DataRemoved":  true,
+    "RegistryRemoved":  true,
+    "Logs":  "H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-befa9df1db23"
+}

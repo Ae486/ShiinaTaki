@@ -1,0 +1,23 @@
+{
+  "cwd": "H:\\TakiAgent",
+  "command": "pnpm",
+  "argv": [
+    "--filter",
+    "@taki/desktop",
+    "exec",
+    "vitest",
+    "run",
+    "src/lib/ws-client.test.ts",
+    "src/lib/ws-client-hindsight-configuration.test.ts",
+    "src/windows/home/pages/operations/hindsight-configuration-controller.test.ts",
+    "src/windows/home/pages/operations/memory-transitions-controller.test.ts",
+    "src/windows/home/pages/operations/local-onboarding-controller.test.ts",
+    "src/windows/home/pages/operations/memory-authority-card.test.tsx",
+    "src/windows/home/pages/operations/hindsight-activation-card.test.tsx",
+    "--maxWorkers=2"
+  ],
+  "startedAt": "2026-10-09T11:08:23.7152649Z",
+  "finishedAt": "2026-10-09T11:08:32.2597548Z",
+  "exitCode": 0,
+  "inputManifest": "b3-home-inputs-02.json"
+}

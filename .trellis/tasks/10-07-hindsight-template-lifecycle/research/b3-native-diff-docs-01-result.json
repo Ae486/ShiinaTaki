@@ -1,0 +1,19 @@
+{
+  "command": [
+    "git",
+    "diff",
+    "--check",
+    "--",
+    ".trellis/spec/backend/hindsight-template-lifecycle.md",
+    ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-native-implementation.md",
+    ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-native-generation-plan.md"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "durationSeconds": 0.282,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-diff-docs-01.log",
+  "sources": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-diff-docs-01-sources.json",
+  "changedInputs": [],
+  "ownedTemp": "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\diff-docs-01-w5k15mdd",
+  "ownedTempRemoved": true
+}

@@ -1,0 +1,47 @@
+{"file":".trellis/spec/backend/index.md","reason":"Backend architecture and pre-development/quality checklist."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Synchronous Core transactions and one-writer ownership."}
+{"file":".trellis/spec/backend/sqlite-migration-lineage.md","reason":"Immutable migration lineage and historical reopen."}
+{"file":".trellis/spec/backend/sqlite-transaction-isolation.md","reason":"Whole-transaction and nested failure isolation."}
+{"file":".trellis/spec/backend/memory-operations.md","reason":"Existing durable admission/status/recovery owner."}
+{"file":".trellis/spec/backend/memory-hindsight-lifecycle.md","reason":"Bank provisioning, revalidation and runtime replacement."}
+{"file":".trellis/spec/backend/hindsight-application-runtime.md","reason":"Exact Native object evidence, existing policy and neutral fallback."}
+{"file":".trellis/spec/backend/memory-hindsight-backup.md","reason":"Paired capture/receipt validation and restore admission."}
+{"file":".trellis/spec/backend/memory-transitions.md","reason":"Native writer admission, exact identity and transition invariants."}
+{"file":".trellis/spec/backend/memory-transition-publication.md","reason":"Final live lease check and atomic publication/custody."}
+{"file":".trellis/spec/backend/memory-transition-healthy-drivers.md","reason":"Healthy return/reentry and preserved source outcomes."}
+{"file":".trellis/spec/backend/server-push-and-connection-auth.md","reason":"Actual operator roles and shared observer status."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Bounded transport and sanitized failures."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Canonical API/client generation and meaningful checks."}
+{"file":".trellis/spec/frontend/index.md","reason":"Home source and quality requirements."}
+{"file":".trellis/spec/frontend/home-window.md","reason":"Existing Home/Operations components and connection."}
+{"file":".trellis/spec/frontend/reactive-read-models.md","reason":"Core-owned state and generation-safe observation."}
+{"file":".trellis/spec/frontend/memory-transitions.md","reason":"Original operation observation and truthful recovery."}
+{"file":".trellis/spec/frontend/operator-connection-recovery.md","reason":"Deadlines, reattachment and no command replay."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"UI/controller/DOM checks and source quality."}
+{"file":".trellis/spec/guides/index.md","reason":"Source grounding, reuse and cross-layer guides."}
+{"file":".trellis/tasks/08-09-hindsight-memory-provider/prd.md","reason":"Accepted template precedence, per-fact layers and R9/R10."}
+{"file":".trellis/tasks/09-29-hindsight-transitions-emergency/research/stage5-readiness-2026-10-07.md","reason":"Stage5/6 residual acceptance map and preserved boundaries."}
+{"file":".trellis/tasks/10-07-hindsight-template-lifecycle/research/source-composition-and-native.md","reason":"Untruncated source-grounded 5B research context: source-composition-and-native.md"}
+{"file":".trellis/tasks/10-07-hindsight-template-lifecycle/research/source-runtime-and-acceptance.md","reason":"Untruncated source-grounded 5B research context: source-runtime-and-acceptance.md"}
+{"file":".trellis/tasks/10-07-hindsight-template-lifecycle/research/source-refresh-and-enrollment.md","reason":"Untruncated source-grounded 5B research context: source-refresh-and-enrollment.md"}
+{"file":".trellis/tasks/10-07-hindsight-template-lifecycle/research/design-review-resolution.md","reason":"Accepted independent review corrections: durable hold, real provenance, claimed refresh publication, finite CAS/hash, template backup equality and pristine proof."}
+{"file":".trellis/spec/backend/hindsight-template-lifecycle.md","reason":"Executable B1 lifecycle contracts and strict B2/B3 producer boundaries."}
+{"file":".trellis/tasks/10-07-hindsight-template-lifecycle/research/review-plan.md","reason":"Risk-based independent B1, B2 and whole-slice review requirements."}
+{"file":".trellis/tasks/10-07-hindsight-template-lifecycle/research/resume-review-plan-2026-10-08.md","reason":"Latest continuation authorization, reviewed release identity, disjoint ownership and test scheduling."}
+{"file":".trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-runtime-integration-map.md","reason":"Live operation/executor, durable hold, runtime replacement, primary witness and offline emergency integration seams."}
+{"file":".trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-native-provenance-map.md","reason":"Actual two-path structured extraction, exact-version provenance publication/invalidation and backup inventory seams."}
+{"file":".trellis/spec/backend/memory-transition-emergency.md","reason":"Preserve W6 offline takeover and old-epoch producer quarantine when adding durable template holds."}
+{"file":".trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-dispatch-plan.md","reason":"B2 source ownership, cross-language contract checkpoint, runtime and provenance obligations."}
+{"file":".trellis/tasks/10-07-hindsight-template-lifecycle/research/b1-independent-review.md","reason":"Accepted combined B1 gate, preserved fixes and exact pre-B2 source baseline."}
+{"file":".trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-core-review-dispatch-2026-10-09.md","reason":"Current resumed B2 Core independent review ownership, source baseline, risk dimensions and serial check schedule."}
+{"file":".trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-core-implementation.md","reason":"Released Core B2 implementation, exact self-check evidence, compatibility corrections and remaining review boundary."}
+{"file":".trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-native-label-independent-review.md","reason":"Accepted Native and seven-file label scope, fixed provenance findings and unchanged dependency evidence."}
+{"file":".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-dispatch-plan.md","reason":"Approved B3 delivery, file ownership, strict versioning and serial implementation/review schedule."}
+{"file":".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-backup-design-proposal.md","reason":"Complete copied-Core attestation, independent Native inventory/config observation, routes b/c and D91/healthy transition contracts."}
+{"file":".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-backup-integration-map.md","reason":"Verified existing backup producer, common pair consumers, same-connection COPY and healthy publication source seams."}
+{"file":".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-home-readiness.md","reason":"Exact Home integration ownership, explicit user intent, operation lifetime and controller/DOM/browser acceptance matrix."}
+{"file":".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-resume-checkpoint-2026-10-09.md","reason":"Current named Shared/Pydantic wire, common fixture ownership, released methods and implementer-confirmed B3 integration boundaries."}
+{"reason":"Accepted combined B2 gate, exact current source reconciliation and release into B3.","file":".trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-independent-review.md"}
+{"reason":"Accepted detached-Apply shutdown fix, preserved final publication guards and current independent Core evidence.","file":".trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-independent-core-review.md"}
+{"file": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-independent-dispatch.md", "reason": "Whole-Stage-5B independent review ownership, cross-layer evidence, final gates and serial scheduling."}
+{"file": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-resume-plan-2026-10-11.md", "reason": "Latest owner continuation, ownership, full B3 residual acceptance and serial quality gate"}

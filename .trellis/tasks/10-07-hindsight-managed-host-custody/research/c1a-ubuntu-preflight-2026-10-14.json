@@ -1,0 +1,140 @@
+{
+  "version": 1,
+  "task": "H:/TakiAgent/.trellis/tasks/10-07-hindsight-managed-host-custody",
+  "scope": "Owner-approved phase 1 read-only Ubuntu preflight only; stopped on the required encrypted-credential tool prerequisite.",
+  "verdict": "BLOCKED_PREREQUISITE",
+  "facts": {
+    "pid1": "systemd",
+    "systemdVersion": "249 (249.11-0ubuntu3.22)",
+    "requiredCredentialTool": "/usr/bin/systemd-creds",
+    "requiredCredentialToolLaunch": "failed: No such file or directory",
+    "requiredCredentialToolExitCode": 1,
+    "loadCredentialEncryptedDirectiveIndependentlyVerified": false,
+    "serviceAcceptancePassed": false
+  },
+  "checks": [
+    {
+      "command": "[pscustomobject]@{at=(Get-Date).ToUniversalTime().ToString('o');wslState=((wsl.exe --list --verbose | Out-String) -replace [char]0,'');plannedWindowsRootExists=(Test-Path -LiteralPath 'G:/Temp/taki-c1a-ubuntu-20261014');drives=@(Get-PSDrive -Name C,G,H | Select-Object Name,Free,Used)} | ConvertTo-Json -Depth 4",
+      "chunk_id": "17779e",
+      "wall_time_seconds": 0.9326921,
+      "exit_code": 0,
+      "original_token_count": 136,
+      "output": "{\r\n  \"at\": \"2026-10-14T09:59:04.4128740Z\",\r\n  \"wslState\": \"  NAME              STATE           VERSION\\r\\n\\r\\n* Ubuntu-22.04      Stopped         2\\r\\n\\r\\n  docker-desktop    Stopped         2\\r\\n\\r\\n\\r\\n\",\r\n  \"plannedWindowsRootExists\": false,\r\n  \"drives\": [\r\n    {\r\n      \"Name\": \"C\",\r\n      \"Free\": 27870048256,\r\n      \"Used\": 346821091328\r\n    },\r\n    {\r\n      \"Name\": \"G\",\r\n      \"Free\": 150073442304,\r\n      \"Used\": 640397668352\r\n    },\r\n    {\r\n      \"Name\": \"H\",\r\n      \"Free\": 14312632320,\r\n      \"Used\": 195402260480\r\n    }\r\n  ]\r\n}\r\n"
+    },
+    {
+      "command": "wsl.exe -d Ubuntu-22.04 --exec /bin/cat /proc/1/comm\nexit $LASTEXITCODE",
+      "chunk_id": "6f17e7",
+      "wall_time_seconds": 7.6961694000000005,
+      "exit_code": 0,
+      "original_token_count": 51,
+      "output": "w\u0000s\u0000l\u0000:\u0000 \u0000�hKm0R \u0000l\u0000o\u0000c\u0000a\u0000l\u0000h\u0000o\u0000s\u0000t\u0000 \u0000�N\u0006tM�n\f�FO*g\\��P0R \u0000W\u0000S\u0000L\u0000\u00020N\u0000A\u0000T\u0000 \u0000!j\u000f_\u000bN�v \u0000W\u0000S\u0000L\u0000 \u0000\rN/e\u0001c \u0000l\u0000o\u0000c\u0000a\u0000l\u0000h\u0000o\u0000s\u0000t\u0000 \u0000�N\u0006t\u00020\r\u0000\n\u0000wsl: Failed to translate 'E:\\Program Files\\Apache\\maven\\bin'\nsystemd\n"
+    },
+    {
+      "name": "systemd-version",
+      "command": "wsl.exe -d Ubuntu-22.04 --exec /usr/bin/systemctl --version\nexit $LASTEXITCODE",
+      "chunk_id": "c8295e",
+      "wall_time_seconds": 4.7834917,
+      "exit_code": 0,
+      "original_token_count": 126,
+      "output": "w\u0000s\u0000l\u0000:\u0000 \u0000�hKm0R \u0000l\u0000o\u0000c\u0000a\u0000l\u0000h\u0000o\u0000s\u0000t\u0000 \u0000�N\u0006tM�n\f�FO*g\\��P0R \u0000W\u0000S\u0000L\u0000\u00020N\u0000A\u0000T\u0000 \u0000!j\u000f_\u000bN�v \u0000W\u0000S\u0000L\u0000 \u0000\rN/e\u0001c \u0000l\u0000o\u0000c\u0000a\u0000l\u0000h\u0000o\u0000s\u0000t\u0000 \u0000�N\u0006t\u00020\r\u0000\n\u0000wsl: Failed to translate 'E:\\Program Files\\Apache\\maven\\bin'\nsystemd 249 (249.11-0ubuntu3.22)\n+PAM +AUDIT +SELINUX +APPARMOR +IMA +SMACK +SECCOMP +GCRYPT +GNUTLS +OPENSSL +ACL +BLKID +CURL +ELFUTILS +FIDO2 +IDN2 -IDN +IPTC +KMOD +LIBCRYPTSETUP +LIBFDISK +PCRE2 -PWQUALITY -P11KIT -QRENCODE +BZIP2 +LZ4 +XZ +ZLIB +ZSTD -XKBCOMMON +UTMP +SYSVINIT default-hierarchy=unified\n"
+    },
+    {
+      "name": "encrypted-credential-tool",
+      "command": "wsl.exe -d Ubuntu-22.04 --exec /usr/bin/systemd-creds --help\nexit $LASTEXITCODE",
+      "chunk_id": "bcd0b3",
+      "wall_time_seconds": 4.7248808,
+      "exit_code": 1,
+      "original_token_count": 78,
+      "output": "w\u0000s\u0000l\u0000:\u0000 \u0000�hKm0R \u0000l\u0000o\u0000c\u0000a\u0000l\u0000h\u0000o\u0000s\u0000t\u0000 \u0000�N\u0006tM�n\f�FO*g\\��P0R \u0000W\u0000S\u0000L\u0000\u00020N\u0000A\u0000T\u0000 \u0000!j\u000f_\u000bN�v \u0000W\u0000S\u0000L\u0000 \u0000\rN/e\u0001c \u0000l\u0000o\u0000c\u0000a\u0000l\u0000h\u0000o\u0000s\u0000t\u0000 \u0000�N\u0006t\u00020\r\u0000\n\u0000wsl: Failed to translate 'E:\\Program Files\\Apache\\maven\\bin'\n<3>WSL (396 - Relay) ERROR: CreateProcessCommon:735: execvpe(/usr/bin/systemd-creds) failed: No such file or directory\n"
+    },
+    {
+      "command": "[pscustomobject]@{at=(Get-Date).ToUniversalTime().ToString('o');wslState=((wsl.exe --list --verbose | Out-String) -replace [char]0,'');plannedWindowsRootExists=(Test-Path -LiteralPath 'G:/Temp/taki-c1a-ubuntu-20261014');planSha256=(Get-FileHash -LiteralPath 'H:/TakiAgent/.trellis/tasks/10-07-hindsight-managed-host-custody/research/c1a-ubuntu-acceptance-plan-2026-10-14.md' -Algorithm SHA256).Hash.ToLowerInvariant();drives=@(Get-PSDrive -Name C,G,H | Select-Object Name,Free,Used)} | ConvertTo-Json -Depth 4",
+      "chunk_id": "a3d570",
+      "wall_time_seconds": 0.9103859,
+      "exit_code": 0,
+      "original_token_count": 157,
+      "output": "{\r\n  \"at\": \"2026-10-14T10:01:35.3234252Z\",\r\n  \"wslState\": \"  NAME              STATE           VERSION\\r\\n\\r\\n* Ubuntu-22.04      Stopped         2\\r\\n\\r\\n  docker-desktop    Stopped         2\\r\\n\\r\\n\\r\\n\",\r\n  \"plannedWindowsRootExists\": false,\r\n  \"planSha256\": \"28640c87c0e43701a982f317c00b72405555844ee615dced236355a89e471640\",\r\n  \"drives\": [\r\n    {\r\n      \"Name\": \"C\",\r\n      \"Free\": 27850936320,\r\n      \"Used\": 346840203264\r\n    },\r\n    {\r\n      \"Name\": \"G\",\r\n      \"Free\": 150057189376,\r\n      \"Used\": 640413921280\r\n    },\r\n    {\r\n      \"Name\": \"H\",\r\n      \"Free\": 14312632320,\r\n      \"Used\": 195402260480\r\n    }\r\n  ]\r\n}\r\n"
+    }
+  ],
+  "before": {
+    "at": "2026-10-14T09:59:04.4128740Z",
+    "wslState": "  NAME              STATE           VERSION\r\n\r\n* Ubuntu-22.04      Stopped         2\r\n\r\n  docker-desktop    Stopped         2\r\n\r\n\r\n",
+    "plannedWindowsRootExists": false,
+    "drives": [
+      {
+        "Name": "C",
+        "Free": 27870048256,
+        "Used": 346821091328
+      },
+      {
+        "Name": "G",
+        "Free": 150073442304,
+        "Used": 640397668352
+      },
+      {
+        "Name": "H",
+        "Free": 14312632320,
+        "Used": 195402260480
+      }
+    ]
+  },
+  "after": {
+    "at": "2026-10-14T10:01:35.3234252Z",
+    "wslState": "  NAME              STATE           VERSION\r\n\r\n* Ubuntu-22.04      Stopped         2\r\n\r\n  docker-desktop    Stopped         2\r\n\r\n\r\n",
+    "plannedWindowsRootExists": false,
+    "planSha256": "28640c87c0e43701a982f317c00b72405555844ee615dced236355a89e471640",
+    "drives": [
+      {
+        "Name": "C",
+        "Free": 27850936320,
+        "Used": 346840203264
+      },
+      {
+        "Name": "G",
+        "Free": 150057189376,
+        "Used": 640413921280
+      },
+      {
+        "Name": "H",
+        "Free": 14312632320,
+        "Used": 195402260480
+      }
+    ]
+  },
+  "notRun": [
+    "Fixed service-name conflict check",
+    "Existing Linux Node version/path discovery",
+    "Current UID and architecture",
+    "Memory, /run tmpfs and native planned-path absence",
+    "LoadCredentialEncrypted / %d / hardening validation",
+    "Systemd host encryption facility validation",
+    "Linux Core fixture import/dependency checks"
+  ],
+  "stopReason": "The required /usr/bin/systemd-creds entrypoint cannot execute in the observed systemd 249 environment; the approved procedure stops rather than provisioning or substituting an encrypted-credential mechanism. No separate directive parser or alternate-path search was performed.",
+  "minimumCompatibleEnvironment": [
+    "Functioning systemd PID1 and an available supported systemd-creds tool",
+    "Actual manager support for LoadCredentialEncrypted=, %d and the packaged service hardening settings",
+    "Existing explicitly approved host encryption facility that does not need machine-key initialization",
+    "Remaining Node 24, Linux Core dependency, exact unit/path absence and /run capacity prerequisites must still pass"
+  ],
+  "effects": {
+    "ubuntuStartedForReadOnlyQueries": true,
+    "dockerStarted": false,
+    "downloads": false,
+    "installs": false,
+    "fixturesCreated": false,
+    "servicesCreatedStartedOrReloaded": false,
+    "credentialsOrOriginalDataRead": false,
+    "systemConfigurationChanged": false,
+    "gitLifecycle": false,
+    "distroTermination": false,
+    "cleanupDeletion": false
+  },
+  "acceptance": {
+    "AC2": "open",
+    "AC6": "open",
+    "AC7": "previously accepted; not repeated",
+    "C2SourceBlocked": false,
+    "deploymentReady": false
+  }
+}

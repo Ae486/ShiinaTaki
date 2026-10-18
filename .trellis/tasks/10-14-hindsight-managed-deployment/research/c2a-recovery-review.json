@@ -1,0 +1,271 @@
+{
+  "version": 1,
+  "createdAt": "2026-10-15T10:08:23.110Z",
+  "task": ".trellis/tasks/10-14-hindsight-managed-deployment",
+  "reviewer": "/root/c2_design_check",
+  "scope": "Recovery Stage 2 independent static implementation review",
+  "result": {
+    "independentImplementationReview": "PASS",
+    "runtime": "NOT_RUN",
+    "release": "READY_FOR_ROOT_CONTROLLED_EXECUTION",
+    "deploymentReady": false
+  },
+  "inputs": [
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts",
+      "bytes": 47334,
+      "sha256": "f7c907eda8a156da8ca20be9d199c2d6ac5eb35ac84b01625ace6a50f608493e"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/recovery-probe.py",
+      "bytes": 5131,
+      "sha256": "e3e49ad25888b34332184775f3193a47ad9e3c0c4943fd08e3dc7b3611119b29"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/README.md",
+      "bytes": 9401,
+      "sha256": "08643e9afef9600213a0570faed2058bcb74ead8acea99d61159d83b4f4831be"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-self-check.md",
+      "bytes": 5710,
+      "sha256": "7f4b277613466acbbfc3a0fed6df5eabe1d1fddf3a18c79247d8518d8530daae"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-self-check.json",
+      "bytes": 18482,
+      "sha256": "25224a0c7befd75b1f91b95d95693c1cbb2b19c29e5641ab1fc8f8677aa568fc"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-plan.md",
+      "bytes": 20574,
+      "sha256": "0f5d3c7c9f90e1be3dc1b8ae209eed0b8324070fb89904a0667db39d1060ed82"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-design-review.md",
+      "bytes": 7382,
+      "sha256": "605867ab58d1b9474d9a1f8f7ad78cc3ac6d730458e383964a9c1e13879e15cc"
+    }
+  ],
+  "fixtureDisposition": [
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts",
+      "beforeSha256": "f7c907eda8a156da8ca20be9d199c2d6ac5eb35ac84b01625ace6a50f608493e",
+      "afterSha256": "f7c907eda8a156da8ca20be9d199c2d6ac5eb35ac84b01625ace6a50f608493e",
+      "changed": false
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/recovery-probe.py",
+      "beforeSha256": "e3e49ad25888b34332184775f3193a47ad9e3c0c4943fd08e3dc7b3611119b29",
+      "afterSha256": "e3e49ad25888b34332184775f3193a47ad9e3c0c4943fd08e3dc7b3611119b29",
+      "changed": false
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/README.md",
+      "beforeSha256": "08643e9afef9600213a0570faed2058bcb74ead8acea99d61159d83b4f4831be",
+      "afterSha256": "08643e9afef9600213a0570faed2058bcb74ead8acea99d61159d83b4f4831be",
+      "changed": false
+    }
+  ],
+  "findings": {
+    "fixed": [],
+    "notFixed": [],
+    "conclusion": "No concrete implementation defect found in the released fixture."
+  },
+  "reviewCoverage": [
+    {
+      "contract": "Exact outer Host completion loss",
+      "finding": "PASS",
+      "references": [
+        "docker-recovery/run-recovery.ts:210",
+        "e2e/src/fixture/ws-relay.ts:163",
+        "e2e/src/fixture/ws-relay.ts:188"
+      ],
+      "reason": "The request mutator selects the inject request. The response mutator checks its request, full control, plan/resource/startup and completed running status. close() synchronously terminates both sockets before forwardToCore can send or queue the returned frame. Unrelated responses re-arm the cleared mutator slot."
+    },
+    {
+      "contract": "Canonical unknown outcome before process interruption",
+      "finding": "PASS",
+      "references": [
+        "docker-recovery/run-recovery.ts:203",
+        "docker-recovery/run-recovery.ts:352",
+        "packages/core/src/memory/hindsight/hindsight-deployment-owner.ts:194",
+        "packages/core/src/harness/recovery-coordinator.ts:46"
+      ],
+      "reason": "The public call must settle outcome-unknown and run.status must retain outcome_unknown. The Core owner settles before returning; its startup recovery skips terminal unknown Runs. Later original-resource observation does not rewrite the original Run."
+    },
+    {
+      "contract": "Exact process ownership and persisted-authentication reopen",
+      "finding": "PASS",
+      "references": [
+        "docker-recovery/run-recovery.ts:149",
+        "docker-recovery/run-recovery.ts:269",
+        "docker-recovery/run-recovery.ts:342",
+        "apps/desktop/src-tauri/src/hindsight_windows/deployment.rs:84",
+        "apps/desktop/src-tauri/src/hindsight_windows/process.rs:51",
+        "apps/desktop/src-tauri/src/ws_client.rs:113"
+      ],
+      "reason": "The resident is verified as the captured Shell child with the exact copied runtime and installed fixed argv. Kill/wait uses owned Proc objects and helper creation identity. Reopen uses original disk state and Node token, the new Core URL and a new operator, with no Node re-pairing, permission reset or second deploymentFixture call."
+    },
+    {
+      "contract": "Original resource and child recovery",
+      "finding": "PASS",
+      "references": [
+        "docker-recovery/run-recovery.ts:315",
+        "docker-recovery/run-recovery.ts:352",
+        "docker-recovery/recovery-probe.py:72",
+        "apps/hindsight-host/src/deployment-owner.ts:53"
+      ],
+      "reason": "PID, /proc start ticks and startup marker are compared across termination/reopen. Original plan, resource identities, attempts and steps stay unchanged; an observer revision increase is allowed."
+    },
+    {
+      "contract": "One restart and explicit fresh-startup authority",
+      "finding": "PASS",
+      "references": [
+        "docker-recovery/run-recovery.ts:406",
+        "docker-recovery/run-recovery.ts:433",
+        "docker-recovery/run-recovery.ts:450",
+        "packages/core/src/memory/hindsight/hindsight-deployment-owner.ts:78"
+      ],
+      "reason": "Only the verified original CID is restarted, once, with a 35-second stop allowance and 45-second outer bound. The new Native startup must be unbound/waiting with no child, preserved volume marker and absent tmpfs marker. Only explicit resume creates the fresh startup Run/Attempt/Effect/request/checkpoint/authorization and C1 mapping. Repeated start/resume only observe."
+    },
+    {
+      "contract": "Effect evidence, containment and owned cleanup",
+      "finding": "PASS",
+      "references": [
+        "docker-recovery/run-recovery.ts:488",
+        "docker-recovery/run-recovery.ts:541",
+        "docker-recovery/run-recovery.ts:585",
+        "docker-recovery/run-recovery.ts:634"
+      ],
+      "reason": "Pre-restart exec metadata is retained before IDs can retire. Resource events and actual no-TTY exec metadata establish one volume/container create, two starts and two submitters; read probes are not grant counts. Bounded scans and finally cleanup use original engine/registry/resource/image/path/token bindings, preserve unknown failures, and do not claim shared daemon or cache cleanup."
+    },
+    {
+      "contract": "Acceptance and documentation boundary",
+      "finding": "PASS",
+      "references": [
+        "docker-recovery/README.md",
+        "c2a-recovery-plan.md",
+        "c2a-recovery-design-review.md"
+      ],
+      "reason": "The fixture claims outer Host completion loss and filesystem markers only. Inner Native ACK and create/start/submit faults, custody rotation, daemon restart, database correctness, C1 service, C2b and real data/model/manual acceptance remain separate. deploymentReady stays false. No production/template/spec contract changed, so no .trellis/spec update is required."
+    }
+  ],
+  "verification": {
+    "lint": "PASS_REUSED",
+    "typeCheck": "PASS_REUSED",
+    "nodeSyntax": "PASS_REUSED",
+    "pythonAst": "PASS_REUSED",
+    "pythonFormat": "PASS_REUSED",
+    "tests": "NOT_RUN",
+    "staticCommandsExecutedByReviewer": 0,
+    "results": [
+      {
+        "name": "node-syntax",
+        "status": "PASS",
+        "verification": "REUSED_HASH_BOUND_RESULT",
+        "source": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-self-check.json",
+        "sourceSha256": "25224a0c7befd75b1f91b95d95693c1cbb2b19c29e5641ab1fc8f8677aa568fc",
+        "attemptIndex": 8,
+        "command": "& 'C:/Program Files/nodejs/node.exe' --check .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts",
+        "startedAt": "2026-10-15T09:45:44.919Z",
+        "exitCode": 0,
+        "output": ""
+      },
+      {
+        "name": "python-ast",
+        "status": "PASS",
+        "verification": "REUSED_HASH_BOUND_RESULT",
+        "source": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-self-check.json",
+        "sourceSha256": "25224a0c7befd75b1f91b95d95693c1cbb2b19c29e5641ab1fc8f8677aa568fc",
+        "attemptIndex": 1,
+        "command": "& 'H:/hindsight/.venv/Scripts/python.exe' -B -c 'import ast, pathlib, sys; ast.parse(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\")); print(\"AST_OK\")' .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/recovery-probe.py",
+        "startedAt": "2026-10-15T09:29:18.412Z",
+        "exitCode": 0,
+        "output": "AST_OK\r\n"
+      },
+      {
+        "name": "scoped-eslint",
+        "status": "PASS",
+        "verification": "REUSED_HASH_BOUND_RESULT",
+        "source": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-self-check.json",
+        "sourceSha256": "25224a0c7befd75b1f91b95d95693c1cbb2b19c29e5641ab1fc8f8677aa568fc",
+        "attemptIndex": 9,
+        "command": "& 'G:/Roaming/npm/pnpm.cmd' exec eslint --no-ignore .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts",
+        "startedAt": "2026-10-15T09:45:46.163Z",
+        "exitCode": 0,
+        "output": ""
+      },
+      {
+        "name": "single-entry-no-emit",
+        "status": "PASS",
+        "verification": "REUSED_HASH_BOUND_RESULT",
+        "source": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-self-check.json",
+        "sourceSha256": "25224a0c7befd75b1f91b95d95693c1cbb2b19c29e5641ab1fc8f8677aa568fc",
+        "attemptIndex": 10,
+        "command": "& 'C:/Program Files/nodejs/node.exe' --input-type=module -e 'import ts from \"typescript\"; import fs from \"node:fs\"; const file=\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts\"; const base=JSON.parse(fs.readFileSync(\"tsconfig.base.json\",\"utf8\")); const parsed=ts.convertCompilerOptionsFromJson(base.compilerOptions,process.cwd()); const program=ts.createProgram([file],{...parsed.options,noEmit:true,incremental:false}); const errors=[...parsed.errors,...ts.getPreEmitDiagnostics(program)]; console.log(JSON.stringify({entry:file,noEmit:true,diagnostics:errors.map(d=>({file:d.file?.fileName,line:d.file&&d.start!==undefined?d.file.getLineAndCharacterOfPosition(d.start).line+1:undefined,code:d.code,message:ts.flattenDiagnosticMessageText(d.messageText,\"\\n\")}))})); process.exitCode=errors.length?1:0;'",
+        "startedAt": "2026-10-15T09:45:51.638Z",
+        "exitCode": 0,
+        "output": "{\"entry\":\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts\",\"noEmit\":true,\"diagnostics\":[]}\n"
+      },
+      {
+        "name": "python-ruff-check",
+        "status": "PASS",
+        "verification": "REUSED_HASH_BOUND_RESULT",
+        "source": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-self-check.json",
+        "sourceSha256": "25224a0c7befd75b1f91b95d95693c1cbb2b19c29e5641ab1fc8f8677aa568fc",
+        "attemptIndex": 4,
+        "command": "& 'H:/hindsight/.venv/Scripts/ruff.exe' check --no-cache --config H:/hindsight/hindsight-api-slim/pyproject.toml .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/recovery-probe.py",
+        "startedAt": "2026-10-15T09:35:24.925Z",
+        "exitCode": 0,
+        "output": "All checks passed!\n"
+      },
+      {
+        "name": "python-ruff-format",
+        "status": "PASS",
+        "verification": "REUSED_HASH_BOUND_RESULT",
+        "source": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-self-check.json",
+        "sourceSha256": "25224a0c7befd75b1f91b95d95693c1cbb2b19c29e5641ab1fc8f8677aa568fc",
+        "attemptIndex": 5,
+        "command": "& 'H:/hindsight/.venv/Scripts/ruff.exe' format --check --no-cache --config H:/hindsight/hindsight-api-slim/pyproject.toml .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/recovery-probe.py",
+        "startedAt": "2026-10-15T09:35:51.645Z",
+        "exitCode": 0,
+        "output": "1 file already formatted\n"
+      }
+    ],
+    "reuseBasis": "All eleven raw self-check attempts were reviewed, including the resolved initial TypeScript errors. The final three released fixture hashes were independently matched before and after review; no fixture edits occurred. Reuse is explicitly required for unchanged accepted checks."
+  },
+  "ownership": {
+    "releasedTo": "/root",
+    "changedFixtureFiles": [],
+    "newReports": [
+      ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-review.md",
+      ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-review.json"
+    ],
+    "productionFilesChanged": [],
+    "metadataFilesChanged": [],
+    "sharedFixtureFilesChanged": []
+  },
+  "preservation": {
+    "acceptedProductionBaseline": "Root-confirmed unchanged; no redundant 109-file hash pass or 182-case rerun",
+    "specSynchronization": "Not required: the reviewed task fixture changes no production/template/spec contract."
+  },
+  "runtimeBoundary": {
+    "notExecuted": [
+      "Docker or WSL commands",
+      "Core/Shell/fixture lifecycle",
+      "Host/image/Rust builds",
+      "Dependency installation",
+      "Behavior/source tests",
+      "Git lifecycle"
+    ],
+    "remaining": [
+      "Root preparation and one controlled recovery execution",
+      "Inner Native ACK loss and inner create/start/submit faults",
+      "Custody rotation and controlled daemon restart",
+      "Actual disposable-database shutdown and persistence",
+      "C1 service criteria, C2b, real model/business data and manual acceptance"
+    ]
+  },
+  "nextAction": "Root may prepare the reviewed unique resources and execute the launcher once, retaining first-failure evidence and exact owned cleanup. Static PASS is not runtime acceptance."
+}

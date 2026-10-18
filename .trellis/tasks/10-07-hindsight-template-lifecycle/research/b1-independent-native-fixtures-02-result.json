@@ -1,0 +1,15 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/python.exe",
+    ".trellis/tasks/09-07-hindsight-recovery-evidence/research/validation/run_isolated_hindsight.py",
+    "--",
+    "tests/native_results/test_transition_backup.py::test_previous_revision_backup_does_not_invent_bank_creation_proof",
+    "tests/test_taki_extension_contract.py",
+    "-q",
+    "--tb=short"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "durationSeconds": 122.637,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b1-independent-native-fixtures-02.log"
+}

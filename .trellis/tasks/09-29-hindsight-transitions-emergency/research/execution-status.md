@@ -1,5 +1,20 @@
 # Stage 4 execution status
 
+## Current continuation - 2026-10-07
+
+W9 is implemented and independently accepted after owner-approved correction and interruption recovery.
+See `w9-implementation.md` and `w9-independent-check.md`: final healthy publication checks the original executor
+at live time after complete read-back, atomically refusing genuine lease expiry. Production lease remains five
+minutes. Independent20/20, adjacent67/67, all5workspace typechecks and root lint pass. The complete Core first run
+has3791passes/4default5s test timeouts/1existing skip; only those4test deadlines changed, then exact file7/7passed.
+This composed gate is accepted and the original exit1 is retained; no second clean full run is claimed.
+
+All implementation/check source ownership is released and no owned test process remains. Manual/original/D91
+boundaries remain open; no commit/push/archive or original-data/model operation occurred. Existing B7 has a new
+planning child `10-07-hindsight-configuration-observation` with complete artifacts/context. It awaits owner review
+of the default-denied exact namespace/Bank disclosure grant and API-runtime-only evidence scope before activation.
+Earlier wave/agent entries below are historical and must not restart completed work.
+
 ## Authorization and environment
 
 Owner approved the presented W0-W8 plan on 2026-09-29. On2026-10-01 the owner resumed W3 and required staged real-data testing using existing converted outputs, permitting necessary real LLM calls but prohibiting repeated full-corpus Local-to-Hindsight conversion/extraction. Use isolated copies; original-data authority replacement remains outside scope. See `real-data-reuse-plan.md`. After final W8 delivery on 2026-10-06 the owner authorized local commits; push and archive remain outside scope.

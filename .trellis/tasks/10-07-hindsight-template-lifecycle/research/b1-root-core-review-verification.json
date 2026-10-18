@@ -1,0 +1,12 @@
+{
+  "scope": "Root readback of independent Core B1 evidence; Native and whole B1 remain pending.",
+  "checkedAtUtc": "2026-10-08T06:12:21.7117997Z",
+  "coreFileCount": 30,
+  "sharedInputCount": 3,
+  "legacyV1Checked": true,
+  "manifestSha256": "210b2009940b5efae6c645395d660fe2a7d4426f00fc7a3a176ab3400880ed7f",
+  "reportSha256": "4f168f6e31cff2f856241650b1cc60a04bb8c3ec6b79979cb551f2cf818e5b53",
+  "mismatches": [],
+  "redTempAbsent": true,
+  "greenTempAbsent": true
+}

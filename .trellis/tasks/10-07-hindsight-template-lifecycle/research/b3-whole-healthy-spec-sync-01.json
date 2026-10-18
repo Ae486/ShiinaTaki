@@ -1,0 +1,24 @@
+{
+  "checkedAtUtc": "2026-10-13T06:19:19.989849+00:00",
+  "baseline": "b3-whole-core-healthy-capture-typecheck-01-inputs-after.json",
+  "baselineSha256": "fc6a8a1c2a7d1e2fe1f0ac1017d2a3fc27d0e55c4735cdcb2639c3d968382993",
+  "inputCount": 2417,
+  "changedInputs": [
+    ".trellis/spec/backend/memory-transition-healthy-drivers.md"
+  ],
+  "changes": [
+    {
+      "before": {
+        "path": ".trellis/spec/backend/memory-transition-healthy-drivers.md",
+        "bytes": 25980,
+        "sha256": "eea1738adc110ce22d5d3996c47bfecdc100931c3912fe39e40f70ea0d4d95a9"
+      },
+      "after": {
+        "path": ".trellis/spec/backend/memory-transition-healthy-drivers.md",
+        "bytes": 26424,
+        "sha256": "8bf92616b960d14a2d8f20ea2b17ee4823d5c471e9a91cba0dd4f0e2436393bd"
+      }
+    }
+  ],
+  "scope": "Existing Healthy spec budget and result-state description only; no executable input changed."
+}

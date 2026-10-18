@@ -1,0 +1,25 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "--filter",
+    "@taki/core",
+    "exec",
+    "vitest",
+    "run",
+    "src/memory/hindsight-backup/hindsight-template-backup-capacity.test.ts",
+    "--maxWorkers=1"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "durationSeconds": 28.593,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-independent-capacity-01.log",
+  "cleanup": {
+    "path": "H:\\TakiAgent\\.trellis\\.runtime\\b3-core-independent-capacity-01-temp",
+    "leftovers": [],
+    "removed": true
+  },
+  "sourceIdentity": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-independent-capacity-01-source.json",
+  "sourceAfter": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-independent-capacity-01-source-after.json",
+  "inputCount": 1599,
+  "sourceMismatches": []
+}

@@ -1,0 +1,22 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/python.exe",
+    "-m",
+    "pytest",
+    "-n",
+    "0",
+    "-p",
+    "g1_fixture_network_guard",
+    "tests/test_taki_template_backup_contract.py",
+    "-q",
+    "--tb=short"
+  ],
+  "cwd": "H:/hindsight/hindsight-api-slim",
+  "exitCode": 0,
+  "durationSeconds": 49.507,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-wire-01.log",
+  "sources": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-wire-01-sources.json",
+  "changedInputs": [],
+  "ownedTemp": "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\wire-01-6qvw9nsq",
+  "ownedTempRemoved": true
+}

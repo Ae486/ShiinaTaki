@@ -1,0 +1,23 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "exec",
+    "vitest",
+    "run",
+    "src/db/migrations/041-canonical-memory-maintenance.test.ts",
+    "src/db/migrations/053-memory-transition-candidates.test.ts",
+    "src/db/migrations/054-memory-transition-publication.test.ts",
+    "src/db/migrations/058-hindsight-template-overlays.test.ts",
+    "src/db/migrations/059-hindsight-template-execution.test.ts",
+    "src/db/migrations/index-list.test.ts",
+    "src/db/migrations/lineage-reopen-matrix.test.ts",
+    "--maxWorkers=2",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile.json=H:/TakiAgent/.trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-core-migrations-final-01-vitest.json"
+  ],
+  "cwd": "H:/TakiAgent/packages/core",
+  "exitCode": 0,
+  "durationSeconds": 16.672,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-core-migrations-final-01.log"
+}

@@ -1,0 +1,168 @@
+{
+  "owner": "/root/core_independent",
+  "recordedAt": "2026-10-13T05:32:35.684503+00:00",
+  "status": "readonly-awaiting-root-source-window-and-diagnostic-slot",
+  "existingCommandsComplete": true,
+  "newMeasurementsExecuted": false,
+  "sourceEditsAfterFirstDiagnostic": [],
+  "instrumentationFrozenSha256": "c3ec50f5cf768e866b19bf504784dff752438efa42d3403855d36359805480dd",
+  "diagnostics": {
+    "healthyResult": {
+      "command": [
+        "G:/Roaming/npm/pnpm.cmd",
+        "--filter",
+        "@taki/core",
+        "exec",
+        "vitest",
+        "run",
+        "src/memory/transitions/transition-template-healthy.test.ts",
+        "--maxWorkers=1",
+        "--testNamePattern",
+        "(?:preserves full template history across RETURN and REENTRY \\(removed=false\\)|refuses 'selection' drift after complete 'transition\\.return-local' readback \\(removed=false\\) with atomic rollback)$"
+      ],
+      "cwd": "H:/TakiAgent",
+      "exitCode": 1,
+      "durationSeconds": 146.023,
+      "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-healthy-phase-diagnostic-01.log",
+      "cleanup": {
+        "path": "H:\\TakiAgent\\.trellis\\.runtime\\b3-core-healthy-phase-diagnostic-01-temp",
+        "leftovers": [],
+        "removed": true
+      },
+      "sourceIdentity": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-healthy-phase-diagnostic-01-source.json",
+      "sourceAfter": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-healthy-phase-diagnostic-01-source-after.json",
+      "inputCount": 1599,
+      "sourceMismatches": []
+    },
+    "d2Result": {
+      "command": [
+        "G:/Roaming/npm/pnpm.cmd",
+        "--filter",
+        "@taki/core",
+        "exec",
+        "vitest",
+        "run",
+        "src/memory/hindsight/hindsight-capture-sync.test.ts",
+        "--maxWorkers=1",
+        "--testNamePattern",
+        "\\(D2\\)$"
+      ],
+      "cwd": "H:/TakiAgent",
+      "exitCode": 1,
+      "durationSeconds": 23.194,
+      "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-d2-default-diagnostic-01.log",
+      "cleanup": {
+        "path": "H:\\TakiAgent\\.trellis\\.runtime\\b3-core-d2-default-diagnostic-01-temp",
+        "leftovers": [],
+        "removed": true
+      },
+      "sourceIdentity": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-d2-default-diagnostic-01-source.json",
+      "sourceAfter": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-core-d2-default-diagnostic-01-source-after.json",
+      "inputCount": 1599,
+      "sourceMismatches": []
+    },
+    "observed": "b3-core-healthy-phase-diagnostic-01-observed.json",
+    "observedSha256": "bb33d3ee09907736e0f903c5d28012144de2f6e421952442a33b038c8936a7c0"
+  },
+  "measurements": {
+    "selected-return-selection-drift": {
+      "totalCallbackSeconds": 39.431894,
+      "phaseSeconds": {
+        "setup": 3.689249,
+        "close": 0.017722,
+        "preview": 0.66202,
+        "submit": 1.015208,
+        "beforeProof": 29.977834,
+        "proof": 0.882048,
+        "publication": 1.047543,
+        "postPublicationToSettlement": 2.077327
+      }
+    },
+    "selected-positive": {
+      "totalCallbackSeconds": 125.857669,
+      "phaseSeconds": {
+        "setup": 2.60683,
+        "close": 0.018867,
+        "transition.return-local:preview": 0.565064,
+        "transition.return-local:submit": 1.265317,
+        "transition.return-local:beforeProof": 29.323246,
+        "transition.return-local:proof": 0.873303,
+        "transition.return-local:publication": 1.503501,
+        "transition.return-local:postPublicationToSettlement": 4.286901,
+        "transition.reenter-hindsight:preview": 0.954143,
+        "transition.reenter-hindsight:submit": 1.313843,
+        "transition.reenter-hindsight:beforeProof": 33.316357,
+        "transition.reenter-hindsight:proof": 1.023395,
+        "transition.reenter-hindsight:publication": 2.004495,
+        "transition.reenter-hindsight:postPublicationToSettlement": 46.697506
+      }
+    }
+  },
+  "causality": {
+    "normalReturnDriftProved": "Non-null failed/source result; complete source-aborted resolution; two factual Native aborts and original published Hindsight epoch",
+    "positiveTimeoutReportedSeconds": 79.164,
+    "positiveCallbackCloseSeconds": 125.857669,
+    "logOrder": [
+      "selected-return-selection-drift:4",
+      "selected-positive:32"
+    ],
+    "postTimeoutOverlap": true,
+    "lateLeaseLostIsIndependentProductionDefect": false,
+    "throwTimeDateValueCaptured": false,
+    "clockPath": [
+      "Healthy harness uses its injected h.clock",
+      "transition-runtime.ts:30 constructs queue executor without now override",
+      "transition-intent-executor.ts:26 uses new Date().toISOString()",
+      "transition-intent-executor.ts:38 checks current lease",
+      "memory-transition-repo.ts:89-97 rejects now at/after leaseUntil",
+      "test afterEach restores real Date while timeout does not await the original callback"
+    ],
+    "constraint": "Late REENTRY unknown/settling status is contaminated by timeout/teardown; do not claim normal positive completion or a production failure"
+  },
+  "formalFixProposal": {
+    "path": "b3-core-healthy-return-minimal-proposal-01.patch.txt",
+    "sha256": "7b569920a9ba6a73f24e4a7e4028eee37ae1c977c45b2729f3d28d2492b22da3",
+    "applied": false,
+    "scope": "Restore original test, retain readTransitionResolution import, replace only RETURN drift terminal expectation with non-null result and source-aborted assertions; preserve REENTRY/lease unknown and all rollback"
+  },
+  "proposedNextCommands": {
+    "healthy": [
+      "python",
+      ".trellis/tasks/10-07-hindsight-template-lifecycle/research/run-b3-core-source-check.py",
+      "healthy-positive-180s-measurement-01",
+      "H:/TakiAgent",
+      "G:/Roaming/npm/pnpm.cmd",
+      "--filter",
+      "@taki/core",
+      "exec",
+      "vitest",
+      "run",
+      "src/memory/transitions/transition-template-healthy.test.ts",
+      "--maxWorkers=1",
+      "--testNamePattern",
+      "preserves full template history across RETURN and REENTRY \\(removed=false\\)$"
+    ],
+    "d2": [
+      "python",
+      ".trellis/tasks/10-07-hindsight-template-lifecycle/research/run-b3-core-source-check.py",
+      "d2-30s-measurement-01",
+      "H:/TakiAgent",
+      "G:/Roaming/npm/pnpm.cmd",
+      "--filter",
+      "@taki/core",
+      "exec",
+      "vitest",
+      "run",
+      "src/memory/hindsight/hindsight-capture-sync.test.ts",
+      "--maxWorkers=1",
+      "--testNamePattern",
+      "\\(D2\\)$",
+      "--testTimeout=30000"
+    ]
+  },
+  "nextHealthyPrerequisite": "Explicit root source window: temporarily change selected-positive effective local limit from 60000 to 180000; removed positive remains 180000 and all other budgets unchanged",
+  "nextD2Prerequisite": "Explicit root diagnostic slot; original test source and fake admission assertions unchanged, CLI 30000 measurement only",
+  "lint": "not run in this diagnostic allocation",
+  "typecheck": "not run in this diagnostic allocation",
+  "stage5B": "pending"
+}

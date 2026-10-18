@@ -1,6 +1,42 @@
 # Memory Operations and Setup UI
 
+## Current continuation baseline (2026-10-07)
+
+This existing B7 task is the parent planning map for the remaining Stage 5 operator scope. On 2026-10-07 the
+owner approved proceeding with the presented Stage 5 plan and delegated implementation/review scheduling.
+Child `10-07-hindsight-configuration-observation` independently passed its bounded automated acceptance;
+`10-07-hindsight-template-lifecycle` is now `in_progress` with reviewed artifacts and B1/B2/B3 check gates.
+Stages 1-4 have already delivered durable operations, Local onboarding, first activation, active Bank/connection
+lifecycle, paired backup/recovery and repeated/emergency transitions with minimal Home controls. Earlier passages
+below describing these as absent are historical inputs, not instructions to implement them again. See the current
+[Stage 4 review](../09-29-hindsight-transitions-emergency/research/stage4-review-2026-10-07.md).
+
+Stage 4's newly identified final healthy-publication lease guard gap was corrected and independently accepted
+under W9 on 2026-10-07. Its correctness prerequisite is satisfied; Stage 5 still requires concrete slice design,
+context and artifact review before implementation. Historical/manual acceptance boundaries remain separate.
+
+Remaining scope is managed provisioning, effective Native model configuration, complete versioned templates/user
+overlays, candidate upgrade and full Home operations. D88 Bank conflict remedies and D90 artifact cleanup require
+explicit administration ownership and preservation checks. D89 manual/environment acceptance and the remaining
+original-environment D91 boundary belong to Stage 6. D23 and D79-D83 stay separately scoped.
+
+U1 is accepted as one normal-switch confirmation with all integrity gates retained; emergency has a separate
+confirmation. Older statements that U1 is unanswered are superseded. No new production action, real-data change,
+deployment, paid call, commit or archive is authorized by this planning refresh.
+
 ## Goal
+
+Planning input: [Stage 5 current-source readiness report](../09-29-hindsight-transitions-emergency/research/stage5-readiness-2026-10-07.md).
+The approved first slice is genuine existing-instance Native configuration observation through Core to Home.
+Its bounded non-secret producer contract is documented in the child artifacts; ordinary Bank configuration and
+health APIs do not provide provider/model read-back. Its independent check passed and all ownership is released.
+
+The completed first implementation slice is [10-07-hindsight-configuration-observation](../10-07-hindsight-configuration-observation/prd.md),
+with separate design/execution artifacts. Research narrowed its truthful coverage to administrator-authorized,
+API-runtime-only single-profile identity, with workers/routed/embedding/reranker coverage unknown. It adds a
+default-denied disclosure policy reviewed with the owner; ordinary tenant keys are not administrator grants.
+Stage 5B now implements the reviewed [template lifecycle](../10-07-hindsight-template-lifecycle/prd.md).
+Later helper/custody work remains planning; see the [execution map](research/stage5-execution-map-2026-10-07.md).
 
 Make Hindsight setup and ongoing memory authority operations understandable, observable, and safely controllable without making the Home window authoritative.
 

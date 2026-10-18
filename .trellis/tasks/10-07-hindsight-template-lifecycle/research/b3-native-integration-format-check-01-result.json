@@ -1,0 +1,20 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/ruff.exe",
+    "format",
+    "--check",
+    "hindsight_api/admin/cli.py",
+    "hindsight_api/api/taki_backup.py",
+    "tests/native_results/template_backup_helpers.py",
+    "tests/native_results/test_template_backup.py",
+    "tests/native_results/test_template_backup_transport.py"
+  ],
+  "cwd": "H:/hindsight/hindsight-api-slim",
+  "exitCode": 0,
+  "durationSeconds": 0.228,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-integration-format-check-01.log",
+  "sources": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-integration-format-check-01-sources.json",
+  "changedInputs": [],
+  "ownedTemp": "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\integration-format-check-01-mobiaww9",
+  "ownedTempRemoved": true
+}

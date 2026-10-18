@@ -1,0 +1,6 @@
+{
+  "exitCode": 0,
+  "command": "pnpm exec eslint <seven owned label-binding-fixture paths>",
+  "startedAt": "2026-10-08T09:17:57.3442719+00:00",
+  "endedAt": "2026-10-08T09:18:02.9247450+00:00"
+}

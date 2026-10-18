@@ -1,0 +1,19 @@
+{
+  "checkedAtUtc": "2026-10-09T09:07:28.086194+00:00",
+  "coreManifest": "b2-independent-core-final-source.json",
+  "coreManifestSha256": "7207ebc61078a54e426240af2b1d6fc531debac1798e1294b982e0415b2e9b28",
+  "nativeManifest": "b2-independent-native-source-reviewed-final-01.json",
+  "nativeManifestSha256": "96bfcd500d5b29230bb248dbf5ce3996f85a399d3bb131764ed66125127ec284",
+  "coreOwnedFiles": 101,
+  "coreCheckInputs": 1939,
+  "nativeFiles": 242,
+  "coreLabelFiles": 7,
+  "generatedFiles": 912,
+  "specOriginalBytesPreserved": true,
+  "uniqueVerifiedPaths": 2994,
+  "heads": {
+    "H:\\TakiAgent": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a",
+    "H:\\hindsight": "eb6413a7f58c4f3f0adb88a33a99516f8707fef7"
+  },
+  "mismatches": []
+}

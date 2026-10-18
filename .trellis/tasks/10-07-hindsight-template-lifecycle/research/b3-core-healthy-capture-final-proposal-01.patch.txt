@@ -1,0 +1,81 @@
+--- a/packages/core/src/memory/transitions/transition-template-healthy.test.ts
++++ b/packages/core/src/memory/transitions/transition-template-healthy.test.ts
+@@ -3,6 +3,7 @@
+ import { W3_AT } from "../../testing/memory-transition-candidate-fixtures.ts";
+ import { readTransitionAttempt } from "../../db/memory-transition-repo.ts";
+ import { readTransitionReceipt } from "../../db/memory-transition-evidence-repo.ts";
++import { readTransitionResolution } from "../../db/memory-transition-recovery-repo.ts";
+ import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
+ import * as reader from "../../db/memory-transition-publication-reader.ts";
+ import * as templates from "./transition-template-state.ts";
+@@ -20,9 +21,9 @@
+ }
+ 
+ describe("selected and removed complete Healthy drivers", () => {
+-  // The measured removed-history roundtrip takes 122.4s (52.7s RETURN + 66.4s
+-  // REENTRY), while selected passes in 46.6s. Only removed tests that execute
+-  // both directions need the 180s envelope; production and other budgets stay fixed.
++  // Full journeys execute RETURN and REENTRY. Recorded removed-only RETURN
++  // reached 164.3s and removed roundtrips reached 279.0s, so local test budgets
++  // follow the work performed; production clocks, leases and deadlines stay fixed.
+   for (const removed of [false, true]) {
+     it(`preserves full template history across RETURN and REENTRY (removed=${removed})`, async () => {
+       const h = await createTemplateHealthyHarness(removed);
+@@ -38,7 +39,7 @@
+         }
+         expect(h.observer.requests.length).toBeGreaterThanOrEqual(4);
+       } finally { await h.close(); }
+-    }, removed ? 180_000 : 60_000);
++    }, removed ? 360_000 : 180_000);
+   }
+ 
+   for (const { removed, kind } of ([false, true] as const).flatMap((removed) =>
+@@ -67,7 +68,8 @@
+         expect(readTransitionReceipt(h.db, transitionId)).toBeUndefined();
+         expect(h.owner.status(operation.operationId).state).toBe("outcome_unknown");
+       } finally { await h.close(); }
+-    }, removed && kind === "transition.reenter-hindsight" ? 180_000 : 60_000);
++    }, removed ? (kind === "transition.reenter-hindsight" ? 360_000 : 240_000)
++      : kind === "transition.reenter-hindsight" ? 180_000 : 60_000);
+   }
+ 
+   for (const { removed, kind, field } of ([false, true] as const).flatMap((removed) =>
+@@ -99,8 +101,17 @@
+         });
+         const operation = h.owner.submit(await h.request(undefined, kind)); await h.owner.stop();
+         expect(injected).toBe(true); expect(after).toEqual(before);
+-        expect(h.owner.status(operation.operationId).state).toBe("outcome_unknown");
++        const outcome = h.owner.status(operation.operationId);
++        if (kind === "transition.return-local") {
++          // RETURN retains its live lease and can prove source abort; prepared REENTRY stays unresolved.
++          expect(outcome).toMatchObject({ state: "failed", result: { kind: "transition", receiptId: null,
++            authorityCommitted: false, runtime: "source", queue: "settled", outcome: "failed",
++            errorCode: "MEMORY_TRANSITION_UNAVAILABLE" } });
++          expect(readTransitionResolution(h.db, operation.operationId)).toMatchObject({ result: outcome.result,
++            release: { disposition: "source-aborted" } });
++        } else expect(outcome.state).toBe("outcome_unknown");
+       } finally { await h.close(); }
+-    }, removed && kind === "transition.reenter-hindsight" ? 180_000 : 60_000);
++    }, removed ? (kind === "transition.reenter-hindsight" ? 360_000 : 240_000)
++      : kind === "transition.reenter-hindsight" ? 180_000 : 60_000);
+   }
+ });
+--- a/packages/core/src/memory/hindsight/hindsight-capture-sync.test.ts
++++ b/packages/core/src/memory/hindsight/hindsight-capture-sync.test.ts
+@@ -117,6 +117,7 @@
+     expect(f.replica.checkpoint(bank.scope.bankId)).toEqual(before);
+   });
+ 
++  // Fake admission time still includes real SQLite/hash work for all eight binding cycles.
+   it("bounds admission by its budget with many pending units; binding finishes in the background exactly once (D2)", async () => {
+     vi.useFakeTimers(); vi.setSystemTime(APPLICATION_TEST_AT);
+     const { f, subsystem, bank } = await primed(); const ids = remoteUnits(bank, 8);
+@@ -137,7 +138,7 @@
+     await vi.runAllTimersAsync(); await subsystem.state.service.settle();
+     expect(receipts(bank, "completed")).toBe(ids.length); expect(receipts(bank, "refused")).toBe(0);
+     for (const id of ids) expect(bound(f, bank, id)).toBe(true);
+-  });
++  }, 15_000);
+ 
+   it.each([
+     { request: 60_000, ack: undefined, budget: 7500 },

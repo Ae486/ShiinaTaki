@@ -1,0 +1,90 @@
+Owned fixture: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-e57eeee0752a
+PostgreSQL: 18.1 ; vector/pg_trgm ready
+Pytest log: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-e57eeee0752a\pytest.log
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade e7c3a9f1b2d5 -> a8c1e4f7b0d3, Add indexes for terminal cleanup and newest-first operation listing.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade a8c1e4f7b0d3 -> b6d2f8a4c1e7, Install the maintenance discovery routines into the configured schema.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade b6d2f8a4c1e7 -> d7b2f8a1c934, Add the ``schemas_with_expired_operations`` cross-tenant discovery routine.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade d7b2f8a1c934 -> c7d1e9a4b3f2, Add ``causal_links`` to the curation archive (invalidated_memory_units).
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade c7d1e9a4b3f2 -> a1c9e7f3b2d8, Drop observation_history's FK to memory_units.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade a1c9e7f3b2d8 -> a9b8c7d6e5f4, Add knowledge_pages table (knowledge-base hierarchy).
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade a9b8c7d6e5f4 -> e4a7c1b9d2f6, Drop the never-written `access_count` column from memory_units (and its archive).
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade e4a7c1b9d2f6 -> f2a6d8c4b1e9, Repair: drop the stale global memory_units vector index on per-bank backends.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade f2a6d8c4b1e9 -> b3e8d1c6f4a9, Add entities.entity_kind and exclude label entities from the trigram index.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade b3e8d1c6f4a9 -> c4a7e2d9b1f6, Add logical revisions to live and invalidated memory units.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade c4a7e2d9b1f6 -> d5b8f1c3a7e2, Add idempotency receipts for conditional memory mutations.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade d5b8f1c3a7e2 -> e6c9a4f2b8d1, Add PostgreSQL lineage and logical replication journal primitives.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade e6c9a4f2b8d1 -> f7d0a5c3e9b2, Add PostgreSQL materialized logical snapshot metadata and pages.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade f7d0a5c3e9b2 -> a8e1b6d4f0c3, Persist factual native results and exact retain-part publication evidence.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade a8e1b6d4f0c3 -> d78a1c4e6f90, Persist atomic current-state import requests and immutable mappings.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade d78a1c4e6f90 -> d78b2d5e7a01, Persist first-activation candidates, native outcomes, and immutable evidence.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade d78b2d5e7a01 -> d78c3e6f8b12, Coordinate finite cutover work with ordinary native maintenance.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade d78c3e6f8b12 -> d77a4f8c2e10, Preserve original Taki artifacts and a joint native/application change stream.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade d77a4f8c2e10 -> e30a9d7f6c21, Durable all-writer transition ownership independent from finite D78 leases.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade e30a9d7f6c21 -> e40b1e8a7d32, Use existing UUID indexes without changing association publication ownership.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade e40b1e8a7d32 -> e51c2f9a8b43, Add immutable template receipts, child admissions/results and pristine definition proof.
+INFO     alembic.runtime.migration:migration.py:622 Running upgrade e51c2f9a8b43 -> e62a3d0b9c54, Bind private structured-label origins to exact current Native unit versions.
+INFO     hindsight_api.migrations:migrations.py:237 Database migrations completed successfully for schema 'd78_maintenance_d9f6798113644206877057c515ea1cf8'
+INFO     hindsight_api.api:__init__.py:66 HTTP REST API enabled
+------------------------------ Captured log call ------------------------------
+INFO     hindsight_api.config_resolver:config_resolver.py:573 Updated bank config for taki-hs-v1-c-d90bea3c5d9e911977105164c84c73c8: ['entity_labels', 'retain_extraction_mode']
+WARNING  hindsight_api.engine.db_utils:db_utils.py:166 [DB POOL] Slow acquire: 0.245s
+INFO     hindsight_api.engine.retain.orchestrator:orchestrator.py:1888 [streaming] Phase 1 (entity resolution): 0.278s
+INFO     hindsight_api.engine.retain.orchestrator:orchestrator.py:2090 [streaming] Phase 2 (write txn): 0.133s
+INFO     hindsight_api.engine.retain.orchestrator:orchestrator.py:2114 [streaming] Consumer batch 1 total (excluding fire-and-forget): 0.417s
+INFO     hindsight_api.engine.retain.orchestrator:orchestrator.py:1331 [streaming] Final ANN chunk 1/1: 1 links in 0.037s
+INFO     hindsight_api.engine.retain.orchestrator:orchestrator.py:2399 
+============================================================
+RETAIN_BATCH START: taki-hs-v1-c-d90bea3c5d9e911977105164c84c73c8
+Batch size: 1 content items, 33 chars
+============================================================
+[streaming] 1 chunks, batch_size 100 — 1 batch
+  Extract facts: 1 facts, 1 chunks from 1 contents in 0.010s
+  Generate embeddings: 1 embeddings in 0.002s
+[streaming] Consumer batch 1: processing 1 facts from 1 chunks
+[streaming] Document 0e37b0eb-f712-49b6-967a-282489531386 tracked (full content)
+  Store chunks: 1 chunks in 0.014s
+  Insert facts: 1 units in 0.000s
+  Insert unit_entities: 1 pairs in 0.018s
+  Temporal links: 0 links in 0.005s
+  Semantic links: skipped (deferred to final ANN pass)
+  Causal links: 0 links in 0.000s
+[streaming] Final ANN: loaded 1 units with embeddings in 0.004s
+      [8.1] ANN search (Phase 1): 1 units → 1 links in 0.016s
+[streaming] Final ANN: 1 total semantic links
+[streaming] Final ANN pass: 0.042s for 1 units
+============================================================
+STREAMING RETAIN COMPLETE: 1 units across 1 batches in 0.501s
+Document: 0e37b0eb-f712-49b6-967a-282489531386
+============================================================
+---------------------------- Captured log teardown ----------------------------
+INFO     hindsight_api.engine.memory_engine:memory_engine.py:4458 close() started
+INFO     hindsight_api.engine.db.postgresql:postgresql.py:166 PostgreSQL pool closed
+============================ slowest 10 durations =============================
+19.05s setup    tests/native_results/test_template_label_extraction.py::test_original_provider_json_ambiguity_keeps_facts_without_trusted_labels[litellm-fact-fields]
+7.32s setup    tests/native_results/test_template_label_extraction.py::test_original_provider_json_ambiguity_keeps_facts_without_trusted_labels[batch-api-fact-fields]
+6.90s call     tests/native_results/test_template_label_extraction.py::test_original_provider_json_ambiguity_keeps_facts_without_trusted_labels[openai-compatible-fact-fields]
+6.82s setup    tests/native_results/test_template_label_extraction.py::test_original_provider_json_ambiguity_keeps_facts_without_trusted_labels[litellm-repaired]
+6.81s setup    tests/native_results/test_template_label_extraction.py::test_provider_dictionary_without_original_json_quality_cannot_mint_label_proof
+6.66s setup    tests/native_results/test_template_label_extraction.py::test_original_provider_json_ambiguity_keeps_facts_without_trusted_labels[litellm-facts-container]
+6.65s setup    tests/native_results/test_template_label_extraction.py::test_original_provider_json_ambiguity_keeps_facts_without_trusted_labels[batch-api-repaired]
+6.61s setup    tests/native_results/test_template_label_extraction.py::test_original_provider_json_ambiguity_keeps_facts_without_trusted_labels[batch-api-facts-container]
+6.47s setup    tests/native_results/test_template_label_extraction.py::test_original_provider_json_ambiguity_keeps_facts_without_trusted_labels[openai-compatible-facts-container]
+6.19s setup    tests/native_results/test_template_label_extraction.py::test_original_provider_json_ambiguity_keeps_facts_without_trusted_labels[openai-compatible-fact-fields]
+=========================== short test summary info ===========================
+FAILED tests/native_results/test_template_label_extraction.py::test_original_provider_json_ambiguity_keeps_facts_without_trusted_labels[litellm-fact-fields]
+FAILED tests/native_results/test_template_label_extraction.py::test_original_provider_json_ambiguity_keeps_facts_without_trusted_labels[litellm-facts-container]
+FAILED tests/native_results/test_template_label_extraction.py::test_original_provider_json_ambiguity_keeps_facts_without_trusted_labels[litellm-repaired]
+FAILED tests/native_results/test_template_label_extraction.py::test_original_provider_json_ambiguity_keeps_facts_without_trusted_labels[openai-compatible-fact-fields]
+FAILED tests/native_results/test_template_label_extraction.py::test_original_provider_json_ambiguity_keeps_facts_without_trusted_labels[openai-compatible-facts-container]
+FAILED tests/native_results/test_template_label_extraction.py::test_original_provider_json_ambiguity_keeps_facts_without_trusted_labels[batch-api-fact-fields]
+FAILED tests/native_results/test_template_label_extraction.py::test_original_provider_json_ambiguity_keeps_facts_without_trusted_labels[batch-api-facts-container]
+FAILED tests/native_results/test_template_label_extraction.py::test_original_provider_json_ambiguity_keeps_facts_without_trusted_labels[batch-api-repaired]
+FAILED tests/native_results/test_template_label_extraction.py::test_provider_dictionary_without_original_json_quality_cannot_mint_label_proof
+======================== 9 failed in 102.23s (0:01:42) ========================
+{
+    "Fixture":  "taki-hindsight-g1-e57eeee0752a",
+    "Stopped":  true,
+    "DataRemoved":  true,
+    "RegistryRemoved":  true,
+    "Logs":  "H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-e57eeee0752a"
+}

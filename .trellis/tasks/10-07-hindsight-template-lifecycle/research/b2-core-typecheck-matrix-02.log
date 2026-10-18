@@ -1,0 +1,8 @@
+
+> @taki/core@0.0.0 typecheck H:\TakiAgent\packages\core
+> tsc --noEmit
+
+src/server/methods/hindsight-template-methods.test.ts(188,27): error TS2532: Object is possibly 'undefined'.
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/core@0.0.0 typecheck: `tsc --noEmit`
+Exit status 2

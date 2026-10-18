@@ -1,0 +1,40 @@
+{
+  "source": "R1 archived bounded Root runner with R2 token and launcher hash",
+  "checks": [
+    {
+      "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/command-runner.mjs",
+      "bytes": 3022,
+      "sha256": "478f7b51f300bb1df7165407141e1f21328d36a7189a44ee180680a80aa1f812",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/prepare-persistence.mjs",
+      "bytes": 6068,
+      "sha256": "42e030f64a51ea27d456ccda3ee7673db7ec1ec633b88dd13baa187d9711943a",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/launch-persistence.mjs",
+      "bytes": 1039,
+      "sha256": "d455bf466b308dccbf5be3f81d2c5d6f2aecaeedd6a27b1b1eb912ed2d7a2c8c",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "path": "G:/TakiAgent-c2a-database/persistence-13f04d85-ee84-408e-890c-88922e36c69e/readback-persistence.mjs",
+      "bytes": 4218,
+      "sha256": "580099516b8a8bca3f976501eb233612f012cd347bcef662d1ce7f449e358d8b",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "inputEntriesVerified": 29,
+  "contextEntries": 12,
+  "passed": true
+}

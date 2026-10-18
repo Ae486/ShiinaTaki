@@ -1,0 +1,6 @@
+{
+  "finishedAt": "2026-10-07T10:42:06.1347211Z",
+  "command": "pnpm exec eslint packages/core/src/memory/transitions/transition-emergency-context.test.ts",
+  "startedAt": "2026-10-07T10:42:01.8047827Z",
+  "exitCode": 0
+}

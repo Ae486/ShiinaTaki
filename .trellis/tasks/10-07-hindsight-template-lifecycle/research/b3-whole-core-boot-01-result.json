@@ -1,0 +1,20 @@
+{
+  "command": [
+    "node",
+    ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-core-boot-smoke.mjs",
+    "b2-core-boot-02"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "startedAt": "2026-10-13T06:38:48.029592+00:00",
+  "finishedAt": "2026-10-13T06:38:53.082597+00:00",
+  "exitCode": 0,
+  "durationSeconds": 5.047,
+  "inputCount": 2417,
+  "changedInputs": [],
+  "inputManifest": "b3-whole-core-boot-01-inputs.json",
+  "afterManifest": "b3-whole-core-boot-01-inputs-after.json",
+  "log": "b3-whole-core-boot-01.log",
+  "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-whole-checks\\core-boot-01-b074698cfea044d3a5e4dd4c71fb2b08",
+  "temporaryRootRemoved": true,
+  "remainingFixtureEntries": []
+}

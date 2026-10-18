@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "pnpm",
+    "exec",
+    "eslint",
+    "packages/core/src/server/methods/hindsight-template-methods.test.ts"
+  ],
+  "resolvedExecutable": "G:\\Roaming\\npm\\pnpm.CMD",
+  "cwd": "H:\\TakiAgent",
+  "startedAt": "2026-10-08T11:35:55.515565+00:00",
+  "endedAt": "2026-10-08T11:36:00.250178+00:00",
+  "durationSeconds": 4.735,
+  "exitCode": 0,
+  "sourceBefore": {
+    "packages/core/src/server/methods/hindsight-template-methods.test.ts": "6a72fcfa007e4076af8bba98b14c6e96a6e267ee9c533ee6fe2de05a5b38cf4f"
+  },
+  "sourceAfter": {
+    "packages/core/src/server/methods/hindsight-template-methods.test.ts": "6a72fcfa007e4076af8bba98b14c6e96a6e267ee9c533ee6fe2de05a5b38cf4f"
+  },
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-operator-methods-03-lint.log"
+}

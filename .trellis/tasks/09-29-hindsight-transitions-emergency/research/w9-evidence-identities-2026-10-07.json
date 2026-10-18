@@ -1,0 +1,137 @@
+[
+  {
+    "sha256": "1BE6311D6CB9D9E1B4F41FC749A403890B8A708CDFD86889E6A71AB9C7E3E53C",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-adjacent-2026-10-07.log",
+    "bytes": 46
+  },
+  {
+    "sha256": "B36A862ACE832013B35630A28B91CAF30AB0AAE54B6D5362D81953BE7F6842CC",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-emergency-context-before-2026-10-07.json",
+    "bytes": 335
+  },
+  {
+    "sha256": "4000EF46DC0290791270B4F0073781DE56A6163AD5D0B8EB4C79DAAFD1CA8C5C",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-final-identity-result-2026-10-07.json",
+    "bytes": 294
+  },
+  {
+    "sha256": "86B321C847B8A719E8A98D2EED0BF3154F2B4BFA9D24E5AB05F904C31A7DBA5E",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-green-focused-2026-10-07.log",
+    "bytes": 226
+  },
+  {
+    "sha256": "33134460912BE60B5237AABC53744647AC0AEDD541E8CF5BF1ABB4DA9F8470D4",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-implementation.md",
+    "bytes": 12741
+  },
+  {
+    "sha256": "8FA30D82A7BF469D96BEC57BCD44AC76D20A8E5B9EE39D7CC1F310C77501B676",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-lint-2026-10-07.log",
+    "bytes": 53
+  },
+  {
+    "sha256": "3E4C164BB8315D3CA5228A0569BAFEE3F1B016B0402EBDA25C20E8930B7711E7",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-pre-core-source-identities-2026-10-07.json",
+    "bytes": 1877
+  },
+  {
+    "sha256": "BE2E039CE6F891D2EE1624FD782D826E864A2EAF9F14491D9F2713B07FDFDBB4",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-adjacent-2026-10-07.log",
+    "bytes": 988
+  },
+  {
+    "sha256": "DE8338E35A9338BC5EF9E98233DC187E24903846FDD5957D8EFC4CB80B8C9E97",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-adjacent-result-2026-10-07.json",
+    "bytes": 830
+  },
+  {
+    "sha256": "EFCC3E64B462C7E4013484F420E32D47CC67B03AA3164C10181E8E5350263535",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-core-2026-10-07.log",
+    "bytes": 4072
+  },
+  {
+    "sha256": "700E9FDE5CF3C70D389305D24874244E06A53CAC28D510BFD987DAC1E68E1FD2",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-core-result-2026-10-07.json",
+    "bytes": 180
+  },
+  {
+    "sha256": "CFBF4D6EE711F3E7E500A6333C716BC9037802DDFC252B4C0962E58F65A2FDC2",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-diff-check-2026-10-07.log",
+    "bytes": 1325
+  },
+  {
+    "sha256": "5D68683ED50BD5932D77D7E8BE215C88DAC8F5AC546F1F92294986F5A2AE0EE4",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-diff-check-result-2026-10-07.json",
+    "bytes": 152
+  },
+  {
+    "sha256": "5DC9B52149EEECBD7CA94AE9BA5429461996D6E68008D3374F809F132A2CEB23",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-emergency-context-2026-10-07.log",
+    "bytes": 1828
+  },
+  {
+    "sha256": "968DCFB4785E472A92A29240ABEBE76FD668BF7D2781380849C325F5BBD16086",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-emergency-context-result-2026-10-07.json",
+    "bytes": 259
+  },
+  {
+    "sha256": "CFBF4D6EE711F3E7E500A6333C716BC9037802DDFC252B4C0962E58F65A2FDC2",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-final-diff-check-2026-10-07.log",
+    "bytes": 1325
+  },
+  {
+    "sha256": "A5211BEB47930D8FFE10CBF35CE14EDDB607F9052DED2D6B3F31511B2C50E8F7",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-final-diff-check-result-2026-10-07.json",
+    "bytes": 152
+  },
+  {
+    "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-final-file-lint-2026-10-07.log",
+    "bytes": 0
+  },
+  {
+    "sha256": "75A4BAEE8983041DDD295CDF0FDB6A9E85200E8D46DBCB43DD971176FA5B1DBB",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-final-file-lint-result-2026-10-07.json",
+    "bytes": 226
+  },
+  {
+    "sha256": "8FA30D82A7BF469D96BEC57BCD44AC76D20A8E5B9EE39D7CC1F310C77501B676",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-lint-2026-10-07.log",
+    "bytes": 53
+  },
+  {
+    "sha256": "AADAE41BF32E577E15A153C016571CE99DE263090C3773FBF4DFAB1FDE5F9E27",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-lint-result-2026-10-07.json",
+    "bytes": 145
+  },
+  {
+    "sha256": "EFC92176E9E0C6CB83A6C7F28B35C2EC545C659A3EE7BFE9A394DC17FED1E8E3",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-typecheck-2026-10-07.log",
+    "bytes": 356
+  },
+  {
+    "sha256": "B3A8E12541F34054A0CC4AD7BF5791DA9B89F76D212DB4FE1EF54CBE8D14ECB6",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-recovery-typecheck-result-2026-10-07.json",
+    "bytes": 153
+  },
+  {
+    "sha256": "C6016437C0C6B5A209C889D4A31FE85840D4790F6BD87234CDF17592A65FA4B9",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-red-final-lease-2026-10-07.log",
+    "bytes": 2051
+  },
+  {
+    "sha256": "7FC08F4B609EDA84F8D3625A7DC32571D7E5805FC787E51ADA6C63C33EBFB23D",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-red-identities-2026-10-07.json",
+    "bytes": 828
+  },
+  {
+    "sha256": "4FE7F2868C0C6E6422525468C2E3A4EBD41526CD4CABEDE94F431A1EC53FD1E4",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-source-identities-2026-10-07.json",
+    "bytes": 2081
+  },
+  {
+    "sha256": "053C25284B9EA0E412B32435DEDC21788C2AF60A169C41DEB9348B62D3D47107",
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w9-typecheck-2026-10-07.log",
+    "bytes": 434
+  }
+]

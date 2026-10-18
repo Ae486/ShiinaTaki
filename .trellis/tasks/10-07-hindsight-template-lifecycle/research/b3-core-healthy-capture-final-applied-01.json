@@ -1,0 +1,32 @@
+{
+  "owner": "/root/core_independent",
+  "recordedAt": "2026-10-13T05:48:19.234317+00:00",
+  "applied": true,
+  "reviewedPatch": "b3-core-healthy-capture-final-proposal-01.patch.txt",
+  "inputCount": 2417,
+  "changedInputs": [
+    "packages/core/src/memory/hindsight/hindsight-capture-sync.test.ts",
+    "packages/core/src/memory/transitions/transition-template-healthy.test.ts"
+  ],
+  "onlyApprovedTwoFilesChanged": true,
+  "allTemporaryProbesRemoved": true,
+  "beforeManifest": "b3-core-healthy-capture-final-applied-01-inputs-before.json",
+  "afterManifest": "b3-core-healthy-capture-final-applied-01-inputs-after.json",
+  "files": [
+    {
+      "path": "packages/core/src/memory/transitions/transition-template-healthy.test.ts",
+      "previousSha256": "bee37357f5abab368c249d8b54bc5972068f774a28592b34b566771cc576e951",
+      "sha256": "2fcc757b3443abe2d1a5919339a6c0524d6eabecb198f0c271283effaf118918",
+      "reviewedSha256": "2fcc757b3443abe2d1a5919339a6c0524d6eabecb198f0c271283effaf118918"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-capture-sync.test.ts",
+      "previousSha256": "9a347011a9dca1291006bbc157d805e217caf9f64b97dc250867fcbecf114cbc",
+      "sha256": "ae3b49e6c47ada489883eda36f2f586b41f8d9797805325c8d307c7486856c54",
+      "reviewedSha256": "ae3b49e6c47ada489883eda36f2f586b41f8d9797805325c8d307c7486856c54"
+    }
+  ],
+  "sourceFrozenForCompleteTests": true,
+  "productionChanges": [],
+  "fixtureChanges": []
+}

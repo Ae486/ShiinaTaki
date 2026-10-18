@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "recordedAt": "2026-10-14T15:12:39.422Z",
+  "task": "10-14-hindsight-managed-deployment",
+  "verdict": "STATIC_PREPARATION_ONLY",
+  "ownership": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/",
+  "files": [
+    {
+      "file": "base-probe.py",
+      "bytes": 1438,
+      "lines": 46,
+      "sha256": "a6d0548b53bf557157590cc87edb1f30ff190fa5813edf0a477a3ba399b6c021"
+    },
+    {
+      "file": "container-scan.py",
+      "bytes": 2074,
+      "lines": 55,
+      "sha256": "6344d9bc7151c0ae8d755f44267aeec35693a1ddfda21a387c20098a4916ec10"
+    },
+    {
+      "file": "README.md",
+      "bytes": 11626,
+      "lines": 166,
+      "sha256": "d4e567a16c73cccf00241e6cc7508e19529952a2a02de545f2daa637b30c68d9"
+    },
+    {
+      "file": "run-first-case.ts",
+      "bytes": 23198,
+      "lines": 318,
+      "sha256": "351ed671d36d7e08f226096d8a6762c8402e0d24b36d4e7ece0f9683a40b7802"
+    }
+  ],
+  "validation": {
+    "nodeSyntax": {
+      "command": "C:/Program Files/nodejs/node.exe --check .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-acceptance/run-first-case.ts",
+      "exitCode": 0
+    },
+    "pythonAst": {
+      "files": [
+        "base-probe.py",
+        "container-scan.py"
+      ],
+      "exitCode": 0,
+      "modulesExecuted": false
+    },
+    "relativeImportsExist": 15,
+    "utf8NoBomLfAndWhitespace": true,
+    "scopedGitDiffCheck": {
+      "exitCode": 0,
+      "note": "New untracked files were independently byte-checked; git diff --check does not inspect them."
+    },
+    "staticContractReview": [
+      "No synthetic custody/invocation sent as authority",
+      "Existing Core/operator/Rust/copied-Host path reused",
+      "One admitted case plus same-key duplicate and original observation",
+      "Bounded fixed read-only exec/log queries",
+      "Owned resource cleanup or explicit residuals"
+    ],
+    "lintTypecheckBuildBehaviorTests": "Not run: this assignment permits lightweight static inspection only; accepted source gates were not repeated."
+  },
+  "scope": {
+    "productionSourceEdits": 0,
+    "acceptedSourceSnapshotEdits": 0,
+    "dockerCalls": 0,
+    "wslCalls": 0,
+    "builds": 0,
+    "dependencyInstalls": 0,
+    "appRuntimeStarts": 0
+  },
+  "pendingPrerequisites": [
+    "Explicit experiment authorization",
+    "Fixed cached-base probe PASS",
+    "One approved local-only fixture image build and image-id.txt",
+    "Existing tiny fake-key adapter compiled into marked staging",
+    "Baseline/ownership/prepared artifact pins"
+  ],
+  "remainingOpen": [
+    "Actual execution of this first case",
+    "Helper or ACK-loss faults",
+    "Core/Host restart recovery against Docker",
+    "Container/daemon restart and fresh tmpfs",
+    "Whole writable-layer/image-layer scans",
+    "Real database shutdown/persistence",
+    "C1 service AC2/6",
+    "C2b receipts",
+    "Real models and manual acceptance"
+  ],
+  "deploymentReady": false,
+  "directoryOwnershipReleased": true
+}

@@ -1,0 +1,29 @@
+
+ RUN  v4.1.10 H:/TakiAgent/apps/desktop
+
+ ❯ src/windows/home/pages/operations/hindsight-configuration-browser.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/windows/home/pages/operations/hindsight-configuration-browser.test.ts [ src/windows/home/pages/operations/hindsight-configuration-browser.test.ts ]
+Error: Cannot find package 'zod' imported from H:/TakiAgent/apps/desktop/src/windows/home/pages/operations/hindsight-configuration-browser-fixture.ts
+ ❯ src/windows/home/pages/operations/hindsight-configuration-browser-fixture.ts:9:1
+      7| import { tmpdir } from "node:os";
+      8| import { join } from "node:path";
+      9| import { z } from "zod";
+       | ^
+     10| import { CHARACTER_METHODS } from "@taki/shared";
+     11| import { configurationObservationFixture } from "../../../../../../../…
+ ❯ src/windows/home/pages/operations/hindsight-configuration-browser.test.ts:9:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  20:45:20
+   Duration  853ms (transform 68ms, setup 0ms, import 0ms, tests 0ms, environment 0ms)
+
+undefined
+H:\TakiAgent\apps\desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/windows/home/pages/operations/hindsight-configuration-browser.test.ts --maxWorkers=1

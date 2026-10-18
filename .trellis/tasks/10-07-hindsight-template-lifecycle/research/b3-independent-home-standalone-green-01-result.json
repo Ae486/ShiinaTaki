@@ -1,0 +1,27 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "--filter",
+    "@taki/desktop",
+    "exec",
+    "vitest",
+    "run",
+    "src/lib/ws-client-hindsight-templates.test.ts",
+    "src/windows/home/pages/operations/hindsight-template-resource-form.test.ts",
+    "src/windows/home/pages/operations/memory-operations-controller.test.ts",
+    "src/windows/home/pages/operations/memory-hindsight-backup-state.test.ts",
+    "--maxWorkers=2"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "startedAt": "2026-10-09T13:25:25.527767+00:00",
+  "finishedAt": "2026-10-09T13:25:31.192842+00:00",
+  "exitCode": 0,
+  "durationSeconds": 5.672,
+  "inputManifest": "b3-independent-home-standalone-green-01-inputs.json",
+  "sourceCount": 2042,
+  "changedInputs": [],
+  "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-independent-home\\standalone-green-01-714da84eebe34040b29e058f10b19d8a",
+  "temporaryRootRemoved": true,
+  "remainingFixtureEntries": [],
+  "log": "b3-independent-home-standalone-green-01.log"
+}

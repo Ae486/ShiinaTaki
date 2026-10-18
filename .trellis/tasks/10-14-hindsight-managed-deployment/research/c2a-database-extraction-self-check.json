@@ -1,0 +1,241 @@
+{
+  "schema": "c2a-database-extraction-self-check-v1",
+  "date": "2026-10-15",
+  "owner": "/root/c2a_database_implement",
+  "task": ".trellis/tasks/10-14-hindsight-managed-deployment",
+  "status": "static_checks_passed_after_independent_review_fix_runtime_not_run",
+  "scope": "One fixed PID-1 supervisor for the approved offline first-start prerequisite; no admitted database child or production implementation.",
+  "changed_files": [
+    "research/docker-database/first-start.py",
+    "research/docker-database/README.md",
+    "research/c2a-database-extraction-self-check.json"
+  ],
+  "files": [
+    {
+      "path": ".trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-database\\first-start.py",
+      "sha256": "7d1ee67f7b3027da781795e365b58a9cb93f847cdba7cc31425f05030d2f7ff6",
+      "bytes": 28600,
+      "utf8_bom": false,
+      "crlf_pairs": 0
+    },
+    {
+      "path": ".trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-database\\README.md",
+      "sha256": "c304db7acf32830bea23d98b00a45941ff19f0b76a9bde705ce6c1c9ba176e05",
+      "bytes": 12772,
+      "utf8_bom": false,
+      "crlf_pairs": 0
+    },
+    {
+      "path": ".trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-database\\probe-runtime.py",
+      "sha256": "57d79748edba8100576eaf79f1090fecb6c2e227563d7522dadf22eead0afd13",
+      "bytes": 10310,
+      "utf8_bom": false,
+      "crlf_pairs": 0
+    },
+    {
+      "path": ".trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\c2a-database-extraction-plan.md",
+      "sha256": "9996da457893c5bc42505f3aad234ff3937e47c8ef0bd2c7ae84c14fa9b0aa1d",
+      "bytes": 15266,
+      "utf8_bom": false,
+      "crlf_pairs": 0
+    },
+    {
+      "path": ".trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\c2a-database-extraction-review.md",
+      "sha256": "d013bdf26592630cabe80bc71e1774c62281c0dd653e9955e31a6d0a8089958c",
+      "bytes": 6695,
+      "utf8_bom": false,
+      "crlf_pairs": 0
+    }
+  ],
+  "initial_checks": [
+    {
+      "command": "& 'G:/anaconda3/python.exe' -I -B -c 'import ast,pathlib,sys; p=pathlib.Path(\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/first-start.py\"); data=p.read_bytes(); ast.parse(data, filename=str(p)); compile(data,str(p),\"exec\"); print(\"Python \" + sys.version.split()[0]); print(\"AST and in-memory compile passed; target not executed\")'",
+      "chunk_id": "667ae9",
+      "wall_time_seconds": 0.4643948,
+      "exit_code": 0,
+      "original_token_count": 18,
+      "output": "Python 3.12.7\r\nAST and in-memory compile passed; target not executed\r\n"
+    },
+    {
+      "command": "& 'G:/Roaming/Python/Python312/Scripts/ruff.exe' check --isolated --no-cache --select E,F,I --line-length 100 '.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/first-start.py'",
+      "chunk_id": "f0b871",
+      "wall_time_seconds": 0.4530181,
+      "exit_code": 1,
+      "original_token_count": 1812,
+      "output": "E501 Line too long (102 > 100)\n   --> .trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-database\\first-start.py:118:101\n    |\n117 |     def alarm(self, _number, _frame):\n118 |         if time.monotonic() >= min(self.whole_deadline, self.phase_deadline, self.operation_deadline):\n    |                                                                                                     ^^\n119 |             raise Refusal(\"shared_deadline:\" + self.stage)\n    |\n\nE501 Line too long (117 > 100)\n   --> .trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-database\\first-start.py:129:101\n    |\n128 |     def guard(self, deadline=None):\n129 |         require(time.monotonic() < min(deadline or self.whole_deadline, self.operation_deadline, self.phase_deadline,\n    |                                                                                                     ^^^^^^^^^^^^^^^^^\n130 |                                        self.whole_deadline), \"deadline:\" + self.stage)\n131 |         if self.seed_owned and self.monitor_enabled and time.monotonic() >= self.next_monitor:\n    |\n\nE501 Line too long (108 > 100)\n   --> .trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-database\\first-start.py:154:101\n    |\n152 |                     total += info.st_size\n153 |                     if count > 4096 or total > 1024**3:\n154 |                         self.result[\"storage_bound\"] = {\"bytes\": total, \"entries\": count, \"complete\": False}\n    |                                                                                                     ^^^^^^^^\n155 |                         raise Refusal(\"volume_storage_bound\")\n156 |                     if stat.S_ISDIR(info.st_mode):\n    |\n\nE501 Line too long (112 > 100)\n   --> .trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-database\\first-start.py:261:101\n    |\n259 |         require(\"[default: 18.1.0]\" in version_help, \"bundle_version\")\n260 |         self.result[\"baseline_processes\"] = [\n261 |             {key: item[key] for key in (\"pid\", \"ppid\", \"pgid\", \"session\", \"state\", \"start_ticks\", \"executable\")}\n    |                                                                                                     ^^^^^^^^^^^^\n262 |             for item in self.processes()\n263 |         ]\n    |\n\nE501 Line too long (102 > 100)\n   --> .trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-database\\first-start.py:312:101\n    |\n310 |     def identify_postmaster(self):\n311 |         lines = read_bytes(DATA / \"postmaster.pid\").decode().splitlines()\n312 |         require(len(lines) >= 4 and lines[1] == str(DATA) and lines[3] == \"55432\", \"pid_file_binding\")\n    |                                                                                                     ^^\n313 |         process = process_identity(int(lines[0]))\n314 |         require(process and process[\"state\"] != \"Z\" and process[\"uid\"] == 1000\n    |\n\nE501 Line too long (103 > 100)\n   --> .trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-database\\first-start.py:343:101\n    |\n341 |                         \"listen_addresses\", \"unix_socket_directories\", \"system_identifier\")\n342 |                 self.result[\"sql\"] = dict(zip(keys, row, strict=True))\n343 |                 self.result[\"sql_ready_elapsed_seconds\"] = round(time.monotonic() - self.start_time, 3)\n    |                                                                                                     ^^^\n344 |                 require(row[0].startswith(\"PostgreSQL 18.1 \"), \"sql_server_version_mismatch\")\n345 |                 require(row[3:10] == (str(DATA), \"on\", \"on\", \"on\", \"55432\", \"127.0.0.1\",\n    |\n\nE501 Line too long (102 > 100)\n   --> .trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-database\\first-start.py:350:101\n    |\n348 |                 backend = process_identity(row[2])\n349 |                 require(backend and backend[\"ppid\"] == self.postmaster[\"pid\"]\n350 |                         and backend[\"executable\"] == self.postmaster[\"executable\"], \"sql_parent_link\")\n    |                                                                                                     ^^\n351 |                 require(self.postmaster[\"ppid\"] == 1, \"postmaster_not_adopted_by_pid1\")\n352 |                 self.result[\"postmaster_live\"] = self.postmaster\n    |\n\nE501 Line too long (106 > 100)\n   --> .trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-database\\first-start.py:421:101\n    |\n419 |             self.reap()\n420 |             live = process_identity(actual[\"pid\"])\n421 |             require(live is None or live[\"start_ticks\"] == actual[\"start_ticks\"], \"postmaster_pid_reused\")\n    |                                                                                                     ^^^^^^\n422 |             remaining = self.processes()\n423 |             self.result[\"shutdown_processes\"] = [\n    |\n\nE501 Line too long (116 > 100)\n   --> .trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-database\\first-start.py:424:101\n    |\n422 |             remaining = self.processes()\n423 |             self.result[\"shutdown_processes\"] = [\n424 |                 {key: item[key] for key in (\"pid\", \"ppid\", \"pgid\", \"session\", \"state\", \"start_ticks\", \"executable\")}\n    |                                                                                                     ^^^^^^^^^^^^^^^^\n425 |                 for item in remaining\n426 |             ]\n    |\n\nE501 Line too long (113 > 100)\n   --> .trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-database\\first-start.py:427:101\n    |\n425 |                 for item in remaining\n426 |             ]\n427 |             if live is None and not (DATA / \"postmaster.pid\").exists() and all(p[\"pid\"] == 1 for p in remaining):\n    |                                                                                                     ^^^^^^^^^^^^^\n428 |                 break\n429 |             time.sleep(0.02)\n    |\n\nE501 Line too long (105 > 100)\n   --> .trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-database\\first-start.py:435:101\n    |\n433 |                                \"pg_controldata\", raw=True)\n434 |         fields = dict(line.split(\":\", 1) for line in control.splitlines() if \":\" in line)\n435 |         require(fields.get(\"Database cluster state\", \"\").strip() == \"shut down\", \"cluster_not_shut_down\")\n    |                                                                                                     ^^^^^\n436 |         identifier = fields.get(\"Database system identifier\", \"\").strip()\n437 |         require(identifier.isdecimal(), \"control_identifier_missing\")\n    |\n\nE501 Line too long (104 > 100)\n   --> .trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-database\\first-start.py:439:101\n    |\n437 |         require(identifier.isdecimal(), \"control_identifier_missing\")\n438 |         if \"sql\" in self.result:\n439 |             require(identifier == self.result[\"sql\"][\"system_identifier\"], \"cluster_identifier_changed\")\n    |                                                                                                     ^^^^\n440 |         self.reap()\n441 |         remaining = self.processes()\n    |\n\nFound 12 errors.\n"
+    },
+    {
+      "command": "& 'G:/Roaming/Python/Python312/Scripts/ruff.exe' format --isolated --check --line-length 100 '.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/first-start.py'",
+      "chunk_id": "01eeb7",
+      "wall_time_seconds": 0.4834428,
+      "exit_code": 1,
+      "original_token_count": 34,
+      "output": "Would reformat: .trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-database\\first-start.py\n1 file would be reformatted\n"
+    }
+  ],
+  "formatting": {
+    "command": "& 'G:/Roaming/Python/Python312/Scripts/ruff.exe' format --isolated --line-length 100 '.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/first-start.py'",
+    "chunk_id": "6c4c9a",
+    "wall_time_seconds": 0.4186925,
+    "exit_code": 0,
+    "original_token_count": 5,
+    "output": "1 file reformatted\n"
+  },
+  "final_checks": [
+    {
+      "command": "& 'G:/anaconda3/python.exe' -I -B -c 'import ast,pathlib,sys; p=pathlib.Path(\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/first-start.py\"); data=p.read_bytes(); ast.parse(data, filename=str(p)); compile(data,str(p),\"exec\"); print(\"Python \" + sys.version.split()[0]); print(\"AST and in-memory compile passed; target not executed\")'",
+      "cwd": "H:/TakiAgent",
+      "startedAt": "2026-10-15T10:39:57.692Z",
+      "chunk_id": "fee333",
+      "wall_time_seconds": 0.4874566,
+      "exit_code": 0,
+      "original_token_count": 18,
+      "output": "Python 3.12.7\r\nAST and in-memory compile passed; target not executed\r\n"
+    },
+    {
+      "command": "& 'G:/Roaming/Python/Python312/Scripts/ruff.exe' check --isolated --no-cache --select E,F,I --line-length 100 '.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/first-start.py'",
+      "cwd": "H:/TakiAgent",
+      "startedAt": "2026-10-15T10:39:57.692Z",
+      "chunk_id": "976e20",
+      "wall_time_seconds": 0.3264644,
+      "exit_code": 0,
+      "original_token_count": 5,
+      "output": "All checks passed!\n"
+    },
+    {
+      "command": "& 'G:/Roaming/Python/Python312/Scripts/ruff.exe' format --isolated --check --line-length 100 '.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/first-start.py'",
+      "cwd": "H:/TakiAgent",
+      "startedAt": "2026-10-15T10:39:57.692Z",
+      "chunk_id": "432129",
+      "wall_time_seconds": 0.4040286,
+      "exit_code": 0,
+      "original_token_count": 7,
+      "output": "1 file already formatted\n"
+    }
+  ],
+  "readback": {
+    "command": "& 'G:/anaconda3/python.exe' -I -B -c 'import hashlib,json,pathlib; root=pathlib.Path(\".trellis/tasks/10-14-hindsight-managed-deployment/research\"); names=[\"docker-database/first-start.py\",\"docker-database/README.md\",\"docker-database/probe-runtime.py\",\"c2a-database-extraction-plan.md\",\"c2a-database-extraction-review.md\"]; facts=[]; [facts.append({\"path\":str(root/name),\"sha256\":hashlib.sha256((root/name).read_bytes()).hexdigest(),\"bytes\":(root/name).stat().st_size,\"utf8_bom\":(root/name).read_bytes().startswith(bytes.fromhex(\"efbbbf\")),\"crlf_pairs\":(root/name).read_bytes().count(bytes([13,10]))}) for name in names]; print(json.dumps({\"files\":facts,\"directory_entries\":sorted(p.name for p in (root/\"docker-database\").iterdir())}))'",
+    "chunk_id": "e24709",
+    "wall_time_seconds": 0.4289215,
+    "exit_code": 0,
+    "original_token_count": 319,
+    "output": "{\"files\": [{\"path\": \".trellis\\\\tasks\\\\10-14-hindsight-managed-deployment\\\\research\\\\docker-database\\\\first-start.py\", \"sha256\": \"e0aaea3533f3810d7e3004e7fb21f3ed1459de809d56b997011b7ea14b370027\", \"bytes\": 28431, \"utf8_bom\": false, \"crlf_pairs\": 0}, {\"path\": \".trellis\\\\tasks\\\\10-14-hindsight-managed-deployment\\\\research\\\\docker-database\\\\README.md\", \"sha256\": \"c304db7acf32830bea23d98b00a45941ff19f0b76a9bde705ce6c1c9ba176e05\", \"bytes\": 12772, \"utf8_bom\": false, \"crlf_pairs\": 0}, {\"path\": \".trellis\\\\tasks\\\\10-14-hindsight-managed-deployment\\\\research\\\\docker-database\\\\probe-runtime.py\", \"sha256\": \"57d79748edba8100576eaf79f1090fecb6c2e227563d7522dadf22eead0afd13\", \"bytes\": 10310, \"utf8_bom\": false, \"crlf_pairs\": 0}, {\"path\": \".trellis\\\\tasks\\\\10-14-hindsight-managed-deployment\\\\research\\\\c2a-database-extraction-plan.md\", \"sha256\": \"9996da457893c5bc42505f3aad234ff3937e47c8ef0bd2c7ae84c14fa9b0aa1d\", \"bytes\": 15266, \"utf8_bom\": false, \"crlf_pairs\": 0}, {\"path\": \".trellis\\\\tasks\\\\10-14-hindsight-managed-deployment\\\\research\\\\c2a-database-extraction-review.md\", \"sha256\": \"d013bdf26592630cabe80bc71e1774c62281c0dd653e9955e31a6d0a8089958c\", \"bytes\": 6695, \"utf8_bom\": false, \"crlf_pairs\": 0}], \"directory_entries\": [\"README.md\", \"first-start.py\", \"probe-runtime.py\"]}\r\n",
+    "applies_to": "Implementer pre-review source; all original bytes/output preserved here. reviewer_followup.source_after and final_checks bind the corrected source."
+  },
+  "static_review": {
+    "source": "The released extraction plan and xhigh design review govern this implementation. Existing task/backend guidance was reused; no accepted producer or prior fixture was changed.",
+    "scope": "A single owner with fixed paths, one pg0 start dispatch and one SQL connection/query. No pluggable runner, command selector, new dependency, Docker API or additional probe stage.",
+    "environment": "Clear inherited environment before importing psycopg2. PATH remains empty; raw tools add only the fixed installation lib directory. All parameters and the diagnostic password are intentionally nonsecret.",
+    "deadlines": "One 60-second start-to-SQL deadline, one 25-second shutdown deadline and a 180-second total deadline. SIGALRM remains active through SQL/import/file/hash work; command and connection deadlines participate in the same alarm. Utility work reserves 200 ms within its cap for kill/reap.",
+    "sql": "Existing psycopg2 2.9.11 asynchronous poll API, verified against installed __init__.py, extensions.py and extras.wait_select source. The connection remains live through backend/postmaster identity capture.",
+    "identity": "Capture CLI /proc identity immediately after Popen while live; retain it after CLI exit. Compare PID-file, SQL backend parent, executable, start ticks, metadata, settings and cluster identifier. Raw tools use exact paths and hashes.",
+    "shutdown": "Direct raw pg_ctl fast wait, actual clean postmaster wait/reap, all remaining descendants absent, PID file absent and raw pg_controldata shut-down/identifier facts. Utility Popen objects reap themselves before adopted-child waitpid, preserving real return codes.",
+    "failure": "First failure is immutable across bounded cleanup. Signal/timeout/limit, forced utility cleanup, missing process handle or unknown supervision cannot become a passing prerequisite.",
+    "evidence": "Bounded volume metadata and logs, streamed hashes, bounded proc reads and 128 KiB final JSON. Output-limit omissions explicitly fail. Root preserves exact resource/client outcomes and owns container/volume cleanup.",
+    "file_encoding": "UTF-8 without BOM and LF confirmed. No pycache appeared in the owned script directory."
+  },
+  "actual_validation_boundary": "AST and in-memory compile plus existing Ruff E/F/I and format checks only. Target source was not executed or imported. No Linux process/database/runtime behavior is claimed.",
+  "not_run": [
+    "Docker or WSL command",
+    "Supervisor or database execution",
+    "Test suite or full source gate",
+    "Build, dependency installation or runtime asset download",
+    "Recovery fixture/resource operation",
+    "Original data, keys or models",
+    "Git lifecycle or task metadata update"
+  ],
+  "next_steps": [
+    "Root obtains byte-bound independent xhigh implementation review of these released files.",
+    "After recovery closure, Root freezes a fresh UUID/name/volume/staging manifest and executes the documented fixed image and Python stdin command once.",
+    "Root records actual bounded stdout/stderr/client outcomes, resource and process/control-state evidence, and exact owned cleanup.",
+    "No result enables admitted-chain, original-volume persistence, C2b or production acceptance."
+  ],
+  "ownership": "Released to Root after independent reviewer correction and fresh affected static checks; no runtime is pending from either agent.",
+  "reviewer_followup": {
+    "reviewer": "/root/c2_design_check",
+    "status": "fixed_and_static_checks_passed_runtime_not_run",
+    "issue": "command() let finally kill/reap/log-read failures replace the initial command error before main recorded first_failure.",
+    "fix": "Capture the initial exception with the existing fail() method before the existing utility finally cleanup; the cleanup path and all budgets/commands remain unchanged.",
+    "previous_status": "static_checks_passed_runtime_not_run",
+    "previous_files": [
+      {
+        "path": ".trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-database\\first-start.py",
+        "sha256": "e0aaea3533f3810d7e3004e7fb21f3ed1459de809d56b997011b7ea14b370027",
+        "bytes": 28431,
+        "utf8_bom": false,
+        "crlf_pairs": 0
+      },
+      {
+        "path": ".trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-database\\README.md",
+        "sha256": "c304db7acf32830bea23d98b00a45941ff19f0b76a9bde705ce6c1c9ba176e05",
+        "bytes": 12772,
+        "utf8_bom": false,
+        "crlf_pairs": 0
+      },
+      {
+        "path": ".trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-database\\probe-runtime.py",
+        "sha256": "57d79748edba8100576eaf79f1090fecb6c2e227563d7522dadf22eead0afd13",
+        "bytes": 10310,
+        "utf8_bom": false,
+        "crlf_pairs": 0
+      },
+      {
+        "path": ".trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\c2a-database-extraction-plan.md",
+        "sha256": "9996da457893c5bc42505f3aad234ff3937e47c8ef0bd2c7ae84c14fa9b0aa1d",
+        "bytes": 15266,
+        "utf8_bom": false,
+        "crlf_pairs": 0
+      },
+      {
+        "path": ".trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\c2a-database-extraction-review.md",
+        "sha256": "d013bdf26592630cabe80bc71e1774c62281c0dd653e9955e31a6d0a8089958c",
+        "bytes": 6695,
+        "utf8_bom": false,
+        "crlf_pairs": 0
+      }
+    ],
+    "previous_final_checks": [
+      {
+        "command": "& 'G:/anaconda3/python.exe' -I -B -c 'import ast,pathlib,sys; p=pathlib.Path(\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/first-start.py\"); data=p.read_bytes(); ast.parse(data, filename=str(p)); compile(data,str(p),\"exec\"); print(\"Python \" + sys.version.split()[0]); print(\"AST and in-memory compile passed; target not executed\")'",
+        "chunk_id": "e15b21",
+        "wall_time_seconds": 0.4617794,
+        "exit_code": 0,
+        "original_token_count": 18,
+        "output": "Python 3.12.7\r\nAST and in-memory compile passed; target not executed\r\n"
+      },
+      {
+        "command": "& 'G:/Roaming/Python/Python312/Scripts/ruff.exe' check --isolated --no-cache --select E,F,I --line-length 100 '.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/first-start.py'",
+        "chunk_id": "92cadf",
+        "wall_time_seconds": 0.385253,
+        "exit_code": 0,
+        "original_token_count": 5,
+        "output": "All checks passed!\n"
+      },
+      {
+        "command": "& 'G:/Roaming/Python/Python312/Scripts/ruff.exe' format --isolated --check --line-length 100 '.trellis/tasks/10-14-hindsight-managed-deployment/research/docker-database/first-start.py'",
+        "chunk_id": "26f99e",
+        "wall_time_seconds": 0.3401581,
+        "exit_code": 0,
+        "original_token_count": 7,
+        "output": "1 file already formatted\n"
+      }
+    ],
+    "pre_review_self_check_sha256": "ee92357a10f5bf9e606c48638d6686e79e8e86a48fb3722f92906acae6d8d0c0",
+    "source_after": {
+      "file": "docker-database/first-start.py",
+      "bytes": 28600,
+      "sha256": "7d1ee67f7b3027da781795e365b58a9cb93f847cdba7cc31425f05030d2f7ff6",
+      "utf8_bom": false,
+      "crlf_pairs": 0
+    },
+    "changes": [
+      "Four lines added to command(): except block, explanatory comment, first-failure capture and re-raise.",
+      "This self-check records the fresh affected checks and retains all earlier failures/results."
+    ],
+    "runtime_executed": false,
+    "reports": [
+      "c2a-database-extraction-implementation-review.md",
+      "c2a-database-extraction-implementation-review.json"
+    ]
+  }
+}

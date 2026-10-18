@@ -1,0 +1,11 @@
+--- docker-database/run-persistence.ts
++++ diag-docker-database/run-persistence.ts
+@@ -29,7 +29,7 @@
+ import { openRpcSocket, type RpcSocket } from "../../../../../e2e/src/fixture/rpc-socket.ts";
+ import { startCapabilityRelay, type CapabilityRelay } from "../../../../../e2e/src/fixture/ws-relay.ts";
+ 
+-const CASE = "1b05d2f6-494c-4a6d-a601-1e807eca1486";
++const CASE = "069242fc-3c26-4413-a767-0d01d819f95e";
+ const REPOSITORY = fileURLToPath(new URL("../../../../../", import.meta.url));
+ const HERE = fileURLToPath(new URL("./", import.meta.url));
+ const ROOT = resolve(`C:/taki-c2a-db-persistence-${CASE}`);

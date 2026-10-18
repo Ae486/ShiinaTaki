@@ -1,0 +1,55 @@
+{
+  "caseId": "069242fc-3c26-4413-a767-0d01d819f95e",
+  "pins": [
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/docker-database/run-persistence.ts",
+      "bytes": 56502,
+      "sha256": "c39fd6e465f922cefd198abe1e6d531d731359f8969b183ae9b5b4d2cf06ee27",
+      "expected": "c39fd6e465f922cefd198abe1e6d531d731359f8969b183ae9b5b4d2cf06ee27"
+    },
+    {
+      "path": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "bytes": 41758128,
+      "sha256": "0a4d8fe2ab107ceae44ee5f5fc1e1c155790042b7e3d3163826660da882b389d",
+      "expected": "0a4d8fe2ab107ceae44ee5f5fc1e1c155790042b7e3d3163826660da882b389d"
+    },
+    {
+      "path": "C:/Program Files/nodejs/node.exe",
+      "bytes": 92534088,
+      "sha256": "9a4eb5f1c29c6a2e93852ead46b999e284a6a5ca8bab4d4e241d587d025a52de",
+      "expected": "9a4eb5f1c29c6a2e93852ead46b999e284a6a5ca8bab4d4e241d587d025a52de"
+    },
+    {
+      "path": "H:/TakiAgent/apps/desktop/src-tauri/target/debug/taki-node.exe",
+      "bytes": 9058816,
+      "sha256": "1ed31593324eaea703590e6dd12b348dfe99c38c7530207b12c89300e8a582c9",
+      "expected": "1ed31593324eaea703590e6dd12b348dfe99c38c7530207b12c89300e8a582c9"
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/c2a-implementation-source-manifest.json",
+      "bytes": 108542,
+      "sha256": "f27379be3b4b5e61e1b2821c2eda2d87bf54e5c2983b034bdb637ee789961ae2",
+      "expected": "f27379be3b4b5e61e1b2821c2eda2d87bf54e5c2983b034bdb637ee789961ae2"
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/docker-database/database-read.py",
+      "bytes": 6084,
+      "sha256": "4bd830c60a4ddecc4e8e7018d2b19eb08093c81fc5d7f3ee0a8ff380178e4271",
+      "expected": "4bd830c60a4ddecc4e8e7018d2b19eb08093c81fc5d7f3ee0a8ff380178e4271"
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research/docker-database/fake_child.py",
+      "bytes": 44233,
+      "sha256": "9d65b8875e5d798a024dff9b4a182d6cff7bf4b62646954e38cd0c2e12ce3819",
+      "expected": "9d65b8875e5d798a024dff9b4a182d6cff7bf4b62646954e38cd0c2e12ce3819"
+    }
+  ],
+  "diagnosticHashes": {
+    "run-persistence.ts": "60bf61f26bed0fc4c3a7c874c2b40b0c8480359d9be236f8a04f02185f91d7a2",
+    "database-read.py": "2407be676ca83e59d9564a23be96e42643869b765bd76ce0efaeb882c71f58ee",
+    "fake_child.py": "928055b53bf5bc65f79279906b6a418b39f08dd5868237afa22d5da0fcfcfb9d"
+  },
+  "tokenOccurrencesPerFile": 1,
+  "acceptedSourceEntries": 109,
+  "recordedAt": "2026-10-18T12:54:42.396Z"
+}

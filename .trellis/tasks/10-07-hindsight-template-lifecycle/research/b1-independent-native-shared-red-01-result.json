@@ -1,0 +1,18 @@
+{
+  "command": [
+    "cmd.exe",
+    "/c",
+    "pnpm",
+    "--filter",
+    "@taki/shared",
+    "exec",
+    "vitest",
+    "run",
+    "src/hindsight-template-validation.test.ts",
+    "--maxWorkers=2"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 1,
+  "durationSeconds": 2.063,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b1-independent-native-shared-red-01.log"
+}

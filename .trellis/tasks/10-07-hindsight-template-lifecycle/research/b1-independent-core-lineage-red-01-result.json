@@ -1,0 +1,12 @@
+{
+  "command": "pnpm --filter @taki/core exec vitest run src/db/migrations/041-canonical-memory-maintenance.test.ts src/db/migrations/053-memory-transition-candidates.test.ts src/db/migrations/054-memory-transition-publication.test.ts src/db/migrations/lineage-reopen-matrix.test.ts --maxWorkers=2",
+  "cwd": "H:\\TakiAgent",
+  "startedAtUtc": "2026-10-08T05:45:06.8446050Z",
+  "endedAtUtc": "2026-10-08T05:45:17.2312033Z",
+  "elapsedSeconds": 10.3192253,
+  "exitCode": 1,
+  "log": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b1-independent-core-lineage-red-01.log",
+  "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b1-independent-core-lineage-red-01-temp",
+  "filesRemainingAfterProcessExit": 6,
+  "isolatedTemporaryRootRemoved": true
+}

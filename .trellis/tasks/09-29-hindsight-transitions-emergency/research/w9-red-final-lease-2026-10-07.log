@@ -1,0 +1,40 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ ❯ src/memory/transitions/transition-healthy-publication-lease.test.ts (2 tests | 2 failed) 6498ms
+     × rolls back all transition.return-local publication state when the actual final read-back reaches leaseUntil 2371ms
+     × rolls back all transition.reenter-hindsight publication state when the actual final read-back reaches leaseUntil 4122ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/memory/transitions/transition-healthy-publication-lease.test.ts > healthy publication final live lease > rolls back all transition.return-local publication state when the actual final read-back reaches leaseUntil
+ FAIL  src/memory/transitions/transition-healthy-publication-lease.test.ts > healthy publication final live lease > rolls back all transition.reenter-hindsight publication state when the actual final read-back reaches leaseUntil
+AssertionError: expected undefined to deeply equal Error: MEMORY_TRANSITION_LEASE_LOST
+
+- Expected:
+Error {
+  "message": "MEMORY_TRANSITION_LEASE_LOST",
+}
+
++ Received:
+undefined
+
+ ❯ src/memory/transitions/transition-healthy-publication-lease.test.ts:73:25
+     71|         expect(validated?.sourceCustody.witnesses).toHaveLength(2);
+     72|         expect(validated?.queue).toHaveLength(1);
+     73|         expect(refusal).toEqual(new Error("MEMORY_TRANSITION_LEASE_LOS…
+       |                         ^
+     74|         expect(after).toEqual(before);
+     75|         expect(readTransitionReceipt(h.db, transitionId)).toBeUndefine…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  18:09:27
+   Duration  18.41s (transform 9.30s, setup 0ms, import 11.48s, tests 6.50s, environment 0ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/transitions/transition-healthy-publication-lease.test.ts --maxWorkers=2

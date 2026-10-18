@@ -1,0 +1,18 @@
+{
+  "checkedAtUtc": "2026-10-07T16:58:49.827689+00:00",
+  "manifest": "b1-composition-final-source.json",
+  "manifestSha256": "927a915b88fe48bd5ed379d90e05c36ebc97bcc71777ca4a0aa13a8339cde08a",
+  "groups": [
+    {
+      "name": "files",
+      "count": 25,
+      "mismatches": []
+    },
+    {
+      "name": "sharedConsumers",
+      "count": 3,
+      "mismatches": []
+    }
+  ],
+  "scope": "Handoff identity verification only; not independent B1 acceptance."
+}

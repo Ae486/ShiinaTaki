@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "reviewId": "c2b-design-review",
+  "date": "2026-10-15",
+  "reviewer": "/root/c2_design_check",
+  "task": ".trellis/tasks/10-14-hindsight-managed-deployment",
+  "scope": "PLAN_ONLY",
+  "decision": "CORRECTION_REQUIRED",
+  "frozenInputs": [
+    {
+      "file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-plan.md",
+      "bytes": 38003,
+      "sha256": "bb569d33bdd1e31a6672aeff87acfab5383b477316453cc3c7dcb6fed329eafa"
+    },
+    {
+      "file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-readiness.md",
+      "bytes": 16549,
+      "sha256": "289d1891f1ec82cd0b37e126fe8f14147beadb5e677d5d3346f1234a2fee06be"
+    },
+    {
+      "file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-native-producer-readiness.md",
+      "bytes": 18788,
+      "sha256": "ea7fbf56504d818b758eed52b350125df8b2f3126746d5a8251aeef5cbc63ba7"
+    }
+  ],
+  "sourceEvidence": [
+    {
+      "file": "packages/core/src/db/migrations/059-hindsight-template-execution.ts",
+      "bytes": 9984,
+      "sha256": "e50671c6311491b05ebf9d5c4bd348f8ad7e0265596b087ad480063cceaac55a"
+    },
+    {
+      "file": "packages/core/src/memory/hindsight/template-lifecycle/template-provision.ts",
+      "bytes": 9554,
+      "sha256": "e3f24a6e6eac2bd9125cc8f19ce566aa721f4e851067785767ceac306dba13bb"
+    },
+    {
+      "file": "packages/core/src/memory/hindsight/template-lifecycle/template-plan-guard.ts",
+      "bytes": 6848,
+      "sha256": "3a1178dfb2ee5e79bcef80620c125d78c20b266030881b939dddb9a6618faf19"
+    },
+    {
+      "file": "packages/core/src/memory/hindsight/template-lifecycle/template-executor-store.ts",
+      "bytes": 6342,
+      "sha256": "f40b0cd589838c9700e153062ccb2d3c4fab79f61d47545bb3ee1a9bf808415c"
+    },
+    {
+      "file": "packages/core/src/memory/operations/memory-operation-service.ts",
+      "bytes": 14402,
+      "sha256": "edf8e08bc16c5a30a343d1a077e01e0ccb977750a27eb43ebcc4fb04d6460ed6"
+    },
+    {
+      "file": "packages/core/src/memory/operations/memory-operation-kind-setup.ts",
+      "bytes": 3623,
+      "sha256": "b4276d302f2c33cfb03853952750c3483e5287998bd29b790c43e5936b67ea13"
+    },
+    {
+      "file": "packages/core/src/db/memory-operation-repo.ts",
+      "bytes": 7518,
+      "sha256": "756291d208deba010a2d9dd26b409d96988c13279988c657c15de1759d4a84ef"
+    },
+    {
+      "file": "packages/core/src/memory/hindsight/hindsight-setup-service.ts",
+      "bytes": 13156,
+      "sha256": "77e89a692eee914d7993f04aca5ccb57d3c738288318cafb555ac1c8a7781f0e"
+    },
+    {
+      "file": "packages/core/src/memory/hindsight/template-lifecycle/template-plan-store.ts",
+      "bytes": 6373,
+      "sha256": "d4326b3c36e9c2bb12d5760bc57d8d34183120def6fcbcf4f23e75899ad0ea5f"
+    },
+    {
+      "file": "packages/core/src/memory/hindsight/template-lifecycle/template-publication.ts",
+      "bytes": 7134,
+      "sha256": "2fceecd494cf6e33944005638b37aaa34e120af41159779569993babce74a069"
+    },
+    {
+      "file": "packages/core/src/memory/operations/memory-operation-template-guard.ts",
+      "bytes": 1771,
+      "sha256": "fad585e1b18bdbdcc70a2a7a1989f57c237bb654ae867af0d12903cd45d96e91"
+    },
+    {
+      "file": "packages/core/src/db/hindsight-connection-repo.ts",
+      "bytes": 4514,
+      "sha256": "fe5c242cb1e864215f57bc86c83205a25b19ef3c4b6d27c840c0d55eff554894"
+    },
+    {
+      "file": "packages/core/src/memory/hindsight/hindsight-setup-recovery.ts",
+      "bytes": 1861,
+      "sha256": "18aefad29290428f5be346559e4fda0f87f1e1662ede142654f2c2178e696386"
+    },
+    {
+      "file": "H:/hindsight/hindsight-api-slim/hindsight_api/server.py",
+      "bytes": 3009,
+      "sha256": "aa3a3dccba49dad28ed122fd4c80fc434a57913c1db954c35d443331d1939c36"
+    },
+    {
+      "file": "H:/hindsight/hindsight-api-slim/hindsight_api/engine/maintenance.py",
+      "bytes": 26389,
+      "sha256": "c2435cb793f074c76393677e967b0278f071da04a09daa3df682ab1805ad1ff8"
+    },
+    {
+      "file": "H:/hindsight/hindsight-api-slim/hindsight_api/engine/template_apply.py",
+      "bytes": 8894,
+      "sha256": "10ce924c12b1512785917835295c262f529051a7945bf2fb72ed3b7db122b915"
+    },
+    {
+      "file": "H:/hindsight/hindsight-api-slim/hindsight_api/engine/template_mutations.py",
+      "bytes": 7023,
+      "sha256": "5f811eb1c5580e9e6a241244576a6b508fd018bb9c300b9901eb3df462770385"
+    },
+    {
+      "file": "H:/hindsight/hindsight-api-slim/hindsight_api/engine/template_initialization.py",
+      "bytes": 7702,
+      "sha256": "0d6aee8b27d6e3268ff6e0ebc7fdd4e205bd97c5486005e6b03faf954dabc220"
+    }
+  ],
+  "findingsFixed": [],
+  "findingsNotFixed": [
+    {
+      "id": "R1",
+      "severity": "implementation_blocker",
+      "file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-plan.md",
+      "lineRanges": [
+        [
+          317,
+          327
+        ],
+        [
+          368,
+          376
+        ]
+      ],
+      "issue": "The existing template hold/admission requires a real immutable plan, but managed setup needs durable exclusion before creating the Banks whose real identities are required to construct that plan.",
+      "sourceReferences": [
+        {
+          "file": "packages/core/src/db/migrations/059-hindsight-template-execution.ts",
+          "lineRanges": [
+            [
+              33,
+              50
+            ],
+            [
+              94,
+              100
+            ]
+          ]
+        },
+        {
+          "file": "packages/core/src/memory/hindsight/template-lifecycle/template-plan-store.ts",
+          "lineRanges": [
+            [
+              29,
+              49
+            ]
+          ]
+        }
+      ],
+      "minimumCorrection": [
+        "Use the already proposed bounded managed-setup connection-row capsule as a pre-plan hold bound to the original operation, attempt, reserved plan/reference identities and guard.",
+        "Keep pre-plan dispatch and known Bank facts in the existing operation producer/capsule; use the existing operation-bound reservation table without inserting fake plan-backed evidence.",
+        "After actual Bank/snapshot identities exist, atomically create the real immutable plan and transfer active ownership into the existing template hold without a gap.",
+        "Handle missing-plan capsule reopen/explicit continuation before readTemplatePlan; preserve original unknown outcomes and forbid inferred adoption or repeated uncertain Bank creation.",
+        "Make memory-operation admission, direct managed setup and Run-owned deployment start/resume consult the same pre-plan/plan-backed held state."
+      ],
+      "prohibitedWorkarounds": [
+        "placeholder immutable plan",
+        "relaxed historical foreign key",
+        "new ledger",
+        "general hold framework",
+        "rewriting old immutable plan JSON"
+      ],
+      "disposition": "Root accepted the minimum correction; plan author must revise after release. No concurrent plan/source edit was made by this reviewer."
+    }
+  ],
+  "prerequisiteOrder": [
+    {
+      "order": 1,
+      "gate": "exact_image_offline_inventory",
+      "required": "Actual installed Native/SDK/tokenizer/PG assets and cl100k_base bytes/hash/effective cache path, with refusal before API import/SQL/listen on mismatch.",
+      "failure": "Stop without download or fallback; retain failed evidence.",
+      "before": "First API execution and broad source integration."
+    },
+    {
+      "order": 2,
+      "gate": "actual_fixed_producer_vertical_slice",
+      "required": "Ordinary authenticated API, migrations, actual Host/resource/PID/listener/provider-lineage join, checked API plus PG stop and same-volume fresh authorized startup.",
+      "before": "Broad resolver/setup/template/capsule/publication/recovery integration.",
+      "networkOrdering": "Validate fixed mappings/routes/waiting state before inject; prove actual host-loopback HTTP after legitimate API launch but before publishing a usable reference/setup."
+    },
+    {
+      "order": 3,
+      "gate": "positive_consumer_integration",
+      "required": "Real durable setup owner, corrected pre-plan transition, exact trusted reference, two verified Bank definitions, atomic B3 publication and original-identity recovery.",
+      "exclusion": "A permanently refusing receipt bridge does not fulfill C2b."
+    }
+  ],
+  "noAdditionalBlockersFound": true,
+  "preservedBoundaries": [
+    "No source/runtime acceptance is inferred from this design review.",
+    "Keep accepted C1, R2, database and 182 unchanged source-test evidence without duplicate runs.",
+    "DB-only evidence does not prove actual Native API lifecycle.",
+    "Only CONNECTION is mapped; six-slot model application/health remains C3.",
+    "Keep V1 immutable bytes/digest domains compatible and update affected versioned mirrors together.",
+    "Do not upgrade original unknown execution into historical completed proof.",
+    "No new dependency, general framework, arbitrary provider matrix, real-model call, original-data access or Git lifecycle action."
+  ],
+  "specificationsToSyncAfterImplementation": [
+    ".trellis/spec/backend/hindsight-managed-deployment.md",
+    ".trellis/spec/backend/hindsight-template-lifecycle.md",
+    "Affected existing setup/operation specifications selected for the actual changed contracts."
+  ],
+  "verification": {
+    "lint": {
+      "status": "NOT_RUN",
+      "reason": "PLAN ONLY; no executable source change."
+    },
+    "typeCheck": {
+      "status": "NOT_RUN",
+      "reason": "PLAN ONLY; no executable source change."
+    },
+    "tests": {
+      "status": "NOT_RUN",
+      "reason": "Excluded from this review authorization."
+    },
+    "build": {
+      "status": "NOT_RUN",
+      "reason": "Excluded from this review authorization."
+    },
+    "runtime": {
+      "status": "NOT_RUN",
+      "reason": "Excluded from this review authorization."
+    },
+    "sourceInspection": "COMPLETED",
+    "c2bAcceptance": "NOT_ESTABLISHED"
+  },
+  "filesOwned": [
+    ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-design-review.md",
+    ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-design-review.json"
+  ],
+  "followUp": "Compare only the author's minimum R1/gate-ordering revision and changed inputs; do not repeat the completed source survey."
+}
+

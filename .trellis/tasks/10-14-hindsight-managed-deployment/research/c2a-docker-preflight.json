@@ -1,0 +1,522 @@
+{
+  "version": 1,
+  "scope": "authorized-startup-and-read-only-preflight",
+  "startedAt": "2026-10-14T14:26:52.987Z",
+  "endpoint": "npipe:////./pipe/dockerDesktopLinuxEngine",
+  "before": {
+    "recordedAt": "2026-10-14T14:24:32.8800582Z",
+    "desktopProcesses": [],
+    "backendProcesses": [],
+    "capacity": [
+      {
+        "Name": "C",
+        "Free": 27742089216
+      },
+      {
+        "Name": "G",
+        "Free": 145034780672
+      },
+      {
+        "Name": "H",
+        "Free": 13104574464
+      }
+    ],
+    "binaryPins": {
+      "C:/Program Files/nodejs/node.exe": "9a4eb5f1c29c6a2e93852ead46b999e284a6a5ca8bab4d4e241d587d025a52de",
+      "C:/Program Files/Docker/Docker/resources/bin/docker.exe": "0a4d8fe2ab107ceae44ee5f5fc1e1c155790042b7e3d3163826660da882b389d",
+      "C:/Program Files/Docker/Docker/Docker Desktop.exe": "9724d12592d638a097bab25a48c016fcc7a887099fd9a3a709ede0a50544062d"
+    },
+    "endpoint": "npipe:////./pipe/dockerDesktopLinuxEngine",
+    "authorization": "Owner approved Desktop startup and read-only engine/workload/cache preflight after source cleanup; no active container mutations"
+  },
+  "launch": {
+    "recordedAt": "2026-10-14T14:26:52.7717073Z",
+    "startedByRoot": true,
+    "launcherPid": 33332,
+    "existingDesktopPids": [
+      null
+    ],
+    "program": "C:/Program Files/Docker/Docker/Docker Desktop.exe",
+    "windowStyle": "Hidden"
+  },
+  "commands": [
+    {
+      "name": "engine-info",
+      "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "argv": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:/TakiAgent-c2a-docker-acceptance/2026-10-14-r1/client-config",
+        "info",
+        "--format",
+        "{\"id\":{{json .ID}},\"os\":{{json .OSType}},\"architecture\":{{json .Architecture}},\"version\":{{json .ServerVersion}},\"liveRestore\":{{json .LiveRestoreEnabled}}}"
+      ],
+      "startedAt": "2026-10-14T14:26:52.989Z",
+      "milliseconds": 145,
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "error": "failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified."
+    },
+    {
+      "name": "engine-info",
+      "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "argv": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:/TakiAgent-c2a-docker-acceptance/2026-10-14-r1/client-config",
+        "info",
+        "--format",
+        "{\"id\":{{json .ID}},\"os\":{{json .OSType}},\"architecture\":{{json .Architecture}},\"version\":{{json .ServerVersion}},\"liveRestore\":{{json .LiveRestoreEnabled}}}"
+      ],
+      "startedAt": "2026-10-14T14:26:55.137Z",
+      "milliseconds": 133,
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "error": "failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified."
+    },
+    {
+      "name": "engine-info",
+      "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "argv": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:/TakiAgent-c2a-docker-acceptance/2026-10-14-r1/client-config",
+        "info",
+        "--format",
+        "{\"id\":{{json .ID}},\"os\":{{json .OSType}},\"architecture\":{{json .Architecture}},\"version\":{{json .ServerVersion}},\"liveRestore\":{{json .LiveRestoreEnabled}}}"
+      ],
+      "startedAt": "2026-10-14T14:26:57.272Z",
+      "milliseconds": 131,
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "error": "failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified."
+    },
+    {
+      "name": "engine-info",
+      "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "argv": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:/TakiAgent-c2a-docker-acceptance/2026-10-14-r1/client-config",
+        "info",
+        "--format",
+        "{\"id\":{{json .ID}},\"os\":{{json .OSType}},\"architecture\":{{json .Architecture}},\"version\":{{json .ServerVersion}},\"liveRestore\":{{json .LiveRestoreEnabled}}}"
+      ],
+      "startedAt": "2026-10-14T14:26:59.416Z",
+      "milliseconds": 128,
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "error": "failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified."
+    },
+    {
+      "name": "engine-info",
+      "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "argv": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:/TakiAgent-c2a-docker-acceptance/2026-10-14-r1/client-config",
+        "info",
+        "--format",
+        "{\"id\":{{json .ID}},\"os\":{{json .OSType}},\"architecture\":{{json .Architecture}},\"version\":{{json .ServerVersion}},\"liveRestore\":{{json .LiveRestoreEnabled}}}"
+      ],
+      "startedAt": "2026-10-14T14:27:01.548Z",
+      "milliseconds": 10019,
+      "exitCode": null,
+      "signal": "SIGTERM",
+      "errorCode": "ETIMEDOUT",
+      "error": ""
+    },
+    {
+      "name": "engine-info",
+      "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "argv": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:/TakiAgent-c2a-docker-acceptance/2026-10-14-r1/client-config",
+        "info",
+        "--format",
+        "{\"id\":{{json .ID}},\"os\":{{json .OSType}},\"architecture\":{{json .Architecture}},\"version\":{{json .ServerVersion}},\"liveRestore\":{{json .LiveRestoreEnabled}}}"
+      ],
+      "startedAt": "2026-10-14T14:27:13.575Z",
+      "milliseconds": 6629,
+      "exitCode": 0,
+      "signal": null,
+      "errorCode": null,
+      "error": null
+    },
+    {
+      "name": "container-ids",
+      "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "argv": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:/TakiAgent-c2a-docker-acceptance/2026-10-14-r1/client-config",
+        "container",
+        "ls",
+        "--all",
+        "--no-trunc",
+        "--format",
+        "{{json .ID}}"
+      ],
+      "startedAt": "2026-10-14T14:27:20.205Z",
+      "milliseconds": 648,
+      "exitCode": 0,
+      "signal": null,
+      "errorCode": null,
+      "error": null
+    },
+    {
+      "name": "container-state",
+      "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "argv": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:/TakiAgent-c2a-docker-acceptance/2026-10-14-r1/client-config",
+        "container",
+        "inspect",
+        "--format",
+        "{\"id\":{{json .Id}},\"name\":{{json .Name}},\"status\":{{json .State.Status}},\"restartPolicy\":{{json .HostConfig.RestartPolicy.Name}}}",
+        "c07d86d32382757d292dd4ebf318e6c44260c817d95f35187663d4d33a26b865"
+      ],
+      "startedAt": "2026-10-14T14:27:20.854Z",
+      "milliseconds": 216,
+      "exitCode": 0,
+      "signal": null,
+      "errorCode": null,
+      "error": null
+    },
+    {
+      "name": "container-state",
+      "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "argv": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:/TakiAgent-c2a-docker-acceptance/2026-10-14-r1/client-config",
+        "container",
+        "inspect",
+        "--format",
+        "{\"id\":{{json .Id}},\"name\":{{json .Name}},\"status\":{{json .State.Status}},\"restartPolicy\":{{json .HostConfig.RestartPolicy.Name}}}",
+        "a38b49e64f74ee4fa4f5cf5531e467d74dda2b64dc7e28e78a9bdadd37272519"
+      ],
+      "startedAt": "2026-10-14T14:27:21.070Z",
+      "milliseconds": 198,
+      "exitCode": 0,
+      "signal": null,
+      "errorCode": null,
+      "error": null
+    },
+    {
+      "name": "container-state",
+      "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "argv": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:/TakiAgent-c2a-docker-acceptance/2026-10-14-r1/client-config",
+        "container",
+        "inspect",
+        "--format",
+        "{\"id\":{{json .Id}},\"name\":{{json .Name}},\"status\":{{json .State.Status}},\"restartPolicy\":{{json .HostConfig.RestartPolicy.Name}}}",
+        "8f5e4468c3a7c0100330e012fdca3da843abfcc732361b71308f06d6eeada5c2"
+      ],
+      "startedAt": "2026-10-14T14:27:21.269Z",
+      "milliseconds": 187,
+      "exitCode": 0,
+      "signal": null,
+      "errorCode": null,
+      "error": null
+    },
+    {
+      "name": "container-state",
+      "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "argv": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:/TakiAgent-c2a-docker-acceptance/2026-10-14-r1/client-config",
+        "container",
+        "inspect",
+        "--format",
+        "{\"id\":{{json .Id}},\"name\":{{json .Name}},\"status\":{{json .State.Status}},\"restartPolicy\":{{json .HostConfig.RestartPolicy.Name}}}",
+        "7992fb2bba71e13dc290e305941ded32b9046c1ec4b67a3697863ff79079cf8b"
+      ],
+      "startedAt": "2026-10-14T14:27:21.457Z",
+      "milliseconds": 201,
+      "exitCode": 0,
+      "signal": null,
+      "errorCode": null,
+      "error": null
+    },
+    {
+      "name": "container-state",
+      "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "argv": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:/TakiAgent-c2a-docker-acceptance/2026-10-14-r1/client-config",
+        "container",
+        "inspect",
+        "--format",
+        "{\"id\":{{json .Id}},\"name\":{{json .Name}},\"status\":{{json .State.Status}},\"restartPolicy\":{{json .HostConfig.RestartPolicy.Name}}}",
+        "ba11af042db0879902996426522611b267f38eab7d21f05e21036929c415cc24"
+      ],
+      "startedAt": "2026-10-14T14:27:21.659Z",
+      "milliseconds": 169,
+      "exitCode": 0,
+      "signal": null,
+      "errorCode": null,
+      "error": null
+    },
+    {
+      "name": "container-state",
+      "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "argv": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:/TakiAgent-c2a-docker-acceptance/2026-10-14-r1/client-config",
+        "container",
+        "inspect",
+        "--format",
+        "{\"id\":{{json .Id}},\"name\":{{json .Name}},\"status\":{{json .State.Status}},\"restartPolicy\":{{json .HostConfig.RestartPolicy.Name}}}",
+        "9d4fc8fb7a4869ac422d9e78a924b49e698e61a562de3af7576dfd18ef81cd98"
+      ],
+      "startedAt": "2026-10-14T14:27:21.829Z",
+      "milliseconds": 159,
+      "exitCode": 0,
+      "signal": null,
+      "errorCode": null,
+      "error": null
+    },
+    {
+      "name": "container-state",
+      "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "argv": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:/TakiAgent-c2a-docker-acceptance/2026-10-14-r1/client-config",
+        "container",
+        "inspect",
+        "--format",
+        "{\"id\":{{json .Id}},\"name\":{{json .Name}},\"status\":{{json .State.Status}},\"restartPolicy\":{{json .HostConfig.RestartPolicy.Name}}}",
+        "697330c3cd8966e02d97fa228c5233a0805531bff00275107630e34fadda0b1a"
+      ],
+      "startedAt": "2026-10-14T14:27:21.988Z",
+      "milliseconds": 157,
+      "exitCode": 0,
+      "signal": null,
+      "errorCode": null,
+      "error": null
+    },
+    {
+      "name": "container-state",
+      "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "argv": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:/TakiAgent-c2a-docker-acceptance/2026-10-14-r1/client-config",
+        "container",
+        "inspect",
+        "--format",
+        "{\"id\":{{json .Id}},\"name\":{{json .Name}},\"status\":{{json .State.Status}},\"restartPolicy\":{{json .HostConfig.RestartPolicy.Name}}}",
+        "f10f31753fc9013707238db0324e02f7d624d295c89a88fcc9bf2839fbffad0b"
+      ],
+      "startedAt": "2026-10-14T14:27:22.145Z",
+      "milliseconds": 159,
+      "exitCode": 0,
+      "signal": null,
+      "errorCode": null,
+      "error": null
+    },
+    {
+      "name": "cached-native-images",
+      "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "argv": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:/TakiAgent-c2a-docker-acceptance/2026-10-14-r1/client-config",
+        "image",
+        "ls",
+        "--no-trunc",
+        "--filter",
+        "reference=taki-hindsight-api:*",
+        "--format",
+        "{\"id\":{{json .ID}},\"repository\":{{json .Repository}},\"tag\":{{json .Tag}},\"size\":{{json .Size}}}"
+      ],
+      "startedAt": "2026-10-14T14:27:22.305Z",
+      "milliseconds": 276,
+      "exitCode": 0,
+      "signal": null,
+      "errorCode": null,
+      "error": null
+    },
+    {
+      "name": "cached-native-metadata",
+      "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "argv": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:/TakiAgent-c2a-docker-acceptance/2026-10-14-r1/client-config",
+        "image",
+        "inspect",
+        "--format",
+        "{\"id\":{{json .Id}},\"os\":{{json .Os}},\"architecture\":{{json .Architecture}},\"user\":{{json .Config.User}},\"entrypoint\":{{json .Config.Entrypoint}}}",
+        "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db"
+      ],
+      "startedAt": "2026-10-14T14:27:22.582Z",
+      "milliseconds": 227,
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "error": "template parsing error: template: :1:131: executing \"\" at <.Config.Entrypoint>: map has no entry for key \"Entrypoint\""
+    },
+    {
+      "name": "cached-native-metadata-optional-fields",
+      "program": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "argv": [
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:/TakiAgent-c2a-docker-acceptance/2026-10-14-r1/client-config",
+        "image",
+        "inspect",
+        "--format",
+        "{\"id\":{{json .Id}},\"os\":{{json .Os}},\"architecture\":{{json .Architecture}},\"user\":{{json (index .Config \"User\")}},\"entrypoint\":{{json (index .Config \"Entrypoint\")}}}",
+        "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db"
+      ],
+      "startedAt": "2026-10-14T14:29:09.096Z",
+      "milliseconds": 219,
+      "exitCode": 0,
+      "signal": null,
+      "errorCode": null,
+      "error": null
+    }
+  ],
+  "engine": {
+    "id": "93e8319e-24b7-4a7d-88f1-60923ad681e0",
+    "os": "linux",
+    "architecture": "x86_64",
+    "version": "29.0.1",
+    "liveRestore": false
+  },
+  "containers": [
+    {
+      "id": "c07d86d32382757d292dd4ebf318e6c44260c817d95f35187663d4d33a26b865",
+      "name": "/taki-hindsight-api-retest",
+      "status": "exited",
+      "restartPolicy": "no"
+    },
+    {
+      "id": "a38b49e64f74ee4fa4f5cf5531e467d74dda2b64dc7e28e78a9bdadd37272519",
+      "name": "/taki-hindsight-api",
+      "status": "exited",
+      "restartPolicy": "no"
+    },
+    {
+      "id": "8f5e4468c3a7c0100330e012fdca3da843abfcc732361b71308f06d6eeada5c2",
+      "name": "/redis",
+      "status": "running",
+      "restartPolicy": "always"
+    },
+    {
+      "id": "7992fb2bba71e13dc290e305941ded32b9046c1ec4b67a3697863ff79079cf8b",
+      "name": "/my_pgvector",
+      "status": "exited",
+      "restartPolicy": "no"
+    },
+    {
+      "id": "ba11af042db0879902996426522611b267f38eab7d21f05e21036929c415cc24",
+      "name": "/rustfs_loacl",
+      "status": "exited",
+      "restartPolicy": "no"
+    },
+    {
+      "id": "9d4fc8fb7a4869ac422d9e78a924b49e698e61a562de3af7576dfd18ef81cd98",
+      "name": "/rpa-redis",
+      "status": "exited",
+      "restartPolicy": "no"
+    },
+    {
+      "id": "697330c3cd8966e02d97fa228c5233a0805531bff00275107630e34fadda0b1a",
+      "name": "/arboris-app",
+      "status": "running",
+      "restartPolicy": "unless-stopped"
+    },
+    {
+      "id": "f10f31753fc9013707238db0324e02f7d624d295c89a88fcc9bf2839fbffad0b",
+      "name": "/gpt-load",
+      "status": "running",
+      "restartPolicy": "always"
+    }
+  ],
+  "images": [
+    {
+      "id": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+      "repository": "taki-hindsight-api",
+      "tag": "local",
+      "size": "6.4GB"
+    }
+  ],
+  "imageMetadata": [
+    {
+      "id": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+      "os": "linux",
+      "architecture": "amd64",
+      "user": "hindsight",
+      "entrypoint": null
+    }
+  ],
+  "startupMayActivateExistingRestartPolicies": true,
+  "activeContainerMutations": 0,
+  "builds": 0,
+  "pulls": 0,
+  "daemonInterruptions": 0,
+  "runtimeAcceptance": false,
+  "compatibleVenvAndNoDownloadBuilderVerified": false,
+  "driverSha256": "73ae118878bb041d4c5bd404bb6924ea51fc62e552f6f26cf7c31cf0a674fcf5",
+  "status": "complete",
+  "completedAt": "2026-10-14T14:29:09.315Z",
+  "milliseconds": 136328,
+  "capacityAfter": [
+    {
+      "name": "C",
+      "free": 27698933760
+    },
+    {
+      "name": "G",
+      "free": 145002381312
+    },
+    {
+      "name": "H",
+      "free": 13104574464
+    }
+  ],
+  "observedGUseIncrease": 32399360,
+  "desktopDisposition": "Left running; no daemon stop/restart authorized or issued",
+  "initialAttempt": {
+    "path": "preflight.initial.json",
+    "sha256": "3ce71a38911c6354cab44a3b9cefd29ed6fe91dce832314b98005110b815bd30",
+    "reason": "Read-only query failed: cached-native-metadata",
+    "correction": "Docker omits unset Config.Entrypoint; Go template index reports null. Only the failed metadata query was repeated."
+  },
+  "cachedNativeCandidatePresent": true,
+  "initialExecutionMilliseconds": 29822
+}

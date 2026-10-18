@@ -1,0 +1,91 @@
+--- archived/execution-owner.mjs
++++ diagnostic/execution-owner.mjs
+@@ -6,7 +6,9 @@
+ import { fileURLToPath, pathToFileURL } from 'node:url';
+ const OUT=path.dirname(fileURLToPath(import.meta.url));
+ const R=path.dirname(OUT), REPO='H:/TakiAgent';
+-const T='1b05d2f6-494c-4a6d-a601-1e807eca1486';
++const T='069242fc-3c26-4413-a767-0d01d819f95e';
++const ARCHIVE=R+'/c2a-database-persistence-run-1b05d2f6';
++const DIAG=R+'/diag-docker-database';
+ const S='G:/TakiAgent-c2a-database/persistence-'+T, W='C:/taki-c2a-db-persistence-'+T;
+ const TAG='taki-c2a-db:'+T;
+ const D='C:/Program Files/Docker/Docker/resources/bin/docker.exe';
+@@ -39,11 +41,13 @@
+   });
+   for(const name of ['run-persistence.ts','database-read.py','fake_child.py']){
+     const s=fs.readFileSync(R+'/docker-database/'+name,'utf8');
+-    fact(s.split(T).length-1===1,'CASE_TOKEN:'+name);
++    fact(s.split('1b05d2f6-494c-4a6d-a601-1e807eca1486').length-1===1,'CASE_TOKEN:'+name);
+   }
+   const accepted=read(R+'/c2a-implementation-source-manifest.json');
+   for(const x of accepted.files)fact(hash(x.absolutePath)===x.afterSha256,'ACCEPTED_SOURCE_CHANGED:'+x.absolutePath);
+-  return {caseId:T,pins,tokenOccurrencesPerFile:1,acceptedSourceEntries:accepted.files.length,recordedAt:new Date().toISOString()};
++  const diagnostic=read(OUT+'/diagnostic-manifest.json');
++  for(const [name,expected]of Object.entries(diagnostic.diagnosticHashes))fact(hash(DIAG+'/'+name)===expected,'DIAGNOSTIC_INPUT_CHANGED:'+name);
++  return {caseId:T,pins,diagnosticHashes:diagnostic.diagnosticHashes,tokenOccurrencesPerFile:1,acceptedSourceEntries:accepted.files.length,recordedAt:new Date().toISOString()};
+ };
+ // Read-only calls can run before S exists; all writes stay in the new evidence directory.
+ async function preDocker(args){
+@@ -79,10 +83,10 @@
+   const containers=await inventory();fact(containers.length===8&&containers.every(x=>/^[0-9a-f]{64}$/.test(x.id)),'EIGHT_CONTAINERS');
+   const ids=(await preDocker(['container','ls','--all','--no-trunc','--format','{{.ID}}'])).trim().split(/\r?\n/);
+   fact(ids.length===8&&containers.every(c=>ids.includes(c.id)),'EIGHT_EXISTING_CONTAINERS');
+-  const native=read(R+'/c2a-database-persistence-self-check.json').nativeContext;
+-  fact(native.length===12,'NATIVE_CONTEXT_COUNT');
+-  for(const x of native)fact(hash(x.path)===x.sha256&&fs.statSync(x.path).size===x.bytes,'NATIVE_SOURCE_CHANGED:'+x.path);
+-  fact(fs.readdirSync('H:/hindsight/docker/standalone/managed_bootstrap').filter(x=>x.endsWith('.py')).length===11,'ELEVEN_MODULES');
++  const native=read(ARCHIVE+'/context-manifest.json');
++  fact(native.length===12,'ARCHIVED_CONTEXT_COUNT');
++  for(const x of native)fact(hash(ARCHIVE+'/context/'+x.path)===x.sha256&&fs.statSync(ARCHIVE+'/context/'+x.path).size===x.bytes,'ARCHIVED_SOURCE_CHANGED:'+x.path);
++  fact(fs.readdirSync(ARCHIVE+'/context/docker/standalone/managed_bootstrap').filter(x=>x.endsWith('.py')).length===11,'ELEVEN_MODULES');
+   save(OUT+'/preflight.json',{caseId:T,baseline,engineBefore,base,containers,rootsAbsent:true,tagAbsent:true});
+   fact(!fs.existsSync(S)&&!fs.existsSync(W),'ROOT_COLLISION');
+   fs.mkdirSync(S);fs.writeFileSync(S+'/.c2a-docker-owner',T,{flag:'wx'});
+@@ -91,19 +95,25 @@
+   save(S+'/baseline.json',baseline);
+   const manifest=[];
+   for(const x of native){
+-    const relative=x.path.slice('H:/hindsight/'.length),replacement=relative.endsWith('/fake_child.py');
+-    const source=replacement?R+'/docker-database/fake_child.py':x.path,target=S+'/context/'+relative;
++    const relative=x.path,replacement=relative.endsWith('/fake_child.py');
++    const source=replacement?DIAG+'/fake_child.py':ARCHIVE+'/context/'+relative,target=S+'/context/'+relative;
+     fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(source,target,fs.constants.COPYFILE_EXCL);
+     const sha256=hash(target);fact(sha256===hash(source),'STAGE_HASH:'+relative);
+     manifest.push({path:relative,source,bytes:fs.statSync(target).size,sha256,upstreamSha256:x.sha256,replacement});
+   }
+   save(S+'/context-manifest.json',manifest);
+   fs.mkdirSync(S+'/frozen-inputs');
+-  const frozen=['docker-database/run-persistence.ts','docker-database/database-read.py','docker-database/fake_child.py','docker-database/README.md','c2a-database-persistence-r2-self-check.json','c2a-database-persistence-exact-byte-review-round2-1b05d2f6.md','c2a-database-persistence-exact-byte-review-round2-1b05d2f6.json','c2a-implementation-source-manifest.json'];
++  const frozen=['diag-docker-database/run-persistence.ts','diag-docker-database/database-read.py','diag-docker-database/fake_child.py','docker-database/run-persistence.ts','docker-database/database-read.py','docker-database/fake_child.py','docker-database/README.md','c2a-implementation-source-manifest.json'];
+   save(S+'/frozen-inputs-manifest.json',frozen.map(relative=>{
+     const dest=S+'/frozen-inputs/'+relative;fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(R+'/'+relative,dest,fs.constants.COPYFILE_EXCL);
+     return {path:relative,sha256:hash(dest),bytes:fs.statSync(dest).size};
+   }));
++  const baseProbe=ARCHIVE+'/base-probe.json';
++  fact(hash(baseProbe)==='819eca37907fa96577bcafca977d41304c16e1a14a782205b8170f874d944d5a'&&read(baseProbe).compatible===true,'BASE_PROBE');
++  fs.copyFileSync(baseProbe,S+'/base-probe.json',fs.constants.COPYFILE_EXCL);
++  save(S+'/reused-base-probe.json',{source:baseProbe,sha256:hash(baseProbe),reason:'Same verified immutable base, engine and accepted source manifest; no extra probe run.'});
++  const priorRunner=fs.readFileSync(ARCHIVE+'/command-runner.mjs','utf8');
++  fs.writeFileSync(S+'/command-runner.mjs',priorRunner.replaceAll('1b05d2f6-494c-4a6d-a601-1e807eca1486',T),{flag:'wx'});
+   console.log(JSON.stringify({stage:'prepared',caseId:T,baseline,containers,contextFiles:manifest.length}));
+ }
+ async function buildRun(){
+@@ -135,7 +145,7 @@
+   fact(!fs.existsSync(W)&&!fs.existsSync(S+'/persistence.started'),'LAUNCH_COLLISION');
+   fs.writeFileSync(S+'/launcher-dispatched',new Date().toISOString(),{flag:'wx'});
+   console.log(JSON.stringify({stage:'launcher-started',at:new Date().toISOString(),deadlineMs:1200000}));
+-  const l=await run(N,[R+'/docker-database/run-persistence.ts','--execute-approved-persistence'],{timeout:1200000,allowFailure:true,env:{SystemRoot:process.env.SystemRoot,TEMP:S,TMP:S,WS_NO_BUFFER_UTIL:'1',WS_NO_UTF_8_VALIDATE:'1'}});
++  const l=await run(N,[DIAG+'/run-persistence.ts','--execute-approved-persistence'],{timeout:1200000,allowFailure:true,env:{SystemRoot:process.env.SystemRoot,TEMP:S,TMP:S,WS_NO_BUFFER_UTIL:'1',WS_NO_UTF_8_VALIDATE:'1'}});
+   fs.writeFileSync(S+'/launcher.stdout.log',l.stdout,{flag:'wx'});fs.writeFileSync(S+'/launcher.stderr.log',l.stderr,{flag:'wx'});save(S+'/launcher-result.json',l);
+   console.log(l.stdout);console.log(JSON.stringify({stage:'launcher-exited',exitCode:l.exitCode,failure:l.failure,elapsedMs:l.elapsedMs}));
+   if(l.exitCode!==0||l.failure)process.exitCode=1;
+@@ -148,7 +158,7 @@
+   const after=space(),delta={gFree:after.gFree-before.baseline.gFree,cFree:after.cFree-before.baseline.cFree,hFree:after.hFree-before.baseline.hFree};
+   const allUnchanged=comparisons.every(x=>x.idUnchanged&&x.startTimeUnchanged);
+   const record={caseId:T,engineAfter,comparisons,allEightUnchanged:allUnchanged,tagAbsent,protectedRootAbsent:!fs.existsSync(W),stageRetained:fs.existsSync(S),resources,space:{before:before.baseline,after,delta},verifiedInputs:inputs()};
+-  save(OUT+'/post-run-verification.json',record);console.log(JSON.stringify(record));
++  save(OUT+'/post-run-verification.json',record);console.log(JSON.stringify({caseId:T,allEightUnchanged:allUnchanged,tagAbsent,protectedRootAbsent:!fs.existsSync(W),resources}));
+   fact(allUnchanged&&tagAbsent&&!fs.existsSync(W),'POST_RUN_VERIFICATION');
+ }
+ try{

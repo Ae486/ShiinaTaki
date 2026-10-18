@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "createdAt": "2026-10-15T12:23:26.110Z",
+  "task": ".trellis/tasks/10-14-hindsight-managed-deployment",
+  "agent": "/root/c2a_database_implement",
+  "scope": "read-only first-attempt diagnosis; no frozen-source edit or rerun",
+  "verdict": "SOURCE_ESTABLISHED_TASK_ASSERTION_MISMATCH",
+  "firstAttemptStatus": "FAIL_UNCHANGED",
+  "runtimeAcceptance": false,
+  "deploymentReady": false,
+  "evidence": {
+    "root": "G:/TakiAgent-c2a-database/persistence-20d996bf-64b6-47c7-908d-730ebdb371c4",
+    "result": {
+      "file": "persistence.json",
+      "bytes": 30385,
+      "sha256": "50e1eaff879108199ba3b069d7b5e7406cf7ef0742984aa12d99aec2f0bc8c41"
+    },
+    "launcher": {
+      "file": "launcher-command.json",
+      "sha256": "b7eedd6e25cc1891b58b3f3da7addafe131c9cdd5478266ff40b20f1cac43b0c",
+      "exitCode": 1,
+      "elapsedMs": 68170,
+      "stderr": "",
+      "failure": null
+    }
+  },
+  "observed": {
+    "innerElapsedMs": 66767,
+    "casePassed": false,
+    "ownedRuntimeCleanup": true,
+    "failureStage": "pre-injection-observation-and-start",
+    "captureToReleaseMs": 784,
+    "preInject": {
+      "state": "waiting-for-credentials",
+      "wrappers": 0,
+      "postgres": 0,
+      "marker": null,
+      "current": null,
+      "manifest": null,
+      "data_exists": false,
+      "intent_exists": false,
+      "last_stop_raw": null
+    },
+    "lastScans": [
+      {
+        "name": "status-4",
+        "bytes": 434,
+        "hits": 0
+      },
+      {
+        "name": "registry-5",
+        "bytes": 9674,
+        "hits": 0
+      }
+    ],
+    "missing": [
+      "raw post-start status",
+      "raw post-start registry",
+      "caught error/code/stack",
+      "initialRun",
+      "firstGeneration",
+      "SQL observation",
+      "first/final checked-stop report"
+    ],
+    "reapedHelpers": [],
+    "cleanupContainer": {
+      "running": false,
+      "exitCode": 0,
+      "oomKilled": false
+    },
+    "liveAbsenceVerificationOwner": "Root"
+  },
+  "identities": {
+    "caseId": "20d996bf-64b6-47c7-908d-730ebdb371c4",
+    "deploymentId": "3b9bf3dc-108d-4d10-8542-77140dad9034",
+    "containerId": "da00d1272f1b8646a00068cec19c9a775ce52682f82da37171e257bbd98c504d",
+    "volume": "taki-c2a-3b9bf3dc-108d-4d10-8542-77140dad9034-data",
+    "startupId": "a0876a02-34ed-4890-9273-77abf26bf97c"
+  },
+  "sourceBindings": [
+    {
+      "file": "research/docker-database/run-persistence.ts",
+      "sha256": "46a1b0b3f13816bbd56b46b1c279724ef7e52bdf75453d7addd8eda6cb01f7b0",
+      "lines": "563-567,734-738",
+      "fact": "All attempts incorrectly required observed; generic catch retains only stale stage"
+    },
+    {
+      "file": "apps/hindsight-host/src/deployment-owner.ts",
+      "sha256": "9a4998b184b439d9ae469f6bbcdfa12e7f7bc161b2bdefc9d3be1aef81f1fe4d",
+      "lines": "67-111,137-143,188-204",
+      "fact": "All attempts admitted initially; create/start progress recorded as verified resource steps",
+      "matchesFrozenSourceManifest": true
+    },
+    {
+      "file": "apps/hindsight-host/src/deployment-injection.ts",
+      "sha256": "5e95d37677a70a014512cf84452d6b25f9d9949a9519677a2eb5addaae434b50",
+      "lines": "61-67",
+      "fact": "Only injection advances its attempt to observed",
+      "matchesFrozenSourceManifest": true
+    },
+    {
+      "file": "research/docker-recovery/run-recovery.ts",
+      "sha256": "869146af78a9cde99cf70af2c857049548c3c097aedd09f63c95d779c8d11017",
+      "lines": "353-356",
+      "fact": "Accepted fixture checks observed only on index-2 injection"
+    }
+  ],
+  "conclusions": {
+    "established": "Universal observed assertion is false on a valid completed Host path; no production defect required",
+    "sourceCoupledInference": "registry-5 follows passed initial running/release checks and immediately precedes the invalid compound assertion",
+    "notEstablished": "Raw runtime phases, exact failed conjunct, helper exception, SQL progress or graceful database stop were not retained"
+  },
+  "proposedRepair": {
+    "source": "Only launcher; exact action/identity checks plus inject observed and resource steps verified",
+    "diagnostics": "Safe status/registry projection retained before assertion; distinct closed stages/codes and bounded owned helper identity booleans",
+    "failureCollection": "At most existing fixed reader on already-owned live CID; after same stop and before rm, fixed <=128KiB last-stop copy with <=10s client cap within existing cleanup deadline; explicit secondary outcome",
+    "excluded": [
+      "production phase/schema changes",
+      "broad trace/logger",
+      "authorization/custody/private frame dumps",
+      "new inspector or container start",
+      "SQL or grant replay",
+      "unchanged source suite rerun"
+    ]
+  },
+  "execution": {
+    "dockerCommands": 0,
+    "applicationRuns": 0,
+    "builds": 0,
+    "tests": 0,
+    "frozenSourceWrites": 0,
+    "originalEvidenceWrites": 0,
+    "reportsAdded": 2
+  },
+  "next": "Root preserves/verifies/cleans R1 then explicitly releases a narrow repair and a fresh token."
+}

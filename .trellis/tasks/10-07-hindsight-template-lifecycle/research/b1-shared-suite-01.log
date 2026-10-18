@@ -1,0 +1,76 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mH:/TakiAgent/packages/shared[39m
+
+ [32m✓[39m src/hindsight-memory-consumer-schema.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 332[2mms[22m[39m
+ [32m✓[39m src/hindsight-journal-schema.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 354[2mms[22m[39m
+     [33m[2m✓[22m[39m admits the full record bound and rejects the entire first oversized transaction [33m 325[2mms[22m[39m
+ [32m✓[39m src/hindsight-application-encoding.test.ts [2m([22m[2m31 tests[22m[2m)[22m[32m 130[2mms[22m[39m
+ [32m✓[39m src/hindsight-backup-schema.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 135[2mms[22m[39m
+ [32m✓[39m src/protocol-fixtures.test.ts [2m([22m[2m62 tests[22m[2m)[22m[32m 99[2mms[22m[39m
+ [32m✓[39m src/memory-provider-pending-results.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 114[2mms[22m[39m
+ [32m✓[39m src/scheduled-task-schema.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 88[2mms[22m[39m
+ [32m✓[39m src/pending-memory-schema.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 92[2mms[22m[39m
+ [32m✓[39m src/memory-policy-assessment-schema.test.ts [2m([22m[2m32 tests[22m[2m)[22m[32m 68[2mms[22m[39m
+ [32m✓[39m src/hindsight-cutover-schema.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 57[2mms[22m[39m
+ [32m✓[39m src/memory-replica-schema.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 62[2mms[22m[39m
+ [32m✓[39m src/hindsight-source-evidence-schema.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 69[2mms[22m[39m
+ [32m✓[39m src/mcp-lifecycle-schema.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 60[2mms[22m[39m
+ [32m✓[39m src/memory-operation-schema.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 63[2mms[22m[39m
+ [32m✓[39m src/timeline-schema.test.ts [2m([22m[2m27 tests[22m[2m)[22m[32m 63[2mms[22m[39m
+ [32m✓[39m src/host-control-schema.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 62[2mms[22m[39m
+ [32m✓[39m src/memory-transition-schema.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 52[2mms[22m[39m
+ [32m✓[39m src/memory-provider-domain-schema.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 59[2mms[22m[39m
+ [32m✓[39m src/skill-lifecycle-schema.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 39[2mms[22m[39m
+ [32m✓[39m src/hindsight-local-coverage-schema.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 38[2mms[22m[39m
+ [32m✓[39m src/memory-provider-operation-schema.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 49[2mms[22m[39m
+ [32m✓[39m src/permission-level-schema.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 46[2mms[22m[39m
+ [32m✓[39m src/approval-decision-schema.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 48[2mms[22m[39m
+ [32m✓[39m src/memory-local-onboarding-schema.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 41[2mms[22m[39m
+ [32m✓[39m src/hindsight-native-proof-encoding.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 43[2mms[22m[39m
+ [32m✓[39m src/capability-schema.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+ [32m✓[39m src/harness-schema.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 41[2mms[22m[39m
+ [32m✓[39m src/memory-activation-schema.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 41[2mms[22m[39m
+ [32m✓[39m src/chat-schema.test.ts [2m([22m[2m21 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+ [32m✓[39m src/approval-schema.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 41[2mms[22m[39m
+ [32m✓[39m src/host-approval-schema.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 47[2mms[22m[39m
+ [32m✓[39m src/character-schema.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 69[2mms[22m[39m
+ [32m✓[39m src/memory-hindsight-lifecycle-schema.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 66[2mms[22m[39m
+ [32m✓[39m src/hindsight-template-schema.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 53[2mms[22m[39m
+ [32m✓[39m src/memory-authority-status-schema.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 41[2mms[22m[39m
+ [32m✓[39m src/hindsight-setup-schema.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 36[2mms[22m[39m
+ [32m✓[39m src/run-event-schema.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 40[2mms[22m[39m
+ [32m✓[39m src/secret-catalog-schema.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 36[2mms[22m[39m
+ [32m✓[39m src/hindsight-transition-schema.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+ [32m✓[39m src/json-rpc-schema.test.ts [2m([22m[2m22 tests[22m[2m)[22m[32m 40[2mms[22m[39m
+ [32m✓[39m src/connect-schema.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 37[2mms[22m[39m
+ [32m✓[39m src/memory-schema.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 56[2mms[22m[39m
+ [32m✓[39m src/memory-hindsight-operation-schema.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 40[2mms[22m[39m
+ [32m✓[39m src/observability-schema.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32m✓[39m src/extension-discovery-schema.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 45[2mms[22m[39m
+ [32m✓[39m src/memory-replica-schedule-schema.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32m✓[39m src/effect-lifecycle-memory.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+ [32m✓[39m src/hindsight-configuration-observation-schema.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32m✓[39m src/memory-transition-candidate-schema.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+ [32m✓[39m src/media-schema.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+ [32m✓[39m src/perception-schema.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [32m✓[39m src/avatar-schema.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 36[2mms[22m[39m
+ [32m✓[39m src/memory-replica-request-schema.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 28[2mms[22m[39m
+ [32m✓[39m src/hindsight-connection-schema.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32m✓[39m src/memory-provider-envelope-schema.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 28[2mms[22m[39m
+ [32m✓[39m src/config-schema.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+ [32m✓[39m src/capability-outputs.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 28[2mms[22m[39m
+ [32m✓[39m src/timing-policy-schema.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+ [32m✓[39m src/governance-schema.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32m✓[39m src/hindsight-json-schema.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m src/hindsight-current-state-encoding.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32m✓[39m src/governance-registry.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m src/ping-schema.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m src/error-code-schema.test.ts [2m([22m[2m22 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m src/observability-presentation.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m src/governance-evaluator.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m66 passed[39m[22m[90m (66)[39m
+[2m      Tests [22m [1m[32m565 passed[39m[22m[90m (565)[39m
+[2m   Start at [22m 01:49:15
+[2m   Duration [22m 42.23s[2m (transform 4.06s, setup 0ms, import 29.91s, tests 3.68s, environment 24ms)[22m
+

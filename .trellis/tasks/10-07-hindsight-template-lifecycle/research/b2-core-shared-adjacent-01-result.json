@@ -1,0 +1,19 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "exec",
+    "vitest",
+    "run",
+    "src/memory-operation-schema.test.ts",
+    "src/memory-authority-status-schema.test.ts",
+    "src/memory-hindsight-lifecycle-schema.test.ts",
+    "--maxWorkers=2",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile.json=H:/TakiAgent/.trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-core-shared-adjacent-01-vitest.json"
+  ],
+  "cwd": "H:/TakiAgent/packages/shared",
+  "exitCode": 0,
+  "durationSeconds": 4.421,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-core-shared-adjacent-01.log"
+}

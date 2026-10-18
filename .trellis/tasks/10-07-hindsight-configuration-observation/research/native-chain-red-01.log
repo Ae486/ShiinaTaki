@@ -1,0 +1,90 @@
+Owned fixture: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-29f8b2a7bb56
+PostgreSQL: 18.1 ; vector/pg_trgm ready
+Pytest log: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-29f8b2a7bb56\pytest.log
+      |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |   File "H:\hindsight\.venv\Lib\site-packages\anyio\streams\memory.py", line 126, in receive
+      |     raise EndOfStream from None
+      | anyio.EndOfStream
+      | 
+      | During handling of the above exception, another exception occurred:
+      | 
+      | Traceback (most recent call last):
+      |   File "H:\hindsight\.venv\Lib\site-packages\starlette\_utils.py", line 86, in create_collapsing_task_group
+      |     yield tg
+      |   File "H:\hindsight\.venv\Lib\site-packages\starlette\middleware\base.py", line 193, in __call__
+      |     response = await self.dispatch_func(request, call_next)
+      |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |   File "H:\hindsight\hindsight-api-slim\hindsight_api\api\http.py", line 3641, in unknown_params_middleware
+      |     response = await call_next(request)
+      |                ^^^^^^^^^^^^^^^^^^^^^^^^
+      |   File "H:\hindsight\.venv\Lib\site-packages\starlette\middleware\base.py", line 169, in call_next
+      |     raise RuntimeError("No response returned.")
+      | RuntimeError: No response returned.
+      +---------------- 2 ----------------
+      | Traceback (most recent call last):
+      |   File "H:\hindsight\.venv\Lib\site-packages\starlette\middleware\base.py", line 144, in coro
+      |     await self.app(scope, receive_or_disconnect, send_no_error)
+      |   File "H:\hindsight\.venv\Lib\site-packages\starlette\middleware\gzip.py", line 29, in __call__
+      |     await responder(scope, receive, send)
+      |   File "H:\hindsight\.venv\Lib\site-packages\starlette\middleware\gzip.py", line 130, in __call__
+      |     await super().__call__(scope, receive, send)
+      |   File "H:\hindsight\.venv\Lib\site-packages\starlette\middleware\gzip.py", line 46, in __call__
+      |     await self.app(scope, receive, self.send_with_compression)
+      |   File "H:\hindsight\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+      |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+      |   File "H:\hindsight\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+      |     await app(scope, receive, sender)
+      |   File "H:\hindsight\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+      |     await self.app(scope, receive, send)
+      |   File "H:\hindsight\.venv\Lib\site-packages\starlette\routing.py", line 660, in __call__
+      |     await self.middleware_stack(scope, receive, send)
+      |   File "H:\hindsight\.venv\Lib\site-packages\starlette\routing.py", line 680, in app
+      |     await route.handle(scope, receive, send)
+      |   File "H:\hindsight\.venv\Lib\site-packages\starlette\routing.py", line 276, in handle
+      |     await self.app(scope, receive, send)
+      |   File "H:\hindsight\.venv\Lib\site-packages\fastapi\routing.py", line 134, in app
+      |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+      |   File "H:\hindsight\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+      |     await app(scope, receive, sender)
+      |   File "H:\hindsight\.venv\Lib\site-packages\fastapi\routing.py", line 120, in app
+      |     response = await f(request)
+      |                ^^^^^^^^^^^^^^^^
+      |   File "H:\hindsight\.venv\Lib\site-packages\fastapi\routing.py", line 674, in app
+      |     raw_response = await run_endpoint_function(
+      |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |   File "H:\hindsight\.venv\Lib\site-packages\fastapi\routing.py", line 328, in run_endpoint_function
+      |     return await dependant.call(**values)
+      |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |   File "H:\hindsight\hindsight-api-slim\hindsight_api\extensions\builtin\taki_memory.py", line 79, in get_compatibility_version
+      |     return await memory.get_taki_compatibility_manifest(request_context=request_context)
+      |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |   File "H:\hindsight\hindsight-api-slim\hindsight_api\engine\memory_engine.py", line 1828, in get_taki_compatibility_manifest
+      |     memory_store=get_memories(),
+      |                  ^^^^^^^^^^^^^^
+      |   File "H:\hindsight\hindsight-api-slim\hindsight_api\engine\memories\__init__.py", line 56, in get_memories
+      |     _memories = create_memories()
+      |                 ^^^^^^^^^^^^^^^^^
+      |   File "H:\hindsight\hindsight-api-slim\tests\test_configuration_observation.py", line 62, in <lambda>
+      |     monkeypatch.setattr("hindsight_api.engine.memories.create_memories", lambda: pytest.fail("Extension initialized"))
+      |                                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |   File "H:\hindsight\.venv\Lib\site-packages\_pytest\outcomes.py", line 163, in __call__
+      |     raise Failed(msg=reason, pytrace=pytrace)
+      | Failed: Extension initialized
+      +------------------------------------
+============================ slowest 10 durations =============================
+2.38s call     tests/test_configuration_observation.py::test_version_then_observation_never_initializes_a_store[False]
+1.87s call     tests/test_configuration_observation.py::test_version_then_observation_never_initializes_a_store[True]
+0.08s setup    tests/test_configuration_observation.py::test_version_then_observation_never_initializes_a_store[False]
+0.02s setup    tests/test_configuration_observation.py::test_version_then_observation_never_initializes_a_store[True]
+
+(2 durations < 0.005s hidden.  Use -vv to show these durations.)
+=========================== short test summary info ===========================
+FAILED tests/test_configuration_observation.py::test_version_then_observation_never_initializes_a_store[False]
+======================== 1 failed, 1 passed in 28.98s =========================
+{
+    "Fixture":  "taki-hindsight-g1-29f8b2a7bb56",
+    "Stopped":  true,
+    "DataRemoved":  true,
+    "RegistryRemoved":  true,
+    "Logs":  "H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-29f8b2a7bb56"
+}

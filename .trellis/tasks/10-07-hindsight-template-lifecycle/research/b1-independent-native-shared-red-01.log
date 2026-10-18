@@ -1,0 +1,80 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mH:/TakiAgent/packages/shared[39m
+
+ [31m❯[39m src/hindsight-template-validation.test.ts [2m([22m[2m36 tests[22m[2m | [22m[31m10 failed[39m[2m)[22m[32m 42[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'complete-preserved-trigger'[32m 10[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'empty-trigger'[32m 1[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'boundary-tag-list'[32m 2[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'unknown-nested-leaf-key'[32m 1[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'ambiguous-nested-group'[32m 1[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'legacy-python-alias-is-not-wire'[32m 1[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'too-many-nested-tags'[32m 1[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'oversized-nested-tag'[32m 1[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'empty-nested-tag'[32m 0[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'invalid-excluded-model-id'[32m 1[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'oversized-excluded-model-id'[32m 0[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'unsafe-integer-budget'[32m 0[2mms[22m[39m
+[31m   [31m×[31m matches Native lifecycle validation: 'empty-structured-properties'[39m[32m 7[2mms[22m[39m
+[31m   [31m×[31m matches Native lifecycle validation: 'missing-structured-properties'[39m[32m 1[2mms[22m[39m
+[31m   [31m×[31m matches Native lifecycle validation: 'invalid-structured-property-type'[39m[32m 1[2mms[22m[39m
+[31m   [31m×[31m matches Native lifecycle validation: 'unknown-required-property'[39m[32m 1[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'legacy-group-preserved'[32m 1[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'complete-map-preserved'[32m 2[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'empty-label-list'[32m 0[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'label-tombstone'[32m 0[2mms[22m[39m
+[31m   [31m×[31m matches Native lifecycle validation: 'nested-duplicate-value'[39m[32m 1[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'nested-description-type'[32m 1[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'group-description-type'[32m 0[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'label-value-description-type'[32m 0[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'nested-empty-field-key'[32m 0[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'retain_mission-empty-text'[32m 2[2mms[22m[39m
+[31m   [31m×[31m matches Native lifecycle validation: 'retain_mission-numeric-value'[39m[32m 1[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'retain_mission-inherit'[32m 0[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'observations_instructions-empty-text'[32m 0[2mms[22m[39m
+[31m   [31m×[31m matches Native lifecycle validation: 'observations_instructions-numeric-val…'[39m[32m 1[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'observations_instructions-inherit'[32m 0[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'reflect_mission-empty-text'[32m 0[2mms[22m[39m
+[31m   [31m×[31m matches Native lifecycle validation: 'reflect_mission-numeric-value'[39m[32m 0[2mms[22m[39m
+   [32m✓[39m matches Native lifecycle validation: 'reflect_mission-inherit'[32m 0[2mms[22m[39m
+[31m   [31m×[31m matches Native lifecycle validation: 'labels-wrong-type'[39m[32m 0[2mms[22m[39m
+[31m   [31m×[31m matches Native lifecycle validation: 'labels-duplicate-group'[39m[32m 1[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 10 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/hindsight-template-validation.test.ts[2m > [22mmatches Native lifecycle validation: 'empty-structured-properties'
+[41m[1m FAIL [22m[49m src/hindsight-template-validation.test.ts[2m > [22mmatches Native lifecycle validation: 'missing-structured-properties'
+[41m[1m FAIL [22m[49m src/hindsight-template-validation.test.ts[2m > [22mmatches Native lifecycle validation: 'invalid-structured-property-type'
+[41m[1m FAIL [22m[49m src/hindsight-template-validation.test.ts[2m > [22mmatches Native lifecycle validation: 'unknown-required-property'
+[41m[1m FAIL [22m[49m src/hindsight-template-validation.test.ts[2m > [22mmatches Native lifecycle validation: 'nested-duplicate-value'
+[41m[1m FAIL [22m[49m src/hindsight-template-validation.test.ts[2m > [22mmatches Native lifecycle validation: 'retain_mission-numeric-value'
+[41m[1m FAIL [22m[49m src/hindsight-template-validation.test.ts[2m > [22mmatches Native lifecycle validation: 'observations_instructions-numeric-val…'
+[41m[1m FAIL [22m[49m src/hindsight-template-validation.test.ts[2m > [22mmatches Native lifecycle validation: 'reflect_mission-numeric-value'
+[41m[1m FAIL [22m[49m src/hindsight-template-validation.test.ts[2m > [22mmatches Native lifecycle validation: 'labels-wrong-type'
+[41m[1m FAIL [22m[49m src/hindsight-template-validation.test.ts[2m > [22mmatches Native lifecycle validation: 'labels-duplicate-group'
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m src/hindsight-template-validation.test.ts:[2m14:26[22m[39m
+    [90m 12|[39m     : kind === "labels" ? HindsightTemplateLabelsSchema.safeParse(valu…
+    [90m 13|[39m       : HindsightTemplateChangesSchema.safeParse({ config: [value], mo…
+    [90m 14|[39m   [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m(accepted)[33m;[39m
+    [90m   |[39m                          [31m^[39m
+    [90m 15|[39m   [35mif[39m (result[33m.[39msuccess) {
+    [90m 16|[39m     if (kind === "trigger") expect(HindsightTemplateModelDefinitionSch…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m10 failed[39m[22m[2m | [22m[1m[32m26 passed[39m[22m[90m (36)[39m
+[2m   Start at [22m 13:30:40
+[2m   Duration [22m 694ms[2m (transform 94ms, setup 0ms, import 225ms, tests 42ms, environment 0ms)[22m
+
+undefined
+H:\TakiAgent\packages\shared:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/hindsight-template-validation.test.ts --maxWorkers=2

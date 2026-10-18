@@ -1,0 +1,19 @@
+{
+  "changes": [
+    {
+      "path": "hindsight-api-slim/hindsight_api/api/taki_backup.py",
+      "greenSha256": "2ba1f668dfb2af8b557e13eb822e64267482f4c529e5c8fbd13ec1d5e3756acd",
+      "redSha256": "46f7c8ae4581a0b21495d0b07934588be3913a8f5173a75b0cf5826c7ab39e44",
+      "removedGuard": "        except Exception:\n            # A v2 SQL/filesystem/observer failure must not expose operational\n            # rows, resolver details or connection information in a traceback.\n            # Preserve the historical v1 exception behavior at this boundary.\n            if isinstance(backup_request, TakiBackupRequestV2):\n                return backup_refusal_response(\"operation_refused\")\n            raise\n",
+      "restored": true
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/admin/cli.py",
+      "greenSha256": "0a70799164ef5fd61ad2d73921085922fd30cc8aaf324b67a23cf99c1340808c",
+      "redSha256": "7ee3fa9ede6985a9416a6e5ab1eae3f93880d6e6f7df0a85f276fff46d045e75",
+      "removedGuard": "    except Exception:\n        # Typer's ordinary exception renderer can include locals. Keep v2\n        # infrastructure failures bounded and omit SQL, config and secrets.\n        if isinstance(request, TakiBackupRequestV2):\n            typer.echo(\"Error: Taki backup refused: operation_refused\", err=True)\n            raise typer.Exit(1) from None\n        raise\n",
+      "restored": true
+    }
+  ],
+  "redExitCode": 1
+}

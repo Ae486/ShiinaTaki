@@ -1,0 +1,51 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ ✓ src/server/methods/hindsight-template-methods.test.ts (16 tests) 12297ms
+     ✓ refuses awaiting template reads before any Native call or SQLite write  650ms
+     ✓ refuses node template reads before any Native call or SQLite write  442ms
+     ✓ rejects hostile extra input: preview snapshot  438ms
+     ✓ rejects hostile extra input: nested target snapshot  464ms
+     ✓ rejects hostile extra input: detail snapshot  418ms
+     ✓ rejects hostile extra input: status mutation  464ms
+     ✓ rejects hostile extra input: derived refresh  441ms
+     ✓ rejects hostile extra input: inline apply snapshot  489ms
+     ✓ rejects hostile extra input: caller recovery executor  438ms
+     ✓ returns Core-held preview/detail/status without persisting ownership or invoking a Native write  630ms
+     ✓ returns a closed unknown-plan refusal through the actual status registration  486ms
+     ✓ expires genuine detail with a closed refusal and no further Native read or SQLite write  551ms
+     ✓ rejects awaiting socket reads and apply/recover without producer or DB work  612ms
+     ✓ rejects node socket reads and apply/recover without producer or DB work  438ms
+     ✓ shares retained 'outcome_unknown' across reconnect and only resumes from explicit same-plan recovery  2693ms
+     ✓ shares retained 'partial' across reconnect and only resumes from explicit same-plan recovery  2636ms
+ ✓ src/memory/hindsight/template-lifecycle/template-lifecycle-service.test.ts (8 tests) 7191ms
+     ✓ previews and details exact Native before-images without any SQLite or model write  353ms
+     ✓ keeps the admitted ACK window observable and cancels atomically before any dispatch  537ms
+     ✓ publishes both Bank selections, defaults, admission and hold release before binding  1948ms
+     ✓ looks up an original admission before expiry or hold checks and never dispatches from replay/status  1827ms
+     ✓ records both default catalogs when no Character Bank exists yet  1191ms
+     ✓ leaves durable hold and desired histories when publication cannot be completed  882ms
+ ✓ src/memory/hindsight/template-lifecycle/template-derived-observation.test.ts (16 tests) 28726ms
+     ✓ observes pending, completed and failed through real dispatch while preserving the timestamped rollout record  2818ms
+     ✓ returns not_observed without looking up or resuming a child whose original receipt is not recorded  741ms
+     ✓ never substitutes cached pending for a failed current read  2122ms
+     ✓ reports a disabled connection and unsupported capability without child dispatch  2104ms
+     ✓ rejects a configuration identity change while the read is in flight  1752ms
+     ✓ rejects a secret identity change while the read is in flight  1788ms
+     ✓ rejects a bank identity change while the read is in flight  1750ms
+     ✓ rejects configuration A-B-A during compatibility before dispatching the child read  1760ms
+     ✓ refuses a wrong target response identity  1795ms
+     ✓ refuses a wrong request response identity  1770ms
+     ✓ refuses a wrong child response identity  1784ms
+     ✓ refuses a wrong model response identity  1783ms
+     ✓ refuses a wrong definition response identity  1794ms
+     ✓ marks Native incarnation loss stale without recovering or retrying  1676ms
+     ✓ bounds an ignored transport abort and never publishes a late successful answer  1759ms
+     ✓ settles an in-flight read on lifecycle stop and denies late or new database access  1525ms
+
+ Test Files  3 passed (3)
+      Tests  40 passed (40)
+   Start at  21:02:26
+   Duration  40.48s (transform 17.87s, setup 0ms, import 24.46s, tests 48.21s, environment 0ms)
+
+JSON report written to H:/TakiAgent/.trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-core-reads-01-vitest.json

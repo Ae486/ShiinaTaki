@@ -1,0 +1,247 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mH:/TakiAgent/packages/core[39m
+
+ [32m✓[39m src/memory/hindsight/template-lifecycle/template-emergency.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 9339[2mms[22m[39m
+     [33m[2m✓[22m[39m does not revisit closed SQLite when an ignored Apply finishes after takeover and shutdown [33m 1181[2mms[22m[39m
+     [33m[2m✓[22m[39m takes over a unknown Apply without remote work and rejects its late completion [33m 1589[2mms[22m[39m
+     [33m[2m✓[22m[39m takes over a hung Apply without remote work and rejects its late completion [33m 1729[2mms[22m[39m
+     [33m[2m✓[22m[39m preserves a failed Bank's reservation-only in the sealed incident [33m 2340[2mms[22m[39m
+     [33m[2m✓[22m[39m preserves a failed Bank's unpublished-plan in the sealed incident [33m 2497[2mms[22m[39m
+ [32m✓[39m src/memory/hindsight/template-lifecycle/template-derived-observation.test.ts [2m([22m[2m16 tests[22m[2m)[22m[33m 24593[2mms[22m[39m
+     [33m[2m✓[22m[39m observes pending, completed and failed through real dispatch while preserving the timestamped rollout record [33m 1410[2mms[22m[39m
+     [33m[2m✓[22m[39m returns not_observed without looking up or resuming a child whose original receipt is not recorded [33m 632[2mms[22m[39m
+     [33m[2m✓[22m[39m never substitutes cached pending for a failed current read [33m 1802[2mms[22m[39m
+     [33m[2m✓[22m[39m reports a disabled connection and unsupported capability without child dispatch [33m 1711[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects a configuration identity change while the read is in flight [33m 1737[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects a secret identity change while the read is in flight [33m 1693[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects a bank identity change while the read is in flight [33m 1768[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects configuration A-B-A during compatibility before dispatching the child read [33m 1661[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses a wrong target response identity [33m 1511[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses a wrong request response identity [33m 1458[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses a wrong child response identity [33m 1514[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses a wrong model response identity [33m 1480[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses a wrong definition response identity [33m 1510[2mms[22m[39m
+     [33m[2m✓[22m[39m marks Native incarnation loss stale without recovering or retrying [33m 1536[2mms[22m[39m
+     [33m[2m✓[22m[39m bounds an ignored transport abort and never publishes a late successful answer [33m 1602[2mms[22m[39m
+     [33m[2m✓[22m[39m settles an in-flight read on lifecycle stop and denies late or new database access [33m 1565[2mms[22m[39m
+ [32m✓[39m src/memory/hindsight/template-lifecycle/template-provision.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 17737[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps a published but unbound Bank operation unknown at actual persisted-copy boot [33m 2236[2mms[22m[39m
+     [33m[2m✓[22m[39m inherits the admitted Character scope default undefined with an exact initialization receipt [33m 2324[2mms[22m[39m
+     [33m[2m✓[22m[39m inherits the admitted Character scope default none with an exact initialization receipt [33m 1985[2mms[22m[39m
+     [33m[2m✓[22m[39m reprobes after a lost create reply and physical restart, preserving the original reservation [33m 2340[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses content arriving after reservation and before the post-create occupancy probe [33m 1629[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses a reused reservation if the Bank was written externally while Core was offline [33m 1618[2mms[22m[39m
+     [33m[2m✓[22m[39m does not adopt a pristine-looking same-ID Bank with an existing managed-field override [33m 1381[2mms[22m[39m
+     [33m[2m✓[22m[39m retains the original initialized request and hold when Native rejects a late ever-used race [33m 976[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses a rehashed receipt missing the required pristine initialization proof [33m 1647[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects a create response for another Bank before requesting its generation or snapshot [33m 1599[2mms[22m[39m
+ [32m✓[39m src/memory/hindsight/template-lifecycle/template-selection.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 15355[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps Character customization local and preserves equal values and suppression across the next scope default [33m 6390[2mms[22m[39m
+     [33m[2m✓[22m[39m removes Taki while preserving complete user resources, labels and authority until an explicit user reset [33m 8963[2mms[22m[39m
+ [31m❯[39m src/memory/hindsight/template-lifecycle/template-rollout.test.ts [2m([22m[2m13 tests[22m[2m | [22m[31m6 failed[39m[2m)[22m[33m 20498[2mms[22m[39m
+     [33m[2m✓[22m[39m recovers a partial two-Bank rollout after physical SQLite reopen using the original requests [33m 1497[2mms[22m[39m
+     [33m[2m✓[22m[39m recovers a committed Apply whose reply was lost without repeating either Native mutation [33m 1988[2mms[22m[39m
+     [33m[2m✓[22m[39m uses binding-only recovery after selection COMMIT and keeps the original failed operation unchanged [33m 1941[2mms[22m[39m
+     [33m[2m✓[22m[39m rolls back every Core publication row on deferred COMMIT failure then recovers from original Native receipts [33m 2399[2mms[22m[39m
+     [33m[2m✓[22m[39m checks the live deadline after final publication readback and rolls back a now-expired executor [33m 1463[2mms[22m[39m
+     [33m[2m✓[22m[39m retains the hold when configuration changes after readback but before publication [33m 1247[2mms[22m[39m
+     [33m[2m✓[22m[39m retains the hold when secret changes after readback but before publication [33m 1261[2mms[22m[39m
+[31m     [31m×[31m rolls back the entire publication when configuration changes inside final readback[39m[33m 1372[2mms[22m[39m
+[31m     [31m×[31m rolls back the entire publication when secret changes inside final readback[39m[33m 1538[2mms[22m[39m
+[31m     [31m×[31m rolls back the entire publication when epoch changes inside final readback[39m[33m 1432[2mms[22m[39m
+[31m     [31m×[31m rolls back the entire publication when bank_generation changes inside final readback[39m[33m 1432[2mms[22m[39m
+[31m     [31m×[31m rolls back the entire publication when bank_scope changes inside final readback[39m[33m 1458[2mms[22m[39m
+[31m     [31m×[31m rolls back the entire publication when bank_identity changes inside final readback[39m[33m 1465[2mms[22m[39m
+ [32m✓[39m src/memory/hindsight/template-lifecycle/template-executor-store.test.ts [2m([22m[2m15 tests[22m[2m)[22m[33m 12317[2mms[22m[39m
+     [33m[2m✓[22m[39m claims only an actual running admission with the same operation and boot [33m 406[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects another live same-boot claim and renews only the current checkpoint [33m 359[2mms[22m[39m
+     [33m[2m✓[22m[39m cannot renew an owner at its deadline plus 0 milliseconds [33m 318[2mms[22m[39m
+     [33m[2m✓[22m[39m cannot renew an owner at its deadline plus 1 milliseconds [33m 610[2mms[22m[39m
+     [33m[2m✓[22m[39m takes over an expired plan while retaining its generic failed outcome [33m 727[2mms[22m[39m
+     [33m[2m✓[22m[39m takes over an expired plan while retaining its generic outcome_unknown outcome [33m 717[2mms[22m[39m
+     [33m[2m✓[22m[39m retains a possible-effect hold on physical reopen and claims only explicit same-plan recovery on the new boot [33m 792[2mms[22m[39m
+     [33m[2m✓[22m[39m cannot claim a plan cancelled through the real operation owner [33m 708[2mms[22m[39m
+     [33m[2m✓[22m[39m cannot reclaim or checkpoint a plan quarantined by the actual W6 store [33m 677[2mms[22m[39m
+     [33m[2m✓[22m[39m a stale token cannot checkpoint, write evidence or release the hold [33m 1338[2mms[22m[39m
+     [33m[2m✓[22m[39m a stale revision cannot checkpoint, write evidence or release the hold [33m 1290[2mms[22m[39m
+     [33m[2m✓[22m[39m rolls back operation claim and executor acquisition on real SQLite statement failure [33m 659[2mms[22m[39m
+     [33m[2m✓[22m[39m rolls back operation claim and executor acquisition on real SQLite commit failure [33m 627[2mms[22m[39m
+     [33m[2m✓[22m[39m rolls back all executor evidence and hold publication on real SQLite statement failure [33m 1591[2mms[22m[39m
+     [33m[2m✓[22m[39m rolls back all executor evidence and hold publication on real SQLite commit failure [33m 1490[2mms[22m[39m
+ [32m✓[39m src/server/methods/hindsight-template-methods.test.ts [2m([22m[2m16 tests[22m[2m)[22m[33m 10663[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses awaiting template reads before any Native call or SQLite write [33m 328[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects hostile extra input: detail snapshot [33m 418[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects hostile extra input: status mutation [33m 386[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects hostile extra input: derived refresh [33m 403[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects hostile extra input: inline apply snapshot [33m 394[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects hostile extra input: caller recovery executor [33m 409[2mms[22m[39m
+     [33m[2m✓[22m[39m returns Core-held preview/detail/status without persisting ownership or invoking a Native write [33m 561[2mms[22m[39m
+     [33m[2m✓[22m[39m returns a closed unknown-plan refusal through the actual status registration [33m 403[2mms[22m[39m
+     [33m[2m✓[22m[39m expires genuine detail with a closed refusal and no further Native read or SQLite write [33m 463[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects awaiting socket reads and apply/recover without producer or DB work [33m 536[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects node socket reads and apply/recover without producer or DB work [33m 417[2mms[22m[39m
+     [33m[2m✓[22m[39m shares retained 'outcome_unknown' across reconnect and only resumes from explicit same-plan recovery [33m 2632[2mms[22m[39m
+     [33m[2m✓[22m[39m shares retained 'partial' across reconnect and only resumes from explicit same-plan recovery [33m 2532[2mms[22m[39m
+ [32m✓[39m src/memory/hindsight/template-lifecycle/template-lifecycle-service.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 7898[2mms[22m[39m
+     [33m[2m✓[22m[39m previews and details exact Native before-images without any SQLite or model write [33m 420[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps the admitted ACK window observable and cancels atomically before any dispatch [33m 861[2mms[22m[39m
+     [33m[2m✓[22m[39m settles ordinary stop and revokes renewal while a sent Apply ignores abort [33m 844[2mms[22m[39m
+     [33m[2m✓[22m[39m publishes both Bank selections, defaults, admission and hold release before binding [33m 1819[2mms[22m[39m
+     [33m[2m✓[22m[39m looks up an original admission before expiry or hold checks and never dispatches from replay/status [33m 1660[2mms[22m[39m
+     [33m[2m✓[22m[39m records both default catalogs when no Character Bank exists yet [33m 985[2mms[22m[39m
+     [33m[2m✓[22m[39m leaves durable hold and desired histories when publication cannot be completed [33m 815[2mms[22m[39m
+ [32m✓[39m src/memory/hindsight/template-lifecycle/template-runtime-control.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 3135[2mms[22m[39m
+     [33m[2m✓[22m[39m closes old tool/live reads and new captures while keeping the old immutable Run and primary witnesses [33m 605[2mms[22m[39m
+     [33m[2m✓[22m[39m retires the complete published scheduler and keeps unbound captures/status explicitly held [33m 414[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses a newly constructed ordinary runtime from the persistent hold after physical reopen [33m 503[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps ordinary admission closed during real private synchronization without Pending replay or early runtime admission [33m 1610[2mms[22m[39m
+ [32m✓[39m src/memory/hindsight/template-lifecycle/template-revalidate.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 4323[2mms[22m[39m
+     [33m[2m✓[22m[39m verifies taki-bank-v2 using its exact receipt/current snapshot without new Native writes [33m 1104[2mms[22m[39m
+     [33m[2m✓[22m[39m verifies none using its exact receipt/current snapshot without new Native writes [33m 1421[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses an external managed definition edit before publishing a new reviewed connection [33m 1796[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 6 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/memory/hindsight/template-lifecycle/template-rollout.test.ts[2m:151:107[22m[2m > [22moriginal-plan template rollout and publication[2m > [22mrolls back the entire publication when configuration changes inside final readback
+[31m[1mAssertionError[22m: expected { …(11) } to deeply equal { …(11) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -1,10 +1,10 @@[39m
+[2m  {[22m
+[2m    "authorityEpochId": "epoch",[22m
+[2m    "bankGeneration": "22222222-2222-4222-8222-222222222222",[22m
+[2m    "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",[22m
+[32m-   "endCursor": 4,[39m
+[31m+   "endCursor": 2,[39m
+[2m    "manifestDigest": "ecd228cde47ea0b43ec889fbd002bfe0b2bbfd2aa378d0ae04d7f622c18460f2",[22m
+[2m    "providerLineageId": "11111111-1111-4111-8111-111111111111",[22m
+[2m    "replicaEpochId": "fcbcf123-05a2-452c-94cf-3b8e418676b4",[22m
+[2m    "snapshotCursor": 2,[22m
+[2m    "snapshotId": "32d4ed6c-08bc-4e67-bd84-49edd5c1c21a",[22m
+
+[36m [2m❯[22m src/memory/hindsight/template-lifecycle/template-rollout.test.ts:[2m181:64[22m[39m
+    [90m179|[39m         const checkpoint = readApplicationCheckpoint(f.db, bank.identi…
+    [90m180|[39m         [34mexpect[39m(checkpoint[33m.[39mnamespace)[33m.[39m[34mtoEqual[39m(bank[33m.[39mnamespace)[33m;[39m
+    [90m181|[39m         expect(readReplicaCheckpoint(f.db, checkpoint.bankId)).toEqual…
+    [90m   |[39m                                                                [31m^[39m
+    [90m182|[39m       }
+    [90m183|[39m       expect(f.db.prepare("SELECT * FROM hindsight_template_users").al…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/memory/hindsight/template-lifecycle/template-rollout.test.ts[2m:151:107[22m[2m > [22moriginal-plan template rollout and publication[2m > [22mrolls back the entire publication when secret changes inside final readback
+[31m[1mAssertionError[22m: expected { …(11) } to deeply equal { …(11) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -1,10 +1,10 @@[39m
+[2m  {[22m
+[2m    "authorityEpochId": "epoch",[22m
+[2m    "bankGeneration": "22222222-2222-4222-8222-222222222222",[22m
+[2m    "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",[22m
+[32m-   "endCursor": 4,[39m
+[31m+   "endCursor": 2,[39m
+[2m    "manifestDigest": "ecd228cde47ea0b43ec889fbd002bfe0b2bbfd2aa378d0ae04d7f622c18460f2",[22m
+[2m    "providerLineageId": "11111111-1111-4111-8111-111111111111",[22m
+[2m    "replicaEpochId": "ed4da2ab-55a6-4a6a-a1f2-46ad49bb1cce",[22m
+[2m    "snapshotCursor": 2,[22m
+[2m    "snapshotId": "aa146a61-32ff-4682-9836-8f1a2ee63c34",[22m
+
+[36m [2m❯[22m src/memory/hindsight/template-lifecycle/template-rollout.test.ts:[2m181:64[22m[39m
+    [90m179|[39m         const checkpoint = readApplicationCheckpoint(f.db, bank.identi…
+    [90m180|[39m         [34mexpect[39m(checkpoint[33m.[39mnamespace)[33m.[39m[34mtoEqual[39m(bank[33m.[39mnamespace)[33m;[39m
+    [90m181|[39m         expect(readReplicaCheckpoint(f.db, checkpoint.bankId)).toEqual…
+    [90m   |[39m                                                                [31m^[39m
+    [90m182|[39m       }
+    [90m183|[39m       expect(f.db.prepare("SELECT * FROM hindsight_template_users").al…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/memory/hindsight/template-lifecycle/template-rollout.test.ts[2m:151:107[22m[2m > [22moriginal-plan template rollout and publication[2m > [22mrolls back the entire publication when epoch changes inside final readback
+[41m[1m FAIL [22m[49m src/memory/hindsight/template-lifecycle/template-rollout.test.ts[2m:151:107[22m[2m > [22moriginal-plan template rollout and publication[2m > [22mrolls back the entire publication when bank_generation changes inside final readback
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m src/memory/hindsight/template-lifecycle/template-rollout.test.ts:[2m168:24[22m[39m
+    [90m166|[39m       const original = f.owner.submit(await f.request()); await f.owne…
+    [90m167|[39m       [35mconst[39m plan [33m=[39m f[33m.[39m[34mplan[39m(original)[33m;[39m
+    [90m168|[39m       expect(injected).toBe(true); expect(f.native.receipts.size).toBe…
+    [90m   |[39m                        [31m^[39m
+    [90m169|[39m       expect(f.owner.status(original.operationId).state).toBe("outcome…
+    [90m170|[39m       for (const table of ["hindsight_template_selections", "hindsight…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/memory/hindsight/template-lifecycle/template-rollout.test.ts[2m:151:107[22m[2m > [22moriginal-plan template rollout and publication[2m > [22mrolls back the entire publication when bank_scope changes inside final readback
+[31m[1mAssertionError[22m: expected { …(11) } to deeply equal { …(11) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -1,10 +1,10 @@[39m
+[2m  {[22m
+[2m    "authorityEpochId": "epoch",[22m
+[2m    "bankGeneration": "22222222-2222-4222-8222-222222222222",[22m
+[2m    "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",[22m
+[32m-   "endCursor": 4,[39m
+[31m+   "endCursor": 2,[39m
+[2m    "manifestDigest": "ecd228cde47ea0b43ec889fbd002bfe0b2bbfd2aa378d0ae04d7f622c18460f2",[22m
+[2m    "providerLineageId": "11111111-1111-4111-8111-111111111111",[22m
+[2m    "replicaEpochId": "efb266cb-8452-4436-bd8d-4cd3a9fcade5",[22m
+[2m    "snapshotCursor": 2,[22m
+[2m    "snapshotId": "d6dd8c7d-7c28-4d50-b898-b869b61568eb",[22m
+
+[36m [2m❯[22m src/memory/hindsight/template-lifecycle/template-rollout.test.ts:[2m181:64[22m[39m
+    [90m179|[39m         const checkpoint = readApplicationCheckpoint(f.db, bank.identi…
+    [90m180|[39m         [34mexpect[39m(checkpoint[33m.[39mnamespace)[33m.[39m[34mtoEqual[39m(bank[33m.[39mnamespace)[33m;[39m
+    [90m181|[39m         expect(readReplicaCheckpoint(f.db, checkpoint.bankId)).toEqual…
+    [90m   |[39m                                                                [31m^[39m
+    [90m182|[39m       }
+    [90m183|[39m       expect(f.db.prepare("SELECT * FROM hindsight_template_users").al…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/memory/hindsight/template-lifecycle/template-rollout.test.ts[2m:151:107[22m[2m > [22moriginal-plan template rollout and publication[2m > [22mrolls back the entire publication when bank_identity changes inside final readback
+[31m[1mAssertionError[22m: expected { …(11) } to deeply equal { …(11) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -1,10 +1,10 @@[39m
+[2m  {[22m
+[2m    "authorityEpochId": "epoch",[22m
+[2m    "bankGeneration": "22222222-2222-4222-8222-222222222222",[22m
+[2m    "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",[22m
+[32m-   "endCursor": 4,[39m
+[31m+   "endCursor": 2,[39m
+[2m    "manifestDigest": "ecd228cde47ea0b43ec889fbd002bfe0b2bbfd2aa378d0ae04d7f622c18460f2",[22m
+[2m    "providerLineageId": "11111111-1111-4111-8111-111111111111",[22m
+[2m    "replicaEpochId": "91983851-ca8b-4e56-a03a-b76c57c78c66",[22m
+[2m    "snapshotCursor": 2,[22m
+[2m    "snapshotId": "a97c38be-4afa-41f6-ade4-18bb53beb489",[22m
+
+[36m [2m❯[22m src/memory/hindsight/template-lifecycle/template-rollout.test.ts:[2m181:64[22m[39m
+    [90m179|[39m         const checkpoint = readApplicationCheckpoint(f.db, bank.identi…
+    [90m180|[39m         [34mexpect[39m(checkpoint[33m.[39mnamespace)[33m.[39m[34mtoEqual[39m(bank[33m.[39mnamespace)[33m;[39m
+    [90m181|[39m         expect(readReplicaCheckpoint(f.db, checkpoint.bankId)).toEqual…
+    [90m   |[39m                                                                [31m^[39m
+    [90m182|[39m       }
+    [90m183|[39m       expect(f.db.prepare("SELECT * FROM hindsight_template_users").al…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m9 passed[39m[22m[90m (10)[39m
+[2m      Tests [22m [1m[31m6 failed[39m[22m[2m | [22m[1m[32m87 passed[39m[22m[90m (93)[39m
+[2m   Start at [22m 16:22:31
+[2m   Duration [22m 78.47s[2m (transform 11.45s, setup 0ms, import 26.95s, tests 125.86s, environment 1ms)[22m
+
+JSON report written to H:/TakiAgent/.trellis/tasks/10-07-hindsight-template-lifecycle/research/b2-independent-core-green-02-vitest.json

@@ -1,0 +1,88 @@
+{
+  "Id": "sha256:5658ce3fbafa2dab191d8996a9b48444b7db4813638260608fca5be32ee4a1fd",
+  "RepoTags": [
+    "taki-c2a-db:069242fc-3c26-4413-a767-0d01d819f95e"
+  ],
+  "RepoDigests": [
+    "taki-c2a-db@sha256:5658ce3fbafa2dab191d8996a9b48444b7db4813638260608fca5be32ee4a1fd"
+  ],
+  "Comment": "buildkit.dockerfile.v0",
+  "Created": "2026-10-18T12:54:57.188538055Z",
+  "Config": {
+    "User": "1000:1000",
+    "ExposedPorts": {
+      "8888/tcp": {},
+      "9999/tcp": {}
+    },
+    "Env": [
+      "PATH=/app/api/.venv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "LANG=C.UTF-8",
+      "GPG_KEY=A035C8C19219BA821ECEA86B64E628F8D684696D",
+      "PYTHON_VERSION=3.11.16",
+      "PYTHON_SHA256=91bcdebfdde239a003ae93738a7fce0f9230fee5c4bc2b86f6e6e8c6f98aabe8",
+      "HF_HUB_DOWNLOAD_TIMEOUT=600",
+      "HINDSIGHT_API_HOST=0.0.0.0",
+      "HINDSIGHT_API_PORT=8888",
+      "HINDSIGHT_API_LOG_LEVEL=info",
+      "NODE_ENV=production",
+      "HINDSIGHT_CP_DATAPLANE_API_URL=http://localhost:8888",
+      "HINDSIGHT_ENABLE_API=true",
+      "HINDSIGHT_ENABLE_CP=true",
+      "PYTHONUNBUFFERED=1",
+      "TRANSFORMERS_VERBOSITY=error",
+      "HF_HUB_VERBOSITY=error",
+      "TOKENIZERS_PARALLELISM=false"
+    ],
+    "Entrypoint": [
+      "/app/api/.venv/bin/python",
+      "-I",
+      "-B",
+      "-m",
+      "managed_bootstrap.owner"
+    ],
+    "WorkingDir": "/app",
+    "Labels": {
+      "taki.c2a.fixture": "069242fc-3c26-4413-a767-0d01d819f95e"
+    },
+    "ArgsEscaped": true
+  },
+  "Architecture": "amd64",
+  "Os": "linux",
+  "Size": 1524063657,
+  "RootFS": {
+    "Type": "layers",
+    "Layers": [
+      "sha256:6f94328331290cbd81edab450664d42da7b64c191416c9346cd5d28c84f76035",
+      "sha256:275f0a9e4758b8a31c628ab748d8184bd103fb27ec8aeff6b588003a3056d082",
+      "sha256:3d7dddf62be3a47f3c072a9dc069ac228beea659375d9fff022792deaaf08d61",
+      "sha256:1a8800d1b976e9a254659bbce8213f99d55639c12cc4d2ebecafe95a163797c5",
+      "sha256:a1a5d0ec92ff09c6a27534c7c47317bb7a01ad7b9f14bf400b52123f8e306e3e",
+      "sha256:299d4347e6df9dfa774bdce3b1364ea95f335a04a8c351c150491360ab4f3246",
+      "sha256:0116ab376532749d4f3eca68930fbf1060c0ed4296c4f838fdcf534f45d4f44a",
+      "sha256:3d54a5a04ca537494f67c5305cc5b7a0c3d96b557091ecd91cf0508a5e317d93",
+      "sha256:b1508537837e0f8b4a39b0449fbc1aee8fe380383d76141d185986e6279f2cfb",
+      "sha256:e2457e4909c2bfcc3db0727b12916f8ed543003a7db1cf23be0d988a51698aef",
+      "sha256:0f590597ee1734f7f7a71d839891d25009e74e4c7ed7e744b75e6d44fb76d222",
+      "sha256:9cabf648e5270b41f20913f5580453321d1ba93e6ac483e49d7f7d2255774dde",
+      "sha256:042a4c1216faa59e1c15024330c72ab7adf3f4a342de48a2bfd1483575a921ae",
+      "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+      "sha256:172abbb300df922427882ebe7409daed5893f3e4bf54bc8b67939167e406dbe5",
+      "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+      "sha256:f21c5e676f9921bdea957f5aa1812135cb72885b155db4c93eb2d461cc7ecfd7",
+      "sha256:e9303b93d2c3c387aa4be7e0ba62b06f74c0b426157fb99a62e15c7896cf3757",
+      "sha256:37f6b792c034c4798abc88776f50ecd0dea6fa035806c49e3f6d44c1c96bbaab",
+      "sha256:2fafe57069de58b2c68024d98e83d29a83a85c66e39bd94b5e072cf1d486025a",
+      "sha256:b6bc2c48d58190125a7fa2de3572cc0177f343762e074510ade31a66a93a0238",
+      "sha256:ca8d130e7b53d6e6a4fced5814c4b68a9432e628e110519465bf068078faa8a0",
+      "sha256:5066bff229d4a7eaedddf4f226f533f15679cde4a9226c8dbb0a59ead43af39e"
+    ]
+  },
+  "Metadata": {
+    "LastTagTime": "2026-10-18T12:54:57.412658418Z"
+  },
+  "Descriptor": {
+    "mediaType": "application/vnd.oci.image.index.v1+json",
+    "digest": "sha256:5658ce3fbafa2dab191d8996a9b48444b7db4813638260608fca5be32ee4a1fd",
+    "size": 856
+  }
+}

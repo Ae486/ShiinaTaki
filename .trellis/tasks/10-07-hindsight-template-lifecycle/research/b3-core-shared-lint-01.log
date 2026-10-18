@@ -1,0 +1,10 @@
+
+H:\TakiAgent\eslint.config.js
+  0:0  warning  File ignored because of a matching ignore pattern. Use "--no-ignore" to disable file ignore settings or use "--no-warn-ignored" to suppress this warning
+
+H:\TakiAgent\packages\shared\src\hindsight-template-backup-encoding.ts
+  42:24  error  '_requestHash' is assigned a value but never used      @typescript-eslint/no-unused-vars
+  63:28  error  '_observationHash' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+✖ 3 problems (2 errors, 1 warning)
+

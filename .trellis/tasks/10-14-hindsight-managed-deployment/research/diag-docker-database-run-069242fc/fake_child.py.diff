@@ -1,0 +1,53 @@
+--- docker-database/fake_child.py
++++ diag-docker-database/fake_child.py
+@@ -16,11 +16,14 @@
+ import subprocess
+ import sys
+ import time
++import traceback
+ import uuid
+ from pathlib import Path
+ 
++DIAG_ERRORS = []
++
+ ROOT = Path("/home/hindsight/.pg0")
+-CASE = "1b05d2f6-494c-4a6d-a601-1e807eca1486"
++CASE = "069242fc-3c26-4413-a767-0d01d819f95e"
+ CASE_ROOT = ROOT / "c2a-db"
+ DATA = CASE_ROOT / "data"
+ MANIFEST = CASE_ROOT / "manifest.json"
+@@ -164,6 +167,22 @@
+         return identity
+     except FileNotFoundError:
+         return None
++    except PermissionError:
++        # Preserve only already-read facts; do not retry /proc reads or mask the error.
++        if len(DIAG_ERRORS) < 8:
++            partial = dict(locals().get("identity", {}))
++            if "raw_stat" in locals():
++                partial.setdefault("stat", raw_stat.strip())
++            if "fields" in locals():
++                partial.setdefault("state", fields[0])
++            if "status" in locals():
++                partial.setdefault("status", status)
++            DIAG_ERRORS.append({
++                "pid": pid,
++                "directory": str(directory),
++                "partial_identity": partial,
++            })
++        raise
+ 
+ 
+ class DatabaseChild:
+@@ -212,7 +231,11 @@
+             "stage": self.stage,
+             "type": type(error).__name__,
+             "detail": str(error)[:512] if isinstance(error, Refusal) else "operation_failed",
++            "traceback": traceback.format_exc()[-2000:],
++            "diag_errors": list(DIAG_ERRORS),
+         }
++        if isinstance(error, OSError):
++            failure.update(errno=error.errno, strerror=error.strerror, filename=error.filename)
+         if self.result["first_failure"] is None:
+             self.result["first_failure"] = failure
+         return failure

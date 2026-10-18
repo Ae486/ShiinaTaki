@@ -1,0 +1,120 @@
+{
+  "recordType": "independent-core-test-expectations-static-review",
+  "task": ".trellis/tasks/10-07-hindsight-template-lifecycle",
+  "reviewer": "native_independent",
+  "originalFailureEvidence": "b3-whole-core-tests-01-result.json and b3-whole-core-tests-01.log",
+  "before": [
+    {
+      "path": "packages/core/src/db/pending-memory-repo.test.ts",
+      "sha256": "56f5b4adc5989f67945369b9715bbdfff8d949432a5f9d6063cffb604759a778"
+    },
+    {
+      "path": "packages/core/src/db/scheduled-task-repo.test.ts",
+      "sha256": "4aeeab1a920d9acccab4451fc9f2e44528d22e9f08267b7c3e4ca4da45ecdf6e"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-receipts.test.ts",
+      "sha256": "2f2950d9cf2c1305a6ea7026be96b215c1e3de10b2e26edb82205e6f33619a21"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-native-route.test.ts",
+      "sha256": "1ef9ac1b0570192209553391ae24db1d529cfe1e0cb6dafea2c79416982cf980"
+    }
+  ],
+  "after": [
+    {
+      "path": "packages/core/src/db/pending-memory-repo.test.ts",
+      "sha256": "6e0e3aecfd5aa7cc9cb2ac797690afead5b39b813d7508d3ab90d9e63b05379e"
+    },
+    {
+      "path": "packages/core/src/db/scheduled-task-repo.test.ts",
+      "sha256": "ae4cef6e6b3328050eb52158619325767cb75b70bc9cc589b7d632319d85dec7"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-receipts.test.ts",
+      "sha256": "91887106bf71108dc0a6c87f78215547ed8e7e55cb3c369e0bbb18e4f2c2c0a7"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-native-route.test.ts",
+      "sha256": "13d1243930ae7c0520a4ecdfce5d8d087e696d9aef89783e340e3e505e3921d4"
+    },
+    {
+      "path": "packages/core/src/db/migrations/index-list.ts",
+      "sha256": "487c588ff4e475e045c6ec64a27e068e7f73415f6721885681bbd329643cfc58"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-receipts.ts",
+      "sha256": "b0931d0e198a2042d320beb3d6e48f3648183f260dd5fef2521ef27310887446"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-backup-client.ts",
+      "sha256": "fbd93f009f8a4278ec75130b24868d1ddb963dcb2407980f69e973a704734ad2"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-client.ts",
+      "sha256": "3acf1e69d4a35dff72d92142d60ed977223f0642f2f39625966f090860867de1"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-native-route.ts",
+      "sha256": "32bd710db159fc99855c64fce7ea27324e3ff02c53932ce0637d72682b06132a"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-service.ts",
+      "sha256": "0a0e3d873c68de7ee42bf83778c128c3b45b02b2e5e6e603082eb9d67b43d42c"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-failure.ts",
+      "sha256": "3fc180367bb9582bed8abe88ae676da179617fa124822722734f217bbc6fa7e6"
+    },
+    {
+      "path": ".trellis/spec/backend/sqlite-migration-lineage.md",
+      "sha256": "df87403eba1007fcbe070640b7e22f784fa8481711843d7921a6fb25b0abbbcf"
+    },
+    {
+      "path": ".trellis/spec/backend/memory-hindsight-backup.md",
+      "sha256": "d545ccb9873baba4161e7044ba230c0d51ce80f246621c01b6259195473b32d9"
+    },
+    {
+      "path": ".trellis/spec/backend/error-handling.md",
+      "sha256": "f0337b3dce7c8e8cd2a70dabe5fe1b9fc669c3117c4eb2ace2bbdfbbeb3a5848"
+    }
+  ],
+  "exactDiff": "diff --git a/packages/core/src/db/pending-memory-repo.test.ts b/packages/core/src/db/pending-memory-repo.test.ts\nindex f47a9c9..9f25bc9 100644\n--- a/packages/core/src/db/pending-memory-repo.test.ts\n+++ b/packages/core/src/db/pending-memory-repo.test.ts\n@@ -169,7 +169,7 @@ describe(\"Pending Memory repository\", () => {\n   it(\"applies the current migration tail after a populated version-34 database and reopens without changes\", () => {\n     const f = fixture(true, 34); const records = f.db.prepare(\"SELECT * FROM hindsight_replica_sync_records\").all();\n     const checkpoints = f.db.prepare(\"SELECT * FROM hindsight_replica_sync_checkpoints\").all();\n-    const applied = f.reopen(); expect(applied).toEqual([35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);\n+    const applied = f.reopen(); expect(applied).toEqual([35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59]);\n     const row = f.repo.enqueue(intent()); expect(f.reopen()).toEqual([]);\n     expect(f.repo.get(pendingMemoryRef(row))).toEqual(row);\n     expect(f.db.prepare(\"SELECT * FROM hindsight_replica_sync_records\").all()).toEqual(records);\ndiff --git a/packages/core/src/db/scheduled-task-repo.test.ts b/packages/core/src/db/scheduled-task-repo.test.ts\nindex 28f2c3e..40ba06a 100644\n--- a/packages/core/src/db/scheduled-task-repo.test.ts\n+++ b/packages/core/src/db/scheduled-task-repo.test.ts\n@@ -9,5 +9,5 @@ function fixture() { const db = openDatabase({ path: \":memory:\", migrations: MIG\n describe(\"ScheduledTaskRepo\", () => {\n   it(\"persists CRUD and revision conflicts\", () => { const { repo } = fixture(); const task = repo.create({ characterId: \"taki\", name: \"Daily\", controlInput: \"Check work\", pattern: { kind: \"cron\", expression: \"0 9 * * *\" }, timezone: { kind: \"fixed\", timezone: \"Asia/Shanghai\" }, nextRunAt: \"2026-08-26T01:00:00.000Z\" }); expect(repo.list(\"taki\")).toHaveLength(1); expect(() => repo.setState({ taskId: task.taskId, expectedRevision: 2, state: \"paused\" })).toThrow(ScheduledTaskConflictError); expect(repo.setState({ taskId: task.taskId, expectedRevision: 1, state: \"paused\" }).state).toBe(\"paused\"); });\n   it(\"claims an occurrence once and scrubs payload after terminal\", () => { const { db, repo } = fixture(); const task = repo.create({ characterId: \"taki\", name: \"Once\", controlInput: \"secret prompt\", pattern: { kind: \"at\", at: \"2026-08-25T00:00:00.000Z\" }, timezone: { kind: \"user\" }, nextRunAt: \"2026-08-25T00:00:00.000Z\" }); const input = { taskId: task.taskId, characterId: task.characterId, scheduledFor: \"2026-08-25T00:00:00.000Z\", taskRevision: 1, controlInput: task.controlInput, firedAt: \"2026-08-25T00:00:01.000Z\", late: true }; expect(repo.claimOccurrence(input)).toBeTruthy(); expect(repo.claimOccurrence(input)).toBeUndefined(); repo.settleOccurrence({ taskId: task.taskId, scheduledFor: input.scheduledFor, state: \"missed\" }); expect(db.prepare(\"SELECT state,control_input FROM schedule_occurrences\").get()).toEqual({ state: \"missed\", control_input: null }); });\n-  it(\"backfills occurrence Character ownership when migration 030 follows an applied 029 database\", () => { const db = openDatabase({ path: \":memory:\", migrations: MIGRATIONS.slice(0, 29) }); dbs.push(db); db.exec(\"INSERT INTO scheduled_tasks (task_id,character_id,name,control_input,pattern_json,timezone_json,enabled,state,revision,next_run_at,last_run_id,created_at,updated_at) VALUES ('task','taki','n','work','{\\\"kind\\\":\\\"at\\\",\\\"at\\\":\\\"2026-08-25T00:00:00.000Z\\\"}','{\\\"kind\\\":\\\"user\\\"}',1,'active',1,'2026-08-25T00:00:00.000Z',NULL,'2026-08-25T00:00:00.000Z','2026-08-25T00:00:00.000Z'); INSERT INTO schedule_occurrences (task_id,scheduled_for,task_revision,control_input,fired_at,late,state,created_at,updated_at) VALUES ('task','2026-08-25T00:00:00.000Z',1,'work','2026-08-25T00:00:00.000Z',0,'pending','2026-08-25T00:00:00.000Z','2026-08-25T00:00:00.000Z')\"); expect(runMigrations(db, MIGRATIONS)).toEqual([30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57]); expect(db.prepare(\"SELECT character_id FROM schedule_occurrences\").get()?.character_id).toBe(\"taki\"); });\n+  it(\"backfills occurrence Character ownership when migration 030 follows an applied 029 database\", () => { const db = openDatabase({ path: \":memory:\", migrations: MIGRATIONS.slice(0, 29) }); dbs.push(db); db.exec(\"INSERT INTO scheduled_tasks (task_id,character_id,name,control_input,pattern_json,timezone_json,enabled,state,revision,next_run_at,last_run_id,created_at,updated_at) VALUES ('task','taki','n','work','{\\\"kind\\\":\\\"at\\\",\\\"at\\\":\\\"2026-08-25T00:00:00.000Z\\\"}','{\\\"kind\\\":\\\"user\\\"}',1,'active',1,'2026-08-25T00:00:00.000Z',NULL,'2026-08-25T00:00:00.000Z','2026-08-25T00:00:00.000Z'); INSERT INTO schedule_occurrences (task_id,scheduled_for,task_revision,control_input,fired_at,late,state,created_at,updated_at) VALUES ('task','2026-08-25T00:00:00.000Z',1,'work','2026-08-25T00:00:00.000Z',0,'pending','2026-08-25T00:00:00.000Z','2026-08-25T00:00:00.000Z')\"); expect(runMigrations(db, MIGRATIONS)).toEqual([30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59]); expect(db.prepare(\"SELECT character_id FROM schedule_occurrences\").get()?.character_id).toBe(\"taki\"); });\n });\ndiff --git a/packages/core/src/memory/hindsight-backup/hindsight-backup-native-route.test.ts b/packages/core/src/memory/hindsight-backup/hindsight-backup-native-route.test.ts\nindex 1001fbf..3bb6a5d 100644\n--- a/packages/core/src/memory/hindsight-backup/hindsight-backup-native-route.test.ts\n+++ b/packages/core/src/memory/hindsight-backup/hindsight-backup-native-route.test.ts\n@@ -68,8 +68,12 @@ describe(\"production native backup route\", () => {\n   it.each([\n     [\"another backup id\", created({ backupId: \"99999999-9999-4999-8999-999999999999\" })],\n     [\"an invalid proof body\", created({ proof: { ...proofBody, banks: \"none\" } })],\n-  ])(\"refuses %s as NATIVE_FAILED\", async (_name, answer) => {\n-    await expect(snapshot(route(answer))).rejects.toEqual(failure(\"HINDSIGHT_BACKUP_NATIVE_FAILED\"));\n+  ])(\"refuses %s during client response validation\", async (_name, answer) => {\n+    // The client validates identity and shape before route proof composition;\n+    // capture maps the escaping HindsightError to NATIVE_FAILED at its own step.\n+    await expect(snapshot(route(answer))).rejects.toEqual(expect.objectContaining({\n+      name: \"HindsightError\", code: \"HINDSIGHT_RESPONSE_INVALID\",\n+    }));\n   });\n \n   it.each([\ndiff --git a/packages/core/src/memory/hindsight-backup/hindsight-backup-receipts.test.ts b/packages/core/src/memory/hindsight-backup/hindsight-backup-receipts.test.ts\nindex 98a106f..41b5edc 100644\n--- a/packages/core/src/memory/hindsight-backup/hindsight-backup-receipts.test.ts\n+++ b/packages/core/src/memory/hindsight-backup/hindsight-backup-receipts.test.ts\n@@ -62,6 +62,8 @@ describe(\"hindsight backup receipt mapping (ruling 3)\", () => {\n       [\"policy work request (045)\", null],\n       [\"observed write\", null],\n       [\"primary conversation witness\", null],\n+      [\"B2 original template Apply receipt, published\", \"memory_template_receipts\"],\n+      [\"B2 persisted semantic refresh-result marker claim\", \"memory_template_refresh_results\"],\n     ]);\n     for (const rule of HINDSIGHT_BACKUP_RECEIPT_MAP) expect(rule.native === null).toBe(rule.id === null);\n   });\n",
+  "changes": [
+    "Append literal migration versions 58 and 59 to the two historical upgrade assertions; preserve all data and second-reopen assertions.",
+    "Append the two explicit template Apply receipt and semantic refresh-result marker mappings.",
+    "Keep both malformed Native responses; assert the existing client's HindsightError/HINDSIGHT_RESPONSE_INVALID boundary before capture maps it to NATIVE_FAILED."
+  ],
+  "plannedChecks": [
+    {
+      "cwd": "H:/TakiAgent",
+      "argv": [
+        "G:/Roaming/npm/pnpm.cmd",
+        "--filter",
+        "@taki/core",
+        "exec",
+        "vitest",
+        "run",
+        "--maxWorkers=2",
+        "src/db/pending-memory-repo.test.ts",
+        "src/db/scheduled-task-repo.test.ts",
+        "src/memory/hindsight-backup/hindsight-backup-receipts.test.ts",
+        "src/memory/hindsight-backup/hindsight-backup-native-route.test.ts"
+      ],
+      "expectedTestCount": 41
+    },
+    {
+      "cwd": "H:/TakiAgent",
+      "argv": [
+        "G:/Roaming/npm/pnpm.cmd",
+        "exec",
+        "eslint",
+        "packages/core/src/db/pending-memory-repo.test.ts",
+        "packages/core/src/db/scheduled-task-repo.test.ts",
+        "packages/core/src/memory/hindsight-backup/hindsight-backup-receipts.test.ts",
+        "packages/core/src/memory/hindsight-backup/hindsight-backup-native-route.test.ts"
+      ]
+    }
+  ],
+  "boundary": "Source and contract review only. No tests/lint/types/build were run for this four-file batch when this immutable source record was written. Production, migrations, schemas, locks, specs and shared fixtures were not modified."
+}

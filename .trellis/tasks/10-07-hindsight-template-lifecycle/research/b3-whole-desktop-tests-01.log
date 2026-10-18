@@ -1,0 +1,208 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mH:/TakiAgent/apps/desktop[39m
+
+[90mstdout[2m | src/windows/home/pages/operations/memory-transitions-browser.test.ts[2m > [22m[2mowns real browser confirmation, focus, close, second observer and complete healthy/emergency producers
+[22m[39mW7 browser evidence: H:\TakiAgent\.trellis\.runtime\w7-browser-artifacts\a106ecb4-443f-4de5-a735-d60319bad7bd
+
+ [32m✓[39m src/windows/home/pages/operations/memory-transitions-browser.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 62693[2mms[22m[39m
+   [33m[2m✓[22m[39m owns real browser confirmation, focus, close, second observer and complete healthy/emergency producers [33m 62691[2mms[22m[39m
+ [32m✓[39m src/lib/ws-client-transitions.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 20083[2mms[22m[39m
+     [33m[2m✓[22m[39m uses real producers, recovers a lost acknowledgement on a second observer and never replays [33m 20081[2mms[22m[39m
+[90mstdout[2m | src/windows/home/pages/operations/hindsight-configuration-browser.test.ts[2m > [22m[2mdrives actual Home controls and Core WS across observers, reconnect, expiry and refusal
+[22m[39mHome browser evidence: H:\TakiAgent\.trellis\tasks\10-07-hindsight-configuration-observation\research\home-browser\fbb9e4f4-9d26-42e0-aaa6-a824ba1c25be
+
+ [32m✓[39m src/windows/home/pages/operations/hindsight-configuration-browser.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 7628[2mms[22m[39m
+   [33m[2m✓[22m[39m drives actual Home controls and Core WS across observers, reconnect, expiry and refusal [33m 7626[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/operations/hindsight-template-browser.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 22860[2mms[22m[39m
+   [33m[2m✓[22m[39m completes integrated Operations preview, partial recovery, independent customization, derived observation and removal [33m 22858[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/operations/hindsight-template-controller.test.ts [2m([22m[2m15 tests[22m[2m)[22m[33m 21610[2mms[22m[39m
+     [33m[2m✓[22m[39m retires consent after observing a same-connection configuration change without losing the draft [33m 471[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps reviewed consent usable when ordinary scheduler and observation timestamps advance [33m 1766[2mms[22m[39m
+     [33m[2m✓[22m[39m subscribes, reads all Bank consequences before confirmation and submits exactly once [33m 2108[2mms[22m[39m
+     [33m[2m✓[22m[39m requires full deletion and provider acknowledgement and preserves user choices after removal [33m 3486[2mms[22m[39m
+     [33m[2m✓[22m[39m retires delayed previews/details after draft, scope or connection change [33m 501[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps unsubmitted choices through a client replacement and blocks preview while a resource form is unfinished [33m 496[2mms[22m[39m
+     [33m[2m✓[22m[39m sanitizes a subscription failure through the template formatter without losing read-only status [33m 442[2mms[22m[39m
+     [33m[2m✓[22m[39m refuses corrupt/failed details and expired previews without a submit [33m 531[2mms[22m[39m
+     [33m[2m✓[22m[39m cannot confirm incomplete all-Bank details or a detail from another preview [33m 456[2mms[22m[39m
+     [33m[2m✓[22m[39m uses Core's recovery action while an original executor is still active [33m 2224[2mms[22m[39m
+     [33m[2m✓[22m[39m sanitizes a mutation transport failure and consumes the confirmation without replay [33m 500[2mms[22m[39m
+     [33m[2m✓[22m[39m a lost submit acknowledgement and second observer rediscover partial work without replay [33m 2880[2mms[22m[39m
+     [33m[2m✓[22m[39m published binding failure recovers only binding and physical reopen keeps original identity [33m 2778[2mms[22m[39m
+     [33m[2m✓[22m[39m current derived reads do not promote rollout history and failure clears previous success [33m 2538[2mms[22m[39m
+     [33m[2m✓[22m[39m unsupported preview never changes operations or hides an untracked Bank's history boundary [33m 428[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/monitor/monitor-controller.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 372[2mms[22m[39m
+[90mstderr[2m | src/lib/ws-client.test.ts[2m > [22m[2mcreateWsClient config methods[2m > [22m[2mroutes memory.operations.changed through the schema boundary, memoizes subscribe, and unwraps operation results
+[22m[39mAn unexpected error occurred while executing "memory.operations.changed" JSON-RPC method: ZodError: [
+  {
+    "code": "custom",
+    "message": "terminal state and terminalAt disagree",
+    "path": [
+      "operation"
+    ]
+  }
+]
+    at H:/TakiAgent/apps/desktop/src/lib/ws-client-routes.ts:178:56
+    at H:\TakiAgent\node_modules\[4m.pnpm[24m\json-rpc-2.0@1.7.1\node_modules\[4mjson-rpc-2.0[24m\dist\server.js:91:28
+    at callMethod (H:\TakiAgent\node_modules\[4m.pnpm[24m\json-rpc-2.0@1.7.1\node_modules\[4mjson-rpc-2.0[24m\dist\server.js:197:24)
+    at noopMiddleware (H:\TakiAgent\node_modules\[4m.pnpm[24m\json-rpc-2.0@1.7.1\node_modules\[4mjson-rpc-2.0[24m\dist\server.js:229:70)
+    at JSONRPCServer.callMethod (H:\TakiAgent\node_modules\[4m.pnpm[24m\json-rpc-2.0@1.7.1\node_modules\[4mjson-rpc-2.0[24m\dist\server.js:211:55)
+    at JSONRPCServer.<anonymous> (H:\TakiAgent\node_modules\[4m.pnpm[24m\json-rpc-2.0@1.7.1\node_modules\[4mjson-rpc-2.0[24m\dist\server.js:158:55)
+    at step (H:\TakiAgent\node_modules\[4m.pnpm[24m\json-rpc-2.0@1.7.1\node_modules\[4mjson-rpc-2.0[24m\dist\server.js:44:23)
+    at Object.next (H:\TakiAgent\node_modules\[4m.pnpm[24m\json-rpc-2.0@1.7.1\node_modules\[4mjson-rpc-2.0[24m\dist\server.js:25:53)
+    at H:\TakiAgent\node_modules\[4m.pnpm[24m\json-rpc-2.0@1.7.1\node_modules\[4mjson-rpc-2.0[24m\dist\server.js:19:71
+    at new Promise (<anonymous>)
+
+ [32m✓[39m src/lib/ws-client.test.ts [2m([22m[2m32 tests[22m[2m)[22m[33m 351[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/operations/local-onboarding-card.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[32m 79[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/operations/hindsight-activation-card.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[32m 109[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/operations/hindsight-configuration-controller.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 56[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/operations/hindsight-configuration-card.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 77[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/operations/memory-hindsight-backup-block.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 70[2mms[22m[39m
+[90mstderr[2m | src/features/operation-wheel/wheel-items.test.ts[2m > [22m[2mWHEEL_ITEMS[2m > [22m[2mtoasts instead of throwing when the home window fails to open
+[22m[39mhome window failed to open Error: boom
+    at openHome (H:/TakiAgent/apps/desktop/src/features/operation-wheel/wheel-items.test.ts:15:45)
+    at navigate (H:/TakiAgent/apps/desktop/src/features/operation-wheel/wheel-items.ts:29:3)
+    at Object.run (H:/TakiAgent/apps/desktop/src/features/operation-wheel/wheel-items.ts:36:57)
+    at H:/TakiAgent/apps/desktop/src/features/operation-wheel/wheel-items.test.ts:54:17
+    at file:///H:/TakiAgent/node_modules/[4m.pnpm[24m/@vitest+runner@4.1.10/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:302:11
+    at file:///H:/TakiAgent/node_modules/[4m.pnpm[24m/@vitest+runner@4.1.10/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:26
+    at file:///H:/TakiAgent/node_modules/[4m.pnpm[24m/@vitest+runner@4.1.10/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2326:20
+    at new Promise (<anonymous>)
+    at runWithCancel (file:///H:/TakiAgent/node_modules/[4m.pnpm[24m/@vitest+runner@4.1.10/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2323:10)
+    at file:///H:/TakiAgent/node_modules/[4m.pnpm[24m/@vitest+runner@4.1.10/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2305:20
+
+ [32m✓[39m src/features/operation-wheel/wheel-items.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 68[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/operations/memory-authority-card.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[32m 67[2mms[22m[39m
+ [32m✓[39m src/windows/home/home-shell.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 42[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/chat/markdown-view.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 45[2mms[22m[39m
+ [32m✓[39m src/windows/home/home-action-readiness.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/operations/local-onboarding-controller.test.ts [2m([22m[2m23 tests[22m[2m)[22m[32m 39[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/operations/memory-authority-state.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m src/lib/ws-client-hindsight-configuration.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 38[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/operations/memory-hindsight-backup-state.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/perception/perception-view.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/skills/skills-page.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/skills/skill-import-files.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/operations/memory-transitions-card.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/operations/hindsight-activation-actions.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/operations/hindsight-activation-state.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32m✓[39m src/lib/ws-client-hindsight-templates.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/mcp/mcp-components.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+ [32m✓[39m src/lib/costume-switch-attempt.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/mcp/mcp-controller.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32m✓[39m src/lib/connection-generation-controller.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/operations/memory-transitions-controller.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 28[2mms[22m[39m
+ [32m✓[39m src/lib/icons/icons.test.tsx [2m([22m[2m30 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/operations/hindsight-template-resource-form.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32m✓[39m src/features/operation-wheel/operation-wheel.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/settings/permission-components.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/operations/memory-hindsight-lifecycle-state.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m src/components/approval/approval-dialog.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m src/components/ui/copyable-row.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m src/lib/rpc-deadline.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+[90mstderr[2m | src/lib/cache-persist.test.ts[2m > [22m[2mreadCache / writeCache[2m > [22m[2msurvives a storage that refuses to write
+[22m[39m[cache] could not persist "memory-status" Error: QuotaExceededError
+    at Object.storage.setItem (H:/TakiAgent/apps/desktop/src/lib/cache-persist.test.ts:100:13)
+    at writeCache (H:/TakiAgent/apps/desktop/src/lib/cache-persist.ts:66:13)
+    at H:/TakiAgent/apps/desktop/src/lib/cache-persist.test.ts:103:18
+    at Proxy.assertThrows (file:///H:/TakiAgent/node_modules/[4m.pnpm[24m/chai@6.2.2/node_modules/[4mchai[24m/index.js:2798:5)
+    at Proxy.methodWrapper (file:///H:/TakiAgent/node_modules/[4m.pnpm[24m/chai@6.2.2/node_modules/[4mchai[24m/index.js:1700:25)
+    at Proxy.<anonymous> (file:///H:/TakiAgent/node_modules/[4m.pnpm[24m/@vitest+expect@4.1.10/node_modules/[4m@vitest/expect[24m/dist/index.js:1216:12)
+    at Proxy.overwritingMethodWrapper (file:///H:/TakiAgent/node_modules/[4m.pnpm[24m/chai@6.2.2/node_modules/[4mchai[24m/index.js:1750:33)
+    at Proxy.<anonymous> (file:///H:/TakiAgent/node_modules/[4m.pnpm[24m/@vitest+expect@4.1.10/node_modules/[4m@vitest/expect[24m/dist/index.js:1552:16)
+    at Proxy.<anonymous> (file:///H:/TakiAgent/node_modules/[4m.pnpm[24m/@vitest+expect@4.1.10/node_modules/[4m@vitest/expect[24m/dist/index.js:1156:15)
+    at Proxy.methodWrapper (file:///H:/TakiAgent/node_modules/[4m.pnpm[24m/chai@6.2.2/node_modules/[4mchai[24m/index.js:1700:25)
+
+ [32m✓[39m src/lib/cache-persist.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m src/windows/pet/restore-pet-connection.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/costume/costume-row.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m src/components/ui/dialog.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m src/components/approval/approval-dialog-controller.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/monitor/monitor-view.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m src/renderer/live2d/idle-motion.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/operations/memory-operations-controller.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m src/components/ui/master-detail.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/components/ui/field.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/settings/knob-field.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m src/renderer/pet-scene.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/components/connection-status/connection-status.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/components/ui/feedback-line.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/components/ui/selection-tile.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m src/components/ui/skeleton.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m src/components/ui/icon-button.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/windows/pet/use-pet-drag.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/settings/permission-controller.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m src/windows/home/extension-convergence.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/chat/chat-timeline-store.test.ts [2m([22m[2m22 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/components/ui/empty-state.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/lib/costume-switch-event.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/chat/chat-delta-coalescer.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/renderer/live2d/costume-switch.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m src/components/toast/toast-store.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/chat/use-attachment-image.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/settings/config-groups.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/mcp/mcp-state.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/renderer/live2d/avatar-commands.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/costume/costume-select-state.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/features/operation-wheel/wheel-summon.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/windows/home/extension-convergence-controller.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/chat/restore-chat-timeline.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/features/character-import/use-costume-switch.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/lib/device-identity.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/skills/skills-controller.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/operations/operations-state.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/costume/costume-result-deadline.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/renderer/live2d/settings-prune.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/renderer/live2d/proximity-reaction.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/settings/config-state.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/settings/knob-editor.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/settings/config-gate.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/settings/permission-state.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/features/operation-wheel/wheel-dismiss.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/windows/pet/click-through-toggle.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/renderer/live2d/click-reactions.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/windows/home/home-navigation.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/renderer/live2d/emotion-resolver.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/costume/costume-view.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/lib/character-asset-url.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/lib/timing-policy.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/lib/timing-policy-sync.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/perception/use-perception.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/chat/date-group.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/lib/costume-report-sync.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/monitor/monitor-labels.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/lib/operator-auth.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/lib/open-home-window.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/operations/memory-hindsight-lifecycle-block.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/windows/pet/costume-report.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/renderer/state-machine.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/lib/cached-fetch-state.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/settings/permission-no-cache.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/renderer/frame-gated-refresher.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/renderer/live2d/model-vocabulary.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/features/operation-wheel/wheel-placement.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/windows/pet/initial-costume-promotion.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/lib/presentation-gate.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/mcp/mcp-no-cache.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/settings/approval-decisions-controller.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/renderer/live2d/gaze.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/skills/skills-no-cache.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/chat/image-attach-decode.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/features/chat-bubble/chat-bubble-store.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/windows/pet/cursor-poll.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/renderer/render-governor.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/renderer/alpha-mask.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/features/chat-bubble/chat-bubble-enter.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/windows/home/navigation-boundary.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/renderer/live2d/click-regions.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/lib/connection-status.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/lib/last-costume.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/windows/home/pages/chat/composer.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/features/chat-bubble/chat-bubble-readiness.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m127 passed[39m[22m[90m (127)[39m
+[2m      Tests [22m [1m[32m723 passed[39m[22m[90m (723)[39m
+[2m   Start at [22m 14:24:29
+[2m   Duration [22m 243.33s[2m (transform 20.67s, setup 0ms, import 61.01s, tests 137.71s, environment 17ms)[22m
+

@@ -1,0 +1,441 @@
+{
+  "version": 1,
+  "caseId": "1b05d2f6-494c-4a6d-a601-1e807eca1486",
+  "outcome": "FAILED_NO_RETRY_EVIDENCE_PRESERVED",
+  "recordedAt": "2026-10-18T12:38:33.060Z",
+  "preparation": {
+    "resumedOwnedPreparation": true,
+    "preparedAt": "2026-10-18T12:29:53.942Z",
+    "originalPathsAndTagAbsent": true,
+    "allFrozenHashesMatch": true,
+    "sourceFilesVerified": 109,
+    "contextFiles": 12,
+    "wholeContextSha256": "a20096ec28ce8181ba0b1e52375a99701abae7fafa5c40234607d773ca015a54"
+  },
+  "invocations": {
+    "build": 1,
+    "launcher": 1
+  },
+  "build": {
+    "exitCode": 0,
+    "elapsedMs": 1883,
+    "imageId": "sha256:cc83b52be0970d6dc4929786d59ca99fe52a86540c55934797af2f3afba3b8bf",
+    "argv": [
+      "--host",
+      "npipe:////./pipe/dockerDesktopLinuxEngine",
+      "--config",
+      "G:/TakiAgent-c2a-database/persistence-1b05d2f6-494c-4a6d-a601-1e807eca1486/build-config",
+      "buildx",
+      "build",
+      "--builder",
+      "default",
+      "--pull=false",
+      "--network=none",
+      "--load",
+      "--progress=plain",
+      "--build-arg",
+      "NATIVE_IMAGE=taki-hindsight-api:local",
+      "--label",
+      "taki.c2a.fixture=1b05d2f6-494c-4a6d-a601-1e807eca1486",
+      "--iidfile",
+      "G:/TakiAgent-c2a-database/persistence-1b05d2f6-494c-4a6d-a601-1e807eca1486/image-id.txt",
+      "--tag",
+      "taki-c2a-db:1b05d2f6-494c-4a6d-a601-1e807eca1486",
+      "--file",
+      "G:/TakiAgent-c2a-database/persistence-1b05d2f6-494c-4a6d-a601-1e807eca1486/context/docker/standalone/Dockerfile.c2a-fake",
+      "G:/TakiAgent-c2a-database/persistence-1b05d2f6-494c-4a6d-a601-1e807eca1486/context"
+    ]
+  },
+  "launcher": {
+    "exitCode": 1,
+    "elapsedMs": 54293,
+    "deadlineMs": 1200000,
+    "environmentKeys": [
+      "SystemRoot",
+      "TEMP",
+      "TMP",
+      "WS_NO_BUFFER_UTIL",
+      "WS_NO_UTF_8_VALIDATE"
+    ],
+    "stdoutVerbatim": "{\"caseId\":\"1b05d2f6-494c-4a6d-a601-1e807eca1486\",\"passed\":false,\"ownedRuntimeCleanup\":true,\"evidence\":\"G:\\\\TakiAgent-c2a-database\\\\persistence-1b05d2f6-494c-4a6d-a601-1e807eca1486\\\\persistence.json\",\"deploymentReady\":false}\n",
+    "stderrVerbatim": ""
+  },
+  "persistence": {
+    "casePassed": false,
+    "deploymentReady": false,
+    "failureStage": "first-database-readiness",
+    "failureCode": "UNEXPECTED_FAILURE",
+    "assertion": null,
+    "assertionAvailability": "The frozen launcher retained only UNEXPECTED_FAILURE, with no exception message, stack, assertion expression or exact failing operands. No code rereview or rerun was performed.",
+    "childFirstFailure": {
+      "stage": "start_and_sql",
+      "type": "PermissionError",
+      "detail": "operation_failed"
+    },
+    "latestReadinessValues": {
+      "expectedGeneration": 1,
+      "expectedStartupId": "8f2b3d9b-0f7f-4ce9-8d0a-0855875d837b",
+      "recordedAt": "2026-10-18T12:35:49.233Z",
+      "current": null,
+      "manifest": null,
+      "dataExists": true,
+      "intentExists": true,
+      "wrapperCount": 1,
+      "postgresCount": 0,
+      "marker": {
+        "pid": 65,
+        "startupId": "8f2b3d9b-0f7f-4ce9-8d0a-0855875d837b",
+        "state": "running"
+      }
+    },
+    "perPassEventCounts": [
+      {
+        "pass": 1,
+        "create": null,
+        "start": null,
+        "stop": null,
+        "die": null,
+        "status": "EVENT_COLLECTION_NOT_REACHED"
+      },
+      {
+        "pass": 2,
+        "create": null,
+        "start": null,
+        "stop": null,
+        "die": null,
+        "status": "SECOND_GENERATION_NOT_REACHED"
+      }
+    ],
+    "submitCount": null,
+    "submitCountAvailability": "Docker event-backed submit count was not collected.",
+    "observedInjectionAttempts": 1,
+    "execMetadataCount": null,
+    "execMetadataRecordsRetained": 0,
+    "execMetadataAvailability": "Metadata collection was not reached; no claim of zero actual Docker execs.",
+    "finalStop": null,
+    "finalStopAvailability": "Final-stop acceptance was not reached.",
+    "failureStop": {
+      "path": "failure-stop.json",
+      "sha256": "c8bd0e59d6c269d10566fd2fcf4add54e7dda331d10bd6bde5581099b0438871",
+      "outcome": "retained",
+      "status": "failed",
+      "first_failure": {
+        "stage": "start_and_sql",
+        "type": "PermissionError",
+        "detail": "operation_failed"
+      },
+      "shutdown": {
+        "state": "checked",
+        "system_identifier": "7697985627284971602",
+        "elapsed_seconds": 0.144,
+        "postmaster_wait_kind": "adopted",
+        "logger_gone": false,
+        "owned_descendants_remaining": 0
+      },
+      "volumeScan": {
+        "entries": 2518,
+        "bytes": 113628636,
+        "link_bytes": 205,
+        "hits": 0,
+        "complete": true,
+        "elapsed_seconds": 0.2
+      }
+    },
+    "engineClock": {
+      "first": "2026-10-18T12:35:23.857459982Z",
+      "last": "2026-10-18T12:35:23.857459982Z"
+    },
+    "engineVsWindows": {
+      "before": {
+        "engine": "2026-10-18T12:29:54.613326017Z",
+        "windowsBefore": "2026-10-18T12:29:53.943Z",
+        "windowsAfter": "2026-10-18T12:29:54.113Z",
+        "engineAheadOfWindowsMilliseconds": {
+          "lower": 500,
+          "upper": 670
+        },
+        "precision": "Engine text retained at nanosecond precision; bounds computed at millisecond precision."
+      },
+      "after": {
+        "engine": "2026-10-18T12:36:16.814151137Z",
+        "windowsBefore": "2026-10-18T12:36:15.999Z",
+        "windowsAfter": "2026-10-18T12:36:16.157Z",
+        "engineAheadOfWindowsMilliseconds": {
+          "lower": 657,
+          "upper": 815
+        },
+        "precision": "Engine text retained at nanosecond precision; bounds computed at millisecond precision."
+      }
+    }
+  },
+  "cleanup": {
+    "ownedRuntimeCleanup": true,
+    "containerAbsent": true,
+    "volumeAbsent": true,
+    "tagAbsent": true,
+    "protectedRootAbsent": true,
+    "stageRetained": true,
+    "staging": "G:/TakiAgent-c2a-database/persistence-1b05d2f6-494c-4a6d-a601-1e807eca1486",
+    "reason": "Failed-run preserve-all instruction: all staging retained; launcher cleanup ran as designed. No additional removal or retry."
+  },
+  "containers": {
+    "allEightIdsUnchanged": true,
+    "allEightStartTimesUnchanged": true,
+    "allEightStatusesUnchanged": true,
+    "comparisons": [
+      {
+        "name": "/taki-openbili-backend",
+        "before": {
+          "id": "1e389e0a2f95121ca804c186c20916196e9e46f67a7691c3d184404a7292deb8",
+          "name": "/taki-openbili-backend",
+          "status": "running",
+          "startedAt": "2026-10-18T05:55:39.597065125Z"
+        },
+        "after": {
+          "id": "1e389e0a2f95121ca804c186c20916196e9e46f67a7691c3d184404a7292deb8",
+          "name": "/taki-openbili-backend",
+          "status": "running",
+          "startedAt": "2026-10-18T05:55:39.597065125Z"
+        },
+        "idUnchanged": true,
+        "startTimeUnchanged": true
+      },
+      {
+        "name": "/taki-hindsight-api-retest",
+        "before": {
+          "id": "c07d86d32382757d292dd4ebf318e6c44260c817d95f35187663d4d33a26b865",
+          "name": "/taki-hindsight-api-retest",
+          "status": "exited",
+          "startedAt": "2026-08-18T16:47:39.697781196Z"
+        },
+        "after": {
+          "id": "c07d86d32382757d292dd4ebf318e6c44260c817d95f35187663d4d33a26b865",
+          "name": "/taki-hindsight-api-retest",
+          "status": "exited",
+          "startedAt": "2026-08-18T16:47:39.697781196Z"
+        },
+        "idUnchanged": true,
+        "startTimeUnchanged": true
+      },
+      {
+        "name": "/taki-hindsight-api",
+        "before": {
+          "id": "a38b49e64f74ee4fa4f5cf5531e467d74dda2b64dc7e28e78a9bdadd37272519",
+          "name": "/taki-hindsight-api",
+          "status": "exited",
+          "startedAt": "2026-08-18T14:11:54.085514229Z"
+        },
+        "after": {
+          "id": "a38b49e64f74ee4fa4f5cf5531e467d74dda2b64dc7e28e78a9bdadd37272519",
+          "name": "/taki-hindsight-api",
+          "status": "exited",
+          "startedAt": "2026-08-18T14:11:54.085514229Z"
+        },
+        "idUnchanged": true,
+        "startTimeUnchanged": true
+      },
+      {
+        "name": "/redis",
+        "before": {
+          "id": "8f5e4468c3a7c0100330e012fdca3da843abfcc732361b71308f06d6eeada5c2",
+          "name": "/redis",
+          "status": "running",
+          "startedAt": "2026-10-18T04:36:51.09898313Z"
+        },
+        "after": {
+          "id": "8f5e4468c3a7c0100330e012fdca3da843abfcc732361b71308f06d6eeada5c2",
+          "name": "/redis",
+          "status": "running",
+          "startedAt": "2026-10-18T04:36:51.09898313Z"
+        },
+        "idUnchanged": true,
+        "startTimeUnchanged": true
+      },
+      {
+        "name": "/my_pgvector",
+        "before": {
+          "id": "7992fb2bba71e13dc290e305941ded32b9046c1ec4b67a3697863ff79079cf8b",
+          "name": "/my_pgvector",
+          "status": "exited",
+          "startedAt": "2026-04-11T08:18:53.87731237Z"
+        },
+        "after": {
+          "id": "7992fb2bba71e13dc290e305941ded32b9046c1ec4b67a3697863ff79079cf8b",
+          "name": "/my_pgvector",
+          "status": "exited",
+          "startedAt": "2026-04-11T08:18:53.87731237Z"
+        },
+        "idUnchanged": true,
+        "startTimeUnchanged": true
+      },
+      {
+        "name": "/rustfs_loacl",
+        "before": {
+          "id": "ba11af042db0879902996426522611b267f38eab7d21f05e21036929c415cc24",
+          "name": "/rustfs_loacl",
+          "status": "exited",
+          "startedAt": "2026-04-11T08:18:55.176936785Z"
+        },
+        "after": {
+          "id": "ba11af042db0879902996426522611b267f38eab7d21f05e21036929c415cc24",
+          "name": "/rustfs_loacl",
+          "status": "exited",
+          "startedAt": "2026-04-11T08:18:55.176936785Z"
+        },
+        "idUnchanged": true,
+        "startTimeUnchanged": true
+      },
+      {
+        "name": "/rpa-redis",
+        "before": {
+          "id": "9d4fc8fb7a4869ac422d9e78a924b49e698e61a562de3af7576dfd18ef81cd98",
+          "name": "/rpa-redis",
+          "status": "exited",
+          "startedAt": "2026-02-20T17:46:12.832921192Z"
+        },
+        "after": {
+          "id": "9d4fc8fb7a4869ac422d9e78a924b49e698e61a562de3af7576dfd18ef81cd98",
+          "name": "/rpa-redis",
+          "status": "exited",
+          "startedAt": "2026-02-20T17:46:12.832921192Z"
+        },
+        "idUnchanged": true,
+        "startTimeUnchanged": true
+      },
+      {
+        "name": "/arboris-app",
+        "before": {
+          "id": "697330c3cd8966e02d97fa228c5233a0805531bff00275107630e34fadda0b1a",
+          "name": "/arboris-app",
+          "status": "running",
+          "startedAt": "2026-10-18T04:36:51.09648348Z"
+        },
+        "after": {
+          "id": "697330c3cd8966e02d97fa228c5233a0805531bff00275107630e34fadda0b1a",
+          "name": "/arboris-app",
+          "status": "running",
+          "startedAt": "2026-10-18T04:36:51.09648348Z"
+        },
+        "idUnchanged": true,
+        "startTimeUnchanged": true
+      }
+    ]
+  },
+  "space": {
+    "before": {
+      "recordedAt": "2026-10-18T12:29:53.942Z",
+      "gFree": 138496249856,
+      "cFree": 25590050816,
+      "hFree": 2377773056
+    },
+    "after": {
+      "recordedAt": "2026-10-18T12:37:38.895Z",
+      "gFree": 138393313280,
+      "cFree": 25587347456,
+      "hFree": 2374828032
+    },
+    "delta": {
+      "gFree": -102936576,
+      "cFree": -2703360,
+      "hFree": -2945024
+    },
+    "deltaMiB": {
+      "gFree": -98.167969,
+      "cFree": -2.578125,
+      "hFree": -2.808594
+    }
+  },
+  "archive": {
+    "path": "H:/TakiAgent/.trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-database-persistence-run-1b05d2f6",
+    "fileCount": 52,
+    "bytes": 2082458,
+    "allSourceAndDestinationHashesMatch": true
+  },
+  "evidence": [
+    {
+      "path": "persistence.json",
+      "bytes": 76375,
+      "sha256": "e7fce21aeb548f873bab59e4bbab701eb2a5ff840ec81f94a6a621247159eb3a"
+    },
+    {
+      "path": "launcher.stdout.log",
+      "bytes": 224,
+      "sha256": "52c80384afb127bd199a960cdef3aa32043e23a4480929242475889bc35a1f3c"
+    },
+    {
+      "path": "launcher.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "launcher-result.json",
+      "bytes": 766,
+      "sha256": "6356c7553369920de274abf8cae87f6b5ed9010c75b56b070b97e8c3e2c2fd48"
+    },
+    {
+      "path": "build-result.json",
+      "bytes": 3384,
+      "sha256": "a3781df6b50c579cc1221246bfea4b38ee01d6da120bd3fdd3978a4e05ea70df"
+    },
+    {
+      "path": "image-id.txt",
+      "bytes": 71,
+      "sha256": "636128809287f19d4960080b709f3eff79be27e8ad38f7386458d63529aaf203"
+    },
+    {
+      "path": "result-image.json",
+      "bytes": 3766,
+      "sha256": "17b478f8a7c038531debaf6d78535130a6af7167771bc6b258362851cf51cca4"
+    },
+    {
+      "path": "failure-stop.json",
+      "bytes": 31832,
+      "sha256": "c8bd0e59d6c269d10566fd2fcf4add54e7dda331d10bd6bde5581099b0438871"
+    },
+    {
+      "path": "context-manifest.json",
+      "bytes": 4451,
+      "sha256": "42782de496a0eb90f7d22f9968804affb3182257570f37c6c0a43ccd5c5dfaa8"
+    },
+    {
+      "path": "stage-archive-manifest.json",
+      "bytes": 10230,
+      "sha256": "47e32b153dabdfc99c51717888a172d31f903419ccc5accacce50cc46eedf86e"
+    },
+    {
+      "path": "verified-inputs-before-launch.json",
+      "bytes": 2332,
+      "sha256": "4048422d35dd7001de1b74c77f37318b78035dff3051f104566fffc1d1a17e72"
+    },
+    {
+      "path": "preflight.json",
+      "bytes": 2389,
+      "sha256": "7bc5ae9de43999aba998d6309c4127d282c59aeba986cef42ba4a20c9741e765"
+    },
+    {
+      "path": "resume-preflight.json",
+      "bytes": 5379,
+      "sha256": "7045ead5f622e918df9d5ff89f1faec269d523b7812cb3e0d092bd68de1cbc09"
+    },
+    {
+      "path": "post-run-verification.json",
+      "bytes": 7895,
+      "sha256": "6ed11dd9fadea9ed7d56917fff100a28450ee1f60743dfb42307491c60a5618c"
+    },
+    {
+      "path": "final-audit.json",
+      "bytes": 2934,
+      "sha256": "8d7f527dfd594f4d1236c9e899f0584596a4ef6d9a4dadbb5e7e2e7ec23653c3"
+    },
+    {
+      "path": "commands.jsonl",
+      "bytes": 13685,
+      "sha256": "e2be5bbf25d0c835ed157a81a3a7e45323222d1c6e0cfffbfc602101ee303d02"
+    },
+    {
+      "path": "owner-commands.jsonl",
+      "bytes": 9445,
+      "sha256": "fafada63caa4f3173e4bd72f21e1853e18ba9e399cf59b174cadef5dfa9553c2"
+    }
+  ]
+}

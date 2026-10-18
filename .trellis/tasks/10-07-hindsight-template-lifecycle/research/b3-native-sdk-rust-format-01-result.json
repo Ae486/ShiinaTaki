@@ -1,0 +1,18 @@
+{
+  "command": [
+    "C:/Users/55473/.cargo/bin/rustfmt.exe",
+    "--edition",
+    "2021",
+    "hindsight-clients/rust/tests/template_backup_contract.rs"
+  ],
+  "cwd": "H:/hindsight",
+  "exitCode": 0,
+  "durationSeconds": 3.224,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-sdk-rust-format-01.log",
+  "sources": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-sdk-rust-format-01-sources.json",
+  "changedInputs": [
+    "H:\\hindsight\\hindsight-clients\\rust\\tests\\template_backup_contract.rs"
+  ],
+  "ownedTemp": "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\sdk-rust-format-01-9u_hlwtn",
+  "ownedTempRemoved": true
+}

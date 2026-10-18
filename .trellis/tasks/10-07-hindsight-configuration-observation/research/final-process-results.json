@@ -1,0 +1,13 @@
+[
+  {"log":"native-clients-03.log","command":"G:/Git/bin/bash.exe scripts/generate-clients.sh","cwd":"H:/hindsight","exitCode":0},
+  {"log":"generated-comparison.log","command":"H:/hindsight/.venv/Scripts/python.exe .trellis/tasks/10-07-hindsight-configuration-observation/research/pin-generated.py after","cwd":"H:/TakiAgent","exitCode":0,"files":809,"byteChanges":0},
+  {"log":"desktop-suite-01.log","command":"pnpm --filter @taki/desktop exec vitest run --maxWorkers=2","cwd":"H:/TakiAgent","exitCode":0,"files":123,"passed":694},
+  {"log":"desktop-build-01.log","command":"pnpm --filter @taki/desktop build","cwd":"H:/TakiAgent","exitCode":0},
+  {"log":"sdk-rust-01.log","command":"cargo test --release --locked --offline --test native_result_contract --test current_state_contract --test transition_contract --test configuration_observation_contract","cwd":"H:/hindsight/hindsight-clients/rust","exitCode":0,"binaries":4,"passed":11},
+  {"log":"native-docs-01.log","command":"npm run build","cwd":"H:/hindsight/hindsight-docs","exitCode":0},
+  {"log":"generator-backend-tests-02.log","command":".venv/Scripts/python.exe scripts/test-openapi-generator-backend.py","cwd":"H:/hindsight","exitCode":0,"passed":3},
+  {"log":"boot-smoke-02.log","command":"node .trellis/tasks/10-07-hindsight-configuration-observation/research/boot-smoke.mjs","cwd":"H:/TakiAgent","exitCode":0},
+  {"log":"native-ty-final-02.log","command":"../.venv/Scripts/ty.exe check --python ../.venv/Scripts/python.exe hindsight_api/engine/configuration_observation.py hindsight_api/engine/configuration_observation_models.py hindsight_api/api/taki_configuration_observation.py hindsight_api/extensions/builtin/configuration_observation_grants.py hindsight_api/engine/memories/__init__.py hindsight_api/engine/taki_compatibility.py hindsight_api/extensions/tenant.py hindsight_api/extensions/builtin/tenant.py hindsight_api/extensions/builtin/taki_memory.py","cwd":"H:/hindsight/hindsight-api-slim","exitCode":0},
+  {"log":"taki-whitespace.log","command":"git diff --check","cwd":"H:/TakiAgent","exitCode":0},
+  {"log":"native-whitespace.log","command":"git diff --check","cwd":"H:/hindsight","exitCode":0}
+]

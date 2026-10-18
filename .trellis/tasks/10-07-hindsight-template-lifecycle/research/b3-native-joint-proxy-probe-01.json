@@ -1,0 +1,5 @@
+{
+  "defaultPoolClass": "AsyncHTTPProxy",
+  "isolatedPoolClass": "AsyncConnectionPool",
+  "proxyEnvironmentKeysPresent": []
+}

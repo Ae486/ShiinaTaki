@@ -1,0 +1,36 @@
+
+> @taki/desktop@0.0.0 build H:\TakiAgent\apps\desktop
+> vite build
+
+[36mvite v8.1.3 [32mbuilding client environment for production...[36m[39m
+[2Ktransforming...✓ 1460 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                  0.56 kB │ gzip:   0.31 kB
+dist/home.html                                   0.90 kB │ gzip:   0.47 kB
+dist/pet.html                                    1.89 kB │ gzip:   0.78 kB
+dist/assets/styles-B45JJtfM.css                 38.16 kB │ gzip:   8.06 kB
+dist/assets/webworkerAll-DhqkPvBt.js             0.05 kB │ gzip:   0.06 kB
+dist/assets/init-BOWOp9d-.js                     0.11 kB │ gzip:   0.10 kB
+dist/assets/browserAll-BaUz65Bg.js               0.22 kB │ gzip:   0.16 kB
+dist/assets/rolldown-runtime-QTnfLwEv.js         0.69 kB │ gzip:   0.42 kB
+dist/assets/main-BkFyYs4W.js                     1.55 kB │ gzip:   0.82 kB
+dist/assets/canvasUtils-NYDebSyR.js              6.01 kB │ gzip:   2.02 kB
+dist/assets/GpuStencilModesToPixi-dwvgL6gZ.js   10.55 kB │ gzip:   2.80 kB
+dist/assets/lib-ekII0fa_.js                     26.64 kB │ gzip:   7.08 kB
+dist/assets/GCManagedHash-Bhl_KYCc.js           26.70 kB │ gzip:   9.33 kB
+dist/assets/Filter-Bl0i_YIN.js                  38.74 kB │ gzip:  11.02 kB
+dist/assets/RenderTargetSystem-DvK9k3uK.js      51.75 kB │ gzip:  14.54 kB
+dist/assets/Shader-CjXiywt1.js                  62.51 kB │ gzip:  20.78 kB
+dist/assets/markdown-view-TLt3Tlb7.js          154.85 kB │ gzip:  46.21 kB
+dist/assets/styles-CkdLMTiF.js                 192.70 kB │ gzip:  60.84 kB
+dist/assets/home-DzFqvsIK.js                   226.23 kB │ gzip:  67.44 kB
+dist/assets/use-tauri-event-ck6Sfirv.js        367.75 kB │ gzip:  98.36 kB
+dist/assets/pet-DGLN9ibT.js                    617.93 kB │ gzip: 167.89 kB
+
+[32m✓ built in 615ms[39m
+[33m[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m

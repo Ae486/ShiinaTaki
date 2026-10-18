@@ -1,0 +1,74 @@
+{
+  "checkedAtUtc": "2026-10-09T15:11:29.949800+00:00",
+  "manifest": "b3-independent-home-source-release-01.json",
+  "manifestSha256": "1c08a53c34b8790a4b3c3c3419b93f24d8492f3c45cab9aa289c5c3d6d2aaf61",
+  "expectedManifestSha256": "1c08a53c34b8790a4b3c3c3419b93f24d8492f3c45cab9aa289c5c3d6d2aaf61",
+  "manifestMatchesAnnouncedRelease": true,
+  "verifiedSourceFiles": 26,
+  "verifiedUniqueSourceSupportArtifactEvidenceFiles": 78,
+  "mismatches": [],
+  "checks": [
+    {
+      "kind": "standalone",
+      "result": "b3-independent-home-standalone-green-01-result.json",
+      "exitCode": 0,
+      "changedInputs": [],
+      "temporaryRootRemoved": true,
+      "currentGraphRerun": null
+    },
+    {
+      "kind": "controller",
+      "result": "b3-independent-home-controller-green-02-result.json",
+      "exitCode": 0,
+      "changedInputs": [],
+      "temporaryRootRemoved": true,
+      "currentGraphRerun": null
+    },
+    {
+      "kind": "browser",
+      "result": "b3-independent-home-browser-diagnose-01-result.json",
+      "exitCode": 0,
+      "changedInputs": [],
+      "temporaryRootRemoved": true,
+      "currentGraphRerun": null
+    },
+    {
+      "kind": "lint",
+      "result": "b3-independent-home-lint-green-01-result.json",
+      "exitCode": 0,
+      "changedInputs": [],
+      "temporaryRootRemoved": true,
+      "currentGraphRerun": null
+    },
+    {
+      "kind": "finalHarnessLint",
+      "result": "b3-independent-home-lint-browser-final-01-result.json",
+      "exitCode": 0,
+      "changedInputs": [],
+      "temporaryRootRemoved": true,
+      "currentGraphRerun": null
+    },
+    {
+      "kind": "desktopTypes",
+      "result": "b3-independent-home-types-green-01-result.json",
+      "exitCode": 0,
+      "changedInputs": [],
+      "temporaryRootRemoved": true,
+      "currentGraphRerun": null
+    },
+    {
+      "kind": "adjacentHistorical",
+      "result": "b3-home-adjacent-01-result.json",
+      "exitCode": 0,
+      "changedInputs": null,
+      "temporaryRootRemoved": null,
+      "currentGraphRerun": false
+    }
+  ],
+  "rootViewedScreenshots": [
+    "all-bank-preview.png",
+    "customization-consequences.png"
+  ],
+  "dependencyScope": "Recorded check input manifests are intact. Core is still implementing: this is not final current-dependency acceptance.",
+  "wholeStage5BAccepted": false
+}

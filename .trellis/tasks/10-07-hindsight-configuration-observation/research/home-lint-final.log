@@ -1,0 +1,8 @@
+
+Oops! Something went wrong! :(
+
+ESLint: 10.6.0
+
+No files matching the pattern "apps/desktop/src/lib/rpc-deadline.ts apps/desktop/src/lib/ws-client-methods.ts apps/desktop/src/lib/ws-client.ts apps/desktop/src/windows/home/pages/operations/operations-page.tsx apps/desktop/src/lib/ws-client-hindsight-configuration.test.ts apps/desktop/src/lib/ws-client-hindsight-configuration.ts apps/desktop/src/windows/home/pages/operations/hindsight-configuration-browser-fixture.ts apps/desktop/src/windows/home/pages/operations/hindsight-configuration-browser.test.ts apps/desktop/src/windows/home/pages/operations/hindsight-configuration-card.test.tsx apps/desktop/src/windows/home/pages/operations/hindsight-configuration-card.tsx apps/desktop/src/windows/home/pages/operations/hindsight-configuration-controller.test.ts apps/desktop/src/windows/home/pages/operations/hindsight-configuration-controller.ts apps/desktop/src/windows/home/pages/operations/hindsight-configuration-state.ts apps/desktop/src/windows/home/pages/operations/use-configuration-characters.ts apps/desktop/src/windows/home/pages/operations/use-hindsight-configuration.ts" were found.
+Please check for typing mistakes in the pattern.
+

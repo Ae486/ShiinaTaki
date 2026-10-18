@@ -1,0 +1,28 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "--filter",
+    "@taki/core",
+    "exec",
+    "vitest",
+    "run",
+    "--maxWorkers=2",
+    "src/db/pending-memory-repo.test.ts",
+    "src/db/scheduled-task-repo.test.ts",
+    "src/memory/hindsight-backup/hindsight-backup-receipts.test.ts",
+    "src/memory/hindsight-backup/hindsight-backup-native-route.test.ts"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "startedAt": "2026-10-13T05:28:42.424828+00:00",
+  "finishedAt": "2026-10-13T05:28:56.601852+00:00",
+  "exitCode": 0,
+  "durationSeconds": 14.187,
+  "inputCount": 2417,
+  "changedInputs": [],
+  "inputManifest": "b3-whole-independent-core-expectations-tests-01-inputs.json",
+  "afterManifest": "b3-whole-independent-core-expectations-tests-01-inputs-after.json",
+  "log": "b3-whole-independent-core-expectations-tests-01.log",
+  "temporaryRoot": "H:\\TakiAgent\\.trellis\\.runtime\\b3-whole-checks\\independent-core-expectations-tests-01-8e0c7e0a23334776adb43660bdfa9c9d",
+  "temporaryRootRemoved": true,
+  "remainingFixtureEntries": []
+}

@@ -1,0 +1,19 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/ruff.exe",
+    "check",
+    "--fix",
+    "tests/native_results/template_backup_joint_helpers.py",
+    "tests/native_results/test_template_backup_pair.py"
+  ],
+  "cwd": "H:/hindsight/hindsight-api-slim",
+  "exitCode": 0,
+  "durationSeconds": 0.48,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-joint-ruff-fix-01.log",
+  "sources": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-joint-ruff-fix-01-sources.json",
+  "changedInputs": [
+    "H:\\hindsight\\hindsight-api-slim\\tests\\native_results\\template_backup_joint_helpers.py"
+  ],
+  "ownedTemp": "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\joint-ruff-fix-01-szxgky9_",
+  "ownedTempRemoved": true
+}

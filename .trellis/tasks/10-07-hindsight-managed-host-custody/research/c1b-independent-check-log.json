@@ -1,0 +1,171 @@
+{
+  "version": 1,
+  "capturedAt": "2026-10-13T12:06:23.057Z",
+  "scope": "Independent C1b source/Windows process review; Ubuntu prerequisite readback only; unchanged C1a accepted evidence reused.",
+  "checks": [
+    {
+      "name": "wsl-state-before-authorized-c1b-tests",
+      "command": "wsl.exe --list --verbose",
+      "startedAt": "2026-10-13T11:46:51.084Z",
+      "chunk_id": "4ac06c",
+      "wall_time_seconds": 0.531948,
+      "exit_code": 0,
+      "original_token_count": 62,
+      "output": " \u0000 \u0000N\u0000A\u0000M\u0000E\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000S\u0000T\u0000A\u0000T\u0000E\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000V\u0000E\u0000R\u0000S\u0000I\u0000O\u0000N\u0000\r\u0000\n\u0000*\u0000 \u0000U\u0000b\u0000u\u0000n\u0000t\u0000u\u0000-\u00002\u00002\u0000.\u00000\u00004\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000S\u0000t\u0000o\u0000p\u0000p\u0000e\u0000d\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u00002\u0000\r\u0000\n\u0000 \u0000 \u0000d\u0000o\u0000c\u0000k\u0000e\u0000r\u0000-\u0000d\u0000e\u0000s\u0000k\u0000t\u0000o\u0000p\u0000 \u0000 \u0000 \u0000 \u0000S\u0000t\u0000o\u0000p\u0000p\u0000e\u0000d\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u00002\u0000\r\u0000\n\u0000"
+    },
+    {
+      "name": "authorized-ubuntu-runtime-discovery",
+      "command": "wsl.exe --distribution Ubuntu-22.04 --exec /bin/sh -c 'command -v python3.11 python3.12 python3.13 python3.14 python3'",
+      "startedAt": "2026-10-13T11:47:30.168Z",
+      "chunk_id": "173fec",
+      "wall_time_seconds": 10.0093337,
+      "original_token_count": 0,
+      "output": "w\u0000s\u0000l\u0000:\u0000 \u0000�hKm0R \u0000l\u0000o\u0000c\u0000a\u0000l\u0000h\u0000o\u0000s\u0000t\u0000 \u0000�N\u0006tM�n\f�FO*g\\��P0R \u0000W\u0000S\u0000L\u0000\u00020N\u0000A\u0000T\u0000 \u0000!j\u000f_\u000bN�v \u0000W\u0000S\u0000L\u0000 \u0000\rN/e\u0001c \u0000l\u0000o\u0000c\u0000a\u0000l\u0000h\u0000o\u0000s\u0000t\u0000 \u0000�N\u0006t\u00020\r\u0000\n\u0000wsl: Failed to translate 'E:\\Program Files\\Apache\\maven\\bin'\n/usr/bin/python3\n",
+      "exit_code": 0
+    },
+    {
+      "name": "ubuntu-c1b-runtime-prerequisites",
+      "command": "$probe = @'\nimport importlib.util, json, os, platform, shutil, socket, sys\nfrom pathlib import Path\nrelease = {}\nfor line in Path('/etc/os-release').read_text().splitlines():\n    if '=' in line:\n        key, value = line.split('=', 1)\n        if key in ('ID', 'VERSION_ID', 'PRETTY_NAME'):\n            release[key] = value.strip('\"')\nprint(json.dumps({'distribution': release, 'kernel': platform.release(), 'executable': sys.executable, 'pythonVersion': platform.python_version(), 'platform': sys.platform, 'uid': os.getuid(), 'euid': os.geteuid(), 'dotenvAvailable': importlib.util.find_spec('dotenv') is not None, 'afUnix': hasattr(socket, 'AF_UNIX'), 'soPeercred': hasattr(socket, 'SO_PEERCRED'), 'killpg': hasattr(os, 'killpg'), 'procFd': Path('/proc/self/fd').is_dir(), 'nativeCheckout': Path('/mnt/h/hindsight/docker/standalone/managed_bootstrap/protocol.py').is_file(), 'linuxProjectVenv': Path('/mnt/h/hindsight/.venv/bin/python').exists(), 'uv': shutil.which('uv')}))\n'@\nwsl.exe --distribution Ubuntu-22.04 --exec /usr/bin/python3 -I -B -c $probe",
+      "startedAt": "2026-10-13T11:49:20.761Z",
+      "chunk_id": "06fb96",
+      "wall_time_seconds": 7.6190329,
+      "exit_code": 0,
+      "original_token_count": 149,
+      "output": "w\u0000s\u0000l\u0000:\u0000 \u0000�hKm0R \u0000l\u0000o\u0000c\u0000a\u0000l\u0000h\u0000o\u0000s\u0000t\u0000 \u0000�N\u0006tM�n\f�FO*g\\��P0R \u0000W\u0000S\u0000L\u0000\u00020N\u0000A\u0000T\u0000 \u0000!j\u000f_\u000bN�v \u0000W\u0000S\u0000L\u0000 \u0000\rN/e\u0001c \u0000l\u0000o\u0000c\u0000a\u0000l\u0000h\u0000o\u0000s\u0000t\u0000 \u0000�N\u0006t\u00020\r\u0000\n\u0000wsl: Failed to translate 'E:\\Program Files\\Apache\\maven\\bin'\n{\"distribution\": {\"PRETTY_NAME\": \"Ubuntu 22.04.5 LTS\", \"VERSION_ID\": \"22.04\", \"ID\": \"ubuntu\"}, \"kernel\": \"6.6.87.2-microsoft-standard-WSL2\", \"executable\": \"/usr/bin/python3\", \"pythonVersion\": \"3.10.12\", \"platform\": \"linux\", \"uid\": 0, \"euid\": 0, \"dotenvAvailable\": false, \"afUnix\": true, \"soPeercred\": true, \"killpg\": true, \"procFd\": true, \"nativeCheckout\": true, \"linuxProjectVenv\": false, \"uv\": null}\n"
+    },
+    {
+      "name": "expired-running-status-regression-before-fix",
+      "command": "& 'H:/hindsight/.venv/Scripts/python.exe' -B -m unittest discover -s 'H:/hindsight/docker/standalone/tests' -p 'test_managed_bootstrap_protocol.py' -k running_status_exchange -v",
+      "startedAt": "2026-10-13T11:53:03.274Z",
+      "chunk_id": "daaa55",
+      "wall_time_seconds": 1.8902476,
+      "exit_code": 1,
+      "original_token_count": 263,
+      "output": "test_running_status_exchange_outlives_admission_without_reinjection (test_managed_bootstrap_protocol.AdmissionTests.test_running_status_exchange_outlives_admission_without_reinjection) ... FAIL\r\n\r\n======================================================================\r\nFAIL: test_running_status_exchange_outlives_admission_without_reinjection (test_managed_bootstrap_protocol.AdmissionTests.test_running_status_exchange_outlives_admission_without_reinjection)\r\n----------------------------------------------------------------------\r\nTraceback (most recent call last):\r\n  File \"H:\\hindsight\\docker\\standalone\\tests\\test_managed_bootstrap_protocol.py\", line 259, in test_running_status_exchange_outlives_admission_without_reinjection\r\n    self.assertGreater(connection.sendall.call_count, 0, \"expired admission must not hide original status\")\r\nAssertionError: 0 not greater than 0 : expired admission must not hide original status\r\n\r\n----------------------------------------------------------------------\r\nRan 1 test in 1.024s\r\n\r\nFAILED (failures=1)\r\n"
+    },
+    {
+      "name": "windows-c1b-suite-after-observation-deadline-fix",
+      "command": "& 'H:/hindsight/.venv/Scripts/python.exe' -B -m unittest discover -s 'H:/hindsight/docker/standalone/tests' -p 'test_managed_bootstrap*.py' -v",
+      "startedAt": "2026-10-13T11:54:43.880Z",
+      "chunk_id": "8b6d10",
+      "wall_time_seconds": 10.0156901,
+      "original_token_count": 803,
+      "output": "test_changed_startup_and_configuration_never_spawn (test_managed_bootstrap_linux.LinuxProcessTests.test_changed_startup_and_configuration_never_spawn) ... skipped 'unexecuted: requires actual Linux AF_UNIX, SO_PEERCRED, /proc and process groups'\r\ntest_graceful_shutdown_keeps_its_own_thirty_second_budget (test_managed_bootstrap_linux.LinuxProcessTests.test_graceful_shutdown_keeps_its_own_thirty_second_budget) ... skipped 'unexecuted: requires actual Linux AF_UNIX, SO_PEERCRED, /proc and process groups'\r\ntest_lost_ack_can_be_observed_after_admission_expiry (test_managed_bootstrap_linux.LinuxProcessTests.test_lost_ack_can_be_observed_after_admission_expiry) ... skipped 'unexecuted: requires actual Linux AF_UNIX, SO_PEERCRED, /proc and process groups'\r\ntest_real_process_group_signal_and_grandchild_reaping (test_managed_bootstrap_linux.LinuxProcessTests.test_real_process_group_signal_and_grandchild_reaping) ... skipped 'unexecuted: requires actual Linux AF_UNIX, SO_PEERCRED, /proc and process groups'\r\ntest_signal_during_partial_frame_cancels_private_read_promptly (test_managed_bootstrap_linux.LinuxProcessTests.test_signal_during_partial_frame_cancels_private_read_promptly) ... skipped 'unexecuted: requires actual Linux AF_UNIX, SO_PEERCRED, /proc and process groups'\r\ntest_socket_uid_modes_actual_submission_duplicate_and_cleanup (test_managed_bootstrap_linux.LinuxProcessTests.test_socket_uid_modes_actual_submission_duplicate_and_cleanup) ... skipped 'unexecuted: requires actual Linux AF_UNIX, SO_PEERCRED, /proc and process groups'\r\ntest_trickle_bytes_cannot_extend_original_deadline (test_managed_bootstrap_linux.LinuxProcessTests.test_trickle_bytes_cannot_extend_original_deadline) ... skipped 'unexecuted: requires actual Linux AF_UNIX, SO_PEERCRED, /proc and process groups'\r\ntest_wrong_kernel_peer_uid_and_unsafe_directory_refuse (test_managed_bootstrap_linux.LinuxProcessTests.test_wrong_kernel_peer_uid_and_unsafe_directory_refuse) ... skipped 'unexecuted: requires actual Linux AF_UNIX, SO_PEERCRED, /proc and process groups'\r\ntest_explicit_owner_stop_terminates_and_reaps_the_real_leaf (test_managed_bootstrap_process.ProcessTests.test_explicit_owner_stop_terminates_and_reaps_the_real_leaf) ... ok\r\ntest_helper_death_before_eof_leaves_native_unstarted (test_managed_bootstrap_process.ProcessTests.test_helper_death_before_eof_leaves_native_unstarted) ... ok\r\ntest_lost_helper_ack_does_not_reinject_or_cancel_running_native (test_managed_bootstrap_process.ProcessTests.test_lost_helper_ack_does_not_reinject_or_cancel_running_native) ... ok\r\ntest_missing_eof_is_bounded_without_starting_native (test_managed_bootstrap_process.ProcessTests.test_missing_eof_is_bounded_without_starting_native) ... ok\r\ntest_missing_locked_rotated_custody_and_old_startup_refuse (test_managed_bootstrap_process.ProcessTests.test_missing_locked_rotated_custody_and_old_startup_refuse) ... ok\r\ntest_real_inheritance_and_unused_slots (test_managed_bootstrap_process.ProcessTests.test_real_inheritance_and_unused_slots) ... ok\r\ntest_real_seven_slot_child_dotenv_isolation_and_no_public_secret (test_managed_bootstrap_process.ProcessTests.test_real_seven_slot_child_dotenv_isolation_and_no_public_secret) ... ok\r\ntest_running_lifetime_outlives_original_admission_deadline (test_managed_bootstrap_process.ProcessTests.test_running_lifetime_outlives_original_admission_deadline) ... ok\r\ntest_truncated_oversize_and_trailing_frames_never_spawn (test_managed_bootstrap_process.ProcessTests.test_truncated_oversize_and_trailing_frames_never_spawn) ... ok\r\ntest_windows_has_no_production_pipe_or_tcp_fallback (test_managed_bootstrap_process.ProcessTests.test_windows_has_no_production_pipe_or_tcp_fallback) ... ok\r\ntest_all_original_bindings_and_selection_are_exact (test_managed_bootstrap_protocol.AdmissionTests.test_all_original_bindings_and_selection_are_exact) ... ok\r\ntest_failed_spawn_or_late_revocation_cannot_replay (test_managed_bootstrap_protocol.AdmissionTests.test_failed_spawn_or_late_revocation_cannot_replay) ... ok\r\ntest_frame_cannot_authorize_itself_or_install_a_consumer (test_managed_bootstrap_protocol.AdmissionTests.test_frame_cannot_authorize_itself_or_install_a_consumer) ... ok\r\ntest_restart_and_old_ack_require_new_grant (test_managed_bootstrap_protocol.AdmissionTests.test_restart_and_old_ack_require_new_grant) ... ok\r\ntest_revoked_custody_and_expired_grant_never_spawn (test_managed_bootstrap_protocol.AdmissionTests.test_revoked_custody_and_expired_grant_never_spawn) ... ok\r\ntest_running_status_exchange_outlives_admission_without_reinjection (test_managed_bootstrap_protocol.AdmissionTests.test_running_status_exchange_outlives_admission_without_reinjection) ... ok\r\ntest_single_use_and_rotation_do_not_revoke_an_existing_process (test_managed_bootstrap_protocol.AdmissionTests.test_single_use_and_rotation_do_not_revoke_an_existing_process) ... ok\r\ntest_exact_frame_and_safe_status_roundtrip (test_managed_bootstrap_protocol.ProtocolTests.test_exact_frame_and_safe_status_roundtrip) ... ok\r\ntest_inheritance_and_unused_selection (test_managed_bootstrap_protocol.ProtocolTests.test_inheritance_and_unused_selection) ... ok\r\ntest_private_frame_size_and_read_growth_are_bounded (test_managed_bootstrap_protocol.ProtocolTests.test_private_frame_size_and_read_growth_are_bounded) ... ok\r\ntest_public_status_cannot_echo_extra_data_or_claim_readiness (test_managed_bootstrap_protocol.ProtocolTests.test_public_status_cannot_echo_extra_data_or_claim_readiness) ... ok\r\ntest_strict_json_and_fixed_fields (test_managed_bootstrap_protocol.ProtocolTests.test_strict_json_and_fixed_fields) ... ok\r\ntest_uuid_parity_preserves_nil_maximum_and_case (test_managed_bootstrap_protocol.ProtocolTests.test_uuid_parity_preserves_nil_maximum_and_case) ... ok\r\ntest_value_limits_count_utf16_and_reject_unrepresentable_environment_values (test_managed_bootstrap_protocol.ProtocolTests.test_value_limits_count_utf16_and_reject_unrepresentable_environment_values) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 32 tests in 17.386s\r\n\r\nOK (skipped=8)\r\n",
+      "exit_code": 0
+    },
+    {
+      "name": "native-scoped-ruff-after-fix",
+      "command": "& 'H:/hindsight/.venv/Scripts/ruff.exe' check --no-cache --config 'H:/hindsight/ruff.toml' 'H:/hindsight/docker/standalone/managed_bootstrap' 'H:/hindsight/docker/standalone/tests'",
+      "startedAt": "2026-10-13T11:56:37.862Z",
+      "chunk_id": "f80aa3",
+      "wall_time_seconds": 0.3618979,
+      "exit_code": 0,
+      "original_token_count": 5,
+      "output": "All checks passed!\n"
+    },
+    {
+      "name": "native-scoped-format-after-fix",
+      "command": "& 'H:/hindsight/.venv/Scripts/ruff.exe' format --check --no-cache --config 'H:/hindsight/ruff.toml' 'H:/hindsight/docker/standalone/managed_bootstrap' 'H:/hindsight/docker/standalone/tests'",
+      "startedAt": "2026-10-13T11:56:59.622Z",
+      "chunk_id": "4f9c52",
+      "wall_time_seconds": 0.3523495,
+      "exit_code": 0,
+      "original_token_count": 7,
+      "output": "14 files already formatted\n"
+    },
+    {
+      "name": "native-scoped-cross-platform-ty-after-fix",
+      "command": "& 'H:/hindsight/.venv/Scripts/ty.exe' check --project 'H:/hindsight/hindsight-api-slim' --python 'H:/hindsight/.venv/Scripts/python.exe' --extra-search-path 'H:/hindsight/docker/standalone' --python-platform all 'H:/hindsight/docker/standalone/managed_bootstrap'",
+      "startedAt": "2026-10-13T11:57:27.622Z",
+      "chunk_id": "849476",
+      "wall_time_seconds": 0.4604352,
+      "exit_code": 0,
+      "original_token_count": 5,
+      "output": "All checks passed!\n"
+    },
+    {
+      "name": "host-typecheck-independent",
+      "command": "& 'G:/Roaming/npm/pnpm.cmd' --filter @taki/hindsight-host typecheck",
+      "startedAt": "2026-10-13T11:58:17.964Z",
+      "chunk_id": "25cb90",
+      "wall_time_seconds": 6.7732049,
+      "exit_code": 0,
+      "original_token_count": 23,
+      "output": "\n> @taki/hindsight-host@0.0.0 typecheck H:\\TakiAgent\\apps\\hindsight-host\n> tsc --noEmit\n\n"
+    },
+    {
+      "name": "host-scoped-eslint-independent",
+      "command": "& 'G:/Roaming/npm/pnpm.cmd' exec eslint apps/hindsight-host/src/restart-observer.ts apps/hindsight-host/src/restart-observer.test.ts",
+      "startedAt": "2026-10-13T11:58:47.761Z",
+      "chunk_id": "a56cd8",
+      "wall_time_seconds": 3.6330629,
+      "exit_code": 0,
+      "original_token_count": 0,
+      "output": ""
+    },
+    {
+      "name": "host-fake-observer-independent",
+      "command": "& 'G:/Roaming/npm/pnpm.cmd' exec vitest run apps/hindsight-host/src/restart-observer.test.ts --maxWorkers=1",
+      "startedAt": "2026-10-13T11:59:21.879Z",
+      "chunk_id": "047950",
+      "wall_time_seconds": 2.6179003,
+      "exit_code": 0,
+      "original_token_count": 50,
+      "output": "\n RUN  v4.1.10 H:/TakiAgent\n\n\n Test Files  1 passed (1)\n      Tests  20 passed (20)\n   Start at  19:59:24\n   Duration  659ms (transform 99ms, setup 0ms, import 235ms, tests 74ms, environment 0ms)\n\n"
+    },
+    {
+      "name": "windows-runtime",
+      "command": "$probe = @'\nimport importlib.metadata, json, platform, socket, sys, tempfile\nprint(json.dumps({'executable': sys.executable, 'pythonVersion': platform.python_version(), 'platform': sys.platform, 'pythonDotenvVersion': importlib.metadata.version('python-dotenv'), 'afUnix': hasattr(socket, 'AF_UNIX'), 'tempRoot': tempfile.gettempdir()}))\n'@\n& 'H:/hindsight/.venv/Scripts/python.exe' -I -B -c $probe",
+      "chunk_id": "7cf6d1",
+      "wall_time_seconds": 0.6498541,
+      "exit_code": 0,
+      "original_token_count": 46,
+      "output": "{\"executable\": \"H:\\\\hindsight\\\\.venv\\\\Scripts\\\\python.exe\", \"pythonVersion\": \"3.11.5\", \"platform\": \"win32\", \"pythonDotenvVersion\": \"1.2.2\", \"afUnix\": false, \"tempRoot\": \"G:\\\\Temp\"}\r\n"
+    },
+    {
+      "name": "wsl-state-after-prerequisite-preflight",
+      "command": "$rawState = wsl.exe --list --verbose\n$stateExit = $LASTEXITCODE\n($rawState -join \"`n\").Replace([string][char]0, '')\nexit $stateExit",
+      "chunk_id": "a931e2",
+      "wall_time_seconds": 0.5730721,
+      "exit_code": 0,
+      "original_token_count": 32,
+      "output": "  NAME              STATE           VERSION\n\n* Ubuntu-22.04      Stopped         2\n\n  docker-desktop    Stopped         2\n\n\r\n"
+    },
+    {
+      "name": "native-scoped-diff-whitespace",
+      "command": "git -C H:/hindsight -c core.safecrlf=false diff --check -- docker/standalone",
+      "chunk_id": "31b953",
+      "wall_time_seconds": 0.489213,
+      "exit_code": 0,
+      "original_token_count": 0,
+      "output": ""
+    },
+    {
+      "name": "taki-tracked-diff-whitespace",
+      "command": "git -c core.safecrlf=false diff --check",
+      "chunk_id": "00243d",
+      "wall_time_seconds": 0.7643109,
+      "exit_code": 0,
+      "original_token_count": 0,
+      "output": ""
+    },
+    {
+      "name": "linux-regression-scoped-ruff-final",
+      "command": "& 'H:/hindsight/.venv/Scripts/ruff.exe' check --no-cache --config 'H:/hindsight/ruff.toml' 'H:/hindsight/docker/standalone/tests/test_managed_bootstrap_linux.py'",
+      "chunk_id": "646bd6",
+      "wall_time_seconds": 0.3641396,
+      "exit_code": 0,
+      "original_token_count": 5,
+      "output": "All checks passed!\n"
+    },
+    {
+      "name": "linux-regression-format-final",
+      "command": "& 'H:/hindsight/.venv/Scripts/ruff.exe' format --check --no-cache --config 'H:/hindsight/ruff.toml' 'H:/hindsight/docker/standalone/tests/test_managed_bootstrap_linux.py'",
+      "chunk_id": "35a566",
+      "wall_time_seconds": 0.365182,
+      "exit_code": 0,
+      "original_token_count": 7,
+      "output": "1 file already formatted\n"
+    }
+  ]
+}

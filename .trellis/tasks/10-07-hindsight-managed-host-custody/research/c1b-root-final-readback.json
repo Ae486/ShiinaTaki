@@ -1,0 +1,180 @@
+{
+  "version": 1,
+  "capturedAt": "2026-10-13T12:21:13.068840+00:00",
+  "verdict": "C1 source and permitted Windows process acceptance passed; platform acceptance remains open",
+  "task": ".trellis/tasks/10-07-hindsight-managed-host-custody",
+  "status": "in_progress",
+  "session": "codex_01a1309f-e374-7241-ab38-4e50f040d985",
+  "sourceAndCheckOwnershipReleased": [
+    "c1a_implement",
+    "c1a_check"
+  ],
+  "source": {
+    "checkedAt": "2026-10-13T12:15:51.672495+00:00",
+    "manifestSha256": "f69ca93f675bf3513ef687952c357c0be0004a305e1ff46ecc91c21d12033c17",
+    "checkedInputs": 34,
+    "mismatches": [],
+    "acceptedC1aInputs": 128,
+    "unchangedC1aInputs": 124,
+    "authorizedC1aDocumentationChanges": [
+      {
+        "path": ".trellis/spec/backend/hindsight-host-custody.md",
+        "sha256": "05e61149e811a60b8d39b5b10f7787a08d66177319ab7f774bb55c8b64f5a682",
+        "authorizedDocumentationChange": true
+      },
+      {
+        "path": ".trellis/spec/backend/index.md",
+        "sha256": "45225fde15aaa8005c1582d41d29dea121545d780501f9bddd29fd9880f590b6",
+        "authorizedDocumentationChange": true
+      },
+      {
+        "path": "apps/hindsight-host/README.md",
+        "sha256": "2bfad9ef4a27efd80c60b92a56577d217a3f79a2caddcd87321d00d5c088c7d3",
+        "authorizedDocumentationChange": true
+      },
+      {
+        "path": "apps/hindsight-host/src/index.md",
+        "sha256": "710c32d6e5d4487b7a8d77ab81156ab048c851f3ab454270b71940fb22e4ad6e",
+        "authorizedDocumentationChange": true
+      }
+    ],
+    "independentCheckRecords": 17,
+    "retainedNonzeroChecks": [
+      {
+        "name": "expired-running-status-regression-before-fix",
+        "exitCode": 1
+      }
+    ]
+  },
+  "cleanup": {
+    "checkedAt": "2026-10-13T12:15:52.2150863Z",
+    "tempRoot": "G:\\Temp\\",
+    "matchedDirectories": [],
+    "fixtureProcesses": [],
+    "c1aFixtureExists": false,
+    "hFreeBytes": 14385172480,
+    "wslState": "  NAME              STATE           VERSION\r\n\r\n* Ubuntu-22.04      Stopped         2\r\n\r\n  docker-desktop    Stopped         2\r\n\r\n\r\n",
+    "removedDuringReadback": false
+  },
+  "identityAndContext": {
+    "toolChunk": "04a6cc",
+    "readback": "2e244d0fdee49fb2c582a4333a9ef1573fa9112a\nmain\neb6413a7f58c4f3f0adb88a33a99516f8707fef7\nmain\nCurrent task: .trellis/tasks/10-07-hindsight-managed-host-custody\r\nSource: session:codex_01a1309f-e374-7241-ab38-4e50f040d985\r\n=== Validating Context Files ===\r\nTarget dir: H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-managed-host-custody\r\n\r\n  implement.jsonl: ✓ (19 entries)\r\n  check.jsonl: ✓ (19 entries)\r\n\r\n✓ All validations passed\r\n"
+  },
+  "independentVerification": {
+    "nativeWindowsPassed": 24,
+    "nativeLinuxSkipped": 8,
+    "fakeObserverPassed": 20,
+    "scopedStaticChecks": "passed",
+    "fullUnchangedSuitesRepeated": false,
+    "realDataOrModelTestsExecuted": false,
+    "deploymentReady": false
+  },
+  "documentation": {
+    "checkedAt": "2026-10-13T12:21:13.068840+00:00",
+    "documentCount": 9,
+    "evidenceCount": 5,
+    "utf8WithoutBom": true,
+    "automaticCriteriaPassed": [
+      1,
+      3,
+      4,
+      5,
+      8,
+      9,
+      10
+    ],
+    "platformCriteriaOpen": [
+      2,
+      6,
+      7
+    ],
+    "taskStatus": "in_progress",
+    "independentLogRecords": 17,
+    "pins": [
+      {
+        "path": ".trellis/spec/backend/hindsight-host-custody.md",
+        "sha256": "05e61149e811a60b8d39b5b10f7787a08d66177319ab7f774bb55c8b64f5a682",
+        "bytes": 11739
+      },
+      {
+        "path": ".trellis/spec/backend/index.md",
+        "sha256": "45225fde15aaa8005c1582d41d29dea121545d780501f9bddd29fd9880f590b6",
+        "bytes": 10493
+      },
+      {
+        "path": ".trellis/tasks/10-07-hindsight-managed-host-custody/prd.md",
+        "sha256": "d89aa86319c8654d53cad484940fddd432cbde4927dd7c1cb1665dbf4b8883e0",
+        "bytes": 10365
+      },
+      {
+        "path": ".trellis/tasks/10-07-hindsight-managed-host-custody/design.md",
+        "sha256": "24390bbd0795fee60aa8a2bdd73f6e64425a51f7fae0b9299ae7b7ca82848790",
+        "bytes": 19319
+      },
+      {
+        "path": ".trellis/tasks/10-07-hindsight-managed-host-custody/implement.md",
+        "sha256": "f2ee3ff9eaf2baa996dbca78e9acd278682e82ddf24b0a635fd1ad36bc0c1abc",
+        "bytes": 7735
+      },
+      {
+        "path": ".trellis/tasks/10-07-hindsight-managed-host-custody/task.json",
+        "sha256": "d1007d4404900c755a7dfdcf8e715d695cbcac1afd834d969bb38e1a03c89afe",
+        "bytes": 3052
+      },
+      {
+        "path": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/leader-now.md",
+        "sha256": "30b72ff53d8fcff1ac81c640a909202e86fae211db1700073d657a53d8de7e1b",
+        "bytes": 7657
+      },
+      {
+        "path": "docs/HANDOFF.md",
+        "sha256": "2d102d4825b169b2a0ae3120ab83e8de124be160e47e2005248d58aba4210586",
+        "bytes": 69637
+      },
+      {
+        "path": ".trellis/tasks/08-09-memory-operations-ui/research/stage5-execution-map-2026-10-07.md",
+        "sha256": "fdd0dd49165e973884e968cf55430ebe6fbc5aee60b1d6433e0d8badddd88ba8",
+        "bytes": 5991
+      },
+      {
+        "path": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/c1b-independent-review-2026-10-13.md",
+        "sha256": "7ab880181934e1b6e9331599ac2c7cd1a50ce2ae695225310a6c8ac4b663ad4b",
+        "bytes": 14244
+      },
+      {
+        "path": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/c1b-independent-check-log.json",
+        "sha256": "1ae4885b25b248fa3c313a5de7693bb5ca538297eb957c595dcb15f9499d6cf6",
+        "bytes": 18294
+      },
+      {
+        "path": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/c1b-independent-cleanup-evidence.json",
+        "sha256": "ba5f04bf7f395fef2a048fc9c1c1046c55291c0ba60c3985dca4daf0b45828f2",
+        "bytes": 2070
+      },
+      {
+        "path": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/c1b-independent-runtime-evidence.json",
+        "sha256": "d19cf6bdd3a10663139911741ad2b7650de372a595a6143b96f29299874b26ce",
+        "bytes": 1524
+      },
+      {
+        "path": ".trellis/tasks/10-07-hindsight-managed-host-custody/research/c1b-independent-source-hashes.json",
+        "sha256": "f69ca93f675bf3513ef687952c357c0be0004a305e1ff46ecc91c21d12033c17",
+        "bytes": 11209
+      }
+    ]
+  },
+  "trackedDocumentationWhitespace": {
+    "exitCode": 0,
+    "toolChunk": "9ec3a4"
+  },
+  "sourceReadbackToolChunk": "2172f8",
+  "cleanupReadbackToolChunk": "a34ccb",
+  "documentationReadbackToolChunk": "a16d7e",
+  "remainingGates": [
+    "Eight actual Linux process tests: existing Ubuntu has Python 3.10.12 and lacks python-dotenv; no installation was authorized or performed.",
+    "Actual C1a Ubuntu credential service and final Windows installer/keyring/manual acceptance.",
+    "C2 real isolated Docker/resource/observer/provider-start wiring and deployment evidence.",
+    "C3/C4/5D real model and populated-data/candidate acceptance."
+  ]
+}
+

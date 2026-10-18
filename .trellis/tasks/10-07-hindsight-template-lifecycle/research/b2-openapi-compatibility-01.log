@@ -1,0 +1,1 @@
+{"report": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b2-openapi-compatibility.json", "canonicalSha256": "bf3cabf4ab6477e2a27e2504e3c1633632fb8468d175593c6d75a9b6794e4a71", "b1": {"paths": {"added": ["/ext/taki-memory/template/label-evidence"], "removed": [], "changed": []}, "schemas": {"added": [], "removed": [], "changed": []}}}

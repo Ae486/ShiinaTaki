@@ -1,0 +1,53 @@
+{
+  "command": "pnpm --filter @taki/shared exec vitest run src/hindsight-template-validation.test.ts src/hindsight-template-schema.test.ts --maxWorkers=2",
+  "cwd": "H:\\TakiAgent",
+  "startedAtUtc": "2026-10-08T05:56:03.7926032Z",
+  "endedAtUtc": "2026-10-08T05:56:06.1161323Z",
+  "elapsedSeconds": 2.3064378,
+  "exitCode": 0,
+  "log": ".trellis/tasks/10-07-hindsight-template-lifecycle/research/b1-independent-core-shared-01.log",
+  "sourceBefore": [
+    {
+      "path": "packages/shared/src/hindsight-template-definition-schema.ts",
+      "sha256": "195a89420535a80fa9ac405c590cda224fd5ca4f5bc3629b4901a4e252473e5a"
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-schema.ts",
+      "sha256": "832815a91a0c48f8df50007f0b89d79b2ecfc3d4dea28bf905f34e6ff9707611"
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-encoding.ts",
+      "sha256": "f33d349c4d60e1be103274f5a69fdd745fe614d4653d001813de634072a6d2df"
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-validation.test.ts",
+      "sha256": "a631da133df5bcf6f3f0169b2a65f56847b63c71609caf98914480e9b5563958"
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-schema.test.ts",
+      "sha256": "3b6f0c23dafd98a1bfeac1ff1c1372b43078fd169eddf6d1e76aeb076dfc94f2"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "path": "packages/shared/src/hindsight-template-definition-schema.ts",
+      "sha256": "195a89420535a80fa9ac405c590cda224fd5ca4f5bc3629b4901a4e252473e5a"
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-schema.ts",
+      "sha256": "832815a91a0c48f8df50007f0b89d79b2ecfc3d4dea28bf905f34e6ff9707611"
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-encoding.ts",
+      "sha256": "f33d349c4d60e1be103274f5a69fdd745fe614d4653d001813de634072a6d2df"
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-validation.test.ts",
+      "sha256": "a631da133df5bcf6f3f0169b2a65f56847b63c71609caf98914480e9b5563958"
+    },
+    {
+      "path": "packages/shared/src/hindsight-template-schema.test.ts",
+      "sha256": "3b6f0c23dafd98a1bfeac1ff1c1372b43078fd169eddf6d1e76aeb076dfc94f2"
+    }
+  ]
+}

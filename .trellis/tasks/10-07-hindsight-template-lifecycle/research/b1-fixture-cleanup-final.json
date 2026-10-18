@@ -1,0 +1,26 @@
+[
+  {
+    "fixture": "taki-hindsight-g1-9e0fb97426fd",
+    "stopped": true,
+    "dataRemoved": true,
+    "registryRemoved": true
+  },
+  {
+    "fixture": "taki-hindsight-g1-f89640374012",
+    "stopped": true,
+    "dataRemoved": true,
+    "registryRemoved": true
+  },
+  {
+    "fixture": "taki-hindsight-g1-f109eb31cc07",
+    "stopped": true,
+    "dataRemoved": true,
+    "registryRemoved": true
+  },
+  {
+    "fixture": "taki-hindsight-g1-537efb2670f5",
+    "stopped": true,
+    "dataRemoved": true,
+    "registryRemoved": true
+  }
+]

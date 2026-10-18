@@ -1,0 +1,14 @@
+{
+  "command": [
+    "cmd.exe",
+    "/c",
+    "pnpm",
+    "--filter",
+    "@taki/shared",
+    "typecheck"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 2,
+  "durationSeconds": 8.19,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b1-independent-native-shared-types-01.log"
+}

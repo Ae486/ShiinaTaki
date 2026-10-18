@@ -1,0 +1,4 @@
+{
+  "command": "pnpm --filter @taki/core exec vitest run template-selection template-revalidate template-provision --testNamePattern <new cases> --maxWorkers=2",
+  "exit": 0
+}

@@ -1,0 +1,11 @@
+{
+  "command": [
+    "git",
+    "diff",
+    "--check"
+  ],
+  "cwd": "H:/hindsight",
+  "exitCode": 0,
+  "durationSeconds": 2.045,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b1-native-whitespace-01.log"
+}

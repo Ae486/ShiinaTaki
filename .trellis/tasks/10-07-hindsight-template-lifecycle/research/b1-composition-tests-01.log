@@ -1,0 +1,31 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ ❯ src/memory/hindsight/template-lifecycle/template-composition.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/memory/hindsight/template-lifecycle/template-composition.test.ts [ src/memory/hindsight/template-lifecycle/template-composition.test.ts ]
+Error: .omit() cannot be used on object schemas containing refinements
+ ❯ Module.omit ../../node_modules/.pnpm/zod@4.4.3/node_modules/zod/v4/core/util.js:369:15
+ ❯ _.omit ../../node_modules/.pnpm/zod@4.4.3/node_modules/zod/v4/classic/schemas.js:775:25
+ ❯ src/memory/hindsight/template-lifecycle/template-projection.ts:12:72
+     10|
+     11| export const TemplateProjectionSchema = HindsightTemplateSnapshotSchem…
+     12|   models: z.array(HindsightTemplateSnapshotSchema.shape.models.element…
+       |                                                                        ^
+     13|   directives: z.array(HindsightTemplateSnapshotSchema.shape.directives…
+     14| });
+ ❯ src/memory/hindsight/template-lifecycle/template-preview.ts:13:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  00:00:38
+   Duration  4.63s (transform 2.52s, setup 0ms, import 0ms, tests 0ms, environment 0ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/hindsight/template-lifecycle/template-composition.test.ts --maxWorkers=2

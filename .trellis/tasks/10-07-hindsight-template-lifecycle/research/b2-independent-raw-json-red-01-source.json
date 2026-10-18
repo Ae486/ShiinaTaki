@@ -1,0 +1,41 @@
+{
+  "capturedAtUtc": "2026-10-08T12:21:42.8663760Z",
+  "repository": "H:/hindsight",
+  "files": [
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/llm_wrapper.py",
+      "bytes": 68112,
+      "sha256": "1ed4579693bd26593ac8343338a26c06d5535e452805d5e0c6d23a7bfb850779"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/providers/litellm_llm.py",
+      "bytes": 26662,
+      "sha256": "110444d8c57704cc2d97978d6d1ca0b06a410ef9b51590a2ad8e28536ab7c852"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/providers/openai_compatible_llm.py",
+      "bytes": 79711,
+      "sha256": "be3b770d2bd7ce4711585604c27d358529ef4309a2e6e380865ac1b8e132d3bd"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/retain/template_label_origin.py",
+      "bytes": 6513,
+      "sha256": "03954acfb1a118f93115671284802f7b88c3347ec52dbf5f8428f6e3c0ec13c7"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/retain/fact_extraction.py",
+      "bytes": 135372,
+      "sha256": "9fd4b0ddcb36c2c4a6b22742ec63f26e5783471a7196fc1dac09b137acdaf4b8"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_template_label_extraction.py",
+      "bytes": 13188,
+      "sha256": "0938d34318de74e8cfa80920472518e2dc2575f58d615ddd075eabf6ab478970"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/template_label_helpers.py",
+      "bytes": 6574,
+      "sha256": "a0ce52613b986cae76f11b887451c6facff85bf213457bc8c79bf54bf7b94aaa"
+    }
+  ]
+}

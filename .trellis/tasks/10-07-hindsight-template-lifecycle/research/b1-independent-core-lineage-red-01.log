@@ -1,0 +1,318 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts (10 tests | 10 failed) 2666ms
+     × converges a fresh database and is a no-op after reopen 234ms
+     × converges the historical T4 17/18 MCP-Skill lineage through 024 251ms
+     × applies the committed main 021-023 tail to the pre-main database 212ms
+     × upgrades a version-31 database with an existing summary and reopens as a no-op 255ms
+     × preserves a legal Hindsight authority marker and activation receipt on reopen 340ms
+     × adds the current tail without rewriting an existing replica, checkpoint, or usable lease 339ms
+     × preserves the 034 history and data through all B4 storage and reopen 277ms
+     × preserves the main history and data through all B4 storage and reopen 228ms
+     × preserves the t4 history and data through all B4 storage and reopen 278ms
+     × preserves the both history and data through all B4 storage and reopen 250ms
+ ❯ src/db/migrations/041-canonical-memory-maintenance.test.ts (10 tests | 2 failed) 1540ms
+     × applies a fresh ordered registry, enforces one pending span, and retains the exact eligibility baseline 227ms
+     × upgrades a real 040 Local/B2 history byte-for-byte, replays after deletion, and reopens without another migration 327ms
+ ❯ src/db/migrations/054-memory-transition-publication.test.ts (7 tests | 3 failed) 980ms
+     × preserves legacy-markdown marker bytes and both old receipt histories through upgrade/reopen 205ms
+     × preserves canonical-local marker bytes and both old receipt histories through upgrade/reopen 181ms
+     × preserves hindsight marker bytes and both old receipt histories through upgrade/reopen 192ms
+ ❯ src/db/migrations/053-memory-transition-candidates.test.ts (2 tests | 1 failed) 848ms
+     × upgrades a real 052 file without rewriting receipts and reopens without migration 196ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 16 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/db/migrations/041-canonical-memory-maintenance.test.ts > 041 canonical maintenance history and ingestion schema > applies a fresh ordered registry, enforces one pending span, and retains the exact eligibility baseline
+AssertionError: expected 58 to be 57 // Object.is equality
+
+- Expected
++ Received
+
+- 57
++ 58
+
+ ❯ src/db/migrations/041-canonical-memory-maintenance.test.ts:57:40
+     55|     const applied: number[][] = []; const db = open(":memory:", MIGRAT…
+     56|     expect(applied).toEqual([MIGRATIONS.map(({ version }) => version)]…
+     57|     expect(MIGRATIONS.at(-1)?.version).toBe(57);
+       |                                        ^
+     58|     const tables = db.prepare("SELECT name FROM sqlite_schema WHERE ty…
+     59|     expect(addedTables.every((table) => tables.includes(table))).toBe(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/16]⎯
+
+ FAIL  src/db/migrations/041-canonical-memory-maintenance.test.ts > 041 canonical maintenance history and ingestion schema > upgrades a real 040 Local/B2 history byte-for-byte, replays after deletion, and reopens without another migration
+AssertionError: expected [ [ 41, 42, 43, 44, 45, 46, …(12) ] ] to deeply equal [ [ 41, 42, 43, 44, 45, 46, …(11) ] ]
+
+- Expected
++ Received
+
+@@ -15,7 +15,8 @@
+      53,
+      54,
+      55,
+      56,
+      57,
++     58,
+    ],
+  ]
+
+ ❯ src/db/migrations/041-canonical-memory-maintenance.test.ts:94:21
+     92|     const before = { history: historyBytes(old), current: currentRows(…
+     93|     const applied: number[][] = []; const upgraded = open(file, MIGRAT…
+     94|     expect(applied).toEqual([[41, 42, 43, 44, 45, 46, 47, 48, 49, 50, …
+       |                     ^
+     95|     expect(historyBytes(upgraded)).toEqual(before.history);
+     96|     expect(currentRows(upgraded)).toEqual({ ...before.current,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/16]⎯
+
+ FAIL  src/db/migrations/053-memory-transition-candidates.test.ts > W3 additive 053 and writer reservation > upgrades a real 052 file without rewriting receipts and reopens without migration
+AssertionError: expected [ [ 53, 54, 55, 56, 57, 58 ] ] to deeply equal [ [ 53, 54, 55, 56, 57 ] ]
+
+- Expected
++ Received
+
+@@ -3,7 +3,8 @@
+      53,
+      54,
+      55,
+      56,
+      57,
++     58,
+    ],
+  ]
+
+ ❯ src/db/migrations/053-memory-transition-candidates.test.ts:17:21
+     15|     const applied: number[][] = [];
+     16|     db = openDatabase({ path, migrations: MIGRATIONS, onMigrated: (ver…
+     17|     expect(applied).toEqual([[53, 54, 55, 56, 57]]);
+       |                     ^
+     18|     expect(db.prepare("SELECT * FROM migrations WHERE version<=52 ORDE…
+     19|     expect(db.prepare("PRAGMA quick_check").get()?.quick_check).toBe("…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/16]⎯
+
+ FAIL  src/db/migrations/054-memory-transition-publication.test.ts > 054 explicit transition publication lineage > preserves legacy-markdown marker bytes and both old receipt histories through upgrade/reopen
+ FAIL  src/db/migrations/054-memory-transition-publication.test.ts > 054 explicit transition publication lineage > preserves canonical-local marker bytes and both old receipt histories through upgrade/reopen
+ FAIL  src/db/migrations/054-memory-transition-publication.test.ts > 054 explicit transition publication lineage > preserves hindsight marker bytes and both old receipt histories through upgrade/reopen
+AssertionError: expected [ [ 54, 55, 56, 57, 58 ] ] to deeply equal [ [ 54, 55, 56, 57 ] ]
+
+- Expected
++ Received
+
+@@ -2,7 +2,8 @@
+    [
+      54,
+      55,
+      56,
+      57,
++     58,
+    ],
+  ]
+
+ ❯ src/db/migrations/054-memory-transition-publication.test.ts:49:21
+     47|     const applied: number[][] = [];
+     48|     db = openDatabase({ path, migrations: MIGRATIONS, onMigrated: (ver…
+     49|     expect(applied).toEqual([[54, 55, 56, 57]]); expect(markerBytes(db…
+       |                     ^
+     50|     expect(db.prepare("SELECT transition_receipt_id FROM memory_author…
+     51|     expect(db.prepare("SELECT * FROM migrations WHERE version<=53 ORDE…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/16]⎯
+
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > converges a fresh database and is a no-op after reopen
+AssertionError: expected 58 to be 57 // Object.is equality
+
+- Expected
++ Received
+
+- 57
++ 58
+
+ ❯ expectFinalSchema src/db/migrations/lineage-reopen-matrix.test.ts:85:87
+     83|
+     84| function expectFinalSchema(db: Database): void {
+     85|   expect(db.prepare("SELECT max(version) AS version FROM migrations").…
+       |                                                                                       ^
+     86|   const tables = db.prepare("SELECT name FROM sqlite_master WHERE type…
+     87|   expect(tables).toEqual(expect.arrayContaining([
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts:206:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/16]⎯
+
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > converges the historical T4 17/18 MCP-Skill lineage through 024
+AssertionError: expected 58 to be 57 // Object.is equality
+
+- Expected
++ Received
+
+- 57
++ 58
+
+ ❯ expectFinalSchema src/db/migrations/lineage-reopen-matrix.test.ts:85:87
+     83|
+     84| function expectFinalSchema(db: Database): void {
+     85|   expect(db.prepare("SELECT max(version) AS version FROM migrations").…
+       |                                                                                       ^
+     86|   const tables = db.prepare("SELECT name FROM sqlite_master WHERE type…
+     87|   expect(tables).toEqual(expect.arrayContaining([
+ ❯ expectReopenNoOp src/db/migrations/lineage-reopen-matrix.test.ts:157:3
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts:269:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/16]⎯
+
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > applies the committed main 021-023 tail to the pre-main database
+AssertionError: expected [ [ 21, 22, 23, 24, 25, 26, …(32) ] ] to deeply equal [ [ 21, 22, 23, 24, 25, 26, …(31) ] ]
+
+- Expected
++ Received
+
+@@ -35,7 +35,8 @@
+      53,
+      54,
+      55,
+      56,
+      57,
++     58,
+    ],
+  ]
+
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts:279:25
+    277|     const tailApplied: number[][] = [];
+    278|     const reopened = open(path, MIGRATIONS, (applied) => tailApplied.p…
+    279|     expect(tailApplied).toEqual([[21, 22, 23, 24, 25, 26, 27, 28, 29, …
+       |                         ^
+    280|     expectFinalSchema(reopened);
+    281|     expect(reopened.prepare("SELECT mode FROM memory_authority_selecti…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/16]⎯
+
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > upgrades a version-31 database with an existing summary and reopens as a no-op
+AssertionError: expected [ [ 32, 33, 34, 35, 36, 37, …(21) ] ] to deeply equal [ [ 32, 33, 34, 35, 36, 37, …(20) ] ]
+
+- Expected
++ Received
+
+@@ -24,7 +24,8 @@
+      53,
+      54,
+      55,
+      56,
+      57,
++     58,
+    ],
+  ]
+
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts:296:21
+    294|     const applied: number[][] = [];
+    295|     const upgraded = open(path, MIGRATIONS, (versions) => applied.push…
+    296|     expect(applied).toEqual([[32, 33, 34, 35, 36, 37, 38, 39, 40, 41, …
+       |                     ^
+    297|     expect(upgraded.prepare(`SELECT through_seq,text,revision,last_ope…
+    298|       source_digest,captured_tail_seq FROM conversation_summary WHERE …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/16]⎯
+
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > preserves a legal Hindsight authority marker and activation receipt on reopen
+AssertionError: expected 58 to be 57 // Object.is equality
+
+- Expected
++ Received
+
+- 57
++ 58
+
+ ❯ expectFinalSchema src/db/migrations/lineage-reopen-matrix.test.ts:85:87
+     83|
+     84| function expectFinalSchema(db: Database): void {
+     85|   expect(db.prepare("SELECT max(version) AS version FROM migrations").…
+       |                                                                                       ^
+     86|   const tables = db.prepare("SELECT name FROM sqlite_master WHERE type…
+     87|   expect(tables).toEqual(expect.arrayContaining([
+ ❯ expectReopenNoOp src/db/migrations/lineage-reopen-matrix.test.ts:157:3
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts:337:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/16]⎯
+
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > adds the current tail without rewriting an existing replica, checkpoint, or usable lease
+AssertionError: expected [ [ 34, 35, 36, 37, 38, 39, …(19) ] ] to deeply equal [ [ 34, 35, 36, 37, 38, 39, …(18) ] ]
+
+- Expected
++ Received
+
+@@ -22,7 +22,8 @@
+      53,
+      54,
+      55,
+      56,
+      57,
++     58,
+    ],
+  ]
+
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts:360:21
+    358|     close(first); const applied: number[][] = [];
+    359|     const upgraded = open(path, MIGRATIONS, (versions) => applied.push…
+    360|     expect(applied).toEqual([[34, 35, 36, 37, 38, 39, 40, 41, 42, 43, …
+       |                     ^
+    361|     expectFinalSchema(upgraded);
+    362|     expect(upgraded.prepare("SELECT * FROM hindsight_replica_sync_reco…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/16]⎯
+
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > preserves the 034 history and data through all B4 storage and reopen
+AssertionError: expected [ [ 35, 36, 37, 38, 39, 40, …(18) ] ] to deeply equal [ [ 35, 36, 37, 38, 39, 40, …(17) ] ]
+
+- Expected
++ Received
+
+@@ -21,7 +21,8 @@
+      53,
+      54,
+      55,
+      56,
+      57,
++     58,
+    ],
+  ]
+
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts:391:21
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/16]⎯
+
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > preserves the main history and data through all B4 storage and reopen
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > preserves the t4 history and data through all B4 storage and reopen
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > preserves the both history and data through all B4 storage and reopen
+AssertionError: expected [ [ 36, 37, 38, 39, 40, 41, …(17) ] ] to deeply equal [ [ 36, 37, 38, 39, 40, 41, …(16) ] ]
+
+- Expected
++ Received
+
+@@ -20,7 +20,8 @@
+      53,
+      54,
+      55,
+      56,
+      57,
++     58,
+    ],
+  ]
+
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts:391:21
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/16]⎯
+
+
+ Test Files  4 failed (4)
+      Tests  16 failed | 13 passed (29)
+   Start at  13:45:08
+   Duration  8.33s (transform 4.61s, setup 0ms, import 7.16s, tests 6.03s, environment 1ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/db/migrations/041-canonical-memory-maintenance.test.ts src/db/migrations/053-memory-transition-candidates.test.ts src/db/migrations/054-memory-transition-publication.test.ts src/db/migrations/lineage-reopen-matrix.test.ts --maxWorkers=2

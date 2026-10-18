@@ -1,0 +1,187 @@
+{
+  "version": 1,
+  "createdAt": "2026-10-15T10:33:58.064Z",
+  "reviewer": "/root/c2_design_check",
+  "task": ".trellis/tasks/10-14-hindsight-managed-deployment",
+  "scope": "Only the consumed-R1-relative R2 scan-order repair, fresh token and static evidence",
+  "result": {
+    "independentReview": "PASS",
+    "release": "READY_FOR_ROOT_ONCE_ONLY_R2_EXECUTION",
+    "runtime": "NOT_RUN",
+    "firstAttempt": "FAIL_UNCHANGED",
+    "deploymentReady": false
+  },
+  "r2": {
+    "caseId": "775da07b-2b69-44a3-868c-2604423dac11",
+    "staging": "G:/TakiAgent-c2a-docker-acceptance/recovery-775da07b-2b69-44a3-868c-2604423dac11",
+    "protectedRoot": "C:/taki-c2a-docker-recovery-775da07b-2b69-44a3-868c-2604423dac11",
+    "imageTag": "taki-c2a-fake:775da07b-2b69-44a3-868c-2604423dac11",
+    "preparedOrExecutedByThisAgent": false
+  },
+  "reviewedInputs": [
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts",
+      "bytes": 47588,
+      "sha256": "869146af78a9cde99cf70af2c857049548c3c097aedd09f63c95d779c8d11017",
+      "bom": false
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/README.md",
+      "bytes": 9848,
+      "sha256": "9c73c76e240e84e45b98d6872a9e6596f9df7d6e7c12d55d46556d36b9c0e3e4",
+      "bom": false
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-r2-self-check.md",
+      "bytes": 5081,
+      "sha256": "974109fdb4598cce3ceaada4f933d804ca24381d96f90a6f401715d6454df20c",
+      "bom": false
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-r2-self-check.json",
+      "bytes": 25449,
+      "sha256": "c9250e0c65792b8656d63a338700665a4f6a781bf9f6d163385c1fb4040fe419",
+      "bom": false
+    }
+  ],
+  "unchangedProbe": {
+    "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/recovery-probe.py",
+    "bytes": 5131,
+    "sha256": "e3e49ad25888b34332184775f3193a47ad9e3c0c4943fd08e3dc7b3611119b29",
+    "independentlyHashMatched": true
+  },
+  "findings": {
+    "verifiedFixed": [
+      {
+        "file": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts",
+        "issue": "R1 attempted a complete local-file read while the Shell retained the exclusive deployment lock.",
+        "repair": "Remove the final live scan; keep the complete existing scan after all process/helper reaping and before R deletion; require its successful completion flag before final PASS.",
+        "implementedBy": "/root/c2a_recovery_implement",
+        "reviewerCodeEdits": false
+      }
+    ],
+    "additional": [],
+    "notFixed": []
+  },
+  "delta": {
+    "onlyFourExpectedRunnerEdits": true,
+    "scannerBodyUnchanged": true,
+    "noConsumedTokenInRunnerOrReadme": true,
+    "currentInputHashesMatchSelfCheck": true,
+    "threePassingAffectedChecks": true,
+    "noEmitDiagnosticsEmpty": true,
+    "threePriorPassingPythonChecks": true,
+    "utf8NoBom": true
+  },
+  "controlFlow": {
+    "liveAssertionsPreserved": "Final original-resource, restart, fresh authorization, marker and exec/event assertions retain their original order.",
+    "scannerCoverage": "Scanner body, provisioning scan, lock leaf coverage, sentinel detection, symlink/regular-file checks and byte/file limits are unchanged.",
+    "order": [
+      "stopProcesses(processes) at line 592",
+      "requireHelperGone for each captured helper at line 593",
+      "full scanTree at line 629",
+      "set protectedTreeScannedAfterStop only after scan returns",
+      "validate original path/token and remove R at lines 630-631",
+      "require flag after cleanup returns at line 685"
+    ],
+    "finalGate": "Main failure remains false even if cleanup succeeds. Scan, cleanup, root-removal or missing-flag failure reaches the existing catch and forces casePassed=false; only complete successful main and cleanup retain true.",
+    "productionLock": "Unchanged; no share-mode workaround or unreadable-leaf exemption.",
+    "mainFailureCatch": "Unchanged; R1 diagnostic limitations are preserved."
+  },
+  "verification": {
+    "lint": "PASS_REUSED_R2_HASH_BOUND",
+    "typeCheck": "PASS_REUSED_R2_HASH_BOUND",
+    "nodeSyntax": "PASS_REUSED_R2_HASH_BOUND",
+    "pythonAstRuff": "PASS_REUSED_UNCHANGED_HASH",
+    "tests": "NOT_RUN",
+    "reviewerStaticCommandReruns": 0,
+    "staticEvidence": {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-r2-self-check.json",
+      "sha256": "c9250e0c65792b8656d63a338700665a4f6a781bf9f6d163385c1fb4040fe419"
+    },
+    "affectedResults": [
+      {
+        "name": "node-syntax",
+        "status": "PASS",
+        "startedAt": "2026-10-15T10:26:22.682Z",
+        "elapsedMs": 1234,
+        "output": ""
+      },
+      {
+        "name": "scoped-eslint",
+        "status": "PASS",
+        "startedAt": "2026-10-15T10:26:34.297Z",
+        "elapsedMs": 4612,
+        "output": ""
+      },
+      {
+        "name": "single-entry-no-emit",
+        "status": "PASS",
+        "startedAt": "2026-10-15T10:26:38.909Z",
+        "elapsedMs": 7043,
+        "output": "{\"entry\":\".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts\",\"noEmit\":true,\"diagnostics\":[]}\n"
+      }
+    ],
+    "reusedPythonResults": [
+      {
+        "name": "python-ast",
+        "index": 0,
+        "startedAt": "2026-10-15T09:29:18.412Z",
+        "exitCode": 0,
+        "output": "AST_OK\r\n"
+      },
+      {
+        "name": "python-ruff-check",
+        "index": 1,
+        "startedAt": "2026-10-15T09:35:24.925Z",
+        "exitCode": 0,
+        "output": "All checks passed!\n"
+      },
+      {
+        "name": "python-ruff-format",
+        "index": 2,
+        "startedAt": "2026-10-15T09:35:51.645Z",
+        "exitCode": 0,
+        "output": "1 file already formatted\n"
+      }
+    ],
+    "note": "The current source hash matches all new successful check inputs; no source repair was necessary during review. No unchanged suite/build/runtime was repeated."
+  },
+  "preservation": {
+    "firstAttemptArchive": {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-first-attempt-evidence.zip",
+      "sha256": "fb0d5afca5f04df4d800c25d831db49c218a2d3233a07c919f5baa55e11b795d",
+      "entryCount": 72,
+      "verifiedBy": "Root; reused without rereading or rehashing all entries"
+    },
+    "firstAttemptResult": "FAIL remains authoritative for the consumed R1 token; no archive/result/review was edited.",
+    "specSync": "Not needed: only task-fixture scheduling and evidence gating changed."
+  },
+  "changes": {
+    "reviewerModifiedOwnedInputs": [],
+    "newReports": [
+      ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-r2-review.md",
+      ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-r2-review.json"
+    ],
+    "production": [],
+    "otherOwnerFiles": [],
+    "runtimeOrMetadata": []
+  },
+  "ownership": {
+    "state": "released-to-root",
+    "files": [
+      ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/run-recovery.ts",
+      ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-recovery/README.md",
+      ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-r2-self-check.md",
+      ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-recovery-r2-self-check.json"
+    ]
+  },
+  "notRun": [
+    "Docker/WSL",
+    "Core/Shell/fixture lifecycle",
+    "Host/image/Rust builds",
+    "Behavior tests or the old 182-case suite",
+    "Git lifecycle"
+  ],
+  "next": "Root may prepare the exact fresh R2 resources and run once after its normal input readback. Runtime acceptance and exact owned cleanup still require that execution."
+}

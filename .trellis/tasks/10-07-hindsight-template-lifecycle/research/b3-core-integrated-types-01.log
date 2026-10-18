@@ -1,0 +1,13 @@
+
+> @taki/core@0.0.0 typecheck H:\TakiAgent\packages\core
+> tsc --noEmit
+
+src/memory/hindsight-backup/hindsight-backup-fixtures.ts(39,3): error TS2719: Type '{ version: 1; backupId: string; createdAt: string; operationId: string; route: "native-endpoint" | "operator-artifact"; core: { file: "core.sqlite"; sha256: string; bytes: number; pages: number; migrationHead: number; }; ... 6 more ...; verifiedAt: string | null; } | { ...; }' is not assignable to type '{ version: 1; backupId: string; createdAt: string; operationId: string; route: "native-endpoint" | "operator-artifact"; core: { file: "core.sqlite"; sha256: string; bytes: number; pages: number; migrationHead: number; }; ... 6 more ...; verifiedAt: string | null; } | { ...; }'. Two different types with this name exist, but they are unrelated.
+  Type '{ backupId: string; operationId: string; route: "native-endpoint" | "operator-artifact"; core: { file: "core.sqlite"; sha256: string; bytes: number; pages: number; migrationHead: number; }; ... 10 more ...; native: { ...; } | { ...; }; }' is not assignable to type '{ version: 1; backupId: string; createdAt: string; operationId: string; route: "native-endpoint" | "operator-artifact"; core: { file: "core.sqlite"; sha256: string; bytes: number; pages: number; migrationHead: number; }; ... 6 more ...; verifiedAt: string | null; } | { ...; }'.
+    Type '{ backupId: string; operationId: string; route: "native-endpoint" | "operator-artifact"; core: { file: "core.sqlite"; sha256: string; bytes: number; pages: number; migrationHead: number; }; ... 10 more ...; native: { ...; } | { ...; }; }' is not assignable to type '{ backupId: string; operationId: string; route: "native-endpoint" | "operator-artifact"; core: { file: "core.sqlite"; sha256: string; bytes: number; pages: number; migrationHead: number; }; ... 10 more ...; native: { ...; }; }'.
+      Types of property 'version' are incompatible.
+        Type '2 | 1' is not assignable to type '2'.
+          Type '1' is not assignable to type '2'.
+src/memory/hindsight/hindsight-backup-client.ts(120,15): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
+src/testing/hindsight-template-backup-joint-fixture.ts(91,35): error TS2322: Type '"retain_extraction_instructions"' is not assignable to type '"retain_mission" | "observations_instructions" | "reflect_mission"'.
+ ELIFECYCLE  Command failed with exit code 2.

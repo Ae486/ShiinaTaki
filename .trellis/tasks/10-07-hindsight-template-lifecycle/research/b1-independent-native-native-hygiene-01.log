@@ -1,0 +1,6 @@
+warning: in the working copy of 'TAKI_PATCHES.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'hindsight-api-slim/hindsight_api/admin/cli.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'hindsight-api-slim/hindsight_api/engine/reflect/agent.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'hindsight-api-slim/hindsight_api/engine/transition_snapshot.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'hindsight-api-slim/tests/native_results/test_transition_backup.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'hindsight-api-slim/tests/test_taki_extension_contract.py', LF will be replaced by CRLF the next time Git touches it

@@ -1,0 +1,17 @@
+{
+  "command": [
+    "H:/hindsight/.venv/Scripts/ruff.exe",
+    "format",
+    "tests/native_results/test_template_backup_restore.py"
+  ],
+  "cwd": "H:/hindsight/hindsight-api-slim",
+  "exitCode": 0,
+  "durationSeconds": 0.264,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-restore-format-01.log",
+  "sources": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b3-native-restore-format-01-sources.json",
+  "changedInputs": [
+    "H:\\hindsight\\hindsight-api-slim\\tests\\native_results\\test_template_backup_restore.py"
+  ],
+  "ownedTemp": "H:\\TakiAgent\\.trellis\\.runtime\\b3-native-checks\\restore-format-01-55gcgv8z",
+  "ownedTempRemoved": true
+}

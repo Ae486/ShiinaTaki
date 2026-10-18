@@ -1,0 +1,33 @@
+
+> @taki/core@0.0.0 test H:\TakiAgent\packages\core
+> vitest run "--maxWorkers=2" "--reporter=verbose" "src/memory/transitions/transition-healthy-publication-lease.test.ts" "src/memory/transitions/transition-evidence-context.test.ts"
+
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ ✓ src/memory/transitions/transition-evidence-context.test.ts > synchronous transition evidence boundaries > isolates mutable bundle views and rejects caller envelopes, another database and an expired context 626ms
+ ✓ src/memory/transitions/transition-evidence-context.test.ts > synchronous transition evidence boundaries > closes on throw or asynchronous misuse and nested synchronous calls retain their owner 457ms
+ ✓ src/memory/transitions/transition-evidence-context.test.ts > synchronous transition evidence boundaries > rejects changed actual body in a live context 411ms
+ ✓ src/memory/transitions/transition-evidence-context.test.ts > synchronous transition evidence boundaries > rejects changed actual transition_id in a live context 377ms
+ ✓ src/memory/transitions/transition-evidence-context.test.ts > synchronous transition evidence boundaries > rejects changed actual slot in a live context 372ms
+ ✓ src/memory/transitions/transition-evidence-context.test.ts > synchronous transition evidence boundaries > rejects changed actual delete in a live context 377ms
+ ✓ src/memory/transitions/transition-evidence-context.test.ts > synchronous transition evidence boundaries > completes real candidate/proof/COMMIT under a finite lease with costly verification and no heartbeat 1265ms
+ ✓ src/memory/transitions/transition-evidence-context.test.ts > synchronous transition evidence boundaries > still rejects genuine lease exhaustion and rolls back candidate and scope insertion 502ms
+ ✓ src/memory/transitions/transition-evidence-context.test.ts > synchronous transition evidence boundaries > revalidates storage between candidate, proof and COMMIT and again after publication 948ms
+ ✓ src/memory/transitions/transition-healthy-publication-lease.test.ts > healthy publication final live lease > rolls back all transition.return-local publication state when the actual final read-back reaches leaseUntil 2043ms
+ ✓ src/memory/transitions/transition-healthy-publication-lease.test.ts > healthy publication final live lease > rolls back all transition.reenter-hindsight publication state when the actual final read-back reaches leaseUntil 3450ms
+ ✓ src/memory/transitions/transition-healthy-publication-lease.test.ts > healthy publication final live lease > commits transition.return-local just before leaseUntil and reads the same receipt after expiry without new writes 1687ms
+ ✓ src/memory/transitions/transition-healthy-publication-lease.test.ts > healthy publication final live lease > commits transition.reenter-hindsight just before leaseUntil and reads the same receipt after expiry without new writes 3647ms
+ ✓ src/memory/transitions/transition-healthy-publication-lease.test.ts > healthy publication final live lease > rejects a changed ownerId after complete read-back instead of adopting the current executor 992ms
+ ✓ src/memory/transitions/transition-healthy-publication-lease.test.ts > healthy publication final live lease > rejects a changed operationId after complete read-back instead of adopting the current executor 877ms
+ ✓ src/memory/transitions/transition-healthy-publication-lease.test.ts > healthy publication final live lease > rejects a changed attemptId after complete read-back instead of adopting the current executor 864ms
+ ✓ src/memory/transitions/transition-healthy-publication-lease.test.ts > healthy publication final live lease > rejects a changed generation after complete read-back instead of adopting the current executor 862ms
+ ✓ src/memory/transitions/transition-healthy-publication-lease.test.ts > healthy publication final live lease > rejects a changed revision after complete read-back instead of adopting the current executor 814ms
+ ✓ src/memory/transitions/transition-healthy-publication-lease.test.ts > healthy publication final live lease > rejects a changed unchanged-revision after complete read-back instead of adopting the current executor 864ms
+ ✓ src/memory/transitions/transition-healthy-publication-lease.test.ts > healthy publication final live lease > requires an explicit live clock before a new publication can write 769ms
+
+ Test Files  2 passed (2)
+      Tests  20 passed (20)
+   Start at  18:50:50
+   Duration  26.68s (transform 12.19s, setup 0ms, import 16.13s, tests 22.22s, environment 0ms)
+

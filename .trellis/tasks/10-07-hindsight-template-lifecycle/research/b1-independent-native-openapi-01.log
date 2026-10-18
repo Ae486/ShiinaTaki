@@ -1,0 +1,144 @@
+HTTP REST API enabled
+✓ OpenAPI specification generated: H:\TakiAgent\.trellis\tasks\10-07-hindsight-template-lifecycle\research\b1-independent-native-openapi.json
+  - Title: Hindsight HTTP API
+  - Version: 0.9.0
+  - Endpoints: 116
+
+  Endpoints:
+    GET    /health                        [Monitoring] - Health check endpoint
+    GET    /version                       [Monitoring] - Get API version and feature flags
+    GET    /metrics                       [Monitoring] - Prometheus metrics endpoint
+    GET    /v1/default/banks/{bank_id}/graph [Memory] - Get memory graph data
+    GET    /v1/default/banks/{bank_id}/memories/list [Memory] - List memory units
+    POST   /v1/default/banks/{bank_id}/memories/dry-run-extract [Memory] - Dry-run fact extraction (preview, no persistence)
+    GET    /v1/default/banks/{bank_id}/memories/{memory_id} [Memory] - Get memory unit
+    PATCH  /v1/default/banks/{bank_id}/memories/{memory_id} [Memory] - Curate memory unit
+    GET    /v1/default/banks/{bank_id}/memories/{memory_id}/history [Memory] - Get observation history
+    POST   /v1/default/banks/{bank_id}/memories/recall [Memory] - Recall memory
+    POST   /v1/default/banks/{bank_id}/reflect [Memory] - Reflect and generate answer
+    GET    /v1/default/banks              [Banks] - List all memory banks
+    GET    /v1/default/banks/{bank_id}/stats [Banks] - Get statistics for memory bank
+    POST   /v1/default/banks/{bank_id}/health/llm [Banks] - Test the bank's LLM connectivity
+    GET    /v1/default/banks/{bank_id}/stats/memories-timeseries [Banks] - Memory ingestion time-series
+    GET    /v1/default/banks/{bank_id}/entities [Entities] - List entities
+    GET    /v1/default/banks/{bank_id}/entities/graph [Entities] - Get entity co-occurrence graph
+    GET    /v1/default/banks/{bank_id}/entities/{entity_id} [Entities] - Get entity details
+    POST   /v1/default/banks/{bank_id}/entities/{entity_id}/regenerate [Entities] - Regenerate entity observations (deprecated)
+    GET    /v1/default/banks/{bank_id}/mental-models [Mental Models] - List mental models
+    POST   /v1/default/banks/{bank_id}/mental-models [Mental Models] - Create mental model
+    GET    /v1/default/banks/{bank_id}/mental-models/{mental_model_id} [Mental Models] - Get mental model
+    PATCH  /v1/default/banks/{bank_id}/mental-models/{mental_model_id} [Mental Models] - Update mental model
+    DELETE /v1/default/banks/{bank_id}/mental-models/{mental_model_id} [Mental Models] - Delete mental model
+    GET    /v1/default/banks/{bank_id}/mental-models/{mental_model_id}/history [Mental Models] - Get mental model history
+    POST   /v1/default/banks/{bank_id}/mental-models/{mental_model_id}/refresh [Mental Models] - Refresh mental model
+    POST   /v1/default/banks/{bank_id}/mental-models/{mental_model_id}/dry-run-refresh [Mental Models] - Dry-run mental model refresh (preview, no persistence)
+    POST   /v1/default/banks/{bank_id}/mental-models/{mental_model_id}/clear [Mental Models] - Clear mental model content
+    GET    /v1/default/banks/{bank_id}/knowledge-base/tree [Knowledge Base] - Get the knowledge-base tree
+    POST   /v1/default/banks/{bank_id}/knowledge-base/folders [Knowledge Base] - Create a knowledge-base folder
+    POST   /v1/default/banks/{bank_id}/knowledge-base/pages [Knowledge Base] - Create a knowledge-base page
+    GET    /v1/default/banks/{bank_id}/knowledge-base/export [Knowledge Base] - Export the knowledge base as a markdown bundle
+    GET    /v1/default/banks/{bank_id}/knowledge-base/search [Knowledge Base] - Hybrid search over knowledge pages (BM25 + vector)
+    GET    /v1/default/banks/{bank_id}/knowledge-base/pages/{page_id} [Knowledge Base] - Get a knowledge-base page
+    PATCH  /v1/default/banks/{bank_id}/knowledge-base/nodes/{node_id} [Knowledge Base] - Rename/move a knowledge-base node or update a page's options
+    DELETE /v1/default/banks/{bank_id}/knowledge-base/nodes/{node_id} [Knowledge Base] - Delete a knowledge-base node
+    GET    /v1/default/banks/{bank_id}/directives [Directives] - List directives
+    POST   /v1/default/banks/{bank_id}/directives [Directives] - Create directive
+    GET    /v1/default/banks/{bank_id}/directives/{directive_id} [Directives] - Get directive
+    PATCH  /v1/default/banks/{bank_id}/directives/{directive_id} [Directives] - Update directive
+    DELETE /v1/default/banks/{bank_id}/directives/{directive_id} [Directives] - Delete directive
+    GET    /v1/default/banks/{bank_id}/documents [Documents] - List documents
+    GET    /v1/default/banks/{bank_id}/documents/{document_id}/chunks [Documents] - List document chunks
+    POST   /v1/default/banks/{bank_id}/documents/{document_id}/reprocess [Documents] - Reprocess document
+    GET    /v1/default/banks/{bank_id}/documents/{document_id} [Documents] - Get document details
+    PATCH  /v1/default/banks/{bank_id}/documents/{document_id} [Documents] - Update document
+    DELETE /v1/default/banks/{bank_id}/documents/{document_id} [Documents] - Delete a document
+    GET    /v1/default/banks/{bank_id}/tags [Memory] - List tags
+    GET    /v1/default/chunks/{chunk_id}  [Documents] - Get chunk details
+    GET    /v1/default/banks/{bank_id}/operations [Operations] - List async operations
+    GET    /v1/default/banks/{bank_id}/operations/{operation_id} [Operations] - Get operation status
+    DELETE /v1/default/banks/{bank_id}/operations/{operation_id} [Operations] - Cancel a pending async operation
+    POST   /v1/default/banks/{bank_id}/operations/{operation_id}/retry [Operations] - Retry a failed async operation
+    DELETE /v1/default/banks/{bank_id}/operations/{operation_id}/delete [Operations] - Delete a terminal async operation
+    GET    /v1/default/banks/{bank_id}/profile [Banks] - Get memory bank profile
+    PUT    /v1/default/banks/{bank_id}/profile [Banks] - Update memory bank disposition
+    POST   /v1/default/banks/{bank_id}/background [Banks] - Add/merge memory bank background (deprecated)
+    PUT    /v1/default/banks/{bank_id}    [Banks] - Create or update memory bank
+    PATCH  /v1/default/banks/{bank_id}    [Banks] - Partial update memory bank
+    DELETE /v1/default/banks/{bank_id}    [Banks] - Delete memory bank
+    POST   /v1/default/banks/{bank_id}/import [Bank Templates] - Import bank template
+    GET    /v1/default/banks/{bank_id}/export [Bank Templates] - Export bank template
+    GET    /v1/default/banks/{bank_id}/document-transfer [Document Transfer] - Export documents
+    POST   /v1/default/banks/{bank_id}/document-transfer [Document Transfer] - Import documents (async)
+    GET    /v1/bank-template-schema       [Bank Templates] - Get bank template JSON Schema
+    DELETE /v1/default/banks/{bank_id}/observations [Banks] - Clear all observations
+    GET    /v1/default/banks/{bank_id}/observations/scopes [Memory] - List observation scopes
+    POST   /v1/default/banks/{bank_id}/consolidation/recover [Banks] - Recover failed consolidation
+    DELETE /v1/default/banks/{bank_id}/memories/{memory_id}/observations [Memory] - Clear observations for a memory
+    GET    /v1/default/banks/{bank_id}/config [Banks] - Get bank configuration
+    PATCH  /v1/default/banks/{bank_id}/config [Banks] - Update bank configuration
+    DELETE /v1/default/banks/{bank_id}/config [Banks] - Reset bank configuration
+    POST   /v1/default/banks/{bank_id}/consolidate [Banks] - Trigger consolidation
+    POST   /v1/default/banks/{bank_id}/webhooks [Webhooks] - Register webhook
+    GET    /v1/default/banks/{bank_id}/webhooks [Webhooks] - List webhooks
+    DELETE /v1/default/banks/{bank_id}/webhooks/{webhook_id} [Webhooks] - Delete webhook
+    PATCH  /v1/default/banks/{bank_id}/webhooks/{webhook_id} [Webhooks] - Update webhook
+    GET    /v1/default/banks/{bank_id}/webhooks/{webhook_id}/deliveries [Webhooks] - List webhook deliveries
+    POST   /v1/default/banks/{bank_id}/memories [Memory] - Retain memories
+    DELETE /v1/default/banks/{bank_id}/memories [Memory] - Clear memory bank memories
+    POST   /v1/default/banks/{bank_id}/files/retain [Files] - Convert files to memories
+    GET    /v1/default/banks/{bank_id}/audit-logs [Audit] - List audit logs
+    GET    /v1/default/banks/{bank_id}/audit-logs/stats [Audit] - Audit log statistics
+    GET    /v1/default/banks/{bank_id}/llm-requests [LLM Traces] - List LLM request traces
+    GET    /v1/default/banks/{bank_id}/llm-requests/stats [LLM Traces] - LLM request statistics
+    GET    /ext/taki-memory/version       [Taki Memory Compatibility] - Get Taki memory compatibility manifest
+    POST   /ext/taki-memory/banks/{bank_id}/retains [Taki Memory Compatibility] - Admit an idempotent native async retain with immutable factual results
+    PATCH  /ext/taki-memory/banks/{bank_id}/memories/{memory_id} [Taki Memory Compatibility] - Conditionally curate a memory with durable native-result evidence
+    GET    /ext/taki-memory/banks/{bank_id}/native-results/{kind}/{operation_id} [Taki Memory Compatibility] - Read durable factual completion without executing memory work
+    GET    /ext/taki-memory/banks/{bank_id}/native-results/{kind}/{operation_id}/results/{result_hash}/pages/{page_number} [Taki Memory Compatibility] - Read one immutable page of the original full source result
+    GET    /ext/taki-memory/banks/{bank_id}/changes [Taki Memory Compatibility] - Read committed logical changes for a Bank
+    POST   /ext/taki-memory/banks/{bank_id}/snapshots [Taki Memory Compatibility] - Create a cursor-bound logical snapshot
+    GET    /ext/taki-memory/banks/{bank_id}/snapshots/{snapshot_id} [Taki Memory Compatibility] - Get a logical snapshot manifest
+    GET    /ext/taki-memory/banks/{bank_id}/snapshots/{snapshot_id}/pages/{page_number} [Taki Memory Compatibility] - Get an immutable logical snapshot page
+    POST   /ext/taki-memory/banks/{bank_id}/application-state/initialize [Taki Memory Compatibility] - Initialize
+    POST   /ext/taki-memory/banks/{bank_id}/application-state/bodies [Taki Memory Compatibility] - Prepare Body
+    GET    /ext/taki-memory/banks/{bank_id}/application-state/bodies/{body_id} [Taki Memory Compatibility] - Get Body
+    PUT    /ext/taki-memory/banks/{bank_id}/application-state/bodies/{body_id}/parts/{part_number} [Taki Memory Compatibility] - Put Part
+    GET    /ext/taki-memory/banks/{bank_id}/application-state/bodies/{body_id}/parts/{part_number} [Taki Memory Compatibility] - Get Part
+    POST   /ext/taki-memory/banks/{bank_id}/application-state/bodies/{body_id}/seal [Taki Memory Compatibility] - Seal Body
+    POST   /ext/taki-memory/banks/{bank_id}/application-state/commits [Taki Memory Compatibility] - Commit
+    GET    /ext/taki-memory/banks/{bank_id}/application-state/commits/{operation_id} [Taki Memory Compatibility] - Get Commit
+    POST   /ext/taki-memory/banks/{bank_id}/application-state/hydrate [Taki Memory Compatibility] - Hydrate
+    POST   /ext/taki-memory/banks/{bank_id}/application-state/snapshots [Taki Memory Compatibility] - Snapshot
+    GET    /ext/taki-memory/banks/{bank_id}/application-state/snapshots/{snapshot_id} [Taki Memory Compatibility] - Get Snapshot
+    GET    /ext/taki-memory/banks/{bank_id}/application-state/snapshots/{snapshot_id}/pages/{page_number} [Taki Memory Compatibility] - Snapshot Page
+    GET    /ext/taki-memory/banks/{bank_id}/application-state/changes [Taki Memory Compatibility] - Changes
+    GET    /ext/taki-memory/banks/{bank_id}/application-state/changes/{state_cursor}/pages/{page_number} [Taki Memory Compatibility] - Change Page
+    POST   /ext/taki-memory/banks/{bank_id}/application-state/prune [Taki Memory Compatibility] - Prune
+    POST   /ext/taki-memory/banks/{bank_id}/application-state/reflect [Taki Memory Compatibility] - Reflect
+    GET    /ext/taki-memory/banks/{bank_id}/configuration-observation [Taki Memory Compatibility] - Observe
+    POST   /ext/taki-memory/template/snapshot [Taki Memory Compatibility] - Get Snapshot
+    POST   /ext/taki-memory/template/apply [Taki Memory Compatibility] - Apply
+    POST   /ext/taki-memory/template/result [Taki Memory Compatibility] - Get Result
+    POST   /ext/taki-memory/template/refresh-result [Taki Memory Compatibility] - Get Refresh Result
+    POST   /ext/taki-memory/banks/{bank_id}/transitions/unused-scope [Taki Memory Compatibility] - Unused
+    POST   /ext/taki-memory/banks/{bank_id}/transitions [Taki Memory Compatibility] - Acquire
+    GET    /ext/taki-memory/banks/{bank_id}/transitions/{transition_id} [Taki Memory Compatibility] - Lookup
+    POST   /ext/taki-memory/banks/{bank_id}/transitions/{transition_id}/claim [Taki Memory Compatibility] - Claim
+    POST   /ext/taki-memory/banks/{bank_id}/transitions/executor/renew [Taki Memory Compatibility] - Renew
+    POST   /ext/taki-memory/banks/{bank_id}/transitions/executor/fence [Taki Memory Compatibility] - Fence
+    POST   /ext/taki-memory/banks/{bank_id}/transitions/executor/verify [Taki Memory Compatibility] - Verify
+    POST   /ext/taki-memory/banks/{bank_id}/transitions/executor/outcome [Taki Memory Compatibility] - Resolve
+    POST   /ext/taki-memory/banks/{bank_id}/transitions/executor/delta [Taki Memory Compatibility] - Delta
+    POST   /ext/taki-memory/banks/{bank_id}/transitions/executor/source-bodies [Taki Memory Compatibility] - Prepare Source Body
+    POST   /ext/taki-memory/banks/{bank_id}/transitions/executor/source-bodies/{body_id}/parts/{part_number} [Taki Memory Compatibility] - Put Source Part
+    POST   /ext/taki-memory/banks/{bank_id}/transitions/executor/source-bodies/{body_id}/seal [Taki Memory Compatibility] - Seal Source Body
+    GET    /ext/taki-memory/banks/{bank_id}/transitions/{transition_id}/delta [Taki Memory Compatibility] - Read Delta
+    GET    /ext/taki-memory/banks/{bank_id}/transitions/{transition_id}/evidence/{page_number} [Taki Memory Compatibility] - Evidence
+    GET    /ext/taki-memory/banks/{bank_id}/transitions/{transition_id}/auxiliary/{page_number} [Taki Memory Compatibility] - Auxiliary
+    POST   /ext/taki-memory/banks/{bank_id}/current-state-transfers [Taki Current State Transfer] - Atomically import a complete frozen current-state Bank candidate
+    GET    /ext/taki-memory/banks/{bank_id}/current-state-transfers/{operation_id} [Taki Current State Transfer] - Reopen an immutable current-state transfer result without executing work
+    GET    /ext/taki-memory/banks/{bank_id}/current-state-transfers/{operation_id}/mappings/{page_number} [Taki Current State Transfer] - Read one stable page of exact source-to-native object mappings
+    POST   /ext/taki-memory/banks/{bank_id}/cutover-verifications [Taki First Activation] - Freeze the complete required maintenance set for an exact current-state import
+    POST   /ext/taki-memory/banks/{bank_id}/cutover-verifications/{verification_id}/verify [Taki First Activation] - Run or resume a finite native maintenance verification attempt
+    GET    /ext/taki-memory/banks/{bank_id}/cutover-verifications/{verification_id} [Taki First Activation] - Read durable first-activation verification status
+    GET    /ext/taki-memory/banks/{bank_id}/cutover-verifications/{verification_id}/certificates/{certificate_hash}/pages/{page_number} [Taki First Activation] - Read one immutable, hash-bound maintenance evidence page

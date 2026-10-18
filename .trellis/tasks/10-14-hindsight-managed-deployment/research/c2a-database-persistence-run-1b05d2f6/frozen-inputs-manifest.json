@@ -1,0 +1,42 @@
+[
+  {
+    "path": "docker-database/run-persistence.ts",
+    "sha256": "c39fd6e465f922cefd198abe1e6d531d731359f8969b183ae9b5b4d2cf06ee27",
+    "bytes": 56502
+  },
+  {
+    "path": "docker-database/database-read.py",
+    "sha256": "4bd830c60a4ddecc4e8e7018d2b19eb08093c81fc5d7f3ee0a8ff380178e4271",
+    "bytes": 6084
+  },
+  {
+    "path": "docker-database/fake_child.py",
+    "sha256": "9d65b8875e5d798a024dff9b4a182d6cff7bf4b62646954e38cd0c2e12ce3819",
+    "bytes": 44233
+  },
+  {
+    "path": "docker-database/README.md",
+    "sha256": "ffd27eba8edae875cdd8f8a84beea17e4dc1385e180c879fba7388816181419a",
+    "bytes": 22962
+  },
+  {
+    "path": "c2a-database-persistence-r2-self-check.json",
+    "sha256": "e25ea9b3058f6425cb6aed90baaa78ff63639e17d96f14dc7bf50b93da86a734",
+    "bytes": 61914
+  },
+  {
+    "path": "c2a-database-persistence-exact-byte-review-round2-1b05d2f6.md",
+    "sha256": "e1e1ea1e9abbb6a16377709be17da33b92f91cbff7962a6e0a78958b128880e5",
+    "bytes": 7645
+  },
+  {
+    "path": "c2a-database-persistence-exact-byte-review-round2-1b05d2f6.json",
+    "sha256": "f3a54993b2e9a53be30f90ab98fbee5b4b7807d119ae5858d0cd08cc7b57711e",
+    "bytes": 56945
+  },
+  {
+    "path": "c2a-implementation-source-manifest.json",
+    "sha256": "f27379be3b4b5e61e1b2821c2eda2d87bf54e5c2983b034bdb637ee789961ae2",
+    "bytes": 108542
+  }
+]

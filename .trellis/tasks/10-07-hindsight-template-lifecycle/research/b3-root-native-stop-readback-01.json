@@ -1,0 +1,64 @@
+{
+  "checkedAtUtc": "2026-10-09T17:14:57.987655+00:00",
+  "manifest": "b3-native-implementation-final-source-01.json",
+  "manifestSha256": "571787e6eded5b2997d00662b859c782a40ae51ddd58f056770979536db2612b",
+  "announcedManifestMatches": true,
+  "verifiedSourceCaptureEntries": 938,
+  "verifiedGeneratedMaintainedEntries": 958,
+  "verifiedUniqueSourceGeneratedDocumentEvidencePaths": 2074,
+  "resultEvidenceCount": 55,
+  "finalPassNames": [
+    "schema-focused-01",
+    "schema-format-01",
+    "schema-ruff-01",
+    "schema-format-check-01",
+    "schema-types-01",
+    "openapi-02",
+    "clients-01",
+    "generated-pin-01",
+    "openapi-03",
+    "clients-02",
+    "generated-pin-02",
+    "sdk-python-01",
+    "sdk-typescript-01",
+    "sdk-typescript-build-01",
+    "sdk-rust-01",
+    "sdk-go-01",
+    "affected-01",
+    "tested-pin-01",
+    "diff-native-01",
+    "diff-docs-01"
+  ],
+  "twoCleanGenerationsAndTestedPinEqual": true,
+  "maintainedChangesReported": [],
+  "checkedRemovedTempCount": 55,
+  "remainingOwnedTemps": [],
+  "postgres": {
+    "ownedDataExists": false,
+    "ownedRegistryExists": false,
+    "recordedCleanupFlags": {
+      "Stopped": true,
+      "DataRemoved": true,
+      "RegistryRemoved": true
+    },
+    "priorPid": 34844
+  },
+  "mismatches": [],
+  "counts": {
+    "pythonSdkTests": 109,
+    "typescriptSdkTests": 46,
+    "typescriptSdkSuites": 13,
+    "typescriptBuild": [
+      "CJS",
+      "ESM",
+      "declarations"
+    ],
+    "rustContractTests": 14,
+    "goTopLevelSelectedContracts": 10,
+    "nativeAffectedTests": 77,
+    "focusedSchemaTests": 2,
+    "countsNote": "The two schema cases are included in the 77 affected cases. Go subcases are not added. These overlapping scoped results are not a whole-workspace test total."
+  },
+  "wholeStage5BAccepted": false,
+  "scope": "Native current implementation/self-check handoff only; actual pair, independent B3 and whole-stage gates remain pending."
+}

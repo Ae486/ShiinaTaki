@@ -1,0 +1,11 @@
+
+> @taki/desktop@0.0.0 typecheck H:\TakiAgent\apps\desktop
+> tsc --noEmit
+
+src/windows/home/pages/operations/hindsight-configuration-controller.test.ts(60,50): error TS2550: Property 'withResolvers' does not exist on type 'PromiseConstructor'. Do you need to change your target library? Try changing the 'lib' compiler option to 'es2024' or later.
+src/windows/home/pages/operations/hindsight-configuration-controller.test.ts(98,76): error TS2550: Property 'withResolvers' does not exist on type 'PromiseConstructor'. Do you need to change your target library? Try changing the 'lib' compiler option to 'es2024' or later.
+src/windows/home/pages/operations/hindsight-configuration-controller.test.ts(105,70): error TS2550: Property 'withResolvers' does not exist on type 'PromiseConstructor'. Do you need to change your target library? Try changing the 'lib' compiler option to 'es2024' or later.
+src/windows/home/pages/operations/hindsight-configuration-controller.ts(32,15): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
+H:\TakiAgent\apps\desktop:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/desktop@0.0.0 typecheck: `tsc --noEmit`
+Exit status 2

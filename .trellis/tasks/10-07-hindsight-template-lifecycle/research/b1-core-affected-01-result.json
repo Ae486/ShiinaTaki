@@ -1,0 +1,24 @@
+{
+  "command": [
+    "G:/Roaming/npm/pnpm.cmd",
+    "--filter",
+    "@taki/core",
+    "exec",
+    "vitest",
+    "run",
+    "src/memory/hindsight/template-lifecycle",
+    "src/db/migrations/058-hindsight-template-overlays.test.ts",
+    "src/db/migrations/index-list.test.ts",
+    "src/memory/hindsight/hindsight-template-compatibility.test.ts",
+    "src/memory/hindsight/hindsight-configuration-compatibility.test.ts",
+    "src/memory/hindsight/hindsight-configuration-service.test.ts",
+    "src/memory/hindsight/hindsight-compatibility-service.test.ts",
+    "src/memory/hindsight/hindsight-application-capability.test.ts",
+    "src/memory/hindsight/hindsight-transition-capability.test.ts",
+    "--maxWorkers=2"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "durationSeconds": 30.716,
+  "log": "H:\\TakiAgent\\.trellis\\tasks\\10-07-hindsight-template-lifecycle\\research\\b1-core-affected-01.log"
+}
