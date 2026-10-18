@@ -10,7 +10,7 @@ import {
   type GovernanceRegistry,
 } from "./governance-schema.ts";
 
-export const GOVERNANCE_REGISTRY_REVISION = 1;
+export const GOVERNANCE_REGISTRY_REVISION = 3;
 
 const levels = (strict: "auto" | "ask" | "deny", standard: "auto" | "ask" | "deny", relaxed: "auto" | "ask" | "deny") => ({ strict, standard, relaxed });
 const cell = (input: {
@@ -26,6 +26,22 @@ const cell = (input: {
 });
 
 const DESCRIPTORS: CapabilityGovernanceDescriptor[] = [
+  {
+    capabilityId: "hindsight-deployment", descriptorRevision: 1, subjectRequired: false,
+    classifier: { authority: "host", classifierId: "hindsight-deployment-action", classifierRevision: 1 },
+    cells: ["create", "start", "inject"].map((action) => cell({ key: `hindsight-deployment:${action}`,
+      postures: levels("ask", "ask", "auto"), approvalMemory: "once-only" })),
+  },
+  {
+    capabilityId: "hindsight-deployment-observe", descriptorRevision: 1, subjectRequired: false,
+    classifier: { authority: "host", classifierId: "hindsight-owned-observation", classifierRevision: 1 },
+    cells: [cell({ key: "hindsight-deployment-observe:read", postures: levels("auto", "auto", "auto"), approvalMemory: "once-only" })],
+  },
+  {
+    capabilityId: "hindsight-custody", descriptorRevision: 1, subjectRequired: false,
+    classifier: { authority: "host", classifierId: "hindsight-fixed-custody", classifierRevision: 1 },
+    cells: [cell({ key: "hindsight-custody:prepare", postures: levels("ask", "ask", "auto"), approvalMemory: "once-only" })],
+  },
   {
     capabilityId: "shell-open", descriptorRevision: 1, subjectRequired: false,
     classifier: { authority: "host", classifierId: "shell-open-target", classifierRevision: 1 },

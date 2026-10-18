@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "build": "taki-hindsight-host-c1-v1",
+  "platform": "win32",
+  "architecture": "x64",
+  "entrypoint": "app/main.js",
+  "files": [
+    {
+      "path": "app/main.js",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    }
+  ]
+}

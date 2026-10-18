@@ -1,0 +1,95 @@
+[
+  {
+    "name": "presence",
+    "domain": "definition",
+    "value": {
+      "absent": {
+        "kind": "absent"
+      },
+      "tombstone": {
+        "kind": "null_tombstone"
+      },
+      "value": {
+        "kind": "value",
+        "value": ""
+      }
+    },
+    "canonical": "[\"taki-current-state/tagged-json-binary64-v1\",[\"object\",[[\"domain\",[\"string\",\"taki-template-definition.v1\"]],[\"value\",[\"object\",[[\"absent\",[\"object\",[[\"kind\",[\"string\",\"absent\"]]]]],[\"tombstone\",[\"object\",[[\"kind\",[\"string\",\"null_tombstone\"]]]]],[\"value\",[\"object\",[[\"kind\",[\"string\",\"value\"]],[\"value\",[\"string\",\"\"]]]]]]]]]]]",
+    "hash": "9964e88730766c314ac3ece3cdea889c534dddc8fd00013dee1e2505649c8897"
+  },
+  {
+    "name": "unicode-and-own-keys",
+    "domain": "definition",
+    "value": {
+      "__proto__": null,
+      "constructor": [],
+      "😀": "雪",
+      "𐀀": "é",
+      "": "é"
+    },
+    "canonical": "[\"taki-current-state/tagged-json-binary64-v1\",[\"object\",[[\"domain\",[\"string\",\"taki-template-definition.v1\"]],[\"value\",[\"object\",[[\"__proto__\",[\"null\"]],[\"constructor\",[\"array\",[]]],[\"\",[\"string\",\"é\"]],[\"𐀀\",[\"string\",\"é\"]],[\"😀\",[\"string\",\"雪\"]]]]]]]]",
+    "hash": "9a115029764adbb12b66dd39f705bf6bc4620313449b7f424ffee993a7da5291"
+  },
+  {
+    "name": "binary64",
+    "domain": "definition",
+    "value": {
+      "integer": 9007199254740991,
+      "large": 1e+21,
+      "fraction": 0.1,
+      "negative_zero": 0,
+      "small": 5e-324
+    },
+    "canonical": "[\"taki-current-state/tagged-json-binary64-v1\",[\"object\",[[\"domain\",[\"string\",\"taki-template-definition.v1\"]],[\"value\",[\"object\",[[\"fraction\",[\"number\",\"3fb999999999999a\"]],[\"integer\",[\"number\",\"433fffffffffffff\"]],[\"large\",[\"number\",\"444b1ae4d6e2ef50\"]],[\"negative_zero\",[\"number\",\"0000000000000000\"]],[\"small\",[\"number\",\"0000000000000001\"]]]]]]]]",
+    "hash": "d725a37a6344c26212c4fdccc07e19234571d24ecb9cde27dda529e572d7fada"
+  },
+  {
+    "name": "complete-trigger",
+    "domain": "definition",
+    "value": {
+      "id": "test-model",
+      "name": "雪",
+      "source_query": "What changed?",
+      "tags": [
+        "b",
+        "a"
+      ],
+      "max_tokens": 1024,
+      "trigger": {
+        "mode": "delta",
+        "refresh_after_consolidation": false,
+        "refresh_cron": null,
+        "fact_types": [
+          "experience",
+          "world"
+        ],
+        "exclude_mental_models": false,
+        "exclude_mental_model_ids": [],
+        "tags_match": "all_strict",
+        "tag_groups": [
+          {
+            "not": {
+              "tags": [
+                "private"
+              ]
+            }
+          }
+        ],
+        "include_chunks": null,
+        "recall_max_tokens": 256,
+        "recall_chunks_max_tokens": null,
+        "response_schema": {
+          "type": "object",
+          "properties": {
+            "__proto__": {
+              "type": "string"
+            }
+          }
+        },
+        "keep_trace": true
+      }
+    },
+    "canonical": "[\"taki-current-state/tagged-json-binary64-v1\",[\"object\",[[\"domain\",[\"string\",\"taki-template-definition.v1\"]],[\"value\",[\"object\",[[\"id\",[\"string\",\"test-model\"]],[\"max_tokens\",[\"number\",\"4090000000000000\"]],[\"name\",[\"string\",\"雪\"]],[\"source_query\",[\"string\",\"What changed?\"]],[\"tags\",[\"array\",[[\"string\",\"b\"],[\"string\",\"a\"]]]],[\"trigger\",[\"object\",[[\"exclude_mental_model_ids\",[\"array\",[]]],[\"exclude_mental_models\",[\"boolean\",false]],[\"fact_types\",[\"array\",[[\"string\",\"experience\"],[\"string\",\"world\"]]]],[\"include_chunks\",[\"null\"]],[\"keep_trace\",[\"boolean\",true]],[\"mode\",[\"string\",\"delta\"]],[\"recall_chunks_max_tokens\",[\"null\"]],[\"recall_max_tokens\",[\"number\",\"4070000000000000\"]],[\"refresh_after_consolidation\",[\"boolean\",false]],[\"refresh_cron\",[\"null\"]],[\"response_schema\",[\"object\",[[\"properties\",[\"object\",[[\"__proto__\",[\"object\",[[\"type\",[\"string\",\"string\"]]]]]]]],[\"type\",[\"string\",\"object\"]]]]],[\"tag_groups\",[\"array\",[[\"object\",[[\"not\",[\"object\",[[\"tags\",[\"array\",[[\"string\",\"private\"]]]]]]]]]]]],[\"tags_match\",[\"string\",\"all_strict\"]]]]]]]]]]]",
+    "hash": "f091cbfd79a4ccdcaa7f9790937963d0de4c813312a4ca77fa6742928ee74854"
+  }
+]

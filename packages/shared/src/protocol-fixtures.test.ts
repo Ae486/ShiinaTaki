@@ -18,6 +18,9 @@ import {
   CapabilityResumeSchema,
 } from "./capability-schema.ts";
 import { CapabilityCancelSchema, CapabilityExecuteSchema, HostCatalogPublishParamsSchema, HostFrameAckSchema } from "./host-control-schema.ts";
+import { HindsightCustodyPrepareSchema, HindsightCustodyResultSchema, HindsightTrustedInvocationSchema } from "./hindsight-custody-schema.ts";
+import { HindsightHostManifestSchema, HindsightHostRegistrationSchema } from "./hindsight-installation-schema.ts";
+import { DeploymentEffectV1Schema, DeploymentInvocationSchema, DeploymentObserveV1Schema, InjectionCheckpointV1Schema, InjectionCheckpointResultSchema, DeploymentStatusV1Schema, HindsightDeploymentRegistrationV1Schema } from "./hindsight-deployment-schema.ts";
 import {
   LegacyPermissionCellSetParamsSchema,
   LegacyPermissionCellStateSchema,
@@ -49,6 +52,18 @@ const AppErrorFrameSchema = z.object({
 // Filename prefix (the dot-free head of `<prefix>.<label>.<valid|invalid>.json`) -> the schema that owns it.
 // The cargo-test manifest maps the SAME prefixes to serde types; a divergence turns one side red.
 const SCHEMA_BY_PREFIX: Record<string, ZodType> = {
+  "hindsight-deployment-effect": DeploymentEffectV1Schema,
+  "hindsight-deployment-invocation": DeploymentInvocationSchema,
+  "hindsight-deployment-observe": DeploymentObserveV1Schema,
+  "hindsight-deployment-checkpoint": InjectionCheckpointV1Schema,
+  "hindsight-deployment-checkpoint-result": InjectionCheckpointResultSchema,
+  "hindsight-deployment-status": DeploymentStatusV1Schema,
+  "hindsight-deployment-registration": HindsightDeploymentRegistrationV1Schema,
+  "hindsight-custody-prepare": HindsightCustodyPrepareSchema,
+  "hindsight-custody-invocation": HindsightTrustedInvocationSchema,
+  "hindsight-custody-result": HindsightCustodyResultSchema,
+  "hindsight-host-manifest": HindsightHostManifestSchema,
+  "hindsight-host-registration": HindsightHostRegistrationSchema,
   "connect-request": ConnectParamsSchema,
   "connect-result": ConnectResultSchema,
   "app-error": AppErrorFrameSchema,

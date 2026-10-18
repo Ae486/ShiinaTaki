@@ -6,7 +6,18 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./hindsight-custody": "./src/hindsight-custody-schema.ts",
+    "./hindsight-installation": "./src/hindsight-installation-schema.ts",
+    "./hindsight-deployment": "./src/hindsight-deployment-schema.ts",
+    "./host-control": "./src/host-control-schema.ts",
+    "./host-input": "./src/host-input-encoding.ts",
+    "./host-approval": "./src/host-approval-schema.ts",
+    "./connect": "./src/connect-schema.ts",
+    "./governance": "./src/governance-registry.ts",
+    "./approval": "./src/approval-schema.ts",
+    "./approval-decision": "./src/approval-decision-schema.ts",
+    "./secret-catalog": "./src/secret-catalog-schema.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

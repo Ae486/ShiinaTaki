@@ -9,6 +9,7 @@ import { z } from "zod";
 import { HindsightBackupStatusSectionSchema } from "./hindsight-backup-schema.ts";
 import { HindsightErrorCodeSchema } from "./hindsight-connection-schema.ts";
 import { MemoryReplicaErrorCodeSchema } from "./memory-replica-schedule-schema.ts";
+import { MemoryTemplateErrorCodeSchema } from "./memory-template-operation-schema.ts";
 
 const Id = z.string().min(1).max(256);
 const CharacterId = z.string().min(1).max(160);
@@ -56,6 +57,7 @@ export type MemoryHindsightStatusSection = z.infer<typeof MemoryHindsightStatusS
 export const MemoryHindsightLifecycleErrorCodeSchema = z.enum([
   ...MemoryReplicaErrorCodeSchema.options, "MEMORY_AUTHORITY_MISMATCH", "MEMORY_RUNTIME_UNAVAILABLE",
   "HINDSIGHT_LIFECYCLE_INTERRUPTED", "HINDSIGHT_LIFECYCLE_INTERNAL_ERROR",
+  ...MemoryTemplateErrorCodeSchema.options,
 ]);
 export type MemoryHindsightLifecycleErrorCode = z.infer<typeof MemoryHindsightLifecycleErrorCodeSchema>;
 /** Core stamps who started a lifecycle operation so the automatic once-guard never counts an operator click. */
@@ -67,6 +69,7 @@ export const MemoryConnectionRevalidateRequestSchema = z.strictObject({ kind: z.
 export const MemoryBankProducerRefSchema = z.strictObject({
   kind: z.literal("bank"), origin: MemoryHindsightLifecycleOriginSchema, characterId: CharacterId, nativeBankId: Id,
   templateRevision: Id, admittedEpochId: Id, configFingerprint: Digest,
+  templateProvision: z.strictObject({ planId: z.uuid(), defaultsRevision: z.int().min(1) }).optional(),
   phase: z.enum(["reserved", "probing", "applying", "syncing", "completed"]),
 });
 export const MemoryConnectionProducerRefSchema = z.strictObject({

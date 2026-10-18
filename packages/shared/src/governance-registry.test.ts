@@ -9,7 +9,10 @@ import {
 describe("canonical governance registry", () => {
   it("contains the complete factory inventory plus explicit extension adapters", () => {
     const cells = CANONICAL_GOVERNANCE_REGISTRY.descriptors.flatMap((descriptor) => descriptor.cells);
-    expect(cells).toHaveLength(31);
+    expect(cells).toHaveLength(36);
+    const custody = governanceDescriptor(CANONICAL_GOVERNANCE_REGISTRY, "hindsight-custody")!;
+    expect(custody.cells[0]?.levels).toEqual({ strict: "ask", standard: "ask", relaxed: "auto" });
+    expect(custody.cells[0]?.approvalMemory).toBe("once-only");
     expect(governanceDescriptor(CANONICAL_GOVERNANCE_REGISTRY, "skill.load")?.cells[0]?.levels).toEqual({ strict: "auto", standard: "auto", relaxed: "auto" });
     expect(governanceDescriptor(CANONICAL_GOVERNANCE_REGISTRY, "mcp.tool.call")?.subjectRequired).toBe(true);
     expect(governanceDescriptor(CANONICAL_GOVERNANCE_REGISTRY, "core.schedule.manage")?.cells[0]?.key).toBe("schedule-manage");

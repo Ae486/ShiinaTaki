@@ -96,8 +96,8 @@ describe("Host-control schemas", () => {
   });
 
   it("pins the canonical projection digest shared with Rust", async () => {
-    const projection = { registryRevision: 1, descriptorRevision: 1, classifierRevision: 1, cells: [{ key: "screenshot", posture: "auto" }] };
+    const projection = { registryRevision: 2, descriptorRevision: 1, classifierRevision: 1, cells: [{ key: "screenshot", posture: "auto" }] };
     const { createHash } = await import("node:crypto");
-    expect(createHash("sha256").update(JSON.stringify(projection)).digest("hex")).toBe("f30ef0476cc356181b289cb892004ef9e1250257b9a2fd60bddefddf9b171210");
+    expect(createHash("sha256").update(JSON.stringify(projection)).digest("hex")).toBe("ca86302f4201b078ebc1694971ba0ba640c0bc99523115f5684b03538a6fff07");
   });
 });

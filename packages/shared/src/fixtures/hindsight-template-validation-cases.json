@@ -1,0 +1,575 @@
+[
+  {
+    "kind": "trigger",
+    "name": "complete-preserved-trigger",
+    "value": {
+      "mode": "delta",
+      "refresh_after_consolidation": false,
+      "refresh_cron": null,
+      "fact_types": [
+        "world",
+        "observation"
+      ],
+      "exclude_mental_models": true,
+      "exclude_mental_model_ids": [
+        "another-model"
+      ],
+      "tags_match": "exact",
+      "tag_groups": [
+        {
+          "and": [
+            {
+              "tags": [
+                "one"
+              ],
+              "match": "all_strict"
+            },
+            {
+              "or": [
+                {
+                  "tags": []
+                },
+                {
+                  "not": {
+                    "tags": [
+                      "two"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "include_chunks": true,
+      "recall_max_tokens": 1024,
+      "recall_chunks_max_tokens": 512,
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "__proto__": {
+            "type": "string"
+          },
+          "雪": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "__proto__"
+        ]
+      },
+      "keep_trace": true
+    },
+    "accepted": true
+  },
+  {
+    "kind": "trigger",
+    "name": "empty-trigger",
+    "value": {},
+    "accepted": true
+  },
+  {
+    "kind": "trigger",
+    "name": "boundary-tag-list",
+    "value": {
+      "tag_groups": [
+        {
+          "tags": [
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+          ]
+        }
+      ]
+    },
+    "accepted": true
+  },
+  {
+    "kind": "trigger",
+    "name": "unknown-nested-leaf-key",
+    "value": {
+      "tag_groups": [
+        {
+          "tags": [
+            "one"
+          ],
+          "unexpected": true
+        }
+      ]
+    },
+    "accepted": false
+  },
+  {
+    "kind": "trigger",
+    "name": "ambiguous-nested-group",
+    "value": {
+      "tag_groups": [
+        {
+          "tags": [
+            "one"
+          ],
+          "and": []
+        }
+      ]
+    },
+    "accepted": false
+  },
+  {
+    "kind": "trigger",
+    "name": "legacy-python-alias-is-not-wire",
+    "value": {
+      "tag_groups": [
+        {
+          "filters": [
+            {
+              "tags": [
+                "one"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "accepted": false
+  },
+  {
+    "kind": "trigger",
+    "name": "too-many-nested-tags",
+    "value": {
+      "tag_groups": [
+        {
+          "tags": [
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one",
+            "one"
+          ]
+        }
+      ]
+    },
+    "accepted": false
+  },
+  {
+    "kind": "trigger",
+    "name": "oversized-nested-tag",
+    "value": {
+      "tag_groups": [
+        {
+          "tags": [
+            "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+          ]
+        }
+      ]
+    },
+    "accepted": false
+  },
+  {
+    "kind": "trigger",
+    "name": "empty-nested-tag",
+    "value": {
+      "tag_groups": [
+        {
+          "tags": [
+            ""
+          ]
+        }
+      ]
+    },
+    "accepted": false
+  },
+  {
+    "kind": "trigger",
+    "name": "invalid-excluded-model-id",
+    "value": {
+      "exclude_mental_model_ids": [
+        "legacy_model"
+      ]
+    },
+    "accepted": false
+  },
+  {
+    "kind": "trigger",
+    "name": "oversized-excluded-model-id",
+    "value": {
+      "exclude_mental_model_ids": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ]
+    },
+    "accepted": false
+  },
+  {
+    "kind": "trigger",
+    "name": "unsafe-integer-budget",
+    "value": {
+      "recall_max_tokens": 9007199254740992
+    },
+    "accepted": false
+  },
+  {
+    "kind": "trigger",
+    "name": "empty-structured-properties",
+    "value": {
+      "response_schema": {
+        "properties": {}
+      }
+    },
+    "accepted": false
+  },
+  {
+    "kind": "trigger",
+    "name": "missing-structured-properties",
+    "value": {
+      "response_schema": {
+        "type": "object"
+      }
+    },
+    "accepted": false
+  },
+  {
+    "kind": "trigger",
+    "name": "invalid-structured-property-type",
+    "value": {
+      "response_schema": {
+        "properties": {
+          "answer": {
+            "type": "invalid"
+          }
+        }
+      }
+    },
+    "accepted": false
+  },
+  {
+    "kind": "trigger",
+    "name": "unknown-required-property",
+    "value": {
+      "response_schema": {
+        "properties": {
+          "answer": {}
+        },
+        "required": [
+          "missing"
+        ]
+      }
+    },
+    "accepted": false
+  },
+  {
+    "kind": "labels",
+    "name": "legacy-group-preserved",
+    "value": [
+      {
+        "key": "legacy",
+        "free_values": true
+      }
+    ],
+    "accepted": true
+  },
+  {
+    "kind": "labels",
+    "name": "complete-map-preserved",
+    "value": {
+      "attributes": [
+        {
+          "key": "person",
+          "type": "map",
+          "fields": {
+            "state": {
+              "type": "value",
+              "values": [
+                {
+                  "value": "known",
+                  "description": "Exact value"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "accepted": true
+  },
+  {
+    "kind": "labels",
+    "name": "empty-label-list",
+    "value": [],
+    "accepted": true
+  },
+  {
+    "kind": "labels",
+    "name": "label-tombstone",
+    "value": null,
+    "accepted": true
+  },
+  {
+    "kind": "labels",
+    "name": "nested-duplicate-value",
+    "value": [
+      {
+        "key": "person",
+        "fields": {
+          "state": {
+            "values": [
+              {
+                "value": "duplicate"
+              },
+              {
+                "value": "duplicate"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "accepted": false
+  },
+  {
+    "kind": "labels",
+    "name": "nested-description-type",
+    "value": [
+      {
+        "key": "person",
+        "fields": {
+          "state": {
+            "description": 1
+          }
+        }
+      }
+    ],
+    "accepted": false
+  },
+  {
+    "kind": "labels",
+    "name": "group-description-type",
+    "value": [
+      {
+        "key": "person",
+        "description": 1
+      }
+    ],
+    "accepted": false
+  },
+  {
+    "kind": "labels",
+    "name": "label-value-description-type",
+    "value": [
+      {
+        "key": "person",
+        "values": [
+          {
+            "value": "known",
+            "description": 1
+          }
+        ]
+      }
+    ],
+    "accepted": false
+  },
+  {
+    "kind": "labels",
+    "name": "nested-empty-field-key",
+    "value": [
+      {
+        "key": "person",
+        "fields": {
+          "": {}
+        }
+      }
+    ],
+    "accepted": false
+  },
+  {
+    "kind": "config",
+    "name": "retain_mission-empty-text",
+    "value": {
+      "key": "retain_mission",
+      "stored": {
+        "kind": "value",
+        "value": ""
+      }
+    },
+    "accepted": true
+  },
+  {
+    "kind": "config",
+    "name": "retain_mission-numeric-value",
+    "value": {
+      "key": "retain_mission",
+      "stored": {
+        "kind": "value",
+        "value": 7
+      }
+    },
+    "accepted": false
+  },
+  {
+    "kind": "config",
+    "name": "retain_mission-inherit",
+    "value": {
+      "key": "retain_mission",
+      "stored": {
+        "kind": "absent"
+      }
+    },
+    "accepted": true
+  },
+  {
+    "kind": "config",
+    "name": "observations_instructions-empty-text",
+    "value": {
+      "key": "observations_instructions",
+      "stored": {
+        "kind": "value",
+        "value": ""
+      }
+    },
+    "accepted": true
+  },
+  {
+    "kind": "config",
+    "name": "observations_instructions-numeric-value",
+    "value": {
+      "key": "observations_instructions",
+      "stored": {
+        "kind": "value",
+        "value": 7
+      }
+    },
+    "accepted": false
+  },
+  {
+    "kind": "config",
+    "name": "observations_instructions-inherit",
+    "value": {
+      "key": "observations_instructions",
+      "stored": {
+        "kind": "absent"
+      }
+    },
+    "accepted": true
+  },
+  {
+    "kind": "config",
+    "name": "reflect_mission-empty-text",
+    "value": {
+      "key": "reflect_mission",
+      "stored": {
+        "kind": "value",
+        "value": ""
+      }
+    },
+    "accepted": true
+  },
+  {
+    "kind": "config",
+    "name": "reflect_mission-numeric-value",
+    "value": {
+      "key": "reflect_mission",
+      "stored": {
+        "kind": "value",
+        "value": 7
+      }
+    },
+    "accepted": false
+  },
+  {
+    "kind": "config",
+    "name": "reflect_mission-inherit",
+    "value": {
+      "key": "reflect_mission",
+      "stored": {
+        "kind": "absent"
+      }
+    },
+    "accepted": true
+  },
+  {
+    "kind": "config",
+    "name": "labels-wrong-type",
+    "value": {
+      "key": "entity_labels",
+      "stored": {
+        "kind": "value",
+        "value": "text"
+      }
+    },
+    "accepted": false
+  },
+  {
+    "kind": "config",
+    "name": "labels-duplicate-group",
+    "value": {
+      "key": "entity_labels",
+      "stored": {
+        "kind": "value",
+        "value": [
+          {
+            "key": "duplicate"
+          },
+          {
+            "key": "duplicate"
+          }
+        ]
+      }
+    },
+    "accepted": false
+  }
+]

@@ -76,6 +76,7 @@ export const HindsightValidateParamsSchema = z.strictObject({ expectedRevision: 
 export const HindsightSetupParamsSchema = z.strictObject({
   expectedRevision: revision,
   characterId: z.string().min(1).max(160),
+  // Historical request decoding only. Fresh setup admission refuses raw receipt JSON until C2's owner ledger exists.
   managedReceipt: HindsightManagedDeploymentReceiptSchema.optional(),
 });
 export const HindsightDisableParamsSchema = z.strictObject({ expectedRevision: revision });

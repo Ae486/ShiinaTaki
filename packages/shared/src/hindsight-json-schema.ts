@@ -6,14 +6,14 @@
 import { z } from "zod";
 import type { JsonValue } from "./memory-provider-domain-schema.ts";
 
-export function createHindsightJsonSchemas(maxStringLength: number) {
+export function createHindsightJsonSchemas(maxStringLength: number, maxKeyLength = 128) {
   return {
-    value: z.custom<JsonValue>((value) => validJson(value, maxStringLength), "invalid bounded JSON value"),
-    object: z.custom<Record<string, JsonValue>>((value) => jsonObject(value) && validJson(value, maxStringLength), "invalid bounded JSON object"),
+    value: z.custom<JsonValue>((value) => validJson(value, maxStringLength, maxKeyLength), "invalid bounded JSON value"),
+    object: z.custom<Record<string, JsonValue>>((value) => jsonObject(value) && validJson(value, maxStringLength, maxKeyLength), "invalid bounded JSON object"),
   };
 }
 
-function validJson(value: unknown, maxStringLength: number): boolean {
+function validJson(value: unknown, maxStringLength: number, maxKeyLength: number): boolean {
   const stack: Array<{ value: unknown; exit?: boolean }> = [{ value }]; const ancestors = new Set<object>();
   while (stack.length) {
     const frame = stack.pop(); if (!frame) return false;
@@ -28,7 +28,7 @@ function validJson(value: unknown, maxStringLength: number): boolean {
     if (Object.getOwnPropertyNames(current).length !== keys.length + (Array.isArray(current) ? 1 : 0)) return false;
     if (Array.isArray(current)) {
       if (current.length > 256 || keys.length !== current.length || keys.some((key, index) => key !== String(index))) return false;
-    } else if (keys.some((key) => key.length < 1 || key.length > 128)) return false;
+    } else if (keys.some((key) => key.length < 1 || key.length > maxKeyLength)) return false;
     ancestors.add(current); stack.push({ value: current, exit: true });
     for (const key of keys) {
       const descriptor = Object.getOwnPropertyDescriptor(current, key);

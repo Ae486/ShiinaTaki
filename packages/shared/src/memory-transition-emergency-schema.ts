@@ -33,7 +33,10 @@ export const MemoryEmergencyBankCoverageSchema = z.strictObject({
 });
 export type MemoryEmergencyBankCoverage = z.infer<typeof MemoryEmergencyBankCoverageSchema>;
 export const MemoryEmergencyUnknownEffectSchema = z.strictObject({
-  table: z.enum(["pending_memory", "hindsight_memory_write_intents", "hindsight_application_command_jobs", "hindsight_ingestion_spans"]),
+  table: z.enum(["pending_memory", "hindsight_memory_write_intents", "hindsight_application_command_jobs", "hindsight_ingestion_spans",
+    "hindsight_template_plans", "hindsight_template_admissions", "hindsight_template_executors", "hindsight_template_dispatches",
+    "hindsight_template_bank_receipts", "hindsight_template_observations", "hindsight_template_holds", "hindsight_template_publications",
+    "hindsight_template_bank_reservations"]),
   epochId: Id, recordKey: z.string().min(1).max(1024), rowHash: Hash, disposition: z.literal("held-unknown"),
 });
 export type MemoryEmergencyUnknownEffect = z.infer<typeof MemoryEmergencyUnknownEffectSchema>;

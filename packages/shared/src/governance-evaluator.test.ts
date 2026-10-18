@@ -5,7 +5,7 @@ import { CANONICAL_GOVERNANCE_REGISTRY } from "./governance-registry.ts";
 const hostId = "11111111-1111-4111-8111-111111111111";
 const base = {
   identity: { capabilityId: "mcp.tool.call", ownerHostId: hostId, subject: { subjectId: "srv.tool", revision: "cfg-1" } },
-  registryRevision: 1,
+  registryRevision: CANONICAL_GOVERNANCE_REGISTRY.registryRevision,
   descriptorRevision: 1,
   classifierId: "mcp-tool-call",
   classifierRevision: 1,
@@ -25,7 +25,7 @@ describe("evaluateGovernance", () => {
   });
 
   it.each([
-    [{ registryRevision: 2 }, "registry-revision-mismatch"],
+    [{ registryRevision: CANONICAL_GOVERNANCE_REGISTRY.registryRevision + 1 }, "registry-revision-mismatch"],
     [{ descriptorRevision: 2 }, "descriptor-revision-mismatch"],
     [{ classifierRevision: 2 }, "classifier-mismatch"],
     [{ cellKey: "mcp-missing" }, "unknown-cell"],

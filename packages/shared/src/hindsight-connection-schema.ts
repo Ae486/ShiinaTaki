@@ -56,6 +56,7 @@ export const HindsightSupportReasonSchema = z.enum([
   "application_state_schema_unavailable", "application_reflect_unavailable",
   "transition_schema_unavailable",
   "transition_source_evidence_unavailable",
+  "template_lifecycle_unavailable", "template_backup_unavailable",
 ]);
 export const HindsightCompatibilitySupportSchema = z.strictObject({ state: HindsightSupportSchema, reason: HindsightSupportReasonSchema });
 export type HindsightCompatibilitySupport = z.infer<typeof HindsightCompatibilitySupportSchema>;
@@ -95,6 +96,9 @@ export const HindsightCompatibilityProjectionSchema = z.strictObject({
     applicationState: HindsightVersionedContractSchema.optional(),
     applicationReflect: HindsightVersionedContractSchema.optional(),
     transitions: HindsightVersionedContractSchema.optional(),
+    configurationObservation: HindsightVersionedContractSchema.optional(),
+    templateLifecycle: HindsightVersionedContractSchema.optional(),
+    templateBackup: HindsightVersionedContractSchema.optional(),
   }),
 });
 export type HindsightCompatibilityProjection = z.infer<typeof HindsightCompatibilityProjectionSchema>;

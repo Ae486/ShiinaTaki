@@ -1,0 +1,9 @@
+{
+  "name": "@taki/secret-catalog-codec",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/catalog-envelope.ts" },
+  "scripts": { "typecheck": "tsc --noEmit", "test": "vitest run --passWithNoTests" },
+  "dependencies": { "@taki/shared": "workspace:*", "libsodium-wrappers": "0.8.4", "zod": "^4.4.0" }
+}

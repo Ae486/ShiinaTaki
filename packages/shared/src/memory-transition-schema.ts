@@ -5,6 +5,7 @@
  */
 import { z } from "zod";
 import { MemoryBankScopeSchema } from "./memory-provider-domain-schema.ts";
+import { MemoryTransitionTemplateCommitmentSchema } from "./memory-transition-template-schema.ts";
 
 const Id = z.string().min(1).max(256);
 const Hash = z.string().regex(/^[a-f0-9]{64}$/);
@@ -25,6 +26,7 @@ export const MemoryTransitionIdentitySchema = z.strictObject({
   configRevision: z.int().nonnegative(), configFingerprint: Hash, inventoryRevision: z.int().nonnegative(),
   inventoryHash: Hash, banks: z.array(MemoryTransitionBankSchema).min(1).max(1024),
   baselineReceiptId: Id.nullable(), baselineHash: Hash.nullable(), custodyBoundaryHash: Hash,
+  templates: MemoryTransitionTemplateCommitmentSchema.optional(),
 }).superRefine((value, ctx) => {
   if (value.sourceProvider === value.targetProvider) ctx.addIssue({ code: "custom", message: "transition must change provider" });
   const scopes = value.banks.map((bank) => JSON.stringify(bank.scope));

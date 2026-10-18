@@ -17,6 +17,7 @@ import { HindsightSnapshotPageWireSchema } from "./hindsight-native-snapshot-sch
 import { HindsightCutoverEvidencePageSchema } from "./hindsight-cutover-verification-schema.ts";
 import { HindsightTransitionStatusSchema, HindsightTransitionAuxiliaryPageSchema } from "./hindsight-transition-schema.ts";
 import { MemoryTransitionSourceAliasSchema, MemoryTransitionSourceSetSchema, MemoryTransitionPendingSourceSchema } from "./memory-transition-source-schema.ts";
+import { MemoryTransitionTemplateAssociationSchema } from "./memory-transition-template-schema.ts";
 
 const Hash = z.string().regex(/^[0-9a-f]{64}$/);
 const Id = z.string().min(1).max(256);
@@ -69,6 +70,7 @@ export const MemoryTransitionNativeEvidenceSchema = z.strictObject({ version: z.
   nativePages: z.array(HindsightSnapshotPageWireSchema), applicationPages: z.array(TakiApplicationRecordPageSchema),
   bodies: z.array(z.strictObject({ ref: TakiApplicationBodyRefSchema, base64: z.string() })),
   maintenancePages: z.array(HindsightCutoverEvidencePageSchema), auxiliaryPages: z.array(HindsightTransitionAuxiliaryPageSchema),
+  templateBackup: MemoryTransitionTemplateAssociationSchema.optional(),
 }).superRefine((value, context) => {
   if (value.transitionId !== value.status.request.transition_id || new Set(value.bodies.map((body) => body.ref.body_id)).size !== value.bodies.length) {
     context.addIssue({ code: "custom", message: "native evidence identity or duplicate body mismatch" });

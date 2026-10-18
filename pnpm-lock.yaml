@@ -101,6 +101,28 @@ importers:
         specifier: ^8.1.0
         version: 8.1.3(@types/node@24.13.3)(jiti@2.7.0)(yaml@2.9.0)
 
+  apps/hindsight-host:
+    dependencies:
+      '@taki/secret-catalog-codec':
+        specifier: workspace:*
+        version: link:../../packages/secret-catalog-codec
+      '@taki/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      json-rpc-2.0:
+        specifier: ^1.7.1
+        version: 1.7.1
+      ws:
+        specifier: ^8.21.0
+        version: 8.21.0
+      zod:
+        specifier: ^4.4.0
+        version: 4.4.3
+    devDependencies:
+      '@types/ws':
+        specifier: ^8.18.1
+        version: 8.18.1
+
   e2e:
     devDependencies:
       '@taki/shared':
@@ -130,6 +152,9 @@ importers:
       '@ai-sdk/openai-compatible':
         specifier: ^3.0.5
         version: 3.0.5(zod@4.4.3)
+      '@taki/secret-catalog-codec':
+        specifier: workspace:*
+        version: link:../secret-catalog-codec
       '@taki/shared':
         specifier: workspace:*
         version: link:../shared
@@ -182,6 +207,18 @@ importers:
       pino-pretty:
         specifier: ^13.1.3
         version: 13.1.3
+
+  packages/secret-catalog-codec:
+    dependencies:
+      '@taki/shared':
+        specifier: workspace:*
+        version: link:../shared
+      libsodium-wrappers:
+        specifier: 0.8.4
+        version: 0.8.4
+      zod:
+        specifier: ^4.4.0
+        version: 4.4.3
 
   packages/shared:
     dependencies:

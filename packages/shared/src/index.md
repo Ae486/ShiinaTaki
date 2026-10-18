@@ -1,4 +1,7 @@
 # shared/src/
+- hindsight-deployment-schema.ts — strict C2a plan, current inject checkpoint, fixed registration and value-free original-resource status.
+- hindsight-custody-schema.ts — finite C1 request/result, fixed slot selection and safe preparation status; no deployment evidence.
+- hindsight-installation-schema.ts — protected registration, compiled artifact manifests and separate Node enrollment credentials; platform adapters establish actual trust.
 - memory-transition-candidate-schema.ts — complete Local/native evidence, stable mappings and immutable candidate/common-baseline contracts
 - memory-transition-preparation-schema.ts — exact prepared delta/result and genuinely unused native scope inventory
 - memory-transition-source-schema.ts — explicit Source aliases, ordered version references, immutable upload attempts and current awaiting-source disposition evidence
@@ -82,6 +85,7 @@
 - memory-policy-assessment-schema.ts — strict D77 memory-body and assessment contracts, plus the shared importance default
 - memory-operation-schema.ts — MEMORY_OPERATION_METHODS + Core-minted durable operation identity/state/request/result contracts and the operator submit/status/list/cancel/subscribe/changed schemas (operator-only, NO Rust mirror)
 - memory-transition-schema.ts — strict transition directions, expected source/baseline identity, durable proof/receipt/result and explicit recovery contracts
+- memory-transition-template-schema.ts — optional versioned Core template/default/hold commitment and immutable W2 association with authenticated per-Bank backup observations.
 - memory-transition-queue-schema.ts — normalized queued write custody, bounded caller identity, fresh target request identity and separate queued/unknown/factual outcomes
 - memory-transition-publication-schema.ts — immutable receipt/candidate/native checkpoints, exact primary custody and positive awaiting-Source dispositions
 - memory-transition-driver-schema.ts — healthy/offline previews, native command/observation evidence and provider-independent historical progress.
@@ -94,5 +98,22 @@
 - memory-activation-schema.ts — MEMORY_ACTIVATION_METHODS + the strict memory.activation.status read (authority, runtime, setup, Bank prerequisites, cutover run/receipt, custody counters, Core-derived actions)
 - memory-authority-status-schema.ts — MEMORY_AUTHORITY_METHODS + the strict composite memory.authority.status read (authority, runtime availability with closed reasons incl. connection_disabled/config_changed, setup, per-Bank replica/Pending, operations, the Hindsight lifecycle section present exactly under Hindsight authority, derivedFreshness literal unknown)
 - memory-hindsight-lifecycle-schema.ts — Hindsight Bank readiness (ready/syncing/provisioning/failed/not_provisioned) and the memory.authority.status `hindsight` section: live connection config/drift/admission time, per-scope readiness, Core-derived actions, the nullable `backup` block; bank.provision / connection.revalidate request, producer (Core-stamped operator/automatic origin), result and closed lifecycle error codes
-- hindsight-backup-schema.ts — Stage 3 backup contracts: artifact manifest (Core copy, native proof, authority, per-Bank checkpoints, terminal-operation list, presence-only credential custody), pair-mismatch reasons, the `hindsight.backup` status block, backup.capture/admit/verify request/producer/result and closed backup error codes
+- hindsight-backup-schema.ts — explicit v1/v2 backup aggregates, closed pair failures, the `hindsight.backup` status block, backup.capture/admit/verify and emergency evidence
+- hindsight-backup-v1-schema.ts — unchanged strict historical request/proof/archive/manifest contracts, common custody and version-specific staged metadata bases
+- hindsight-backup-v2-schema.ts — strict complete backup request, proof body, endpoint response, archive, observation and copied-Core manifest variants
+- hindsight-template-backup-schema.ts — independent receipt inventory and selected/unselected Bank proof with actual service configuration provenance
+- hindsight-template-backup-attestation-schema.ts — bounded copied-Core template history/default/publication/hold commitments for exact Bank incarnations
+- hindsight-template-backup-encoding.ts — independent backup hash domains, complete receipt inventory ordering and explicit request/response byte budgets
 - memory-transition-emergency-schema.ts — distinct offline preview, captured scope, immutable incident/surviving candidate/publication and held-unknown contracts.
+
+- hindsight-configuration-observation-schema.ts — optional strict Native observation, bounded model aliases and Core status/comparison contracts
+- hindsight-template-definition-schema.ts — complete bounded template resources, field-specific config/label validation and lossless trigger shape; Native owns cron compilation
+- hindsight-template-schema.ts — lifecycle snapshot/apply/receipt/child and finite future label/backup wire evidence
+- hindsight-template-encoding.ts — unchanged current-state codec with template domain separation and identity-set sorting
+- memory-template-user-schema.ts — shared complete explicit user choices and independent revisions, preserving equal values, suppression and reset
+- memory-template-operation-schema.ts — exact preview references, original-plan recovery, producer phases, truthful partial/unbound outcomes and closed errors
+- memory-template-schema.ts — operator preview/detail/status methods with bounded desired/applied/bound state, timestamped rollout child records and recovery availability
+- memory-template-derived-schema.ts — exact single-child observation request and observed-at, stale or unavailable result contracts
+- hindsight-custody-schema.ts — strict fixed-slot C1 prepare/invocation/result protocol and budgets; no values or deployment authority.
+- hindsight-installation-schema.ts — complete compiled artifact, external runtime/owner registration and separate Node enrollment/credential contracts.
+- host-input-encoding.ts — boot-free canonical input serialization shared by Core, installed Host and Rust parity fixtures.

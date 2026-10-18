@@ -562,3 +562,66 @@ export { MemoryEmergencyCaptureSchema, MemoryEmergencyBankCoverageSchema, Memory
   MemorySurvivingBankEvidenceSchema, MemoryEmergencyCandidateSchema, type MemoryEmergencyCandidate, type MemorySurvivingBankEvidence,
   MemoryEmergencyUnknownEffectSchema, MemoryEmergencyPublicationSchema, type MemoryEmergencyUnknownEffect, type MemoryEmergencyPublication,
   type MemoryEmergencyCapture, type MemoryEmergencyBankCoverage, type MemoryEmergencySnapshot } from "./memory-transition-emergency-schema.ts";
+export { HINDSIGHT_CONFIGURATION_BUILD, HINDSIGHT_CONFIGURATION_VERSION, HINDSIGHT_CONFIGURATION_MAX_BYTES,
+  HINDSIGHT_CONFIGURATION_TTL_MS, HINDSIGHT_CONFIGURATION_METHODS, HindsightObservedModelIdentifierSchema,
+  HindsightObservedProfileSchema, HindsightConfigurationObservationSchema, HindsightConfigurationRefusalSchema,
+  HindsightConfigurationScopeSchema, HindsightConfigurationParamsSchema, HindsightConfigurationComparisonSchema,
+  HindsightConfigurationStatusSchema, type HindsightObservedProfile, type HindsightConfigurationObservation,
+  type HindsightConfigurationRefusal, type HindsightConfigurationScope, type HindsightConfigurationParams,
+  type HindsightConfigurationComparison, type HindsightConfigurationStatus } from "./hindsight-configuration-observation-schema.ts";
+export { HINDSIGHT_TEMPLATE_BUILD, HINDSIGHT_TEMPLATE_VERSION, HINDSIGHT_TEMPLATE_MAX_BYTES,
+  HindsightTemplateHashSchema, HindsightTemplateIdSchema, HindsightTemplateTextSchema, HindsightTemplateNameSchema,
+  HindsightTemplateTagsSchema, HindsightTemplateModelIdSchema, HindsightTemplateJsonSchema, HindsightTemplateObjectSchema,
+  HindsightTemplateConfigKeySchema, HindsightTemplateTriggerSchema, HindsightTemplateModelDefinitionSchema,
+  HindsightTemplateDirectiveDefinitionSchema, HindsightTemplatePresenceSchema, HindsightTemplateTargetSchema,
+  HindsightTemplateConfigEntrySchema, HindsightTemplateSelectorsSchema, HindsightTemplateLabelGroupSchema, HindsightTemplateLabelsSchema,
+  isHindsightTemplateConfigValue,
+  type HindsightTemplateConfigKey, type HindsightTemplateModelDefinition, type HindsightTemplateDirectiveDefinition,
+  type HindsightTemplatePresence, type HindsightTemplateTarget, type HindsightTemplateSelectors,
+  type HindsightTemplateLabelGroup, type HindsightTemplateLabels } from "./hindsight-template-definition-schema.ts";
+export { HindsightTemplateObjectProofSchema, HindsightTemplateSnapshotRequestSchema, HindsightTemplateSnapshotSchema,
+  HindsightTemplateChangesSchema, HindsightTemplateApplyRequestSchema, HindsightTemplateChildSchema, HindsightTemplateReceiptSchema,
+  HindsightTemplateResultRequestSchema, HindsightTemplateRefreshResultRequestSchema, HindsightTemplateResultSchema, HindsightTemplateRefreshResultSchema, HindsightTemplateFailureSchema,
+  HindsightTemplateLabelEvidenceSchema, HindsightTemplateLabelEvidenceRequestSchema, HindsightTemplateLabelEvidenceResultSchema,
+  HindsightTemplateBackupEvidenceSchema, type HindsightTemplateSnapshot, type HindsightTemplateChanges,
+  type HindsightTemplateApplyRequest, type HindsightTemplateReceipt } from "./hindsight-template-schema.ts";
+export { hindsightTemplateHashJson, normalizeHindsightTemplateSelectors, normalizeHindsightTemplateSnapshot,
+  normalizeHindsightTemplateChanges, normalizeHindsightTemplateRequest, normalizeHindsightTemplateReceipt,
+  type HindsightTemplateHashDomain } from "./hindsight-template-encoding.ts";
+export { MemoryTemplateUserChoicesSchema, MemoryTemplateUserRevisionSchema,
+  type MemoryTemplateUserChoices, type MemoryTemplateUserRevision } from "./memory-template-user-schema.ts";
+export { MemoryTemplateDerivedParamsSchema, MemoryTemplateDerivedObservationSchema,
+  type MemoryTemplateDerivedParams, type MemoryTemplateDerivedObservation } from "./memory-template-derived-schema.ts";
+export { MemoryTemplateErrorCodeSchema, MemoryTemplateApplyRequestSchema, MemoryTemplateRecoverRequestSchema, MemoryTemplateRequestSchema,
+  MemoryTemplatePhaseSchema, MemoryTemplateProducerRefSchema, MemoryTemplateResultSchema,
+  type MemoryTemplateErrorCode, type MemoryTemplateRequest, type MemoryTemplateProducerRef, type MemoryTemplateResult } from "./memory-template-operation-schema.ts";
+export { MEMORY_TEMPLATE_METHODS, MEMORY_TEMPLATE_DETAIL_MAX_BYTES, MemoryTemplatePreviewParamsSchema, MemoryTemplateBankSummarySchema,
+  MemoryTemplatePreviewSchema, MemoryTemplateDetailParamsSchema, MemoryTemplateDetailSchema, MemoryTemplateStatusParamsSchema,
+  MemoryTemplateBankProgressSchema, MemoryTemplateBankStatusSchema, MemoryTemplateStatusSchema, type MemoryTemplatePreviewParams, type MemoryTemplateBankSummary,
+  type MemoryTemplatePreview, type MemoryTemplateDetail, type MemoryTemplateStatus } from "./memory-template-schema.ts";
+export { HindsightBackupNativeRequestV1Schema, HindsightBackupNativeProofBodyV1Schema, HindsightBackupNativeProofV1Schema,
+  HindsightBackupArchiveProofV1Schema, HindsightBackupManifestV1BaseSchema, HindsightBackupManifestV1Schema,
+  type HindsightBackupNativeRequestV1, type HindsightBackupNativeProofBodyV1, type HindsightBackupNativeProofV1,
+  type HindsightBackupArchiveProofV1, type HindsightBackupManifestV1 } from "./hindsight-backup-v1-schema.ts";
+export { HindsightBackupNativeRequestV2Schema, HindsightBackupNativeProofBodyV2Schema, HindsightBackupNativeProofV2Schema,
+  HindsightBackupNativeResponseV2Schema, HindsightBackupArchiveProofV2Schema, HindsightBackupManifestV2BaseSchema,
+  HindsightBackupManifestV2Schema, HindsightTemplateBackupObservationRequestSchema, HindsightTemplateBackupObservationResponseSchema,
+  type HindsightBackupNativeRequestV2, type HindsightBackupNativeProofBodyV2, type HindsightBackupNativeProofV2,
+  type HindsightBackupNativeResponseV2, type HindsightBackupArchiveProofV2, type HindsightBackupManifestV2,
+  type HindsightTemplateBackupObservationRequest, type HindsightTemplateBackupObservationResponse } from "./hindsight-backup-v2-schema.ts";
+export { HINDSIGHT_TEMPLATE_BACKUP_VERSION, HINDSIGHT_TEMPLATE_BACKUP_BUILD, HINDSIGHT_TEMPLATE_BACKUP_OBSERVATION_PATH,
+  HindsightTemplateBackupReceiptTupleSchema, HindsightTemplateBackupReceiptInventorySchema,
+  HindsightTemplateBackupConfigurationObservationSchema, HindsightTemplateBackupBankProofV2Schema,
+  HindsightTemplateBackupFailureSchema, type HindsightTemplateBackupFailure,
+  type HindsightTemplateBackupReceiptTuple, type HindsightTemplateBackupReceiptInventory,
+  type HindsightTemplateBackupConfigurationObservation, type HindsightTemplateBackupBankProofV2 } from "./hindsight-template-backup-schema.ts";
+export { HindsightTemplateBackupBankAttestationSchema, HindsightTemplateBackupAttestationSchema,
+  type HindsightTemplateBackupBankAttestation, type HindsightTemplateBackupAttestation } from "./hindsight-template-backup-attestation-schema.ts";
+export { HINDSIGHT_BACKUP_V2_REQUEST_MAX_BYTES, HINDSIGHT_BACKUP_APPLY_MAX_BYTES, HINDSIGHT_BACKUP_PROOF_MAX_BYTES,
+  HINDSIGHT_BACKUP_MANIFEST_MAX_BYTES, HINDSIGHT_BACKUP_OBSERVATION_WRAPPER_MAX_BYTES, HINDSIGHT_BACKUP_OBSERVATION_REQUEST_MAX_BYTES,
+  HINDSIGHT_TEMPLATE_BACKUP_HASH_DOMAINS, hindsightTemplateBackupHashJson, hindsightBackupJsonBytes,
+  normalizeHindsightBackupRequestV2, hindsightTemplateBackupRequestValue, hindsightTemplateBackupReceiptsValue,
+  hindsightTemplateBackupDatabaseValue, hindsightTemplateBackupInheritedValue, hindsightTemplateBackupObservationValue,
+  type HindsightTemplateBackupHashDomain } from "./hindsight-template-backup-encoding.ts";
+export { MemoryTransitionTemplateCommitmentSchema, MemoryTransitionTemplateAssociationSchema,
+  type MemoryTransitionTemplateCommitment, type MemoryTransitionTemplateAssociation } from "./memory-transition-template-schema.ts";

@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "requestId": "11111111-1111-4111-8111-111111111111",
+  "control": {
+    "runId": "11111111-1111-4111-8111-111111111111",
+    "operationId": "11111111-1111-4111-8111-111111111111",
+    "attemptId": "22222222-2222-4222-8222-222222222222",
+    "targetHostId": "22222222-2222-4222-8222-222222222222",
+    "connectionGeneration": 1,
+    "catalogGeneration": 1,
+    "policyGeneration": 1,
+    "governanceProjection": {
+      "registryRevision": 3,
+      "descriptorRevision": 1,
+      "classifierRevision": 1,
+      "cells": [
+        {
+          "key": "hindsight-deployment:create",
+          "posture": "auto"
+        },
+        {
+          "key": "hindsight-deployment:inject",
+          "posture": "auto"
+        },
+        {
+          "key": "hindsight-deployment:start",
+          "posture": "auto"
+        }
+      ],
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "approvalGeneration": 1,
+    "capabilityId": "hindsight-deployment",
+    "inputDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "idempotencyKey": "11111111-1111-4111-8111-111111111111",
+    "dispatchedAt": "2026-10-13T00:00:00.000Z",
+    "deadlineAt": "2026-10-13T00:01:00.000Z",
+    "coreAttemptId": "33333333-3333-4333-8333-333333333333",
+    "effectId": "33333333-3333-4333-8333-333333333333"
+  },
+  "checkpointId": "33333333-3333-4333-8333-333333333333",
+  "deploymentId": "11111111-1111-4111-8111-111111111111",
+  "containerId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "startupId": "33333333-3333-4333-8333-333333333333",
+  "configurationDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "custodySnapshotId": "11111111-1111-4111-8111-111111111111",
+  "authorization": null
+}
