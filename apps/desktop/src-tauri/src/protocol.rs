@@ -9,6 +9,15 @@ pub use host_control_protocol::*;
 #[path = "host_approval_protocol.rs"]
 mod host_approval_protocol;
 pub use host_approval_protocol::*;
+#[path = "hindsight_custody_protocol.rs"]
+mod hindsight_custody_protocol;
+pub use hindsight_custody_protocol::*;
+#[path = "hindsight_installation_protocol.rs"]
+mod hindsight_installation_protocol;
+pub use hindsight_installation_protocol::*;
+#[path = "hindsight_deployment_protocol.rs"]
+mod hindsight_deployment_protocol;
+pub use hindsight_deployment_protocol::*;
 #[path = "ws_challenge.rs"]
 pub(crate) mod ws_challenge;
 use serde::{Deserialize, Serialize};
@@ -274,6 +283,18 @@ mod tests {
     // Parse `text` under the type owning `prefix`; on success return the re-serialized Value (for the round-trip trap).
     fn reparse(prefix: &str, text: &str) -> Option<Value> {
         match prefix {
+            "hindsight-deployment-effect" => serde_json::from_str::<Value>(text).ok().and_then(|value| parse_deployment_effect(value).ok()).map(to_value),
+            "hindsight-deployment-invocation" => serde_json::from_str::<Value>(text).ok().and_then(|value| parse_deployment_invocation(value).ok()).map(to_value),
+            "hindsight-deployment-observe" => serde_json::from_str::<Value>(text).ok().and_then(|value| parse_deployment_observe(value).ok()).map(to_value),
+            "hindsight-deployment-checkpoint" => serde_json::from_str::<Value>(text).ok().and_then(|value| parse_deployment_checkpoint(value).ok()).map(to_value),
+            "hindsight-deployment-checkpoint-result" => serde_json::from_str::<Value>(text).ok().and_then(|value| parse_deployment_checkpoint_result(value).ok()).map(to_value),
+            "hindsight-deployment-status" => serde_json::from_str::<Value>(text).ok().and_then(|value| parse_deployment_status(value).ok()).map(to_value),
+            "hindsight-deployment-registration" => serde_json::from_str::<Value>(text).ok().and_then(|value| parse_deployment_registration(value).ok()).map(to_value),
+            "hindsight-custody-prepare" => serde_json::from_str::<Value>(text).ok().and_then(|value| parse_hindsight_prepare(value).ok()).map(to_value),
+            "hindsight-custody-invocation" => serde_json::from_str::<Value>(text).ok().and_then(|value| parse_hindsight_invocation(value).ok()).map(to_value),
+            "hindsight-custody-result" => serde_json::from_str::<Value>(text).ok().and_then(|value| parse_hindsight_result(value).ok()).map(to_value),
+            "hindsight-host-manifest" => serde_json::from_str::<Value>(text).ok().and_then(|value| parse_hindsight_manifest(value).ok()).map(to_value),
+            "hindsight-host-registration" => serde_json::from_str::<Value>(text).ok().and_then(|value| parse_hindsight_registration(value).ok()).map(to_value),
             "connect-request" => serde_json::from_str::<ConnectParams>(text)
                 .ok()
                 .map(to_value),

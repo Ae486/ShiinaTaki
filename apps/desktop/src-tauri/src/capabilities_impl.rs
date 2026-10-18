@@ -1,5 +1,5 @@
 //! INPUT:  a capability name + input Value (from a gate-authorized capability.request)
-//! OUTPUT: CapabilityRegistry::respond -> CapabilityRespond; CapabilityExec trait + ExecError
+//! OUTPUT: CapabilityRegistry responses and post-gate code-owned invocation context; CapabilityExec + ExecError
 //! POS:    shell/capabilities — the pluggable handler table (invariant 7); executors reachable ONLY after the gate
 
 pub mod clipboard;
@@ -14,7 +14,18 @@ use std::sync::Arc;
 
 use serde_json::Value;
 
-use crate::protocol::{CapabilityErrorCode, CapabilityRespond, HostOperationControl};
+use crate::protocol::{CapabilityAuthorizationLineage, CapabilityErrorCode, CapabilityRespond, HostOperationControl};
+
+/// Created only by the authenticated Host after final enforcement. This is deliberately not deserializable:
+/// putting a control tuple in ordinary capability input cannot turn it into execution authority.
+#[derive(Clone)]
+pub struct TrustedHostInvocationContext {
+    pub(crate) request_id: String,
+    pub(crate) control: HostOperationControl,
+    pub(crate) authorization: Option<CapabilityAuthorizationLineage>,
+    pub(crate) live: Arc<std::sync::atomic::AtomicBool>,
+    pub(crate) checkpoint: Option<crate::hindsight_checkpoint_relay::CheckpointCallback>,
+}
 
 /// A capability execution failure, carrying a closed wire code the core surfaces to the model.
 #[derive(Debug, Clone)]
@@ -37,6 +48,9 @@ impl ExecError {
 pub trait CapabilityExec: Send + Sync {
     fn capability(&self) -> &str;
     fn run(&self, input: &Value) -> Result<Value, ExecError>;
+    fn run_with_context(&self, input: &Value, _context: &TrustedHostInvocationContext) -> Result<Value, ExecError> {
+        self.run(input)
+    }
     /// An optional human-readable detail derived from the input, shown in the approval dialog (ruling 4). Default: none.
     /// It is dialog-only — NEVER logged (the target may be content, e.g. a URL the user is browsing).
     #[allow(dead_code)] // Retained for the Slice-4 operator challenge UI; Slice 3 never prompts locally.
@@ -69,6 +83,7 @@ impl CapabilityRegistry {
     }
 
     /// Runs the capability and shapes the node's respond frame; an unknown capability is UNSUPPORTED_CAPABILITY.
+    #[allow(dead_code)] // Retained context-free compatibility seam; custody explicitly refuses it.
     pub fn respond(
         &self,
         request_id: String,
@@ -89,6 +104,29 @@ impl CapabilityRegistry {
                     CapabilityRespond::err(request_id, control, error.code, error.message)
                 }
             },
+        }
+    }
+
+    /// Both execute and Approval resume use this seam only after the final Host gate. Ordinary handlers keep
+    /// their existing implementation; custody requires this context and refuses its context-free `run` path.
+    pub(crate) fn respond_with_context(
+        &self,
+        context: &TrustedHostInvocationContext,
+        input: &Value,
+    ) -> CapabilityRespond {
+        let request_id = context.request_id.clone();
+        let control = context.control.clone();
+        let response = match self.handlers.get(&control.capability_id) {
+            None => CapabilityRespond::err(request_id, control, CapabilityErrorCode::UnsupportedCapability,
+                "capability is not installed".into()),
+            Some(exec) => match exec.run_with_context(input, context) {
+                Ok(output) => CapabilityRespond::ok(request_id, control, output),
+                Err(error) => CapabilityRespond::err(request_id, control, error.code, error.message),
+            },
+        };
+        match &context.authorization {
+            Some(lineage) => response.with_authorization(lineage.clone()),
+            None => response,
         }
     }
 }

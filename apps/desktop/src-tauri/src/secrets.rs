@@ -129,10 +129,17 @@ fn credential_mutex_name(user_sid: &[u8], service: &str, key: &str) -> String {
 }
 
 #[cfg(windows)]
-fn current_user_sid() -> Result<Vec<u8>, String> {
+pub(crate) fn current_user_sid() -> Result<Vec<u8>, String> {
+    // SAFETY: GetCurrentProcess returns the live current-process pseudo handle.
+    process_user_sid(unsafe { GetCurrentProcess() })
+}
+
+/// Used by installed custody to compare the launched runtime's actual token user with this Host's user.
+#[cfg(windows)]
+pub(crate) fn process_user_sid(process: HANDLE) -> Result<Vec<u8>, String> {
     let mut token = HANDLE::default();
-    // SAFETY: GetCurrentProcess returns the current-process pseudo handle; token points to writable storage.
-    unsafe { OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &mut token) }
+    // SAFETY: the caller holds a live process handle; token points to writable storage.
+    unsafe { OpenProcessToken(process, TOKEN_QUERY, &mut token) }
         .map_err(|error| format!("open process token failed: {error}"))?;
     let result = read_user_sid(token);
     // SAFETY: OpenProcessToken returned an owned token handle, closed exactly once here.

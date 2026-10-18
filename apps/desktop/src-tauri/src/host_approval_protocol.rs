@@ -295,7 +295,7 @@ fn validate_authorization(value: &CapabilityAuthorization) -> Result<(), String>
     Ok(())
 }
 
-fn validate_control(control: &HostOperationControl) -> Result<(), String> {
+pub(crate) fn validate_control(control: &HostOperationControl) -> Result<(), String> {
     for value in [&control.run_id, &control.operation_id, &control.attempt_id,
         &control.target_host_id, &control.idempotency_key] {
         validate_uuid(value)?;

@@ -5,6 +5,7 @@
 
 use sha2::{Digest, Sha256};
 use std::collections::{HashMap, VecDeque};
+use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
 
 use crate::protocol::{
     CapabilityCancel, CapabilityRequest, CapabilityRespond, HostOperationControl,
@@ -24,6 +25,7 @@ pub(crate) enum BeginDecision {
 struct AttemptBinding {
     request_id: String,
     control: HostOperationControl,
+    live: Arc<AtomicBool>,
 }
 
 impl AttemptBinding {
@@ -127,6 +129,7 @@ impl HostSession {
             return BeginDecision::Rejected;
         }
         if request.control.policy_generation > self.highest_policy_generation {
+            for binding in self.active.values() { binding.live.store(false, Ordering::Release); }
             self.highest_policy_generation = request.control.policy_generation;
             self.projection_digests.clear();
         }
@@ -159,6 +162,7 @@ impl HostSession {
             AttemptBinding {
                 request_id: request.request_id.clone(),
                 control: request.control.clone(),
+                live: Arc::new(AtomicBool::new(true)),
             },
         );
         BeginDecision::Start
@@ -173,7 +177,7 @@ impl HostSession {
         if !binding.matches(&cancel.request_id, &cancel.control) {
             return None;
         }
-        self.active.remove(attempt_id);
+        if let Some(binding) = self.active.remove(attempt_id) { binding.live.store(false, Ordering::Release); }
         let response =
             CapabilityRespond::cancelled(cancel.request_id.clone(), cancel.control.clone());
         self.terminal.insert(attempt_id.clone(), response.clone());
@@ -189,9 +193,23 @@ impl HostSession {
         if !binding.matches(response.request_id(), response.control()) {
             return None;
         }
-        self.active.remove(&attempt_id);
+        if let Some(binding) = self.active.remove(&attempt_id) { binding.live.store(false, Ordering::Release); }
         self.terminal.insert(attempt_id, response.clone());
         Some(response)
+    }
+
+    /// Execution receives only the already-admitted attempt's cancellation flag. A reconnect, policy advance
+    /// or cancel retires it; the bounded custody child checks it while waiting and before returning.
+    pub(crate) fn invocation_live(&self, request_id: &str, control: &HostOperationControl) -> Option<Arc<AtomicBool>> {
+        let binding = self.active.get(&control.attempt_id)?;
+        (self.accepts(control) && binding.matches(request_id, control) && binding.live.load(Ordering::Acquire))
+            .then(|| binding.live.clone())
+    }
+
+    pub(crate) fn close(&mut self) {
+        for binding in self.active.values() { binding.live.store(false, Ordering::Release); }
+        self.active.clear();
+        self.pending_challenges.clear();
     }
 
     fn accepts(&self, control: &HostOperationControl) -> bool {
@@ -270,6 +288,9 @@ fn validate_projection(
         ],
         "screenshot" | "screenshot-ambient" | "process-list" | "clipboard-read"
         | "clipboard-write" | "foreground-window" => &[capability],
+        "hindsight-custody" => &["hindsight-custody:prepare"],
+        "hindsight-deployment" => &["hindsight-deployment:create", "hindsight-deployment:start", "hindsight-deployment:inject"],
+        "hindsight-deployment-observe" => &["hindsight-deployment-observe:read"],
         _ => return false,
     };
     let keys: Vec<&str> = projection
@@ -279,7 +300,7 @@ fn validate_projection(
         .collect();
     let mut expected = expected.to_vec();
     expected.sort_unstable();
-    projection.registry_revision == 1
+    projection.registry_revision == 3
         && projection.descriptor_revision == 1
         && projection.classifier_revision == 1
         && keys == expected
@@ -440,7 +461,7 @@ mod tests {
 
     fn projection(capability: &str, cell: &str) -> crate::protocol::HostGovernanceProjection {
         let mut projection = crate::protocol::HostGovernanceProjection {
-            registry_revision: 1,
+            registry_revision: 3,
             descriptor_revision: 1,
             classifier_revision: 1,
             cells: vec![crate::protocol::HostGovernanceCell {
@@ -459,7 +480,7 @@ mod tests {
         let projection = projection("screenshot", "screenshot");
         assert_eq!(
             projection.digest,
-            "f30ef0476cc356181b289cb892004ef9e1250257b9a2fd60bddefddf9b171210"
+            "2074385f6cc1fb761a5262f00b7fa30011f7ca3a20e305a6e00d034681db1ba2"
         );
         let mut changed = projection.clone();
         changed.cells[0].posture = crate::protocol::HostGovernancePosture::Deny;
@@ -474,7 +495,7 @@ mod tests {
         assert!(!validate_projection("screenshot", &complete));
 
         let mut exec = crate::protocol::HostGovernanceProjection {
-            registry_revision: 1,
+            registry_revision: 3,
             descriptor_revision: 1,
             classifier_revision: 1,
             cells: [
@@ -549,8 +570,14 @@ mod tests {
         let path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .join("../../../packages/shared/fixtures/protocol")
             .join(name);
-        serde_json::from_str(&std::fs::read_to_string(path).expect("read Host Approval fixture"))
-            .expect("parse fixture JSON")
+        let mut challenge: crate::protocol::CapabilityChallenge = serde_json::from_str(
+            &std::fs::read_to_string(path).expect("read Host Approval fixture")).expect("parse fixture JSON");
+        // Golden revision-1 wire fixtures remain readable, while this live session requires the current registry.
+        challenge.control.governance_projection.registry_revision = 3;
+        challenge.control.governance_projection.digest = projection_digest(&challenge.control.governance_projection);
+        challenge.control_digest = crate::protocol::control_digest(&challenge.control).unwrap();
+        challenge.challenge_digest = crate::protocol::challenge_digest(&challenge).unwrap();
+        serde_json::to_value(challenge).unwrap()
     }
 
     #[test]

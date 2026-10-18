@@ -86,10 +86,12 @@ impl WsClient {
         )));
         let (write, mut read) = socket.split();
         let write = Arc::new(Mutex::new(write));
+        let relay = Arc::new(crate::hindsight_checkpoint_relay::CheckpointRelay::default());
+        let mut failure = None;
         while let Some(message) = read.next().await {
-            let message = message.map_err(|error| error.to_string())?;
+            let message = match message { Ok(message) => message, Err(error) => { failure = Some(error.to_string()); break; } };
             match message {
-                Message::Text(text) => self.dispatch(text.as_str(), &write, &session).await,
+                Message::Text(text) => self.dispatch(text.as_str(), &write, &session, &relay).await,
                 Message::Ping(payload) => {
                     let _ = write.lock().await.send(Message::Pong(payload)).await;
                 }
@@ -97,7 +99,9 @@ impl WsClient {
                 _ => {}
             }
         }
-        Ok(())
+        session.lock().await.close();
+        relay.close();
+        match failure { Some(error) => Err(error), None => Ok(()) }
     }
 
     // Sends connect frames until authenticated. Returns Ok(true) once connected, Ok(false) if auth failed (retry fresh).
@@ -222,7 +226,12 @@ impl WsClient {
     }
 
     // Host-control notifications remain responsive while a blocking capability executes on a worker thread.
-    async fn dispatch(&self, text: &str, write: &SharedWrite, session: &SharedSession) {
+    async fn dispatch(&self, text: &str, write: &SharedWrite, session: &SharedSession, relay: &Arc<crate::hindsight_checkpoint_relay::CheckpointRelay>) {
+        match serde_json::from_str::<ClientFrame>(text) {
+            Ok(ClientFrame::Success { id, result, .. }) => { relay.deliver(&id, result); return; }
+            Ok(ClientFrame::Error { id: Some(id), .. }) => { relay.deliver(&id, json!({"state":"unavailable","reason":"host-unavailable"})); return; }
+            _ => {},
+        }
         let Ok(ClientFrame::Notification { method, params, .. }) =
             serde_json::from_str::<ClientFrame>(text)
         else {
@@ -230,9 +239,9 @@ impl WsClient {
         };
         match method.as_str() {
             "capability.request" => self.dispatch_request(params, write, session).await,
-            "capability.execute" => self.dispatch_execute(params, write, session).await,
+            "capability.execute" => self.dispatch_execute(params, write, session, relay).await,
             "capability.cancel" => self.dispatch_cancel(params, write, session).await,
-            "capability.resume" => self.dispatch_resume(params, write, session).await,
+            "capability.resume" => self.dispatch_resume(params, write, session, relay).await,
             _ => {}
         }
     }
@@ -303,18 +312,26 @@ impl WsClient {
         }
     }
 
-    async fn dispatch_execute(&self, params: Value, write: &SharedWrite, session: &SharedSession) {
+    async fn dispatch_execute(&self, params: Value, write: &SharedWrite, session: &SharedSession, relay: &Arc<crate::hindsight_checkpoint_relay::CheckpointRelay>) {
         let Ok(execute) = serde_json::from_value::<crate::protocol::CapabilityExecute>(params) else { return; };
         let Some(record) = session.lock().await.pending_challenge(&execute.request_id).cloned() else { return; };
         if record.challenge.challenge_id != execute.challenge_id || record.challenge.control != execute.control { return; }
-        let authorized_ask = execute.authorization.is_some();
+        let mut lineage = None;
         if let Some(raw) = execute.authorization.clone() {
             let Ok(authorization) = serde_json::from_value(raw) else { return; };
             let resume = crate::protocol::CapabilityResume { request_id: execute.request_id.clone(), control: execute.control.clone(), challenge_id: execute.challenge_id.clone(), authorization };
             if matches_pending_authorization(&record, &resume).is_err() { return; }
+            lineage = Some(CapabilityAuthorizationLineage {
+                authorization_id: resume.authorization.authorization_id,
+                approval_generation: resume.authorization.approval_generation,
+                challenge_digest: resume.authorization.challenge_digest,
+            });
         }
+        let authorized_ask = lineage.is_some();
+        let Some(live) = session.lock().await.invocation_live(&execute.request_id, &execute.control) else { return; };
         let _ = session.lock().await.consume_challenge(&execute.request_id);
         let handlers = self.handlers.clone(); let gate = self.gate.clone(); let exec_policy = self.exec_policy.clone(); let session = session.clone(); let write = write.clone();
+        let relay = relay.clone();
         tokio::spawn(async move {
             let evidence = final_host_enforcement(&gate, &exec_policy, &execute.control, &record.input);
             let approved = evidence.effective_posture == if authorized_ask { crate::protocol::HostGovernancePosture::Ask } else { crate::protocol::HostGovernancePosture::Auto };
@@ -327,7 +344,11 @@ impl WsClient {
                     true,
                     audit_command(&execute.control.capability_id, &record.input),
                 );
-                handlers.respond(execute.request_id.clone(), execute.control.clone(), &execute.control.capability_id, &record.input).with_governance(evidence)
+                let mut context = crate::capabilities_impl::TrustedHostInvocationContext {
+                    request_id: execute.request_id.clone(), control: execute.control.clone(), authorization: lineage.clone(), live, checkpoint: None,
+                };
+                attach_checkpoint(&mut context, &write, &session, relay);
+                execute_with_context(handlers, context, record.input).await.with_governance(evidence)
             } else {
                 gate.audit_enforcement(
                     &execute.request_id,
@@ -337,6 +358,7 @@ impl WsClient {
                 );
                 CapabilityRespond::err(execute.request_id.clone(), execute.control.clone(), crate::protocol::CapabilityErrorCode::Denied, "Host governance tightened after Core intent".into()).with_governance(evidence)
             };
+            let response = match lineage { Some(lineage) => response.with_authorization(lineage), None => response };
             if let Some(response) = session.lock().await.complete(response) { send_response(&write, response).await; }
         });
     }
@@ -365,7 +387,7 @@ impl WsClient {
 
     // Core -> Node resume for an authorized ask: revalidate the one-shot authorization against the
     // stored challenge, consume it, execute at most once, and settle with the authorization lineage.
-    async fn dispatch_resume(&self, params: Value, write: &SharedWrite, session: &SharedSession) {
+    async fn dispatch_resume(&self, params: Value, write: &SharedWrite, session: &SharedSession, relay: &Arc<crate::hindsight_checkpoint_relay::CheckpointRelay>) {
         let Ok(resume) = parse_capability_resume(params) else {
             tracing::warn!("capability.resume params failed to parse; resume dropped");
             return;
@@ -394,12 +416,14 @@ impl WsClient {
         let Some((record, authorization)) = authorized else {
             return;
         };
+        let Some(live) = session.lock().await.invocation_live(&record.challenge.request_id, &record.challenge.control) else { return; };
         let handlers = self.handlers.clone();
         let gate = self.gate.clone();
         let exec_policy = self.exec_policy.clone();
         let write = write.clone();
         let session = session.clone();
         let capability = record.challenge.control.capability_id.clone();
+        let relay = relay.clone();
         tokio::spawn(async move {
             let (approved, evidence) = enforce_authorized_resume(
                 &gate,
@@ -409,12 +433,19 @@ impl WsClient {
                 &record.input,
             );
             let response = if approved {
-                handlers.respond(
-                    record.challenge.request_id.clone(),
-                    record.challenge.control.clone(),
-                    &capability,
-                    &record.input,
-                )
+                let mut context = crate::capabilities_impl::TrustedHostInvocationContext {
+                    request_id: record.challenge.request_id.clone(),
+                    control: record.challenge.control.clone(),
+                    authorization: Some(CapabilityAuthorizationLineage {
+                        authorization_id: authorization.authorization_id.clone(),
+                        approval_generation: authorization.approval_generation,
+                        challenge_digest: authorization.challenge_digest.clone(),
+                    }),
+                    live,
+                    checkpoint: None,
+                };
+                attach_checkpoint(&mut context, &write, &session, relay);
+                execute_with_context(handlers, context, record.input).await
             } else {
                 CapabilityRespond::err(
                     record.challenge.request_id.clone(),
@@ -498,8 +529,16 @@ impl WsClient {
 
 type WsStream =
     tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>;
-type SharedWrite = Arc<Mutex<futures_util::stream::SplitSink<WsStream, Message>>>;
-type SharedSession = Arc<Mutex<HostSession>>;
+pub(crate) type SharedWrite = Arc<Mutex<futures_util::stream::SplitSink<WsStream, Message>>>;
+pub(crate) type SharedSession = Arc<Mutex<HostSession>>;
+
+fn attach_checkpoint(context: &mut crate::capabilities_impl::TrustedHostInvocationContext, write: &SharedWrite,
+    session: &SharedSession, relay: Arc<crate::hindsight_checkpoint_relay::CheckpointRelay>) {
+    if context.control.capability_id == "hindsight-deployment" {
+        context.checkpoint = Some(crate::hindsight_checkpoint_relay::checkpoint_callback(context.clone(),
+            crate::hindsight_checkpoint_relay::CheckpointTransport { relay, write: write.clone(), session: session.clone() }));
+    }
+}
 
 enum ConnectStep {
     Connected {
@@ -582,6 +621,20 @@ async fn authorize_and_run(
     }
 }
 
+/// A custody child can wait up to its original deadline. Keep the socket reader runnable so cancellation and
+/// disconnect can retire the code-owned flag; no request input or raw join failure is logged on this path.
+async fn execute_with_context(
+    handlers: Arc<crate::capabilities_impl::CapabilityRegistry>,
+    context: crate::capabilities_impl::TrustedHostInvocationContext,
+    input: Value,
+) -> CapabilityRespond {
+    let fallback = context.clone();
+    tokio::task::spawn_blocking(move || handlers.respond_with_context(&context, &input)).await.unwrap_or_else(|_| {
+        CapabilityRespond::err(fallback.request_id, fallback.control, crate::protocol::CapabilityErrorCode::ExecFailed,
+            "Host execution did not complete".into())
+    })
+}
+
 fn final_host_enforcement(
     gate: &Gate,
     exec_policy: &ExecPolicy,
@@ -598,6 +651,12 @@ fn final_host_enforcement(
             let class = classify_shell_open(input);
             (class.key(), class != crate::gate::ShellOpenClass::Blocked)
         }
+        "hindsight-custody" => ("hindsight-custody:prepare", crate::protocol::parse_hindsight_prepare(input.clone()).is_ok()),
+        "hindsight-deployment" => match crate::protocol::parse_deployment_effect(input.clone()) {
+            Ok(effect) => (effect.cell(), control.core_attempt_id.is_some() && control.effect_id.is_some()),
+            Err(_) => ("hindsight-deployment:create", false),
+        },
+        "hindsight-deployment-observe" => ("hindsight-deployment-observe:read", crate::protocol::parse_deployment_observe(input.clone()).is_ok()),
         _ => (capability, true),
     };
     let projection = &control.governance_projection;
@@ -703,9 +762,9 @@ fn log_terminal(capability: &str, response: &CapabilityRespond) {
 
 fn capability_descriptor(capability: &str) -> Option<HostCapabilityDescriptor> {
     let execution = match capability {
-        "clipboard-write" | "shell-open" | "exec" => CapabilityExecutionKind::Effect,
+        "clipboard-write" | "shell-open" | "exec" | "hindsight-deployment" => CapabilityExecutionKind::Effect,
         "screenshot" | "screenshot-ambient" | "process-list" | "clipboard-read"
-        | "foreground-window" => CapabilityExecutionKind::Read,
+        | "foreground-window" | "hindsight-custody" | "hindsight-deployment-observe" => CapabilityExecutionKind::Read,
         _ => return None,
     };
     let cancellation = match execution {
@@ -721,6 +780,9 @@ fn capability_descriptor(capability: &str) -> Option<HostCapabilityDescriptor> {
             classifier_id: match capability {
                 "exec" => "exec-command",
                 "shell-open" => "shell-open-target",
+                "hindsight-custody" => "hindsight-fixed-custody",
+                "hindsight-deployment" => "hindsight-deployment-action",
+                "hindsight-deployment-observe" => "hindsight-owned-observation",
                 _ => "fixed-risk",
             }.into(),
             classifier_revision: 1,
@@ -859,5 +921,36 @@ mod tests {
         assert_eq!(audit.records.lock().unwrap().as_slice(), &[(
             request.request_id, "screenshot".into(), Decision::AllowedOnce,
         )]);
+    }
+
+    #[test]
+    fn hindsight_deployment_classifies_exact_effects_and_requires_lifecycle_ids() {
+        let (_dir, gate, policy, _audit, decisions) = harness();
+        let base = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../../packages/shared/fixtures/protocol");
+        let invocation = crate::protocol::parse_deployment_invocation(serde_json::from_str(
+            &std::fs::read_to_string(base.join("hindsight-deployment-invocation.windows.valid.json")).unwrap()).unwrap()).unwrap();
+        for action in ["create", "start", "inject"] {
+            let input: Value = serde_json::from_str(&std::fs::read_to_string(
+                base.join(format!("hindsight-deployment-effect.{action}.valid.json"))).unwrap()).unwrap();
+            let mut control = invocation.control.clone();
+            for posture in [crate::protocol::HostGovernancePosture::Auto, crate::protocol::HostGovernancePosture::Ask,
+                crate::protocol::HostGovernancePosture::Deny] {
+                for cell in &mut control.governance_projection.cells { cell.posture = posture; }
+                let result = final_host_enforcement(&gate, &policy, &control, &input);
+                assert_eq!(result.cell_key, format!("hindsight-deployment:{action}"));
+                assert_eq!(result.effective_posture, posture);
+            }
+            for cell in &mut control.governance_projection.cells { cell.posture = crate::protocol::HostGovernancePosture::Auto; }
+            control.effect_id = None;
+            assert_eq!(final_host_enforcement(&gate, &policy, &control, &input).effective_posture,
+                crate::protocol::HostGovernancePosture::Deny);
+        }
+        let input = serde_json::to_value(&invocation.input).unwrap();
+        decisions.seed_for_test("hindsight-deployment:inject", crate::gate::approver::Scope::Session, false);
+        assert_eq!(final_host_enforcement(&gate, &policy, &invocation.control, &input).effective_posture,
+            crate::protocol::HostGovernancePosture::Deny);
+        assert_eq!(input_digest("hindsight-deployment-plan:v1", &input["plan"]),
+            "35764c5d2ba0a365c09588e4f3c5a8e609c360a23229b3a53e8b420384ebe40b");
     }
 }

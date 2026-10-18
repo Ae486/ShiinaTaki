@@ -9,6 +9,11 @@ pub mod audit;
 mod capabilities_impl;
 pub mod gate;
 mod host_session;
+mod hindsight_host;
+mod hindsight_deployment;
+mod hindsight_checkpoint_relay;
+#[cfg(windows)]
+mod hindsight_windows;
 pub mod node;
 mod protocol;
 pub mod secrets;

@@ -115,6 +115,27 @@ const FIXED_RISK: CapabilityGovernance = CapabilityGovernance {
     floor_classes: &[],
 };
 
+/// Custody reads are once-only even though C1a creates no Native process. Remembered general approval must
+/// never silently authorize a fresh catalog/configuration snapshot after a restart or secret change.
+const HINDSIGHT_CUSTODY: CapabilityGovernance = CapabilityGovernance {
+    name: "hindsight-custody",
+    cells: &[GovernanceCell {
+        key: "hindsight-custody:prepare", strict: Ask, standard: Ask, relaxed: Auto, persist: false,
+    }],
+    floor_classes: &[],
+};
+
+const HINDSIGHT_DEPLOYMENT: CapabilityGovernance = CapabilityGovernance {
+    name: "hindsight-deployment",
+    cells: &[
+        GovernanceCell { key: "hindsight-deployment:create", strict: Ask, standard: Ask, relaxed: Auto, persist: false },
+        GovernanceCell { key: "hindsight-deployment:start", strict: Ask, standard: Ask, relaxed: Auto, persist: false },
+        GovernanceCell { key: "hindsight-deployment:inject", strict: Ask, standard: Ask, relaxed: Auto, persist: false },
+        GovernanceCell { key: "hindsight-deployment-observe:read", strict: Auto, standard: Auto, relaxed: Auto, persist: false },
+    ],
+    floor_classes: &[],
+};
+
 /// The registry the gate + the level-config surface read. Adding a capability = declare its descriptor above
 /// (or beside its policy module) and list it in `factory()` — invariant 7; evaluate_by_class is untouched.
 pub struct GovernanceRegistry {
@@ -123,7 +144,7 @@ pub struct GovernanceRegistry {
 
 impl GovernanceRegistry {
     pub fn factory() -> Self {
-        Self { rows: &[&SHELL_OPEN, &EXEC, &FS_WRITE, &FIXED_RISK] }
+        Self { rows: &[&SHELL_OPEN, &EXEC, &FS_WRITE, &FIXED_RISK, &HINDSIGHT_CUSTODY, &HINDSIGHT_DEPLOYMENT] }
     }
 
     /// The projection cell owning `key`, or None (the gate fail-closed denies an unregistered key). A per-target
@@ -170,6 +191,17 @@ fn family_key(key: &str) -> Option<&str> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn custody_has_exact_once_only_projection_at_every_level() {
+        let registry = GovernanceRegistry::factory();
+        let cell = registry.cell("hindsight-custody:prepare").unwrap();
+        assert_eq!(cell.posture(PermissionLevel::Strict), Ask);
+        assert_eq!(cell.posture(PermissionLevel::Standard), Ask);
+        assert_eq!(cell.posture(PermissionLevel::Relaxed), Auto);
+        assert!(!cell.persist);
+        assert!(registry.cell("hindsight-custody:arbitrary-ref").is_none());
+    }
 
     #[test]
     fn the_projection_matches_the_prd_factory_table() {
@@ -254,9 +286,8 @@ mod tests {
         let registry = GovernanceRegistry::factory();
         for level in [PermissionLevel::Strict, PermissionLevel::Standard, PermissionLevel::Relaxed] {
             let projection = registry.project_level(level);
-            // 3 shell-open + 4 exec + 4 fs-write + 6 fixed-risk = 17 cells; + 4 floor keys (shell-open:blocked,
-            // exec:blocked, fs-write:sensitive, fs-write:self-escalation) = 21 rows (fixed-risk adds no floor).
-            assert_eq!(projection.len(), 21, "every cell + every floor row appears");
+            // 3 shell-open + 4 exec + 4 fs-write + 6 fixed-risk + 1 custody + 4 deployment + 4 floor keys.
+            assert_eq!(projection.len(), 26, "every cell + every floor row appears");
             for floor in ["shell-open:blocked", "exec:blocked", "fs-write:sensitive", "fs-write:self-escalation"] {
                 let row = projection.iter().find(|(key, _)| *key == floor).unwrap();
                 assert_eq!(row.1, Deny, "the floor {floor} is deny in {level:?}");
@@ -333,5 +364,22 @@ mod tests {
         // (fs-write:in-workspace was batch B's placeholder here; batch C registers it, so this retargets to a
         // genuine miss to keep the intent.)
         assert!(GovernanceRegistry::factory().cell("network:connect").is_none());
+    }
+
+    #[test]
+    fn hindsight_deployment_effects_are_separate_once_only_cells() {
+        let registry = GovernanceRegistry::factory();
+        for key in ["hindsight-deployment:create", "hindsight-deployment:start", "hindsight-deployment:inject"] {
+            let cell = registry.cell(key).expect("registered effect");
+            assert_eq!(cell.posture(PermissionLevel::Strict), Ask);
+            assert_eq!(cell.posture(PermissionLevel::Standard), Ask);
+            assert_eq!(cell.posture(PermissionLevel::Relaxed), Auto);
+            assert!(!cell.persist);
+        }
+        let read = registry.cell("hindsight-deployment-observe:read").expect("owned observation");
+        for level in [PermissionLevel::Strict, PermissionLevel::Standard, PermissionLevel::Relaxed] {
+            assert_eq!(read.posture(level), Auto);
+        }
+        assert!(registry.cell("hindsight-deployment:delete").is_none());
     }
 }

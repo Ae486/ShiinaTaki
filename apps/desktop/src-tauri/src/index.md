@@ -4,15 +4,23 @@
 - node.rs — tauri-FREE node assembly: NodeConfig + build_node, create-only stable device identity with winner adoption, tracing, and WsClient; shared by lib.rs and bin/taki-node
 - status.rs — StatusEmitter trait (status sink seam) + TracingStatusEmitter (headless log-only impl)
 - protocol.rs — stable crate-internal protocol import surface, non-Host serde mirrors, and the golden-fixture parity sweep
+- hindsight_custody_protocol.rs — strict fixed-slot C1 prepare/invocation/result serde mirror with safe integers, UUID parity and absent-versus-null boundaries.
+- hindsight_installation_protocol.rs — strict complete artifact/external registration/runtime/custody identity mirror.
+- hindsight_host.rs — registered C1 executor; only internal post-gate context can invoke the installed Windows helper.
+- hindsight_windows.rs — retained Windows installation/owner and hidden bounded invocation entry.
+- hindsight_windows/ — NTFS/ACL/SID handles, mutable Catalog snapshot and Job-owned process lifetime; platform and copied-install tests.
 - ws_challenge.rs — pure Host ask helpers: sealed challenge building, redacted classification-only presentation, and exact one-shot resume authorization validation
 - host_control_protocol.rs — strict Host negotiation/catalog/immutable-control/request/cancel/response serde mirrors and protocol-v3 constants
 - host_approval_protocol.rs — validated Host challenge/resume authorization DTOs plus cross-language canonical digest helpers (control, challenge, and approval decision scope)
-- host_session.rs — one live Host generation's exact binding, cancellation, 256-entry terminal-attempt cache, and memory-only one-shot pending challenge state
+- host_session.rs — one live Host generation's exact binding, cancellation, terminal-attempt cache, one-shot challenge and retireable execution liveness state.
+- hindsight_deployment_protocol.rs — strict C2 plan, resource, invocation, independent permit and closed status mirrors.
+- hindsight_deployment.rs — post-gate effect/observation handlers sharing one installed resident and state lock.
+- hindsight_checkpoint_relay.rs — bounded per-session one-use checkpoint request/reply map, retired on disconnect or cancellation.
 - ws_client.rs — reconnecting node client: handshake/catalog, request classification, challenge/resume; resume consumes once, rechecks current Host floors immediately before execution, and audits approved/denied truth
 - gate.rs — retained pre-Slice-3 evaluator plus production legacy-deny/legacy-level readers and distinct auto/deny/Core-approved final-enforcement audit seams; `ws_client.rs` never calls the local prompt/writer
 - gate/ — read-only legacy compatibility plus dormant pre-Slice-3 evaluator/approver helpers and tests; current production authority is the Core projection composed with Host stricter-only constraints
 - audit.rs — Shell-owned JSONL audit trail (append-only, names-only EXCEPT exec's command, ruling 9) + ISO-8601 timestamp
 - secrets.rs — SecretStore trait + Windows Credential Manager; SID/service/account-scoped `Global\` create lock, Local-persistence new entries, and in-memory fake
-- capabilities_impl.rs — capability handler registry (invariant 7; opaque Value output + optional dialog detail) + capabilities_impl/ executors
+- capabilities_impl.rs — capability handler registry and non-deserializable trusted post-gate invocation context; legacy opaque executors retain their compatibility seam.
 - capabilities_impl/ — one executor per capability (screenshot, screenshot-ambient, process-list, clipboard read/write, shell-open, exec, foreground-window)
 - bin/ — extra crate roots (taki-node, the headless e2e/CI node)

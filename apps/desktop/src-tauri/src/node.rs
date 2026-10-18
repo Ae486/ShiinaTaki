@@ -57,6 +57,9 @@ pub fn default_capabilities() -> Vec<String> {
         "shell-open",
         "exec",
         "foreground-window",
+        "hindsight-custody",
+        "hindsight-deployment",
+        "hindsight-deployment-observe",
     ]
     .into_iter()
     .map(str::to_string)
@@ -71,7 +74,7 @@ pub fn build_node(config: NodeConfig) -> Result<WsClient, Box<dyn std::error::Er
         exec_cwd,
         url,
         device_name,
-        capabilities,
+        mut capabilities,
         approver,
         secrets,
         status,
@@ -108,6 +111,22 @@ pub fn build_node(config: NodeConfig) -> Result<WsClient, Box<dyn std::error::Er
     handlers.register(Arc::new(ShellOpenExec));
     handlers.register(Arc::new(ExecExec::new(exec_policy.clone())));
     handlers.register(Arc::new(ForegroundWindowExec));
+    if capabilities.iter().any(|name| name == "hindsight-custody") {
+        match crate::hindsight_host::HindsightCustodyExec::registered(data_dir.join("hindsight-host/installation.json"), &device_id) {
+            Some(executor) => handlers.register(Arc::new(executor)),
+            None => capabilities.retain(|name| name != "hindsight-custody"),
+        }
+    }
+    if capabilities.iter().any(|name| name == "hindsight-deployment" || name == "hindsight-deployment-observe") {
+        match crate::hindsight_deployment::DeploymentResident::registered(&data_dir.join("hindsight-host/installation.json"), &device_id) {
+            Some(resident) => {
+                for observe in [false, true] {
+                    handlers.register(Arc::new(crate::hindsight_deployment::HindsightDeploymentExec { resident: resident.clone(), observe }));
+                }
+            }
+            None => capabilities.retain(|name| name != "hindsight-deployment" && name != "hindsight-deployment-observe"),
+        }
+    }
 
     Ok(WsClient {
         url,

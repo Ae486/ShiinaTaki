@@ -87,11 +87,18 @@ pub(crate) fn matches_pending_authorization(
         return Err("authorization digests do not match the pending challenge".into());
     }
     let sealed = challenge.control.approval_generation;
-    if authorization.approval_generation != sealed && authorization.approval_generation != sealed + 1 {
+    if authorization.approval_generation != sealed && sealed.checked_add(1) != Some(authorization.approval_generation) {
         return Err("authorization approval generation is outside the sealed lineage".into());
     }
     let issued = parse_timestamp(&authorization.issued_at)?;
     let expires = parse_timestamp(&authorization.expires_at)?;
+    if challenge.control.capability_id == crate::protocol::CUSTODY_CAPABILITY
+        && (authorization.decision_scope != crate::protocol::CapabilityDecisionScope::Once
+            || issued < parse_timestamp(&challenge.control.dispatched_at)?
+            || issued > time::OffsetDateTime::now_utc()
+            || expires > parse_timestamp(&challenge.control.deadline_at)?) {
+        return Err("custody authorization is outside its once-only original window".into());
+    }
     if issued >= expires || time::OffsetDateTime::now_utc() >= expires {
         return Err("authorization window is expired".into());
     }
