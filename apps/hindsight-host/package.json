@@ -1,0 +1,16 @@
+{
+  "name": "@taki/hindsight-host",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24 <25" },
+  "scripts": { "build": "node scripts/build.ts", "build:linux": "node scripts/build-linux-release.ts", "typecheck": "tsc --noEmit", "test": "vitest run" },
+  "dependencies": {
+    "@taki/secret-catalog-codec": "workspace:*",
+    "@taki/shared": "workspace:*",
+    "json-rpc-2.0": "^1.7.1",
+    "ws": "^8.21.0",
+    "zod": "^4.4.0"
+  },
+  "devDependencies": { "@types/ws": "^8.18.1" }
+}

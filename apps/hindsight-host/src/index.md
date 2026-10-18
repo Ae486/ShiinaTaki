@@ -1,0 +1,24 @@
+# hindsight-host/
+- deployment-host.ts — installed resident framing, concrete owner construction and current Core checkpoint relay.
+- deployment-owner.ts — one plan/resource owner with durable fences and original-only recovery observation.
+- deployment-registry.ts — strict provisioned vacant/owned disk record and atomic bounded publication.
+- deployment-registration.ts — fixed C2 registration, executable and mutable state/config identity checks.
+- deployment-injection.ts — fake-only private selection, independent one-use permit and grant/submission fences.
+- deployment-error.ts — closed C2 ownership and process refusal reasons.
+- docker-adapter.ts — fixed no-pull topology, owned inspections and separate Native control/private submitter.
+- docker-process.ts — explicit registered no-shell CLI with cleared environment and bounded private I/O.
+- catalog-selection.ts — narrow private C1/C2 Catalog callback with post-await current-byte checks.
+- main.ts — installed compiled command entry for bounded prepare/status, C2 resident ownership and release-safe enrollment/service lifetime.
+- installation.ts — external registration and complete artifact identity verification with current-file/parent rechecks.
+- installed-files.ts — bounded read-only opened-object snapshots, streaming digests and protected Unix path checks.
+- credential-source.ts — fixed get-only Windows key frame or fresh private systemd credentials; Node token stays separate.
+- prepare-custody.ts — authenticate original TSC1/store/key/fixed selection and return only generation-bound safe status.
+- custody-error.ts — closed sanitized refusal categories; raw input, key and process diagnostics never become output.
+- host-gate.ts — fixed C1 classifier, canonical challenge and exact once-only approval authorization.
+- host-session.ts — generation-owned request/execute/resume/cancel handling and bounded non-replay state.
+- host-client.ts — actual Node pairing/control transport, complete catalog publication and disconnect-owned retirement.
+- enroll-node.ts — explicit Node-role pairing into a protected new token credential file; no key creation.
+- stdio-request.ts — bounded abortable private JSON control reader.
+- custody-test-fixtures.ts — non-secret original-control fixtures for deterministic tests; no installed-OS trust claim.
+- deployment-test-fixtures.ts — explicit vacant state, generated fake TSC1 values and current C2 protocol inputs for process tests.
+- restart-observer.ts — internal C1b fake-adapter startup observation, independent grants and original-ID recovery; no production registry/Docker/start wiring.

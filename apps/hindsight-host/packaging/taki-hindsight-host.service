@@ -1,0 +1,36 @@
+# INPUT: explicit protected payload/runtime registration and separately provisioned encrypted credentials
+# OUTPUT: one authenticated same-UID custody Host lifetime; restart starts a fresh connection without replay
+# POS: hindsight-host/packaging — installer-reviewed system unit; this repository never enables it automatically
+[Unit]
+Description=Taki Hindsight credential custody Host
+After=network.target
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=@CUSTODY_USER@
+Group=@CUSTODY_GROUP@
+WorkingDirectory=/opt/taki-hindsight-host
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+RestrictSUIDSGID=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+LoadCredentialEncrypted=taki-secret-catalog-master-key:/etc/credstore.encrypted/taki-secret-catalog-master-key
+LoadCredentialEncrypted=taki-hindsight-host-node:/etc/credstore.encrypted/taki-hindsight-host-node
+UnsetEnvironment=NODE_OPTIONS NODE_PATH LD_PRELOAD LD_LIBRARY_PATH
+ExecStart=/usr/bin/env -i CREDENTIALS_DIRECTORY=%d WS_NO_BUFFER_UTIL=1 WS_NO_UTF_8_VALIDATE=1 /opt/taki-hindsight-host/node24/bin/node --no-addons --no-global-search-paths /usr/local/libexec/taki-hindsight-host/launcher.mjs serve --registration /etc/taki-hindsight-host/installation.json
+Restart=on-failure
+RestartSec=5
+KillMode=control-group
+TimeoutStopSec=15
+StandardOutput=journal
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target
