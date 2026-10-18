@@ -30,3 +30,6 @@ scripts/migrate-node-to-g.ps1
 
 # Exported agent session transcripts (local working notes)
 codex-session-*.md
+
+# Task evidence debug symbols (regenerable; the reviewed binaries stay tracked)
+.trellis/tasks/**/*.pdb
