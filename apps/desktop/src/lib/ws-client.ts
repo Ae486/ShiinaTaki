@@ -80,6 +80,8 @@ import { createTimingPolicyStore, type TimingPolicyStore } from "./timing-policy
 import { createTimingPolicySync, type TimingPolicySync } from "./timing-policy-sync.ts";
 import type { MemoryOperationMethods } from "./ws-client-memory-operations.ts";
 import type { MemoryOnboardingMethods } from "./ws-client-memory-onboarding.ts";
+import type { HindsightConfigurationMethods } from "./ws-client-hindsight-configuration.ts";
+import type { HindsightTemplateMethods } from "./ws-client-hindsight-templates.ts";
 import { handshake, requestMethods, type ConnectOutcome } from "./ws-client-methods.ts";
 import {
   addConfigChangedHandler,
@@ -99,7 +101,7 @@ import type { WsTransport } from "./ws-transport.ts";
 
 export type { ChatHandlers, ConnectOutcome };
 
-export interface WsClient extends MemoryOperationMethods, MemoryOnboardingMethods {
+export interface WsClient extends MemoryOperationMethods, MemoryOnboardingMethods, HindsightConfigurationMethods, HindsightTemplateMethods {
   connect(params: ConnectParams): Promise<ConnectOutcome>;
   chat(params: ChatSendParams, handlers: ChatHandlers): Promise<void>;
   /** Cancels the character's in-flight turn (idempotent; false = nothing was running). The composer's abort entry. */

@@ -19,6 +19,7 @@ const OPERATION_STATE: Record<MemoryOperation["state"], string> = {
 const RUNTIME_REASON: Record<NonNullable<MemoryOnboardingStatus["runtime"]["unavailableReason"]>, string> = {
   authority_mismatch: "运行时与权威不一致", connection_unavailable: "连接不可用", stopped: "运行时已停止", not_installed: "运行时未安装",
   connection_disabled: "Hindsight 连接已关闭", config_changed: "连接配置已变更，需要重新校验",
+  template_hold: "模板变更尚未完成，需要恢复原操作",
 };
 const ACTIONS = Object.keys(ONBOARDING_ACTION_LABEL) as OnboardingAction[];
 

@@ -83,6 +83,14 @@ describe("Hindsight backup view model", () => {
     expect(view(recovered).actions).toEqual([CAPTURE]);
   });
 
+  it.each(["HINDSIGHT_BACKUP_TEMPLATE_UNPROVEN", "HINDSIGHT_BACKUP_TEMPLATE_UNPUBLISHED", "HINDSIGHT_BACKUP_TEMPLATE_OBSERVATION_REQUIRED"] as const)(
+    "discloses %s without treating manual export as a way around missing template evidence", (code) => {
+      const failed = view(backupStatus(NO_BACKUP, [failedCapture(code)]));
+      expect(failed.failure).toMatch(/^创建备份失败：/);
+      expect(failed.failure).not.toMatch(/未分类|undefined|HINDSIGHT_/);
+      expect(failed.actions).toEqual([CAPTURE]);
+    });
+
   it("offers the newest capture Core lists as staged, whatever the operations window holds, also across a failed admit", () => {
     expect(view(BACKUP_STATES.staged).staged).toEqual({ backupId: STAGED_ID, expectedEpochId: "epoch-2" });
     expect(view(backupStatus(STAGED_BACKUP)).staged).toEqual({ backupId: STAGED_ID, expectedEpochId: "epoch-2" });

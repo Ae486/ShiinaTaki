@@ -45,6 +45,7 @@ const MODE_LABEL: Record<MemoryAuthorityStatus["authority"]["mode"], string> = {
 export const MEMORY_RUNTIME_UNAVAILABLE_LABEL: Record<NonNullable<MemoryAuthorityStatus["runtime"]["unavailableReason"]>, string> = {
   authority_mismatch: "运行时与权威标记不一致", connection_unavailable: "连接不可用", stopped: "运行时已停止", not_installed: "运行时未安装",
   connection_disabled: "Hindsight 连接已关闭", config_changed: "连接配置已变更，需要重新校验",
+  template_hold: "模板变更尚未完成，需要恢复原操作",
 };
 export const MEMORY_OPERATION_STATE_LABEL: Record<MemoryOperation["state"], string> = {
   admitted: "已受理（未认领）", running: "执行中", completed: "已完成", failed: "失败", cancelled: "已取消", outcome_unknown: "结果未知",
@@ -54,6 +55,7 @@ export const MEMORY_OPERATION_KIND_LABEL: Record<MemoryOperation["kind"], string
   "local.onboard.prepare": "准备本地记忆", "local.onboard.activate": "启用 / 恢复本地记忆", "hindsight.activate": "启用 Hindsight",
   "bank.provision": "创建 Bank", "connection.revalidate": "重新校验连接",
   "backup.capture": "创建备份", "backup.admit": "导入备份", "backup.verify": "校验备份",
+  "template.apply": "应用模板", "template.recover": "恢复模板操作",
   "transition.return-local": "返回 Local", "transition.reenter-hindsight": "重新进入 Hindsight", "transition.emergency-local": "紧急接管至 Local",
 };
 const UNKNOWN = "未知";

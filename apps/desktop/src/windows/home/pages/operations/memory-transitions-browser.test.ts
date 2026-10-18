@@ -10,7 +10,8 @@ import { createTransitionOperatorFixture } from "../../../../../../../packages/c
 import { W3_AT } from "../../../../../../../packages/core/src/testing/memory-transition-candidate-fixtures.ts";
 
 const python = "G:/anaconda3/python.exe";
-const chromium = "G:/AppDataMove/ms-playwright/chromium-1181/chrome-win/chrome.exe";
+// The installed full Chromium exits before navigation on this host; the same-version shell passed an isolated launch probe.
+const chromium = "G:/AppDataMove/ms-playwright/chromium_headless_shell-1181/chrome-win/headless_shell.exe";
 beforeEach(() => { vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(W3_AT); });
 afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
 
@@ -50,6 +51,8 @@ it.skipIf(!existsSync(python) || !existsSync(chromium))("owns real browser confi
     expect(fixture.control.submits).toBe(3);
     expect(fixture.service.overview().provider).toBe("local");
     console.info(`W7 browser evidence: ${artifacts}`);
+  } catch (cause) {
+    writeFileSync(join(artifacts, "failure.txt"), String(cause), "utf8"); throw cause;
   } finally { await server.close(); await fixture.close(); }
 }, 120000);
 
@@ -82,6 +85,10 @@ errors=[]
 with sync_playwright() as p:
     browser=p.chromium.launch(executable_path=chromium,headless=True)
     context=browser.new_context(viewport={"width":1100,"height":950})
+    def control(path):
+        # Synthetic control reads span real Core work; a pooled socket can race Vite's idle close.
+        # Close each control connection instead of retrying a request that may mutate fixture state.
+        return context.request.get(base+path,headers={"Connection":"close"})
     # Only wall-clock identity is pinned to the synthetic Core clock; timers and performance.now remain real.
     context.add_init_script("const D=Date;const fixed=D.parse("+json.dumps(fixed)+");window.Date=class extends D{constructor(...a){super(...(a.length?a:[fixed]));}static now(){return fixed;}};")
     first=context.new_page(); second=context.new_page()
@@ -98,8 +105,8 @@ with sync_playwright() as p:
     expect(first.get_by_role('button',name='确认紧急接管')).to_be_enabled()
     expect(first.get_by_text('紧急接管只使用本机保全证据。远端最新状态及可能丢失的区间未知；游标相等也不能证明没有丢失。')).to_be_visible()
     first.get_by_role('button',name='取消预览').click()
-    assert context.request.get(base+'/w7-control').json()['submits']==0
-    context.request.get(base+'/w7-control?delay=1800&holdBinding=1')
+    assert control('/w7-control').json()['submits']==0
+    control('/w7-control?delay=1800&holdBinding=1')
     opener.click(); expect(first.get_by_role('button',name='确认切换')).to_be_enabled()
     started=time.monotonic()
     first.get_by_role('button',name='确认切换').evaluate('(button)=>{button.click();button.click();}')
@@ -107,24 +114,24 @@ with sync_playwright() as p:
     elapsed=time.monotonic()-started
     second.wait_for_function("window.__w7view?.status?.entries[0]?.operation.state==='running'",timeout=20000)
     first.close()
-    context.request.get(base+'/w7-control?holdBinding=0')
+    control('/w7-control?holdBinding=0')
     second.wait_for_function("window.__w7view?.status?.provider==='local' && window.__w7view.status.entries[0].operation.state==='completed'",timeout=20000)
     original=second.evaluate('window.__w7view.status.entries[0].operation.operationId')
     second.evaluate('window.__w7reconnect()')
     second.wait_for_function("window.__w7view?.connectionReady && !window.__w7view.loading")
     assert second.evaluate('window.__w7view.status.entries[0].operation.operationId')==original
-    assert context.request.get(base+'/w7-control').json()['submits']==1
-    context.request.get(base+'/w7-control?delay=0&bindDelay=0')
+    assert control('/w7-control').json()['submits']==1
+    control('/w7-control?delay=0&bindDelay=0')
     second.get_by_role('button',name='预览重新进入 Hindsight',exact=True).click()
     expect(second.get_by_role('button',name='确认切换')).to_be_enabled()
     second.get_by_role('button',name='确认切换').click()
     second.wait_for_function("window.__w7view?.status?.provider==='hindsight' && window.__w7view.status.entries[0].operation.state==='completed'",timeout=20000)
-    native=context.request.get(base+'/w7-control').json()['native']
+    native=control('/w7-control').json()['native']
     second.get_by_role('button',name='预览紧急接管至 Local',exact=True).click()
     expect(second.get_by_role('button',name='确认紧急接管')).to_be_enabled()
     second.get_by_role('button',name='确认紧急接管').click()
     second.wait_for_function("window.__w7view?.status?.provider==='local' && window.__w7view.status.entries[0].operation.state==='completed'",timeout=20000)
-    final=context.request.get(base+'/w7-control').json()
+    final=control('/w7-control').json()
     assert final['submits']==3 and final['native']==native
     body=second.locator('body').inner_text()
     assert '当前已使用 Local，无需再次返回或紧急接管。' in body

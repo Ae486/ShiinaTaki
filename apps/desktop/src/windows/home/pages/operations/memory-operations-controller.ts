@@ -62,7 +62,7 @@ function isCurrent<T>(state: ControllerState<T>, candidate: MemoryOperationsClie
 function subscribed<T>(state: ControllerState<T>, candidate: MemoryOperationsClient, token: number): Promise<void> {
   state.subscribed ??= candidate.subscribeMemoryOperations().catch((cause: unknown) => {
     // Without the push channel the card still tells the truth: every mutation and remount re-reads Core; nothing polls.
-    if (isCurrent(state, candidate, token)) { state.subscribed = null; state.sink.mutationSettled(refusalFeedback(cause)); }
+    if (isCurrent(state, candidate, token)) { state.subscribed = null; state.sink.mutationSettled(state.feedbackForError(cause)); }
   });
   return state.subscribed;
 }

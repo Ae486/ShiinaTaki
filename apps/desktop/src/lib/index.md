@@ -6,6 +6,8 @@ icons/ (the shared glyph set) and the two window-shared React hooks below.
 - ws-client-methods.ts — outbound half: handshake plus schema-validated operator methods including extension convergence
 - ws-client-memory-operations.ts — Shared-validated authority/activation, transition preview/status/overview and operation wrappers; exact-once memory.operations.subscribe per client.
 - ws-client-memory-onboarding.ts — outbound sibling: memory.onboarding.preview/status/exceptions/exclude wrappers and the exact-once memory.onboarding.subscribe (retryable after failure)
+- ws-client-hindsight-configuration.ts — strict optional configuration status/observe reads over the authenticated client; both use ordinary read deadlines and never invoke model health.
+- ws-client-hindsight-templates.ts — strict template preview, exact Bank consequences, status and one-child observation reads; apply/recover retain the existing durable operation adapter.
 - rpc-deadline.ts — method-class timing table and native JSON-RPC cleanup; transition reads use bounded long read deadlines, transition submit is a parameter-sensitive long unknown-outcome mutation.
 - timing-policy.ts — window-owned bootstrap/last-good timing policy store; validates full Core config refreshes without persistence
 - timing-policy-sync.ts — exact-once config subscription and serialized full-policy refresh for an authenticated client

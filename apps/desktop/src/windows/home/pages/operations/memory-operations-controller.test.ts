@@ -113,4 +113,16 @@ describe("memory operations controller", () => {
     expect(s.loaded).not.toHaveBeenCalled();
     expect(s.loadFailed).toHaveBeenCalledWith(expect.objectContaining({ message: "deadline" }));
   });
+
+  it("retains the default subscription error formatter and still reads Core truth", async () => {
+    const s = sink();
+    const controller = createMemoryOperationsController(s, readAuthority);
+    controller.replace(client({ subscribeMemoryOperations: async () => {
+      throw Object.assign(new Error("refused"), { data: { code: "MEMORY_OPERATION_REFUSED", reason: "MEMORY_OPERATION_RUNNING" } });
+    } }));
+    await settle();
+    expect(s.mutationSettled).toHaveBeenCalledWith({ tone: "warn", message: "Core 拒绝了该操作：MEMORY_OPERATION_RUNNING" });
+    expect(s.loaded).toHaveBeenCalledWith(hindsightStatus());
+    controller.dispose();
+  });
 });

@@ -93,6 +93,8 @@ import {
 import { requestWithDeadline } from "./rpc-deadline.ts";
 import { memoryOperationMethods } from "./ws-client-memory-operations.ts";
 import { memoryOnboardingMethods } from "./ws-client-memory-onboarding.ts";
+import { hindsightConfigurationMethods } from "./ws-client-hindsight-configuration.ts";
+import { hindsightTemplateMethods } from "./ws-client-hindsight-templates.ts";
 
 function permissionMethods(request: <T>(method: string, params: JSONRPCParams) => Promise<T>) {
   return {
@@ -244,5 +246,7 @@ export function requestMethods(rpc: JSONRPCServerAndClient, timing: () => Timing
     ...skillMethods(request),
     ...memoryOperationMethods(request),
     ...memoryOnboardingMethods(request),
+    ...hindsightConfigurationMethods(request),
+    ...hindsightTemplateMethods(request),
   };
 }

@@ -1,7 +1,7 @@
 /**
  * INPUT:  none (page root); reads status/usage and drives the maintenance actions through useOperations.
  * OUTPUT: <OperationsPage> — Local onboarding, Hindsight activation, the memory authority / Hindsight card, memory maintenance
- *         (manual tidy + its defect counts), the memory/context status card, and the storage card with the D46 attachment purge.
+ *         (manual tidy + its defect counts), API configuration observation, template/user management, memory/context status and D46 attachment purge.
  * POS:    ui/windows/home/pages/operations — presentational; every ws call goes through a hook. Loading rides the
  *         shared Skeleton and the failed status/usage read carries a retry (batch-2 U5).
  */
@@ -21,6 +21,8 @@ import { useLocalOnboarding } from "./use-local-onboarding.ts";
 import { useOperations } from "./use-operations.ts";
 import { useMemoryTransitions } from "./use-memory-transitions.ts";
 import { MemoryTransitionsCard } from "./memory-transitions-card.tsx";
+import { HindsightConfigurationSection } from "./hindsight-configuration-card.tsx";
+import { HindsightTemplateSection } from "./hindsight-template-card.tsx";
 
 export function OperationsPage() {
   const ops = useOperations();
@@ -42,6 +44,8 @@ export function OperationsPage() {
         <MemoryTransitionsCard view={transitions} />
         <LocalOnboardingCard onboarding={onboarding} />
         <HindsightActivationCard activation={activation} />
+        <HindsightConfigurationSection />
+        <HindsightTemplateSection />
 
         <PageCard title="记忆整理">
           <ActionButton
