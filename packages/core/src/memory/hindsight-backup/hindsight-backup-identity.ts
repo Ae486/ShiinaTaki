@@ -11,12 +11,12 @@ import { readReplicaCheckpoint } from "../../db/hindsight-replica-checkpoint-sto
 import type { Database } from "../../db/sqlite.ts";
 import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
 import type { MemoryOperationsRuntime } from "../operations/memory-operation-contract.ts";
-import { hindsightBackupOperationDigest, type HindsightBackupCoreIdentity } from "./hindsight-backup-pair.ts";
+import { hindsightBackupOperationDigest, type HindsightBackupCoreIdentityV1 } from "./hindsight-backup-pair.ts";
 import { readHindsightTerminalOperations } from "./hindsight-backup-receipts.ts";
 
 export type HindsightBackupRuntimeIdentity = Pick<MemoryOperationsRuntime, "epochId" | "configFingerprint" | "deploymentMode" | "banks">;
 export interface HindsightBackupIdentity {
-  core: HindsightBackupCoreIdentity;
+  core: HindsightBackupCoreIdentityV1;
   operationIds: string[];
   migrationHead: number;
 }
@@ -40,7 +40,7 @@ function readIdentity(db: Database, runtime: HindsightBackupRuntimeIdentity): Hi
   const authority: HindsightBackupManifest["authority"] = { epochId, activationTransactionId: transactionId, providerLineageId,
     replicaCheckpointDigest, configFingerprint: runtime.configFingerprint, deploymentMode: runtime.deploymentMode,
     ...(transitionReceiptId ? { transitionReceiptId } : {}) };
-  return { core: { authority, banks, terminalOperations: { count: new Set(operationIds).size, digest: hindsightBackupOperationDigest(operationIds) } },
+  return { core: { version: 1, authority, banks, terminalOperations: { count: new Set(operationIds).size, digest: hindsightBackupOperationDigest(operationIds) } },
     operationIds: [...new Set(operationIds)], migrationHead: migrationHead(db) };
 }
 

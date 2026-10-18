@@ -10,7 +10,7 @@
 - canonical-memory-copy-sources.ts — distinct genuine copied Local Sources for different historical versions; duplicate references remain ordered
 - canonical-memory-policy-revision.ts — semantic policy changes advance versions; placement/bookkeeping/no-op edits do not
 - effect-repo.ts — Core-owned provider-neutral Effect intent/wait/settlement CAS boundary with authoritative detailed usage rows/events
-- run-repo.ts — durable Run aggregate with atomic admission/context evidence, full internal admission manifests for safe context restoration, CAS lifecycle/retry transitions, and bounded public Receipt/status references
+- run-repo.ts — durable Run aggregate with atomic admission/context evidence, full internal admission manifests for safe context restoration, durable pre-admission idempotency lookup, CAS lifecycle/retry transitions, and bounded public Receipt/status references
 - run-event-repo.ts — immutable, contiguous, redaction-safe lifecycle evidence ledger queries and appends
 - run-event-live.ts — post-commit best-effort observer bus with cursor isolation
 - run-event-projection.ts — deterministic replay/projection anchor and readable summary mapper
@@ -117,7 +117,7 @@
 - memory-transition-queue-repo.ts — bounded normalized custody while ownership remains open, durable target reservation, immutable unknown observations and factual settlement
 - memory-transition-recovery-repo.ts — explicit new recovery admissions and resolution evidence preserving original operation history and durable fence obligations
 - memory-transition-publication-proof.ts — independent final source/config/inventory/custody/candidate/native closure under SQLite writer reservation; rejects observation-context substitution
-- memory-transition-publication-repo.ts — one atomic epoch, representation, marker, custody, queue obligation and immutable receipt COMMIT with one synchronous native-evidence context
+- memory-transition-publication-repo.ts — atomic epoch, representation, marker, custody, queue and receipt COMMIT; full evidence read-back followed by the original executor's live-clock lease and exact receipt revision guard
 - memory-transition-publication-reader.ts — independent full boot/recovery and scoped verified observation with the same current joins, immutable evidence integrity and legal Local edits
 - memory-transition-representation.ts — Local staging and retained native/application pair installation from independently reconstructed W2 closure
 - memory-transition-custody.ts — bidirectional exact custody, finalized membership boundaries and producer/ancestry-proven consumed spans before and after compaction
@@ -141,10 +141,12 @@
 - hindsight-lifecycle-attempt-reads.ts — read-only automatic once-guard: whether an automatic bank.provision (Character + fingerprint) or connection.revalidate (epoch + fingerprint) row already exists
 - hindsight-runtime-memory-view.ts — complete current Canonical memory rows for internal prompt/report staging
 - memory-transition-emergency-repo.ts — immutable transition-owned capture reservation, incident ACK and exact original identity reads.
-- memory-transition-emergency-quarantine.ts — transactional old-epoch quarantine with the same pure eligibility predicate used by operator action reads; unrelated exclusive work still blocks.
+- memory-transition-emergency-quarantine.ts — transactional old-epoch quarantine including terminal unpublished template effects and reservations; unrelated exclusive work still blocks.
 - memory-transition-surviving-capture.ts — complete paired replica/body closure and transition-owned immutable surviving evidence.
 - memory-transition-surviving-policy.ts — exact predecessor publication/Native/head/mapping/initial-policy correspondence with shared synchronous immutable evidence; current joins rerun and missing policy is never initialized.
 - memory-transition-emergency-candidate.ts — incident-bound Local candidate using W3 projection and complete closure, sharing one fresh synchronous evidence context across construction and read-back while rereading current SQL joins.
 - memory-transition-emergency-publication.ts — offline proof and atomic incident/custody/authority join; one independent evidence context through install/read-back, uncached current SQL checks and final real-clock original-executor COMMIT guard.
 - memory-transition-row-hash.ts — lossless domain-separated hash of original unknown-effect SQLite row bytes.
 - memory-transition-held-primary.ts — exact held unknown ingestion and witnessed-primary disposition across emergency publication.
+- ../memory/hindsight/template-lifecycle/template-overlay-store.ts — narrow 058 enrollment/user/catalog/applied evidence adapter; existing operation journal remains the execution owner.
+- hindsight-template-emergency-evidence.ts — complete hashed original template effect/reservation inventory and old-epoch quarantine candidates independent of generic terminal state.

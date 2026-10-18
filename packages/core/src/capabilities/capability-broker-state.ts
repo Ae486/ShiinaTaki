@@ -6,6 +6,7 @@
 import type {
   ApprovalDecisionBinding,
   CapabilityAuthorization,
+  CapabilityAuthorizationLineage,
   CapabilityCancel,
   CapabilityCancelReason,
   CapabilityCancellation,
@@ -22,6 +23,8 @@ import type { Connection } from "../server/connection-registry.ts";
 import type { CapabilityOutcome } from "./capability-broker.ts";
 import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 import { settleHostEffect } from "./capability-effect-lifecycle.ts";
+import type { CapabilityRequestObservers } from "./capability-observers.ts";
+import { deploymentOutcome, deploymentUnknown, isDispatchedDeployment } from "./hindsight-deployment-outcome.ts";
 
 export type CapabilityNotify = (method: string, params: unknown) => void;
 
@@ -36,6 +39,7 @@ export interface CapabilityDispatchTarget {
   governanceProjection: HostGovernanceProjection;
   operator?: { connection: Connection; signal?: AbortSignal };
   isCurrent(): boolean;
+  ownerCurrent?: () => boolean;
 }
 
 export interface PendingChallenge {
@@ -62,6 +66,8 @@ export interface PendingCapability {
   authorization?: PendingAuthorization;
   effect?: { id: string; version: number; state: "waiting" | "intent_committed" };
   targetDispatched?: boolean;
+  observers?: CapabilityRequestObservers;
+  hindsightCheckpointConsumed?: boolean;
 }
 
 export interface TerminalRecord {
@@ -86,12 +92,17 @@ export const TIMEOUT_MESSAGE = "capability request timed out";
 export function settlePending(
   state: CapabilityBrokerState,
   requestId: string,
-  terminal: { outcome: CapabilityOutcome; terminalReason: TerminalRecord["reason"] },
+  terminal: {
+    outcome: CapabilityOutcome; terminalReason: TerminalRecord["reason"];
+    acceptance?: { provenance: { hostId: string; connectionGeneration: number }; authorization: CapabilityAuthorizationLineage | undefined };
+  },
 ): boolean {
   const entry = state.pending.get(requestId);
   if (!entry) return false;
-  const accepted = settleHostEffect(state, entry, terminal.outcome);
-  const outcome = accepted ? terminal.outcome : {
+  let intended = deploymentOutcome(entry, terminal.outcome);
+  if (intended.ok && isDispatchedDeployment(entry) && !acceptanceCurrent(state, entry)) intended = deploymentUnknown();
+  const accepted = settleHostEffect(state, entry, intended);
+  let outcome = accepted ? intended : isDispatchedDeployment(entry) ? deploymentUnknown() : {
     ok: false as const,
     code: "CANCELLED" as const,
     message: "Host Effect settlement was stale",
@@ -101,9 +112,29 @@ export function settlePending(
   clearTimeout(entry.timer);
   releaseChallenge(entry);
   rememberTerminal(state.terminal, requestId, { control: entry.control, authorization: entry.authorization, reason: terminal.terminalReason });
+  // Effect settlement may downgrade success. Only its final outcome can reach an admission owner.
+  if (outcome.ok && terminal.acceptance && entry.observers?.onAccepted) {
+    try {
+      if (!acceptanceCurrent(state, entry)) throw new Error("stale custody acceptance");
+      entry.observers.onAccepted({ requestId, control: structuredClone(entry.control), ...terminal.acceptance, outcome });
+    } catch {
+      outcome = isDispatchedDeployment(entry) ? deploymentUnknown()
+        : { ok: false, code: "CANCELLED", message: "Host acceptance was stale", state: "cancelled" };
+    }
+  }
+  entry.observers = undefined;
   state.log.info({ requestId, attemptId: entry.control.attemptId, ok: outcome.ok }, "capability settled");
   entry.finish(outcome);
   return true;
+}
+
+function acceptanceCurrent(state: CapabilityBrokerState, entry: PendingCapability): boolean {
+  try {
+    return entry.target.isCurrent() && entry.target.operator?.signal?.aborted !== true
+      && state.now() < Date.parse(entry.control.deadlineAt)
+      && (entry.control.expiresAt === undefined || state.now() < Date.parse(entry.control.expiresAt))
+      && state.approval.approvalGeneration() === (entry.authorization?.value.approvalGeneration ?? entry.control.approvalGeneration);
+  } catch { return false; }
 }
 
 /** Releases the operator interaction handle and abort hook exactly once; safe on already-finished handles. */

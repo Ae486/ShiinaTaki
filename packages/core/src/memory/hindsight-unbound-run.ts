@@ -15,8 +15,9 @@ import type { HindsightLiveConnection } from "./hindsight/hindsight-runtime-conn
 import { createHindsightUnavailableRun } from "./hindsight/hindsight-unavailable-run.ts";
 import { readMemoryAuthoritySelection } from "./legacy-migration/legacy-activation-repo.ts";
 import { createFallbackPersonaProvider, createPersonaProvider } from "./persona-provider.ts";
+import { activeTemplateHold } from "./hindsight/template-lifecycle/template-execution-reads.ts";
 
-export type HindsightUnboundReason = "connection_disabled" | "config_changed";
+export type HindsightUnboundReason = "connection_disabled" | "config_changed" | "template_hold";
 // The connection guard's own refusals: construction on a non-ready config, start() on a config disabled since, a template drift.
 const DISABLED_CODES: ReadonlySet<string> = new Set(["HINDSIGHT_APPLICATION_CONNECTION_UNAVAILABLE", "MEMORY_AUTHORITY_MISMATCH", "HINDSIGHT_TEMPLATE_CONFLICT"]);
 
@@ -29,6 +30,7 @@ export function hindsightUnboundReason(snapshot: HindsightBindingSnapshot, live:
   const { binding } = snapshot;
   if (snapshot.selection !== "hindsight" || snapshot.lifetime !== "running" || binding.kind !== "unavailable"
     || binding.epochId !== snapshot.selectedEpochId) return null;
+  if (binding.code === "MEMORY_TEMPLATE_HOLD") return "template_hold";
   if (live && live.state !== "ready") return DISABLED_CODES.has(binding.code) ? "connection_disabled" : null;
   if (binding.code === "HINDSIGHT_TEMPLATE_CONFLICT") return "config_changed";
   return binding.code === "HINDSIGHT_APPLICATION_CONNECTION_UNAVAILABLE" && live?.state === "ready" ? "config_changed" : null;
@@ -40,11 +42,13 @@ export function createUnboundHindsightCapture(input: {
 }): (characterId: string) => CapturedMemoryRun {
   const persona = input.promptDir ? createPersonaProvider({ promptDir: input.promptDir }) : createFallbackPersonaProvider();
   return (characterId) => {
-    const reason = hindsightUnboundReason(input.binding(), readLive(input.live));
-    if (!reason) throw new Error("MEMORY_RUNTIME_UNAVAILABLE");
     // The marker read re-verifies the committed receipt, so the Run carries the proven epoch/lineage identity.
     const selection = readMemoryAuthoritySelection(input.db);
     if (selection.mode !== "hindsight" || !selection.epochId || !selection.providerLineageId) throw new Error("MEMORY_RUNTIME_UNAVAILABLE");
+    const binding = input.binding();
+    const held = binding.lifetime === "running" && activeTemplateHold(input.db, selection.epochId);
+    const reason = held ? "template_hold" : hindsightUnboundReason(binding, readLive(input.live));
+    if (!reason) throw new Error("MEMORY_RUNTIME_UNAVAILABLE");
     input.logger.warn({ characterId, code: reason }, "Hindsight Run admitted without memory");
     input.onUnavailable?.({ characterId, reason });
     return createHindsightUnavailableRun({ epoch: { epochId: selection.epochId, providerLineageId: selection.providerLineageId },

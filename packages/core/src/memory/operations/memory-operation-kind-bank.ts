@@ -7,6 +7,7 @@
  * POS:    core/memory/operations — family hindsight-lifecycle (exclusive with setup / local-onboarding / hindsight-activation)
  */
 import type { MemoryBankProducerRef, MemoryBankResult, MemoryOperationProducerRef, MemoryOperationRequest } from "@taki/shared";
+import { randomUUID } from "node:crypto";
 import { hindsightLifecycleErrorCode } from "../hindsight-lifecycle/hindsight-lifecycle-context.ts";
 import type { HindsightBankFacts } from "../hindsight-lifecycle/hindsight-lifecycle-reads.ts";
 import { HINDSIGHT_LIFECYCLE_FAMILY, type HindsightLifecycleService } from "../hindsight-lifecycle/hindsight-lifecycle-service.ts";
@@ -28,6 +29,7 @@ export const bankProvisionKind: MemoryOperationKindHandler<ProvisionRequest> = {
     const runtime = cleanRuntime(ctx);
     const facts = admissibleFacts(lifecycle, { epochId: runtime.epochId, characterId: request.characterId });
     return { kind: "bank", origin: admission.origin, characterId: request.characterId, nativeBankId: facts.nativeBankId,
+      ...(facts.templateDefaultsRevision ? { templateProvision: { planId: randomUUID(), defaultsRevision: facts.templateDefaultsRevision } } : {}),
       templateRevision: facts.globalRevision, admittedEpochId: runtime.epochId, configFingerprint: runtime.configFingerprint, phase: "reserved" };
   },
   execute: async (execution) => {
@@ -38,7 +40,7 @@ export const bankProvisionKind: MemoryOperationKindHandler<ProvisionRequest> = {
     if (claimed === "interrupted") return lifecycleFailure("HINDSIGHT_LIFECYCLE_INTERRUPTED", { producer: ref, reason: "runtime_unavailable" });
     return provision(lifecycle, execution, ref);
   },
-  observeBoot: (operation, ctx) => ctx.lifecycle ? observeBoot(ctx.lifecycle, bankRef(operation.producer)) : null,
+  observeBoot: (operation, ctx) => ctx.lifecycle ? observeBoot(ctx, ctx.lifecycle, bankRef(operation.producer)) : null,
   cancel: (operation) => { if (operation.state !== "admitted") throw new MemoryOperationRefusal("MEMORY_OPERATION_RUNNING"); },
 };
 
@@ -72,7 +74,7 @@ Promise<MemoryOperationSettlement> {
   let latest = ref;
   const checkpoint = (phase: MemoryBankProducerRef["phase"]) => { latest = { ...latest, phase }; execution.checkpoint(latest); };
   try {
-    const outcome = await lifecycle.provision(ref, checkpoint);
+    const outcome = await lifecycle.provision(ref, checkpoint, execution.operationId);
     if (outcome.readiness === "ready") return lifecycleCompleted(result(ref, "ready"), { ...latest, phase: "completed" });
     return lifecycleFailure(outcome.errorCode, { producer: latest, result: result(ref, "syncing") });
   } catch (error) {
@@ -81,10 +83,11 @@ Promise<MemoryOperationSettlement> {
   }
 }
 
-function observeBoot(lifecycle: HindsightLifecycleService, ref: MemoryBankProducerRef): MemoryOperationSettlement {
+function observeBoot(ctx: MemoryOperationContext, lifecycle: HindsightLifecycleService, ref: MemoryBankProducerRef): MemoryOperationSettlement {
   let facts: HindsightBankFacts;
   try { facts = lifecycle.bankFacts({ epochId: ref.admittedEpochId, characterId: ref.characterId }); }
   catch { return lifecycleUnknown(ref); }
+  if (ref.templateProvision && !ctx.templates?.provisionBound(ref)) return lifecycleUnknown(ref);
   if (facts.row?.status === "verified" && facts.bound) return lifecycleCompleted(result(ref, "ready"), { ...ref, phase: "completed" });
   return lifecycleUnknown(ref);
 }

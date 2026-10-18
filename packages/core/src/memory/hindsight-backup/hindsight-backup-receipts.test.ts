@@ -62,6 +62,8 @@ describe("hindsight backup receipt mapping (ruling 3)", () => {
       ["policy work request (045)", null],
       ["observed write", null],
       ["primary conversation witness", null],
+      ["B2 original template Apply receipt, published", "memory_template_receipts"],
+      ["B2 persisted semantic refresh-result marker claim", "memory_template_refresh_results"],
     ]);
     for (const rule of HINDSIGHT_BACKUP_RECEIPT_MAP) expect(rule.native === null).toBe(rule.id === null);
   });

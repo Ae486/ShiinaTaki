@@ -1,6 +1,9 @@
 # core/capabilities/
 - capability-broker.ts — sealed Host-bound request/challenge/respond/cancel broker; generation retirement distinguishes cooperative read cancellation from unknown effect outcomes
 - capability-broker-state.ts — pending/terminal state owner with exact cleanup and execution/cancellation-aware interruption settlement shared with the Approval bridge
+- capability-observers.ts — code-owned issued and accepted observation contracts; original controls before notification and authenticated provenance after final effect settlement.
+- hindsight-injection-checkpoint.ts — exact live inject pending/control/committed-Effect validation and one-use independent Native permit callback.
+- hindsight-deployment-outcome.ts — validates C2 semantic status/resource binding before canonical Effect settlement; dispatched uncertainty stays unknown.
 - capability-effect-lifecycle.ts — Host preflight-to-wait/intent coordinator and exact terminal Effect settlement
 - capability-response.ts — pure terminal verifier shared by live and terminal-cache settlement: provenance, exact control, authorization lineage, and stricter-only governance evidence
 - capability-challenge.ts — the ONE Host ask bridge: capability.challenge provenance/digest validation, operator-owned Approval bridging, and single-use resume authorization minting

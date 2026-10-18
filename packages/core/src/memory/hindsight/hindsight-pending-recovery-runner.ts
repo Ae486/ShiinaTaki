@@ -9,6 +9,8 @@ import {
   HINDSIGHT_CURRENT_STATE_BUILD, HINDSIGHT_NATIVE_RESULT_BUILD, HINDSIGHT_NATIVE_RESULT_VERSION,
   HINDSIGHT_APPLICATION_STATE_BUILD,
   HINDSIGHT_TRANSITION_BUILD,
+  HINDSIGHT_CONFIGURATION_BUILD,
+  HINDSIGHT_TEMPLATE_BUILD,
   type HindsightConnectionProjection, type MemoryAuthorityEpoch, type MemoryReplicaCheckpoint, type MemoryReplicaRunResult, type PendingMemoryRecord,
 } from "@taki/shared";
 import type { CanonicalMemoryAuthorityRepo } from "../../db/canonical-memory-authority-repo.ts";
@@ -135,7 +137,9 @@ async function nativeResultSupported(context: RecoveryContext): Promise<boolean>
   return (manifest.source_identity.compatibility_build === HINDSIGHT_NATIVE_RESULT_BUILD
       || manifest.source_identity.compatibility_build === HINDSIGHT_CURRENT_STATE_BUILD
       || manifest.source_identity.compatibility_build === HINDSIGHT_APPLICATION_STATE_BUILD
-      || manifest.source_identity.compatibility_build === HINDSIGHT_TRANSITION_BUILD)
+      || manifest.source_identity.compatibility_build === HINDSIGHT_TRANSITION_BUILD
+      || manifest.source_identity.compatibility_build === HINDSIGHT_CONFIGURATION_BUILD
+      || manifest.source_identity.compatibility_build === HINDSIGHT_TEMPLATE_BUILD)
     && contract?.version === HINDSIGHT_NATIVE_RESULT_VERSION && contract.support.state === "supported"
     && contract.support.reason === "all_contracts_available";
 }

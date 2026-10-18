@@ -38,6 +38,8 @@ import { createHindsightBackupMethods, type HindsightBackupClient } from "./hind
 import { createHindsightTransitionMethods, type HindsightTransitionClient } from "./hindsight-transition-client.ts";
 import { hindsightTransitionPublicationFailure } from "./hindsight-transition-errors.ts";
 import { createHindsightTransitionSourceMethods, type HindsightTransitionSourceClient } from "./hindsight-transition-source-client.ts";
+import { createHindsightConfigurationMethods, type HindsightConfigurationClient } from "./hindsight-configuration-client.ts";
+import { createHindsightTemplateMethods, type HindsightTemplateClient } from "./hindsight-template-client.ts";
 
 export interface HindsightTransportResponse {
   status: number;
@@ -50,7 +52,7 @@ export interface HindsightCallContext {
   timeoutMs: number;
   attemptId?: string;
 }
-export interface HindsightClient extends Partial<HindsightPendingClient>, Partial<HindsightNativeResultClient>, Partial<HindsightCurrentStateClient>, Partial<HindsightRuntimeClient>, Partial<HindsightApplicationClient>, Partial<HindsightBackupClient>, Partial<HindsightTransitionClient>, Partial<HindsightTransitionSourceClient> {
+export interface HindsightClient extends Partial<HindsightPendingClient>, Partial<HindsightNativeResultClient>, Partial<HindsightCurrentStateClient>, Partial<HindsightRuntimeClient>, Partial<HindsightApplicationClient>, Partial<HindsightBackupClient>, Partial<HindsightTransitionClient>, Partial<HindsightTransitionSourceClient>, Partial<HindsightConfigurationClient>, Partial<HindsightTemplateClient> {
   health(context: HindsightCallContext): Promise<{ status: "healthy"; database: "connected" }>;
   version(context: HindsightCallContext): Promise<{ apiVersion: string }>;
   compatibility(context: HindsightCallContext): Promise<HindsightCompatibilityWire>;
@@ -136,7 +138,7 @@ function createClientMethods(request: <T>(input: HindsightRequestInput<T>) => Pr
   };
   return Object.assign(methods, createBankProbeMethods(request), createSnapshotMethods(request), createJournalMethods(request),
     createHindsightPendingMethods(request), createHindsightNativeResultMethods(request), createHindsightCurrentMethods(request),
-    createHindsightRuntimeMethods(request), createHindsightApplicationMethods(request), createHindsightBackupMethods(request), createHindsightTransitionMethods(request), createHindsightTransitionSourceMethods(request));
+    createHindsightRuntimeMethods(request), createHindsightApplicationMethods(request), createHindsightBackupMethods(request), createHindsightTransitionMethods(request), createHindsightTransitionSourceMethods(request), createHindsightConfigurationMethods(request), createHindsightTemplateMethods(request));
 }
 
 function createBankProbeMethods(request: <T>(input: HindsightRequestInput<T>) => Promise<T>): Pick<HindsightClient, "bankLlmHealth" | "bankStats"> {
@@ -197,6 +199,8 @@ export interface HindsightRequestInput<T> {
   schema: { parse: (value: unknown) => T };
   responses?: Partial<Record<number, { parse: (value: unknown) => T }>>;
   maxResponseBytes?: number;
+  /** Opt-in strict decoding for new evidence contracts; legacy endpoint parsing stays unchanged. */
+  decodeJson?(body: string): unknown;
 }
 
 interface RequestJsonInput<T> extends HindsightRequestInput<T> {
@@ -225,7 +229,7 @@ async function requestJson<T>(input: RequestJsonInput<T>): Promise<T> {
     if (fenced) throw fenced;
     const expectedResponse = input.responses?.[response.status];
     if (expectedResponse) {
-      try { return parseResponse(response, expectedResponse, input.maxResponseBytes); }
+      try { return parseResponse(response, expectedResponse, input); }
       catch (error) {
         // Only a matching endpoint envelope overrides transport/authentication classification.
         if (response.status === 403) throw hindsightError("HINDSIGHT_AUTHENTICATION_FAILED");
@@ -238,7 +242,7 @@ async function requestJson<T>(input: RequestJsonInput<T>): Promise<T> {
     if (response.status === 500 && input.path.includes("/snapshots")) throw hindsightError("HINDSIGHT_SNAPSHOT_INTEGRITY");
     if (response.status >= 500) throw hindsightError("HINDSIGHT_UNREACHABLE");
     if (response.status < 200 || response.status >= 300) throw mapHttpFailure(response.status, input.path, response.body);
-    return parseResponse(response, input.schema, input.maxResponseBytes);
+    return parseResponse(response, input.schema, input);
   } catch (error) {
     requireActiveRequest(signal, controller.signal, firstAbort.reason);
     if (error instanceof HindsightError) throw error;
@@ -265,9 +269,11 @@ function awaitTransport<T>(signal: AbortSignal, dispatch: () => Promise<T>): Pro
   });
 }
 
-function parseResponse<T>(response: HindsightTransportResponse, schema: { parse: (value: unknown) => T }, maxBytes = HINDSIGHT_DEFAULT_RESPONSE_BYTES): T {
+function parseResponse<T>(response: HindsightTransportResponse, schema: { parse: (value: unknown) => T },
+  options: Pick<HindsightRequestInput<T>, "maxResponseBytes" | "decodeJson">): T {
+  const maxBytes = options.maxResponseBytes ?? HINDSIGHT_DEFAULT_RESPONSE_BYTES;
   if (new TextEncoder().encode(response.body).byteLength > maxBytes) throw hindsightError("HINDSIGHT_RESPONSE_INVALID");
-  try { return schema.parse(response.body === "" ? null : JSON.parse(response.body)); }
+  try { return schema.parse(response.body === "" ? null : (options.decodeJson ?? JSON.parse)(response.body)); }
   catch { throw hindsightError("HINDSIGHT_RESPONSE_INVALID"); }
 }
 

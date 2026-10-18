@@ -1,6 +1,6 @@
 /**
- * INPUT:  actual W1 lease/proof and immutable W3 candidate with the live source boundary
- * OUTPUT: one SQLite COMMIT publishing epoch, representation, marker, custody, queue obligations and receipt
+ * INPUT:  actual W1 lease/proof, immutable W3 candidate, live source boundary and executor clock
+ * OUTPUT: lease-guarded SQLite COMMIT of epoch, representation, marker, custody, queue obligations and receipt
  * POS:    core/db — sole healthy repeated-transition publication; no asynchronous work or source revival
  */
 import { MemoryTransitionCommonBaselineSchema, MemoryTransitionPublicationSchema, MemoryTransitionReceiptSchema,
@@ -18,10 +18,12 @@ import { readTransitionDocument } from "./memory-transition-document-repo.ts";
 import { readVerifiedTransitionPublication } from "./memory-transition-publication-reader.ts";
 import type { Database } from "./sqlite.ts";
 import { withTransitionEvidenceContext, type TransitionEvidenceContext } from "../memory/transitions/transition-evidence-context.ts";
-import { readTransitionIntent } from "./memory-transition-repo.ts";
+import { readTransitionIntent, requireTransitionLease } from "./memory-transition-repo.ts";
 import { publishEmergencyTransition } from "./memory-transition-emergency-publication.ts";
+import { readTransitionNativeEvidence } from "./memory-transition-candidate-repo.ts";
+import { assertTransitionTemplatePublication } from "../memory/transitions/transition-template-state.ts";
 
-type PublicationInput = TransitionCaptureInput & { candidateId: string; currentTime?: () => string };
+type PublicationInput = TransitionCaptureInput & { candidateId: string; currentTime(): string };
 export function publishMemoryTransition(db: Database, input: PublicationInput): MemoryTransitionReceipt {
   return withTransitionEvidenceContext(db, (verification) => publishTransition(db, input, verification));
 }
@@ -34,8 +36,8 @@ function publishTransition(db: Database, input: PublicationInput, verification: 
       if (publication.candidateId !== input.candidateId) invalid();
       receipt = prior; return;
     }
+    if (typeof input.currentTime !== "function") invalid();
     if (readTransitionIntent(db, input.lease.transitionId)?.request.kind === "transition.emergency-local") {
-      if (!input.currentTime) invalid();
       receipt = publishEmergencyTransition(db, { ...input, currentTime: input.currentTime }, verification); return;
     }
     const boundary = readTransitionPublicationBoundary(db, input, verification); const { candidate, intent, attempt } = boundary;
@@ -69,6 +71,11 @@ function publishTransition(db: Database, input: PublicationInput, verification: 
         candidate: candidate.candidateId, json: JSON.stringify(publication) });
     publishTransitionMarker(db, receipt, publication);
     readVerifiedTransitionPublication(db, receipt.receiptId, verification);
+    assertTransitionTemplatePublication(db, { identity: intent.request.expected,
+      evidence: candidate.evidenceIds.map((id) => readTransitionNativeEvidence(db, id, verification)) });
+    // Synchronous validation can exhaust the lease while its heartbeat cannot run. Receipt insertion is the
+    // only attempt mutation here: preserve the original executor and require exactly that one revision step.
+    requireTransitionLease(db, { lease: { ...input.lease, revision: attempt.revision + 1 }, now: input.currentTime() });
   });
   if (!receipt) invalid(); return receipt;
 }

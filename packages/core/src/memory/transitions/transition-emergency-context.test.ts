@@ -46,6 +46,8 @@ describe("independent synchronous emergency evidence", () => {
     } finally { await f.close(); }
   }, 30_000);
 
+  // Each case constructs the same complete SQLite fixture as the 30-second cases above. Its full closure
+  // work exceeds Vitest's default five-second budget under the Core suite's two-worker load.
   it("rejects forged objects, cross-database and expired contexts and isolates body bytes and Maps", async () => {
     const f = await createEmergencyCandidateFixture(); const other = openDatabase({ path: ":memory:", migrations: [] });
     let saved: TransitionEvidenceContext | undefined;
@@ -65,7 +67,7 @@ describe("independent synchronous emergency evidence", () => {
       expect(() => withTransitionEvidenceContext(f.db, (context) => { saved = context; return Promise.resolve(); })).toThrow();
       expect(() => saved!.readSurviving(f.db, f.evidence[0]!.evidenceId)).toThrow();
     } finally { other.close(); await f.close(); }
-  });
+  }, 30_000);
 
   it("rereads surviving SQL bytes and identity even when a pure projection already exists", async () => {
     const f = await createEmergencyCandidateFixture();
@@ -89,7 +91,7 @@ describe("independent synchronous emergency evidence", () => {
         })).toThrow("rollback synthetic corruption");
       }
     } finally { await f.close(); }
-  });
+  }, 30_000);
 
   it("keys pure projection by full mappings and explicit policy Map entries rather than {}", async () => {
     const f = await createEmergencyCandidateFixture();
@@ -115,7 +117,7 @@ describe("independent synchronous emergency evidence", () => {
         projectSurvivingLocalBank({ ...input, survivingPolicies: changed, previous }); expect(spy).toHaveBeenCalledTimes(count * 5);
       });
     } finally { await f.close(); }
-  });
+  }, 30_000);
 
   it("opens a fresh emergency context for each observer read and still checks mutable publication joins", async () => {
     const f = await createEmergencyCandidateFixture(); const observer = createTransitionPublicationObserver(f.db);
@@ -135,5 +137,5 @@ describe("independent synchronous emergency evidence", () => {
         expect(() => readVerifiedEmergencyPublication(f.db, receipt.receiptId, context)).toThrow("MEMORY_TRANSITION_PROOF_INVALID");
       });
     } finally { observer.close(); await f.close(); }
-  });
+  }, 30_000);
 });

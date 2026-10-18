@@ -89,6 +89,7 @@ export function catalogsReturning(capability: string, descriptor?: Partial<HostC
 
 export function brokerReturning(outcome: CapabilityOutcome): CapabilityBroker {
   return {
+    authorizeHindsightInjection: () => ({ state: "unavailable", reason: "denied" }),
     request: () => Promise.resolve(outcome),
     challenge: () => ({ accepted: false, reason: "unknown_request" }),
     resolve: () => ({ accepted: false, reason: "unknown_request" }),
@@ -99,6 +100,7 @@ export function brokerReturning(outcome: CapabilityOutcome): CapabilityBroker {
 export function brokerCapturing(outcome: CapabilityOutcome) {
   const sent: { capability?: string; input?: unknown; hostId?: string } = {};
   const broker: CapabilityBroker = {
+    authorizeHindsightInjection: () => ({ state: "unavailable", reason: "denied" }),
     request: (target, input) => {
       sent.capability = target.descriptor.capabilityId;
       sent.input = input;

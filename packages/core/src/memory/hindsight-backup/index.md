@@ -3,8 +3,24 @@ Stage 3 backup primitives under a committed Hindsight authority. Operator-only: 
 only below `<dataDir>/backups/`.
 - hindsight-backup-store.ts — the artifact store: `<backupId>.partial/` staging, Core copy with removal on failure, sha256/bytes, re-hash then manifest then rename on seal, quarantine of leftover partials, route-b `<backupId>.staged/` records with inbox claim/return by plain file name and a synchronous listing of staged captures with a readable Core identity, atomic verifiedAt rewrite, `incident-<id>/` emergency dirs, listing of sealed schema-valid manifests only, owner-only modes where the OS has them
 - hindsight-backup-pair.ts — the pure pair verifier (lineage, Bank set and native Bank ids, generations, replica/application cursors, terminal-operation receipt scope and membership; native superset accepted) and the shared operation-list digest
+- hindsight-template-backup-pair.ts — exact v2 copied attestation, complete receipt inventory, original selection and current definition/configuration comparison
+- hindsight-template-backup-integrity.ts — backup-domain hashes, verified full original Apply/snapshot requests and definition projection facets
+- hindsight-template-backup-attestation.ts — copied-Core template/default attestations, verified original selections and complete receipt/terminal-refresh membership; separate healthy and backup cardinality bounds.
+- hindsight-template-backup-history.ts — complete enrollment, user, selection and default history for exact admitted Bank incarnations.
+- hindsight-template-backup-execution.ts — original plan, dispatch, receipt, publication and clear-hold commitments; terminal operation labels cannot erase unpublished effects.
+- hindsight-template-backup-publication.ts — historical runtime selection reconstruction at each original publication's connection revision.
+- hindsight-template-backup-observer.ts — authenticated fresh nonce/schema/context-bound Native observation shared by current-target readiness and healthy recovery.
+- hindsight-backup-staging.ts — strict separate v1/v2 staged Core records with exact request, scope and receipt-list binding
+- hindsight-backup-copied-identity.ts — immutable completed Core-copy identity and versioned template evidence, retaining the exact captured authority/configuration/request stamp.
+- hindsight-backup-copy-readback.ts — common capture/admit/verify/restore reconstruction of historical copied metadata, request and complete template state.
+- hindsight-backup-json.ts — compact bounded metadata serialization and regular-file UTF-8 reads with byte limits enforced before parsing.
+- hindsight-backup-manifest.ts — strict version-preserving sealed manifest assembly from the actual staged copy and Native proof/schema.
+- hindsight-backup-preflight.ts — explicit D91 current-target readiness from fresh authenticated observation and a second immutable Core read-back before writer startup.
+- hindsight-backup-preflight-operator.ts — maintained operator adapter for stopped-copy readiness using the actual endpoint and presence-only current-host secret custody.
 - hindsight-backup-fixtures.ts — test support (not in the production path): manifest, native proof and Core Bank builders
 - hindsight-backup-identity.ts — capture step 3: authority, per-Bank replica/application checkpoints, terminal-operation ids and migration head in one SQLite transaction (lower bounds the native side must meet)
+- hindsight-backup-capture-state.ts — versioned capture admission, immutable-copy comparison and live template/hold/connection revalidation before Native dispatch or sealing.
+- hindsight-backup-capture-connection.ts — exact configured revision/fingerprint/reviewed-mode and complete raw verified Bank setup commitment for capture race refusal.
 - hindsight-backup-receipts.ts — the test-pinned Core terminal write kind -> native receipt table map (ruling 3) and the reader that lists native-confirmed Pending and completed D77 job ids of the current lineage/generation
 - hindsight-backup-route.ts — the route-c native snapshot seam (the Shared native request -> native proof + artifact reference, plus the native-host ZIP digest read-back) and the unavailable route
 - hindsight-backup-native-route.ts — the production route c over the Hindsight client: live-connection availability, proof composed from the native body and ZIP digest, disabled endpoint -> ROUTE_UNAVAILABLE, single-flight refusal and other failures -> NATIVE_FAILED
@@ -19,5 +35,5 @@ only below `<dataDir>/backups/`.
 - hindsight-backup-emergency.ts — sealEmergencyEvidence(): transition-owned original-ID incident with snapshot-derived facts, atomic immutable seal/read-back and no Native dependency
 - hindsight-backup-harness.ts — test support (not in the production path): the service harness, the route-b operator ZIP builder (the W5 CLI contract) and inbox helpers
 - hindsight-backup-route-fixtures.ts — test support (not in the production path): programmable in-memory native route double with an inter-capture hook, failure injection and the produced native-host ZIP digests
-- hindsight-emergency-snapshot.ts — immutable copied Core facts, per-Bank closure and original Pending/parent/application/ingestion uncertainty.
+- hindsight-emergency-snapshot.ts — immutable copied Core facts, per-Bank closure and complete original Pending/parent/application/ingestion/template uncertainty, including lost-create reservations.
 - hindsight-backup-restore.ts — D91 pre-writer validation of sealed Core/native pair, actual authority/checkpoints/body closure and credential custody.

@@ -68,8 +68,12 @@ describe("production native backup route", () => {
   it.each([
     ["another backup id", created({ backupId: "99999999-9999-4999-8999-999999999999" })],
     ["an invalid proof body", created({ proof: { ...proofBody, banks: "none" } })],
-  ])("refuses %s as NATIVE_FAILED", async (_name, answer) => {
-    await expect(snapshot(route(answer))).rejects.toEqual(failure("HINDSIGHT_BACKUP_NATIVE_FAILED"));
+  ])("refuses %s during client response validation", async (_name, answer) => {
+    // The client validates identity and shape before route proof composition;
+    // capture maps the escaping HindsightError to NATIVE_FAILED at its own step.
+    await expect(snapshot(route(answer))).rejects.toEqual(expect.objectContaining({
+      name: "HindsightError", code: "HINDSIGHT_RESPONSE_INVALID",
+    }));
   });
 
   it.each([

@@ -93,8 +93,9 @@ describe("synchronous transition evidence boundaries", () => {
       vi.spyOn(native, "verifyTransitionNativeEvidence").mockImplementation((evidence) => {
         const bundle = verify(evidence); elapsed += 45_000; return bundle;
       });
+      f.input.currentTime = () => new Date(Date.parse(W3_AT) + elapsed).toISOString();
       f.input.assertConfiguration = () => { requireTransitionLease(f.db,
-        { lease: f.input.lease, now: new Date(Date.parse(W3_AT) + elapsed).toISOString() }); };
+        { lease: f.input.lease, now: f.input.currentTime() }); };
       const candidate = buildTransitionLocalCandidate(f.db, { ...f.input, evidenceIds: f.proofs.map((e) => e.evidenceId) });
       expect(candidate).toEqual(f.candidate);
       const receipt = publishMemoryTransition(f.db, f.prove());

@@ -12,12 +12,13 @@ import type { HindsightBackupManifest, HindsightBackupNativeProof, MemoryBackupE
 import type { Logger } from "../../logging/logger.ts";
 import { readHindsightBackupArchive } from "./hindsight-backup-archive.ts";
 import {
-  codeOf, failedOutcome, HindsightBackupFailure, outcomeOf, stepAsync, type HindsightBackupOutcome,
+  codeOf, failedOutcome, HindsightBackupFailure, outcomeOf, step, stepAsync, type HindsightBackupOutcome,
 } from "./hindsight-backup-failure.ts";
 import { errorCode, type HindsightBackupFileDigest } from "./hindsight-backup-files.ts";
 import { verifyHindsightBackupPair } from "./hindsight-backup-pair.ts";
 import type { HindsightNativeBackupRoute } from "./hindsight-backup-route.ts";
 import type { HindsightBackupFile, HindsightBackupStore } from "./hindsight-backup-store.ts";
+import { readHindsightBackupCopy } from "./hindsight-backup-copy-readback.ts";
 
 export interface HindsightBackupVerifyInput {
   backupId: string;
@@ -30,7 +31,8 @@ interface VerifyDeps {
 }
 
 /** Codes that describe the artifact itself; only these clear a recorded verification. */
-const ARTIFACT_CODES: readonly MemoryBackupErrorCode[] = ["HINDSIGHT_BACKUP_ARTIFACT_INVALID", "HINDSIGHT_BACKUP_PROOF_MISSING", "HINDSIGHT_BACKUP_PAIR_MISMATCH"];
+const ARTIFACT_CODES: readonly MemoryBackupErrorCode[] = ["HINDSIGHT_BACKUP_ARTIFACT_INVALID", "HINDSIGHT_BACKUP_PROOF_MISSING", "HINDSIGHT_BACKUP_PAIR_MISMATCH",
+  "HINDSIGHT_BACKUP_READBACK_MISMATCH", "HINDSIGHT_BACKUP_TEMPLATE_UNPROVEN", "HINDSIGHT_BACKUP_TEMPLATE_UNPUBLISHED"];
 const READ_BACK_TIMEOUT_MS = 60_000;
 
 export async function verifyHindsightBackup(deps: VerifyDeps, input: HindsightBackupVerifyInput): Promise<HindsightBackupOutcome> {
@@ -63,9 +65,11 @@ export async function verifyHindsightBackup(deps: VerifyDeps, input: HindsightBa
 async function judge(deps: VerifyDeps, manifest: HindsightBackupManifest, signal?: AbortSignal): Promise<void> {
   assertDigest(await digest(deps.store, { manifest, file: "core.sqlite" }), manifest.core);
   signal?.throwIfAborted();
+  const copied = manifest.version === 2 ? step(() => readHindsightBackupCopy(deps.store.corePath(manifest.backupId), manifest),
+    (error) => codeOf(error, "HINDSIGHT_BACKUP_ARTIFACT_INVALID")) : null;
   const proof = await nativeProof(deps, manifest, signal);
   signal?.throwIfAborted();
-  const pair = verifyHindsightBackupPair(manifest, proof);
+  const pair = verifyHindsightBackupPair(copied?.identity.core ?? manifest, proof);
   if (!pair.ok) throw new HindsightBackupFailure("HINDSIGHT_BACKUP_PAIR_MISMATCH", { reason: pair.reason, bankId: pair.bankId });
 }
 
@@ -83,7 +87,8 @@ async function nativeProof(deps: VerifyDeps, manifest: HindsightBackupManifest, 
   }
   const archive = await stepAsync(() => readHindsightBackupArchive(store.nativePath(manifest.backupId)),
     (error) => codeOf(error, "HINDSIGHT_BACKUP_ARTIFACT_INVALID"));
-  if (archive.backupId !== manifest.backupId || !isDeepStrictEqual(archive.proof, recorded)) {
+  if (archive.backupId !== manifest.backupId || archive.version !== manifest.version || archive.schema !== manifest.native.schema
+    || !isDeepStrictEqual(archive.proof, recorded)) {
     throw new HindsightBackupFailure("HINDSIGHT_BACKUP_ARTIFACT_INVALID");
   }
   return archive.proof;

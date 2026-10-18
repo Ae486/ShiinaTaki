@@ -150,11 +150,13 @@ describe("secret catalog service (durable layer)", () => {
     const seeded = await boot(dir, KEY);
     seeded.service.set(REF, SENTINEL);
     // Force the rename to fail: a directory at the target path cannot be replaced by a file rename.
+    const revision = seeded.service.revision();
     const active = readFileSync(seeded.filePath);
     rmSync(seeded.filePath);
     mkdirSync(seeded.filePath);
 
     expect(() => seeded.service.set("mcp.other.env.K", "v2")).toThrow(/store-write-failed/);
+    expect(seeded.service.revision()).toBe(revision);
     rmSync(seeded.filePath, { recursive: true });
     writeFileSync(seeded.filePath, active);
     // The in-memory last-known-good survives the failed write.
@@ -165,9 +167,11 @@ describe("secret catalog service (durable layer)", () => {
     const dir = tempDir();
     const seeded = await boot(dir, KEY);
     seeded.service.set(REF, SENTINEL);
+    const before = seeded.service.revision();
     expect(seeded.service.clear(REF)).toEqual({ present: false });
     expect(seeded.service.presence(REF)).toMatchObject({ present: false, provenance: null, health: "ok" });
     expect(seeded.service.clear(REF)).toEqual({ present: false }); // absent clear stays a success
+    expect(seeded.service.revision()).toBe(before + 1);
     const reopened = await boot(dir, KEY);
     expect(reopened.service.presence(REF)).toMatchObject({ present: false });
   });
@@ -195,8 +199,10 @@ describe("secret catalog service (durable layer)", () => {
     const dir = tempDir();
     const seeded = await boot(dir, KEY);
     seeded.service.set(REF, SENTINEL);
+    const before = seeded.service.revision();
     const rotated = seeded.service.rotateToKey(OTHER_KEY);
     expect(rotated).toEqual({ keyVersion: 2 });
+    expect(seeded.service.revision()).toBe(before + 1);
     expect(seeded.service.presence(REF)).toMatchObject({ present: true, provenance: { keyVersion: 2 } });
 
     const oldKeyBoot = await boot(dir, KEY);

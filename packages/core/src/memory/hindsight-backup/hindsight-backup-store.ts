@@ -8,18 +8,24 @@
  * POS:    core/memory/hindsight-backup — the only site naming backup dirs; every path derives from dataDir + a validated id or
  *         inbox name, never a caller path; a partial, staged or quarantined dir is never listed
  */
-import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync } from "node:fs";
-import { chmod, lstat, mkdir, readFile, rename, rm } from "node:fs/promises";
+import { existsSync, lstatSync, mkdirSync, readdirSync, renameSync } from "node:fs";
+import { chmod, lstat, mkdir, rename, rm } from "node:fs/promises";
 import { join } from "node:path";
 import {
   HindsightBackupIdSchema, HindsightBackupInboxFileSchema, HindsightBackupManifestSchema, HindsightBackupNativeRequestSchema,
-  HindsightIncidentManifestSchema, type HindsightBackupManifest, type HindsightBackupNativeRequest, type HindsightIncidentManifest,
+  HindsightIncidentManifestSchema, HINDSIGHT_BACKUP_V2_REQUEST_MAX_BYTES, HINDSIGHT_BACKUP_MANIFEST_MAX_BYTES,
+  parseHindsightApplicationJson, type HindsightBackupManifest, type HindsightIncidentManifest,
 } from "@taki/shared";
 import { z } from "zod";
 import {
   digestFile, errorCode, exists, OWNER_DIR, OWNER_FILE, removeDir, replaceOwnerFile, storageFailed, writeOwnerFile,
   type HindsightBackupFileDigest,
 } from "./hindsight-backup-files.ts";
+import { compactHindsightBackupJson, readBoundedHindsightBackupText, readBoundedHindsightBackupTextSync } from "./hindsight-backup-json.ts";
+import { readHindsightBackupRequest } from "./hindsight-template-backup-integrity.ts";
+import { HindsightBackupStagedCoreSchema as StagedCoreSchema, HindsightBackupStagedRecordSchema,
+  type HindsightBackupStagedRecord } from "./hindsight-backup-staging.ts";
+export type { HindsightBackupStagedRecord } from "./hindsight-backup-staging.ts";
 
 export const HINDSIGHT_BACKUP_CORE_FILE = "core.sqlite";
 export const HINDSIGHT_BACKUP_NATIVE_FILE = "native.zip";
@@ -32,16 +38,6 @@ const INBOX_DIR = "inbox";
 export type HindsightBackupFile = typeof HINDSIGHT_BACKUP_CORE_FILE | typeof HINDSIGHT_BACKUP_NATIVE_FILE;
 type CoreDigest = HindsightBackupFileDigest & { pages: number };
 
-const { shape } = HindsightBackupManifestSchema;
-/** The Core half of a route-b capture: every manifest field except those the native ZIP and admission supply. */
-const StagedCoreSchema = z.strictObject({
-  version: shape.version, backupId: shape.backupId, createdAt: shape.createdAt, operationId: shape.operationId, core: shape.core,
-  authority: shape.authority, banks: shape.banks, terminalOperations: shape.terminalOperations, custody: shape.custody,
-});
-export interface HindsightBackupStagedRecord {
-  request: HindsightBackupNativeRequest;
-  core: z.infer<typeof StagedCoreSchema>;
-}
 export interface HindsightBackupStagedSummary { backupId: string; createdAt: string; epochId: string }
 
 export interface HindsightBackupStore {
@@ -80,6 +76,8 @@ export interface HindsightBackupStore {
   digest(backupId: string, file: HindsightBackupFile): Promise<HindsightBackupFileDigest>;
   /** The sealed dir's native.zip path, for re-reading a Core-held archive. */
   nativePath(backupId: string): string;
+  /** An owner-derived completed copy; the reader refuses symlinked directories and nonregular files. */
+  corePath(backupId: string, state?: "sealed" | "staged" | "partial"): string;
   /** A fresh partial copy is inspected before atomic seal. Failure never removes an existing sealed incident. */
   writeIncident(incidentId: string, input: { write(path: string): Promise<number>;
     manifest(core: CoreDigest, path: string): HindsightIncidentManifest }): Promise<void>;
@@ -90,7 +88,12 @@ export interface HindsightBackupStore {
 
 export function createHindsightBackupStore(dataDir: string): HindsightBackupStore {
   const paths = storePaths(join(dataDir, "backups"));
-  return { root: paths.root, ...captureMethods(paths), ...stagedMethods(paths), ...sealedMethods(paths), ...incidentMethods(paths.root) };
+  return { root: paths.root, ...captureMethods(paths), ...stagedMethods(paths), ...sealedMethods(paths), ...incidentMethods(paths.root),
+    corePath: (id, state = "sealed") => {
+      const dir = paths[state](id); const path = join(dir, HINDSIGHT_BACKUP_CORE_FILE);
+      if (!lstatSync(dir).isDirectory() || lstatSync(dir).isSymbolicLink() || !lstatSync(path).isFile() || lstatSync(path).isSymbolicLink()) invalidIncident();
+      return path;
+    } };
 }
 
 interface StorePaths {
@@ -180,10 +183,10 @@ function invalidIncident(): never { throw new Error("HINDSIGHT_BACKUP_ARTIFACT_I
 function stagedMethods(paths: StorePaths): Pick<HindsightBackupStore, "stage" | "readStaged" | "listStagedSync" | "claimInbox" | "returnInbox" | "sealStaged"> {
   return {
     stage: async (record) => {
-      const dir = paths.partial(record.request.backupId);
-      await writeOwnerFile(join(dir, HINDSIGHT_BACKUP_REQUEST_FILE), json(HindsightBackupNativeRequestSchema.parse(record.request)));
-      await writeOwnerFile(join(dir, IDENTITY_FILE), json(StagedCoreSchema.parse(record.core)));
-      await rename(dir, paths.staged(record.request.backupId));
+      const value = HindsightBackupStagedRecordSchema.parse(record); const dir = paths.partial(value.request.backupId);
+      await writeOwnerFile(join(dir, HINDSIGHT_BACKUP_REQUEST_FILE), compactHindsightBackupJson(readHindsightBackupRequest(value.request), HINDSIGHT_BACKUP_V2_REQUEST_MAX_BYTES));
+      await writeOwnerFile(join(dir, IDENTITY_FILE), json(value.core));
+      await rename(dir, paths.staged(value.request.backupId));
     },
     readStaged: (backupId) => readStaged(paths.staged(backupId), backupId),
     listStagedSync: () => listStaged(paths),
@@ -274,7 +277,8 @@ async function claimInbox(input: { from: string; dir: string }): Promise<string>
 
 async function readStaged(dir: string, backupId: string): Promise<HindsightBackupStagedRecord | null> {
   let texts: [string, string];
-  try { texts = [await readFile(join(dir, HINDSIGHT_BACKUP_REQUEST_FILE), "utf8"), await readFile(join(dir, IDENTITY_FILE), "utf8")]; }
+  try { texts = [await readBoundedHindsightBackupText(join(dir, HINDSIGHT_BACKUP_REQUEST_FILE), HINDSIGHT_BACKUP_V2_REQUEST_MAX_BYTES),
+    await readBoundedHindsightBackupText(join(dir, IDENTITY_FILE), HINDSIGHT_BACKUP_MANIFEST_MAX_BYTES)]; }
   catch (error) {
     if (errorCode(error) === "ENOENT" || errorCode(error) === "ENOTDIR") return null;
     throw error;
@@ -284,7 +288,7 @@ async function readStaged(dir: string, backupId: string): Promise<HindsightBacku
   if (!request.success || !core.success || request.data.backupId !== backupId || core.data.backupId !== backupId) {
     throw new Error("HINDSIGHT_BACKUP_ARTIFACT_INVALID");
   }
-  return { request: request.data, core: core.data };
+  return HindsightBackupStagedRecordSchema.parse({ request: readHindsightBackupRequest(request.data), core: core.data });
 }
 
 function listManifests(root: string, read: (backupId: string) => HindsightBackupManifest | null): HindsightBackupManifest[] {
@@ -323,7 +327,7 @@ function readManifest(dir: string, backupId: string): HindsightBackupManifest | 
 /** A missing file reads as undefined, which no schema accepts. */
 function readJsonSync(path: string): unknown {
   let text: string;
-  try { text = readFileSync(path, "utf8"); }
+  try { text = readBoundedHindsightBackupTextSync(path); }
   catch (error) {
     if (errorCode(error) === "ENOENT" || errorCode(error) === "ENOTDIR") return undefined;
     throw error;
@@ -338,12 +342,12 @@ function parseManifest(manifest: unknown): HindsightBackupManifest {
 }
 
 function parseJson(text: string): unknown {
-  try { return JSON.parse(text); }
+  try { return parseHindsightApplicationJson(text); }
   catch { return undefined; }
 }
 
 function json(value: unknown): string {
-  return `${JSON.stringify(value, null, 2)}\n`;
+  return compactHindsightBackupJson(value);
 }
 
 function requireBackupId(backupId: string): string {

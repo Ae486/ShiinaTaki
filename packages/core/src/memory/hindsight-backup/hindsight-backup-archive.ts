@@ -8,7 +8,8 @@
 import { createHash } from "node:crypto";
 import { lstat } from "node:fs/promises";
 import {
-  HindsightNativeArchiveManifestSchema, type HindsightBackupNativeProof, type HindsightNativeArchiveManifest,
+  HindsightNativeArchiveManifestSchema, HindsightBackupNativeProofSchema, parseHindsightApplicationJson,
+  type HindsightBackupNativeProof, type HindsightNativeArchiveManifest,
 } from "@taki/shared";
 import yauzl, { type Entry, type ZipFile } from "yauzl";
 import { codeOf } from "./hindsight-backup-failure.ts";
@@ -20,6 +21,7 @@ const MAX_ENTRIES = 513;
 const TABLE_ENTRY = /^([A-Za-z0-9_]{1,63})\.bin$/;
 
 export interface HindsightBackupArchive {
+  version: 1 | 2;
   backupId: string;
   schema: string;
   proof: HindsightBackupNativeProof;
@@ -35,8 +37,10 @@ export async function readHindsightBackupArchive(path: string): Promise<Hindsigh
     const manifest = parseManifest(contents.manifest);
     if (!manifest.taki) throw new Error("HINDSIGHT_BACKUP_PROOF_MISSING");
     assertEntries(manifest, contents.tables);
-    return { backupId: manifest.taki.backupId, schema: manifest.schema,
-      proof: { ...manifest.taki.proof, zipSha256: file.sha256, zipBytes: file.bytes } };
+    if (manifest.taki.version === 2 && manifest.taki.proof.templates.some((bank) => bank.selected.state === "selected"
+      && bank.selected.configurationObservation.schema !== manifest.schema)) throw invalid();
+    return { version: manifest.taki.version, backupId: manifest.taki.backupId, schema: manifest.schema,
+      proof: HindsightBackupNativeProofSchema.parse({ ...manifest.taki.proof, zipSha256: file.sha256, zipBytes: file.bytes }) };
   } catch (error) {
     // yauzl and fs errors carry paths and offsets; only the closed code leaves this reader.
     throw new Error(codeOf(error, "HINDSIGHT_BACKUP_ARTIFACT_INVALID"), { cause: error });
@@ -77,6 +81,7 @@ async function drain(zip: ZipFile, input: { entry: Entry; keep: boolean }): Prom
   for await (const value of await zip.openReadStreamPromise(input.entry) as AsyncIterable<unknown>) {
     if (!(value instanceof Uint8Array)) throw invalid();
     hash.update(value); size += value.length;
+    if (input.keep && size > MANIFEST_MAX_BYTES) throw invalid();
     if (input.keep) chunks.push(Buffer.from(value));
   }
   if (size !== input.entry.uncompressedSize) throw invalid();
@@ -86,7 +91,7 @@ async function drain(zip: ZipFile, input: { entry: Entry; keep: boolean }): Prom
 function parseManifest(bytes: Buffer | null): HindsightNativeArchiveManifest {
   if (bytes === null) throw invalid();
   let value: unknown;
-  try { value = JSON.parse(bytes.toString("utf8")); }
+  try { value = parseHindsightApplicationJson(new TextDecoder("utf-8", { fatal: true }).decode(bytes)); }
   catch { throw invalid(); }
   const manifest = HindsightNativeArchiveManifestSchema.safeParse(value);
   if (!manifest.success) throw invalid();

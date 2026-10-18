@@ -30,9 +30,13 @@ W5 owns orchestration. These modules never temporarily select a candidate or man
 - transition-current-identity.ts — current reviewed connection, independent Character coverage, healthy common-baseline and offline emergency identity; optional synchronous evidence context never caches current rows.
 - transition-native-session.ts — exact acquire/claim/verify/decision history; late renewal validates the dispatched request before preserving newer executor/proof/terminal state.
 - transition-native-decision.ts — immutable finalization decisions and proof-bound continuation of an original refused abort.
-- transition-healthy-candidate.ts — complete return candidate or current-Local delta followed by every Bank's final native proof; reuses immutable verified evidence only under the same original request and sealed proof after executor changes.
+- transition-healthy-candidate.ts — complete return candidate or current-Local delta followed by every Bank's final native proof; template-aware reuse preserves immutable documents and freshly observes every original Bank before returning a saved candidate.
+- transition-template-state.ts — complete Core template/default/hold commitments, exact-incarnation association inventory and final synchronous publication revalidation; new Native generations cannot inherit old ownership.
+- transition-template-auxiliary.ts — independent complete W2 Apply inventory, requested terminal semantic refresh markers and database-only definition projection.
+- transition-template-evidence.ts — immutable W2-to-template association integrity and common stored/fresh observation comparison without rewriting historical evidence.
+- transition-template-observer.ts — transaction-external authenticated observation producer and recovery check with exact per-Bank verified receipt/refresh membership and original schema/context binding.
 - transition-unused-inventory.ts — complete unused-Bank reads with one expiry-qualified renewal per invocation, append-only snapshot request chains and current source/fence/namespace guards.
-- transition-healthy-execution.ts — complete producer with independent validation, event-loop boundaries joining the existing heartbeat, live lease rechecks and terminal tick shutdown; original abort/recovery and sanitized diagnostics.
+- transition-healthy-execution.ts — complete producer with independent validation, live clock passed into atomic publication, event-loop boundaries joining the existing heartbeat, lease rechecks and terminal tick shutdown; original abort/recovery and sanitized diagnostics.
 - transition-execution-heartbeat.ts — shared serial renewal lifetime, transaction-external event-loop join, failure propagation and terminal cleanup; each owner supplies its own renewal dependencies.
 - transition-healthy-service.ts — current previews, independent synchronous admission with entry and post-validation real-clock expiry checks, explicit recovery and joined shutdown over the existing owner.
 - transition-healthy-status.ts — factual per-Bank/queue/runtime/release observations independent of the selected provider.

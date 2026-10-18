@@ -7,7 +7,7 @@
  */
 import { randomUUID } from "node:crypto";
 import type { MemoryOperation, MemoryOperationListParams, MemoryOperationProducerRef, MemoryOperationRequest } from "@taki/shared";
-import { MemoryTransitionErrorCodeSchema } from "@taki/shared";
+import { MemoryTemplateErrorCodeSchema, MemoryTransitionErrorCodeSchema } from "@taki/shared";
 import { createMemoryOperationRepo, type MemoryOperationRepo } from "../../db/memory-operation-repo.ts";
 import { readReplicaRequest } from "../../db/hindsight-replica-request-repo.ts";
 import type { Database } from "../../db/sqlite.ts";
@@ -17,6 +17,7 @@ import type { HindsightActivationService } from "../hindsight-activation/hindsig
 import type { HindsightBackupService } from "../hindsight-backup/hindsight-backup-service.ts";
 import type { HindsightLifecycleService } from "../hindsight-lifecycle/hindsight-lifecycle-service.ts";
 import type { HindsightSetupService } from "../hindsight/hindsight-setup-service.ts";
+import type { HindsightTemplateLifecycleService } from "../hindsight/template-lifecycle/template-lifecycle-service.ts";
 import type { LocalOnboardingService } from "../local-onboarding/local-onboarding-service.ts";
 import {
   MemoryOperationRefusal, type MemoryOperationAdmission, type MemoryOperationContext, type MemoryOperationKindHandler, type MemoryOperationSettlement,
@@ -26,6 +27,7 @@ import { MEMORY_OPERATION_KINDS, memoryOperationHandler, type MemoryOperationKin
 import { createTransitionOperationStorage, type MemoryTransitionDriver } from "./memory-operation-transition-storage.ts";
 import { withTransitionAdmissionContext } from "../transitions/transition-evidence-context.ts";
 import { quarantineEmergencyProducers, operationIsQuarantined } from "../../db/memory-transition-emergency-quarantine.ts";
+import { assertTemplateOperationAdmission } from "./memory-operation-template-guard.ts";
 
 export interface MemoryOperationService {
   /** The origin defaults to the operator; only Core's automatic lifecycle trigger passes "automatic". */
@@ -49,6 +51,7 @@ export interface MemoryOperationServiceInput {
   hindsight?: HindsightActivationService;
   lifecycle?: HindsightLifecycleService;
   backup?: HindsightBackupService;
+  templates?: HindsightTemplateLifecycleService;
   transition?: MemoryTransitionDriver;
   bootId: string;
   onChanged(operation: MemoryOperation): void;
@@ -69,7 +72,7 @@ export function createMemoryOperationService(input: MemoryOperationServiceInput)
   const owner: Owner = {
     repo, kinds: input.kinds ?? MEMORY_OPERATION_KINDS,
     ctx: { live: input.live, setup: input.setup, local: input.local, hindsight: input.hindsight, lifecycle: input.lifecycle, backup: input.backup,
-      transition: input.transition, transitionStorage: createTransitionOperationStorage(input.db),
+      templates: input.templates, transition: input.transition, transitionStorage: createTransitionOperationStorage(input.db),
       lookup: (operationId) => repo.get(operationId),
       replicaRequest: (requestId) => readReplicaRequest(input.db, requestId),
       activeInFamily: (family) => repo.activeInFamily(family), latestInFamily: (family) => repo.latestInFamily(family), now }, input, inflight: new Map(),
@@ -115,6 +118,7 @@ function submit(owner: Owner, request: MemoryOperationRequest, admission: Memory
     owner.input.db.transaction(() => {
       existing = handler.existing?.(request, owner.ctx);
       if (existing) return;
+      assertTemplateOperationAdmission(owner.input.db, request);
       const persist = (ctx: MemoryOperationContext) => {
         const producer = handler.admit(request, ctx, admission);
         if (request.kind === "transition.emergency-local" && !request.recovery) quarantined = quarantineEmergencyProducers(owner.input.db,
@@ -135,12 +139,17 @@ function submit(owner: Owner, request: MemoryOperationRequest, admission: Memory
     if (error instanceof MemoryOperationRefusal) throw error;
     const transitionError = MemoryTransitionErrorCodeSchema.safeParse(error instanceof Error ? error.message : null);
     if (transitionError.success) throw new MemoryOperationRefusal(transitionError.data);
+    const templateError = MemoryTemplateErrorCodeSchema.safeParse(error instanceof Error ? error.message : null);
+    if (templateError.success) throw new MemoryOperationRefusal(templateError.data);
     if (!(error instanceof Error) || error.message !== "MEMORY_OPERATION_BUSY") throw error;
     throw new MemoryOperationRefusal("MEMORY_OPERATION_BUSY", owner.repo.activeInFamily(family)?.operationId ?? null);
   }
   if (existing) return existing;
   if (!admitted?.producer) throw new Error("MEMORY_OPERATION_NOT_FOUND");
-  if (request.kind === "transition.emergency-local") owner.ctx.transition?.emergencyAdmitted?.(request.expected.predecessorEpochId);
+  if (request.kind === "transition.emergency-local") {
+    owner.ctx.transition?.emergencyAdmitted?.(request.expected.predecessorEpochId);
+    owner.ctx.templates?.emergencyAdmitted(request.expected.predecessorEpochId);
+  }
   for (const operation of quarantined) owner.input.onChanged(operation);
   owner.input.onChanged(admitted);
   const execution = execute(owner, handler, { operationId, request, producer: admitted.producer });
@@ -211,9 +220,14 @@ function cancel(owner: Owner, operationId: string): MemoryOperation {
   if (current.terminalAt !== null) throw new MemoryOperationRefusal("MEMORY_OPERATION_SETTLED");
   const handler = memoryOperationHandler(owner.kinds, current.kind);
   if (!handler.cancel) throw new MemoryOperationRefusal("MEMORY_OPERATION_RUNNING");
-  handler.cancel(current, owner.ctx);
-  const next = transition(owner, operationId, (row) => row.terminalAt !== null ? null : { state: "cancelled", reason: "cancelled_before_claim" });
+  let next: MemoryOperation | undefined;
+  owner.input.db.transaction(() => {
+    handler.cancel?.(current, owner.ctx);
+    next = owner.repo.transition({ operationId, expectedState: current.state,
+      patch: { state: "cancelled", reason: "cancelled_before_claim" } });
+  });
   if (!next || next.state !== "cancelled") throw new MemoryOperationRefusal("MEMORY_OPERATION_SETTLED");
+  owner.input.onChanged(next);
   return next;
 }
 

@@ -12,6 +12,7 @@ import type { GovernancePolicyService } from "../governance/governance-policy-se
 import type { ApprovalInteractionService } from "../approval/approval-interaction-service.ts";
 import type { Connection } from "../server/connection-registry.ts";
 import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
+import type { CapabilityRequestObservers } from "./capability-observers.ts";
 
 export interface InteractiveOperator {
   connection: Connection;
@@ -43,6 +44,9 @@ export interface CapabilityRouteRequest {
   runId?: string;
   attemptId?: string;
   effectId?: string;
+  operationId?: string;
+  observers?: CapabilityRequestObservers;
+  ownerCurrent?: () => boolean;
 }
 
 export async function routeCapability(
@@ -50,16 +54,14 @@ export async function routeCapability(
   request: CapabilityRouteRequest,
 ): Promise<RouteResult> {
   const { capabilityId, input, targetHostId } = request;
-  const log = deps.logger.child({ mod: "capability" });
   const resolved = resolveTarget(deps, capabilityId, targetHostId);
   if (!resolved.ok) {
-    log.warn({ capability: capabilityId, code: resolved.code }, "capability routing failed");
+    deps.logger.child({ mod: "capability" }).warn({ capability: capabilityId, code: resolved.code }, "capability routing failed");
     return resolved;
   }
   const { catalog, connection, descriptor } = resolved;
   if (!connection.notify) return { ok: false, code: "NO_NODE", message: `Host ${catalog.hostId} is unavailable` };
-  const dispatchPolicy = deps.governance.hostDispatchPolicy(capabilityId);
-  const expected = dispatchPolicy.compatibility;
+  const { compatibility: expected, ...dispatchPolicy } = deps.governance.hostDispatchPolicy(capabilityId);
   if (
     descriptor.governance.descriptorRevision !== expected.descriptorRevision
     || descriptor.governance.classifierRevision !== expected.classifierRevision
@@ -81,7 +83,8 @@ export async function routeCapability(
     policyGeneration: dispatchPolicy.policyGeneration,
     governanceProjection: dispatchPolicy.projection,
     operator: deps.interactive,
-    isCurrent: () => isCurrentDispatch(deps, {
+    ownerCurrent: request.ownerCurrent,
+    isCurrent: () => (request.ownerCurrent?.() ?? true) && isCurrentDispatch(deps, {
       hostId: catalog.hostId,
       connectionGeneration: catalog.connectionGeneration,
       catalogGeneration: catalog.catalogGeneration,
@@ -90,7 +93,11 @@ export async function routeCapability(
       policyGeneration: dispatchPolicy.policyGeneration,
       projection: dispatchPolicy.projection,
     }),
-  }, input, { runId: request.runId ?? deps.interactive?.runId, coreAttemptId: request.attemptId ?? deps.interactive?.attemptId, effectId: request.effectId, approvalGeneration: deps.approval.approvalGeneration() });
+  }, input, {
+    runId: request.runId ?? deps.interactive?.runId, coreAttemptId: request.attemptId ?? deps.interactive?.attemptId,
+    effectId: request.effectId, operationId: request.operationId, observers: request.observers,
+    approvalGeneration: deps.approval.approvalGeneration(),
+  });
 }
 
 interface SealedDispatch {

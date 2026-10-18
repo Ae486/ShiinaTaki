@@ -73,7 +73,7 @@ function build(options: { failDryRunBank?: string; failApplyBank?: string; opera
     authorityMode: () => String(db.prepare("SELECT mode FROM memory_authority_selection WHERE singleton=1").get()?.mode),
     now: () => "2026-08-21T00:00:00.000Z", attemptId: () => "attempt-1", wait: async () => undefined,
   });
-  return { db, service, client, calls, bindings, options };
+  return { db, service, client, calls, bindings, options, connection };
 }
 
 async function validateAndSetup(harness: ReturnType<typeof build>) {
@@ -82,6 +82,30 @@ async function validateAndSetup(harness: ReturnType<typeof build>) {
 }
 
 describe("Hindsight setup service", () => {
+  it("does not accept raw managed receipt JSON or require a helper for an existing instance", async () => {
+    const h = build();
+    const validated = await h.service.validate({ expectedRevision: 0 });
+    const managedReceipt = { contractVersion: 1 as const, helperId: "operator-json", deploymentId: "not-producer-evidence",
+      endpoint: "http://127.0.0.1:8888", status: "ready" as const,
+      storage: { kind: "embedded-pg0" as const, persistent: true as const },
+      immutableHindsightIdentity: "fake-native", observedAt: "2026-08-21T00:00:00.000Z" };
+    await expect(h.service.setup({ expectedRevision: validated.revision, characterId: "taki", managedReceipt }))
+      .rejects.toMatchObject({ code: "HINDSIGHT_ENDPOINT_REJECTED" });
+    expect(h.calls).toEqual([]);
+    expect((await h.service.setup({ expectedRevision: validated.revision, characterId: "taki" })).phase).toBe("configured");
+  });
+
+  it("keeps historical managed status readable while refusing a fresh setup without C2 producer evidence", async () => {
+    const h = build();
+    h.connection.deploymentMode = "managed-helper";
+    const validated = await h.service.validate({ expectedRevision: 0 });
+    expect(h.service.status()).toEqual(validated);
+    await expect(h.service.setup({ expectedRevision: validated.revision, characterId: "taki" }))
+      .rejects.toMatchObject({ code: "HINDSIGHT_ENDPOINT_REJECTED" });
+    expect(h.service.status()).toEqual(validated);
+    expect(h.calls).toEqual([]);
+  });
+
   it("finishes every dry-run before mutation, waits operations, verifies templates, and preserves canonical-local", async () => {
     const h = build({ operationPending: true });
     const result = await validateAndSetup(h);

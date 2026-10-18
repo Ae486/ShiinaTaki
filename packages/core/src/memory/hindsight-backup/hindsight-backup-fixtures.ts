@@ -3,7 +3,7 @@
  * OUTPUT: BACKUP_ID / LINEAGE / GENERATION constants, backupBank(), nativeProof(), backupManifest() used by the backup tests
  * POS:    core/memory/hindsight-backup — test support; not in the production path
  */
-import type { HindsightBackupBank, HindsightBackupManifest, HindsightBackupNativeProof } from "@taki/shared";
+import type { HindsightBackupBank, HindsightBackupManifestV1, HindsightBackupNativeProofV1 } from "@taki/shared";
 import { hindsightBackupOperationDigest } from "./hindsight-backup-pair.ts";
 
 export const AT = "2026-09-26T00:00:00.000Z";
@@ -23,7 +23,7 @@ export function backupBank(nativeBankId: string, characterId: string | null = nu
 }
 
 /** The native side exactly equal to backupBank() for each id, answering membership for TERMINAL_IDS with nothing missing. */
-export function nativeProof(nativeBankIds: readonly string[], patch: Partial<HindsightBackupNativeProof> = {}): HindsightBackupNativeProof {
+export function nativeProof(nativeBankIds: readonly string[], patch: Partial<HindsightBackupNativeProofV1> = {}): HindsightBackupNativeProofV1 {
   return {
     providerLineage: LINEAGE, alembicRevision: "a1b2c3d4e5f6", upstreamCommit: "0123456789abcdef", compatibilityBuild: "taki-build",
     banks: nativeBankIds.map((bankId) => ({
@@ -34,7 +34,7 @@ export function nativeProof(nativeBankIds: readonly string[], patch: Partial<Hin
   };
 }
 
-export function backupManifest(core: { sha256: string; bytes: number; pages: number }, patch: Partial<HindsightBackupManifest> = {}): HindsightBackupManifest {
+export function backupManifest(core: { sha256: string; bytes: number; pages: number }, patch: Partial<HindsightBackupManifestV1> = {}): HindsightBackupManifestV1 {
   const banks = [backupBank("taki-hs-g"), backupBank("taki-hs-c", "taki")];
   return {
     version: 1, backupId: BACKUP_ID, createdAt: AT, operationId: "44444444-4444-4444-8444-444444444444", route: "native-endpoint",

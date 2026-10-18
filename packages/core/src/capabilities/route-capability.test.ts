@@ -71,6 +71,7 @@ function setup(hostIds: string[]) {
   }
   const request = vi.fn((target: { hostId: string }) => Promise.resolve({ ok: true as const, output: target.hostId }));
   const broker: CapabilityBroker = {
+    authorizeHindsightInjection: () => ({ state: "unavailable", reason: "denied" }),
     request,
     challenge: () => ({ accepted: false, reason: "unknown_request" }),
     resolve: () => ({ accepted: false, reason: "unknown_request" }),

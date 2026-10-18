@@ -51,6 +51,7 @@ export interface RunCancelResult {
 }
 
 export interface RunRepo {
+  findByIdempotency(key: string): Run | undefined;
   admit(input: RunAdmissionInput): RunAdmissionResult;
   status(runId: string): RunStatusResult;
   start(runId: string, attemptId: string): { started: boolean; status: RunStatusResult };
@@ -81,6 +82,10 @@ const ATTEMPT_TERMINAL = new Set<Attempt["state"]>([
 export function createRunRepo(db: Database, eventRepo: RunEventRepo = createRunEventRepo(db), liveBus?: RunEventLiveBus): RunRepo {
   const now = () => new Date().toISOString();
   return {
+    findByIdempotency(key) {
+      const row = readRunByIdempotency(db, key);
+      return row ? readRunRow(row) : undefined;
+    },
     admit(input) {
       const requestHash = digestRunValue(input.request);
       const existing = readRunByIdempotency(db, input.request.idempotencyKey);

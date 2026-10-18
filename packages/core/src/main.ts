@@ -25,6 +25,8 @@ import { createAvatarTools } from "./avatar/avatar-tools.ts";
 import { createAvatarVocabulary } from "./avatar/avatar-vocabulary.ts";
 import { presentationTailStop } from "./avatar/presentation-stop.ts";
 import { createCapabilityBroker } from "./capabilities/capability-broker.ts";
+import { composeHindsightCustody } from "./boot/hindsight-custody-boot.ts";
+import { composeHindsightDeployment } from "./boot/hindsight-deployment-boot.ts";
 import { createCapabilityTools } from "./capabilities/capability-tools.ts";
 import { routeCapability } from "./capabilities/route-capability.ts";
 import { createScreenshotDescriber } from "./capabilities/screenshot-describe.ts";
@@ -33,6 +35,8 @@ import { composeHindsightActivation } from "./boot/hindsight-activation-boot.ts"
 import { composeHindsightBackup } from "./boot/hindsight-backup-boot.ts";
 import { composeHindsightLifecycle } from "./boot/hindsight-lifecycle-boot.ts";
 import { composeHindsightSetup } from "./boot/hindsight-setup-boot.ts";
+import { composeHindsightConfiguration } from "./boot/hindsight-configuration-boot.ts";
+import { composeHindsightTemplates } from "./boot/hindsight-template-boot.ts";
 import { createPrivacyPauseRepo } from "./db/privacy-pause-repo.ts";
 import { composeApprovalRuntime } from "./approval/approval-runtime.ts";
 import { createGovernancePolicyRepo } from "./governance/governance-policy-repo.ts";
@@ -135,13 +139,14 @@ import { registerObservabilityMethods } from "./server/methods/observability-met
 const boot = bootstrapCore(process.env);
 const { logger, db, serverConfig, contextConfig, model, visionModel } = boot;
 const coreHostId = loadOrCreateHostIdentity(join(serverConfig.dataDir, "host-identity.json"));
+const bootId = randomUUID();
 logger.info("Core Host identity loaded");
 // The selected memory runtime and inactive B3 setup share the same just-in-time
 // connection secret source. Opening the catalog itself performs no model/network work.
 const secretLog = logger.child({ mod: "secrets" });
 const secretCatalog = await createSecretCatalogService({
   filePath: join(serverConfig.dataDir, "secret-catalog.bin"), storeId: coreHostId,
-  keySource: resolveMasterKeySource(process.env), logger: secretLog,
+  keySource: resolveMasterKeySource(process.env), logger: secretLog, coreBootId: bootId,
 });
 const governance = createGovernancePolicyService(createGovernancePolicyRepo(db));
 const runEventRepo = createRunEventRepo(db);
@@ -183,7 +188,6 @@ const avatarSubscriptions = createAvatarSubscriptions();
 const avatarVocabulary = createAvatarVocabulary();
 
 // One per-process boot id tells rows this boot owns apart from rows an earlier boot left open (operations, custody).
-const bootId = randomUUID();
 // Automatic lifecycle submits (R8) are late-bound: degraded Runs may report before the operation owner exists.
 const hindsightLifecycleTrigger = createHindsightLifecycleTrigger({ db, logger: logger.child({ mod: "hindsight-lifecycle" }) });
 // Marker-first composition owns every legacy/canonical reader, writer, prompt, scheduler, and migration cutover seam.
@@ -248,6 +252,8 @@ registerSkillMethods(registry, { service: skillLifecycle, logger: skillsLog });
 // Hindsight B3 setup is an operator-only inactive control plane. Composition registers methods and SQLite state only;
 // it makes no boot request, performs no LLM health probe, and has no Memory Authority writer/provider registration.
 const hindsightSetup = composeHindsightSetup({ db, config: boot.config.source, secrets: secretCatalog, registry, logger });
+const hindsightConfiguration = composeHindsightConfiguration({ db, config: boot.config.source, secrets: secretCatalog, registry,
+  configurationRevision: boot.config.subscriptions.revision });
 // Durable memory operations (Stage 1): one Core-owned owner over the B3 setup service and the B5 scheduler. Construction
 // reconciles rows another boot left open (outcome_unknown); the per-process boot id is what tells those rows apart.
 // Local onboarding (Stage 2a) is the only caller of the B2 producer; its kinds observe their own receipts at boot first.
@@ -260,7 +266,9 @@ const localOnboarding = createLocalOnboardingService({
 // Hindsight activation (Stage 2b) is the only caller of the B4/D78 mutation primitives; it rebinds the runtime after COMMIT.
 const hindsightActivation = composeHindsightActivation({ db, config: boot.config.source, secrets: secretCatalog, setup: hindsightSetup, runtime: memoryRuntime, logger });
 // Hindsight lifecycle (Stage 2c): Bank provisioning and connection revalidation under a committed Hindsight authority.
-const hindsightLifecycle = composeHindsightLifecycle({ db, config: boot.config.source, secrets: secretCatalog, runtime: memoryRuntime, logger });
+const hindsightTemplates = composeHindsightTemplates({ db, config: boot.config.source, secrets: secretCatalog,
+  registry, bootId, runtime: memoryRuntime.templates });
+const hindsightLifecycle = composeHindsightLifecycle({ db, config: boot.config.source, secrets: secretCatalog, runtime: memoryRuntime, logger, templates: hindsightTemplates });
 // Hindsight backup (Stage 3): capture pauses Hindsight writers and copies Core, then pairs it with the native half from the
 // opt-in native endpoint (W5) or, via backup.admit, from the operator's native CLI ZIP; verify re-checks a sealed pair.
 const hindsightBackup = composeHindsightBackup({ db, dataDir: serverConfig.dataDir, config: boot.config.source, secrets: { catalog: secretCatalog, storeId: coreHostId }, logger });
@@ -268,7 +276,7 @@ const memoryTransitions = composeMemoryTransitions({ db, config: boot.config.sou
   runtime: memoryRuntime, ownerId: bootId, actorId: coreHostId, logger, backup: hindsightBackup, lifecycle: hindsightLifecycle });
 const memoryOperations = createMemoryOperationService({
   db, live: memoryRuntime.operations, setup: hindsightSetup, local: localOnboarding, hindsight: hindsightActivation, lifecycle: hindsightLifecycle,
-  backup: hindsightBackup, transition: memoryTransitions, bootId, logger, onChanged: memoryOperationSubscriptions.publish,
+  backup: hindsightBackup, templates: hindsightTemplates, transition: memoryTransitions, bootId, logger, onChanged: memoryOperationSubscriptions.publish,
 });
 registerMemoryTransitionMethods(registry, memoryTransitions);
 hindsightLifecycleTrigger.bind({ lifecycle: hindsightLifecycle, operations: memoryOperations });
@@ -318,6 +326,10 @@ const ambientCapabilityDeps = {
   governance,
   approval,
 };
+const hindsightCustody = composeHindsightCustody({
+  dataDir: serverConfig.dataDir, coreHostId, secrets: secretCatalog, config: boot.config.source,
+  methods: registry, route: ambientCapabilityDeps,
+});
 
 // Perception (#19 T3a + #20 T3b): SYSTEM-initiated polls of the foreground window (always-on, low sensitivity) and of
 // the screen itself (DEFAULT OFF, its own `screenshot-ambient` grant) feed an OS-neutral, bounded state (invariant 8)
@@ -373,6 +385,8 @@ const runService = createRunService({
 // Recovery is a boot barrier: classify durable orphan work before registering/accepting trigger dispatch.
 const recovery = createRecoveryCoordinator({ db, runs: runRepo, effects: effectLifecycle });
 await recovery.scan();
+const hindsightDeployment = composeHindsightDeployment({ dataDir: serverConfig.dataDir, coreHostId,
+  runs: runService, custody: hindsightCustody, route: { ...ambientCapabilityDeps, effects: effectLifecycle }, methods: registry });
 
 // Turn lifecycle (D1 #3/#4): per-character serialization + the cancellable-turn registry shared by send/cancel.
 const turnControls = { queue: createTurnQueue(), turns: createTurnRegistry() };
@@ -558,8 +572,12 @@ memoryRuntime.start();
 
 let shuttingDown = false;
 function shutdown(signal: string): void {
+  hindsightCustody.dispose();
+  hindsightDeployment.dispose();
+  hindsightConfiguration.dispose();
   if (shuttingDown) return;
   shuttingDown = true;
+  hindsightTemplates.stop();
   logger.info({ signal }, "shutting down");
   const schedulerStopped = scheduleEngine.stop();
   runService.seal();

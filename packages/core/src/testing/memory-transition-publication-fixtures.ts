@@ -55,7 +55,7 @@ export async function createTransitionPublicationFixture(options: {
     lease = changeTransitionAdmission(db, { lease, now: W3_AT, action: "close" });
     lease = updateTransitionAttempt(db, { lease, now: W3_AT, patch: { phase: "fenced" } });
   }
-  const input = { lease, now: W3_AT, assertConfiguration: () => undefined };
+  const input = { lease, now: W3_AT, currentTime: () => W3_AT, assertConfiguration: () => undefined };
   for (const evidence of proofs) persistTransitionNativeEvidence(db, { ...input, evidence });
   const candidate = buildTransitionLocalCandidate(db, { ...input, evidenceIds: proofs.map((evidence) => evidence.evidenceId) });
   const prove = () => {

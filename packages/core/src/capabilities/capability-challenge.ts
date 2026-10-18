@@ -46,7 +46,7 @@ export function acceptCapabilityChallenge(
   if (!pending) return reject("unknown_request");
   if (provenance.hostId !== pending.control.targetHostId) return reject("wrong_host");
   if (provenance.connectionGeneration !== pending.control.connectionGeneration) return reject("stale_generation");
-  if (pending.challenge || pending.authorization) return reject("duplicate");
+  if (pending.challenge || pending.authorization || pending.targetDispatched) return reject("duplicate");
   const failure = challengeFrameFailure(pending, params);
   if (failure || !pending.target.isCurrent()
     || state.approval.approvalGeneration() !== pending.control.approvalGeneration) {
@@ -63,6 +63,7 @@ export function acceptCapabilityChallenge(
       return { accepted: true };
     }
     try {
+      if (!pending.target.isCurrent() || state.now() >= Date.parse(pending.control.deadlineAt)) throw new Error("stale Host intent");
       pending.targetDispatched = true;
       pending.target.notify(HOST_CONTROL_METHODS.execute, { requestId: params.requestId, control: pending.control, challengeId: params.challengeId });
     } catch {
@@ -187,6 +188,7 @@ function resumeAuthorized(
   pending.abortListener?.();
   pending.abortListener = undefined;
   try {
+    if (!pending.target.isCurrent() || state.now() >= Date.parse(pending.control.deadlineAt)) throw new Error("stale Host resume");
     pending.targetDispatched = true;
     pending.target.notify(HOST_CONTROL_METHODS.resume, {
       requestId,

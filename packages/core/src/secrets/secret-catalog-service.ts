@@ -11,6 +11,8 @@ import type { Logger } from "../logging/logger.ts";
 import { SecretRefSchema, type SecretCatalogHealth, type SecretProvenance } from "@taki/shared";
 import type { MasterKeySource } from "./master-key.ts";
 import { publishFileAtomically } from "./catalog-publication.ts";
+import { createCatalogCustody, catalogFileIdentity, sealedCatalogDigest, type CatalogCustodySnapshot } from "./catalog-custody.ts";
+import type { HindsightFixedSelection } from "@taki/shared/hindsight-custody";
 import {
   SECRET_CATALOG_FORMAT_VERSION,
   SecretCatalogError,
@@ -39,6 +41,10 @@ export class SecretRefusalError extends Error {
 
 export interface SecretCatalogService {
   health(): SecretCatalogHealth;
+  /** Internal process-local publication generation; never persisted or included in operator projections. */
+  revision(): number;
+  captureCustodySnapshot(selection: HindsightFixedSelection): CatalogCustodySnapshot;
+  validateCustodySnapshot(snapshot: CatalogCustodySnapshot): boolean;
   set(secretRef: string, value: string): { present: true; provenance: SecretProvenance };
   clear(secretRef: string): { present: false };
   presence(secretRef: string): { secretRef: string; present: boolean; provenance: SecretProvenance | null; health: SecretCatalogHealth };
@@ -62,6 +68,7 @@ export interface SecretCatalogDeps {
   keySource: MasterKeySource | null;
   logger: Logger;
   now?: () => string;
+  coreBootId?: string;
 }
 
 /** The mutable single-writer state every operation below closes over (synchronous ops = serialized by design). */
@@ -70,15 +77,22 @@ interface CatalogState {
   health: SecretCatalogHealth;
   key: Uint8Array | null;
   data: SecretCatalogPlain | null;
+  revision: number;
+  sealedDigest: string | null;
+  fileIdentity: string | null;
 }
 
 export async function createSecretCatalogService(deps: SecretCatalogDeps): Promise<SecretCatalogService> {
   await sodiumReady; // one Wasm load per process; every op below is then synchronous (single-writer by construction)
-  const state: CatalogState = { deps, health: "locked", key: null, data: null };
+  const state: CatalogState = { deps, health: "locked", key: null, data: null, revision: 0, sealedDigest: null, fileIdentity: null };
   loadInitialState(state);
+  const custody = createCatalogCustody(deps.filePath, () => state, deps.coreBootId);
   deps.logger.child({ mod: "secrets" }).info({ health: state.health, keySource: deps.keySource?.kind ?? "none" }, "secret catalog opened");
   return {
     health: () => state.health,
+    revision: () => state.revision,
+    captureCustodySnapshot: custody.capture,
+    validateCustodySnapshot: custody.validate,
     set: (secretRef, value) => setSecret(state, secretRef, value),
     clear: (secretRef) => clearSecret(state, secretRef),
     presence: (secretRef) => presenceOf(state, secretRef),
@@ -118,7 +132,10 @@ function loadInitialState(state: CatalogState): void {
     return;
   }
   try {
-    state.data = openCatalog(readFileSync(deps.filePath), state.key, deps.storeId);
+    const sealed = readFileSync(deps.filePath);
+    state.data = openCatalog(sealed, state.key, deps.storeId);
+    state.sealedDigest = sealedCatalogDigest(sealed);
+    state.fileIdentity = catalogFileIdentity(deps.filePath);
     state.health = "ok";
   } catch (error) {
     state.data = null;
@@ -144,6 +161,9 @@ function publish(state: CatalogState, next: SecretCatalogPlain, mode: "create-on
       throw new SecretRefusalError("store-write-failed");
     }
     state.data = next; // last-known-good swap only after durable publication
+    state.sealedDigest = sealedCatalogDigest(sealed);
+    state.fileIdentity = catalogFileIdentity(state.deps.filePath);
+    state.revision++; // timestamp collisions and restored metadata cannot repeat this process-local identity
   } catch (error) {
     if (error instanceof SecretRefusalError || error instanceof SecretCatalogError) throw error;
     throw new SecretRefusalError("store-write-failed");
@@ -195,8 +215,9 @@ function rotateKey(state: CatalogState, newKey: Uint8Array): { keyVersion: numbe
   const current = requireOk(state);
   if (!isSecretCatalogKey(newKey)) throw new SecretRefusalError("store-write-failed");
   const next: SecretCatalogPlain = { ...current, keyVersion: current.keyVersion + 1 };
+  let sealed: Uint8Array;
   try {
-    const sealed = sealCatalog(next, newKey);
+    sealed = sealCatalog(next, newKey);
     if (publishFileAtomically(state.deps.filePath, sealed, "replace") === "already-exists") {
       throw new SecretRefusalError("store-write-failed");
     }
@@ -206,6 +227,9 @@ function rotateKey(state: CatalogState, newKey: Uint8Array): { keyVersion: numbe
   }
   state.key = newKey;
   state.data = next;
+  state.sealedDigest = sealedCatalogDigest(sealed);
+  state.fileIdentity = catalogFileIdentity(state.deps.filePath);
+  state.revision++;
   return { keyVersion: next.keyVersion };
 }
 
@@ -220,6 +244,9 @@ function restoreEnvelope(state: CatalogState, envelope: Uint8Array): void {
   const restored = openCatalog(envelope, state.key as Uint8Array, state.deps.storeId);
   publishFileAtomically(state.deps.filePath, envelope, "replace");
   state.data = restored;
+  state.sealedDigest = sealedCatalogDigest(envelope);
+  state.fileIdentity = catalogFileIdentity(state.deps.filePath);
+  state.revision++;
   state.deps.logger.child({ mod: "secrets" }).info(
     { keyVersion: restored.keyVersion, entries: Object.keys(restored.entries).length },
     "secret catalog restored",

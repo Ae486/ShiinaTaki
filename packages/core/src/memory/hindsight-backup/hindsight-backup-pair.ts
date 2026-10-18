@@ -5,17 +5,23 @@
  *         native may be a superset of Core (later cursors, extra receipts), never behind it
  */
 import { createHash } from "node:crypto";
-import type { HindsightBackupBank, HindsightBackupManifest, HindsightBackupNativeProof, HindsightBackupPairMismatch } from "@taki/shared";
+import type { HindsightBackupBank, HindsightBackupManifestV1, HindsightBackupManifestV2,
+  HindsightBackupNativeProof, HindsightBackupNativeProofBodyV2, HindsightBackupPairMismatch } from "@taki/shared";
+import { verifyHindsightTemplateBackupPair } from "./hindsight-template-backup-pair.ts";
 
-export type HindsightBackupCoreIdentity = Pick<HindsightBackupManifest, "authority" | "banks" | "terminalOperations">;
+export type HindsightBackupCoreIdentityV1 = Pick<HindsightBackupManifestV1, "version" | "authority" | "banks" | "terminalOperations">;
+export type HindsightBackupCoreIdentityV2 = Pick<HindsightBackupManifestV2, "version" | "authority" | "banks" | "terminalOperations" | "requestHash" | "templates">;
+export type HindsightBackupCoreIdentity = HindsightBackupCoreIdentityV1 | HindsightBackupCoreIdentityV2;
 export type HindsightBackupPairResult = { ok: true } | ({ ok: false } & HindsightBackupPairMismatch);
+/** A fresh authenticated observation intentionally has no ZIP identity. */
+export type HindsightBackupPairProof = HindsightBackupNativeProof | HindsightBackupNativeProofBodyV2;
 type NativeBank = HindsightBackupNativeProof["banks"][number];
 
 const OK: HindsightBackupPairResult = { ok: true };
 const mismatch = (reason: HindsightBackupPairMismatch["reason"], bankId: string | null = null): HindsightBackupPairResult =>
   ({ ok: false, reason, bankId });
 
-export function verifyHindsightBackupPair(core: HindsightBackupCoreIdentity, native: HindsightBackupNativeProof): HindsightBackupPairResult {
+export function verifyHindsightBackupPair(core: HindsightBackupCoreIdentity, native: HindsightBackupPairProof): HindsightBackupPairResult {
   if (core.authority.providerLineageId !== native.providerLineage) return mismatch("lineage");
   const nativeBanks = new Map(native.banks.map((bank) => [bank.bankId, bank]));
   for (const bank of core.banks) {
@@ -30,6 +36,8 @@ export function verifyHindsightBackupPair(core: HindsightBackupCoreIdentity, nat
   if (receipts.count !== core.terminalOperations.count || receipts.digest !== core.terminalOperations.digest) return mismatch("receipt_scope");
   // A Core terminal success without its native receipt is the reverse-order capture PR01 forbids.
   if (receipts.missingCount > 0) return mismatch("receipt_missing");
+  if (core.version === 2) return verifyHindsightTemplateBackupPair(core, native);
+  if ("version" in native) return mismatch("template_request");
   return OK;
 }
 

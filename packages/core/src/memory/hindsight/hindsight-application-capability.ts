@@ -8,6 +8,9 @@ import {
   HINDSIGHT_APPLICATION_PART_BYTES, HINDSIGHT_APPLICATION_RESPONSE_BYTES, HINDSIGHT_APPLICATION_UPLOAD_BYTES,
   HINDSIGHT_NATIVE_RESULT_VERSION,
   HINDSIGHT_TRANSITION_BUILD,
+  HINDSIGHT_CONFIGURATION_BUILD,
+  HINDSIGHT_TEMPLATE_BUILD,
+  HINDSIGHT_TEMPLATE_BACKUP_BUILD,
 } from "@taki/shared";
 import type { HindsightClient, HindsightCallContext } from "./hindsight-client.ts";
 import type { HindsightApplicationClient } from "./hindsight-application-client.ts";
@@ -27,7 +30,7 @@ export function requireHindsightApplicationClient(client: HindsightClient): Hind
 export function requireHindsightApplicationCapability(manifest: HindsightCompatibilityWire): { providerLineage: string; guardedReflect: boolean } {
   const generic = projectHindsightCompatibilityManifest(manifest);
   const contract = manifest.contracts.application_state; const factual = manifest.contracts.native_results;
-  if (![HINDSIGHT_APPLICATION_STATE_BUILD, HINDSIGHT_TRANSITION_BUILD].includes(generic.compatibilityBuild) || !generic.providerLineage
+  if (![HINDSIGHT_APPLICATION_STATE_BUILD, HINDSIGHT_TRANSITION_BUILD, HINDSIGHT_CONFIGURATION_BUILD, HINDSIGHT_TEMPLATE_BUILD, HINDSIGHT_TEMPLATE_BACKUP_BUILD].includes(generic.compatibilityBuild) || !generic.providerLineage
     || contract?.version !== HINDSIGHT_APPLICATION_STATE_VERSION || !supported(contract.support)
     || contract.body_part_bytes !== HINDSIGHT_APPLICATION_PART_BYTES || contract.max_response_bytes !== HINDSIGHT_APPLICATION_RESPONSE_BYTES
     || contract.max_preparation_bytes !== HINDSIGHT_APPLICATION_UPLOAD_BYTES || !contract.state_cursor_reset_supported

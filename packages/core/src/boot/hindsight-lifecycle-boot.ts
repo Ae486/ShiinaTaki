@@ -13,6 +13,7 @@ import { createHindsightLifecycleService, type HindsightLifecycleService } from 
 import type { HindsightBindingSnapshot } from "../memory/hindsight-runtime-binding.ts";
 import type { MemoryOperationsRuntime } from "../memory/operations/memory-operation-contract.ts";
 import type { SecretCatalogService } from "../secrets/secret-catalog-service.ts";
+import type { HindsightTemplateLifecycleService } from "../memory/hindsight/template-lifecycle/template-lifecycle-service.ts";
 
 export function composeHindsightLifecycle(input: {
   db: Database;
@@ -26,6 +27,7 @@ export function composeHindsightLifecycle(input: {
   logger: Logger;
   /** Injected transport client for isolated journey tests; production always uses the common authenticated factory. */
   client?: HindsightClient;
+  templates?: HindsightTemplateLifecycleService;
 }): HindsightLifecycleService {
   const secret = createHindsightConnectionSecret(input.secrets);
   return createHindsightLifecycleService({
@@ -34,6 +36,7 @@ export function composeHindsightLifecycle(input: {
     secrets: input.secrets,
     client: (projection) => input.client ?? createHindsightClient({ endpoint: projection.endpoint, resolveApiKey: secret.resolve }),
     runtime: input.runtime.operations,
+    templates: input.templates,
     binding: input.runtime.hindsightBindingSnapshot,
     replaceBinding: input.runtime.replaceHindsightBinding,
     logger: input.logger.child({ mod: "hindsight-lifecycle" }),

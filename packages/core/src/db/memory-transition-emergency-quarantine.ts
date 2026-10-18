@@ -9,6 +9,7 @@ import { transitionLocalHash } from "../memory/transitions/transition-local-enco
 import { readTransitionReceipt } from "./memory-transition-evidence-repo.ts";
 import type { MemoryOperationRepo } from "./memory-operation-repo.ts";
 import type { Database } from "./sqlite.ts";
+import { pendingTemplateQuarantineOperations, quarantineTemplateHolds } from "./hindsight-template-emergency-evidence.ts";
 
 /** Historical migration fixtures remain readable before the additive emergency schema is installed. */
 export function hasEmergencyStorage(db: Database): boolean {
@@ -33,7 +34,8 @@ export function emergencyCanQuarantineOperation(db: Database, operation: MemoryO
       : operation.authorityEpochId === epochId;
   }
   return operation.authorityEpochId === epochId && (operation.kind === "replica.sync"
-    || operation.kind.startsWith("backup.") || operation.kind === "bank.provision" || operation.kind === "connection.revalidate");
+    || operation.kind.startsWith("backup.") || operation.kind.startsWith("template.")
+    || operation.kind === "bank.provision" || operation.kind === "connection.revalidate");
 }
 
 /** Called after the first full plan and before insertAdmitted, inside its outer transaction. */
@@ -56,6 +58,10 @@ export function quarantineEmergencyProducers(db: Database, input: {
     const operation = input.repo.get(String(row.operation_id));
     if (operation && belongs(operation)) candidates.set(operation.operationId, operation);
   }
+  for (const operationId of pendingTemplateQuarantineOperations(db, input.epochId)) {
+    const operation = input.repo.get(operationId);
+    if (operation && belongs(operation)) candidates.set(operationId, operation);
+  }
   const changed: MemoryOperation[] = [];
   for (const operation of candidates.values()) {
     if (operationIsQuarantined(db, operation.operationId)) continue;
@@ -74,5 +80,6 @@ export function quarantineEmergencyProducers(db: Database, input: {
       .run({ id: String(manual.request_id), emergency: input.emergencyOperationId, epoch: input.epochId,
         hash: transitionLocalHash(manual), at: input.now });
   }
+  quarantineTemplateHolds(db, input.epochId);
   return changed;
 }

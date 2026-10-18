@@ -13,6 +13,7 @@ import type { SecretCatalogService } from "../../secrets/secret-catalog-service.
 import type { HindsightClient } from "../hindsight/hindsight-client.ts";
 import type { HindsightBindingSnapshot } from "../hindsight-runtime-binding.ts";
 import type { MemoryOperationsRuntime } from "../operations/memory-operation-contract.ts";
+import type { HindsightTemplateLifecycleService } from "../hindsight/template-lifecycle/template-lifecycle-service.ts";
 
 export interface HindsightLifecycleDeps {
   db: Database;
@@ -21,6 +22,7 @@ export interface HindsightLifecycleDeps {
   client(projection: HindsightConnectionProjection): HindsightClient;
   /** The published Hindsight runtime view; null while unbound. */
   runtime(): MemoryOperationsRuntime | null;
+  templates?: HindsightTemplateLifecycleService;
   binding(): HindsightBindingSnapshot;
   /** Same-epoch swap onto a runtime built from the live connection; rejects when construction or start fails. */
   replaceBinding(epochId: string): Promise<void>;

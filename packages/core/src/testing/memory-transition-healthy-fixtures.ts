@@ -59,7 +59,7 @@ export async function createHealthyTransitionHarness(options: { migrationVersion
 
 export function composeHealthyTransitionHarness(input: { db: Database; dataDir: string;
   timeline: ReturnType<typeof createTimelineRepo>; remote: ReturnType<typeof createHealthyTransitionTransport>;
-  clock: { value: string } }) {
+  clock: { value: string }; fingerprint?: string }) {
   const { db, dataDir, timeline, remote, clock } = input; const now = () => clock.value;
   const { logger, records } = createCaptureLogger();
   const source = createConfigSource({ repo: createConfigRepo(db), env: { TAKI_HINDSIGHT_ENABLED: "true", TAKI_HINDSIGHT_ENDPOINT: "http://127.0.0.1:18481" } });
@@ -73,7 +73,7 @@ export function composeHealthyTransitionHarness(input: { db: Database; dataDir: 
     return value.lifetime === "running" && value.binding.kind === "published" && value.binding.epochId === epochId;
   };
   const service = createHealthyTransitionService({ db, ownerId: "healthy-owner", actorId: "operator", now, logger,
-    fingerprint: () => ACTIVATION_CONFIG, client: () => { if (fault.constructor) throw new Error("owned constructor failure"); return remote.client; },
+    fingerprint: () => input.fingerprint ?? ACTIVATION_CONFIG, client: () => { if (fault.constructor) throw new Error("owned constructor failure"); return remote.client; },
     runtime: runtime.transitions, ready, requestTimeoutMs: 1000, maintenanceTimeoutMs: 2000 });
   const owner = createMemoryOperationService({ db, live: () => null, setup: fakeSetup(), transition: service,
     bootId: "healthy-fixture", now, logger, onChanged: () => undefined });

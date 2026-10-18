@@ -9,6 +9,7 @@ import type { Database } from "../db/sqlite.ts";
 import type { MemoryEngine } from "./memory-engine.ts";
 import type { MemorySubsystem } from "./bootstrap.ts";
 import { readMemoryAuthoritySelection, type MemoryAuthoritySelection } from "./legacy-migration/legacy-activation-repo.ts";
+import { activeTemplateHold } from "./hindsight/template-lifecycle/template-execution-reads.ts";
 
 export type BindingRecoveryOutcome = "healthy" | "published";
 export interface SelectedMemoryRuntime {
@@ -83,9 +84,11 @@ export function selectMemoryRuntime(input: SelectMemoryRuntimeInput): SelectedMe
     recoverHindsight: (epochId) => {
       alive(state);
       committedHindsightEpoch(readMemoryAuthoritySelection(input.db), epochId);
+      if (activeTemplateHold(input.db, epochId)) throw new Error("MEMORY_TEMPLATE_HOLD");
       if (state.current && state.provider === "hindsight" && state.epochId === epochId && (input.hindsightLive?.() ?? true)) return "healthy";
       state.current = undefined; state.provider = "hindsight"; state.epochId = epochId;
       input.onLocalRetired?.();
+      input.onHindsightRetired?.();
       state.current = requireHindsight(input)(epochId);
       return "published";
     },

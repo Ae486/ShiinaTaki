@@ -16,6 +16,7 @@ import { classifyTransitionSources } from "./memory-transition-source-dispositio
 import { readTransitionQueue } from "./memory-transition-queue-repo.ts";
 import type { Database } from "./sqlite.ts";
 import { withTransitionEvidenceContext, type TransitionEvidenceContext } from "../memory/transitions/transition-evidence-context.ts";
+import { assertTransitionTemplatePublication } from "../memory/transitions/transition-template-state.ts";
 
 export function readTransitionPublicationBoundary(db: Database, input: TransitionCaptureInput & { candidateId: string }, context?: TransitionEvidenceContext) {
   context?.assertIndependent();
@@ -33,6 +34,8 @@ function readPublicationBoundary(db: Database, input: TransitionCaptureInput & {
   if (candidate.transitionId !== intent.transitionId || candidate.predecessorEpochId !== selection.epochId) invalid();
   if (candidate.localCaptureId) assertTransitionLocalCurrent(db, readTransitionLocalCapture(db, candidate.localCaptureId));
   requireTransitionConfiguration(db, intent.request.expected, candidate);
+  assertTransitionTemplatePublication(db, { identity: intent.request.expected,
+    evidence: candidate.evidenceIds.map((id) => readTransitionNativeEvidence(db, id, verification)) });
   const custody = readTransitionCustody(db, candidate.predecessorEpochId);
   const sourceDispositions = classifyTransitionSources(db, candidate);
   const queue = readTransitionQueue(db, intent.transitionId).map(({ intentId, replayId, sequence, commandHash }) => ({ intentId, replayId, sequence, commandHash }));

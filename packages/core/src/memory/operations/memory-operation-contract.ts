@@ -19,6 +19,7 @@ import type { HindsightLifecycleService } from "../hindsight-lifecycle/hindsight
 import type { HindsightReplicaScheduler } from "../hindsight/hindsight-replica-scheduler.ts";
 import type { HindsightConnectionDrift } from "../hindsight/hindsight-runtime-connection.ts";
 import type { HindsightSetupService } from "../hindsight/hindsight-setup-service.ts";
+import type { HindsightTemplateLifecycleService } from "../hindsight/template-lifecycle/template-lifecycle-service.ts";
 import type { LocalOnboardingService } from "../local-onboarding/local-onboarding-service.ts";
 import type { MemoryTransitionDriver, MemoryTransitionOperationStorage } from "./memory-operation-transition-storage.ts";
 import type { TransitionEvidenceContext } from "../transitions/transition-evidence-context.ts";
@@ -51,6 +52,7 @@ export interface MemoryOperationContext {
   lifecycle?: HindsightLifecycleService;
   /** Absent when Core composes without a Hindsight backup producer; the backup kinds then refuse at admission. */
   backup?: HindsightBackupService;
+  templates?: HindsightTemplateLifecycleService;
   transition?: MemoryTransitionDriver;
   transitionStorage?: MemoryTransitionOperationStorage;
   /** Fresh independent scope for one synchronous admission transaction; absent from execution and observation. */
@@ -64,7 +66,7 @@ export interface MemoryOperationContext {
 }
 
 /** Setup, Local onboarding, Hindsight activation, lifecycle and backup are mutually single-flight (grill G6); the open row wins and is named. */
-export const EXCLUSIVE_MEMORY_FAMILIES = ["setup", "local-onboarding", "hindsight-activation", "hindsight-lifecycle", "hindsight-backup", "memory-transition"] as const;
+export const EXCLUSIVE_MEMORY_FAMILIES = ["setup", "local-onboarding", "hindsight-activation", "hindsight-lifecycle", "hindsight-backup", "memory-transition", "hindsight-template"] as const;
 export function refuseWhileExclusiveFamilyBusy(ctx: Pick<MemoryOperationContext, "activeInFamily">): void {
   for (const family of EXCLUSIVE_MEMORY_FAMILIES) {
     const active = ctx.activeInFamily(family);

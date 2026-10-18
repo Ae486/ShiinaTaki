@@ -23,10 +23,17 @@ export type HindsightProvisionOutcome = { readiness: "ready" } | { readiness: "s
 interface Prepared { live: HindsightReadyLive; runtime: MemoryOperationsRuntime; facts: HindsightBankFacts; target: HindsightBankSetupTarget }
 
 export async function provisionHindsightBank(deps: HindsightLifecycleDeps, input: {
-  ref: MemoryBankProducerRef; call: HindsightLifecycleCall<HindsightBankPhase>;
+  ref: MemoryBankProducerRef; operationId?: string; call: HindsightLifecycleCall<HindsightBankPhase>;
 }): Promise<HindsightProvisionOutcome> {
   const { ref, call } = input;
   call.signal.throwIfAborted();
+  if (ref.templateProvision) {
+    if (!input.operationId || !deps.templates) throw new Error("MEMORY_TEMPLATE_UNSUPPORTED");
+    call.checkpoint("applying");
+    await deps.templates.provision({ operationId: input.operationId, ref, signal: call.signal });
+    call.signal.throwIfAborted();
+    return { readiness: "ready" };
+  }
   const { live, runtime, facts, target } = prepare(deps, ref);
   const client = deps.client(live.projection);
   if (facts.row === null) {

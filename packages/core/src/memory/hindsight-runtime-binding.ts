@@ -14,6 +14,7 @@ import type { Logger } from "../logging/logger.ts";
 import type { PrimaryConversationCommit } from "./canonical-ingestion-source.ts";
 import type { createHindsightMemorySubsystem } from "./hindsight/hindsight-memory-subsystem.ts";
 import { readMemoryAuthoritySelection, type MemoryAuthoritySelection } from "./legacy-migration/legacy-activation-repo.ts";
+import { activeTemplateHold } from "./hindsight/template-lifecycle/template-execution-reads.ts";
 
 export type HindsightSubsystem = ReturnType<typeof createHindsightMemorySubsystem>;
 export type HindsightBindingState =
@@ -154,6 +155,7 @@ function retirementQueue(logger: Logger) {
 export function hindsightRuntimeAvailability(snapshot: HindsightBindingSnapshot): HindsightRuntimeAvailability {
   if (snapshot.selection !== "hindsight") return { available: true, unavailableReason: null };
   if (snapshot.lifetime === "stopped") return { available: false, unavailableReason: "stopped" };
+  if (snapshot.binding.kind === "unavailable" && snapshot.binding.code === "MEMORY_TEMPLATE_HOLD") return { available: false, unavailableReason: "template_hold" };
   if (snapshot.binding.kind !== "published") return { available: false, unavailableReason: "not_installed" };
   if (snapshot.binding.epochId !== snapshot.selectedEpochId) return { available: false, unavailableReason: "authority_mismatch" };
   return { available: true, unavailableReason: null };
@@ -185,8 +187,10 @@ function install(draft: HindsightSubsystem): void {
 
 function snapshotOf(db: Database, input: { binding: HindsightBindingState; stopped: boolean; flushing: boolean }, verification?: TransitionEvidenceContext): HindsightBindingSnapshot {
   const selection = readMemoryAuthoritySelection(db, verification);
-  return { selection: selection.mode, selectedEpochId: selection.epochId, binding: input.binding,
-    lifetime: input.stopped ? "stopped" : "running", flush: input.flushing ? "available" : "failing" };
+  const held = selection.mode === "hindsight" && selection.epochId ? activeTemplateHold(db, selection.epochId) : null;
+  return { selection: selection.mode, selectedEpochId: selection.epochId,
+    binding: held ? { kind: "unavailable", epochId: held.epochId, code: "MEMORY_TEMPLATE_HOLD" } : input.binding,
+    lifetime: input.stopped ? "stopped" : "running", flush: input.flushing && !held ? "available" : "failing" };
 }
 
 /** The replaced subsystem is already unpublished; a failing stop is logged, never allowed to undo the swap. */

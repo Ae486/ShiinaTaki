@@ -41,7 +41,7 @@ export function commitTransitionStage(stage: TransitionStageFixture) {
   recordTransitionProof(stage.db, { ...stage.input, proof });
   stage.input.lease = updateTransitionAttempt(stage.db, { ...stage.input,
     lease: readTransitionAttempt(stage.db, stage.intent.transitionId)!, patch: { phase: "proven" } });
-  const receipt = publishMemoryTransition(stage.db, { ...stage.input, candidateId: stage.candidate.candidateId });
+  const receipt = publishMemoryTransition(stage.db, { ...stage.input, candidateId: stage.candidate.candidateId, currentTime: () => W3_AT });
   stage.input.lease = readTransitionAttempt(stage.db, stage.intent.transitionId)!;
   return receipt;
 }

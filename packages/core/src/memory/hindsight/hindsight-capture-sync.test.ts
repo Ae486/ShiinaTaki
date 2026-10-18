@@ -117,6 +117,7 @@ describe("Run-admission Hindsight sync resilience", () => {
     expect(f.replica.checkpoint(bank.scope.bankId)).toEqual(before);
   });
 
+  // Fake admission time still includes real SQLite/hash work for all eight binding cycles.
   it("bounds admission by its budget with many pending units; binding finishes in the background exactly once (D2)", async () => {
     vi.useFakeTimers(); vi.setSystemTime(APPLICATION_TEST_AT);
     const { f, subsystem, bank } = await primed(); const ids = remoteUnits(bank, 8);
@@ -137,7 +138,7 @@ describe("Run-admission Hindsight sync resilience", () => {
     await vi.runAllTimersAsync(); await subsystem.state.service.settle();
     expect(receipts(bank, "completed")).toBe(ids.length); expect(receipts(bank, "refused")).toBe(0);
     for (const id of ids) expect(bound(f, bank, id)).toBe(true);
-  });
+  }, 15_000);
 
   it.each([
     { request: 60_000, ack: undefined, budget: 7500 },

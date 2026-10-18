@@ -54,11 +54,11 @@
 - canonical-observed-write.ts — trusted image-description writes via the Local provider with observed provenance and automatic visibility limits
 - canonical-memory-view.ts — revision-bearing opaque references and canonical row projection for reused T5 policy/report code
 - canonical-memory-assembly.ts — admission-frozen canonical prompt data, complete pinned relationships, deliberate profile promotion, intention selection and observed fences
-- runtime-selector.ts — marker/provider/epoch routing with symmetric retirement, unavailable boot and fresh same-epoch repair
+- runtime-selector.ts — marker/provider/epoch routing with symmetric retirement, persistent template-hold boot refusal and fresh same-epoch repair
 - local-runtime-binding.ts — draft/install/publish/start, detached metadata, full authority snapshots accepting a same-boundary independent context, permanent retirement and failed/replaced draft settlement
-- hindsight-runtime-binding.ts — draft publication, detached replacement-aware metadata, full snapshots with optional same-boundary independent context, epoch retirement, all-draft shutdown and marker-routed primary witnesses
-- hindsight-unbound-run.ts — hindsightUnboundReason() (disabled/unconfigured connection -> connection_disabled, template conflict or a connection unavailable at construction but ready now -> config_changed, else null) and the composition capture that admits the memory-unavailable Run for that cause (reported to onUnavailable) or refuses MEMORY_RUNTIME_UNAVAILABLE
-- runtime-composition.ts — one Utility Slot/Compaction owner, selected binding/custody, detached publication/presence queries plus context-threaded independent full snapshots, complete transitions seam and joined shutdown
+- hindsight-runtime-binding.ts — draft publication, exact unavailable/template-hold snapshots, full retirement/quarantine lifetime and marker-routed primary witnesses
+- hindsight-unbound-run.ts — truthful memory-unavailable captures for connection/configuration/template holds while retaining the selected authority and primary-source path
+- runtime-composition.ts — one Utility/Compaction owner, selected binding/custody, full transition and guarded template retirement/synchronization/replacement seams, plus joined shutdown
 - authority-aware-legacy-surfaces.ts — mutable authority wrappers that retire legacy auto-memory, tidy, and direct writes after canonical activation
 - memory-coordinator.ts — provider-neutral authority/capability verification and immutable caller provenance across queued foreground writes
 - memory-capability-snapshot.ts — detached immutable capabilities and one canonical Run/tool/coordinator digest; keeps dynamic vector health separate from stable operation identity

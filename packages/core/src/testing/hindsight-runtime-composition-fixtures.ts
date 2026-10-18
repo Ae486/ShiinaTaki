@@ -89,7 +89,9 @@ function seedReplica(repo: ReturnType<typeof createHindsightApplicationReplicaRe
   finally { repo.leases.release(lease); }
 }
 function seedHindsightAuthority(db: Database, banks: CuratorTestBank[]) {
-  const at = APPLICATION_TEST_AT; const lineage = APPLICATION_TEST_SCOPE.namespace.provider_lineage; const digest = "a".repeat(64); const config = "b".repeat(64);
+  const at = APPLICATION_TEST_AT; const lineage = banks[0]?.scope.namespace.provider_lineage ?? APPLICATION_TEST_SCOPE.namespace.provider_lineage;
+  if (banks.some((bank) => bank.scope.namespace.provider_lineage !== lineage)) throw new Error("fixture requires one actual Native lineage");
+  const digest = "a".repeat(64); const config = "b".repeat(64);
   db.prepare(`INSERT INTO canonical_memory_authority_epochs(epoch_id,provider_id,provider_lineage_id,status,started_at,ended_at,reason)
     VALUES ('fixture-local','local','fixture-local-lineage','closed',:at,:at,'initial-local'),('epoch','hindsight',:lineage,'active',:at,NULL,'planned-switch')`).run({ at, lineage });
   db.prepare("INSERT INTO canonical_memory_authority_state(singleton,active_epoch_id,updated_at) VALUES (1,'epoch',:at)").run({ at });
@@ -110,11 +112,12 @@ export function hindsightFixtureSecrets() {
   const state = { value: "fixture-connection-key" as string | null, version: 1 };
   const provenance = () => ({ source: "catalog" as const, keyVersion: state.version, updatedAt: APPLICATION_TEST_AT });
   const unsupported = (): never => { throw new Error("unused fixture secret method"); };
-  const catalog: SecretCatalogService = { health: () => "ok", resolve: () => state.value,
+  const catalog: SecretCatalogService = { health: () => "ok", resolve: () => state.value, revision: () => state.version,
     presence: (secretRef) => ({ secretRef, present: state.value !== null, provenance: state.value ? provenance() : null, health: "ok" }),
     set: (_secretRef, value) => { state.value = value; state.version++; return { present: true, provenance: provenance() }; },
     clear: () => { state.value = null; state.version++; return { present: false }; },
-    list: () => ({ health: "ok", entries: [] }), verifyEntries: unsupported, rotateToKey: unsupported, backup: unsupported, restore: unsupported };
+    list: () => ({ health: "ok", entries: [] }), verifyEntries: unsupported, rotateToKey: unsupported, backup: unsupported, restore: unsupported,
+    captureCustodySnapshot: unsupported, validateCustodySnapshot: unsupported };
   return { catalog, state };
 }
 

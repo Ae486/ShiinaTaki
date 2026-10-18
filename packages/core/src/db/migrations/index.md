@@ -59,3 +59,5 @@
 - 055-memory-transition-drivers.ts — immutable healthy preview, all-Bank driver, native command/dispatch/observation and factual non-dispatch/failure history
 - 056-memory-transition-verification-dispatch.ts — additive immutable new-verification dispatch without fabricating missing055 history
 - 057-memory-transition-emergency.ts — additive immutable emergency capture, incident, surviving evidence, quarantine and foreign branch history; atomic admission trigger replacement.
+- 058-hindsight-template-overlays.ts — immutable exact-incarnation overlay enrollment, before-images, user/catalog/history and CAS applied/default selection; no legacy ownership backfill or second operation journal.
+- 059-hindsight-template-execution.ts — original template plans/admissions, executor CAS, durable holds/receipts/publications, lost-create reservations and monotonic configuration revisions; no legacy ownership backfill.

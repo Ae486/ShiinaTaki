@@ -15,6 +15,7 @@ import type { Database } from "../../db/sqlite.ts";
 import { emergencyRowHash as rowHash } from "../../db/memory-transition-row-hash.ts";
 import { transitionLocalHash } from "../transitions/transition-local-encoding.ts";
 import { captureSurvivingBankEvidence } from "../../db/memory-transition-surviving-capture.ts";
+import { readTemplateEmergencyEffects } from "../../db/hindsight-template-emergency-evidence.ts";
 
 export function readEmergencySnapshot(db: Database, capture: MemoryEmergencyCapture, backup: HindsightBackupManifest | null): MemoryEmergencySnapshot {
   const saved = readEmergencyCapture(db, capture.transitionId);
@@ -34,7 +35,8 @@ export function readEmergencySnapshot(db: Database, capture: MemoryEmergencyCapt
       const rows = db.prepare(`SELECT * FROM ${quoted}`).all();
       return { table, count: rows.length, hash: transitionLocalHash(rows.map(rowHash).sort()) };
     });
-  const body = { capture, banks, tables, unknownEffects: unknownEffects(db, capture.predecessorEpochId) };
+  const body = { capture, banks, tables, unknownEffects: [...unknownEffects(db, capture.predecessorEpochId),
+    ...readTemplateEmergencyEffects(db, capture.predecessorEpochId)] };
   return MemoryEmergencySnapshotSchema.parse({ ...body, factsHash: transitionLocalHash(body) });
 }
 

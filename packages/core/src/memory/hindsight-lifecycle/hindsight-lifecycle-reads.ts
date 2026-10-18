@@ -18,11 +18,16 @@ import type { SecretCatalogService } from "../../secrets/secret-catalog-service.
 import { hindsightBankBindings } from "../hindsight/hindsight-bank-identity.ts";
 import { readHindsightLiveProjection, type HindsightLiveProjection } from "../hindsight/hindsight-runtime-connection.ts";
 import type { MemoryOperationsRuntime } from "../operations/memory-operation-contract.ts";
+import { readTemplateDefaults } from "../hindsight/template-lifecycle/template-default-store.ts";
+import { hasTemplateExecutionStorage } from "../hindsight/template-lifecycle/template-execution-reads.ts";
+import { createCanonicalMemoryAuthorityRepo } from "../../db/canonical-memory-authority-repo.ts";
+import { readRuntimeTemplateSelection } from "../hindsight/template-lifecycle/template-runtime-selection.ts";
 
 export interface HindsightBankFacts {
   nativeBankId: string;
-  /** The verified Global row's template revision: the only revision a new Character Bank may be provisioned with. */
+  /** The admitted Character scope default, with the legacy verified Global revision as the pre-managed fallback. */
   globalRevision: string | null;
+  templateDefaultsRevision?: number;
   row: HindsightBankSetupProjection | null;
   bound: boolean;
 }
@@ -35,7 +40,11 @@ export function readHindsightBankFacts(db: Database, input: { epochId: string; c
   const [global, character] = hindsightBankBindings(input.characterId);
   const repo = createHindsightBankSetupRepo(db);
   const globalRow = repo.get(global.canonicalIdentity);
-  return { nativeBankId: character.externalBankId, globalRevision: globalRow?.status === "verified" ? globalRow.templateRevision : null,
+  const epoch = createCanonicalMemoryAuthorityRepo(db).authorityEpoch(input.epochId);
+  const defaults = epoch.providerId === "hindsight" && hasTemplateExecutionStorage(db) ? readTemplateDefaults(db, epoch.providerLineageId) : null;
+  return { nativeBankId: character.externalBankId,
+    globalRevision: defaults?.characterTemplateRevision ?? (globalRow?.status === "verified" ? globalRow.templateRevision : null),
+    ...(defaults ? { templateDefaultsRevision: defaults.revision } : {}),
     row: repo.get(character.canonicalIdentity), bound: hindsightReplicaBound(db, { epochId: input.epochId, bankId: character.externalBankId }) };
 }
 
@@ -68,7 +77,9 @@ export function hindsightRevalidateBlocker(db: Database, input: {
 }): HindsightRevalidateBlocker | null {
   const global = createHindsightBankSetupRepo(db).get("global");
   if (global?.status !== "verified") return "HINDSIGHT_STATE_CONFLICT";
-  if (global.templateRevision !== input.live.projection.desiredTemplateRevision) return "HINDSIGHT_TEMPLATE_CONFLICT";
+  const checkpoint = readApplicationCheckpoint(db, global.externalBankId);
+  const managed = checkpoint ? readRuntimeTemplateSelection(db, { bankId: global.externalBankId, namespace: checkpoint.namespace }) : null;
+  if (!managed && global.templateRevision !== input.live.projection.desiredTemplateRevision) return "HINDSIGHT_TEMPLATE_CONFLICT";
   const reviewed = createHindsightConnectionRepo(db).reviewed();
   const mode = reviewed.deploymentMode
     ?? (input.runtime !== null && input.runtime.configFingerprint === reviewed.configFingerprint ? input.runtime.deploymentMode : null);

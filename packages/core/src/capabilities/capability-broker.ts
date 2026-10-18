@@ -29,6 +29,9 @@ import {
 } from "./capability-broker-state.ts";
 import { responseOutcome, terminalFailure } from "./capability-response.ts";
 import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
+import type { CapabilityRequestObservers } from "./capability-observers.ts";
+import type { InjectionCheckpointV1, InjectionCheckpointResult } from "@taki/shared/hindsight-deployment";
+import { authorizeHindsightInjection } from "./hindsight-injection-checkpoint.ts";
 
 export type CapabilityFailureCode =
   | "DENIED"
@@ -45,6 +48,7 @@ export type CapabilityOutcome =
   | { ok: false; code: CapabilityFailureCode; message: string; state?: "cancelled" | "outcome_unknown" };
 
 export interface CapabilityBroker {
+  authorizeHindsightInjection(params: InjectionCheckpointV1, provenance: { hostId: string; connectionGeneration: number }): InjectionCheckpointResult;
   request(target: CapabilityDispatchTarget, input: unknown, identity?: CapabilityRequestIdentity): Promise<CapabilityOutcome>;
   challenge(params: CapabilityChallenge, provenance: { hostId: string; connectionGeneration: number }): CapabilityRespondResult;
   resolve(params: CapabilityRespondParams, provenance: { hostId: string; connectionGeneration: number }): CapabilityRespondResult;
@@ -61,6 +65,7 @@ export interface CapabilityRequestIdentity {
   effectId?: string;
   operationId?: string;
   approvalGeneration?: number;
+  observers?: CapabilityRequestObservers;
 }
 
 const DEFAULT_TIMEOUT_MS = 90_000;
@@ -87,6 +92,7 @@ export function createCapabilityBroker(deps: {
   deps.approval.onPolicyInvalidated((generation) => retireChallengesForPolicy(state, generation));
 
   return {
+    authorizeHindsightInjection: (params, provenance) => authorizeHindsightInjection(state, params, provenance),
     request: (target, input, identity = {}) => dispatchRequest({ state, target, input, identity, timeoutMs, log }),
     challenge: (params, provenance) => acceptCapabilityChallenge(state, params, provenance),
     resolve: (params, provenance) => resolveResponse(state, params, provenance),
@@ -112,6 +118,10 @@ function dispatchRequest(args: {
   log: Logger;
 }): Promise<CapabilityOutcome> {
   const { state, target, input, identity, timeoutMs } = args;
+  if (target.descriptor.capabilityId === "hindsight-deployment"
+    && (!state.effects || !identity.runId || !identity.coreAttemptId || !target.ownerCurrent)) {
+    return Promise.resolve({ ok: false, code: "DENIED", message: "Deployment requires current Run and Effect authority" });
+  }
   const requestId = randomUUID();
   const control = makeControl({ target, input, identity, dispatchedMs: state.now(), timeoutMs });
   return new Promise<CapabilityOutcome>((resolve) => {
@@ -123,9 +133,19 @@ function dispatchRequest(args: {
       cancellation: target.descriptor.cancellation,
       finish: resolve,
       timer: setTimeout(() => expire(state, requestId), timeoutMs),
+      observers: identity.observers,
     };
     state.pending.set(requestId, entry);
-    target.notify(CAPABILITY_METHODS.request, { requestId, control, input } satisfies CapabilityRequest);
+    try {
+      if (!target.isCurrent() || target.operator?.signal?.aborted) throw new Error("stale Host dispatch");
+      identity.observers?.onIssued?.({ requestId, control: structuredClone(control) });
+      target.notify(CAPABILITY_METHODS.request, { requestId, control, input } satisfies CapabilityRequest);
+    } catch {
+      settlePending(state, requestId, {
+        outcome: { ok: false, code: "CANCELLED", message: "Host dispatch could not be recorded or delivered" },
+        terminalReason: "late",
+      });
+    }
     args.log.info({ requestId, attemptId: control.attemptId, capability: control.capabilityId }, "capability requested");
   });
 }
@@ -139,7 +159,16 @@ function resolveResponse(
   if (pending) {
     const failure = terminalFailure({ expected: pending.control, expectedAuthorization: pending.authorization, params, provenance });
     if (failure) return failure;
-    settlePending(state, params.requestId, { outcome: responseOutcome(params), terminalReason: "duplicate" });
+    // C2 never uses the legacy direct-success lane: a matching response alone
+    // cannot skip Host classification and the durable intent/execute exchange.
+    if (params.state === "completed" && pending.control.capabilityId === "hindsight-deployment"
+      && (!pending.targetDispatched || pending.effect?.state !== "intent_committed")) {
+      return { accepted: false, reason: "stale_generation" };
+    }
+    settlePending(state, params.requestId, {
+      outcome: responseOutcome(params), terminalReason: "duplicate",
+      acceptance: { provenance, authorization: params.authorization },
+    });
     return { accepted: true };
   }
   const terminal = state.terminal.get(params.requestId);

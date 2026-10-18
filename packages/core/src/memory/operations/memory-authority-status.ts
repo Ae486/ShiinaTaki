@@ -1,13 +1,7 @@
 /**
- * INPUT:  the authority selection marker, the live Hindsight runtime accessor and connection config, the pure Local and
- *         Hindsight binding snapshots, the B3 setup service, the operation owner and the backup producer's inventory
- * OUTPUT: readMemoryAuthorityStatus() — one strict composite MemoryAuthorityStatus with the `hindsight` lifecycle section under
- *         Hindsight authority (open bank.provision Characters, exclusive-family business and the lifecycle revalidate blocker
- *         feed its actions; the backup block carries the last verified pair, its age, the per-Bank missing interval, the newest
- *         sealed backup and the staged route-b captures); an
- *         unavailable runtime or an unreadable live connection never fails the read
- * POS:    core/memory/operations — read-only projection, never probes the network; a changed/disabled connection is its own
- *         reason, authority_mismatch only for a real epoch/lineage mismatch; unknown stays unknown (derivedFreshness "unknown")
+ * INPUT:  authority/binding snapshots, connection, setup/lifecycle owners, operation journal and backup inventory
+ * OUTPUT: strict composite status with runtime/hold reasons, lifecycle actions, backup evidence and source intervals
+ * POS:    read-only Core projection — no network probes; unavailable connections and unknown freshness stay explicit
  */
 import {
   MemoryAuthorityStatusSchema, type HindsightBackupStatusSection, type MemoryAuthorityStatus, type MemoryOperation, type MemoryRuntimeUnavailableReason,
@@ -28,6 +22,7 @@ import { readHindsightLifecycleStatus } from "./memory-hindsight-lifecycle-statu
 import { EXCLUSIVE_MEMORY_FAMILIES, type MemoryOperationsRuntime } from "./memory-operation-contract.ts";
 import { MEMORY_OPERATION_KINDS, memoryOperationHandler } from "./memory-operation-kinds.ts";
 import type { MemoryOperationService } from "./memory-operation-service.ts";
+import { activeTemplateHold } from "../hindsight/template-lifecycle/template-execution-reads.ts";
 
 export interface MemoryAuthorityStatusInput {
   db: Database;
@@ -70,6 +65,8 @@ export function readMemoryAuthorityStatus(input: MemoryAuthorityStatusInput): Me
   // A runtime a setting keeps unbound reports that setting (the same rule that admits its memory-unavailable Runs).
   const unbound = binding ? hindsightUnboundReason(binding, live) : null;
   if (unbound) unavailableReason = unbound;
+  const held = hindsight && selection.epochId ? activeTemplateHold(input.db, selection.epochId) : null;
+  if (held) unavailableReason = "template_hold";
   const active = input.operations.list({ includeTerminal: false, limit: 50 });
   const observedAt = (input.now ?? (() => new Date().toISOString()))();
   return MemoryAuthorityStatusSchema.parse({
@@ -80,7 +77,7 @@ export function readMemoryAuthorityStatus(input: MemoryAuthorityStatusInput): Me
     operations: { active, recent: input.operations.recent(20) },
     hindsight: hindsight && selection.epochId
       ? readHindsightLifecycleStatus({ db: input.db, epochId: selection.epochId, live: live ?? { state: "unconfigured", fingerprint: null },
-        runtimeDrift: drift, setup, provisioning: provisioning(active), busy: active.some(exclusive), unavailableReason,
+        runtimeDrift: drift, setup, provisioning: provisioning(active), busy: held !== null || active.some(exclusive), unavailableReason,
         revalidateBlocked: revalidateBlocked(input, selection.epochId), backup: backupStatus(input, { epochId: selection.epochId, now: observedAt }) })
       : null,
     derivedFreshness: "unknown",

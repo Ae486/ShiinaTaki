@@ -7,7 +7,6 @@
 import { randomUUID } from "node:crypto";
 import {
   HindsightLlmHealthResultSchema,
-  HindsightManagedDeploymentReceiptSchema,
   HindsightSetupSnapshotSchema,
   type HindsightConnectionProjection,
   type HindsightDeploymentMode,
@@ -125,7 +124,7 @@ async function setup(input: {
   const current = requireRevision(read(deps), params.expectedRevision);
   requireIdle(current);
   const configured = requireConnection(deps.config());
-  const connection = managedConnection(configured, params, runtime.now());
+  const connection = managedConnection(configured, params);
   const fingerprint = await requireCurrentCompatibility(deps, current, connection);
   const targets = setupTargets(connection.desiredTemplateRevision, params.characterId);
   const client = deps.client(connection);
@@ -213,19 +212,14 @@ async function requireCurrentCompatibility(
 function managedConnection(
   connection: HindsightConnectionProjection,
   params: HindsightSetupParams,
-  observedAt: string,
 ): HindsightConnectionProjection {
   if (connection.deploymentMode === "existing-instance") {
     if (params.managedReceipt) throw hindsightError("HINDSIGHT_ENDPOINT_REJECTED");
     return connection;
   }
-  if (!params.managedReceipt) throw hindsightError("HINDSIGHT_ENDPOINT_REJECTED");
-  const receipt = HindsightManagedDeploymentReceiptSchema.parse(params.managedReceipt);
-  const age = Date.parse(observedAt) - Date.parse(receipt.observedAt);
-  if (receipt.endpoint !== connection.endpoint || age < 0 || age > connection.setupTimeoutMs || /(^|[-_.])latest($|[-_.])/i.test(receipt.immutableHindsightIdentity)) {
-    throw hindsightError("HINDSIGHT_ENDPOINT_REJECTED");
-  }
-  return connection;
+  // Historical owner snapshots remain readable. New managed setup needs the C2 accepted deployment ledger;
+  // neither a caller receipt nor a C1 credential preparation establishes an installed Native resource.
+  throw hindsightError("HINDSIGHT_ENDPOINT_REJECTED");
 }
 
 function requireConnection(config: HindsightResolvedConfig): HindsightConnectionProjection {

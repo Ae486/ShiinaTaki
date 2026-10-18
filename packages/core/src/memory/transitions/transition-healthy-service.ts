@@ -22,6 +22,7 @@ import type { Logger } from "../../logging/logger.ts";
 import { hasEmergencyStorage, transitionIsQuarantined } from "../../db/memory-transition-emergency-quarantine.ts";
 import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
 import { readTransitionOverview } from "./transition-operator-overview.ts";
+import { hindsightTemplateBackupAvailable } from "../hindsight/hindsight-template-backup-capability.ts";
 
 type Dependencies = Omit<HealthyTransitionExecutionDependencies, "signal"> & { actorId: string; logger: Logger;
   /** Observation only; preview, admission and execution keep the independent full ready boundary. */
@@ -38,7 +39,8 @@ export function createHealthyTransitionService(deps: Dependencies) {
     if (request.recovery) validateRecovery(deps, request);
     else {
       const current = readHealthyTransitionIdentity(deps.db, { kind: request.kind, fingerprint: deps.fingerprint(),
-        providerLineage: request.expected.sourceProvider === "hindsight" ? request.expected.sourceLineageId : request.expected.targetLineageId }, verification);
+        providerLineage: request.expected.sourceProvider === "hindsight" ? request.expected.sourceLineageId : request.expected.targetLineageId,
+        templateBackup: request.expected.templates !== undefined }, verification);
       if (transitionLocalHash(current) !== transitionLocalHash(request.expected)
         || !deps.ready(current.predecessorEpochId, current.sourceProvider, verification)) throw new Error("MEMORY_TRANSITION_STALE");
     }
@@ -71,7 +73,8 @@ export function createHealthyTransitionService(deps: Dependencies) {
       alive(); const capability = requireHindsightTransitionSourceCapability(manifest);
       if (fingerprint !== deps.fingerprint()) throw new Error("MEMORY_TRANSITION_STALE");
       const recovery = request.recoveryTransitionId ? recoveryIdentity(deps, request.recoveryTransitionId, request.kind) : null;
-      const expected = recovery?.expected ?? readHealthyTransitionIdentity(deps.db, { kind: request.kind, fingerprint, providerLineage: capability.providerLineage });
+      const expected = recovery?.expected ?? readHealthyTransitionIdentity(deps.db, { kind: request.kind, fingerprint,
+        providerLineage: capability.providerLineage, templateBackup: hindsightTemplateBackupAvailable(manifest) });
       if ((expected.sourceProvider === "hindsight" ? expected.sourceLineageId : expected.targetLineageId) !== capability.providerLineage) throw new Error("MEMORY_TRANSITION_STALE");
       if (!recovery && !deps.ready(expected.predecessorEpochId, expected.sourceProvider)) unavailable();
       const preview: MemoryHealthyTransitionPreview = { version: 1, previewId: randomUUID(), kind: request.kind, expected,

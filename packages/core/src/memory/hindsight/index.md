@@ -1,4 +1,5 @@
 # core/memory/hindsight/
+- hindsight-deployment-owner.ts — stable durable Run lookup, independent C1 custody, admitted C2 Effects/checkpoint and original-resource observation; final publication consumes actual Run/Attempt settlement.
 - hindsight-transition-source-capability.ts — independent Source-evidence capability admission before new upload/delta routes
 - hindsight-transition-source-client.ts — exact-executor Source prepare/part/seal transport with namespace and capability checks
 - hindsight-application-source-evidence.ts — ordinary complete replica/reader closure for original Source bytes and evidence-only wrappers
@@ -19,6 +20,7 @@
 - hindsight-native-proof.ts — frozen dispatch encoding, portable producer hashes and bounded full-page proof verification
 - hindsight-pending-native-result.ts — tracked replay/progress, safe missing-claim retry and factual receipt publication
 - hindsight-secret-refs.ts — fixed provider-neutral Secret Catalog refs and connection-only trusted resolver marker
+- hindsight-custody-owner.ts — original Catalog/Core/config admission, broker/Host attempt mapping and WeakMap accepted custody handles; post-await revalidation and no raw receipt authority.
 - hindsight-compatibility-service.ts — ordered exact-build health/version/manifest gate, independent cutover support and stable settings fingerprint
 - hindsight-bank-identity.ts — versioned deterministic opaque Global/Character external Bank ids
 - taki-bank-template-v1.ts — fixed secret-free additive template, canonical digest, and Taki-owned read-back verification
@@ -59,14 +61,15 @@
 - hindsight-replica-reconcile.ts — exact import document/fact/revision reconciliation against a staged snapshot
 - hindsight-authority-promotion-service.ts — bounded Local quiescence and single synchronous Hindsight promotion transaction
 - hindsight-setup-errors.ts — sanitized setup error normalization shared by setup stages
-- hindsight-application-binding-context.ts — restriction-preserving Bank/source/memory bodies for exact native binding commands
-- hindsight-application-binding-runner.ts — first policy, source association, exact rebinding and Core Block preservation without model work
+- hindsight-application-binding-context.ts — restriction-preserving Bank/source/memory bodies with exact preloaded Native template evidence as an optional trusted-label input
+- hindsight-application-binding-runner.ts — exact-version label-evidence preload, first policy/source association/rebinding and Core Block preservation without model work
 - hindsight-application-body-transfer.ts — immutable uploads and verified multipart downloads with the containing operation's request budget
 - hindsight-application-bundle-loader.ts — complete verified closures, resumable bounded body reads and genuine native baseline capture
 - hindsight-application-bundle.ts — complete bundle/native closure validation; ordinary snapshot TTL remains separate from retained immutable transition proof
 - hindsight-application-capability.ts — explicit D77/G1 capability admission, independent of native reflect availability
 - hindsight-application-client.ts — bounded application-state methods with exact response namespace and operation checks
 - hindsight-backup-client.ts — opt-in TAKI-HS-013 native backup POST (proof + native-host ZIP digest, never the ZIP) and digest read-back; closed refusals (route absent, backup in progress/exists, artifact missing) returned as values
+- hindsight-template-backup-capability.ts — optional template-backup negotiation over the admitted manifest, retaining lifecycle prerequisites and separate legacy admission.
 - hindsight-application-command-receipt.ts — exact namespace/request/result proof and complete per-command artifact revision validation
 - hindsight-application-command-runner.ts — exact-identity upload/commit recovery, verified historical receipts and explicit pending outcomes
 - hindsight-application-integrity.ts — scoped semantic digests, native witnesses and fully checked typed body values
@@ -116,11 +119,20 @@
 - hindsight-policy-curator-tools.ts — a small proposal-only toolset with immutable local result persistence
 - hindsight-policy-curator.ts — scoped production policy reviews, restart-safe publication and actual applied-effect outcomes
 - hindsight-runtime-bank-service.ts — cancellable Bank queues, independently owned full capture sequences after admission expiry, renewable foreground leases and Pending/parent recovery with shutdown drain
-- hindsight-runtime-connection.ts — one captured authenticated client and guards for connection, epoch and Bank route changes; driftReason() (changed/disabled connection vs integrity failure), routedBanks(), characterRouted(), readHindsightLiveConnection() / readHindsightLiveProjection() and the template-revision refusal at construction
-- hindsight-runtime-state.ts — real provider, source/application/Pending producers and Bank work ownership with permanent retirement guards
+- hindsight-runtime-connection.ts — captured authenticated client, exact connection/epoch/Bank/selection guards, durable template-hold refusal and separately guarded private rollout synchronization
+- hindsight-runtime-state.ts — provider/source/application/Pending ownership with retirement guards; private rollout synchronization excludes Pending replay and early runtime admission
 - hindsight-runtime-view.ts — admitted frozen prompt/T5 rows and explicit capture refusal when a required pin needs native-policy rebinding
 - hindsight-runtime-consumers.ts — whole foreground capture/read lifetime, inherited Bank ownership, held-reference refusal and preserved Effect metadata
 - hindsight-transition-client.ts — authenticated bounded native transition/delta methods; exact claim revision and decision response joins, without implicit retries or authority wiring
 - hindsight-transition-proof.ts — native-compatible command/proof hashes and exact wire identity validation
 - hindsight-transition-capability.ts — independent exact-build transition capability and client inventory admission
 - hindsight-transition-errors.ts — native fence/stale-executor classification before legacy cursor rebuild handling
+
+- hindsight-configuration-client.ts — authenticated 16 KiB optional observation read and fixed refusal envelopes
+- hindsight-configuration-context.ts — read-only connection/config/secret/epoch and pinned Bank identity capture
+- hindsight-configuration-comparison.ts — pure desired-versus-observed field comparison and safe hints
+- hindsight-configuration-service.ts — coalesced Core evidence with nonce, context/session ordering and monotonic expiry
+- template-lifecycle/ — independently versioned overlays, exact previews, durable original-plan rollout/hold, all-Bank publication, scope-default provisioning and binding-only recovery
+- hindsight-template-capability.ts — optional exact lifecycle build/version admission preserving mandatory transition/application/result contracts
+- hindsight-template-client.ts — bounded authenticated lifecycle snapshot/apply/result/refresh/evidence methods with exact target/request validation and no implicit retry
+- hindsight-template-label-evidence.ts — exact current-unit Native provenance validation against the selected group/scope, with neutral fallback before trusted policy input

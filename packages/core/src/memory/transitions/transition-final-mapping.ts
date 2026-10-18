@@ -18,6 +18,8 @@ import { transitionLocalHash } from "./transition-local-encoding.ts";
 import { sameApplicationValue } from "../hindsight/hindsight-application-integrity.ts";
 import { projectTransitionPendingSources } from "./transition-pending-sources.ts";
 import { withTransitionEvidenceContext, type TransitionEvidenceContext } from "./transition-evidence-context.ts";
+import { readTransitionIntent } from "../../db/memory-transition-repo.ts";
+import { verifyTransitionTemplateInventory } from "./transition-template-state.ts";
 
 export function buildTransitionHindsightCandidate(db: Database, input: TransitionCaptureInput & {
   preparationIds: string[]; evidenceIds: string[];
@@ -122,9 +124,11 @@ function readVerifiedCandidate(db: Database, candidateId: string, verification: 
   const records: MemoryTransitionLocalState = { banks: [], sources: [], records: [], derived: [], blocks: [], history: [], historicalReferences: [], sourceAliases: [], sourceSets: [] };
   const mappings: MemoryTransitionObjectMapping[] = [];
   const pendingSources = [];
+  const nativeEvidence: MemoryTransitionNativeEvidence[] = [];
   for (const scope of candidate.scopes) {
     if (!candidate.evidenceIds.includes(scope.evidenceId)) invalid();
     const evidence = readTransitionNativeEvidence(db, scope.evidenceId, verification);
+    nativeEvidence.push(evidence);
     pendingSources.push(...projectTransitionPendingSources(evidence, scope, verification));
     if (evidence.transitionId !== candidate.transitionId || scope.nativeBankId !== evidence.status.bank_id
       || scope.nativeGeneration !== evidence.status.request.bank_generation) invalid();
@@ -149,6 +153,8 @@ function readVerifiedCandidate(db: Database, candidateId: string, verification: 
   }
   if (!sameApplicationValue(mappings, candidate.mappings) || new Set(candidate.scopes.map((scope) => scope.localBankId)).size !== candidate.scopes.length
     || candidate.scopes.length !== candidate.evidenceIds.length || !sameApplicationValue(pendingSources, candidate.pendingSources)) invalid();
+  const intent = readTransitionIntent(db, candidate.transitionId); if (!intent) invalid();
+  verifyTransitionTemplateInventory(intent.request.expected, nativeEvidence);
   requireTransitionLocalClosure(candidate.state); return candidate;
 }
 function findPreparation(db: Database, transitionId: string, bankId: string): MemoryTransitionPreparation {

@@ -1,5 +1,5 @@
 /**
- * INPUT:  complete verified replica evidence, trusted Bank routing and original activation artifacts
+ * INPUT:  verified replica evidence, trusted Bank routing, original artifacts and preloaded first-policy labels
  * OUTPUT: restriction-preserving Bank/source/memory bodies for exact native binding commands
  * POS:    core/memory/hindsight — deterministic policy initialization/rebinding; no model call or speculative source matching
  */
@@ -12,7 +12,7 @@ import {
 import type { HindsightApplicationReplicaRepo } from "../../db/hindsight-application-replica-contract.ts";
 import { assertHindsightApplicationOriginalBinding,
   type HindsightApplicationBootstrapEvidence } from "../../db/hindsight-application-bootstrap-evidence.ts";
-import { resolveHindsightApplicationPolicy } from "./hindsight-application-policy.ts";
+import { resolveHindsightApplicationPolicy, type HindsightTrustedUnitLabel } from "./hindsight-application-policy.ts";
 import { rebindHindsightApplicationPolicyEvidence } from "./hindsight-policy-assessment.ts";
 import { requirePersistedHindsightPolicy, requireHindsightPolicyOwnership,
   type VerifiedHindsightPolicyContext } from "./hindsight-policy-context.ts";
@@ -26,7 +26,10 @@ export interface HindsightApplicationBindingContext extends HindsightApplication
   repo: HindsightApplicationReplicaRepo; evidence: HindsightApplicationEvidenceReader;
   original: HindsightApplicationBootstrapEvidence | undefined;
 }
-interface Work { head: TakiApplicationNativeHead; native: TakiApplicationNativeRecord; prior: TakiApplicationArtifact | null; at: string }
+interface Work {
+  head: TakiApplicationNativeHead; native: TakiApplicationNativeRecord; prior: TakiApplicationArtifact | null;
+  at: string; label?: HindsightTrustedUnitLabel;
+}
 
 export function hindsightApplicationEvidenceReader(repo: HindsightApplicationReplicaRepo, scope: HindsightApplicationScope): HindsightApplicationEvidenceReader {
   return {
@@ -105,7 +108,7 @@ function memoryBody(context: HindsightApplicationBindingContext, work: Work): Ta
   }
   const address = { namespace: context.namespace, bankId: context.bankId, native: work.native.version };
   const resolved = resolveHindsightApplicationPolicy({ context: policyContext, state: { status: "authenticated-absence", ...address },
-    initial: { stamp: { policyVersion: 1, updatedAt: work.at }, evidence: { kind: "provider-derived", observedAt: work.at } } });
+    initial: { stamp: { policyVersion: 1, updatedAt: work.at }, evidence: { kind: "provider-derived", observedAt: work.at }, label: work.label } });
   if (resolved.kind !== "initialize") invalid();
   return TakiApplicationMemoryBodySchema.parse({ ...resolved.body, source_artifacts: sourceArtifacts });
 }

@@ -16,6 +16,7 @@ import { listTimelineCharacterIds } from "../../db/timeline-repo.ts";
 import { hindsightBankBindings } from "../hindsight/hindsight-bank-identity.ts";
 import { hindsightReplicaBound } from "../hindsight-lifecycle/hindsight-lifecycle-reads.ts";
 import type { HindsightConnectionDrift, HindsightLiveConnection } from "../hindsight/hindsight-runtime-connection.ts";
+import { activeTemplateHold } from "../hindsight/template-lifecycle/template-execution-reads.ts";
 
 export interface HindsightLifecycleStatusInput {
   db: Database;
@@ -53,7 +54,7 @@ export function readHindsightLifecycleStatus(input: HindsightLifecycleStatusInpu
 const REVALIDATABLE: readonly (MemoryRuntimeUnavailableReason | null)[] = ["not_installed", "connection_unavailable", "config_changed"];
 
 function actions(input: HindsightLifecycleStatusInput, section: Pick<Section, "connection" | "banks">): Section["actions"] {
-  if (input.busy) return { revalidate: false, provision: [] };
+  if (input.busy || activeTemplateHold(input.db, input.epochId)) return { revalidate: false, provision: [] };
   const revalidate = section.connection.config === "ready" && !input.revalidateBlocked
     && (section.connection.drift !== "none" || REVALIDATABLE.includes(input.unavailableReason));
   const provision = input.unavailableReason !== null ? [] : section.banks.flatMap((bank) =>

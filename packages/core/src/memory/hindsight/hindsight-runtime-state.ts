@@ -34,6 +34,7 @@ import type { HindsightMemoryWriteAdvance } from "./hindsight-memory-write-conte
 import { sameApplicationValue } from "./hindsight-application-integrity.ts";
 import { transitionQueuedProvider } from "../transitions/transition-queued-provider.ts";
 import type { CanonicalLocalWriteFence } from "../canonical-local-write-fence.ts";
+import { readSelectedTemplateLabelGroup } from "./template-lifecycle/template-runtime-selection.ts";
 
 interface Input { db: Database; runtime: HindsightRuntimeConnection; config: MemoryConfig; now?: () => string; workFence?: CanonicalLocalWriteFence }
 export type HindsightRuntimeState = ReturnType<typeof createHindsightRuntimeState>;
@@ -43,10 +44,12 @@ export function createHindsightRuntimeState(input: Input) {
   const { replica, writer, blocks, assertActive, bankScope, nativeReplica, pending, admission } = stores;
   const bind = createHindsightApplicationBindingRunner({ repo: replica, writer, client: runtime.client,
     bootstrap: (scope) => readHindsightApplicationBootstrapEvidence(db, scope),
+    templateLabelGroup: (scope) => runtime.templateExecution ? runtime.templateExecution.labelGroup(scope) : readSelectedTemplateLabelGroup(db, scope),
     blocks: (scope) => readBlocks(blocks, scope.bankScope) });
   const sync = createHindsightApplicationSyncRunner({ client: runtime.client, repo: replica, authority: runtime.authority,
     bankScope, requestTimeoutMs: runtime.connection.requestTimeoutMs, bind, now: input.now,
-    onAdmission: (manifest) => { runtime.assertConnection(); admission.save({ authorityEpochId: runtime.epoch.epochId,
+    onAdmission: (manifest) => { runtime.assertConnection(); if (runtime.templateExecution) return;
+      admission.save({ authorityEpochId: runtime.epoch.epochId,
       configFingerprint: runtime.configFingerprint, manifest, admittedAt: input.now?.() ?? new Date().toISOString() }); } });
   const unsupported = (): never => { throw new Error("HINDSIGHT_APPLICATION_NATIVE_PUBLICATION_REFUSED"); };
   const recovery = createHindsightPendingRecoveryRunner({ client: runtime.client, replica: nativeReplica, pending,

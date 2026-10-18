@@ -12,6 +12,7 @@ import { requireTransitionCommonBaseline } from "../../db/memory-transition-cand
 import { transitionLocalHash } from "./transition-local-encoding.ts";
 import type { Database, SqlRow } from "../../db/sqlite.ts";
 import type { TransitionEvidenceContext } from "./transition-evidence-context.ts";
+import { readTransitionTemplateState, assertTransitionTemplatesCurrent } from "./transition-template-state.ts";
 
 export function transitionConfiguration(db: Database, fingerprint: string | null) {
   const row = db.prepare("SELECT revision,config_fingerprint,phase FROM hindsight_connection_state WHERE singleton=1").get();
@@ -26,6 +27,7 @@ export function assertTransitionConfiguration(db: Database, expected: MemoryTran
   if (actual.configRevision !== expected.configRevision || actual.inventoryRevision !== expected.inventoryRevision
     || actual.configFingerprint !== expected.configFingerprint || actual.inventoryHash !== expected.inventoryHash) stale();
   assertTransitionScopeCoverage(db, expected.predecessorEpochId, expected.banks);
+  assertTransitionTemplatesCurrent(db, expected);
 }
 export function assertTransitionScopeCoverage(db: Database, epochId: string, banks: MemoryTransitionIdentity["banks"]): void {
   const characters = db.prepare(`SELECT character_id FROM timeline_messages UNION
@@ -35,7 +37,7 @@ export function assertTransitionScopeCoverage(db: Database, epochId: string, ban
   if (characters.some((row) => !banks.some((bank) => bank.scope.kind === "character" && bank.scope.characterId === row.character_id))) stale();
 }
 export function readHealthyTransitionIdentity(db: Database, input: { kind: "transition.return-local" | "transition.reenter-hindsight";
-  fingerprint: string | null; providerLineage: string }, verification?: TransitionEvidenceContext): MemoryTransitionIdentity {
+  fingerprint: string | null; providerLineage: string; templateBackup?: boolean }, verification?: TransitionEvidenceContext): MemoryTransitionIdentity {
   const selected = readMemoryAuthoritySelection(db, verification);
   const sourceProvider = input.kind === "transition.return-local" ? "hindsight" : "local";
   if (!selected.epochId || selected.mode !== (sourceProvider === "local" ? "canonical-local" : "hindsight")) unavailable();
@@ -55,6 +57,8 @@ export function readHealthyTransitionIdentity(db: Database, input: { kind: "tran
     inventoryRevision: config.inventoryRevision, inventoryHash: config.inventoryHash, banks,
     baselineReceiptId: common?.receipt.receiptId ?? null, baselineHash: common?.baseline.baselineId ?? null,
     custodyBoundaryHash: transitionLocalHash(readTransitionCustody(db, selected.epochId)) });
+  if (input.templateBackup) result.templates = readTransitionTemplateState(db, result).commitment;
+  assertTransitionTemplatesCurrent(db, result);
   return result;
 }
 export function currentTransitionBaseline(db: Database, epochId: string) {

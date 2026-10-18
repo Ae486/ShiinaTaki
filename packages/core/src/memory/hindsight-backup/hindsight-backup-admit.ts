@@ -7,14 +7,16 @@
  * POS:    core/memory/hindsight-backup — backup.admit producer (route b, PR02 fallback); never contacts native, never pauses
  *         writes: the Core copy was taken under the fence at capture, the ZIP must prove it is not older than that copy
  */
-import type { HindsightBackupManifest, MemoryBackupProducerRef } from "@taki/shared";
+import type { MemoryBackupProducerRef } from "@taki/shared";
 import type { Logger } from "../../logging/logger.ts";
 import { readHindsightBackupArchive } from "./hindsight-backup-archive.ts";
 import {
-  codeOf, errorMessage, failedOutcome, HindsightBackupFailure, outcomeOf, stepAsync, type HindsightBackupOutcome,
+  codeOf, errorMessage, failedOutcome, HindsightBackupFailure, outcomeOf, step, stepAsync, type HindsightBackupOutcome,
 } from "./hindsight-backup-failure.ts";
 import { verifyHindsightBackupPair } from "./hindsight-backup-pair.ts";
 import type { HindsightBackupStagedRecord, HindsightBackupStore } from "./hindsight-backup-store.ts";
+import { readHindsightBackupCopy } from "./hindsight-backup-copy-readback.ts";
+import { createHindsightSealedManifest } from "./hindsight-backup-manifest.ts";
 
 export interface HindsightBackupAdmitInput {
   backupId: string; fileName: string; expectedEpochId: string;
@@ -31,6 +33,8 @@ export async function admitHindsightBackup(deps: AdmitDeps, input: HindsightBack
     // Only a Core copy this host staged can be paired; an unknown id has no Core half to prove anything against.
     if (!staged) return failedOutcome("HINDSIGHT_BACKUP_ARTIFACT_INVALID");
     if (staged.core.authority.epochId !== input.expectedEpochId) return failedOutcome("MEMORY_AUTHORITY_MISMATCH");
+    if (staged.core.version === 2) step(() => readHindsightBackupCopy(deps.store.corePath(input.backupId, "staged"), staged.core, staged.request),
+      (error) => codeOf(error, "HINDSIGHT_BACKUP_ARTIFACT_INVALID"));
     const path = await stepAsync(() => deps.store.claimInbox(input.backupId, input.fileName),
       (error) => codeOf(error, "HINDSIGHT_BACKUP_STORAGE_FAILED"));
     try { return await sealClaimed(deps, { input, staged, path }); }
@@ -49,13 +53,12 @@ async function sealClaimed(deps: AdmitDeps, claimed: { input: HindsightBackupAdm
   const archive = await stepAsync(() => readHindsightBackupArchive(claimed.path), (error) => codeOf(error, "HINDSIGHT_BACKUP_ARTIFACT_INVALID"));
   input.signal?.throwIfAborted();
   // The echoed id binds the ZIP to this staged request; a ZIP made before the request existed cannot carry it.
-  if (archive.backupId !== input.backupId) throw new HindsightBackupFailure("HINDSIGHT_BACKUP_ARTIFACT_INVALID");
+  if (archive.backupId !== input.backupId || archive.version !== staged.request.version) throw new HindsightBackupFailure("HINDSIGHT_BACKUP_ARTIFACT_INVALID");
   const pair = verifyHindsightBackupPair(staged.core, archive.proof);
   if (!pair.ok) throw new HindsightBackupFailure("HINDSIGHT_BACKUP_PAIR_MISMATCH", { reason: pair.reason, bankId: pair.bankId });
   input.checkpoint("sealing");
-  const manifest: HindsightBackupManifest = { ...staged.core, route: "operator-artifact",
-    native: { location: "core-dir", file: "native.zip", nativeManifestVersion: "2", schema: archive.schema, proof: archive.proof },
-    sensitive: true, verifiedAt: deps.now() };
+  const manifest = createHindsightSealedManifest(staged.core, { route: "operator-artifact", native: { location: "core-dir", file: "native.zip" },
+    schema: archive.schema, proof: archive.proof, verifiedAt: deps.now() });
   await stepAsync(() => deps.store.sealStaged(manifest), (error) => errorMessage(error) === "HINDSIGHT_BACKUP_ARTIFACT_INVALID"
     ? "HINDSIGHT_BACKUP_INTERNAL_ERROR" : "HINDSIGHT_BACKUP_STORAGE_FAILED");
   return { ok: true, verifiedAt: manifest.verifiedAt };

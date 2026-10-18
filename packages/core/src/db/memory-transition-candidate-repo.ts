@@ -15,6 +15,7 @@ import { readTransitionReceipt } from "./memory-transition-evidence-repo.ts";
 import { createCanonicalMemoryAuthorityRepo } from "./canonical-memory-authority-repo.ts";
 import type { Database } from "./sqlite.ts";
 import { readFreshTransitionEvidence, type TransitionEvidenceContext } from "../memory/transitions/transition-evidence-context.ts";
+import { verifyTransitionTemplateInventory } from "../memory/transitions/transition-template-state.ts";
 
 export function persistTransitionNativeEvidence(db: Database, input: TransitionCaptureInput & { evidence: MemoryTransitionNativeEvidence }): void {
   verifyTransitionNativeEvidence(input.evidence);
@@ -115,6 +116,7 @@ export function saveTransitionCandidate(db: Database, input: TransitionCaptureIn
     const evidence = candidate.evidenceIds.map((id) => readTransitionNativeEvidence(db, id, input.verification));
     if (new Set(evidence.map((entry) => entry.status.bank_id)).size !== evidence.length
       || evidence.some((entry) => entry.transitionId !== intent.transitionId)) throw new Error("MEMORY_TRANSITION_PROOF_INVALID");
+    verifyTransitionTemplateInventory(intent.request.expected, evidence);
     insertTransitionDocument(db, "candidates", { id: candidateId, transitionId: intent.transitionId, slot: "final", value: candidate });
   });
 }

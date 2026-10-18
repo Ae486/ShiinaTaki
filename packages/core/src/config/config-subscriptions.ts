@@ -14,10 +14,13 @@ export interface ConfigSubscriptions {
   unsubscribe(connection: Connection): void;
   publish(change: ConfigChanged): void;
   count(): number;
+  /** In-process write generation, including changes that restore an earlier value. */
+  revision(): number;
 }
 
 export function createConfigSubscriptions(): ConfigSubscriptions {
   const sinks = new Map<Connection, ConfigSink>();
+  let revision = 0;
 
   return {
     subscribe(connection, sink) {
@@ -27,11 +30,13 @@ export function createConfigSubscriptions(): ConfigSubscriptions {
       sinks.delete(connection);
     },
     publish(change) {
+      revision++;
       // No panel open (invariant 4: a disposable client) → nobody hears it; never an error.
       for (const sink of sinks.values()) sink(change);
     },
     count() {
       return sinks.size;
     },
+    revision: () => revision,
   };
 }

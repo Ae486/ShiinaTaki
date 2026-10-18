@@ -13,6 +13,7 @@ import {
   type RunMemoryReference,
   type RunStatusResult,
   type TriggerRequest,
+  type Run,
   type QueueListParams, type QueueListResult,
 } from "@taki/shared";
 import type { RunAdmissionInput, RunAdmissionResult, RunRepo } from "../db/run-repo.ts";
@@ -42,6 +43,7 @@ export interface RunSnapshotCapture<TAdmission = unknown> {
 }
 
 export interface RunService<TAdmission = unknown> {
+  findByIdempotency(key: string): Run | undefined;
   admit(request: TriggerRequest, admission?: TAdmission): Promise<RunAdmissionResult>;
   start(runId: string, attemptId: string): boolean;
   retry(runId: string, attemptId: string, reason: string): RunStatusResult;
@@ -67,6 +69,7 @@ export function createRunService<TAdmission = unknown>(deps: {
   const contexts = new Map<string, RunExecutionContext>();
   let accepting = true;
   return {
+    findByIdempotency: (key) => deps.repo.findByIdempotency(key),
     async admit(candidate, interactive) {
       if (!accepting) throw new Error("RUN_ADMISSION_CLOSED");
       const request = TriggerRequestSchema.parse(candidate);

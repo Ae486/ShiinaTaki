@@ -1,5 +1,5 @@
 /**
- * INPUT:  paired replica state, immutable original evidence and durable application command execution
+ * INPUT:  paired replica state, immutable originals, selected label evidence and durable application execution
  * OUTPUT: first policy, source association, exact rebinding and Core Block preservation without model work
  * POS:    core/memory/hindsight — deterministic binding pass between complete pulls; model assessment remains an independent curator
  */
@@ -7,7 +7,7 @@ import { createHash } from "node:crypto";
 import {
   hindsightApplicationTaggedJson, MemoryBankScopeSchema, type TakiApplicationArtifact, type TakiApplicationArtifactKey,
   type TakiApplicationNativeHead, type TakiApplicationNativeRecord, type TakiApplicationBlockBody,
-  type TakiApplicationCommand, type TakiApplicationBodySchema,
+  type TakiApplicationCommand, type TakiApplicationBodySchema, type HindsightTemplateLabelGroup, type TakiApplicationNamespace,
 } from "@taki/shared";
 import type { HindsightApplicationReplicaRepo, HindsightApplicationBindingWork } from "../../db/hindsight-application-replica-contract.ts";
 import type { HindsightApplicationBootstrapEvidence, HindsightApplicationBootstrapScope } from "../../db/hindsight-application-bootstrap-evidence.ts";
@@ -17,22 +17,26 @@ import type { HindsightApplicationBindingPass } from "./hindsight-application-sy
 import type { HindsightApplicationWriter } from "./hindsight-application-writer.ts";
 import { prepareHindsightApplicationBody } from "./hindsight-application-body-transfer.ts";
 import { hindsightApplicationArtifactVersion, hindsightApplicationBindingBody, hindsightApplicationEvidenceReader,
-  type HindsightApplicationBindingContext } from "./hindsight-application-binding-context.ts";
+  hindsightApplicationPolicyContext, type HindsightApplicationBindingContext } from "./hindsight-application-binding-context.ts";
 import { projectHindsightApplicationNativeBank, readHindsightApplicationNative } from "./hindsight-application-projection.ts";
 import { proveHindsightAwaitingSource, readHindsightApplicationSourceEvidence } from "./hindsight-application-source-binding.ts";
 import { sameApplicationValue } from "./hindsight-application-integrity.ts";
 import { hindsightError } from "./hindsight-errors.ts";
+import { loadHindsightTemplateUnitLabel } from "./hindsight-template-label-evidence.ts";
+import type { HindsightTrustedUnitLabel } from "./hindsight-application-policy.ts";
 
 interface Dependencies {
   repo: HindsightApplicationReplicaRepo; writer: HindsightApplicationWriter; client: HindsightClient;
   bootstrap(scope: HindsightApplicationBootstrapScope): HindsightApplicationBootstrapEvidence | undefined;
   blocks?: (scope: HindsightApplicationBootstrapScope) => TakiApplicationBlockBody[];
+  templateLabelGroup?: (input: { bankId: string; namespace: TakiApplicationNamespace }) => HindsightTemplateLabelGroup | null;
 }
 interface Context extends HindsightApplicationBindingContext { input: HindsightApplicationBindingPass; deps: Dependencies }
 interface ArtifactWork {
   key: TakiApplicationArtifactKey; prior: TakiApplicationArtifact | null; native: TakiApplicationNativeRecord | null;
   purpose: "bind-native" | "bind-retained-source" | "preserve-block";
-  body(at: string): { schema: TakiApplicationBodySchema; value: unknown };
+  label?: () => Promise<HindsightTrustedUnitLabel | undefined>;
+  body(at: string, label?: HindsightTrustedUnitLabel): { schema: TakiApplicationBodySchema; value: unknown };
 }
 
 export function createHindsightApplicationBindingRunner(deps: Dependencies) {
@@ -92,7 +96,10 @@ async function bindHead(context: Context, head: TakiApplicationNativeHead): Prom
   const latest = context.repo.latestArtifact({ ...context, key });
   if (!sameApplicationValue(latest ?? null, prior)) throw new Error("HINDSIGHT_APPLICATION_BINDING_EVIDENCE_INVALID");
   return commit(context, { key, prior, native, purpose: "bind-native",
-    body: (at) => hindsightApplicationBindingBody(context, { native, head, prior, at }) });
+    label: !prior && kind === "memory" && !context.original?.memories.has(head.object_id)
+      ? () => loadHindsightTemplateUnitLabel({ client: context.deps.client, context: hindsightApplicationPolicyContext(context, native),
+        group: () => context.deps.templateLabelGroup?.(context) ?? null, request: context.input.request }) : undefined,
+    body: (at, label) => hindsightApplicationBindingBody(context, { native, head, prior, at, label }) });
 }
 
 async function bindAwaitingSources(context: Context): Promise<boolean> {
@@ -143,10 +150,16 @@ async function commit(context: Context, work: ArtifactWork): Promise<boolean> {
   const expected = work.prior ? hindsightApplicationArtifactVersion(work.prior) : null;
   const intent = { purpose: work.purpose, artifact: work.key, expected_artifact: expected, expected_native: work.native?.version ?? null };
   const digest = createHash("sha256").update(hindsightApplicationTaggedJson({ domain: "taki-core-binding-intent.v1", intent })).digest("hex");
+  const key = { authorityEpochId: context.authorityEpochId, bankId: context.bankId, requestId: `binding:${digest}` };
+  context.input.request();
+  // A retry reuses the first durable body. Only new provider policy commands need
+  // this read, and it must finish before synchronous preparation enters SQLite.
+  const label = !context.deps.writer.get(key) ? await work.label?.() : undefined;
+  context.input.request();
   const job = context.deps.writer.prepare({ namespace: context.namespace,
-    key: { authorityEpochId: context.authorityEpochId, bankId: context.bankId, requestId: `binding:${digest}` }, intent,
+    key, intent,
     create: (at) => {
-      const value = work.body(at); const body = prepareHindsightApplicationBody({ ...context, ...value });
+      const value = work.body(at, label); const body = prepareHindsightApplicationBody({ ...context, ...value });
       const actor = { kind: work.purpose === "preserve-block" ? "restore" as const : "background" as const, actor_ref: "taki-application-binding" };
       const command: TakiApplicationCommand = work.prior && work.native ? { command: "rebind_artifact", key: work.key,
         expected_artifact: hindsightApplicationArtifactVersion(work.prior), expected_native: work.native.version, body_ref: body.ref, actor }

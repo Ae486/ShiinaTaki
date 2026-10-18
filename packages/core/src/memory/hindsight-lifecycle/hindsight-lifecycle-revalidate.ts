@@ -22,6 +22,7 @@ import { hindsightRuntimeAvailability } from "../hindsight-runtime-binding.ts";
 import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
 import { hindsightLifecycleErrorCode, type HindsightLifecycleCall, type HindsightLifecycleDeps } from "./hindsight-lifecycle-context.ts";
 import { hindsightRevalidateBlocker, readHindsightLifecycleLive, type HindsightReadyLive } from "./hindsight-lifecycle-reads.ts";
+import { verifyManagedTemplateBank } from "../hindsight/template-lifecycle/template-revalidate.ts";
 
 export type HindsightConnectionPhase = MemoryConnectionProducerRef["phase"];
 export type HindsightRevalidateOutcome =
@@ -67,6 +68,7 @@ function prepare(deps: HindsightLifecycleDeps, ref: MemoryConnectionProducerRef)
 async function verifyBanks(deps: HindsightLifecycleDeps, input: { client: HindsightClient; request: () => HindsightCallContext }): Promise<void> {
   for (const row of createHindsightBankSetupRepo(deps.db).list()) {
     if (row.status !== "verified") continue;
+    if (await verifyManagedTemplateBank(deps.db, { ...input, row })) continue;
     verifyTakiBankTemplate(await input.client.exportTemplate(row.externalBankId, input.request()), loadTakiBankTemplate(row.templateRevision, row.scope));
   }
 }

@@ -46,6 +46,7 @@ import { selectMemoryRuntime, type BindingRecoveryOutcome } from "./runtime-sele
 import { createUtilitySlot, type UtilitySlot } from "./utility-slot.ts";
 import { MEMORY_VOICE_RULE } from "./write-convention.ts";
 import { createMemoryTransitionRuntime } from "./transitions/transition-runtime.ts";
+import { createTemplateRuntimeControl } from "./hindsight/template-lifecycle/template-runtime-control.ts";
 
 interface MemoryRuntimeInput {
   db: Database; dataDir: string; promptDir: string; model: LanguageModel; timeline: TimelineRepo; bootId: string;
@@ -76,8 +77,11 @@ export function composeMemoryRuntime(input: MemoryRuntimeInput) {
   const transitions = createMemoryTransitionRuntime({ db: input.db, local, hindsight: hindsightBinding, selected, custody,
     alive, settle: compaction.autoMemory.settle, startHindsight: lifecycle.startHindsight,
     retireBackground: () => { compaction.compact.retirePending(); compaction.autoMemory.retirePending(); utility.retirePending(); } });
+  const bindingSeams = createBindingSeams({ input, scope, custody, lifecycle, settle: compaction.autoMemory.settle });
+  const templates = createTemplateRuntimeControl({ db: input.db, config: loadMemoryConfig(input.env), connection: input.hindsight,
+    binding: hindsightBinding, alive, settle: compaction.autoMemory.settle, replaceBinding: bindingSeams.replaceHindsightBinding });
   return {
-    selected, memory: selected.memory, fence, custody, transitions, dataDir: input.dataDir,
+    selected, memory: selected.memory, fence, custody, transitions, templates, dataDir: input.dataDir,
     snapshot: () => { alive(); return scope.hindsight ? scope.hindsight.snapshot() : diagnosticSnapshot(input.db); },
     ...createBindingQueries(scope),
     // The ONE live accessor the memory operation owner uses (D-S1-1): resolved per call, never a captured subsystem.
@@ -109,7 +113,7 @@ export function composeMemoryRuntime(input: MemoryRuntimeInput) {
     start: () => { alive(); lifecycle.start(); },
     stop: () => lifecycle.stop(transitions.stop),
     memoryRoot: selected.legacy?.memoryRoot ?? join(input.dataDir, "workspace", "memory"),
-    ...createBindingSeams({ input, scope, custody, lifecycle, settle: compaction.autoMemory.settle }),
+    ...bindingSeams,
     migrationRunner: async () => {
       alive();
       const { createLegacyMigrationRunner } = await import("./legacy-migration/legacy-migration-runner.ts");
@@ -202,7 +206,11 @@ function createSelectedSubsystem(input: MemoryRuntimeInput, utility: UtilitySlot
     onLocalRetired: () => local.retire(),
     // The binding already recorded the unavailable state; boot continues with an observable, fail-closed facade.
     onBootUnavailable: () => undefined,
-    hindsightLive: () => hindsight.current() !== undefined,
+    hindsightLive: () => {
+      const current = hindsight.current();
+      if (!current) return false;
+      try { current.state.runtime.assertConnection(); return true; } catch { return false; }
+    },
     localLive: () => local.current() !== undefined,
     onHindsightRetired: () => { void hindsight.retire(); },
   });

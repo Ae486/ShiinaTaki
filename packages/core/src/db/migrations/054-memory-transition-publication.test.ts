@@ -1,11 +1,28 @@
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { basename, dirname, join, resolve } from "node:path";
+import { afterEach, describe, expect, it } from "vitest";
 import { openDatabase, type Database } from "../sqlite.ts";
 import { runMigrations } from "../migration-runner.ts";
 import { MIGRATIONS } from "./index-list.ts";
 import { memoryTransitionPublicationMigration054 } from "./054-memory-transition-publication.ts";
+import { rmTempDir } from "../../testing/rm-temp.ts";
+
+const roots: string[] = []; const databases: Database[] = [];
+afterEach(() => {
+  for (const db of databases.splice(0)) db.close();
+  for (const root of roots.splice(0)) {
+    const absolute = resolve(root);
+    if (dirname(absolute) !== resolve(tmpdir()) || !basename(absolute).startsWith("taki-w4-migration-")) throw new Error("unsafe fixture path");
+    rmTempDir(absolute);
+  }
+});
+function fixturePath() {
+  const root = mkdtempSync(join(tmpdir(), "taki-w4-migration-")); roots.push(root); return join(root, "database.sqlite");
+}
+function openFixture(options: Parameters<typeof openDatabase>[0]) {
+  const db = openDatabase(options); databases.push(db); return db;
+}
 
 function markerBytes(db: Database) {
   return db.prepare(`SELECT singleton,mode,hex(CAST(active_epoch_id AS BLOB)) AS epoch,
@@ -40,23 +57,23 @@ function history(db: Database) {
 
 describe("054 explicit transition publication lineage", () => {
   it.each(["legacy-markdown", "canonical-local", "hindsight"] as const)("preserves %s marker bytes and both old receipt histories through upgrade/reopen", (mode) => {
-    const path = join(mkdtempSync(join(tmpdir(), "taki-w4-migration-")), "database.sqlite");
-    let db = openDatabase({ path, migrations: MIGRATIONS.filter((migration) => migration.version <= 53) });
+    const path = fixturePath();
+    let db = openFixture({ path, migrations: MIGRATIONS.filter((migration) => migration.version <= 53) });
     seed(db, mode); const marker = markerBytes(db); const old = history(db);
     const receipts = db.prepare("SELECT * FROM migrations ORDER BY version").all(); db.close();
     const applied: number[][] = [];
-    db = openDatabase({ path, migrations: MIGRATIONS, onMigrated: (versions) => applied.push(versions) });
-    expect(applied).toEqual([[54, 55, 56, 57]]); expect(markerBytes(db)).toEqual(marker); expect(history(db)).toEqual(old);
+    db = openFixture({ path, migrations: MIGRATIONS, onMigrated: (versions) => applied.push(versions) });
+    expect(applied).toEqual([[54, 55, 56, 57, 58, 59]]); expect(markerBytes(db)).toEqual(marker); expect(history(db)).toEqual(old);
     expect(db.prepare("SELECT transition_receipt_id FROM memory_authority_selection").get()?.transition_receipt_id).toBeNull();
     expect(db.prepare("SELECT * FROM migrations WHERE version<=53 ORDER BY version").all()).toEqual(receipts);
     expect(db.prepare("PRAGMA foreign_key_check").all()).toEqual([]); db.close();
-    db = openDatabase({ path, migrations: MIGRATIONS, onMigrated: (versions) => applied.push(versions) });
-    try { expect(applied).toEqual([[54, 55, 56, 57], []]); expect(markerBytes(db)).toEqual(marker); expect(history(db)).toEqual(old); }
+    db = openFixture({ path, migrations: MIGRATIONS, onMigrated: (versions) => applied.push(versions) });
+    try { expect(applied).toEqual([[54, 55, 56, 57, 58, 59], []]); expect(markerBytes(db)).toEqual(marker); expect(history(db)).toEqual(old); }
     finally { db.close(); }
   });
 
   it.each(["unknown-schema", "sql-failure", "receipt-failure", "commit-failure"])("refuses %s atomically without rewriting the old marker", (failure) => {
-    const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS.filter((migration) => migration.version <= 53) });
+    const db = openFixture({ path: ":memory:", migrations: MIGRATIONS.filter((migration) => migration.version <= 53) });
     try {
       seed(db, "hindsight"); const marker = markerBytes(db); const old = history(db);
       const receipts = db.prepare("SELECT * FROM migrations ORDER BY version").all();

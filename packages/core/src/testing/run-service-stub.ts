@@ -18,6 +18,7 @@ export function createRunServiceStub(): RunService {
     return status;
   };
   return {
+    findByIdempotency: (key) => [...statuses.values()].find((status) => status.run.idempotencyKey === key)?.run,
     async admit(request: TriggerRequest) {
       const runId = randomUUID();
       const snapshot = { snapshotId: randomUUID(), manifestDigest: DIGEST, schemaVersion: "slice1.v1" };

@@ -32,7 +32,7 @@ export interface HindsightLifecycleService {
   revalidateBlocker(live: HindsightReadyLive, epochId: string): HindsightRevalidateBlocker | null;
   /** Whether the B3 snapshot reviewed this fingerprint and admission evidence exists for it (restart classification). */
   revalidated(input: { epochId: string; fingerprint: string }): boolean;
-  provision(ref: MemoryBankProducerRef, checkpoint: (phase: HindsightBankPhase) => void): Promise<HindsightProvisionOutcome>;
+  provision(ref: MemoryBankProducerRef, checkpoint: (phase: HindsightBankPhase) => void, operationId?: string): Promise<HindsightProvisionOutcome>;
   revalidate(ref: MemoryConnectionProducerRef, checkpoint: (phase: HindsightConnectionPhase) => void): Promise<HindsightRevalidateOutcome>;
   stopRequested(): boolean;
   stop(): Promise<void>;
@@ -52,7 +52,8 @@ export function createHindsightLifecycleService(deps: HindsightLifecycleDeps): H
     runtime: deps.runtime,
     revalidateBlocker: (live, epochId) => hindsightRevalidateBlocker(deps.db, { live, runtime: runtimeFor(epochId) }),
     revalidated: (input) => revalidated(deps, input),
-    provision: (ref, checkpoint) => bounded(state, ref.admittedEpochId, (call) => provisionHindsightBank(deps, { ref, call: { ...call, checkpoint } })),
+    provision: (ref, checkpoint, operationId) => bounded(state, ref.admittedEpochId,
+      (call) => provisionHindsightBank(deps, { ref, operationId, call: { ...call, checkpoint } })),
     revalidate: (ref, checkpoint) => bounded(state, ref.epochId, (call) => revalidateHindsightConnection(deps, { ref, call: { ...call, checkpoint } })),
     retireEpoch: (epochId) => {
       state.retired.add(epochId);

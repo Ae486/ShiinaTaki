@@ -6,7 +6,7 @@
  *         ROUTE_UNAVAILABLE, a native backup already running (single-flight) is NATIVE_FAILED with a logged reason, anything else
  *         NATIVE_FAILED; the ZIP stays on the native host
  */
-import { HindsightBackupNativeProofSchema, type HindsightConnectionProjection } from "@taki/shared";
+import { HindsightBackupNativeProofSchema, type HindsightConnectionProjection, type HindsightBackupNativeRequest } from "@taki/shared";
 import type { Logger } from "../../logging/logger.ts";
 import type { HindsightNativeBackupResult, HindsightNativeBackupWire } from "../hindsight/hindsight-backup-client.ts";
 import type { HindsightClient } from "../hindsight/hindsight-client.ts";
@@ -33,7 +33,7 @@ export function createHindsightNativeBackupRoute(deps: HindsightNativeBackupRout
       if (!api.createNativeBackup) throw new HindsightBackupFailure("HINDSIGHT_BACKUP_NATIVE_FAILED");
       const result = await api.createNativeBackup({ request, context: { signal, timeoutMs: SNAPSHOT_TIMEOUT_MS } });
       if (result.state === "refused") throw refused(deps.logger, result.reason);
-      return snapshotOf(request.backupId, result.backup);
+      return snapshotOf(request, result.backup);
     }),
     readBack: ({ file, signal }) => logged(deps.logger, async () => {
       const api = client(deps);
@@ -59,9 +59,10 @@ function refused(logger: Logger, reason: Extract<HindsightNativeBackupResult, { 
 }
 
 /** The echoed id proves the native snapshot answers this capture; the ZIP digest completes the proof the pair check judges. */
-function snapshotOf(backupId: string, wire: HindsightNativeBackupWire): HindsightNativeBackupSnapshot {
+function snapshotOf(request: HindsightBackupNativeRequest, wire: HindsightNativeBackupWire): HindsightNativeBackupSnapshot {
   const proof = HindsightBackupNativeProofSchema.safeParse({ ...wire.proof, zipSha256: wire.artifact.sha256, zipBytes: wire.artifact.bytes });
-  if (wire.backupId !== backupId || !proof.success) throw new HindsightBackupFailure("HINDSIGHT_BACKUP_NATIVE_FAILED");
+  if (wire.backupId !== request.backupId || wire.version !== request.version || !proof.success
+    || request.version === 2 && (wire.version !== 2 || wire.requestHash !== request.requestHash)) throw new HindsightBackupFailure("HINDSIGHT_BACKUP_NATIVE_FAILED");
   return { proof: proof.data, artifact: { location: "native-host", file: wire.artifact.fileName }, schema: wire.schema };
 }
 

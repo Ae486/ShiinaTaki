@@ -83,9 +83,7 @@ export function createHindsightMemorySubsystem(input: Input) {
     }
     runtime.assertConnection(); await tidy.maybeRun(characterId);
   } };
-  // Retirement of an unrouted Character's source stays refused (never "not required"), so uncovered Timeline rows are kept.
-  const memoryFlush: MemoryFlushPort = { prepareRetirement: (request) => runtime.characterRouted(request.characterId)
-    ? ingestion.flushPort.prepareRetirement(request) : Promise.resolve({ status: "retryable_failure", code: "MEMORY_FLUSH_INCOMPLETE" }) };
+  const memoryFlush = routedFlushPort(runtime, ingestion);
   const writers = fenceHindsightWriters({ engine: foreground.engine, maintenance, memoryFlush, tidy,
     writeMemory: createHindsightObservedWriter(state),
     captureRun: async (characterId, signal) => {
@@ -98,6 +96,16 @@ export function createHindsightMemorySubsystem(input: Input) {
     start: () => { runtime.assertConnection(); scheduler.start(); },
     stop: () => { writeFence.retire(); workFence.retire(); return stopSubsystem({ state, ingestion, curator, scheduler, foreground }); },
     recordPrimaryCommitted: (commit: PrimaryConversationCommit) => recordWitness(input, { runtime, ingestion }, commit) };
+}
+
+/** Unrouted or held source retirement stays refused, preserving its uncovered Timeline witnesses. */
+function routedFlushPort(runtime: ReturnType<typeof createHindsightRuntimeConnection>, ingestion: ReturnType<typeof createHindsightIngestion>): MemoryFlushPort {
+  return { prepareRetirement: (request) => {
+    try { runtime.assertConnection(); }
+    catch { return Promise.resolve({ status: "retryable_failure", code: "MEMORY_FLUSH_INCOMPLETE" }); }
+    return runtime.characterRouted(request.characterId) ? ingestion.flushPort.prepareRetirement(request)
+      : Promise.resolve({ status: "retryable_failure", code: "MEMORY_FLUSH_INCOMPLETE" });
+  } };
 }
 
 /** A foreground success proves the provider is back; a Bank parked in availability backoff catches up now, not at retryDueAt. */

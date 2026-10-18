@@ -19,9 +19,12 @@ import type { HindsightReplicaScheduler } from "../hindsight/hindsight-replica-s
 import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
 import { admitHindsightBackup, type HindsightBackupAdmitInput } from "./hindsight-backup-admit.ts";
 import {
-  errorMessage, failedOutcome, HindsightBackupFailure, outcomeOf, step, stepAsync, type HindsightBackupOutcome,
+  codeOf, errorMessage, failedOutcome, HindsightBackupFailure, outcomeOf, step, stepAsync, type HindsightBackupOutcome,
 } from "./hindsight-backup-failure.ts";
-import { readHindsightBackupIdentity, type HindsightBackupIdentity, type HindsightBackupRuntimeIdentity } from "./hindsight-backup-identity.ts";
+import { type HindsightBackupIdentity, type HindsightBackupRuntimeIdentity } from "./hindsight-backup-identity.ts";
+import { readHindsightCaptureState, readHindsightCapturedCopy, assertHindsightCaptureCurrent, type HindsightCaptureState } from "./hindsight-backup-capture-state.ts";
+import { HindsightBackupStagedRecordSchema } from "./hindsight-backup-staging.ts";
+import { createHindsightSealedManifest } from "./hindsight-backup-manifest.ts";
 import { verifyHindsightBackupPair } from "./hindsight-backup-pair.ts";
 import type { HindsightNativeBackupRoute, HindsightNativeBackupSnapshot } from "./hindsight-backup-route.ts";
 import type { HindsightBackupStagedRecord, HindsightBackupStagedSummary, HindsightBackupStore } from "./hindsight-backup-store.ts";
@@ -157,7 +160,7 @@ async function paused(deps: Deps, capture: HindsightBackupCaptureInput, signal: 
 /** Resolves the sealed pair's verifiedAt, or null once a route-b capture is staged for its native ZIP. */
 async function captureQuiesced(deps: Deps, work: { capture: HindsightBackupCaptureInput; signal: AbortSignal }): Promise<string | null> {
   const { capture } = work;
-  const identity = step(() => readHindsightBackupIdentity(deps.db, capture.runtime), coreReadCode);
+  const admitted = step(() => readHindsightCaptureState(deps.db, capture.runtime), coreReadCode);
   const custody = step(() => deps.custody(), () => "HINDSIGHT_BACKUP_INTERNAL_ERROR");
   const createdAt = deps.now();
   capture.checkpoint("capturing-core");
@@ -166,13 +169,17 @@ async function captureQuiesced(deps: Deps, work: { capture: HindsightBackupCaptu
     const core = await stepAsync(() => deps.store.captureCore(capture.backupId, (path) => deps.db.backupTo(path)),
       () => "HINDSIGHT_BACKUP_CORE_CAPTURE_FAILED");
     if (work.signal.aborted) throw new HindsightBackupFailure("HINDSIGHT_BACKUP_NATIVE_FAILED");
-    const staged: HindsightBackupStagedRecord = {
-      request: nativeRequest(identity, { backupId: capture.backupId, createdAt }),
-      core: { version: 1, backupId: capture.backupId, createdAt, operationId: capture.operationId,
-        core: { file: "core.sqlite", ...core, migrationHead: identity.migrationHead }, ...identity.core, custody },
-    };
-    if (capture.route === "native-endpoint") return await pairAndSeal(deps, { capture, staged, signal: work.signal });
+    const copied = admitted.version === 2 ? step(() => readHindsightCapturedCopy(deps.store.corePath(capture.backupId, "partial"),
+      { version: 2, backupId: capture.backupId, createdAt, epochId: capture.runtime.epochId,
+        configFingerprint: capture.runtime.configFingerprint, deploymentMode: capture.runtime.deploymentMode }, admitted), coreReadCode)
+      : { identity: admitted.identity, request: nativeRequest(admitted.identity, { backupId: capture.backupId, createdAt }) };
+    const staged = HindsightBackupStagedRecordSchema.parse({ request: copied.request,
+      core: { ...copied.identity.core, backupId: capture.backupId, createdAt, operationId: capture.operationId,
+        core: { file: "core.sqlite", ...core, migrationHead: copied.identity.migrationHead }, custody } });
+    step(() => assertHindsightCaptureCurrent(deps.db, capture.runtime, admitted), coreReadCode);
+    if (capture.route === "native-endpoint") return await pairAndSeal(deps, { capture, admitted, staged, signal: work.signal });
     capture.checkpoint("sealing");
+    step(() => assertHindsightCaptureCurrent(deps.db, capture.runtime, admitted), coreReadCode);
     await stepAsync(() => deps.store.stage(staged), () => "HINDSIGHT_BACKUP_STORAGE_FAILED");
     return null;
   } catch (error) {
@@ -182,17 +189,21 @@ async function captureQuiesced(deps: Deps, work: { capture: HindsightBackupCaptu
   }
 }
 
-async function pairAndSeal(deps: Deps, input: { capture: HindsightBackupCaptureInput; staged: HindsightBackupStagedRecord; signal: AbortSignal }): Promise<string> {
+async function pairAndSeal(deps: Deps, input: { capture: HindsightBackupCaptureInput; admitted: HindsightCaptureState;
+  staged: HindsightBackupStagedRecord; signal: AbortSignal }): Promise<string> {
   const { capture, staged } = input;
   capture.checkpoint("capturing-native");
+  step(() => assertHindsightCaptureCurrent(deps.db, capture.runtime, input.admitted), coreReadCode);
   const native = await nativeSnapshot(deps, { request: staged.request, signal: input.signal });
   capture.checkpoint("verifying");
   const pair = verifyHindsightBackupPair(staged.core, native.proof);
   if (!pair.ok) throw new HindsightBackupFailure("HINDSIGHT_BACKUP_PAIR_MISMATCH", { reason: pair.reason, bankId: pair.bankId });
   capture.checkpoint("sealing");
+  if (input.signal.aborted) throw new HindsightBackupFailure("HINDSIGHT_BACKUP_NATIVE_FAILED");
+  step(() => assertHindsightCaptureCurrent(deps.db, capture.runtime, input.admitted), coreReadCode);
   const verifiedAt = deps.now();
-  const manifest: HindsightBackupManifest = { ...staged.core, route: "native-endpoint",
-    native: { ...native.artifact, nativeManifestVersion: "2", schema: native.schema, proof: native.proof }, sensitive: true, verifiedAt };
+  const manifest = createHindsightSealedManifest(staged.core, { route: "native-endpoint", native: native.artifact,
+    schema: native.schema, proof: native.proof, verifiedAt });
   await stepAsync(() => deps.store.seal(manifest), (error) => errorMessage(error) === "HINDSIGHT_BACKUP_ARTIFACT_INVALID"
     ? "HINDSIGHT_BACKUP_INTERNAL_ERROR" : "HINDSIGHT_BACKUP_STORAGE_FAILED");
   return verifiedAt;
@@ -211,6 +222,8 @@ async function nativeSnapshot(deps: Deps, input: { request: HindsightBackupNativ
     () => "HINDSIGHT_BACKUP_NATIVE_FAILED");
   const proof = HindsightBackupNativeProofSchema.safeParse(snapshot.proof);
   if (!proof.success) throw new HindsightBackupFailure("HINDSIGHT_BACKUP_NATIVE_FAILED");
+  if (input.request.version === 2 ? !("version" in proof.data) || proof.data.requestHash !== input.request.requestHash
+    : "version" in proof.data) throw new HindsightBackupFailure("HINDSIGHT_BACKUP_NATIVE_FAILED");
   return { ...snapshot, proof: proof.data };
 }
 
@@ -227,7 +240,7 @@ function restartScheduler(runtime: HindsightBackupRuntime, logger: Logger): void
 }
 
 function coreReadCode(error: unknown): MemoryBackupErrorCode {
-  return errorMessage(error) === "MEMORY_AUTHORITY_MISMATCH" ? "MEMORY_AUTHORITY_MISMATCH" : "HINDSIGHT_BACKUP_CORE_CAPTURE_FAILED";
+  return codeOf(error, "HINDSIGHT_BACKUP_CORE_CAPTURE_FAILED");
 }
 function emergencyRetired(signal: AbortSignal): boolean {
   return signal.aborted && signal.reason instanceof Error && signal.reason.message === "MEMORY_AUTHORITY_MISMATCH";

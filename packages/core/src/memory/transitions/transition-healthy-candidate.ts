@@ -17,13 +17,15 @@ import { loadTransitionUnusedInventory } from "./transition-unused-inventory.ts"
 import { transitionLocalHash } from "./transition-local-encoding.ts";
 import type { HindsightCallContext } from "../hindsight/hindsight-client.ts";
 import type { TransitionNativeSession } from "./transition-native-session.ts";
+import { associateTransitionTemplateEvidence, assertFreshTransitionTemplateEvidence } from "./transition-template-observer.ts";
+import { verifyTransitionTemplateInventory } from "./transition-template-state.ts";
 
 interface Input { db: Database; intent: MemoryTransitionIntent; native: TransitionNativeSession;
   work(): TransitionCaptureInput; request(): HindsightCallContext; changed(): void }
 export async function prepareHealthyTransitionCandidate(input: Input) {
   const existing = input.db.prepare("SELECT id FROM memory_transition_candidates WHERE transition_id=:id AND slot='final'")
     .get({ id: input.intent.transitionId });
-  if (existing) return readTransitionCandidate(input.db, String(existing.id));
+  if (existing) return reuseCandidate(input, String(existing.id));
   const capture = input.intent.request.expected.sourceProvider === "local" ? captureTransitionLocal(input.db, input.work()) : null;
   const preparations: string[] = []; const evidenceIds: string[] = [];
   for (const bank of input.intent.request.expected.banks) {
@@ -43,6 +45,20 @@ export async function prepareHealthyTransitionCandidate(input: Input) {
   }
   return capture ? buildTransitionHindsightCandidate(input.db, { ...input.work(), preparationIds: preparations, evidenceIds })
     : buildTransitionLocalCandidate(input.db, { ...input.work(), evidenceIds });
+}
+
+async function reuseCandidate(input: Input, candidateId: string) {
+  const candidate = readTransitionCandidate(input.db, candidateId);
+  if (!input.intent.request.expected.templates) return candidate;
+  const evidence = candidate.evidenceIds.map((id) => readTransitionNativeEvidence(input.db, id));
+  verifyTransitionTemplateInventory(input.intent.request.expected, evidence);
+  for (const prior of evidence) {
+    if (prior.transitionId !== input.intent.transitionId) invalid();
+    // An existing final proof needs current fence/read-only evidence, never another maintenance invocation.
+    const status = await input.native.fence(prior.status.bank_id);
+    if (await nativeEvidence(input, status) !== prior.evidenceId) invalid();
+  }
+  input.work().assertConfiguration(); return candidate;
 }
 async function prepareBankDelta(input: Input, bank: { target: HindsightTransitionStatus; localBankId: string; captureId: string }) {
   const row = input.db.prepare("SELECT id FROM memory_transition_preparations WHERE transition_id=:transition AND slot=:bank")
@@ -65,12 +81,16 @@ async function nativeEvidence(input: Input, status: HindsightTransitionStatus): 
       || transitionLocalHash(prior.status.request) !== transitionLocalHash(status.request)
       || !status.proof || transitionLocalHash(prior.status.proof) !== transitionLocalHash(status.proof)
       || status.phase !== "proven" || status.outcome || status.active_writers !== 0 || status.accepted_operations !== 0) invalid();
+    await assertFreshTransitionTemplateEvidence({ db: input.db, intent: input.intent, evidence: prior,
+      client: input.native.client, request: input.request });
     input.work().assertConfiguration(); return prior.evidenceId;
   }
   const client = requireHindsightApplicationClient(input.native.client);
   if (!client.currentSnapshotPage) invalid();
-  const evidence = await loadTransitionNativeEvidence({ status,
+  const loaded = await loadTransitionNativeEvidence({ status,
     client: { ...input.native.client, ...client, currentSnapshotPage: client.currentSnapshotPage }, request: input.request });
+  const evidence = await associateTransitionTemplateEvidence({ db: input.db, intent: input.intent, evidence: loaded,
+    client: input.native.client, request: input.request });
   persistTransitionNativeEvidence(input.db, { ...input.work(), evidence }); return evidence.evidenceId;
 }
 function invalid(): never { throw new Error("MEMORY_TRANSITION_PROOF_INVALID"); }

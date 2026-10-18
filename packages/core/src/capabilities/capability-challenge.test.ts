@@ -498,3 +498,33 @@ function effectService(order: string[]): EffectLifecycleService {
     unfinished: () => [],
   };
 }
+
+describe("code-owned broker custody observers", () => {
+  it("does not notify the Host if the original issued mapping cannot be recorded", async () => {
+    const harness = makeHarness(); const target = askTarget(harness); const notify = vi.fn(); target.notify = notify;
+    const accepted = vi.fn();
+    const outcome = await harness.broker.request(target, {}, { observers: {
+      onIssued: () => { throw new Error("mapping persistence refused"); }, onAccepted: accepted,
+    } });
+    expect(outcome).toMatchObject({ ok: false, code: "CANCELLED" });
+    expect(notify).not.toHaveBeenCalled(); expect(accepted).not.toHaveBeenCalled();
+  });
+
+  it("uses final Effect settlement rather than protocol accepted:true before notifying the custody owner", async () => {
+    const order: string[] = []; const effects = effectService(order);
+    effects.settle = () => { order.push("effect.downgrade"); return { stale: true, duplicate: false }; };
+    const harness = makeHarness(true, effects); const target = askTarget(harness);
+    target.governanceProjection.cells[0]!.posture = "auto";
+    const accepted = vi.fn(); const issued = vi.fn();
+    const pending = harness.broker.request(target, {}, { coreAttemptId: "33333333-3333-4333-8333-333333333333",
+      effectId: "88888888-8888-4888-8888-888888888888", observers: { onIssued: issued, onAccepted: accepted } });
+    const request = sentRequest(harness);
+    expect(issued).toHaveBeenCalledTimes(1);
+    expect(harness.broker.challenge(challengeFor(request, AUTO_EVIDENCE), { hostId: HOST, connectionGeneration: 1 }).accepted).toBe(true);
+    expect(order).toContain("effect.prepare");
+    expect(harness.broker.resolve({ requestId: request.requestId, control: request.control, state: "completed", output: {}, governance: AUTO_EVIDENCE },
+      { hostId: HOST, connectionGeneration: 1 }).accepted).toBe(true);
+    expect(await pending).toMatchObject({ ok: false, code: "CANCELLED" });
+    expect(order).toContain("effect.downgrade"); expect(accepted).not.toHaveBeenCalled();
+  });
+});

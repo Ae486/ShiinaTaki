@@ -11,6 +11,9 @@ import {
   HINDSIGHT_CURRENT_STATE_BUILD,
   HINDSIGHT_APPLICATION_STATE_BUILD,
   HINDSIGHT_TRANSITION_BUILD,
+  HINDSIGHT_CONFIGURATION_BUILD,
+  HINDSIGHT_TEMPLATE_BUILD,
+  HINDSIGHT_TEMPLATE_BACKUP_BUILD,
   HINDSIGHT_COMPATIBILITY_VERSION,
   HindsightCompatibilityProjectionSchema,
   type HindsightCompatibilityProjection,
@@ -59,7 +62,7 @@ async function validateCompatibility(input: {
 export function projectHindsightCompatibilityManifest(manifest: HindsightCompatibilityWire): HindsightCompatibilityProjection {
   const build = manifest.source_identity.compatibility_build;
   if (manifest.base_api_version !== HINDSIGHT_API_VERSION || manifest.compatibility_version !== HINDSIGHT_COMPATIBILITY_VERSION ||
-      ![HINDSIGHT_COMPATIBILITY_BUILD, HINDSIGHT_NATIVE_RESULT_BUILD, HINDSIGHT_CURRENT_STATE_BUILD, HINDSIGHT_APPLICATION_STATE_BUILD, HINDSIGHT_TRANSITION_BUILD].includes(build)) {
+      ![HINDSIGHT_COMPATIBILITY_BUILD, HINDSIGHT_NATIVE_RESULT_BUILD, HINDSIGHT_CURRENT_STATE_BUILD, HINDSIGHT_APPLICATION_STATE_BUILD, HINDSIGHT_TRANSITION_BUILD, HINDSIGHT_CONFIGURATION_BUILD, HINDSIGHT_TEMPLATE_BUILD, HINDSIGHT_TEMPLATE_BACKUP_BUILD].includes(build)) {
     throw hindsightError("HINDSIGHT_EXTENSION_UNSUPPORTED");
   }
   if (manifest.provider.database_dialect !== "postgresql" || manifest.provider.storage_mode !== "sql_rows" || manifest.provider.lineage === null) {
@@ -97,6 +100,9 @@ export function projectHindsightCompatibilityManifest(manifest: HindsightCompati
       ...(manifest.contracts.application_reflect ? { applicationReflect: {
         version: manifest.contracts.application_reflect.version, support: manifest.contracts.application_reflect.support } } : {}),
       ...(manifest.contracts.transitions ? { transitions: manifest.contracts.transitions } : {}),
+      ...(manifest.contracts.configuration_observation ? { configurationObservation: manifest.contracts.configuration_observation } : {}),
+      ...(manifest.contracts.template_lifecycle ? { templateLifecycle: manifest.contracts.template_lifecycle } : {}),
+      ...(manifest.contracts.template_backup ? { templateBackup: manifest.contracts.template_backup } : {}),
     },
   });
 }

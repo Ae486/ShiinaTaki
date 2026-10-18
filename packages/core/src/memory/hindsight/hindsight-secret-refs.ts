@@ -4,17 +4,10 @@
  * POS:    core/memory/hindsight — Core resolves only the connection key; helper model refs remain opaque
  */
 import { createHash } from "node:crypto";
+import { HINDSIGHT_SECRET_REFS } from "@taki/shared/hindsight-custody";
 import type { SecretCatalogService } from "../../secrets/secret-catalog-service.ts";
 
-export const HINDSIGHT_SECRET_REFS = {
-  connectionApiKey: "memory.hindsight.connection.api-key",
-  defaultModelApiKey: "memory.hindsight.model.default.api-key",
-  retainModelApiKey: "memory.hindsight.model.retain.api-key",
-  reflectModelApiKey: "memory.hindsight.model.reflect.api-key",
-  consolidationModelApiKey: "memory.hindsight.model.consolidation.api-key",
-  embeddingApiKey: "memory.hindsight.model.embedding.api-key",
-  rerankerApiKey: "memory.hindsight.model.reranker.api-key",
-} as const;
+export { HINDSIGHT_SECRET_REFS };
 
 export function createHindsightConnectionSecret(catalog: SecretCatalogService) {
   return {

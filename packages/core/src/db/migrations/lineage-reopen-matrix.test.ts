@@ -45,6 +45,8 @@ import { memoryTransitionPublicationMigration054 } from "./054-memory-transition
 import { memoryTransitionDriversMigration055 } from "./055-memory-transition-drivers.ts";
 import { memoryTransitionVerificationDispatchMigration056 } from "./056-memory-transition-verification-dispatch.ts";
 import { memoryTransitionEmergencyMigration057 } from "./057-memory-transition-emergency.ts";
+import { hindsightTemplateOverlaysMigration058 } from "./058-hindsight-template-overlays.ts";
+import { hindsightTemplateExecutionMigration059 } from "./059-hindsight-template-execution.ts";
 import { hindsightReplicaRequestsMigration051 } from "./051-hindsight-replica-requests.ts";
 import { canonicalPayloadHash } from "../../memory/legacy-migration/legacy-identities.ts";
 import { createIntlSegmenterTokenizer } from "../../memory/search-tokenizer.ts";
@@ -82,7 +84,7 @@ function close(db: Database): void {
 }
 
 function expectFinalSchema(db: Database): void {
-  expect(db.prepare("SELECT max(version) AS version FROM migrations").get()?.version).toBe(57);
+  expect(db.prepare("SELECT max(version) AS version FROM migrations").get()?.version).toBe(59);
   const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map((row) => row.name);
   expect(tables).toEqual(expect.arrayContaining([
     "canonical_memory_units",
@@ -101,6 +103,14 @@ function expectFinalSchema(db: Database): void {
     "memory_transition_incidents",
     "memory_transition_emergency_quarantine",
     "memory_transition_foreign_branches",
+    "hindsight_template_enrollments",
+    "hindsight_template_catalog",
+    "hindsight_template_bases",
+    "hindsight_template_users",
+    "hindsight_template_selections",
+    "hindsight_template_applied",
+    "hindsight_template_default_history",
+    "hindsight_template_defaults",
     "mcp_desired_servers",
     "skill_packages",
     "memory_authority_selection",
@@ -204,10 +214,10 @@ describe("migration lineage reopen matrix", () => {
     const firstApplied: number[][] = [];
     const first = open(path, MIGRATIONS, (applied) => firstApplied.push(applied));
     expectFinalSchema(first);
-    expect(firstApplied).toEqual([Array.from({ length: 57 }, (_, index) => index + 1)]);
+    expect(firstApplied).toEqual([Array.from({ length: 59 }, (_, index) => index + 1)]);
     close(first);
     const reopened = expectReopenNoOp(path);
-    expect(reopened.prepare("SELECT count(*) AS count FROM migrations").get()?.count).toBe(57);
+    expect(reopened.prepare("SELECT count(*) AS count FROM migrations").get()?.count).toBe(59);
   });
 
   it("converges the historical T4 17/18 MCP-Skill lineage through 024", () => {
@@ -259,11 +269,13 @@ describe("migration lineage reopen matrix", () => {
       memoryTransitionDriversMigration055,
       memoryTransitionVerificationDispatchMigration056,
       memoryTransitionEmergencyMigration057,
+      hindsightTemplateOverlaysMigration058,
+      hindsightTemplateExecutionMigration059,
     ], (applied) => tailApplied.push(applied));
-    expect(tailApplied).toEqual([[19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57]]);
+    expect(tailApplied).toEqual([[19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59]]);
     expectFinalSchema(reopened);
     expect(reopened.prepare("SELECT version FROM migrations ORDER BY version").all().map((row) => row.version)).toEqual(
-      Array.from({ length: 57 }, (_, index) => index + 1),
+      Array.from({ length: 59 }, (_, index) => index + 1),
     );
     close(reopened);
     expectReopenNoOp(path);
@@ -276,7 +288,7 @@ describe("migration lineage reopen matrix", () => {
     close(first);
     const tailApplied: number[][] = [];
     const reopened = open(path, MIGRATIONS, (applied) => tailApplied.push(applied));
-    expect(tailApplied).toEqual([[21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57]]);
+    expect(tailApplied).toEqual([[21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59]]);
     expectFinalSchema(reopened);
     expect(reopened.prepare("SELECT mode FROM memory_authority_selection WHERE singleton=1").get()?.mode)
       .toBe("legacy-markdown");
@@ -293,7 +305,7 @@ describe("migration lineage reopen matrix", () => {
 
     const applied: number[][] = [];
     const upgraded = open(path, MIGRATIONS, (versions) => applied.push(versions));
-    expect(applied).toEqual([[32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57]]);
+    expect(applied).toEqual([[32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59]]);
     expect(upgraded.prepare(`SELECT through_seq,text,revision,last_operation_id,source_from_seq,source_through_seq,
       source_digest,captured_tail_seq FROM conversation_summary WHERE character_id='taki'`).get()).toEqual({
       through_seq: 12,
@@ -357,7 +369,7 @@ describe("migration lineage reopen matrix", () => {
     const leases = first.prepare("SELECT * FROM hindsight_replica_sync_leases").all();
     close(first); const applied: number[][] = [];
     const upgraded = open(path, MIGRATIONS, (versions) => applied.push(versions));
-    expect(applied).toEqual([[34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57]]);
+    expect(applied).toEqual([[34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59]]);
     expectFinalSchema(upgraded);
     expect(upgraded.prepare("SELECT * FROM hindsight_replica_sync_records").all()).toEqual(records);
     expect(createReplicaRecordStore(upgraded, createIntlSegmenterTokenizer({ stoplist: true })).get({
@@ -388,7 +400,7 @@ describe("migration lineage reopen matrix", () => {
 
     const applied: number[][] = [];
     const upgraded = open(path, MIGRATIONS, (versions) => applied.push(versions));
-    expect(applied).toEqual([history === "034" ? [35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57] : [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57]]);
+    expect(applied).toEqual([history === "034" ? [35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59] : [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59]]);
     expectFinalSchema(upgraded);
     expect(upgraded.prepare("SELECT version,applied_at FROM migrations WHERE version<=:version ORDER BY version")
       .all({ version: history === "034" ? 34 : 35 })).toEqual(receipts);

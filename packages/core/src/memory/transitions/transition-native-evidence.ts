@@ -13,6 +13,7 @@ import { normalizeSnapshotMetadata, normalizeSnapshotPage } from "../hindsight/h
 import { verifySnapshotContents } from "../hindsight/hindsight-snapshot-validator.ts";
 import { verifyCurrentMaintenanceStream } from "../hindsight/hindsight-current-maintenance-stream.ts";
 import { currentRequiredSetHash } from "../hindsight/hindsight-current-maintenance-hash.ts";
+import { verifyTransitionTemplateAssociation } from "./transition-template-evidence.ts";
 
 export function sealTransitionNativeEvidence(raw: Omit<MemoryTransitionNativeEvidence, "evidenceId">): MemoryTransitionNativeEvidence {
   const evidence = MemoryTransitionNativeEvidenceSchema.parse({ ...raw, evidenceId: "0".repeat(64) });
@@ -50,6 +51,7 @@ export function verifyTransitionNativeEvidence(evidence: MemoryTransitionNativeE
     native_records_hash: proof.native_records_hash, application_records_hash: proof.application_records_hash,
     auxiliary_records_hash: proof.auxiliary_records_hash });
   if (hash !== proof.baseline_hash) invalid();
+  verifyTransitionTemplateAssociation(parsed);
   return bundle;
 }
 

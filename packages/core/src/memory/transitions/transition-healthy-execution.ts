@@ -146,7 +146,7 @@ async function run(execution: Execution): Promise<void> {
     }
     if (old.phase !== "proven") phase(execution, "proven");
     execution.stage = "publication";
-    deps.runtime.publish({ ...execution.work(), candidateId: candidate.candidateId }); refresh(execution);
+    deps.runtime.publish({ ...execution.work(), candidateId: candidate.candidateId, currentTime: deps.now }); refresh(execution);
   }
   await finalize(execution);
 }

@@ -42,9 +42,9 @@ export interface CuratorTestBank {
   native: ApplicationNativeFixture[]; artifacts: ApplicationArtifactFixture[]; events: HindsightApplicationEvent[];
   server: ReturnType<typeof applicationCommandTestClient>;
 }
-export function curatorTestBank(input: { bankId?: string; characterId?: string;
+export function curatorTestBank(input: { bankId?: string; characterId?: string; namespace?: HindsightApplicationScope["namespace"];
   memories?: Array<{ id: string; text?: string; policy?: Partial<TakiMemoryPolicyProjection>; invalidated?: boolean }> } = {}): CuratorTestBank {
-  const scope = { ...APPLICATION_TEST_SCOPE, bankId: input.bankId ?? "bank-a" };
+  const scope = { ...APPLICATION_TEST_SCOPE, namespace: input.namespace ?? APPLICATION_TEST_SCOPE.namespace, bankId: input.bankId ?? "bank-a" };
   const bankScope: MemoryBankScope = input.characterId ? { kind: "character", characterId: input.characterId } : { kind: "global", characterId: null };
   const bank = applicationTestBoundBank(scope, bankScope);
   const memories = (input.memories ?? [{ id: "memory-a" }]).map((memory) => applicationTestBoundMemory({ scope, bankScope,

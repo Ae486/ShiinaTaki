@@ -62,6 +62,8 @@ import { memoryTransitionPublicationMigration054 } from "./054-memory-transition
 import { memoryTransitionDriversMigration055 } from "./055-memory-transition-drivers.ts";
 import { memoryTransitionVerificationDispatchMigration056 } from "./056-memory-transition-verification-dispatch.ts";
 import { memoryTransitionEmergencyMigration057 } from "./057-memory-transition-emergency.ts";
+import { hindsightTemplateOverlaysMigration058 } from "./058-hindsight-template-overlays.ts";
+import { hindsightTemplateExecutionMigration059 } from "./059-hindsight-template-execution.ts";
 
 export const MIGRATIONS: Migration[] = [
   timelineMigration001,
@@ -121,4 +123,6 @@ export const MIGRATIONS: Migration[] = [
   memoryTransitionDriversMigration055,
   memoryTransitionVerificationDispatchMigration056,
   memoryTransitionEmergencyMigration057,
+  hindsightTemplateOverlaysMigration058,
+  hindsightTemplateExecutionMigration059,
 ];

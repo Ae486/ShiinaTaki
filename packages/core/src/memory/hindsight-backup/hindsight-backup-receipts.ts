@@ -5,11 +5,15 @@
  * POS:    core/memory/hindsight-backup — design ruling 3; pure synchronous read, called inside the capture's one Core read
  */
 import type { Database } from "../../db/sqlite.ts";
+import { createHindsightBankSetupRepo } from "../../db/hindsight-bank-setup-repo.ts";
+import { TemplateBankIdentitySchema } from "../hindsight/template-lifecycle/template-overlay-schema.ts";
+import { readHindsightTemplateAttestation } from "./hindsight-template-backup-attestation.ts";
 
 export interface HindsightBackupReceiptRule {
   core: string;
   /** The native table whose row proves the effect; null means the Bank cursor comparison is the only proof. */
-  native: "memory_native_operation_receipts" | "memory_mutation_receipts" | "memory_application_operations" | null;
+  native: "memory_native_operation_receipts" | "memory_mutation_receipts" | "memory_application_operations"
+    | "memory_template_receipts" | "memory_template_refresh_results" | null;
   id: string | null;
 }
 
@@ -30,6 +34,8 @@ export const HINDSIGHT_BACKUP_RECEIPT_MAP: readonly HindsightBackupReceiptRule[]
   { core: "policy work request (045)", native: null, id: null },
   { core: "observed write", native: null, id: null },
   { core: "primary conversation witness", native: null, id: null },
+  { core: "B2 original template Apply receipt, published", native: "memory_template_receipts", id: "template-receipt:<request UUID>" },
+  { core: "B2 persisted semantic refresh-result marker claim", native: "memory_template_refresh_results", id: "template-refresh-result:<child UUID>" },
 ]);
 
 export interface HindsightTerminalScope {
@@ -37,10 +43,22 @@ export interface HindsightTerminalScope {
   providerLineageId: string;
   /** Native Bank id -> its current Core generation; receipts of an older generation are not this Bank's history. */
   generations: ReadonlyMap<string, string>;
+  /** Explicit v2 opt-in keeps historical v1 membership bytes unchanged. */
+  includeTemplates?: boolean;
 }
 
 export function readHindsightTerminalOperations(db: Database, scope: HindsightTerminalScope): string[] {
-  return [...pendingOperations(db, scope), ...applicationOperations(db, scope)];
+  return [...pendingOperations(db, scope), ...applicationOperations(db, scope), ...scope.includeTemplates ? templateOperations(db, scope) : []];
+}
+
+function templateOperations(db: Database, scope: HindsightTerminalScope): string[] {
+  const identities = createHindsightBankSetupRepo(db).list().flatMap((bank) => {
+    const generation = scope.generations.get(bank.externalBankId);
+    return generation ? [TemplateBankIdentitySchema.parse({ scope: bank.scope, canonicalIdentity: bank.canonicalIdentity,
+      target: { provider_lineage: scope.providerLineageId, bank_id: bank.externalBankId, bank_generation: generation } })] : [];
+  });
+  if (identities.length !== scope.generations.size) throw new Error("HINDSIGHT_BACKUP_TEMPLATE_UNPROVEN");
+  return readHindsightTemplateAttestation(db, { epochId: scope.epochId, providerLineageId: scope.providerLineageId, identities }).operationIds;
 }
 
 function pendingOperations(db: Database, scope: HindsightTerminalScope): string[] {

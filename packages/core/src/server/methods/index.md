@@ -1,4 +1,5 @@
 # core/server/methods/
+- hindsight-deployment-checkpoint.ts — current authenticated Node route to the exact live pending C2 injection; caller JSON cannot create authority.
 - connect.ts — connect: the ONLY pre-auth method; token verify, pairing handshake, or loopback operator auto-trust (P3), then authenticate the socket
 - host-catalog-publish.ts — host.catalogPublish (node-only): provenance-bound complete publication with fail-closed retirement for rejected current-generation candidates
 - extension-status.ts — operator-only extension.status convergence projection over current Host/Skill/MCP owner generations
@@ -45,3 +46,6 @@
 - memory-transition-methods.ts — operator-only preview/status/overview with sanitized closed reasons; execution and explicit original-identity recovery remain on memory.operations.submit.
 - memory-authority-status.ts — memory.authority.status (operator-only): the strict composite read (authority, runtime availability from the Hindsight probe or the pure Local binding snapshot, setup, per-Bank replica/Pending, operations); a read, never a subscription
 - observability-methods.ts — operator-only monitor state/list/trajectory/inspector and connection-scoped live subscription
+
+- hindsight-configuration-methods.ts — authenticated operator-only observation/status dispatch
+- hindsight-template-methods.ts — authenticated operator-only preview, bounded Bank detail, local status and exact single-child Native observation; writes use memory.operations
