@@ -9,7 +9,7 @@
  *         Pure + OS-neutral; it names nothing to its caller beyond a verdict, so a refusal cannot re-leak the app.
  */
 import { ForegroundWindowOutputSchema } from "@taki/shared";
-import type { RouteResult } from "../capabilities/route-capability.ts";
+import type { CapabilityRouteProvenance, RouteResult } from "../capabilities/route-capability.ts";
 import { scrubPii } from "./pii-scrub.ts";
 
 export const FOREGROUND_CAPABILITY = "foreground-window";
@@ -20,7 +20,7 @@ export const FOREGROUND_CAPABILITY = "foreground-window";
  * log line that discloses more than "we did not look".
  */
 export type ForegroundScreen =
-  | { status: "clear"; key: string }
+  | { status: "clear"; key: string; provenance?: CapabilityRouteProvenance }
   | { status: "sensitive" }
   | { status: "unscreenable" }
   | { status: "denied" };
@@ -46,5 +46,5 @@ export async function screenForegroundNow(deps: ForegroundScreenDeps): Promise<F
   if (!parsed.success || !parsed.data.available || parsed.data.processName === null) return { status: "unscreenable" };
   const { processName, windowTitle } = parsed.data;
   if (deps.isSensitive(processName)) return { status: "sensitive" };
-  return { status: "clear", key: foregroundKey(processName, scrubPii(windowTitle ?? "")) };
+  return { status: "clear", key: foregroundKey(processName, scrubPii(windowTitle ?? "")), ...(routed.provenance ? { provenance: routed.provenance } : {}) };
 }

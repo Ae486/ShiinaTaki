@@ -1,0 +1,68 @@
+{
+  "node": "v24.18.0",
+  "bodyCalls": 24,
+  "modelCalls": 6,
+  "samples": [
+    {
+      "runs": 1,
+      "beforeHydration": 1,
+      "bodyEntries": 2,
+      "retainedSnapshots": 0,
+      "retainedBytes": 0,
+      "canonicalRows": 3,
+      "previews": 0,
+      "capacity": false
+    },
+    {
+      "runs": 2,
+      "beforeHydration": 1,
+      "bodyEntries": 2,
+      "retainedSnapshots": 0,
+      "retainedBytes": 0,
+      "canonicalRows": 6,
+      "previews": 0,
+      "capacity": false
+    },
+    {
+      "runs": 3,
+      "beforeHydration": 1,
+      "bodyEntries": 2,
+      "retainedSnapshots": 0,
+      "retainedBytes": 0,
+      "canonicalRows": 9,
+      "previews": 0,
+      "capacity": false
+    },
+    {
+      "runs": 4,
+      "beforeHydration": 1,
+      "bodyEntries": 2,
+      "retainedSnapshots": 0,
+      "retainedBytes": 0,
+      "canonicalRows": 12,
+      "previews": 0,
+      "capacity": false
+    },
+    {
+      "runs": 5,
+      "beforeHydration": 1,
+      "bodyEntries": 2,
+      "retainedSnapshots": 0,
+      "retainedBytes": 0,
+      "canonicalRows": 15,
+      "previews": 0,
+      "capacity": false
+    },
+    {
+      "runs": 6,
+      "beforeHydration": 1,
+      "bodyEntries": 2,
+      "retainedSnapshots": 0,
+      "retainedBytes": 0,
+      "canonicalRows": 18,
+      "previews": 0,
+      "capacity": false
+    }
+  ],
+  "errors": []
+}

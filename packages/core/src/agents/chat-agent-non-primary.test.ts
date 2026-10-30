@@ -11,11 +11,34 @@ import { createCoreToolGovernanceAdapter } from "../governance/core-tool-governa
 import { createEffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 import { createEffectRepo } from "../db/effect-repo.ts";
 import { createRunEventRepo } from "../db/run-event-repo.ts";
+import { wrapGovernedTool } from "../governance/governed-tool.ts";
 
 const fixtures: CompanionFixture[] = [];
 afterEach(() => { for (const fixture of fixtures.splice(0)) fixture.cleanup(); });
 
 describe("ChatAgent non-primary input seam", () => {
+  it("attributes captured unattended tools to the executing Attempt without replacing the captured context", async () => {
+    const fixture = createCompanionFixture(); fixtures.push(fixture); seedRun(fixture);
+    const effects = createEffectLifecycleService(createEffectRepo(fixture.db, createRunEventRepo(fixture.db)));
+    const service = createGovernancePolicyService(createGovernancePolicyRepo(fixture.db));
+    const execute = vi.fn(async () => ({ ok: true }));
+    const capturedTool = wrapGovernedTool(tool({ inputSchema: z.strictObject({}), execute }), {
+      service, binding: { identity: { capabilityId: "workspace.file.read", ownerHostId: "11111111-1111-4111-8111-111111111111" }, cellKey: "workspace-read" },
+    });
+    const captured = Object.freeze({ tools: Object.freeze({ captured_read: capturedTool }) });
+    const agent = createChatAgent({ model: scriptedModel([
+      { kind: "tool", toolCallId: "captured", toolName: "captured_read", input: {} }, { kind: "text", deltas: ["done"] },
+    ]), store: fixture.conversation, memory: fixture.memory, effectLifecycle: effects });
+    for await (const delta of agent.stream({ characterId: "taki", message: "Read the captured material" }, {
+      turnKind: "non-primary", runId: "run", attemptId: "attempt", runContext: captured,
+    })) { void delta; }
+    expect(execute).toHaveBeenCalledOnce();
+    expect(fixture.db.prepare("SELECT run_id,attempt_id,state,outcome FROM run_effects WHERE kind='tool'").all())
+      .toEqual([{ run_id: "run", attempt_id: "attempt", state: "terminal", outcome: "completed" }]);
+    expect(captured.tools.captured_read).toBe(capturedTool);
+    expect(fixture.conversation.history("taki")).toEqual([]);
+  });
+
   it("keeps control input ephemeral and suppresses Timeline, costume, and conversational memory writes", async () => {
     const fixture = createCompanionFixture(); fixtures.push(fixture);
     fixture.conversation.appendUser("taki", "existing"); fixture.conversation.appendAssistant("taki", "history");

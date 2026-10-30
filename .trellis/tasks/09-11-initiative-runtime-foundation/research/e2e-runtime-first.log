@@ -1,0 +1,119 @@
+
+ RUN  v4.1.10 H:/TakiAgent-worktrees/t4/e2e
+
+ ❯ src/initiative-runtime.e2e.test.ts (10 tests | 8 failed) 60473ms
+     × settles silent through one actual Agent request and the existing Monitor 4062ms
+     × settles express through one actual Agent request and the existing Monitor 24506ms
+     × settles speak through one actual Agent request and the existing Monitor 4006ms
+     × holds executable presentation without owning the lane and resumes the same Attempt without the model 3973ms
+     × suppresses a held result when its original source is invalidated 3974ms
+     × fails quietly for a missing structural decision 3981ms
+     × fails quietly for a unoffered structural decision 3998ms
+     × fails quietly for a conflicting structural decision 4025ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/initiative-runtime.e2e.test.ts > initiative through the real Core composition > settles silent through one actual Agent request and the existing Monitor
+ FAIL  src/initiative-runtime.e2e.test.ts > initiative through the real Core composition > settles speak through one actual Agent request and the existing Monitor
+AssertionError: expected { …(19) } to match object { state: 'completed', …(2) }
+(21 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "deliveryClass": "class_b",
+    "initiator": "heartbeat",
+-   "state": "completed",
++   "state": "cancelled",
+  }
+
+ ❯ src/initiative-runtime.e2e.test.ts:57:26
+     55|       expect(receipt.status).toBe("settled");
+     56|       const status = await runStatus(scenario.operator, receipt.runId);
+     57|       expect(status.run).toMatchObject({ state: "completed", initiator…
+       |                          ^
+     58|       expect(status.attempts).toHaveLength(1);
+     59|       expect(status.run.activeAttemptId).toBe(receipt.attemptId);
+ ❯ withScenario src/initiative-runtime.e2e.test.ts:271:5
+ ❯ src/initiative-runtime.e2e.test.ts:49:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  src/initiative-runtime.e2e.test.ts > initiative through the real Core composition > settles express through one actual Agent request and the existing Monitor
+Error: notification wait timed out after 20000ms
+ ❯ Timeout._onTimeout src/fixture/rpc-socket.ts:99:14
+     97|     const timer = setTimeout(() => {
+     98|       inbox.waiters.delete(waiter);
+     99|       reject(new Error(`notification wait timed out after ${timeoutMs}…
+       |              ^
+    100|     }, timeoutMs);
+    101|     const waiter: NoteWaiter = {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  src/initiative-runtime.e2e.test.ts > initiative through the real Core composition > holds executable presentation without owning the lane and resumes the same Attempt without the model
+AssertionError: expected 'settled' to be 'held' // Object.is equality
+
+Expected: "held"
+Received: "settled"
+
+ ❯ src/initiative-runtime.e2e.test.ts:95:27
+     93|       const opportunity = await selectedOpportunity(scenario.process);
+     94|       const held = admitted(await scenario.process.command({ action: "…
+     95|       expect(held.status).toBe("held");
+       |                           ^
+     96|       expect((await runStatus(scenario.operator, held.runId)).run.stat…
+     97|       expect(await scenario.process.command({ action: "background-prob…
+ ❯ withScenario src/initiative-runtime.e2e.test.ts:271:5
+ ❯ src/initiative-runtime.e2e.test.ts:91:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  src/initiative-runtime.e2e.test.ts > initiative through the real Core composition > suppresses a held result when its original source is invalidated
+AssertionError: expected 'settled' to be 'held' // Object.is equality
+
+Expected: "held"
+Received: "settled"
+
+ ❯ src/initiative-runtime.e2e.test.ts:121:27
+    119|       const opportunity = await selectedOpportunity(scenario.process);
+    120|       const held = admitted(await scenario.process.command({ action: "…
+    121|       expect(held.status).toBe("held");
+       |                           ^
+    122|       await scenario.process.command({ action: "facts", opportunityId:…
+    123|       await scenario.process.command({ action: "resume", runId: held.r…
+ ❯ withScenario src/initiative-runtime.e2e.test.ts:271:5
+ ❯ src/initiative-runtime.e2e.test.ts:117:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  src/initiative-runtime.e2e.test.ts > initiative through the real Core composition > fails quietly for a missing structural decision
+ FAIL  src/initiative-runtime.e2e.test.ts > initiative through the real Core composition > fails quietly for a unoffered structural decision
+ FAIL  src/initiative-runtime.e2e.test.ts > initiative through the real Core composition > fails quietly for a conflicting structural decision
+AssertionError: expected 'cancelled' to be 'failed' // Object.is equality
+
+Expected: "failed"
+Received: "cancelled"
+
+ ❯ src/initiative-runtime.e2e.test.ts:164:77
+    162|       const opportunity = await selectedOpportunity(scenario.process);
+    163|       const receipt = admitted(await scenario.process.command({ action…
+    164|       expect((await runStatus(scenario.operator, receipt.runId)).run.s…
+       |                                                                             ^
+    165|       expect(await fetchTimelineEntries(scenario.operator, "taki")).to…
+    166|       expect(scenario.logs()).not.toContain(PRIVATE);
+ ❯ withScenario src/initiative-runtime.e2e.test.ts:271:5
+ ❯ src/initiative-runtime.e2e.test.ts:152:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  8 failed | 2 passed (10)
+   Start at  20:05:50
+   Duration  62.24s (transform 933ms, setup 0ms, import 1.44s, tests 60.47s, environment 0ms)
+
+undefined
+H:\TakiAgent-worktrees\t4\e2e:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/initiative-runtime.e2e.test.ts

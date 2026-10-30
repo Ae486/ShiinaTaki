@@ -8,6 +8,23 @@ describe("startSweeper", () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 
+  it("contains a failed authority gate and retries without running an unapproved sweep", () => {
+    const { logger, records } = createCaptureLogger();
+    let gateBroken = true;
+    let passes = 0;
+    const control = startSweeper({
+      name: "memory", message: "swept", logger, intervalMs: 10,
+      enabled: () => { if (gateBroken) throw new Error("private authority error"); return true; },
+      sweep: () => { passes += 1; return undefined; },
+    });
+    expect(passes).toBe(0);
+    expect(records).toEqual([{ level: "warn", obj: { code: "SWEEP_FAILED" }, msg: "retention sweep failed; will retry" }]);
+    gateBroken = false;
+    vi.advanceTimersByTime(10);
+    expect(passes).toBe(1);
+    control.stop();
+  });
+
   it("sweeps once at boot and again on every 6h tick", () => {
     const { logger } = createCaptureLogger();
     let passes = 0;
@@ -74,5 +91,66 @@ describe("startSweeper", () => {
     const timer = spy.mock.results[0]?.value as { hasRef?: () => boolean };
     expect(timer.hasRef?.()).toBe(false);
     spy.mockRestore();
+  });
+
+  it("waits for a durable async result and skips ticks while that pass is pending", async () => {
+    const { logger, records } = createCaptureLogger();
+    let complete: (value: { archived: number }) => void = () => undefined;
+    let passes = 0;
+    const control = startSweeper({
+      name: "memory", message: "memory swept", logger, intervalMs: 10,
+      sweep: () => {
+        passes += 1;
+        return new Promise<{ archived: number }>((resolve) => { complete = resolve; });
+      },
+    });
+    vi.advanceTimersByTime(30);
+    expect(passes).toBe(1);
+    expect(records).toEqual([]);
+    complete({ archived: 2 });
+    await Promise.resolve();
+    expect(records).toEqual([{ level: "info", obj: { archived: 2 }, msg: "memory swept" }]);
+    vi.advanceTimersByTime(10);
+    expect(passes).toBe(2);
+    control.stop();
+    complete({ archived: 0 });
+    await Promise.resolve();
+  });
+
+  it("contains async failure without logging private errors and retries on the next tick", async () => {
+    const { logger, records } = createCaptureLogger();
+    let passes = 0;
+    const control = startSweeper({
+      name: "memory", message: "memory swept", logger, intervalMs: 10,
+      sweep: async () => {
+        passes += 1;
+        if (passes === 1) throw new Error("private source and provider credential");
+        return { deleted: 1 };
+      },
+    });
+    await Promise.resolve();
+    expect(records).toEqual([{ level: "warn", obj: { code: "SWEEP_FAILED" }, msg: "retention sweep failed; will retry" }]);
+    await vi.advanceTimersByTimeAsync(10);
+    expect(passes).toBe(2);
+    expect(records.at(-1)?.obj).toEqual({ deleted: 1 });
+    control.stop();
+  });
+
+  it("stops future ticks and preserves the runtime authority gate", () => {
+    const { logger } = createCaptureLogger();
+    let enabled = false;
+    let passes = 0;
+    const control = startSweeper({
+      name: "memory", message: "memory swept", logger, intervalMs: 10,
+      enabled: () => enabled,
+      sweep: () => { passes += 1; return undefined; },
+    });
+    expect(passes).toBe(0);
+    enabled = true;
+    vi.advanceTimersByTime(10);
+    expect(passes).toBe(1);
+    control.stop();
+    vi.advanceTimersByTime(30);
+    expect(passes).toBe(1);
   });
 });

@@ -11,6 +11,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@qqmm/management-client": "file:..\\..\\..\\..\\QQMessageMonitor\\packages\\management-client\\artifacts\\qqmm-management-client-0.1.0.tgz",
     "@taki/shared": "workspace:*",
     "@tanstack/react-virtual": "3.14.9",
     "@tauri-apps/api": "^2.11.0",

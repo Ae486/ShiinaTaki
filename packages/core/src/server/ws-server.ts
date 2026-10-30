@@ -48,6 +48,7 @@ export async function startWsServer(options: WsServerOptions): Promise<WsServer>
     // Peer address (ws passes the upgrade request as the 2nd arg) — the connect handler uses it for
     // loopback auto-trust (P3). Undefined for an unknown peer ⇒ never auto-trusted (fail-closed).
     const connection = connectionRegistry.create(notify, request.socket.remoteAddress, () => socket.close());
+    connection.notifyObserved = (method, params) => replyObserved(socket, createJSONRPCNotification(method, params));
     // Cleanups registered by handlers (via ctx.onClose) for THIS socket — run once on close.
     const closeListeners: Array<() => void> = [];
     log.info("client connected");
@@ -140,6 +141,24 @@ async function dispatchFrame({ socket, connection, closeListeners, registry }: H
 
 function reply(socket: WebSocket, payload: unknown): void {
   if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(payload));
+}
+
+/** A ws callback proves transport acceptance only. The bounded timeout preserves uncertainty after dispatch. */
+function replyObserved(socket: WebSocket, payload: unknown): Promise<"accepted" | "refused" | "unknown"> {
+  if (socket.readyState !== WebSocket.OPEN) return Promise.resolve("refused");
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (value: "accepted" | "refused" | "unknown") => {
+      if (settled) return;
+      settled = true; clearTimeout(timer); socket.off("close", closed); resolve(value);
+    };
+    const closed = () => finish("unknown");
+    // Five seconds bounds a local write callback; it is not a user-reading or presentation deadline.
+    const timer = setTimeout(() => finish("unknown"), 5_000); timer.unref();
+    socket.once("close", closed);
+    try { socket.send(JSON.stringify(payload), (error) => finish(error ? "unknown" : "accepted")); }
+    catch { finish("unknown"); }
+  });
 }
 
 function recoverableId(parsed: unknown): JsonRpcId | null {

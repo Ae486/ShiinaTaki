@@ -1,0 +1,10 @@
+[
+  {
+    "path": "packages/shared/src/index.md",
+    "sha256": "5f3e9328a51c88f3e233f6002f9d64506a0aa71589d7e193dcb37356c0399089"
+  },
+  {
+    "path": "packages/core/src/testing/index.md",
+    "sha256": "f0dca16f019cc3ba071d0a2d42c26a984e398f5c4fd9fa4c9fa61e6e8f88ba8a"
+  }
+]

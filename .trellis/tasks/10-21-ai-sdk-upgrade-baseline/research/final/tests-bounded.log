@@ -1,0 +1,64 @@
+Scope: 5 of 6 workspace projects
+packages/shared test$ vitest run "--maxWorkers=4"
+packages/shared test:  RUN  v4.1.10 H:/TakiAgent-worktrees/t4/packages/shared
+packages/shared test:  Test Files  75 passed (75)
+packages/shared test:       Tests  674 passed (674)
+packages/shared test:    Start at  16:37:44
+packages/shared test:    Duration  12.45s (transform 3.04s, setup 0ms, import 16.70s, tests 1.67s, environment 11ms)
+packages/shared test: Done
+apps/cli test$ vitest run "--maxWorkers=4"
+apps/desktop test$ vitest run --passWithNoTests "--maxWorkers=4"
+packages/core test$ vitest run "--maxWorkers=4"
+apps/cli test:  RUN  v4.1.10 H:/TakiAgent-worktrees/t4/apps/cli
+packages/core test:  RUN  v4.1.10 H:/TakiAgent-worktrees/t4/packages/core
+apps/desktop test:  RUN  v4.1.10 H:/TakiAgent-worktrees/t4/apps/desktop
+apps/cli test:  Test Files  8 passed (8)
+apps/cli test:       Tests  50 passed (50)
+apps/cli test:    Start at  16:37:57
+apps/cli test:    Duration  3.85s (transform 5.10s, setup 0ms, import 8.74s, tests 542ms, environment 1ms)
+apps/cli test: Done
+apps/desktop test:  Test Files  202 passed (202)
+apps/desktop test:       Tests  1214 passed (1214)
+apps/desktop test:    Start at  16:37:58
+apps/desktop test:    Duration  48.86s (transform 23.69s, setup 0ms, import 93.68s, tests 10.93s, environment 31ms)
+apps/desktop test: Done
+packages/core test:  ❯ src/agents/chat-agent.test.ts (10 tests | 2 failed) 1449ms
+packages/core test:      × cancel after partial text keeps the stop path: partial persisted, no retract, autoMemory fires 148ms
+packages/core test:      × throw-ending cancel after partial text rethrows and keeps the partial (stop, matches old runtime) 155ms
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+packages/core test:  FAIL  src/agents/chat-agent.test.ts > createChatAgent > cancel after partial text keeps the stop path: partial persisted, no retract, autoMemory fires
+packages/core test: AssertionError: expected [] to deeply equal [ 'taki' ]
+packages/core test: - Expected
+packages/core test: + Received
+packages/core test: - [
+packages/core test: -   "taki",
+packages/core test: - ]
+packages/core test: + []
+packages/core test:  ❯ src/agents/chat-agent.test.ts:204:18
+packages/core test:     202|       { role: "assistant", content: "par" },
+packages/core test:     203|     ]);
+packages/core test:     204|     expect(auto).toEqual(["taki"]); // the stop path still fires the a…
+packages/core test:        |                  ^
+packages/core test:     205|   });
+packages/core test:     206|
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+packages/core test:  FAIL  src/agents/chat-agent.test.ts > createChatAgent > throw-ending cancel after partial text rethrows and keeps the partial (stop, matches old runtime)
+packages/core test: AssertionError: expected 'null' to contain 'turn cancelled by operator'
+packages/core test: Expected: "turn cancelled by operator"
+packages/core test: Received: "null"
+packages/core test:  ❯ src/agents/chat-agent.test.ts:265:27
+packages/core test:     263|
+packages/core test:     264|     expect(deltas).toEqual(["par"]);
+packages/core test:     265|     expect(String(threw)).toContain("turn cancelled by operator"); // …
+packages/core test:        |                           ^
+packages/core test:     266|     expect(retracted).toBe(false); // partial text exists → stop, not …
+packages/core test:     267|     expect(f.conversation.history("taki")).toEqual([
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+packages/core test:  Test Files  1 failed | 483 passed | 1 skipped (485)
+packages/core test:       Tests  2 failed | 4028 passed | 2 skipped (4032)
+packages/core test:    Start at  16:37:57
+packages/core test:    Duration  251.73s (transform 41.99s, setup 0ms, import 330.92s, tests 481.05s, environment 69ms)
+packages/core test: Failed
+H:\TakiAgent-worktrees\t4\packages\core:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/core@0.0.0 test: `vitest run "--maxWorkers=4"`
+Exit status 1

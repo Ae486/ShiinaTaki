@@ -15,6 +15,7 @@ import { KnobField } from "./knob-field.tsx";
 import { PermissionSection } from "./permission-section.tsx";
 import { ApprovalDecisionsSection } from "./approval-decisions-section.tsx";
 import { configLabelOf, filterConfigEntries, groupConfigEntries } from "./config-groups.ts";
+import { UserTimezoneSection } from "./user-timezone-section.tsx";
 
 export function SettingsPage() {
   const { entries, hasSnapshot, connectionReady, loading, error, refreshing, observationGap, save, refresh } = useConfig();
@@ -25,6 +26,7 @@ export function SettingsPage() {
     <>
       <PageHeader title="设置" hint="值优先级：环境变量 > 面板存储 > 内置默认；每项都注明生效方式。" busy={refreshing} />
       <PageBody>
+        <UserTimezoneSection />
         <PermissionSection />
         <ApprovalDecisionsSection />
         {error && <PageAlert action={{ label: "重试", onClick: () => void refresh() }}>读取配置失败：{error}</PageAlert>}

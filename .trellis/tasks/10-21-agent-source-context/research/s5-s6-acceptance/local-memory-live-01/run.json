@@ -1,0 +1,12 @@
+{
+  "requestedModel": "deepseek-v4-flash",
+  "physicalRequestsLimit": 4,
+  "sourceUnchanged": true,
+  "deadlineExceeded": false,
+  "observationFailures": [],
+  "completed": true,
+  "logicalGenerationsLimit": 2,
+  "primaryAnswer": "scripted",
+  "privatePublicationToolSources": "isolated synthetic fixtures",
+  "semanticReview": "Review retained facts and recall against source subjects."
+}

@@ -318,7 +318,8 @@ function sourceDigest(entries: TimelineEntry[]): string {
   const hash = createHash("sha256");
   hash.update("taki/conversation-compaction-source/v1\0");
   for (const entry of entries) hash.update(JSON.stringify({ seq: entry.seq, id: entry.id, role: entry.role,
-    content: entry.content, parts: canonicalSourceParts(entry.parts) ?? null, createdAt: entry.createdAt })).update("\0");
+    content: entry.content, parts: canonicalSourceParts(entry.parts) ?? null, createdAt: entry.createdAt,
+    ...(entry.sourceContext ? { sourceContext: entry.sourceContext } : {}) })).update("\0");
   return hash.digest("hex");
 }
 

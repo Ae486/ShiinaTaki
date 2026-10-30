@@ -1,0 +1,65 @@
+
+ RUN  v4.1.10 H:/TakiAgent-worktrees/t4/e2e
+
+ ❯ src/initiative-pattern-real.e2e.test.ts (8 tests | 3 failed | 1 skipped) 433852ms
+     × authoring and multi-turn lifecycle sample 2 9014ms
+     × real heartbeat selected context and decision sample 1 184356ms
+     × real heartbeat selected context and decision sample 2 184290ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/initiative-pattern-real.e2e.test.ts > L2 C3 real model acceptance (explicit opt-in) > authoring and multi-turn lifecycle sample 2
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ only src/initiative-pattern-real.e2e.test.ts:207:20
+    206|       return result.pattern;
+    207|     },
+    208|     async set(key, value) { expect(await rpc(base.socket, CONFIG_METHO…
+       |             ^
+    209|   };
+    210| }
+ ❯ src/initiative-pattern-real.e2e.test.ts:47:21
+ ❯ withRealScenario src/initiative-pattern-real.e2e.test.ts:172:5
+ ❯ src/initiative-pattern-real.e2e.test.ts:44:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/initiative-pattern-real.e2e.test.ts > L2 C3 real model acceptance (explicit opt-in) > real heartbeat selected context and decision sample 1
+ FAIL  src/initiative-pattern-real.e2e.test.ts > L2 C3 real model acceptance (explicit opt-in) > real heartbeat selected context and decision sample 2
+AssertionError: expected 'failed' to be 'completed' // Object.is equality
+
+Expected: "completed"
+Received: "failed"
+
+ ❯ src/initiative-pattern-real.e2e.test.ts:125:48
+    123|           if (seen.has(command.commandId)) continue;
+    124|           seen.add(command.commandId);
+    125|           void rpc(s.socket, AVATAR_METHODS.outcome, { characterId: "t…
+       |                                                ^
+    126|         }
+    127|       }, 20);
+ ❯ withRealScenario src/initiative-pattern-real.e2e.test.ts:172:5
+ ❯ src/initiative-pattern-real.e2e.test.ts:102:5
+
+Caused by: Error: Matcher did not succeed in time.
+ ❯ src/initiative-pattern-real.e2e.test.ts:124:9
+ ❯ withRealScenario src/initiative-pattern-real.e2e.test.ts:172:5
+ ❯ src/initiative-pattern-real.e2e.test.ts:102:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 4 passed | 1 skipped (8)
+   Start at  18:42:51
+   Duration  435.71s (transform 1.01s, setup 0ms, import 1.51s, tests 433.85s, environment 0ms)
+
+undefined
+H:\TakiAgent-worktrees\t4\e2e:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/initiative-pattern-real.e2e.test.ts -t sample 2|unsupported-source|scheduled reminder|real heartbeat

@@ -24,3 +24,26 @@ scripts/migrate-node-to-g.ps1
 
 # Claude Code local worktrees (agent isolation scratch — never commit)
 .claude/worktrees/
+
+# Live user-data backups taken before memory migrations (protected; never commit)
+.backup-*/
+
+# Exported agent session transcripts (local working notes)
+codex-session-*.md
+
+# Task evidence debug symbols (regenerable; the reviewed binaries stay tracked)
+.trellis/tasks/**/*.pdb
+
+# Local runtime scratch: media/live runs, venvs, cloned sources (never commit)
+/.runtime/
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Task evidence runtime databases, Node compile caches and third-party package archives (regenerable)
+.trellis/tasks/**/*.db
+.trellis/tasks/**/*.db-wal
+.trellis/tasks/**/*.db-shm
+.trellis/tasks/**/node-compile-cache/
+.trellis/tasks/**/*.tgz

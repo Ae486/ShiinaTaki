@@ -1,0 +1,17 @@
+{
+  "label": "desktop-full",
+  "command": [
+    "pnpm",
+    "--filter",
+    "@taki/desktop",
+    "exec",
+    "vitest",
+    "run",
+    "--maxWorkers=4"
+  ],
+  "cwd": "H:\\TakiAgent-worktrees\\t4",
+  "startedAt": "2026-09-19T12:02:09.485904+00:00",
+  "seconds": 45.281,
+  "exitCode": 0,
+  "log": "logs/desktop-full.log"
+}

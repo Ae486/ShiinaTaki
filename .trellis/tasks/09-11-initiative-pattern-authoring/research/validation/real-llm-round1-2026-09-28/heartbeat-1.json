@@ -1,0 +1,30 @@
+{
+  "name": "heartbeat-1",
+  "startedAt": "2026-09-28T10:43:58.181Z",
+  "passed": false,
+  "finishedAt": "2026-09-28T10:47:02.508Z",
+  "model": "deepseek-v4-flash",
+  "providerHost": "api.deepseek.com",
+  "turns": [],
+  "runs": [
+    {
+      "initiator": "heartbeat",
+      "state": "failed",
+      "outcome": "failed"
+    }
+  ],
+  "usage": [
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "unknown",
+      "input_tokens": null,
+      "output_tokens": null,
+      "total_tokens": null,
+      "cache_read_tokens": null,
+      "reasoning_tokens": null
+    }
+  ],
+  "deliveries": [],
+  "tools": []
+}

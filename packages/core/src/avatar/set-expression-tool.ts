@@ -1,13 +1,14 @@
 /**
- * INPUT:  an LLM avatar_set_expression call ({ name }) + bound characterId, AvatarSubscriptions, and live vocab (name enum, 1e)
- * OUTPUT: createSetExpressionTool(deps) -> ToolSet { avatar_set_expression }; returns { ok:true } (fire-and-forget)
- * POS:    core/avatar — the agent tool; publishes an avatar.command to the Pet UI; execute NEVER throws; no OS/gate (invariant 1/4).
- *         Risk posture (MCP vocab, doc-only — canonical Core governance is authoritative; an Execution Host may only
- *         tighten and finally enforce Host-local actions): readOnly (no OS side effect), non-destructive, idempotent,
- *         closed-world.
+ * INPUT:  an LLM avatar_set_expression call ({ name }) + bound characterId, AvatarSubscriptions, AvatarOutcomes, live vocab
+ * OUTPUT: createSetExpressionTool(deps) -> ToolSet { avatar_set_expression }; returns the Presentation Outcome (§3.2 table)
+ * POS:    core/avatar — the agent tool; publishes an avatar.command (Core-generated commandId) and awaits the Pet UI's
+ *         bounded outcome; execute NEVER throws; no OS/gate (invariant 1/4). Risk posture (MCP vocab, doc-only —
+ *         canonical Core governance is authoritative): readOnly (no OS side effect), non-destructive, idempotent, closed-world.
  */
+import { randomUUID } from "node:crypto";
 import { tool, type ToolSet } from "ai";
 import { z } from "zod";
+import { OUTCOME_GUIDANCE, avatarToolResult } from "./avatar-tool-result.ts";
 import type { AvatarToolDeps } from "./avatar-tools.ts";
 import { vocabNameSchema } from "./vocab-name-schema.ts";
 
@@ -18,21 +19,23 @@ export function createSetExpressionTool(deps: AvatarToolDeps): ToolSet {
       description:
         "Set your avatar's facial expression to show how you feel (e.g. before replying, or reacting to the user); " +
         "to play a body motion instead, use avatar_play_motion. " +
-        "The name MUST be one of the expression names listed in your avatar vocabulary; an unknown name is ignored. " +
-        "Fire-and-forget: it changes what the user sees on screen — there is no result to read, and it is fine if no " +
-        "avatar is currently shown. After calling it, add a follow-up message only if you have new substantive " +
-        "content to say — never filler.",
+        "The name MUST be one of the expression names listed in your avatar vocabulary. " +
+        OUTCOME_GUIDANCE,
       inputSchema: z.object({ name: vocabNameSchema(deps.vocab?.expressions ?? []) }),
-      // Publishing is a synchronous fan-out that never blocks the turn; execute still degrades any failure to a
-      // structured result the model can read (error-handling spec) rather than throwing.
-      execute: async ({ name }) => {
+      // Publish is synchronous fan-out; the wait is bounded by the outcomes registry (deadline / abort / no subscriber)
+      // so the turn never blocks on a Pet UI. Any failure degrades to a structured result the model can read.
+      execute: async ({ name }, options) => {
+        const { characterId } = deps;
+        const commandId = randomUUID();
         try {
-          deps.subscriptions.publish({ characterId: deps.characterId, kind: "expression", name });
-          log.info({ characterId: deps.characterId, name }, "avatar expression published");
-          return { ok: true as const };
+          const pending = deps.outcomes.open({ commandId, subscribers: deps.subscriptions.count(characterId), signal: options.abortSignal });
+          deps.subscriptions.publish({ characterId, commandId, kind: "expression", name });
+          const resolution = await pending;
+          log.info({ characterId, name, commandId, toolCallId: options.toolCallId, ...resolution }, "avatar expression settled");
+          return avatarToolResult(resolution);
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
-          log.warn({ err: message }, "avatar set_expression tool failed");
+          log.warn({ err: message, commandId }, "avatar set_expression tool failed");
           return { ok: false as const, code: "INTERNAL_ERROR", message };
         }
       },

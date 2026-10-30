@@ -1,0 +1,32 @@
+{
+  "sourceManifest": "final/source-complete.json",
+  "sourceManifestSha256": "89fdac02d5081b875c5968db6a36812463f84bbb8117fdceee6edf6cf1ee226d",
+  "verifiedFiles": 15,
+  "sourceHashMismatches": [],
+  "baselineSourcePreimageMismatches": [],
+  "removedObserverAbsent": true,
+  "independentApprovedProbe": "recovery/abort-real-fetch-target-approved-policy-review.json",
+  "approvedProbeAssertions": "pass",
+  "reversePatchCheck": {
+    "command": [
+      "git",
+      "apply",
+      "--reverse",
+      "--check",
+      "--",
+      "H:\\TakiAgent-worktrees\\t4\\.trellis\\tasks\\10-21-ai-sdk-upgrade-baseline\\research\\final\\sdk-scope.diff"
+    ],
+    "exitCode": 0,
+    "stderr": ""
+  },
+  "productionMutation": false,
+  "finalGates": {
+    "resultFile": "final-verified/results-typecheck-lint-tests-bounded.json",
+    "allExitCodesZero": true,
+    "testsPassed": 5968,
+    "testsSkipped": 2,
+    "focusedFiles": 9,
+    "focusedTests": 69
+  },
+  "reviewDisposition": "pass; no blocking findings"
+}

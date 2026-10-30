@@ -5,6 +5,7 @@ import type { TriggerRequest } from "@taki/shared";
 import { createTimelineRepo } from "../db/timeline-repo.ts";
 import { createExtensionRunContext } from "../extensions/extension-run-context.ts";
 import type { GovernancePolicyService } from "../governance/governance-policy-service.ts";
+import { createMemoryRunReference } from "../memory/memory-capability-snapshot.ts";
 import { createRunSnapshotCapture } from "../harness/run-snapshot-capture.ts";
 import { createHostCatalogStore } from "../hosts/host-catalog.ts";
 import type { McpManager, McpToolSnapshot } from "../mcp/mcp-manager.ts";
@@ -39,11 +40,12 @@ describe("ChatAgent captured tool names", () => {
     const snapshot = vi.fn(() => [generation === 1 ? first : second]);
     const capture = snapshotCapture({ snapshot } as unknown as McpManager);
     const admitted = await capture.capture(request("first"), RUN_A);
+    const firstExtensionId = Object.keys(admitted.context?.toolDisclosure?.describedTools ?? {})[0];
+    expect(firstExtensionId).toBeDefined();
     const model = scriptedModel([
+      { kind: "tool", toolCallId: "describe-first", toolName: "extension_describe", input: { extensionId: firstExtensionId } },
       { kind: "tool", toolCallId: "call-first", toolName: ROUTE, input: {} },
       { kind: "text", deltas: ["first done"] },
-      { kind: "tool", toolCallId: "call-second", toolName: ROUTE, input: {} },
-      { kind: "text", deltas: ["second done"] },
     ]);
     const fallbackContext = vi.fn(() => ({ tools: {} }));
     const agent = createChatAgent({ model, store: fixture.conversation, memory: fixture.memory, runContext: fallbackContext });
@@ -54,22 +56,36 @@ describe("ChatAgent captured tool names", () => {
     expect(first.isCurrent()).toBe(false);
     expect(Object.isFrozen(admitted.context?.toolDisplayNames)).toBe(true);
     expect(admitted.context?.toolDisplayNames?.[ROUTE]).toBe("source-server · tool.name");
-    expect(toolParts(fixture).map((part) => part.displayName)).toEqual(["source-server · tool.name", "source-server · tool.name"]);
-    expect(toolParts(fixture)[1]).toMatchObject({ output: { type: "json", value: { from: "first runtime" } } });
+    const routeParts = () => toolParts(fixture).filter((part) => part.toolName === ROUTE);
+    expect(routeParts().map((part) => part.displayName)).toEqual(["source-server · tool.name", "source-server · tool.name"]);
+    expect(routeParts()[1]).toMatchObject({ output: { type: "json", value: { from: "first runtime" } } });
 
     const replacement = await capture.capture(request("second"), RUN_B);
-    await drain(agent.stream({ characterId: "taki", message: "second request" }, { runContext: replacement.context }));
+    const secondExtensionId = Object.keys(replacement.context?.toolDisclosure?.describedTools ?? {})[0];
+    expect(secondExtensionId).toBeDefined();
+    const replacementModel = scriptedModel([
+      { kind: "tool", toolCallId: "describe-second", toolName: "extension_describe", input: { extensionId: secondExtensionId } },
+      { kind: "tool", toolCallId: "call-second", toolName: ROUTE, input: {} },
+      { kind: "text", deltas: ["second done"] },
+    ]);
+    const replacementAgent = createChatAgent({ model: replacementModel, store: fixture.conversation,
+      memory: fixture.memory, runContext: fallbackContext });
+    await drain(replacementAgent.stream({ characterId: "taki", message: "second request" }, { runContext: replacement.context }));
 
     expect(snapshot).toHaveBeenCalledTimes(2);
     expect(fallbackContext).not.toHaveBeenCalled();
-    expect(toolParts(fixture).map((part) => [part.toolCallId, part.toolName, part.displayName])).toEqual([
+    expect(routeParts().map((part) => [part.toolCallId, part.toolName, part.displayName])).toEqual([
       ["call-first", ROUTE, "source-server · tool.name"],
       ["call-first", ROUTE, "source-server · tool.name"],
       ["call-second", ROUTE, "source-server · tool_name"],
       ["call-second", ROUTE, "source-server · tool_name"],
     ]);
-    expect(JSON.stringify(fixture.conversation.history("taki"))).not.toContain("displayName");
-    expect(JSON.stringify(model.doStreamCalls[2]?.prompt)).not.toContain("source-server · tool.name");
+    // Descriptor results legitimately contain displayName inside their data. Presentation metadata must
+    // still stay out of canonical model-message parts and must not replace the captured routing key.
+    for (const message of fixture.conversation.history("taki")) {
+      if (Array.isArray(message.content)) for (const part of message.content) expect(part).not.toHaveProperty("displayName");
+    }
+    expect(JSON.stringify(replacementModel.doStreamCalls[0]?.prompt)).not.toContain("source-server · tool.name");
   });
 
   it("captures a compatibility context once across a clean overflow retry and later injected-table mutations", async () => {
@@ -147,10 +163,10 @@ function snapshotCapture(mcp: McpManager) {
       route: async () => ({ ok: true }),
     }) },
     governance,
-    memory: { createTools: () => ({}), snapshot: () => ({ providerId: "local", contractVersion: 1,
+    memory: { captureRun: async () => ({ tools: {}, snapshot: createMemoryRunReference({ providerId: "local", contractVersion: 1,
       capabilities: { providerId: "local", contractVersion: 1, retain: true, recall: true, reflect: false, edit: true,
         invalidate: true, restore: true, conditionalMutation: true, idempotentWrites: true, sparseRetrieval: true,
-        vectorRetrieval: "unavailable", derivedMemoryRead: false } }) },
+        vectorRetrieval: "unavailable", derivedMemoryRead: false } }) }) },
     provider: "test", modelId: "test",
   });
 }

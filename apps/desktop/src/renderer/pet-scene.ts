@@ -21,6 +21,7 @@ import { renderActivityFor, type AvatarState } from "./state-machine.ts";
 import { loadCharacterModel, DEV_MODEL_SOURCE, type CostumeSource } from "./live2d/load-character-model.ts";
 import { createIdleMotionScheduler, type IdleMotionScheduler } from "./live2d/idle-motion.ts";
 import { createAvatarController, type AvatarController } from "./live2d/avatar-controller.ts";
+import type { AvatarOutcomeReport } from "./live2d/avatar-commands.ts";
 import { reloadModel } from "./live2d/costume-switch.ts";
 import { readVocabulary, type AvatarVocabulary } from "./live2d/model-vocabulary.ts";
 import type { ClickRegion } from "./live2d/click-regions.ts";
@@ -57,9 +58,10 @@ export type PetScene = {
   // Truthful live-scene snapshot for generation restoration. The optional costume comes from the source that actually
   // attached; it is never inferred from last-costume persistence or a click intent.
   reportSnapshot: () => AvatarVocabulary & { costume?: string };
-  // Applies an LLM-driven avatar command (validated vs the vocabulary); an unknown name fires onVocabularyDrift so the
-  // caller re-reports the live inventory (self-heal, 1b). F3.
-  applyAvatarCommand: (command: AvatarCommand, onVocabularyDrift?: () => void) => void;
+  // Applies an LLM-driven avatar command (validated vs the vocabulary) and resolves its Presentation Outcome report;
+  // an unknown name fires onVocabularyDrift so the caller re-reports the live inventory (self-heal, 1b). Model-less
+  // scene → rejected/unavailable. F3 / D80.
+  applyAvatarCommand: (command: AvatarCommand, onVocabularyDrift?: () => void) => Promise<AvatarOutcomeReport>;
   // Reacts to a click at canvas-local px (region reaction) and returns the region hit for the caller's precedence. F4.
   handleClick: (x: number, y: number) => ClickRegion | null;
   // Gaze follow: point the model at a canvas-local cursor position (clamped + delta-gated). F4.
@@ -158,7 +160,9 @@ export async function createPetScene(host: HTMLElement, options: PetSceneOptions
       const vocabulary = current.avatar.vocabulary;
       return current.costume === null ? vocabulary : { ...vocabulary, costume: current.costume };
     },
-    applyAvatarCommand: (command, onVocabularyDrift) => slot.current?.avatar.applyCommand(command, onVocabularyDrift),
+    applyAvatarCommand: (command, onVocabularyDrift) =>
+      slot.current?.avatar.applyCommand(command, onVocabularyDrift)
+        ?? Promise.resolve({ outcome: "rejected", reason: "unavailable" }),
     handleClick: (x, y) => slot.current?.avatar.reactToClick(x, y) ?? null,
     focusAt: (x, y) => slot.current?.avatar.focusAt(x, y),
     handleProximity: (x, y) => slot.current?.avatar.handleProximity(x, y),

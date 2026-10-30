@@ -1,0 +1,26 @@
+[
+  {
+    "path": "packages/core/src/db/pending-memory-repo.test.ts",
+    "beforeSha256": "722cc9d792336467c942358aa054c3d7f9f2d5a9e0f7613c0f4ff3508e6eb418"
+  },
+  {
+    "path": "packages/core/src/db/scheduled-task-repo.test.ts",
+    "beforeSha256": "5acf995c3bb63d8ddda771f639bd02a4d7fb41168d07838bff5f2e0eaf063b60"
+  },
+  {
+    "path": "packages/core/src/db/migrations/041-canonical-memory-maintenance.test.ts",
+    "beforeSha256": "b7356542e11de24a37ef8be64b45d2e2b922c29dbd513e22d1af58f6f0524338"
+  },
+  {
+    "path": "packages/core/src/db/migrations/048-memory-operations.test.ts",
+    "beforeSha256": "195115857d7dd560cb7b632b050c2df6a4c2aaa5b1ece25055e766c114ccc3fd"
+  },
+  {
+    "path": "packages/core/src/db/migrations/index-list.test.ts",
+    "beforeSha256": "3c137d2c6799d12833622f250e03d2bc7d63ac0e8684c77f44e69f11ebda96a4"
+  },
+  {
+    "path": "packages/core/src/db/migrations/lineage-reopen-matrix.test.ts",
+    "beforeSha256": "54cd06ba7df82db3d5a1a8a67743c1120c26e293549df16e4ba2de16be2ac7e8"
+  }
+]

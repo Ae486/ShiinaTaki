@@ -1,6 +1,6 @@
 /**
- * INPUT:  cursor-bound snapshots, complete journal pages, admitted Bank bindings, Core-issued leases, and run deadlines
- * OUTPUT: deadline-fenced atomic record/FTS/cache/checkpoint publication and durable full canonical reads
+ * INPUT:  cursor-bound snapshots, complete journal pages, captured Authority/Bank bindings, leases, and deadlines
+ * OUTPUT: transaction-fenced atomic record/FTS/cache/checkpoint publication and durable full canonical reads
  * POS:    core/db — B5 single-writer replica; no writes to B4 activation receipts or Memory Authority
  */
 import { randomUUID } from "node:crypto";
@@ -8,7 +8,7 @@ import { z } from "zod";
 import {
   MemoryReplicaBankSchema, MemoryReplicaCheckpointSchema, MemoryReplicaJournalPageSchema, type CanonicalMemoryRecord, type MemoryReplicaBank,
   type HindsightLogicalSnapshotMetadata, type HindsightLogicalSnapshotPage, type HindsightLogicalSnapshotRecord, type MemoryReplicaCheckpoint,
-  type MemoryReplicaJournalPage, type MemoryReplicaLease, type MemoryReplicaRecord,
+  type MemoryAuthorityEpoch, type MemoryReplicaJournalPage, type MemoryReplicaLease, type MemoryReplicaRecord,
 } from "@taki/shared";
 import type { Database } from "./sqlite.ts";
 import { canonicalJson } from "../memory/legacy-migration/legacy-identities.ts";
@@ -19,16 +19,19 @@ import { createReplicaRecordStore, type ReplicaRecordRead, type ReplicaRecordSto
 import { createHindsightReplicaLeaseRepo, type HindsightReplicaLeaseRepo } from "./hindsight-replica-lease-repo.ts";
 import { readReplicaCheckpoint, publishReplicaCheckpoint } from "./hindsight-replica-checkpoint-store.ts";
 import { invalidateReplicaSnapshotCache, publishReplicaSnapshotCache, readReplicaSnapshotCache, type ReplicaSnapshotCacheKey } from "./hindsight-replica-snapshot-cache.ts";
+import { createCanonicalMemoryAuthorityRepo } from "./canonical-memory-authority-repo.ts";
 
 export interface ReplicaSnapshotInput {
   metadata: HindsightLogicalSnapshotMetadata; pages: HindsightLogicalSnapshotPage[];
   authorityEpochId: string; expectedProviderLineageId: string; expectedBankGeneration: string;
   expectedCheckpoint: MemoryReplicaCheckpoint | null; lease: MemoryReplicaLease;
   deadlineAt?: string; expectedBank?: MemoryReplicaBank;
+  expectedAuthority?: Pick<MemoryAuthorityEpoch, "epochId" | "providerLineageId">;
 }
 export interface ReplicaApplyInput {
   page: MemoryReplicaJournalPage; expectedCheckpoint: MemoryReplicaCheckpoint; lease: MemoryReplicaLease;
   deadlineAt?: string; expectedBank?: MemoryReplicaBank;
+  expectedAuthority?: Pick<MemoryAuthorityEpoch, "epochId" | "providerLineageId">;
 }
 export type ReplicaReconciliationInput = Omit<ReplicaSnapshotInput, "expectedCheckpoint"> & {
   expectedCheckpoint: MemoryReplicaCheckpoint; reset: boolean;
@@ -72,12 +75,15 @@ function seed(state: State, input: ReplicaSnapshotInput, mode: "seed" | "reconci
   if (snapshot.metadata.manifest.bankGeneration !== input.expectedBankGeneration) throw new Error("HINDSIGHT_REPLICA_GENERATION_MISMATCH");
   const records = snapshot.records.map((record) => projectHindsightReplicaRecord(record, {
     bankId: input.lease.bankId, authorityEpochId: input.authorityEpochId, projection: state.projection,
+    providerLineageId: snapshot.metadata.manifest.providerLineage,
+    bankGeneration: snapshot.metadata.manifest.bankGeneration,
   }));
   assertSnapshotRecords(records, input.lease.bankId);
   assertBankBinding(input.lease.bankId, input.expectedBank, records);
   let result: MemoryReplicaCheckpoint | undefined;
   state.db.transaction(() => {
     state.leases.assert(input.lease);
+    assertPublicationBinding(state, input);
     assertSnapshotFresh(state.now(), input);
     const previous = requireExpected(state, input.lease.bankId, input.expectedCheckpoint);
     if (mode !== "seed" && !previous) throw new Error("HINDSIGHT_CHECKPOINT_MISSING");
@@ -95,6 +101,7 @@ function seed(state: State, input: ReplicaSnapshotInput, mode: "seed" | "reconci
     publishReplicaSnapshotCache(state.db, snapshot);
     assertSnapshotFresh(state.now(), input);
     state.leases.assert(input.lease);
+    assertPublicationBinding(state, input);
     publishReplicaCheckpoint(state.db, { previous, next: result });
   });
   if (!result) throw new Error("HINDSIGHT_REPLICA_APPLY_FAILED");
@@ -120,6 +127,7 @@ function apply(state: State, input: ReplicaApplyInput): MemoryReplicaCheckpoint 
   let result: MemoryReplicaCheckpoint | undefined;
   state.db.transaction(() => {
     state.leases.assert(input.lease);
+    assertPublicationBinding(state, input);
     assertRunDeadline(state.now(), input.deadlineAt);
     if (input.lease.bankId !== page.bankId) throw new Error("HINDSIGHT_REPLICA_LEASE_LOST");
     const previous = requireExpected(state, page.bankId, expected);
@@ -136,6 +144,7 @@ function apply(state: State, input: ReplicaApplyInput): MemoryReplicaCheckpoint 
       manifestDigest: state.records.digest(page.bankId), verifiedAt: state.now() });
     assertRunDeadline(state.now(), input.deadlineAt);
     state.leases.assert(input.lease);
+    assertPublicationBinding(state, input);
     publishReplicaCheckpoint(state.db, { previous, next: result });
   });
   if (!result) throw new Error("HINDSIGHT_REPLICA_APPLY_FAILED");
@@ -177,5 +186,20 @@ function assertBankBinding(bankId: string, expectedBank: MemoryReplicaBank | und
   if (expected.bankId !== bankId || records.some((record) => record.payload?.kind === "bank"
     && (record.payload.value.scope.kind !== expected.scope || record.payload.value.scope.characterId !== expected.characterId))) {
     throw new Error("HINDSIGHT_REPLICA_BANK_BINDING_MISMATCH");
+  }
+}
+
+function assertPublicationBinding(state: State, input: Pick<ReplicaApplyInput, "expectedAuthority" | "expectedBank">): void {
+  // A valid old checkpoint/lease does not prove that its Authority or trusted scope is still selected after HTTP work.
+  if (input.expectedAuthority) {
+    const current = createCanonicalMemoryAuthorityRepo(state.db).authorityEpoch();
+    if (current.providerId !== "hindsight" || current.epochId !== input.expectedAuthority.epochId
+      || current.providerLineageId !== input.expectedAuthority.providerLineageId) throw new Error("HINDSIGHT_PENDING_AUTHORITY_MISMATCH");
+  }
+  if (input.expectedBank) {
+    const expected = MemoryReplicaBankSchema.parse(input.expectedBank);
+    const current = state.projection.bankScope(expected.bankId);
+    // Most journal pages contain no Bank row, so checking only the projected page cannot detect scope rebinding.
+    if (current.kind !== expected.scope || current.characterId !== expected.characterId) throw new Error("HINDSIGHT_REPLICA_BANK_BINDING_MISMATCH");
   }
 }

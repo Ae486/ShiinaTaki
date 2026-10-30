@@ -1,0 +1,50 @@
+{
+  "id": "initiative-presence-feedback",
+  "name": "initiative-presence-feedback",
+  "title": "User presence and presentation feedback",
+  "description": "Authenticated Desktop presence sources, per-message presentation and honest cross-device response opportunities.",
+  "status": "in_progress",
+  "dev_type": null,
+  "scope": "initiative-presence-feedback",
+  "package": null,
+  "priority": "P1",
+  "creator": "pleia",
+  "assignee": "pleia",
+  "createdAt": "2026-09-11",
+  "completedAt": null,
+  "branch": "task/t4-skills-mcp-productization",
+  "base_branch": "main",
+  "worktree_path": "H:/TakiAgent-worktrees/t4",
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "09-11-companion-initiative-implementation",
+  "relatedFiles": [],
+  "notes": "Owner requested a new development task and consolidation on 2026-09-11. Prepared artifacts do not claim implementation, runtime acceptance, commit, push or finish/archive. Preserve the existing Runtime and Monitor authorities. On 2026-09-27 the owner requested formal start; the native session was activated for this child. On 2026-09-28 implementation and verification resumed from on-disk changes. No owner acceptance, commit, push or archive is claimed. On 2026-09-28 successor session completed the C2 automated gate: Core 3460 plus one existing skip, Shared 610, Desktop 1104, CLI 50, real-process E2E 17, Rust 205, five typechecks, Clippy and current Desktop build. One C2-caused Rust ACL expectation was corrected. Root lint and QQMM lock reproducibility remain independent workspace limits. Native fixture evidence is retained separately from owner/Live2D acceptance. No C3 activation, commit, push or archive.",
+  "meta": {
+    "stage": "automated_verified",
+    "source_baseline": "t4:a35d273;main:3c63a80",
+    "implementation_order": 2,
+    "depends_on": [
+      "09-11-initiative-runtime-foundation"
+    ],
+    "parent_design": ".trellis/tasks/09-11-companion-initiative-implementation/design.md",
+    "owner_authorization": "development-approved-subject-to-ordered-prerequisite-checks",
+    "development_approved_at": "2026-09-16",
+    "snapshot_approved_at": "2026-09-19",
+    "incoming_source_commit": "516e151ad1cbd298d07b95e7b4460833e55442f6",
+    "snapshot_contract": ".trellis/tasks/09-11-companion-initiative-implementation/research/baseline-snapshot-contract-2026-09-19.md",
+    "activation_prerequisite": "C1 automated shared runtime/delivery/timezone/Monitor gate passed; owner acceptance remains pending",
+    "continuation_report": ".trellis/tasks/09-11-initiative-presence-feedback/research/continuation-2026-09-28.md",
+    "verified_at": "2026-09-28",
+    "verification_report": ".trellis/tasks/09-11-initiative-presence-feedback/research/implementation-evidence-2026-09-28.md",
+    "formal_review": ".trellis/tasks/09-11-initiative-presence-feedback/research/formal-review-2026-09-28.md",
+    "verified_source": ".trellis/tasks/09-11-initiative-presence-feedback/research/verified-source-2026-09-28.json",
+    "whole_workspace_limits": [
+      "Independent QQMM native-smoke script exceeds the root lint size limit.",
+      "Independent QQMM repository and installed lock integrity differ."
+    ],
+    "owner_acceptance": "pending"
+  }
+}

@@ -9,13 +9,15 @@
 import { ToolLoopAgent, type LanguageModel, type ModelMessage } from "ai";
 import { scrubPii } from "../perception/pii-scrub.ts";
 import type { MemoryWriteOp } from "./episodic-writer.ts";
+import { SOURCE_INTERPRETATION_RULE } from "../agents/source-interpretation.ts";
 
 // The description is the authoritative, PERMANENT record that replaces the image after its bytes expire (decision 6);
 // keep it faithful, concise, and in the conversation's language so later text-model recall reads naturally.
 const DESCRIBE_PROMPT =
   "You describe images for long-term memory. Describe the attached image(s) faithfully, concisely and objectively — " +
   "content, notable details, any visible text. The authoritative record replaces the image. Reply with ONLY the " +
-  "description, at most 150 words, in the conversation's language.";
+  "description, at most 150 words, in the conversation's language. Preserve displayed speaker, title and quotation " +
+  "when relevant. Do not turn a depicted event into the user's experience.\n\n" + SOURCE_INTERPRETATION_RULE;
 
 // Mid-range episodic importance for an auto-written image description (the store's own range is 3-7).
 const IMAGE_IMPORTANCE = 4;
@@ -58,7 +60,7 @@ export function createImageDescriptionWriter(deps: ImageDescriptionWriterDeps): 
         // assembler renders stored entries later without it, so a fenced string would be stored, not fenced. The entry
         // instead carries origin "observed" (Q8), which is what lets the render sites fence it (D47 closes in T5).
         // ONE entry via the EXISTING episodic write path (no new memory machinery — D28); the prefix keeps recall readable.
-        deps.writeEpisode({
+        await deps.writeEpisode({
           characterId,
           layer: IMAGE_LAYER,
           content: `[image] ${scrubPii(description)}`,

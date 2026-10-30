@@ -82,6 +82,37 @@ function executableTools(keys: readonly string[], called: string[]): ToolSet {
 }
 
 describe("createCoreToolGovernanceAdapter", () => {
+  it("keeps recommendation preparation under the existing governed media control cell", async () => {
+    const governance = service(); const called: string[] = [];
+    const wrap = vi.spyOn(governedTool, "wrapGovernedTool");
+    const wrapped = createCoreToolGovernanceAdapter(governance, OWNER_HOST_ID)
+      .wrap(executableTools(["manage_co_watching", "manage_media_recommendations"], called));
+    expect(wrap).toHaveBeenCalledTimes(2);
+    for (const [, options] of wrap.mock.calls) expect(options.binding).toMatchObject({
+      identity: { capabilityId: "core.co-watching.manage", ownerHostId: OWNER_HOST_ID }, cellKey: "co-watching-manage" });
+    expect(await wrapped.manage_media_recommendations!.execute!({}, { toolCallId: "allowed", messages: [], context: undefined })).toMatchObject({ ok: true });
+    expect(called).toEqual(["manage_media_recommendations"]);
+  });
+  it("uses an exact durable grant for unattended Core tools and observes revocation", async () => {
+    const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS }); dbs.push(db);
+    const authority = createApprovalDecisionService(createApprovalStateRepo(db));
+    const approval = createApprovalInteractionService(authority);
+    const governance = createGovernancePolicyService(createGovernancePolicyRepo(db));
+    governance.setCell({ key: "fs-write:in-workspace", level: "standard", posture: "ask", expectedPolicyGeneration: 1 });
+    const scope = { bindingRevision: 1 as const, identity: { capabilityId: "fs-write", ownerHostId: OWNER_HOST_ID },
+      descriptorRevision: 1, classifierId: "workspace-path", classifierRevision: 1, cellKey: "fs-write:in-workspace" };
+    authority.grantAlways({ binding: { ...scope, decisionScopeDigest: approvalDecisionScopeDigest(scope), disclosureRevision: 1 },
+      expectedApprovalGeneration: authority.snapshot().approvalGeneration });
+    const called: string[] = [];
+    const wrapped = createCoreToolGovernanceAdapter(governance, OWNER_HOST_ID, approval).wrap(executableTools(["write_file"], called));
+    const options = { toolCallId: "background", messages: [], context: undefined };
+    expect(await wrapped.write_file!.execute!({}, options)).toMatchObject({ ok: true });
+    const decision = approval.list().decisions[0]!;
+    approval.revoke(decision.decisionId, approval.approvalGeneration());
+    expect(await wrapped.write_file!.execute!({}, options)).toMatchObject({ ok: false, code: "APPROVAL_REQUIRED" });
+    expect(called).toEqual(["write_file"]);
+  });
+
   it("approves one actual Workspace write with the exact registered classifier and scope", async () => {
     const root = realpathSync(mkdtempSync(join(tmpdir(), "taki-approval-write-")));
     writeRoots.push(root);

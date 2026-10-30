@@ -1,0 +1,107 @@
+--- a/packages/core/src/agents/chat-agent.ts
++++ b/packages/core/src/agents/chat-agent.ts
+@@ -4,7 +4,6 @@
+  * POS:    core/agents — the existing ToolLoopAgent boundary; owns abort/retract and one context-overflow retry,
+  *         preserving day-stable instructions, volatile message-tail context, and detached memory writes
+  */
+-/* eslint max-lines: ["error", { "max": 363, "skipBlankLines": true, "skipComments": true }] -- Keep SDK abort failure and completed-step capture beside retry/commit ordering; splitting these turn-owner seams would obscure that contract. */
+ import { ToolLoopAgent, isStepCount, type LanguageModel, type ModelMessage, type StopCondition, type Telemetry, type ToolSet } from "ai";
+ import { captureToolDisplayNames, type ChatSendParams, type ImageAttachment, type InitiativeSelectedContext, type RunMemoryReference, type TimelineEntry } from "@taki/shared";
+ import { initiativeInstructions, initiativeReplay, restrictInitiativeTools } from "./initiative-context.ts";
+@@ -33,7 +32,6 @@
+ import type { ToolDisclosureSnapshot } from "../extensions/tool-disclosure-snapshot.ts";
+ import { bindCapturedSkillLoad, createToolDisclosure, type SkillToolBundle } from "./tool-disclosure.ts";
+ import { bindCapturedToolExecution } from "../governance/captured-tool-execution.ts";
+-import { observeProviderStreamFailure } from "./provider-stream-failure.ts";
+ 
+ /** Per-turn execution handle. Primary chat supplies a WS connection; unattended non-primary Runs omit it. */
+ export interface TurnContext {
+@@ -149,7 +147,7 @@
+   /** Extra stop conditions OR-composed into stopWhen after the step cap (e.g. the avatar presentation tail-stop, 1c). */
+   stopConditions?: StopCondition<ToolSet>[];
+   /** Usage-capture seam (batch 6, R1 tier 2): fired DETACHED on committed turns only, alongside the auto-memory
+-   *  fire (same never-adds-latency contract); a retract or a thrown ending fires nothing. Absent = today's behavior. */
++   *  fire (same never-adds-latency contract); a retract, cancellation or thrown ending fires nothing. */
+   onUsage?: (report: TurnUsageReport) => void;
+   /** The configured non-history share of the calibrated context window; actual stable costs consume it first. */
+   requestEnvelopeReserve?: () => number;
+@@ -262,7 +260,8 @@
+     }
+     if (retracted) return;
+     if (failure) throw failure.error;
+-    state.afterCommit?.();
++    // A cancelled turn keeps its committed source witness but starts no post-turn maintenance.
++    if (!turn?.signal?.aborted) state.afterCommit?.();
+     return;
+   }
+ }
+@@ -304,9 +303,7 @@
+   const clock = { now, timezone: selected ? undefined : deps.userTimezone?.() };
+   const memoryContext = selected ? "" : attempt.runContext?.assembleMemory?.(controlMessage) ?? deps.memory.assemble({ characterId, currentMessage: controlMessage });
+   const instructions = selected ? initiativeInstructions(selected) : composeInstructions(deps, { characterId, memoryContext, memoryPrompt: attempt.runContext?.memoryPrompt, runInstructions: attempt.runContext?.instructions }, clock);
+-  let providerStreamFailure: { error: unknown } | undefined;
+-  const selectedModel = observeProviderStreamFailure(vision ? vision.model : deps.model,
+-    (error) => { providerStreamFailure ??= { error }; });
++  const selectedModel = vision ? vision.model : deps.model;
+   const { model, observability } = createRunObservabilityModel({
+     model: selectedModel, lifecycle: deps.effectLifecycle, runId: turn?.runId, attemptId: turn?.attemptId,
+     onCommitModelIntent: turn?.onCommitModelIntent,
+@@ -375,9 +372,6 @@
+     else if (part.type === "error") throw part.error;
+   }
+   observability?.assertHealthy();
+-  // The SDK now cancels its reader immediately on abort, which can replace a physical provider rejection
+-  // with a graceful public abort. Preserve that original throw ending and its no-detached-writes contract.
+-  if (turn?.signal?.aborted && providerStreamFailure) throw providerStreamFailure.error;
+   if (!primary && turn?.onSettledText && !turn.signal?.aborted) turn.onSettledText(await result.text);
+   state.afterCommit = () => {
+     if (!primary) return;
+--- a/packages/core/src/agents/index.md
++++ b/packages/core/src/agents/index.md
+@@ -31,7 +31,6 @@
+ - untrusted-fence.ts — the A1 minimal fence: fenceUntrusted({source,content}) → XML-delimited `<untrusted-observation>` block labeling content DATA-never-INSTRUCTIONS; neutralizes any literal closing tag so hostile content can't escape; reused by every untrusted-content producer (T3a activity, later T3b/screenshot/T5)
+ - window-calibrator.ts — createWindowCalibrator({repo, slot, declared}): R1 tier-2 EMA correction factor over the estimator (clamped) + R2 overflow shrink (floor(observed×0.9), never above declared), persisted via window-state-repo; a lowered declaration is written back so runtime and operator status agree while an earlier overflow shrink survives; effectiveWindow() returns the estimator-unit budget
+ - model-effect-middleware.ts — model Effect lifecycle and exact request/first-output/tool-call observation before provider parts leave the middleware
+-- provider-stream-failure.ts — observes physical provider read/cancel failure so SDK immediate abort cancellation preserves Core's original throw ending
+ - sdk-wire-compatibility.test.ts — real compatible-provider SSE regression: complete streamed arguments, distinct sparse/repeated IDs, unsafe finish suppression, and abort aggregate settlement
+ - model-observability.ts — Effect-keyed per-request telemetry and unique unfinished SDK-end association; ambiguous generations never overwrite a request
+ - run-observability-telemetry.ts — per-attempt SDK composition sharing immutable invocations with optional activity; legacy callers gain no invented Run/Effect
+--- a/packages/core/src/agents/provider-stream-failure.ts
++++ /dev/null
+@@ -1,36 +0,0 @@
+-/**
+- * INPUT: one selected provider model and a per-attempt failure observer
+- * OUTPUT: model preserving the physical provider stream failure across SDK abort cancellation
+- * POS: core/agents — compatibility observation only; never changes cancellation or executes/retries a call
+- */
+-import { wrapLanguageModel, type LanguageModel, type LanguageModelMiddleware } from "ai";
+-
+-export function observeProviderStreamFailure(model: LanguageModel, observe: (error: unknown) => void): LanguageModel {
+-  const middleware: LanguageModelMiddleware = {
+-    specificationVersion: "v4",
+-    async wrapStream({ doStream }) {
+-      const result = await doStream();
+-      const reader = result.stream.getReader();
+-      let cancelled = false;
+-      return { ...result, stream: new ReadableStream({
+-        async pull(controller) {
+-          try {
+-            const next = await reader.read();
+-            if (cancelled) return;
+-            if (next.done) controller.close();
+-            else controller.enqueue(next.value);
+-          } catch (error) {
+-            observe(error);
+-            if (!cancelled) controller.error(error);
+-          }
+-        },
+-        async cancel(reason) {
+-          cancelled = true;
+-          try { await reader.cancel(reason); }
+-          catch (error) { observe(error); throw error; }
+-        },
+-      }) };
+-    },
+-  };
+-  return wrapLanguageModel({ model: model as Parameters<typeof wrapLanguageModel>[0]["model"], middleware });
+-}

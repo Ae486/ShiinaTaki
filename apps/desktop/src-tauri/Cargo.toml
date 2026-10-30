@@ -28,6 +28,7 @@ path = "src/bin/taki-secret-key.rs"
 tauri-build = { version = "2.6", features = [] }
 
 [dependencies]
+qqmm-management-native = { path = "../../../../../QQMessageMonitor/packages/management-native" }
 # protocol-asset: serves the Workspace characters/ subtree to the pet webview via the asset: protocol (#18); the
 # scope + CSP live in tauri.conf.json (app.security.assetProtocol). The build script requires this feature when
 # assetProtocol is enabled — a mismatch fails `cargo check` (not at runtime), which is why it is pinned here.

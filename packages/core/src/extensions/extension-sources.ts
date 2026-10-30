@@ -17,8 +17,10 @@ import { createReadSkillResourceTool } from "../skills/read-skill-resource-tool.
 import type { SkillsLoader } from "../skills/skills-loader.ts";
 import type { ExtensionCandidate } from "./extension-registry.ts";
 import { routeExtensionTransfer } from "./extension-transfer.ts";
+import type { CapabilityRouteRequest } from "../capabilities/route-capability.ts";
+import { governedExecutionContext } from "../governance/captured-tool-execution.ts";
 
-type CapabilityRoute = (request: { capabilityId: string; input: unknown; targetHostId: string }) => Promise<unknown>;
+type CapabilityRoute = (request: CapabilityRouteRequest & { targetHostId: string }) => Promise<unknown>;
 
 export interface McpExtensionSnapshot {
   readonly candidates: readonly ExtensionCandidate[];
@@ -46,6 +48,7 @@ export function snapshotSkillExtensions(input: {
       displayName: name.slice(0, 160),
       summary: (entry.row.description ?? "Load this Skill's instructions").slice(0, 512),
       callMode: "skill-load",
+      selectionToolNames: ["load_skill"],
       isCurrent: current,
       call: (value, options) => emptyInput(value)
         ? executeTool(loadTool, { name }, options)
@@ -56,6 +59,7 @@ export function snapshotSkillExtensions(input: {
       displayName: `${name} resources`.slice(0, 160),
       summary: "Read one listed UTF-8 support resource from this Skill package.",
       callMode: "skill-resource",
+      selectionToolNames: ["read_skill_resource"],
       isCurrent: current,
       call: (value, options) => {
         const parsed = ResourceInputSchema.safeParse(value);
@@ -101,17 +105,23 @@ export function snapshotHostCapabilityExtensions(
     displayName: descriptor.capabilityId.slice(0, 160),
     summary: `Host capability (${descriptor.execution}; ${descriptor.cancellation} cancellation)`,
     callMode: transfer ? "transfer" as const : "capability" as const,
+    selectionToolNames: [descriptor.capabilityId.replaceAll("-", "_")],
     available: catalog.readiness === "ready",
     isCurrent: () => currentCapability(catalogs, catalog, descriptor.capabilityId),
-    call: (value: unknown) => transfer
-      ? routeExtensionTransfer({ catalogs, route }, {
+    call: (value: unknown, options: ToolExecutionOptions<unknown>) => transfer
+      ? routeExtensionTransfer({ catalogs, route: (request) => route({ ...request, ...hostExecution(options) }) }, {
           targetHostId: catalog.hostId,
           transferCapabilityId: descriptor.capabilityId,
           input: value,
         })
-      : route({ capabilityId: descriptor.capabilityId, input: value, targetHostId: catalog.hostId }),
+      : route({ capabilityId: descriptor.capabilityId, input: value, targetHostId: catalog.hostId, ...hostExecution(options) }),
     };
   })));
+}
+
+function hostExecution(options: ToolExecutionOptions<unknown>): Partial<CapabilityRouteRequest> {
+  const execution = governedExecutionContext(options);
+  return execution ? { runId: execution.runId, attemptId: execution.attemptId, signal: options.abortSignal ?? execution.signal } : {};
 }
 
 export function snapshotHosts(catalogs: readonly LiveHostCatalog[]): readonly ExtensionHostSnapshot[] {
@@ -126,6 +136,7 @@ export function snapshotHosts(catalogs: readonly LiveHostCatalog[]): readonly Ex
 }
 
 function mcpCandidate(entry: McpToolSnapshot): ExtensionCandidate {
+  const capturedTool = entry.tool;
   return {
     identity: localIdentity({
       kind: "mcp-tool",
@@ -137,8 +148,9 @@ function mcpCandidate(entry: McpToolSnapshot): ExtensionCandidate {
     displayName: entry.ref.toolName.slice(0, 160),
     summary: typeof entry.tool.description === "string" ? entry.tool.description.slice(0, 512) : "Configured MCP tool",
     callMode: "mcp-tool",
+    modelToolName: entry.toolKey,
     isCurrent: entry.isCurrent,
-    call: (value, options) => executeTool(entry.tool, value, options),
+    call: (value, options) => executeTool(capturedTool, value, options),
   };
 }
 

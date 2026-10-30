@@ -109,6 +109,27 @@ async function driveToChallenge(harness: Harness) {
 }
 
 describe("capability challenge/resume", () => {
+  it("retains unknown outcome when an unattended non-cooperative effect is cancelled after execute", async () => {
+    const order: string[] = [];
+    const effects = effectService(order);
+    const settle = vi.spyOn(effects, "settle");
+    const harness = makeHarness(false, effects);
+    const controller = new AbortController();
+    const target = askTarget(harness);
+    target.operator = undefined; target.signal = controller.signal;
+    target.descriptor = { ...target.descriptor, execution: "effect", cancellation: "non-cooperative" };
+    target.governanceProjection = { ...target.governanceProjection, cells: [{ key: "screenshot", posture: "auto" }] };
+    const pending = harness.broker.request(target, {}, {
+      runId: "22222222-2222-4222-8222-222222222222", coreAttemptId: "33333333-3333-4333-8333-333333333333" });
+    const request = sentRequest(harness);
+    expect(harness.broker.challenge(challengeFor(request, AUTO_EVIDENCE), { hostId: HOST, connectionGeneration: 1 })).toEqual({ accepted: true });
+    controller.abort();
+    await expect(pending).resolves.toMatchObject({ ok: false, code: "OUTCOME_UNKNOWN", state: "outcome_unknown" });
+    expect(settle).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ outcome: "outcome_unknown" }));
+    expect(harness.hostFrames.get("capability.cancel")).toBeUndefined();
+    expect(harness.approvalRequests).toEqual([]);
+  });
+
   it("bridges an ask challenge to the owning operator and resumes with a sealed single-use authorization", async () => {
     const harness = makeHarness();
     const { pending, request, ack } = await driveToChallenge(harness);

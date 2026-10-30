@@ -80,7 +80,9 @@ select the canonical call/result `partIndex` and may retain the observed outcome
   once. Normal, exceptional, cancellation and iterator-close paths converge on one commit guard.
   `onStepEnd` may precede consumption of public `finish-step`; identify whether partial text's exact
   step was already captured. Equal language from different steps is not a reason to deduplicate it.
-- Migration 035 adds nullable `timeline_messages.presentation` after unchanged migrations 001-034.
+- Historical T4 migration 035 adds nullable `timeline_messages.presentation` after unchanged migrations 001-034.
+  The combined forward registry uses main Pending Memory 035 and existing 036 convergence through 048;
+  applied receipts and both original 035 modules remain unchanged.
   Metadata references existing canonical content; it stores no second transcript, output or Run ledger.
 - Prepare/validate the full turn, insert it in one synchronous DB transaction, then publish legacy
   appends and one complete batch. Rollback publishes nothing. Empty batches create no blank row.
@@ -162,3 +164,11 @@ activity.start();
 For visibility, reading anchors and motion, follow the
 [frontend foreground-feedback contract](../frontend/foreground-chat-feedback.md). For process teardown,
 follow [accepted connection cleanup](server-push-and-connection-auth.md#scenario-core-shutdown-drains-accepted-connections-before-storage).
+
+## Combined canonical Memory source witness
+
+The turn recording guard returns the exact rows from the atomic writer. Primary ingestion receives that
+batch plus the exact committed user row after commit, including useful exceptional and iterator-close partials.
+It receives no retracted row, unrelated interleaved row, automatic Recall fragment or non-primary turn.
+The captured Memory assembly/tools/Recall bundle and tool-display-name map coexist; automatic Recall
+remains primary-only and is reused across the one clean overflow retry.

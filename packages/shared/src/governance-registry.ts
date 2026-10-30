@@ -26,6 +26,12 @@ const cell = (input: {
 });
 
 const DESCRIPTORS: CapabilityGovernanceDescriptor[] = [
+  ...["manage", "read", "result"].map((operation): CapabilityGovernanceDescriptor => ({
+    capabilityId: `core.subagent.${operation}`, descriptorRevision: 1, subjectRequired: false,
+    classifier: { authority: "core", classifierId: "fixed-risk", classifierRevision: 1 },
+    cells: [cell({ key: `subagent-${operation}`, postures: levels("auto", "auto", "auto"),
+      approvalMemory: "once-only", overrideMode: "immutable" })],
+  })),
   {
     capabilityId: "shell-open", descriptorRevision: 1, subjectRequired: false,
     classifier: { authority: "host", classifierId: "shell-open-target", classifierRevision: 1 },
@@ -77,6 +83,11 @@ const DESCRIPTORS: CapabilityGovernanceDescriptor[] = [
     cells: [cell({ key: "mcp-tool-call", postures: levels("ask", "ask", "ask"), approvalMemory: "rememberable" })],
   },
   {
+    capabilityId: "core.initiative.decide", descriptorRevision: 1, subjectRequired: false,
+    classifier: { authority: "core", classifierId: "fixed-risk", classifierRevision: 1 },
+    cells: [cell({ key: "initiative-decide", postures: levels("auto", "auto", "auto"), approvalMemory: "once-only", overrideMode: "immutable" })],
+  },
+  {
     capabilityId: "core.time.read", descriptorRevision: 1, subjectRequired: false,
     classifier: { authority: "core", classifierId: "fixed-risk", classifierRevision: 1 },
     cells: [cell({ key: "get-current-time", postures: levels("auto", "auto", "auto"), approvalMemory: "once-only", overrideMode: "immutable" })],
@@ -85,6 +96,21 @@ const DESCRIPTORS: CapabilityGovernanceDescriptor[] = [
     capabilityId: "core.schedule.manage", descriptorRevision: 1, subjectRequired: false,
     classifier: { authority: "core", classifierId: "fixed-risk", classifierRevision: 1 },
     cells: [cell({ key: "schedule-manage", postures: levels("auto", "auto", "auto"), approvalMemory: "once-only", overrideMode: "immutable" })],
+  },
+  {
+    capabilityId: "core.initiative.pattern.manage", descriptorRevision: 1, subjectRequired: false,
+    classifier: { authority: "core", classifierId: "fixed-risk", classifierRevision: 1 },
+    cells: [cell({ key: "interaction-pattern-manage", postures: levels("auto", "auto", "auto"), approvalMemory: "once-only", overrideMode: "immutable" })],
+  },
+  {
+    capabilityId: "core.co-watching.manage", descriptorRevision: 2, subjectRequired: false,
+    classifier: { authority: "core", classifierId: "fixed-risk", classifierRevision: 1 },
+    cells: [cell({ key: "co-watching-manage", postures: levels("auto", "auto", "auto"), approvalMemory: "once-only", overrideMode: "immutable" })],
+  },
+  {
+    capabilityId: "core.initiative.intention.plan", descriptorRevision: 1, subjectRequired: false,
+    classifier: { authority: "core", classifierId: "fixed-risk", classifierRevision: 1 },
+    cells: [cell({ key: "intention-plan", postures: levels("auto", "auto", "auto"), approvalMemory: "once-only", overrideMode: "immutable" })],
   },
   {
     capabilityId: "core.memory.search", descriptorRevision: 1, subjectRequired: false,

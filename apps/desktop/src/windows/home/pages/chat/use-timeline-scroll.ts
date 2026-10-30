@@ -11,6 +11,7 @@ const NEAR_EDGE_PX = 48;
 const LOAD_BACKSTOP_MS = 2_000;
 
 export interface TimelineScrollInput {
+  reading?: { key: string; positions: Map<string, TimelineReadingPosition> };
   entryCount: number;
   /** Oldest mounted seq: a prepended older page LOWERS it. The landed-prepend signal survives the P1b window trim,
    *  where a prepend and its trim cancel out in entryCount. */
@@ -21,12 +22,19 @@ export interface TimelineScrollInput {
   tailKey?: string;
 }
 
+export interface TimelineReadingPosition {
+  top: number;
+  following: boolean;
+  anchor?: { key: string; offset: number };
+}
+
 export interface TimelineScroll {
   scrollRef: RefObject<HTMLDivElement | null>;
   contentRef: RefObject<HTMLDivElement | null>;
   onScroll: () => void;
   hasNewContent: boolean;
   followTail: () => void;
+  requestOlder: () => void;
 }
 
 interface ScrollState {
@@ -59,11 +67,38 @@ function readAnchor(element: HTMLElement): ScrollState["anchor"] {
   return row && key ? { key, offset: row.getBoundingClientRect().top - top } : undefined;
 }
 
+function rememberReading(state: ScrollState, input: TimelineScrollInput): void {
+  const element = state.ref.current;
+  if (element && input.reading) input.reading.positions.set(input.reading.key,
+    { top: element.scrollTop, following: state.following, anchor: readAnchor(element) });
+}
+
+function restoreReading(state: ScrollState, input: TimelineScrollInput): void {
+  const element = state.ref.current;
+  const saved = input.reading?.positions.get(input.reading.key);
+  state.following = saved?.following ?? true;
+  state.loading = false;
+  state.firstSeq = input.firstSeq;
+  if (state.timer !== null) clearTimeout(state.timer);
+  state.timer = null;
+  if (!element || !saved) return;
+  const row = [...element.querySelectorAll<HTMLElement>("[data-transcript-key]")]
+    .find((candidate) => candidate.dataset.transcriptKey === saved.anchor?.key);
+  element.scrollTop = saved.top;
+  if (row && saved.anchor) element.scrollTop += row.getBoundingClientRect().top - element.getBoundingClientRect().top - saved.anchor.offset;
+}
+
 function scrollChanged(state: ScrollState, input: TimelineScrollInput): void {
   const element = state.ref.current;
   if (!element) return;
   state.following = !hasSelection(element) && element.scrollHeight - element.scrollTop - element.clientHeight < NEAR_EDGE_PX;
   if (element.scrollTop >= NEAR_EDGE_PX || !input.hasMore || state.loading) return;
+  requestOlder(state, input);
+}
+
+function requestOlder(state: ScrollState, input: TimelineScrollInput): void {
+  const element = state.ref.current;
+  if (!element || state.loading) return;
   state.loading = true;
   state.height = element.scrollHeight;
   state.anchor = readAnchor(element);
@@ -107,14 +142,16 @@ export function useTimelineScroll(input: TimelineScrollInput): TimelineScroll {
   const state = useRef<ScrollState>({ ref: scrollRef, following: true, loading: false, height: 0,
     firstSeq: input.firstSeq, tailKey: "", timer: null }).current;
   const tailKey = input.tailKey ?? `${input.entryCount}:${input.inflightLen}`;
+  useLayoutEffect(() => { restoreReading(state, input); setNewContent(false); }, [input.reading?.key, state]);
   useLayoutEffect(() => {
     contentChanged(state, input);
     if (state.tailKey !== tailKey && !state.following) setNewContent(true);
     state.tailKey = tailKey;
+    rememberReading(state, input);
   }, [input.entryCount, input.firstSeq, input.inflightLen, tailKey, state]);
   useEffect(() => observeContent(state, contentRef.current), [state]);
-  const onScroll = () => { scrollChanged(state, input); if (state.following) setNewContent(false); };
+  const onScroll = () => { scrollChanged(state, input); rememberReading(state, input); if (state.following) setNewContent(false); };
   const followTail = () => { state.following = true; const element = scrollRef.current;
-    if (element) element.scrollTop = element.scrollHeight; setNewContent(false); };
-  return { scrollRef, contentRef, onScroll, hasNewContent, followTail };
+    if (element) element.scrollTop = element.scrollHeight; rememberReading(state, input); setNewContent(false); };
+  return { scrollRef, contentRef, onScroll, hasNewContent, followTail, requestOlder: () => requestOlder(state, input) };
 }

@@ -1,0 +1,14 @@
+{
+  "method": "Exact published private method isolated from class with TypeScript AST",
+  "inputRoles": [
+    "system",
+    "user",
+    "assistant",
+    "tool",
+    "user"
+  ],
+  "actual": {
+    "role": "user",
+    "content": "follow up"
+  }
+}

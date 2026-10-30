@@ -42,6 +42,9 @@ impl KeyringStore {
         Self { service: KEYRING_SERVICE.to_string() }
     }
 
+    /// Explicit isolated Shell profiles cannot reuse the daily profile's Node token or attachment credential.
+    pub(crate) fn with_service(service: String) -> Self { Self { service } }
+
     fn entry(&self, key: &str) -> Result<keyring_core::Entry, String> {
         #[cfg(windows)]
         {

@@ -52,4 +52,5 @@ const NEXT_ACTION: Record<HindsightErrorCode, string> = {
   HINDSIGHT_LLM_HEALTH_UNAVAILABLE: "Repair model configuration and run the explicit check again.",
   HINDSIGHT_STATE_CONFLICT: "Refresh status and retry with its current revision.",
   HINDSIGHT_RESPONSE_INVALID: "Use the exact admitted Hindsight compatibility build.",
+  HINDSIGHT_SETUP_INTERRUPTED: "The previous setup attempt was interrupted by a Core restart; retry the idempotent stage.",
 };

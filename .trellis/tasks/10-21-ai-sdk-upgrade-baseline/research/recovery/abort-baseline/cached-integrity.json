@@ -1,0 +1,89 @@
+{
+  "source": "G:\\Roaming\\pnpm-store\\v10",
+  "files": [
+    {
+      "package": "ai",
+      "version": "7.0.17",
+      "file": "dist/index.js",
+      "integrity": "sha512-rsW0a4KRlpc56CPY5u7IMXnjDi0fvyAD3scxXsKRCt63xQKOzHNU35+FBgXrswga6+0rytga7K2iTlIlUQpVjQ=="
+    },
+    {
+      "package": "ai",
+      "version": "7.0.17",
+      "file": "dist/internal/index.js",
+      "integrity": "sha512-AUvFHa/9+W4tkVGLhsgOWp37kxRJ7K1hiLL70//Ns6k/E0aYTW/85HtHkX56eHYFkpmqnwDGOJ33QLgsRgBIww=="
+    },
+    {
+      "package": "ai",
+      "version": "7.0.17",
+      "file": "dist/test/index.js",
+      "integrity": "sha512-Ppaxn7qQBQNWj0on+pGfKSEVEU5IOEcBHWCp5gcSYFI12BoRIZUS2d4RTbcJEwxMx28LvqktFAr0zbCqyvHciQ=="
+    },
+    {
+      "package": "ai",
+      "version": "7.0.17",
+      "file": "package.json",
+      "integrity": "sha512-LOfivVkt4IfW/UGbzi1b3sRtnT5i5bjqHmUmfIvFDIJyoW+cv7xvuMlEFBKBWMN+togqLfXorwXeCTlim2ZaQA=="
+    },
+    {
+      "package": "@ai-sdk/openai-compatible",
+      "version": "3.0.5",
+      "file": "dist/index.js",
+      "integrity": "sha512-ENBHP7HxgJ7Hz18K4hMQzZgavUPhdWcOLfUfEAGdmLPmktEkNdPHVu/1LjIL+7sZq7HTjrzqvUXpr4tTjWlOLw=="
+    },
+    {
+      "package": "@ai-sdk/openai-compatible",
+      "version": "3.0.5",
+      "file": "dist/internal/index.js",
+      "integrity": "sha512-FdKndEXWd2Mk8pT/eJtVeO1xp5U8/5+L779kpHsYs26AjLVEX8r3A6r/JmHFfBuQXwxsT41o1KRBFFYko8ZtRA=="
+    },
+    {
+      "package": "@ai-sdk/openai-compatible",
+      "version": "3.0.5",
+      "file": "package.json",
+      "integrity": "sha512-SimZL7Fh3NzyBTVzIZCSV/auTIzjdabsL9yPrjHwm5PT/3tOxxYQ3Sw5BmpDI+ha/TscSdITmfzqJlbaxfB+yA=="
+    },
+    {
+      "package": "@ai-sdk/provider",
+      "version": "4.0.2",
+      "file": "dist/index.js",
+      "integrity": "sha512-41Ok8MHSFle2PwxDuIZFd7YYPVm8AVkta1ePjbraSzTtqPJlrozCnhtNhNf9Au035SwMZKg55Fb2bFcPGXWf1g=="
+    },
+    {
+      "package": "@ai-sdk/provider",
+      "version": "4.0.2",
+      "file": "package.json",
+      "integrity": "sha512-t9r9Cob1OZXLoN4TJXSMYOZ84HZTQ3hGW0tyKexUR0K1VUoqnIaaD0IdDTFzyOmdnnWgDEGfohrp8gw2+8Rlyg=="
+    },
+    {
+      "package": "@ai-sdk/provider-utils",
+      "version": "5.0.5",
+      "file": "dist/index.js",
+      "integrity": "sha512-2gj7ewskwEL+j02rsDKZLBBhz1IIx+bN7BZ3O45bdaKX22ZfwXr70iBoqAU704eqA2R6qxRFwc6WP9ONEG70pg=="
+    },
+    {
+      "package": "@ai-sdk/provider-utils",
+      "version": "5.0.5",
+      "file": "dist/test/index.js",
+      "integrity": "sha512-S1FYVTJbBwwaPyFzS8Rg9z8fiJHvxp2V/vM1m0NneVGpVy5NKaFzGQ6fEzwE27dpKeQrHnxdYfO1SQCbJB5J+g=="
+    },
+    {
+      "package": "@ai-sdk/provider-utils",
+      "version": "5.0.5",
+      "file": "package.json",
+      "integrity": "sha512-Puu9S7IKpfo+p8z4Se+tdl7GRnAcqv78W1+XjEEQFdR405vPx5Y70ZUJG0dTvwKTNPK1mMuZZA74wNsscZeNqA=="
+    },
+    {
+      "package": "@ai-sdk/gateway",
+      "version": "4.0.13",
+      "file": "dist/index.js",
+      "integrity": "sha512-89NTXBdw+oAWWoCc7iFHTzwaKZbxnu9zurlVPXWAjjWsqTQwEx0x9nKlqlhPSrDIJgk+WhqvIDjPe+l79+MWEA=="
+    },
+    {
+      "package": "@ai-sdk/gateway",
+      "version": "4.0.13",
+      "file": "package.json",
+      "integrity": "sha512-e7m0yZE+JM2RPMQlOFEopG7Nq1zZgH1hVYinxXpgXcKg4QhpmXFrKFxEiDzztv+2eei8otSQdAfr6tM5HjTZ3Q=="
+    }
+  ]
+}

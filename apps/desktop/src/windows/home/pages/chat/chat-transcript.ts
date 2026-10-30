@@ -7,8 +7,13 @@ import type { ChatActivityToolStatus, TimelineEntry, TimelineToolOutput } from "
 import type { TimelineLiveTurn } from "./chat-timeline-activity.ts";
 import { activityItemKey } from "@/lib/chat-activity-state.js";
 import { projectCanonicalTimeline } from "./timeline-projection.ts";
+import type { CommittedTextTarget } from "@/features/presence/surface-presence.js";
 
 interface TranscriptPosition {
+  sender?: string;
+  detail?: string;
+  workLabel?: string;
+  readMore?: { run(): void; pending: boolean; error: string | null };
   key: string;
   seq: number;
   order: number;
@@ -16,7 +21,7 @@ interface TranscriptPosition {
 }
 export type ChatTranscriptItem = TranscriptPosition & (
   | { kind: "user"; entry: TimelineEntry }
-  | { kind: "text"; role: "user" | "assistant"; text: string }
+  | { kind: "text"; role: "user" | "assistant"; text: string; committed?: CommittedTextTarget[] }
   | { kind: "image"; role: "user" | "assistant"; imageRef: string }
   | { kind: "tool"; toolName: string; displayName?: string; status: ChatActivityToolStatus; output?: TimelineToolOutput; stale?: boolean }
   | { kind: "notice"; text: string }

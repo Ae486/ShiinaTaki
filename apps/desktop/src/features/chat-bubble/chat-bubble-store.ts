@@ -6,6 +6,7 @@
 
 import { create } from "zustand";
 import { activityMessageId, type ChatActivityView } from "@/lib/chat-activity-state.js";
+import type { CommittedBubble } from "./bubble-committed-timeline.ts";
 
 // Discriminated union (no boolean-flag combos, type-safety spec): the bubble is empty, streaming a reply, done, or failed.
 export type BubbleReply =
@@ -21,6 +22,9 @@ type ChatBubbleStore = {
   activitySource: ChatActivityView | null;
   activity: ChatActivityView | null;
   presentationVersion: number;
+  committed: CommittedBubble | null;
+  observeCommitted: (committed: CommittedBubble) => void;
+  clearCommitted: () => void;
   observeActivity: (view: ChatActivityView) => void;
   presentActivity: (view: ChatActivityView) => void;
   retirePresentation: () => void;
@@ -36,13 +40,17 @@ type ChatBubbleStore = {
 export const useChatBubbleStore = create<ChatBubbleStore>()((set) => ({
   reply: { kind: "empty" },
   replyMessageId: null, legacyEpoch: 0, activitySource: null, activity: null, presentationVersion: 0,
+  committed: null,
+  observeCommitted: (committed) => set({ committed }),
+  clearCommitted: () => set({ committed: null }),
   observeActivity: (view) => set((state) => {
     // An empty new runtime projection cannot establish the outcome of the previously visible turn.
     if (view.snapshot.status === "idle" && state.activitySource && state.activitySource.snapshot.status !== "idle") {
       return { activitySource: { ...state.activitySource, stale: true } };
     }
     const changed = activityMessageId(view.snapshot) !== (state.activitySource && activityMessageId(state.activitySource.snapshot));
-    return { activitySource: view, ...(changed ? { activity: null, presentationVersion: state.presentationVersion + 1 } : {}) };
+    return { activitySource: view, ...(changed ? { activity: null, presentationVersion: state.presentationVersion + 1,
+      ...(view.snapshot.status === "active" ? { committed: null } : {}) } : {}) };
   }),
   presentActivity: (view) => set((state) => {
     if (state.activitySource !== view) return state;
@@ -54,7 +62,7 @@ export const useChatBubbleStore = create<ChatBubbleStore>()((set) => ({
   retirePresentation: () => set((state) => ({ presentationVersion: state.presentationVersion + 1 })),
   identifyReply: (replyMessageId) => set({ replyMessageId }),
   clearReply: () => set({ reply: { kind: "empty" }, replyMessageId: null }),
-  startReply: () => set((state) => ({ reply: { kind: "streaming", text: "" }, replyMessageId: null, legacyEpoch: state.legacyEpoch + 1 })),
+  startReply: () => set((state) => ({ reply: { kind: "streaming", text: "" }, replyMessageId: null, committed: null, legacyEpoch: state.legacyEpoch + 1 })),
   appendDelta: (delta) =>
     set((state) =>
       state.reply.kind === "streaming" ? { reply: { kind: "streaming", text: state.reply.text + delta } } : state,
@@ -66,5 +74,5 @@ export const useChatBubbleStore = create<ChatBubbleStore>()((set) => ({
     return { reply: { kind: "error", message, ...(text ? { text } : {}) } };
   }),
   reset: () => set((state) => ({ reply: { kind: "empty" }, replyMessageId: null, activitySource: null, activity: null,
-    legacyEpoch: state.legacyEpoch + 1, presentationVersion: state.presentationVersion + 1 })),
+    committed: null, legacyEpoch: state.legacyEpoch + 1, presentationVersion: state.presentationVersion + 1 })),
 }));

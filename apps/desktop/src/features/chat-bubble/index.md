@@ -1,4 +1,6 @@
 # features/chat-bubble/
+- bubble-committed-timeline.ts — latest complete ordinary Timeline text projection, preserving shared canonical semantic keys
+- bubble-timeline-binding.ts — bounded append/commit/history/removal recovery for autonomous and primary text through the existing presentation gate
 The disposable Pet conversation view: explicit body-click opening, fixed composer, ordered language/tool bubbles and read-only recovery.
 - chat-bubble.tsx — fixed transparent frame and open gate; only visible child surfaces participate in click-through hit testing
 - use-chat-bubble.ts — component-facing readiness, transcript, initiating send and explicit open/close actions

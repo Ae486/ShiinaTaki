@@ -1,0 +1,49 @@
+{
+  "name": "scheduled-1",
+  "startedAt": "2026-09-28T10:43:27.050Z",
+  "passed": true,
+  "finishedAt": "2026-09-28T10:43:37.263Z",
+  "model": "deepseek-v4-flash",
+  "providerHost": "api.deepseek.com",
+  "turns": [
+    {
+      "scenario": "scheduled-1",
+      "prompt": "按用户时区UTC，明天上午9点提醒我喝水，只提醒一次。请帮我设好这个定时提醒。",
+      "response": "设好了。按你说的走 UTC，明天 2026-09-29 09:00 触发一次，不重复。\n\n不过提醒一句——你这台机器现在的本地时间是 18:43，换算下来是 UTC+8。所以这个\"上午9点\"按 UTC 走，落到你屏幕上的钟其实是**下午5点**。如果你要的是本地上午9点，说一声，我改。\n\n……还有，别光等我提醒才喝。",
+      "status": "complete"
+    }
+  ],
+  "runs": [
+    {
+      "initiator": "primary",
+      "state": "completed",
+      "outcome": "completed"
+    }
+  ],
+  "usage": [
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "reported",
+      "input_tokens": 13194,
+      "output_tokens": 743,
+      "total_tokens": 13937,
+      "cache_read_tokens": 3712,
+      "reasoning_tokens": 621
+    },
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "reported",
+      "input_tokens": 14120,
+      "output_tokens": 334,
+      "total_tokens": 14454,
+      "cache_read_tokens": 13824,
+      "reasoning_tokens": 236
+    }
+  ],
+  "deliveries": [],
+  "tools": [
+    "schedule_task"
+  ]
+}

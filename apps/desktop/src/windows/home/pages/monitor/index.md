@@ -2,7 +2,7 @@
 Read-only DSH presentation over Core Run/Event projections: compact Run browser, 32px Toolbar, fixed
 three-lane Overview, compact measured ledger, and temporary resizable Inspector/narrow drawer.
 System and accessible copy is Chinese. Correlation stays internal; unsupported payload panels are absent.
-- monitor-page.tsx — full-height Monitor composition with committed Run keys, scoped replacement retry, and stable read-status chrome
+- monitor-page.tsx — full-height Monitor composition with committed Run keys, scoped replacement retry, stable read-status chrome and bounded initiative policy diagnostics
 - use-monitor-controller.ts — pre-paint Home client/route-visibility binding with visibility established before bind; returning pages reconcile current controller authority before paint, with disposable cleanup
 - monitor-controller.ts — generation-guarded browsing, coherent committed/requested snapshots, displayed-Run action guards, and atomic Inspector eviction from both mode snapshots and live config hints; hidden hints stay cheap and old mode reads cannot override them
 - monitor-selection.ts — independent Run candidates, atomic replacement, same-Run restoration, bounded forward catch-up, older/live cursors, and scoped unavailable-record retirement

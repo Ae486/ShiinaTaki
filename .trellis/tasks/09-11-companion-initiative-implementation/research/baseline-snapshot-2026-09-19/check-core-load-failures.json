@@ -1,0 +1,18 @@
+{
+  "label": "core-load-failures",
+  "command": [
+    "pnpm",
+    "--filter",
+    "@taki/core",
+    "exec",
+    "vitest",
+    "run",
+    "src/skills/skill-package-source.test.ts",
+    "src/memory/hindsight/hindsight-http-transport.test.ts"
+  ],
+  "cwd": "H:\\TakiAgent-worktrees\\t4",
+  "startedAt": "2026-09-19T11:58:49.156544+00:00",
+  "seconds": 4.906,
+  "exitCode": 0,
+  "log": "logs/core-load-failures.log"
+}

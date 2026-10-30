@@ -5,6 +5,7 @@
  */
 import type { Logger } from "../logging/logger.ts";
 import type { RouteResult } from "../capabilities/route-capability.ts";
+import type { PerceptionEvidence } from "../perception/perception-evidence.ts";
 import { createActivitySampler, type ActivitySampler } from "./activity-sampler.ts";
 import { createActivityState, type ActivityState } from "./activity-state.ts";
 
@@ -33,6 +34,7 @@ export interface ActivityLayerDeps {
   /** Sensitive-process skip (core/perception): forwarded verbatim; a hit drops the sample before it is stored. */
   isSensitive: (processName: string | null) => boolean;
   logger: Logger;
+  evidence?: PerceptionEvidence;
   onChange?: () => void;
 }
 
@@ -55,6 +57,7 @@ export function createActivityLayer(deps: ActivityLayerDeps): ActivityLayer {
     isPaused: deps.isPaused,
     isSensitive: deps.isSensitive,
     state,
+    evidence: deps.evidence,
     logger: deps.logger,
     onChange: deps.onChange,
     config: { pollMs: DEFAULTS.pollMs, errorBackoffThreshold: DEFAULTS.errorBackoffThreshold, maxBackoffMs: DEFAULTS.maxBackoffMs },

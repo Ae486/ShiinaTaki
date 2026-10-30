@@ -1,0 +1,29 @@
+Scope: 5 of 6 workspace projects
+packages/shared test$ vitest run "--maxWorkers=4"
+packages/shared test:  RUN  v4.1.10 H:/TakiAgent-worktrees/t4/packages/shared
+packages/shared test:  Test Files  75 passed (75)
+packages/shared test:       Tests  674 passed (674)
+packages/shared test:    Start at  16:55:05
+packages/shared test:    Duration  10.64s (transform 2.08s, setup 0ms, import 13.93s, tests 1.62s, environment 10ms)
+packages/shared test: Done
+apps/cli test$ vitest run "--maxWorkers=4"
+apps/desktop test$ vitest run --passWithNoTests "--maxWorkers=4"
+packages/core test$ vitest run "--maxWorkers=4"
+apps/cli test:  RUN  v4.1.10 H:/TakiAgent-worktrees/t4/apps/cli
+packages/core test:  RUN  v4.1.10 H:/TakiAgent-worktrees/t4/packages/core
+apps/desktop test:  RUN  v4.1.10 H:/TakiAgent-worktrees/t4/apps/desktop
+apps/cli test:  Test Files  8 passed (8)
+apps/cli test:       Tests  50 passed (50)
+apps/cli test:    Start at  16:55:16
+apps/cli test:    Duration  3.77s (transform 4.41s, setup 0ms, import 8.30s, tests 541ms, environment 2ms)
+apps/cli test: Done
+apps/desktop test:  Test Files  202 passed (202)
+apps/desktop test:       Tests  1214 passed (1214)
+apps/desktop test:    Start at  16:55:17
+apps/desktop test:    Duration  45.13s (transform 15.38s, setup 0ms, import 81.06s, tests 10.67s, environment 35ms)
+apps/desktop test: Done
+packages/core test:  Test Files  484 passed | 1 skipped (485)
+packages/core test:       Tests  4030 passed | 2 skipped (4032)
+packages/core test:    Start at  16:55:17
+packages/core test:    Duration  211.17s (transform 28.37s, setup 0ms, import 293.05s, tests 378.19s, environment 68ms)
+packages/core test: Done

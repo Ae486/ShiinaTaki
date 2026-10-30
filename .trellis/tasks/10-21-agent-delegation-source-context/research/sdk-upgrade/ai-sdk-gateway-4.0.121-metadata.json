@@ -1,0 +1,124 @@
+{
+  "metadata": {
+    "bugs": {
+      "url": "https://github.com/vercel/ai/issues"
+    },
+    "dist": {
+      "shasum": "72ccde4d8f17abeae376720fee8c04d06be10924",
+      "tarball": "https://registry.npmjs.org/@ai-sdk/gateway/-/gateway-4.0.121.tgz",
+      "fileCount": 65,
+      "integrity": "sha512-cPNXvQ4B5OkmVAm98Dxe1fHdMthyqqqAG0HJx3D92NUa9FpcvkNxdAqiuZdeAhNAodFb9lBrslzzzEwxuVS53A==",
+      "signatures": [
+        {
+          "sig": "MEUCICUzYCUaJLgSbW7/wCCbpUnAL0+MvvmfpjX0w1zExqULAiEAhI6g4bvSvd1COnvFIecaPiK8cnEZcw6RHrZrqjjyHko=",
+          "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+        },
+        {
+          "sig": "MEYCIQCMb6N/y9H3WeVjIKe73QI1QJcrHcCQkV+zhGYH+Tm70AIhALj0ECThxDEqmegmCpf1GhaJhub0CCB25zZ+eLGpeU06",
+          "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+        }
+      ],
+      "attestations": {
+        "url": "https://registry.npmjs.org/-/npm/v1/attestations/@ai-sdk%2fgateway@4.0.121",
+        "provenance": {
+          "predicateType": "https://slsa.dev/provenance/v1"
+        }
+      },
+      "unpackedSize": 904081
+    },
+    "main": "./dist/index.js",
+    "name": "@ai-sdk/gateway",
+    "type": "module",
+    "types": "./dist/index.d.ts",
+    "engines": {
+      "node": ">=22"
+    },
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js",
+        "default": "./dist/index.js"
+      },
+      "./package.json": "./package.json"
+    },
+    "license": "Apache-2.0",
+    "private": false,
+    "scripts": {
+      "test": "pnpm test:node && pnpm test:edge",
+      "build": "pnpm clean && tsdown",
+      "clean": "del-cli docs *.tsbuildinfo",
+      "test:edge": "vitest --config vitest.edge.config.js --run",
+      "test:node": "vitest --config vitest.node.config.js --run",
+      "test:watch": "vitest --config vitest.node.config.js",
+      "type-check": "tsc --build",
+      "build:watch": "pnpm clean && tsdown --watch",
+      "test:update": "pnpm test:node -u",
+      "generate-model-settings": "tsx scripts/generate-model-settings.ts"
+    },
+    "_npmUser": {
+      "name": "GitHub Actions",
+      "email": "npm-oidc-no-reply@github.com",
+      "trustedPublisher": {
+        "id": "github",
+        "oidcConfigId": "ebe2175f-c55a-4701-a697-0ae165c758d3"
+      }
+    },
+    "homepage": "https://ai-sdk.dev/docs",
+    "keywords": [
+      "ai"
+    ],
+    "repository": {
+      "url": "https://github.com/vercel/ai",
+      "type": "git",
+      "directory": "packages/gateway"
+    },
+    "directories": {
+      "doc": "./docs"
+    },
+    "maintainers": [
+      {
+        "name": "vercel-release-bot",
+        "email": "infra+release@vercel.com"
+      },
+      {
+        "name": "matheuss",
+        "email": "matheus.frndes@gmail.com"
+      },
+      {
+        "name": "matt.straka",
+        "email": "matt.j.straka@gmail.com"
+      }
+    ],
+    "sideEffects": false,
+    "dependencies": {
+      "@vercel/oidc": "3.2.0",
+      "@ai-sdk/provider": "4.0.31",
+      "@ai-sdk/provider-utils": "5.0.65"
+    },
+    "publishConfig": {
+      "access": "public",
+      "provenance": true
+    },
+    "_hasShrinkwrap": false,
+    "devDependencies": {
+      "tsx": "4.23.12",
+      "zod": "3.25.76",
+      "tsdown": "^0.23.0",
+      "typescript": "6.0.3",
+      "@types/node": "22.19.19",
+      "@ai-sdk/test-server": "2.0.4",
+      "@vercel/ai-tsconfig": "0.0.0",
+      "@vercel/ai-tsdown-config": "0.0.0"
+    },
+    "peerDependencies": {
+      "zod": "^3.25.76 || ^4.1.8"
+    },
+    "_npmOperationalInternal": {
+      "tmp": "tmp/gateway_4.0.121_1792549167805_0.35847480727871917",
+      "host": "s3://npm-registry-packages-npm-production"
+    },
+    "_id": "@ai-sdk/gateway@4.0.121",
+    "version": "4.0.121"
+  },
+  "url": "https://registry.npmjs.org/%40ai-sdk%2Fgateway/4.0.121"
+}

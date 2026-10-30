@@ -1,0 +1,23 @@
+{
+  "phase": "ready",
+  "state": {
+    "available": true,
+    "runs": [],
+    "attempts": [],
+    "effects": [],
+    "deliveries": [],
+    "subagent_conversations": [],
+    "subagent_inputs": [],
+    "subagent_executions": [],
+    "run_messages": [],
+    "timeline_messages": [],
+    "run_usage": [],
+    "canonical_memory_sources": [],
+    "canonical_memory_units": [],
+    "canonical_memory_policy": [],
+    "canonical_memory_operation_receipts": [],
+    "canonical_memory_primary_commits": []
+  },
+  "requests": [],
+  "turns": []
+}

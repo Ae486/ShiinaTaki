@@ -21,9 +21,12 @@ export interface HindsightReplicaScheduler {
   stop(): Promise<void>;
   tick(): Promise<void>;
   requestManual(bankId: string, kind?: MemoryReplicaRunKind): MemoryReplicaSyncStatus;
+  /** Clears an unclaimed manual request; throws HINDSIGHT_REPLICA_BUSY once the run is claimed. */
+  cancelManual(bankId: string): MemoryReplicaSyncStatus;
   verifiedReconnect(): void;
   status(bankId?: string): MemoryReplicaSyncStatus[];
   lastError(): MemoryReplicaErrorCode | null;
+  started(): boolean;
 }
 interface SchedulerInput {
   repo: HindsightReplicaSchedulerRepo;
@@ -45,7 +48,7 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
   private readonly input: SchedulerInput;
   private readonly leaseDurationMs: number;
   private readonly runTimeoutMs: number;
-  private started = false;
+  private running = false;
   private rerun = false;
   private timer: ReturnType<typeof setTimeout> | undefined;
   private active: Promise<void> | undefined;
@@ -60,19 +63,19 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
   }
 
   start(): void {
-    if (this.started) return;
+    if (this.running) return;
     for (const bank of this.banks()) {
       const state = this.input.repo.ensureBank({ bank });
       this.input.repo.recover(bank.bankId);
       this.input.repo.requestCatchUp(bank.bankId);
       if (state.automatic) this.supervisorRetries.delete(bank.bankId);
     }
-    this.started = true;
+    this.running = true;
     this.armTimer();
   }
 
   async stop(): Promise<void> {
-    this.started = false;
+    this.running = false;
     this.clearWake();
     this.cancel?.();
     await this.active;
@@ -80,7 +83,7 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
 
   tick(): Promise<void> {
     if (this.active) return this.active;
-    if (!this.started) return Promise.resolve();
+    if (!this.running) return Promise.resolve();
     this.clearWake();
     this.active = this.drain().finally(() => {
       this.active = undefined;
@@ -122,6 +125,15 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
 
   lastError(): MemoryReplicaErrorCode | null { return this.error; }
 
+  started(): boolean { return this.running; }
+
+  cancelManual(bankId: string): MemoryReplicaSyncStatus {
+    this.input.repo.cancelManual(bankId);
+    const status = this.status(bankId)[0];
+    if (!status) throw new Error("HINDSIGHT_REPLICA_BANK_NOT_SCHEDULED");
+    return status;
+  }
+
   private banks(): MemoryReplicaBank[] {
     const source = typeof this.input.banks === "function" ? this.input.banks() : this.input.banks;
     const banks = source.map((bank) => MemoryReplicaBankSchema.parse(bank));
@@ -133,7 +145,7 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
     do {
       this.rerun = false;
       for (const bank of this.banks()) {
-        if (!this.started) return;
+        if (!this.running) return;
         try { await this.runBank(bank); }
         catch (error) {
           this.error = replicaErrorCode(error);
@@ -141,7 +153,7 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
           this.supervisorRetries.set(bank.bankId, Date.parse(this.input.repo.now()) + REPLICA_RETRY_DELAYS_MS[0]);
         }
       }
-    } while (this.rerun && this.started);
+    } while (this.rerun && this.running);
     if (this.supervisorRetries.size === 0) this.error = null;
   }
 
@@ -172,7 +184,7 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
 
   private armTimer(): void {
     this.clearWake();
-    if (!this.started || this.active) return;
+    if (!this.running || this.active) return;
     const now = this.input.repo.now();
     const due = this.status().map((state) => this.nextWake(state, now)).filter((value): value is string => value !== null);
     if (due.length === 0) return;

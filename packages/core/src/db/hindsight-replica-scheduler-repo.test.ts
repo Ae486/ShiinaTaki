@@ -184,4 +184,15 @@ describe("B5 durable scheduler recovery regressions", () => {
     expect(f.repo.get(bank.bankId)).toEqual(before);
     expect(f.db.prepare("SELECT expires_at FROM hindsight_replica_sync_leases WHERE bank_id='global'").get()?.expires_at).toBe(run.lease.expiresAt);
   });
+
+  it("cancels an unclaimed manual request and refuses once the run is claimed", () => {
+    const f = fixture();
+    f.repo.requestManual({ bankId: bank.bankId, kind: "full" });
+    expect(f.repo.cancelManual(bank.bankId)).toMatchObject({ pendingManualKind: null, run: null });
+    expect(f.repo.cancelManual(bank.bankId).pendingManualKind).toBeNull();
+    f.repo.requestManual({ bankId: bank.bankId, kind: "incremental" });
+    const run = take(f.repo);
+    expect(() => f.repo.cancelManual(bank.bankId)).toThrow("HINDSIGHT_REPLICA_BUSY");
+    expect(f.repo.get(bank.bankId)).toMatchObject({ run, mode: "running" });
+  });
 });

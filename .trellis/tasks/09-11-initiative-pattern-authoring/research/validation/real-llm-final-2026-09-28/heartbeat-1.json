@@ -1,0 +1,178 @@
+{
+  "name": "heartbeat-1",
+  "startedAt": "2026-09-28T11:08:25.422Z",
+  "passed": true,
+  "requests": [
+    {
+      "tools": [
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "heartbeat_respond",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "selectedMemoryPresent": true,
+      "primaryHistoryPresent": false,
+      "status": 200
+    },
+    {
+      "tools": [
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "heartbeat_respond",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "selectedMemoryPresent": true,
+      "primaryHistoryPresent": false,
+      "status": 200
+    }
+  ],
+  "finishedAt": "2026-09-28T11:08:32.931Z",
+  "model": "deepseek-v4-flash",
+  "providerHost": "api.deepseek.com",
+  "turns": [],
+  "runs": [
+    {
+      "initiator": "heartbeat",
+      "state": "completed",
+      "outcome": "completed"
+    }
+  ],
+  "usage": [
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "reported",
+      "input_tokens": 5594,
+      "output_tokens": 193,
+      "total_tokens": 5787,
+      "cache_read_tokens": 3584,
+      "reasoning_tokens": 91
+    },
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "reported",
+      "input_tokens": 6055,
+      "output_tokens": 237,
+      "total_tokens": 6292,
+      "cache_read_tokens": 5760,
+      "reasoning_tokens": 82
+    }
+  ],
+  "deliveries": [
+    {
+      "delivery_class": "class_b",
+      "state": "staged",
+      "decision_json": "{\"outcome\":\"silent\",\"selectedCandidateIds\":[\"905ede1a81cf6e9bce5633f3f005cf0cbed9b13c3c9d38d666f8f0256fa8b0d9\"]}"
+    }
+  ],
+  "patterns": [
+    {
+      "state": "active",
+      "version": 2
+    }
+  ],
+  "schedules": [],
+  "authoringTrace": [],
+  "tools": []
+}

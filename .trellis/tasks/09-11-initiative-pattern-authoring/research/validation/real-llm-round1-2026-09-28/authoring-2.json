@@ -1,0 +1,50 @@
+{
+  "name": "authoring-2",
+  "startedAt": "2026-09-28T10:42:52.979Z",
+  "passed": false,
+  "finishedAt": "2026-09-28T10:43:01.953Z",
+  "model": "deepseek-v4-flash",
+  "providerHost": "api.deepseek.com",
+  "turns": [
+    {
+      "scenario": "authoring-2",
+      "prompt": "帮我创建一个互动习惯，名称是“晚间近况”：每天19:00到21:00，在有可靠信息确认我在场时，可以简短关心我的近况。只参考角色记忆，允许保持安静或主动说话，不用表情。每次符合条件时有25%的概率考虑互动，同一习惯两次判断至少间隔60分钟，包含安静的判断；长期有效。请给我待确认的候选。",
+      "response": "……行，给你过一遍。候选如下：\n\n**名称**：晚间近况\n**目的**：每天晚间（19:00–21:00）里，如果确认你在场，就简短地问一句近况——不是打卡，也不必每次都开口。\n**判定条件**（需同时成立）：\n- 时间窗：每天 19:00–21:00\n- 在场：有可靠信息确认你在场\n**参考上下文**：只读角色记忆\n**允许的结果**：保持安静 / 主动说话（不含表情）\n**节奏**：每次符合条件时 25% 概率才考虑互动；同一习惯两次判断（包括安静的那次）至少间隔 60 分钟\n**有效期**：长期，立即生效、无结束时间\n\n说明几句：\n- 这是「考虑互动」的机会，不是必须开口——安静也是允许的结果之一，别指望每天准点响。\n- 我只会用记忆里的内容开口，不看屏幕、不看你在开什么程序。\n- 还没有生效。你得在待确认的卡片上确认，确认之后才算数；在那之前什么都不动。",
+      "status": "complete"
+    }
+  ],
+  "runs": [
+    {
+      "initiator": "primary",
+      "state": "completed",
+      "outcome": "completed"
+    }
+  ],
+  "usage": [
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "reported",
+      "input_tokens": 13251,
+      "output_tokens": 248,
+      "total_tokens": 13499,
+      "cache_read_tokens": 3712,
+      "reasoning_tokens": 72
+    },
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "reported",
+      "input_tokens": 14447,
+      "output_tokens": 532,
+      "total_tokens": 14979,
+      "cache_read_tokens": 13440,
+      "reasoning_tokens": 297
+    }
+  ],
+  "deliveries": [],
+  "tools": [
+    "load_skill",
+    "manage_interaction_pattern"
+  ]
+}

@@ -1,30 +1,116 @@
 # core/memory/hindsight/
-- hindsight-contracts.ts — bounded Hindsight 0.9.0 raw-wire schemas and safe projections
+- hindsight-recall-evidence.ts — exact current native/source/artifact/policy lifetime capture and original retain-completion bindings
+- hindsight-source-lifetime.ts — bounded immutable source/native/policy evidence codec shared by original ingestion and whole-write receipts
+- hindsight-contracts.ts — bounded Hindsight 0.9.0 raw-wire schemas and independently negotiated G1/D78 capabilities
 - hindsight-endpoint-policy.ts — endpoint normalization and SSRF/redirect policy for explicit operator endpoints
 - hindsight-errors.ts — sanitized Hindsight setup failure code and retry projection
-- hindsight-client.ts — authenticated REST client with streaming response bounds for setup, import, logical snapshots, and complete journal pages
+- hindsight-client.ts — authenticated REST client with finite HTTP deadlines, prompt cancellation even for an abort-ignoring delegate, response bounds and typed setup/import/replica/recovery/native-read/D77 application-state methods
+- hindsight-runtime-client.ts — bounded native recall/reflect POST methods through the existing authenticated requester; no Canonical hydration or runtime activation
+- hindsight-http-transport.ts — single HTTP/HTTPS request under the captured total deadline, bounded decompression, and no redirect/retry or hidden fetch phase timeout
+- hindsight-pending-client.ts — canonical retain-to-native wire mapping and B0 expected-revision/mutation-ID replay with bounded native receipts
+- hindsight-pending-retain.ts — native operation/document/fact completion proof; pruned responses remain unknown and never cause blind resubmission
+- hindsight-pending-replay.ts — frozen idempotent native replay, expected-revision supersession, and stage-preserving per-operation failures
+- hindsight-derived-completion.ts — required operation-scoped derived/journal evidence port; the admitted provider explicitly reports the missing contract
+- hindsight-pending-recovery-stages.ts — retain-first dispatch, native/derived completion, same-lease reset continuation, and generation-loss uncertainty
+- hindsight-pending-recovery-runner.ts — routine factual proof/checkpoint recovery with explicit legacy compatibility under the existing scheduler
+- hindsight-native-result-client.ts — tracked write admission, durable result status and immutable page HTTP methods
+- hindsight-native-proof.ts — frozen dispatch encoding, portable producer hashes and bounded full-page proof verification
+- hindsight-pending-native-result.ts — tracked replay/progress, safe missing-claim retry and factual receipt publication
 - hindsight-secret-refs.ts — fixed provider-neutral Secret Catalog refs and connection-only trusted resolver marker
-- hindsight-compatibility-service.ts — ordered exact-build health/version/manifest gate and safe configuration fingerprint
+- hindsight-compatibility-service.ts — ordered exact-build health/version/manifest gate, independent cutover support and stable settings fingerprint
 - hindsight-bank-identity.ts — versioned deterministic opaque Global/Character external Bank ids
 - taki-bank-template-v1.ts — fixed secret-free additive template, canonical digest, and Taki-owned read-back verification
-- hindsight-setup-service.ts — resumable validate/setup/disable/explicit LLM-health state machine; never owns Memory Authority
+- hindsight-setup-service.ts — resumable validate/setup/disable/explicit LLM-health state machine (a failed validate withdraws compatibility, keeps the fingerprint); never owns Memory Authority
+- hindsight-setup-recovery.ts — boot reconciliation: a busy phase left by a dead process becomes failed/HINDSIGHT_SETUP_INTERRUPTED and intermediate Bank rows return to pending
 - hindsight-bank-setup.ts — idempotent Bank/template application, operation polling, and verified projection
 - hindsight-setup-stages.ts — deterministic setup targets and dry-run preflight orchestration
 - hindsight-import-contracts.ts — bounded retain/operation/document/fact data-plane wire schemas
-- hindsight-import-identity.ts — deterministic UUID adapter for B2 operation identities
+- hindsight-import-identity.ts — frozen deterministic UUID adapter for domain-separated B2 and Pending Memory operation identities
 - hindsight-import-ledger-repo.ts — resumable B4 operation and one-to-many fact ledger repository
 - hindsight-import-orchestrator.ts — deadline-bounded idempotent retain and derived fact mapping orchestration
 - hindsight-snapshot-contracts.ts — bounded provider wire schemas and collision-rejecting logical payload normalization with opaque nested JSON keys
-- hindsight-snapshot-validator.ts — page/order/count/hash/manifest and provider-lineage integrity gate
+- hindsight-snapshot-validator.ts — page/order/count/hash/manifest integrity with ordinary TTL and separately certificate-bound D78 retention
 - hindsight-replica-builder.ts — cursor-bound snapshot capture, staging, reconciliation callback, and checkpoint publication
 - hindsight-replica-projection.ts — source-grounded canonical Taki policy/provenance projection for snapshot and journal records
+- hindsight-current-local-source.ts — writer-reserved frozen Local coverage to durable source evidence preparation, without remote dispatch
+- hindsight-source-preparation.ts — immutable v1 native-item preparation and complete typed provenance with explicit representation gaps
+- hindsight-source-binding-proof.ts — native request/result/page and actual snapshot/journal proof for exact source/unit bindings
+- hindsight-source-evidence-projection.ts — repository-backed typed source/unit enrichment with native field ownership and exact-version checks
+- hindsight-current-baseline.ts — complete native Bank/B3 control witnesses and explicit target-content accounting
+- hindsight-current-request.ts — full current Local structured adapter, preserving independent typed fields and reporting representation gaps
+- hindsight-current-request-preflight.ts — native PostgreSQL NUL, JSON depth and model subtype limits checked before submission
+- hindsight-current-state-hash.ts — D78 native-compatible tagged/binary64 request and evidence hashes
+- hindsight-current-client.ts — authenticated structured-transfer and finite-verification methods with bounded endpoint-specific failure envelopes
+- hindsight-current-import-proof.ts — complete transfer result/page/source/target/journal-boundary integrity checks
+- hindsight-current-verification-identity.ts — immutable candidate/request and exact transfer-result identity binding
+- hindsight-current-maintenance-hash.ts — native requirement, input-group, witness-list and action key composition
+- hindsight-current-maintenance-stream.ts — complete required-set/outcome/action/input/model evidence validation
+- hindsight-current-maintenance-proof.ts — complete native maintenance certificate and exact immutable retained snapshot proof
+- hindsight-current-orchestrator.ts — current-state import, ACK-loss recovery, finite verification, known-native-drift persistence and raw replica publication
 - hindsight-journal-contracts.ts — authenticated changes endpoint wire normalization with complete transaction bounds
-- hindsight-incremental-sync.ts — one admitted Bank journal page pulled, projected, and transactionally applied under Bank binding, lease, and captured deadline
-- hindsight-replica-scheduler.ts — asynchronous all-Bank single-flight execution, persisted wakes, bounded supervisor retries, manual/reconnection requests, and truthful status
-- hindsight-replica-run-execution.ts — bounded per-run cancellation, reset escalation, and lease-fenced completion
-- hindsight-replica-sync-runner.ts — admitted client/repository incremental catch-up, full logical reconciliation, and verified reset integration
+- hindsight-incremental-sync.ts — one admitted Bank journal page pulled, projected, and transactionally applied under captured Authority/Bank binding, lease, and deadline
+- hindsight-replica-scheduler.ts — asynchronous all-Bank single-flight execution, persisted wakes, bounded supervisor retries, manual request/cancel-before-claim, reconnection requests, started() and truthful status
+- hindsight-replica-run-execution.ts — captured absolute run/reset deadline, bounded cancellation, reset escalation, and lease-fenced completion
+- hindsight-replica-sync-runner.ts — admitted B5 catch-up and reconciliation/reset with fixed deadlines; shared internal run contract also carries process-local foreground lease ownership
 - hindsight-replica-snapshot-loader.ts — verified one-record snapshot transfer with current-manifest cache reuse and bounded requests
 - hindsight-replica-errors.ts — closed replica diagnostics and lease/reset classification without provider exception text
 - hindsight-replica-reconcile.ts — exact import document/fact/revision reconciliation against a staged snapshot
 - hindsight-authority-promotion-service.ts — bounded Local quiescence and single synchronous Hindsight promotion transaction
 - hindsight-setup-errors.ts — sanitized setup error normalization shared by setup stages
+- hindsight-application-binding-context.ts — restriction-preserving Bank/source/memory bodies for exact native binding commands
+- hindsight-application-binding-runner.ts — first policy, source association, exact rebinding and Core Block preservation without model work
+- hindsight-application-body-transfer.ts — immutable uploads and verified multipart downloads with the containing operation's request budget
+- hindsight-application-bundle-loader.ts — complete verified closures, resumable bounded body reads and genuine native baseline capture
+- hindsight-application-bundle.ts — verified namespace, hashes, native identities and recovery-closure relationships
+- hindsight-application-capability.ts — explicit D77/G1 capability admission, independent of native reflect availability
+- hindsight-application-client.ts — bounded application-state methods with exact response namespace and operation checks
+- hindsight-application-command-receipt.ts — exact namespace/request/result proof and complete per-command artifact revision validation
+- hindsight-application-command-runner.ts — exact-identity upload/commit recovery, verified historical receipts and explicit pending outcomes
+- hindsight-application-integrity.ts — scoped semantic digests, native witnesses and fully checked typed body values
+- hindsight-application-policy.ts — preserved policy or a deterministic first-policy proposal that must be committed before exposure
+- hindsight-application-projection.ts — complete Canonical consumer projections or explicit withheld binding state
+- hindsight-application-recovery-replica.ts — the existing Pending recovery reader interface backed by current D77 projections
+- hindsight-application-source-binding.ts — truthful current-source projection and operation-proven awaiting-source resolution
+- hindsight-application-source-write.ts — an immutable application Source artifact prepared before any native source dispatch
+- hindsight-application-sync-runner.ts — atomic joint publication with fixed operation deadlines or a renewable foreground lease, independent HTTP caps and frozen authority/namespace/checkpoint guards
+- hindsight-application-writer.ts — durable original command identity plus independently verified remote receipt/application status
+- hindsight-ingestion-contract.ts — durable source-only plans, original retain payloads, stable operation identities and coverage codecs
+- hindsight-ingestion-lifetime.ts — owner cancellation, serial ingestion chains and a drain that waits for every underlying operation
+- hindsight-ingestion.ts — source-only ingestion with restart-safe gate/Bank coverage, pre-retirement flush and owned stop/drain
+- hindsight-memory-pending-read.ts — separate unconfirmed overlays, gated by exact scope and current known target policy
+- hindsight-memory-provider-context.ts — guarded foreground request allowances, bounded capability admission or explicit shrinking operation deadlines, and closed provider failures
+- hindsight-memory-provider.ts — native reads/reflection with foreground cold-admission cancellation, truthful Pending outcomes and stable authority
+- hindsight-memory-read-projection.ts — exact current Canonical hits admitted by persisted Taki policy before result limits
+- hindsight-memory-recall.ts — foreground native recall and complete hydration under per-HTTP limits, or verified sparse replica plus truthful Pending overlays
+- hindsight-memory-reflect.ts — policy-guarded native reflection with one fixed five-minute allowance across synchronization, admission, policy upload and generation
+- hindsight-memory-runtime.ts — canonical tools, caller-cancellable verified Run capture, scoped initiative Block/Persona assembly, foreground synchronization and native policy-bearing recall
+- hindsight-memory-subsystem.ts — provider/run/ingestion/curator/flush composition with caller-cancellable admission, the existing B5 scheduler and settled shutdown
+- hindsight-memory-write-admission.ts — atomic parent intent plus required native/source children, or a stable no-dispatch result
+- hindsight-memory-write-context.ts — guarded write contexts and verified mutation targets shared by admission and recovery
+- hindsight-memory-write-fixtures.ts — real parent journal, Pending repository/writer, application outbox and G1 replay composition
+- hindsight-memory-write-mutation.ts — independent policy application or an explicit superseded result without overwriting newer state
+- hindsight-memory-write-native-fixtures.ts — tracked G1 results/pages plus actual native/application fixture publications
+- hindsight-memory-write-policy.ts — one deterministic policy CAS command, with explicit preflight and independent application proof
+- hindsight-memory-write-recovery.ts — whole-operation completion only after every required native/application effect is verified
+- hindsight-memory-write-result.ts — truthful current pending projections and immutable public operation results
+- hindsight-memory-write-retain.ts — complete original memory references and a stable retain result with an actually observed source revision
+- hindsight-memory-writes.ts — durable original intents, truthful queued results and restartable native/policy completion
+- hindsight-observed-write.ts — durable source acceptance through the real provider, with an honest source or Pending operation identity
+- hindsight-policy-admission.ts — exact addressed-record policy eligibility for facts/observations and non-mutating Taki layer-tag projection
+- hindsight-policy-assessment.ts — immutable rebind, assessment-success and retry proposals for the application repository
+- hindsight-policy-context.ts — exact scope/version checks and validated policy bodies for pure policy consumers
+- hindsight-policy-curator-context.ts — narrow curator dependency, review and run-state contracts
+- hindsight-policy-curator-execution.ts — durable model proposals/failures with single-attempt evidence and no remote writes during generation
+- hindsight-policy-curator-fixtures.ts — real curator/work/outbox/replica composition with deterministic byte-client and model substitutes
+- hindsight-policy-curator-lifetime.ts — a shared deadline/abort lifetime and bounded awaits which cannot resume into late DB callbacks; cancellation regressions retain current-prompt admission evidence
+- hindsight-policy-curator-model.ts — a bounded production AI SDK tool loop with actual completed-step/token usage
+- hindsight-policy-curator-prompt.ts — dedicated source-aware policy-only instructions, fenced report and actual effective prompt hash; native extraction stays provider-owned
+- hindsight-policy-curator-publication.ts — original-command recovery, verified replica refresh and truthful committed-effect counts
+- hindsight-policy-curator-targets.ts — scoped exact targets and last-moment model/publication admission checks
+- hindsight-policy-curator-tools.ts — a small proposal-only toolset with immutable local result persistence
+- hindsight-policy-curator.ts — scoped production policy reviews, restart-safe publication and actual applied-effect outcomes
+- hindsight-runtime-bank-service.ts — cancellable Bank queues and renewable foreground read leases alongside bounded synchronization, Pending/parent-write recovery and shutdown drain
+- hindsight-runtime-connection.ts — one captured authenticated client and guards for connection, epoch and Bank route changes
+- hindsight-runtime-state.ts — application replica, source/binding producer, Pending recovery, durable writes and real provider
+- hindsight-runtime-view.ts — admitted frozen prompt/T5 rows and explicit capture refusal when a required pin needs native-policy rebinding
+- hindsight-runtime-consumers.ts — captured foreground/initiative lifetime, held-reference refusal and preserved non-enumerable Effect metadata

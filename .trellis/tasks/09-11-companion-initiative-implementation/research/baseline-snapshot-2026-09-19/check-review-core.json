@@ -1,0 +1,31 @@
+{
+  "label": "review-core",
+  "command": [
+    "pnpm",
+    "--filter",
+    "@taki/core",
+    "exec",
+    "vitest",
+    "run",
+    "--maxWorkers=4",
+    "src/agents/chat-agent-baseline-integration.test.ts",
+    "src/agents/chat-agent-memory-recall.test.ts",
+    "src/agents/chat-agent-canonical-memory.test.ts",
+    "src/agents/chat-agent-non-primary.test.ts",
+    "src/agents/chat-agent-tool-names.test.ts",
+    "src/harness/run-snapshot-capture.test.ts",
+    "src/harness/run-service-memory-restore.test.ts",
+    "src/db/migrations/035-timeline-presentation.test.ts",
+    "src/db/migrations/036-memory-timeline-convergence.test.ts",
+    "src/db/migrations/040-hindsight-cutover-convergence.test.ts",
+    "src/db/migrations/lineage-reopen-matrix.test.ts",
+    "src/memory/operations",
+    "src/server/methods/memory-operation-methods.test.ts",
+    "src/server/methods/memory-authority-status.test.ts"
+  ],
+  "cwd": "H:\\TakiAgent-worktrees\\t4",
+  "startedAt": "2026-09-20T11:20:30.715598+00:00",
+  "seconds": 10.578,
+  "exitCode": 0,
+  "log": "logs/review-core.log"
+}

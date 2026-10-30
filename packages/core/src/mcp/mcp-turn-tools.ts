@@ -1,6 +1,6 @@
 /**
- * INPUT: active runtime generations, governance dependencies, and interactive turn context
- * OUTPUT: governed per-turn tools with readable approvals and acquire/execute/finally-release generation leases
+ * INPUT: active runtime generations, canonical policy/durable Approval, and optional interactive turn context
+ * OUTPUT: governed captured tools with readable interactive asks, unattended durable checks and generation leases
  * POS: core/mcp turn assembly; retired generations fail closed and captured snapshots never redirect
  */
 import type { Tool, ToolSet } from "ai";
@@ -37,6 +37,7 @@ export function buildTurnTools(
         ? wrapGovernedTool(tool, {
             service: governance.service,
             binding: mcpBinding(governance, record, ref),
+            approval: governance.approval,
             interactive: governance.approval && interactive
               ? lateBoundInteractive(interactive, governance.approval, mcpPresentation(ref))
               : undefined,

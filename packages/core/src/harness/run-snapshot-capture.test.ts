@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { createMemoryRunReference } from "../memory/memory-capability-snapshot.ts";
 import type { TriggerRequest } from "@taki/shared";
 import type { ExtensionRunContext } from "../extensions/extension-run-context.ts";
 import { createRunSnapshotCapture } from "./run-snapshot-capture.ts";
@@ -13,7 +14,7 @@ describe("createRunSnapshotCapture", () => {
   it("persists only reduced authority references while returning the exact executable context", async () => {
     const memoryTools = { captured_memory_tool: {} as never };
     const names = { direct_mcp: "Actual server · operation" };
-    const context: ExtensionRunContext = { tools: {}, toolDisplayNames: names, instructions: "secret prompt instructions", snapshot: {
+    const context: ExtensionRunContext = { tools: {}, toolDisclosure: { deferredToolNames: [], describedTools: {}, skills: {} }, toolDisplayNames: names, instructions: "secret prompt instructions", snapshot: {
       runId: "550e8400-e29b-41d4-a716-446655440001", primaryHostId: hostId,
       hosts: [{ hostId, available: true, connectionGeneration: 2, catalogGeneration: 3, extensionCount: 1 }],
       entries: [{ identity: { extensionId, kind: "skill", ownerHostId: hostId, subjectId: "skill.pkg",
@@ -25,9 +26,8 @@ describe("createRunSnapshotCapture", () => {
       extensions: { runContext: () => context },
       governance: { level: () => ({ level: "standard", policyGeneration: 4, registryRevision: 2 }) },
       approval: { approvalGeneration: () => 7 },
-      memory: { snapshot: () => ({ providerId: "local", authorityEpochId: "epoch-1", contractVersion: 1,
-        capabilities: memoryCapabilities }),
-        createTools: () => memoryTools },
+      memory: { captureRun: async () => ({ snapshot: createMemoryRunReference({ providerId: "local", providerLineageId: "lineage-1", authorityEpochId: "epoch-1", contractVersion: 1,
+        capabilities: memoryCapabilities }), tools: memoryTools }) },
       provider: "openai-compatible",
       modelId: "model",
     });
@@ -36,8 +36,9 @@ describe("createRunSnapshotCapture", () => {
       deliveryClass: "class_a", contextMode: "primary" };
     const result = await capture.capture(request, context.snapshot.runId);
     expect(result.context).toMatchObject({ tools: context.tools, instructions: context.instructions });
-    expect(result.context?.memoryTools).toBe(memoryTools);
+    expect(result.context?.memoryTools).toEqual(memoryTools);
     expect(result.context?.toolDisplayNames).toEqual(names);
+    expect(result.context?.toolDisclosure).toBe(context.toolDisclosure);
     expect(Object.isFrozen(result.context?.toolDisplayNames)).toBe(true);
     expect(result.snapshot).toMatchObject({ primaryHostId: hostId,
       hosts: [{ hostId, connectionGeneration: 2, catalogGeneration: 3 }],
@@ -59,5 +60,37 @@ describe("createRunSnapshotCapture", () => {
     const renamed = await capture.capture(request, context.snapshot.runId);
     expect(renamed.context?.toolDisplayNames?.direct_mcp).toBe("Changed display only");
     expect(JSON.stringify(renamed.snapshot)).toBe(persisted);
+  });
+
+  it("captures memory once and keeps its exact immutable snapshot plus process-local ports", async () => {
+    const caps = { ...memoryCapabilities };
+    const snapshot = createMemoryRunReference({ providerId: "local", providerLineageId: "lineage", authorityEpochId: "epoch",
+      contractVersion: 1, capabilities: caps });
+    const automaticRecall = vi.fn(async () => "PRIVATE_RECALLED_CONTENT");
+    const assemble = vi.fn(() => "PRIVATE_STABLE_MEMORY");
+    const memoryTools = { recall: { description: "original", execute: vi.fn() } as never };
+    const captureRun = vi.fn(async () => ({ snapshot, tools: memoryTools, automaticRecall, assemble, prompt: "PRIVATE_PROCEDURE" }));
+    const capture = createRunSnapshotCapture({ memory: { captureRun },
+      extensions: { runContext: () => ({ tools: {}, toolDisclosure: { deferredToolNames: [], describedTools: {}, skills: {} }, instructions: "", snapshot: { runId: "run", hosts: [], entries: [],
+        primaryHostId: hostId, collisions: [], budget: { maxEntries: 1, maxDescriptionChars: 1, maxSearchResults: 1, maxCalls: 1 } } }) },
+      governance: { level: () => ({ level: "standard", policyGeneration: 1, registryRevision: 1 }) },
+      provider: "test", modelId: "test" });
+    const result = await capture.capture({ triggerRequestId: "trigger", idempotencyKey: "idempotency", characterId: "taki",
+      initiator: "primary", provenance: { provider: "chat" }, deliveryClass: "class_a", contextMode: "primary" }, "run");
+    expect(captureRun).toHaveBeenCalledExactlyOnceWith("taki");
+    expect(result.snapshot.memory).toBe(snapshot);
+    expect(result.context?.memorySnapshot).toBe(snapshot);
+    expect(result.context?.automaticMemoryRecall).toBe(automaticRecall);
+    expect(result.context?.assembleMemory).toBe(assemble);
+    expect(result.context?.memoryPrompt).toBe("PRIVATE_PROCEDURE");
+    caps.recall = false;
+    memoryTools.recall = { description: "replacement" } as never;
+    expect(result.context?.memoryTools?.recall?.description).toBe("original");
+    expect(snapshot.capabilities.recall).toBe(true);
+    expect(Object.isFrozen(result.context?.memoryTools?.recall)).toBe(true);
+    expect(Object.isFrozen(snapshot.capabilities)).toBe(true);
+    expect(JSON.stringify(result.snapshot)).not.toContain("PRIVATE_");
+    expect(automaticRecall).not.toHaveBeenCalled();
+    expect(assemble).not.toHaveBeenCalled();
   });
 });

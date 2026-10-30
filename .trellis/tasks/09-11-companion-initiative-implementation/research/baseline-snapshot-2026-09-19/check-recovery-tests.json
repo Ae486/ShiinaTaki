@@ -1,0 +1,15 @@
+{
+  "label": "recovery-tests",
+  "command": [
+    "pnpm",
+    "-r",
+    "--workspace-concurrency=1",
+    "test",
+    "--maxWorkers=4"
+  ],
+  "cwd": "H:\\TakiAgent-worktrees\\t4",
+  "startedAt": "2026-09-20T02:50:57.630754+00:00",
+  "seconds": 222.282,
+  "exitCode": 0,
+  "log": "logs/recovery-tests.log"
+}

@@ -1,0 +1,25 @@
+diff --git a/.trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/baseline/preimages/packages/core/src/agents/chat-agent.ts b/packages/core/src/agents/chat-agent.ts
+index 1938b67..e429f68 100644
+--- a/.trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/baseline/preimages/packages/core/src/agents/chat-agent.ts
++++ b/packages/core/src/agents/chat-agent.ts
+@@ -321,6 +321,9 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
+     instructions,
+     tools,
+     toolOrder,
++    prepareCall: (settings) => ({ ...settings,
++      // The SDK fallback prints raw provider exceptions. Core handles the unchanged public error part.
++      onError: () => undefined }),
+     prepareStep: ({ steps }) => ({ activeTools: disclosure.activeTools(steps) }),
+     telemetry: { isEnabled: true, recordInputs: false, recordOutputs: false,
+       integrations: observability ? [observability.telemetry, requestTelemetry] : [requestTelemetry] },
+@@ -331,7 +334,9 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
+     // Capture each completed step before a later request can fail and reject the aggregate response promise.
+     // The same completed-step fact preserves the existing prohibition on retrying completed tool effects.
+     onStepEnd: (event) => {
+-      state.stepEnded = true;
++      // SDK 7.0.148 also emits onStepEnd for an error-only provider response before the public error part.
++      // That failed request must retain the one clean overflow retry; completed tools still fence replay.
++      state.stepEnded ||= event.finishReason !== "error" || event.content.length > 0;
+       state.recording.capture(event.stepNumber, event.response.messages);
+     },
+   });

@@ -1,0 +1,199 @@
+{
+  "name": "recall-2",
+  "startedAt": "2026-09-28T13:54:54.806Z",
+  "passed": true,
+  "turns": [],
+  "requests": [
+    {
+      "tools": [
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "heartbeat_respond",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "selectedMemoryPresent": false,
+      "primaryHistoryPresent": false,
+      "status": 200
+    },
+    {
+      "tools": [
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "heartbeat_respond",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "selectedMemoryPresent": true,
+      "primaryHistoryPresent": false,
+      "status": 200
+    }
+  ],
+  "finishedAt": "2026-09-28T13:55:05.318Z",
+  "model": "deepseek-v4-flash",
+  "providerHost": "api.deepseek.com",
+  "plans": [],
+  "runs": [
+    {
+      "initiator": "heartbeat",
+      "state": "completed",
+      "outcome": "completed",
+      "initiative_timezone": "UTC"
+    }
+  ],
+  "effects": [
+    {
+      "kind": "model",
+      "state": "terminal",
+      "outcome": "completed",
+      "error_code": null
+    },
+    {
+      "kind": "memory",
+      "state": "terminal",
+      "outcome": "completed",
+      "error_code": null
+    },
+    {
+      "kind": "model",
+      "state": "terminal",
+      "outcome": "completed",
+      "error_code": null
+    },
+    {
+      "kind": "tool",
+      "state": "terminal",
+      "outcome": "completed",
+      "error_code": null
+    }
+  ],
+  "deliveries": [
+    {
+      "delivery_class": "class_b",
+      "state": "sent",
+      "decision_json": "{\"outcome\":\"speak\",\"selectedCandidateIds\":[\"04a73a7190ba18b0dac98756cdb069b14c5e1d1aa2ef2f3be1c3f0bbb4431861\"],\"text\":\"……研究那个面试，怎么样了。\\n\\n结果要是还没出，就还没出，别自己在那儿翻来覆去地想。\",\"presentation\":null,\"responseExpectation\":\"invitation\"}"
+    }
+  ],
+  "usage": [
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "reported",
+      "input_tokens": 5233,
+      "output_tokens": 174,
+      "total_tokens": 5407,
+      "cache_read_tokens": 4864,
+      "reasoning_tokens": 136
+    },
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "reported",
+      "input_tokens": 5573,
+      "output_tokens": 563,
+      "total_tokens": 6136,
+      "cache_read_tokens": 5376,
+      "reasoning_tokens": 387
+    }
+  ],
+  "tools": [],
+  "planningTrace": []
+}

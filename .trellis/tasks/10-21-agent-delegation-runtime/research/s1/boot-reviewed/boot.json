@@ -1,0 +1,22 @@
+{
+  "node": "v24.18.0",
+  "cwd": "H:\\TakiAgent-worktrees\\t4",
+  "command": [
+    "node",
+    "packages/core/src/main.ts"
+  ],
+  "envFileLoaded": false,
+  "inheritedEnvironment": "OS path/runtime allowlist only; no TAKI/model/credential configuration inherited",
+  "provider": "owned loopback HTTP trap with invalid noncredential placeholder required by startup schema",
+  "dataDir": "H:\\TakiAgent-worktrees\\t4\\.trellis\\tasks\\10-21-agent-delegation-runtime\\research\\s1\\boot-reviewed\\boot-data",
+  "port": 14967,
+  "pid": 41580,
+  "listeningLog": true,
+  "socketConnected": true,
+  "modelRequests": 0,
+  "exitCode": 1,
+  "stop": {
+    "exitCode": 0,
+    "output": "�ɹ�: ����ֹ PID 25356 (���� PID 41580 �ӽ���)�Ľ��̡�\r\n�ɹ�: ����ֹ PID 41580 (���� PID 28252 �ӽ���)�Ľ��̡�"
+  }
+}

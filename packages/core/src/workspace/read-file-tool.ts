@@ -9,6 +9,7 @@ import { z } from "zod";
 import type { Logger } from "../logging/logger.ts";
 import { fsErrorCode } from "./fs-error.ts";
 import type { WorkspacePaths } from "./workspace-paths.ts";
+import { withToolSourceMaterials } from "../agents/tool-source-materials.ts";
 
 // 256 KiB read cap (ruling 9); beyond it the model gets the first slice + truncated:true.
 const READ_CAP = 256 * 1024;
@@ -56,7 +57,8 @@ export function createReadFileTool(deps: ReadFileToolDeps): ToolSet {
           }
           // The path (relative) and byte count are safe to log; the file content is NOT.
           log.info({ path: resolved.relative, bytes: slice.length, truncated }, "workspace file read");
-          return { ok: true as const, path: resolved.relative, content, bytes: slice.length, truncated };
+          return withToolSourceMaterials({ ok: true as const, path: resolved.relative, content, bytes: slice.length, truncated },
+            [{ key: "result", source: { label: "Workspace file", reference: resolved.relative } }]);
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
           log.warn({ err: message }, "read-file tool failed");

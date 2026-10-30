@@ -1,11 +1,15 @@
 /**
- * INPUT:  normalized logical snapshot metadata/pages from one Hindsight Bank
+ * INPUT:  normalized logical snapshot pages or a complete retained D78 certificate and its raw pages
  * OUTPUT: canonical page/order/hash/count/aggregate verification with bounded safe failures
  * POS:    core/memory/hindsight — integrity gate before staging persistence or checkpoint publication
  */
 import { createHash } from "node:crypto";
-import { HindsightLogicalSnapshotMetadataSchema, HindsightLogicalSnapshotPageSchema, type HindsightLogicalSnapshotMetadata, type HindsightLogicalSnapshotPage, type HindsightLogicalSnapshotRecord } from "@taki/shared";
+import { HindsightLogicalSnapshotMetadataSchema, HindsightLogicalSnapshotPageSchema, HindsightCutoverCertificateSchema,
+  HindsightSnapshotPageWireSchema, type HindsightLogicalSnapshotMetadata, type HindsightLogicalSnapshotPage,
+  type HindsightLogicalSnapshotRecord, type HindsightCutoverCertificate, type HindsightSnapshotPageWire } from "@taki/shared";
 import { canonicalJson } from "../legacy-migration/legacy-identities.ts";
+import { hindsightCurrentStateHash } from "./hindsight-current-state-hash.ts";
+import { normalizeSnapshotMetadata, normalizeSnapshotPage } from "./hindsight-snapshot-contracts.ts";
 
 export interface VerifiedSnapshot {
   metadata: HindsightLogicalSnapshotMetadata;
@@ -18,8 +22,29 @@ export function verifyLogicalSnapshot(input: { metadata: HindsightLogicalSnapsho
   if (metadata.manifest.bankId !== input.expectedBankId) fail("HINDSIGHT_SNAPSHOT_BANK_MISMATCH");
   if (metadata.manifest.providerLineage !== input.expectedProviderLineage) fail("HINDSIGHT_SNAPSHOT_LINEAGE_MISMATCH");
   if (Date.parse(metadata.expiresAt) <= Date.parse(input.now)) fail("HINDSIGHT_SNAPSHOT_EXPIRED");
-  if (input.pages.length !== metadata.manifest.totalPages) fail("HINDSIGHT_SNAPSHOT_PAGE_MISSING");
-  const pages = input.pages.map((page) => HindsightLogicalSnapshotPageSchema.parse(page));
+  return verifySnapshotContents(metadata, input.pages);
+}
+
+export function verifyRetainedLogicalSnapshot(input: { certificate: HindsightCutoverCertificate;
+  pages: HindsightSnapshotPageWire[]; expectedBankId: string; expectedProviderLineage: string }): VerifiedSnapshot {
+  const certificate = HindsightCutoverCertificateSchema.parse(input.certificate);
+  const { certificate_hash: hash, ...body } = certificate;
+  const pages = input.pages.map((page) => HindsightSnapshotPageWireSchema.parse(page));
+  const metadata = normalizeSnapshotMetadata(certificate.snapshot);
+  // Retention is sealed atomically with this exact immutable snapshot. The diagnostic TTL stays unchanged.
+  // A flag alone, another certificate, or reusing page hashes with different bytes cannot grant the exception.
+  if (hash !== hindsightCurrentStateHash(body) || certificate.bank_id !== input.expectedBankId
+    || certificate.provider_lineage !== input.expectedProviderLineage || metadata.manifest.bankId !== certificate.bank_id
+    || metadata.manifest.providerLineage !== certificate.provider_lineage || metadata.manifest.bankGeneration !== certificate.bank_generation
+    || hindsightCurrentStateHash(pages.flatMap((page) => page.records)) !== certificate.snapshot_records_hash) {
+    fail("HINDSIGHT_SNAPSHOT_RETENTION_INVALID");
+  }
+  return verifySnapshotContents(metadata, pages.map(normalizeSnapshotPage));
+}
+
+function verifySnapshotContents(metadata: HindsightLogicalSnapshotMetadata, inputPages: HindsightLogicalSnapshotPage[]): VerifiedSnapshot {
+  if (inputPages.length !== metadata.manifest.totalPages) fail("HINDSIGHT_SNAPSHOT_PAGE_MISSING");
+  const pages = inputPages.map((page) => HindsightLogicalSnapshotPageSchema.parse(page));
   pages.forEach((page, index) => verifyPage(metadata, page, index));
   const records = pages.flatMap((page) => page.records);
   if (records.length !== metadata.manifest.totalRecords) fail("HINDSIGHT_SNAPSHOT_COUNT_MISMATCH");

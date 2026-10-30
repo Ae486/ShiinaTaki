@@ -1,0 +1,7 @@
+{
+  "exitCode": 0,
+  "startedAt": "2026-10-23T03:40:04.4034386Z",
+  "cwd": "H:/TakiAgent-worktrees/t4",
+  "finishedAt": "2026-10-23T03:40:11.7144210Z",
+  "command": "pnpm --filter @taki/shared typecheck"
+}

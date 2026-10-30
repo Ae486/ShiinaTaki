@@ -5,10 +5,19 @@
  */
 import {
   getKnownToolDisplayName, observabilityLabel, observabilityLabels, TrajectoryRowSchema,
-  type RunEvent, type TrajectoryRow,
+  type RunEvent, type RunWorkEvent, type TrajectoryRow,
 } from "@taki/shared";
 
 export function projectEvent(event: RunEvent): TrajectoryRow {
+  if (event.schemaVersion === "run-event.v3") return projectWorkEvent(event);
+  if (event.schemaVersion === "run-event.v2") return TrajectoryRowSchema.parse({
+    rowKey: event.eventId, seq: event.seq, groupKey: event.attemptId, kind: "lifecycle",
+    label: initiativeLabel(event.kind), phase: "delivery", category: "lifecycle", categoryLabel: "主动表达与投递",
+    status: initiativeLabel(event.payload.state), occurredAt: event.occurredAt,
+    surface: "current", surfaceLabel: "当前记录",
+    summary: event.payload.disposition ? initiativeLabel(event.payload.disposition)
+      : event.payload.outcome ? initiativeLabel(event.payload.outcome) : undefined,
+  });
   const payload = event.payload;
   const base = projectBase(event);
   if (payload.kind === "usage.settled") return TrajectoryRowSchema.parse({
@@ -69,6 +78,16 @@ function projectBase(event: RunEvent) {
   };
 }
 
+function projectWorkEvent(event: RunWorkEvent): TrajectoryRow {
+  return TrajectoryRowSchema.parse({
+    rowKey: event.eventId, seq: event.seq, groupKey: event.attemptId, kind: "lifecycle",
+    label: event.kind === "run.work_held" ? "任务等待后续输入" : "任务继续执行",
+    phase: "run", category: "lifecycle", categoryLabel: "任务生命周期",
+    status: event.payload.state === "waiting" ? "等待" : "执行中", occurredAt: event.occurredAt,
+    surface: "current", surfaceLabel: "当前记录",
+  });
+}
+
 function correlation(payload: RunEvent["payload"]) {
   const modelEffectId = payload.kind === "usage.settled" || payload.kind.startsWith("model.")
     || (isEffectPayload(payload) && payload.effectKind === "model")
@@ -95,6 +114,22 @@ function phaseOf(event: RunEvent): TrajectoryRow["phase"] {
   if (event.kind.startsWith("effect.")) return "effect";
   if (event.kind === "recovery.classified") return "recovery";
   return event.category === "lifecycle" ? "run" : event.category;
+}
+
+export function initiativeLabel(value: string): string {
+  const labels: Record<string, string> = {
+    "initiative.decision": "主动判断", "delivery.staged": "表达已保存", "delivery.held": "等待投递",
+    "delivery.resumed": "继续投递", "delivery.dispatch_committed": "投递已提交", "delivery.sent": "传输已接受",
+    "delivery.unknown": "传输结果未知", "delivery.no_target": "没有可用接收端", "delivery.expired": "表达已过期",
+    "delivery.suppressed": "表达已抑制", "delivery.presentation_settled": "呈现操作已结束",
+    "delivery.presented": "消息已呈现", "delivery.feedback_settled": "回应机会观察已结算",
+    presented: "已呈现", feedback_settled: "已结算", engaged: "观察到后续互动",
+    weak_non_engagement: "有回应机会但未观察到后续互动",
+    silent: "保持安静", express: "仅表情动作", speak: "说话", committed: "已确认", staged: "已保存",
+    held: "等待", resumed: "继续", dispatch_committed: "投递已提交", sent: "传输已接受",
+    unknown: "未知", no_target: "没有接收端", expired: "已过期", suppressed: "已抑制", completed: "已完成", failed: "失败",
+  };
+  return labels[value] ?? "投递记录";
 }
 
 type EffectPayload = Extract<RunEvent["payload"], { kind: "effect.intent_committed" | "effect.waiting" | "effect.settled" }>;

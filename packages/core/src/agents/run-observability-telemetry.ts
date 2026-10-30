@@ -4,6 +4,7 @@
  * POS:    core/agents — observer wiring only; model execution and canonical settlement keep their existing owners
  */
 import { wrapLanguageModel, type LanguageModel, type LanguageModelMiddleware, type Telemetry } from "ai";
+import type { EffectLifecycle } from "@taki/shared";
 import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 import type { ToolEffectObserver } from "../observability/tool-effect-observer.ts";
 import { createModelEffectMiddleware } from "./model-effect-middleware.ts";
@@ -19,6 +20,7 @@ export interface RunObservabilitySession {
   invocations: ToolInvocationBridge;
   observeStreamPart(part: unknown): void;
   assertHealthy(): void;
+  releaseCompleted(): void;
 }
 
 export function createRunObservabilityModel(input: {
@@ -28,6 +30,7 @@ export function createRunObservabilityModel(input: {
   attemptId?: string;
   toolDisplayNames?: Readonly<Record<string, string>>;
   activity?: ToolActivityObserver;
+  onCommitModelIntent?: (effect: EffectLifecycle) => void;
 }): { model: LanguageModel; observability?: RunObservabilitySession } {
   if (!input.lifecycle || !input.runId || !input.attemptId) {
     return { model: input.model, ...(input.activity ? { observability: untrackedToolSession(input) } : {}) };
@@ -36,6 +39,7 @@ export function createRunObservabilityModel(input: {
     lifecycle: input.lifecycle, runId: input.runId, attemptId: input.attemptId,
     toolDisplayNames: input.toolDisplayNames,
     activity: input.activity,
+    onCommitModelIntent: input.onCommitModelIntent,
   });
   return {
     model: observability.middleware ? wrapLanguageModel({
@@ -52,6 +56,7 @@ export function createRunObservabilitySession(input: {
   toolDisplayNames?: Readonly<Record<string, string>>;
   activity?: ToolActivityObserver;
   now?: () => number;
+  onCommitModelIntent?: (effect: EffectLifecycle) => void;
 }): RunObservabilitySession {
   const now = input.now ?? Date.now;
   const invocations = createToolInvocationBridge(input);
@@ -63,13 +68,14 @@ export function createRunObservabilitySession(input: {
       onLanguageModelCallStart: model.start, onLanguageModelCallEnd: model.end,
       onToolExecutionStart: tools.start, onToolExecutionEnd: tools.end, executeTool: tools.execute,
     },
-    tools: { bindEffect: tools.bindEffect, phase: tools.phase },
+    tools: { bindEffect: tools.bindEffect, phase: tools.phase, currentInvocation: tools.currentInvocation },
     invocations,
     observeStreamPart(part) {
       tools.observeStreamPart(part);
       model.assertHealthy();
     },
     assertHealthy: model.assertHealthy,
+    releaseCompleted: tools.releaseCompleted,
   };
 }
 
@@ -79,9 +85,10 @@ function untrackedToolSession(input: {
   const tools = createToolObserver(input, Date.now);
   return {
     telemetry: { onToolExecutionStart: tools.start, onToolExecutionEnd: tools.end, executeTool: tools.execute },
-    tools: { bindEffect: tools.bindEffect, phase: tools.phase },
+    tools: { bindEffect: tools.bindEffect, phase: tools.phase, currentInvocation: tools.currentInvocation },
     invocations: tools.invocations,
     observeStreamPart: tools.observeStreamPart,
     assertHealthy() { /* Legacy callers have no model Effect authority to validate or fabricate. */ },
+    releaseCompleted: tools.releaseCompleted,
   };
 }

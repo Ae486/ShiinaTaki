@@ -15,9 +15,12 @@
 |-------|-------------|
 | [Directory Structure](./directory-structure.md) | Feature folders, window entries, renderer isolation |
 | [Component Guidelines](./component-guidelines.md) | Component patterns, props, composition |
+| [Explicit Co-Watching](../backend/co-watching.md) | Operator acceptance card, producer revisions, hidden/read/command lifetimes and actual-delivery evidence |
 | [Hook Guidelines](./hook-guidelines.md) | Custom hooks, WS subscription patterns |
 | [State Management](./state-management.md) | Zustand stores, state ownership, guarded SWR page snapshots |
 | [Foreground Chat Feedback](./foreground-chat-feedback.md) | Shared ordered activity, complete Timeline handoff, segmented Pet tools/text, reading anchors and CSS geometry continuity |
+| [User Presence and Presentation Feedback](./user-presence-feedback.md) | Socket-bound Home/Chat/Pet sources, trusted input age, actual committed-text exposure and designated Home User Timezone reporting |
+| [Interaction Pattern Authoring and Review](./interaction-patterns.md) | Exact immutable review, preserved CAS drafts/history, explicit Skill/example setup, same-Monitor policy/backoff controls and semantic follow-up tool results |
 | [Reactive Read-Models](./reactive-read-models.md) | Event/demand policy, coherent target commits, stable reading/editing, non-displacing pending feedback, once-consumed Toasts and truthful recovery |
 | [Type Safety](./type-safety.md) | zod boundaries, no-any policy |
 | [Quality Guidelines](./quality-guidelines.md) | Size/responsibility guard, perf rules (this window is always-on), tests |

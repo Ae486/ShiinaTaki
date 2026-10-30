@@ -1,0 +1,16 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend pre-dev checklist and quality gates"}
+{"file": ".trellis/spec/backend/tool-design.md", "reason": "Tool result envelope, execute never throws, structured error rules"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Structured degradation and error-code vocabulary rules"}
+{"file": ".trellis/spec/backend/server-push-and-connection-auth.md", "reason": "Operator-role method registration, notifications and connection lifecycle"}
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "ToolLoopAgent composition, stopWhen and per-turn tool binding"}
+{"file": ".trellis/spec/backend/foreground-chat-activity.md", "reason": "How tool outcomes reach the Chat activity projection"}
+{"file": ".trellis/spec/backend/config-store.md", "reason": "Knob registry and env > stored > default precedence for the deadline knob"}
+{"file": ".trellis/spec/backend/e2e-harness.md", "reason": "withStack real-process E2E conventions for the fake operator scenario"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend pre-dev checklist"}
+{"file": ".trellis/spec/frontend/live2d-renderer.md", "reason": "Engine facts: priorities, generation split, per-frame order, teardown"}
+{"file": ".trellis/spec/frontend/operator-connection-recovery.md", "reason": "Pet connection generation guard and reconnect rules"}
+{"file": ".trellis/spec/frontend/foreground-chat-feedback.md", "reason": "Chat tool card status rendering contract"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "Shared schema first, no parallel interfaces"}
+{"file": ".trellis/tasks/09-19-avatar-command-outcome/research/command-path-map-2026-09-19.md", "reason": "Exact seams and line anchors for every layer touched"}
+{"file": ".trellis/tasks/09-19-avatar-command-outcome/research/ai-sdk-invalid-tool-calls.md", "reason": "Installed SDK invalid-call semantics, execute options, probe scenarios for tests"}
+{"file": ".trellis/tasks/archive/2026-09/09-03-avatar-presentation-lab/research/production-command-findings-2026-09-08.md", "reason": "Engine rejection cases that become renderer fixtures"}

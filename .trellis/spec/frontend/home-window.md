@@ -89,6 +89,49 @@ generation, and gates while hidden is codified in [`reactive-read-models.md`](./
 - Full storage/runtime/governance and verification requirements live in
   [`skill-lifecycle.md`](../backend/skill-lifecycle.md).
 
+### Memory authority and operations card (Operations page)
+
+- The card is a disposable projection of `memory.authority.status` plus the `memory.operations.changed` push. It owns
+  no authority, progress, checkpoint or setup state; the legacy `memory-status` counter cache never stores any of it.
+- Each authenticated Home client generation subscribes once and refetches the composite status on every push, on
+  reconnect and on remount. There is no polling; results from a retired client are ignored; nothing is replayed.
+- Actions (立即同步 / 完整对账 / 重试 / 取消) are serialized `memory.operations.*` submits; the card enables Retry only when
+  the Bank reports `explicit_retry_required` and Cancel only for an `admitted` `replica.sync`. Availability follows the
+  current Core status, never a stale snapshot.
+- Unknown values render as 未知; the card never shows `0` pending, a health badge or freshness that the producer did
+  not report. Setup validate/apply and every later workflow (activation, transitions, backup, upgrade) are not on
+  this card until their Core operations exist.
+- Full operation ownership and verification requirements live in
+  [`memory-operations.md`](../backend/memory-operations.md).
+
+### Private Subagent Conversation
+
+- Home registers `subagents` once in `pages.ts`. `features/subagents/` owns a disposable query/controller view;
+  retained private content never enters the Character Timeline, presence exposure reports, or persisted UI caches.
+  Reuse Chat text/tool presentation without manufacturing canonical Timeline identities.
+- Install the parsed `subagent.changed` handler, await `subagent.subscribe`, then read bounded list/history pages.
+  Input, message and execution cursors remain independent. Hide retires read authority and retains the gap; it
+  does not cancel a submitted command. Each authenticated replacement repeats read restoration only.
+- Keep the committed child/title/payload/work coherent while another child loads. Actions require a fresh
+  displayed target: `subagentId`, exact `workInputId`, `expectedControlVersion`, and `expectedRunId` including
+  explicit `null` for an idle child. Stale displayed callbacks cannot retarget a different child or work.
+- Serialize controls. Stop addresses only the chosen child. An authenticated explicit Continue clears the
+  user-stop latch through Core; sending a message or opening the page does not. Co-Watching `paused_child`
+  links its exact child/work into this same page through `openSubagentConversation`.
+- An accepted input with no `consumed` receipt displays as waiting for inclusion. A receipt means included in
+  model request intent, not provider receipt or model understanding. Child outcome, completion disposition,
+  parent synthesis/decision, publication and canonical delivery state remain separate visible facts.
+  Execution pages use a Run-ID cursor, not a chronological sequence; do not label their array positions as
+  first/second executions. Display the retained execution state without inventing an ordinal.
+- Timeout/disconnect preserves the draft and unknown-outcome diagnostic across client replacement; never
+  resend automatically. Conflict and subsequent read failure remain separate. Only fresh reads restore action
+  readiness. Known absent/forbidden selected detail removes that projection; ordinary refresh failure retains
+  permitted last-good content with retry. Do not substitute an empty/success response for a failed read.
+- Verify exact targeting, subscription-before-read, stale read/action retirement, hidden mutation settlement,
+  receipt distinctions and no reconnect replay. Actual WebView2/browser evidence must separately cover rendered
+  navigation, retained editor/message nodes and deliberate controls; scripted RPC evidence is not Runtime/model
+  or owner acceptance.
+
 ## Cross-window commands (the pet owns the scene, the pages own the surface)
 
 A page that needs something only the pet window can do COMMANDS it and does not reach into it:

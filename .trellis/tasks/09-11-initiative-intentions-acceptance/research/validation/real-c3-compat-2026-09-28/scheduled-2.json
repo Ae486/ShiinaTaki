@@ -1,0 +1,630 @@
+{
+  "name": "scheduled-2",
+  "startedAt": "2026-09-28T14:23:21.548Z",
+  "passed": true,
+  "requests": [
+    {
+      "tools": [
+        {
+          "name": "avatar_play_motion",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "avatar_set_expression",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "clipboard_read",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "clipboard_write",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "exec",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_call",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_describe",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_discover",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "invalidate_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "manage_interaction_pattern",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "plan_follow_up",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "process_list",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_file",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "restore_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "retain",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "schedule_task",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "screenshot",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "shell_open",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "update_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "write_file",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "selectedMemoryPresent": true,
+      "primaryHistoryPresent": true,
+      "status": 200
+    },
+    {
+      "tools": [
+        {
+          "name": "avatar_play_motion",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "avatar_set_expression",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "clipboard_read",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "clipboard_write",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "exec",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_call",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_describe",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_discover",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "invalidate_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "manage_interaction_pattern",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "plan_follow_up",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "process_list",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_file",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "restore_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "retain",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "schedule_task",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "screenshot",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "shell_open",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "update_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "write_file",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "selectedMemoryPresent": true,
+      "primaryHistoryPresent": true,
+      "status": 200
+    }
+  ],
+  "finishedAt": "2026-09-28T14:23:29.369Z",
+  "model": "deepseek-v4-flash",
+  "providerHost": "api.deepseek.com",
+  "turns": [
+    {
+      "scenario": "scheduled-2",
+      "prompt": "按用户时区UTC，明天上午9点提醒我喝水，只提醒一次。请帮我设好这个定时提醒。",
+      "response": "设好了。明天（9月29日）UTC 上午9点，只响一次。\n\n……到点别装没听见。",
+      "status": "complete"
+    }
+  ],
+  "runs": [
+    {
+      "initiator": "primary",
+      "state": "completed",
+      "outcome": "completed"
+    }
+  ],
+  "usage": [
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "reported",
+      "input_tokens": 14420,
+      "output_tokens": 541,
+      "total_tokens": 14961,
+      "cache_read_tokens": 3712,
+      "reasoning_tokens": 431
+    },
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "reported",
+      "input_tokens": 15131,
+      "output_tokens": 183,
+      "total_tokens": 15314,
+      "cache_read_tokens": 14848,
+      "reasoning_tokens": 154
+    }
+  ],
+  "deliveries": [],
+  "patterns": [],
+  "schedules": [
+    {
+      "pattern_json": "{\"kind\":\"at\",\"at\":\"2026-09-29T09:00:00.000Z\"}",
+      "timezone_json": "{\"kind\":\"user\"}",
+      "state": "active"
+    }
+  ],
+  "authoringTrace": [
+    {
+      "type": "tool-call",
+      "toolCallId": "call_00_anur60kMSN4of74qCwo41433",
+      "toolName": "schedule_task",
+      "displayName": "管理定时任务"
+    },
+    {
+      "type": "tool-result",
+      "toolCallId": "call_00_anur60kMSN4of74qCwo41433",
+      "toolName": "schedule_task",
+      "displayName": "管理定时任务",
+      "output": {
+        "type": "json",
+        "value": {
+          "ok": true,
+          "task": {
+            "taskId": "393903ee-39cc-4b17-a38f-b6baaec1dd87",
+            "characterId": "taki",
+            "name": "喝水提醒",
+            "controlInput": "到点了。去喝水。",
+            "pattern": {
+              "kind": "at",
+              "at": "2026-09-29T09:00:00.000Z"
+            },
+            "timezone": {
+              "kind": "user"
+            },
+            "enabled": true,
+            "state": "active",
+            "revision": 1,
+            "nextRunAt": "2026-09-29T09:00:00.000Z",
+            "createdAt": "2026-09-28T14:23:27.534Z",
+            "updatedAt": "2026-09-28T14:23:27.534Z"
+          }
+        }
+      }
+    }
+  ],
+  "tools": [
+    "schedule_task"
+  ]
+}

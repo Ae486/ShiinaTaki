@@ -1,0 +1,44 @@
+Scope: 5 of 6 workspace projects
+packages/shared test$ vitest run "--maxWorkers=4"
+packages/shared test:  RUN  v4.1.10 H:/TakiAgent-worktrees/t4/packages/shared
+packages/shared test:  ❯ src/governance-presentation.test.ts (9 tests | 1 failed) 17ms
+packages/shared test:      × covers every canonical capability and cell without changing registry authority 11ms
+packages/shared test:  ❯ src/governance-registry.test.ts (3 tests | 1 failed) 15ms
+packages/shared test:      × contains the complete factory inventory plus explicit extension adapters 11ms
+packages/shared test: ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+packages/shared test:  FAIL  src/governance-presentation.test.ts > governance presentation vocabulary > covers every canonical capability and cell without changing registry authority
+packages/shared test: AssertionError: expected [ { …(5) }, { …(5) }, { …(5) }, …(23) ] to have a length of 23 but got 26
+packages/shared test: - Expected
+packages/shared test: + Received
+packages/shared test: - 23
+packages/shared test: + 26
+packages/shared test:  ❯ src/governance-presentation.test.ts:13:25
+packages/shared test:      11|     const before = JSON.stringify(CANONICAL_GOVERNANCE_REGISTRY);
+packages/shared test:      12|     const { descriptors } = CANONICAL_GOVERNANCE_REGISTRY;
+packages/shared test:      13|     expect(descriptors).toHaveLength(23);
+packages/shared test:        |                         ^
+packages/shared test:      14|     expect(descriptors.flatMap((descriptor) => descriptor.cells)).toHa…
+packages/shared test:      15|     for (const descriptor of descriptors) {
+packages/shared test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+packages/shared test:  FAIL  src/governance-registry.test.ts > canonical governance registry > contains the complete factory inventory plus explicit extension adapters
+packages/shared test: AssertionError: expected [ …(38) ] to have a length of 35 but got 38
+packages/shared test: - Expected
+packages/shared test: + Received
+packages/shared test: - 35
+packages/shared test: + 38
+packages/shared test:  ❯ src/governance-registry.test.ts:12:19
+packages/shared test:      10|   it("contains the complete factory inventory plus explicit extension …
+packages/shared test:      11|     const cells = CANONICAL_GOVERNANCE_REGISTRY.descriptors.flatMap((d…
+packages/shared test:      12|     expect(cells).toHaveLength(35);
+packages/shared test:        |                   ^
+packages/shared test:      13|     expect(governanceDescriptor(CANONICAL_GOVERNANCE_REGISTRY, "core.c…
+packages/shared test:      14|       { key: "co-watching-manage", overrideMode: "immutable", levels: …
+packages/shared test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+packages/shared test:  Test Files  2 failed | 74 passed (76)
+packages/shared test:       Tests  2 failed | 677 passed (679)
+packages/shared test:    Start at  11:33:56
+packages/shared test:    Duration  10.78s (transform 2.09s, setup 0ms, import 14.22s, tests 1.66s, environment 10ms)
+packages/shared test: Failed
+H:\TakiAgent-worktrees\t4\packages\shared:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/shared@0.0.0 test: `vitest run "--maxWorkers=4"`
+Exit status 1

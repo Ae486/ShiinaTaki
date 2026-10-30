@@ -1,0 +1,17 @@
+Execution summary transcribed from the completed native command and retained evidence.json.
+Command: node apps/desktop/test/c4-backoff-native-smoke.mjs
+Exit code: 0
+Tool-reported wall time: 6.52 seconds
+Vite chunk-size advisory: present, non-fatal
+
+PASS cold read failure shows unknown fields and disabled reset, never fabricated zero
+PASS real components render scripted 1x/2x/4x/daily stages, counts and exact next eligibility without remounting
+PASS held warm read retains the card and finite invalidations require one covering read
+PASS hidden Monitor keeps a dirty obligation without reading and refreshes on actual return
+PASS accepted reset preserves daily usage while failed refresh stays independently visible
+PASS lost reset acknowledgement reconnects and restores current data without replay or erasing uncertainty
+PASS actual Chat disclosure, native selected text and accessibility tree remain semantic without changing canonical parts
+PASS a reset invalidation racing its accepted echo does not hide a failed status refresh
+
+Observed after completion: no c2-presence-fixture process remained.
+Scope: real WebView2/React/WsClient; scripted backoff/Monitor/Timeline protocol data.

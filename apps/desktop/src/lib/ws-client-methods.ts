@@ -6,11 +6,17 @@
  */
 
 import { JSONRPCErrorException, type JSONRPCParams, type JSONRPCServerAndClient } from "json-rpc-2.0";
+import { initiativeMethods } from "./ws-client-initiative.ts";
+import { coWatchingMethods } from "./ws-client-co-watching.ts";
+import { subagentMethods } from "./ws-client-subagents.ts";
 import {
   AVATAR_METHODS,
+  BROWSER_PLAYBACK_METHODS,
+  BrowserPlaybackReadResultSchema,
   APPROVAL_METHODS,
   ApprovalListResultSchema,
   ApprovalRevokeResultSchema,
+  AvatarOutcomeResultSchema,
   CanonicalApprovalRespondResultSchema,
   CHARACTER_METHODS,
   CHAT_METHODS,
@@ -63,6 +69,7 @@ import {
   RunMonitorUnsubscribeResultSchema,
   TrajectoryInspectorSchema,
   TrajectoryResultSchema,
+  type AvatarOutcomeParams,
   type AvatarReportParams,
   type ApprovalRevokeParams,
   type CanonicalApprovalRespondParams,
@@ -90,9 +97,13 @@ import {
 import { requestWithDeadline } from "./rpc-deadline.ts";
 import { configMethods } from "./ws-config-methods.ts";
 import { readSubscriptionMethods } from "./ws-read-subscriptions.ts";
+import { memoryOperationMethods } from "./ws-client-memory-operations.ts";
+import { userTimezoneMethods } from "./ws-client-user-timezone.ts";
+import { presenceMethods } from "./ws-client-presence.ts";
 
 function permissionMethods(request: <T>(method: string, params: JSONRPCParams) => Promise<T>) {
   return {
+    browserPlaybackRead: async () => BrowserPlaybackReadResultSchema.parse(await request(BROWSER_PLAYBACK_METHODS.read, {})),
     permissionLevelGet: async () =>
       PermissionLevelStateSchema.parse(await request(PERMISSION_METHODS.levelGet, {})),
     permissionLevelSet: async (params: PermissionLevelSetParams) =>
@@ -190,6 +201,8 @@ function avatarMethods(request: <T>(method: string, params: JSONRPCParams) => Pr
       console.info(`[avatar] reported vocab motions=${params.motions.length} expressions=${params.expressions.length}`);
       await request(AVATAR_METHODS.report, params);
     },
+    reportAvatarOutcome: async (params: AvatarOutcomeParams) =>
+      void AvatarOutcomeResultSchema.parse(await request(AVATAR_METHODS.outcome, params)),
   };
 }
 
@@ -227,16 +240,28 @@ export function requestMethods(rpc: JSONRPCServerAndClient, timing: () => Timing
     perceptionPauseSet: async (params: PerceptionPauseSetParams) =>
       PerceptionPauseStateSchema.parse(await request(PERCEPTION_METHODS.pauseSet, params)),
     perceptionCard: async () => PerceptionCardSchema.parse(await request(PERCEPTION_METHODS.card, {})),
+    ...monitorMethods(request),
+    ...permissionMethods(request),
+    ...approvalMethods(request),
+    ...extensionMethods(request),
+    ...mcpMethods(request),
+    ...skillMethods(request),
+    ...memoryOperationMethods(request),
+    ...userTimezoneMethods(request),
+    ...presenceMethods(request),
+    ...initiativeMethods(request),
+    ...coWatchingMethods(request),
+    ...subagentMethods(request),
+  };
+}
+
+function monitorMethods(request: <T>(method: string, params: JSONRPCParams) => Promise<T>) {
+  return {
     monitorState: async () => MonitorStateResultSchema.parse(await request(OBSERVABILITY_METHODS.state, {})),
     monitorList: async (params: RunMonitorListParams) => RunMonitorListResultSchema.parse(await request(OBSERVABILITY_METHODS.list, params)),
     monitorTrajectory: async (params: TrajectoryParams) => TrajectoryResultSchema.parse(await request(OBSERVABILITY_METHODS.trajectory, params)),
     monitorInspect: async (params: TrajectoryInspectParams) => TrajectoryInspectorSchema.parse(await request(OBSERVABILITY_METHODS.inspect, params)),
     subscribeMonitor: async (params: RunMonitorSubscribeParams) => void RunMonitorSubscribeResultSchema.parse(await request(OBSERVABILITY_METHODS.subscribe, params)),
     unsubscribeMonitor: async () => void RunMonitorUnsubscribeResultSchema.parse(await request(OBSERVABILITY_METHODS.unsubscribe, {})),
-    ...permissionMethods(request),
-    ...approvalMethods(request),
-    ...extensionMethods(request),
-    ...mcpMethods(request),
-    ...skillMethods(request),
   };
 }

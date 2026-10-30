@@ -1,0 +1,38 @@
+{
+  "copiedAt": "2026-09-28T08:06:35.669894+00:00",
+  "sourceDirectory": "apps/desktop/src-tauri/target/c2-native-evidence/2026-09-28T02-35-50-358Z",
+  "evidenceSession": "01a0e5c0-8b2b-74f3-adf0-204cbf616a7e",
+  "parentSession": "01a0dd62-d788-7762-ba7d-c7baab4b5638",
+  "checkpoint": "../../source-before-final-2026-09-28.json",
+  "checkpointSha256": "a8136f8a5274f087226baa8c8e70897fd004cc23066cf6a57ff31829301ee2be",
+  "checkpointCapturedAt": "2026-09-28T02:51:24.339388+00:00",
+  "auditedDesktopAndSharedFiles": 895,
+  "changedCheckpointEntries": [],
+  "artifacts": {
+    "evidence.json": {
+      "sha256": "ebb146f53823553f69536b1bd3c9224e8194b2e20766d93e06b0fe2f374722da",
+      "bytes": 47391
+    },
+    "chat-rendered.png": {
+      "sha256": "785abdcb5b99cb7dbc2c3e8c62c4cba6a943f11d661dc5781551621332e5b490",
+      "bytes": 35612
+    },
+    "pet-rendered.png": {
+      "sha256": "3bb57f329be36bf3a0678152a9fa177f309f01e832a96ca514b5cdfce57bbd7f",
+      "bytes": 21812
+    },
+    "timezone-settings.png": {
+      "sha256": "559012f99b013019be27824fb5520d5a1025bafcef8b2a8188725da4d3177a3e",
+      "bytes": 75003
+    },
+    "reading-anchor.png": {
+      "sha256": "5b5c1a5cc86d79d6492f046df01c7f2b9daee7ce7da762cc529d8398fb4638f3",
+      "bytes": 112639
+    }
+  },
+  "limitations": [
+    "Copied original evidence; native fixture was not rerun during closeout.",
+    "Source audit establishes equality with later checkpoint, not a contemporaneous binary hash at original execution.",
+    "Scripted WS server, development StrictMode, fixture Pet opener, no Live2D model, no human-reading or owner-acceptance claim."
+  ]
+}

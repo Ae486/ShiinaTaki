@@ -1,4 +1,25 @@
 # core/harness/
-- run-service.ts — Core-owned Trigger admission and Attempt-aware lifecycle; process-local bindings/names remain separate from snapshot capture and atomic event-write rollback
-- run-snapshot-capture.ts — redaction-safe durable snapshot builder plus process-local Extension/Memory bindings and frozen tool names excluded from authority digests
+- prepared-publication-authorization.ts — immutable process-owned Class A handles with explicit finite/until-cancelled scope and original-primary witness gating
+- primary-request-witness.ts — exact live primary user-row and delegated-input witness; prevents copied or previously accepted work from minting unlimited report authority
+- run-work-binding.ts — strict synchronous accepted-purpose/authority and optional registered publication-grant checks; missing bindings require explicit continuation
+- run-prepared-publication.ts — exact reference/revision child admission from the retained root snapshot, original Attempt and authorized delivery class; no business-policy literal, recapture or model Effect
+- run-service.ts — Core-owned admission with trusted linked work scopes, original snapshot/authority capture and exact context disposal after canonical outermost terminal commit
+- run-snapshot-capture.ts — redaction-safe durable snapshot plus process-local Extension/Memory bindings, frozen tool names and disclosure identities excluded from authority digests; carries cancellation/deadlines through admission and preserves exact governed provider/capability/tool/recall/prompt bindings
 - effect-lifecycle-service.ts — guarded Core effect boundary with contained observability event recording
+- recovery-coordinator.ts — boot classification before admission, including terminal-Run pending delivery reconciliation
+- initiative-recovery.ts — missing-decision and lost-binding recovery without model/presentation replay; expires unsent terminal text and preserves uncertain publication charges
+- delegation-tools.ts — immutable allow/inherit/exclude selection with fixed child Memory mutation exclusions and normal main-continuation authority
+- subagent-state.ts — trusted work/domain/source ports, failure proposals and disposable execution coordination state
+- subagent-service.ts — Core create/reuse/input/stop/continue service, independent child scheduling and post-commit owner callbacks
+- subagent-execution.ts — one freshly captured shared-Agent Run per child execution with private result and exact cancellation ownership
+- subagent-completion.ts — durable completion outbox admission and deduplicated parent execution; speech remains separately authorized
+- subagent-parent-execution.ts — fresh main-Companion inference with current relationship replay plus exact retained child report
+- subagent-recovery.ts — terminal linked restart classification without inferring success from the last model Effect or replaying unknown work
+- subagent-queries.ts — paged private input/message/result projections and joined authoritative Delivery state
+- subagent-subscriptions.ts — coalesced data-free child invalidations restricted to current authenticated operator connections
+- subagent-tool-materials.ts — exact completed tool bodies and producer sources, unknown-source fallback references, scoped durable selection and post-checkpoint cache release
+- subagent-composition.ts — single root wiring for child service, report adapter, authenticated methods and lifecycle cleanup
+
+- subagent-inbox-context.ts — lazy first foreground claim, eager idle binding and exact private handling ports
+- subagent-inbox-execution.ts — normal background-lane inbox execution, meaningful pre-intent retry opportunities, cooperative yield and explicit reconciliation admission
+- subagent-activity.ts — isolated real child SDK activity and durable native item references

@@ -1,0 +1,6 @@
+warning: in the working copy of 'packages/core/src/agents/conversation-store.ts', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'packages/core/src/db/index.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'packages/core/src/db/migrations/index-list.test.ts', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'packages/core/src/db/migrations/index-list.ts', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'packages/core/src/db/migrations/index.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'packages/core/src/db/migrations/lineage-reopen-matrix.test.ts', CRLF will be replaced by LF the next time Git touches it

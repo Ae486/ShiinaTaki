@@ -176,7 +176,7 @@ describe("createChatAgent", () => {
     expect(auto).toEqual([]); // a retracted turn never enters memory
   });
 
-  it("cancel after partial text keeps the stop path: partial persisted, no retract, autoMemory fires", async () => {
+  it("cancel after partial text keeps the partial source without retraction or post-turn maintenance", async () => {
     const f = fresh();
     const auto: string[] = [];
     const controller = new AbortController();
@@ -201,11 +201,11 @@ describe("createChatAgent", () => {
       { role: "user", content: "hi" },
       { role: "assistant", content: "par" },
     ]);
-    expect(auto).toEqual(["taki"]); // the stop path still fires the auto-write
+    expect(auto).toEqual([]); // Owner-approved policy skips the callback bundle even on a graceful partial abort.
   });
 
-  // The THROW ending (the common prefill-cancel timing): the transport rejects the read with our string abort reason,
-  // which fails the SDK's isAbortError, so the stream errors and the for-await throws instead of ending gracefully.
+  // A scripted rejecting body remains covered, but modern SDK cancellation may finish gracefully before that
+  // failure crosses the provider boundary. Retraction must not depend on either public ending.
   it("throw-ending cancel before any output still retracts (transport rejects with the string reason)", async () => {
     const f = fresh();
     const auto: string[] = [];
@@ -238,7 +238,7 @@ describe("createChatAgent", () => {
     expect(auto).toEqual([]); // a retracted turn never enters memory
   });
 
-  it("throw-ending cancel after partial text rethrows and keeps the partial (stop, matches old runtime)", async () => {
+  it("a rejecting provider cancelled after partial text keeps the source and accepts the SDK graceful ending", async () => {
     const f = fresh();
     const auto: string[] = [];
     const controller = new AbortController();
@@ -262,12 +262,12 @@ describe("createChatAgent", () => {
     }
 
     expect(deltas).toEqual(["par"]);
-    expect(String(threw)).toContain("turn cancelled by operator"); // the reason propagates → pump maps it to chat.error
+    expect(threw).toBeNull(); // Owner-approved SDK policy does not synthesize the historical transport-dependent throw.
     expect(retracted).toBe(false); // partial text exists → stop, not retract
     expect(f.conversation.history("taki")).toEqual([
       { role: "user", content: "hi" },
       { role: "assistant", content: "par" },
     ]);
-    expect(auto).toEqual([]); // the throw ending skips the detached auto-write (pre-existing runtime behavior)
+    expect(auto).toEqual([]); // Core cancellation skips detached callbacks independently of the stream ending.
   });
 });

@@ -1,0 +1,128 @@
+{
+  "date": "2026-10-21T12:11:46.300Z",
+  "cwd": "H:\\TakiAgent-worktrees\\t4",
+  "node": "v24.18.0",
+  "platform": "win32",
+  "packages": [
+    {
+      "name": "ai",
+      "version": "7.0.17",
+      "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\ai@7.0.17_zod@4.4.3\\node_modules\\ai\\package.json",
+      "engines": {
+        "node": ">=22"
+      },
+      "dependencies": {
+        "@ai-sdk/gateway": "4.0.13",
+        "@ai-sdk/provider": "4.0.2",
+        "@ai-sdk/provider-utils": "5.0.5"
+      },
+      "peerDependencies": {
+        "zod": "^3.25.76 || ^4.1.8"
+      },
+      "nested": [
+        {
+          "name": "@ai-sdk/provider",
+          "version": "4.0.2",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+provider@4.0.2\\node_modules\\@ai-sdk\\provider\\package.json"
+        },
+        {
+          "name": "@ai-sdk/provider-utils",
+          "version": "5.0.5",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+provider-utils@5.0.5_zod@4.4.3\\node_modules\\@ai-sdk\\provider-utils\\package.json"
+        },
+        {
+          "name": "@ai-sdk/gateway",
+          "version": "4.0.13",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+gateway@4.0.13_zod@4.4.3\\node_modules\\@ai-sdk\\gateway\\package.json"
+        }
+      ]
+    },
+    {
+      "name": "@ai-sdk/mcp",
+      "version": "2.0.10",
+      "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+mcp@2.0.10_zod@4.4.3\\node_modules\\@ai-sdk\\mcp\\package.json",
+      "engines": {
+        "node": ">=22"
+      },
+      "dependencies": {
+        "pkce-challenge": "^5.0.1",
+        "@ai-sdk/provider-utils": "5.0.7",
+        "@ai-sdk/provider": "4.0.3"
+      },
+      "peerDependencies": {
+        "zod": "^3.25.76 || ^4.1.8"
+      },
+      "nested": [
+        {
+          "name": "@ai-sdk/provider",
+          "version": "4.0.3",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+provider@4.0.3\\node_modules\\@ai-sdk\\provider\\package.json"
+        },
+        {
+          "name": "@ai-sdk/provider-utils",
+          "version": "5.0.7",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+provider-utils@5.0.7_zod@4.4.3\\node_modules\\@ai-sdk\\provider-utils\\package.json"
+        },
+        {
+          "name": "@ai-sdk/gateway",
+          "version": "4.0.13",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+gateway@4.0.13_zod@4.4.3\\node_modules\\@ai-sdk\\gateway\\package.json"
+        }
+      ]
+    },
+    {
+      "name": "@ai-sdk/openai-compatible",
+      "version": "3.0.5",
+      "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+openai-compatible@3.0.5_zod@4.4.3\\node_modules\\@ai-sdk\\openai-compatible\\package.json",
+      "engines": {
+        "node": ">=22"
+      },
+      "dependencies": {
+        "@ai-sdk/provider-utils": "5.0.5",
+        "@ai-sdk/provider": "4.0.2"
+      },
+      "peerDependencies": {
+        "zod": "^3.25.76 || ^4.1.8"
+      },
+      "nested": [
+        {
+          "name": "@ai-sdk/provider",
+          "version": "4.0.2",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+provider@4.0.2\\node_modules\\@ai-sdk\\provider\\package.json"
+        },
+        {
+          "name": "@ai-sdk/provider-utils",
+          "version": "5.0.5",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+provider-utils@5.0.5_zod@4.4.3\\node_modules\\@ai-sdk\\provider-utils\\package.json"
+        },
+        {
+          "name": "@ai-sdk/gateway",
+          "version": "4.0.13",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+gateway@4.0.13_zod@4.4.3\\node_modules\\@ai-sdk\\gateway\\package.json"
+        }
+      ]
+    },
+    {
+      "name": "zod",
+      "version": "4.4.3",
+      "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\zod@4.4.3\\node_modules\\zod\\package.json",
+      "nested": [
+        {
+          "name": "@ai-sdk/provider",
+          "version": "4.0.3",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+provider@4.0.3\\node_modules\\@ai-sdk\\provider\\package.json"
+        },
+        {
+          "name": "@ai-sdk/provider-utils",
+          "version": "5.0.7",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+provider-utils@5.0.7_zod@4.4.3\\node_modules\\@ai-sdk\\provider-utils\\package.json"
+        },
+        {
+          "name": "@ai-sdk/gateway",
+          "version": "4.0.13",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+gateway@4.0.13_zod@4.4.3\\node_modules\\@ai-sdk\\gateway\\package.json"
+        }
+      ]
+    }
+  ]
+}

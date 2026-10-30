@@ -124,18 +124,20 @@ async function execute(deps: TidyPassDeps, characterId: string, lastTidyAt: stri
   // picked up by the next trigger instead of being skipped forever.
   const startedAt = new Date().toISOString();
   const startedMs = Date.now();
-  const report = buildTidyReport(deps.view, { characterId, lastTidyAt }, deps.config);
+  const view = deps.view.captureReview?.(characterId) ?? deps.view;
+  const report = buildTidyReport(view, { characterId, lastTidyAt }, deps.config);
   if (!report.hasWork) {
     // rc §135: clean store + no new writes = ZERO model calls — return before any agent exists.
     return { status: "clean", defects: report.defects, edits: 0, steps: 0, usage: deps.slot.usage() };
   }
 
-  const result = await deps.slot.run("tidy", () => runAgent(deps, characterId, report.text));
-  if (result === undefined) {
+  const progress = { edits: 0, steps: 0 };
+  const result = await deps.slot.run("tidy", () => runAgent({ ...deps, view }, { characterId, reportText: report.text, progress }));
+  if (result === undefined || view.reviewHealthy?.() === false) {
     // The slot already warned with the error; the watermark stays put so the next trigger retries (auto-memory's
     // failure convention).
     deps.logger.warn({ characterId }, "tidy pass failed; watermark not advanced");
-    return { status: "failed", defects: report.defects, edits: 0, steps: 0, usage: deps.slot.usage() };
+    return { status: "failed", defects: report.defects, edits: progress.edits, steps: progress.steps, usage: deps.slot.usage() };
   }
 
   const edits = countEdits(result.toolResults);
@@ -149,16 +151,18 @@ async function execute(deps: TidyPassDeps, characterId: string, lastTidyAt: stri
   return { status: "ran", defects: report.defects, edits, steps, usage: deps.slot.usage() };
 }
 
-function runAgent(deps: TidyPassDeps, characterId: string, reportText: string) {
+function runAgent(deps: TidyPassDeps, input: { characterId: string; reportText: string; progress: { edits: number; steps: number } }) {
   const agent = new ToolLoopAgent({
     model: deps.slot.model,
     instructions: TIDY_SYSTEM_PROMPT,
-    tools: deps.view.createTools(characterId),
+    tools: deps.view.createTools(input.characterId),
+    // Count completed steps as they happen: a later failed CAS or model call does not undo earlier durable edits.
+    onStepEnd: (step) => { input.progress.steps += 1; input.progress.edits += countEdits(step.toolResults); },
     // Structural exit (rc A2): the finish tool ends the loop, the step cap ends a runaway. Names verified against
     // the installed ai@7.0.17 types (hasToolCall + isStepCount; stopWhen takes an array).
     stopWhen: [hasToolCall(FINISH_TOOL_NAME), isStepCount(deps.config.tidyMaxSteps)],
   });
-  return agent.generate({ prompt: `<system-reminder>\n${INPUT_FRAMING}\n</system-reminder>\n\n${reportText}` });
+  return agent.generate({ prompt: `<system-reminder>\n${INPUT_FRAMING}\n</system-reminder>\n\n${input.reportText}` });
 }
 
 // Successful MUTATING tool results only: finish is a no-op terminal, and a refused/failed op is not an edit.

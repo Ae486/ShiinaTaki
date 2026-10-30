@@ -1,0 +1,935 @@
+--- working-preimage/packages/shared/src/prepared-publication-schema.ts
++++ current/packages/shared/src/prepared-publication-schema.ts
+@@ -1,10 +1,11 @@
+ /**
+  * INPUT: trusted accepted-source snapshots and reference-only prepared-output requests
+- * OUTPUT: bounded internal publication/edit contracts; no caller-selected text, class or root authority
++ * OUTPUT: bounded source-preserving publication/edit contracts; no caller-selected text, class or root authority
+  * POS: shared/protocol — Core integration contracts only; no model tool or public RPC is installed
+  */
+ import { z } from "zod";
+ import { DeliveryStateSchema } from "./initiative-schema.ts";
++import { SourceContextSchema } from "./context-source-schema.ts";
+ 
+ const Id = z.string().min(1).max(200);
+ const Time = z.string().datetime({ offset: true });
+@@ -28,6 +29,7 @@
+   candidateRef: Id, revision: Id, expiresAt: Time,
+   // The delivery schema trims utterances. Refuse a noncanonical producer value instead of changing exact text.
+   text: z.string().min(1).max(8_000).refine((text) => text.trim() === text, "text must already be canonical"),
++  sourceContext: SourceContextSchema.optional(),
+ });
+ export type PreparedPublicationCandidate = z.infer<typeof PreparedPublicationCandidateSchema>;
+ export const PreparedPublicationEditSchema = z.strictObject({ editId: Id, expectedRevision: Id });
+--- working-preimage/packages/shared/src/initiative-schema.ts
++++ current/packages/shared/src/initiative-schema.ts
+@@ -1,9 +1,10 @@
+ /**
+  * INPUT: trusted selected-context manifests and model structural decisions
+- * OUTPUT: strict bounded initiative execution, delivery and policy facts
++ * OUTPUT: strict initiative execution, delivery/source evidence and policy facts
+  * POS: shared/protocol — payload text stays in ephemeral input or confined delivery storage
+  */
+ import { z } from "zod";
++import { SourceContextSchema } from "./context-source-schema.ts";
+ 
+ const Id = z.string().min(1).max(200);
+ const Time = z.string().datetime({ offset: true });
+@@ -90,6 +91,7 @@
+   deliveryId: Id, runId: Id, attemptId: Id, characterId: Id,
+   deliveryClass: z.enum(["class_a", "class_b"]), version: Version,
+   decision: HeartbeatDecisionSchema, expiresAt: Time, state: DeliveryStateSchema,
++  sourceContext: SourceContextSchema.optional(),
+   continuation: z.enum(["none", "pending", "waiting", "running", "completed", "failed", "unknown", "expired"]),
+   primaryVersion: Version, timelineSeq: z.number().int().positive().nullable(),
+   chargedAt: Time.nullable(), createdAt: Time,
+--- working-preimage/packages/shared/src/timeline-schema.ts
++++ current/packages/shared/src/timeline-schema.ts
+@@ -1,13 +1,13 @@
+ /**
+  * INPUT:  candidate timeline.* params/event payloads (parsed WS frames + repo rows)
+- * OUTPUT: canonical timeline rows, optional stable presentation references, and atomic turn-commit notifications
++ * OUTPUT: canonical timeline rows, optional source/presentation evidence, and atomic turn-commit notifications
+  * POS:    shared/protocol — the timeline persistence contract (ADR 0005, invariants 3, 7); core repo + server + CLI
+  */
+ import { z } from "zod";
+ import { IMAGE_MEDIA_TYPES } from "./chat-schema.ts";
+ import { getValidToolDisplayName } from "./tool-presentation.ts";
+ import { readTimelinePresentation, sanitizeTimelinePresentations } from "./timeline-presentation-schema.ts";
+-import { ToolSourceMaterialSchema } from "./context-source-schema.ts";
++import { SourceContextSchema, ToolSourceMaterialSchema } from "./context-source-schema.ts";
+ 
+ export const TIMELINE_METHODS = {
+   history: "timeline.history",
+@@ -73,6 +73,7 @@
+   content: z.string(),
+   // Additive, backward-compatible: absent on legacy text-only rows; present carries full model-replay fidelity.
+   parts: z.array(TimelinePartSchema).optional(),
++  sourceContext: SourceContextSchema.optional(),
+   createdAt: z.string().min(1),
+   presentation: z.unknown().optional(),
+ });
+--- working-preimage/packages/shared/src/prepared-publication-schema.test.ts
++++ current/packages/shared/src/prepared-publication-schema.test.ts
+@@ -32,4 +32,14 @@
+       expect(PreparedPublicationCandidateSchema.safeParse({ ...candidate, ...change }).success).toBe(false);
+     }
+   });
++
++  it("retains optional source facts without granting candidate or request authority", () => {
++    const sourceContext = { generatedBy: { runId: "generation", attemptId: "attempt" },
++      materials: [{ label: "External interview", reference: "document:interview", speaker: "Guest", time: "00:12" }] };
++    const candidate = { candidateRef: "one", revision: "r1", expiresAt: "2026-10-11T06:00:00.000Z",
++      text: "The guest described their experience.", sourceContext };
++    expect(PreparedPublicationCandidateSchema.parse(candidate)).toEqual(candidate);
++    expect(PreparedPublicationRequestSchema.safeParse({ candidateRef: "one", expectedRevision: "r1", sourceContext }).success).toBe(false);
++    expect(PreparedPublicationCandidateSchema.safeParse({ ...candidate, sourceContext: { materials: [{ accepted: true }] } }).success).toBe(false);
++  });
+ });
+--- working-preimage/packages/shared/src/timeline-schema.test.ts
++++ current/packages/shared/src/timeline-schema.test.ts
+@@ -19,6 +19,15 @@
+   content: "hello",
+   createdAt: "2026-07-10T00:00:00.000Z",
+ };
++
++describe("TimelineEntry source context", () => {
++  it("preserves optional known facts separately from role and original speech", () => {
++    const sourceContext = { generatedBy: { runId: "run", attemptId: "attempt" }, materials: [{ label: "Interview" }] };
++    expect(TimelineEntrySchema.parse({ ...entry, sourceContext })).toEqual({ ...entry, sourceContext });
++    expect(TimelineEntrySchema.parse(entry)).toEqual(entry);
++    expect(TimelineEntrySchema.safeParse({ ...entry, sourceContext: { materials: [{ speaker: 42 }] } }).success).toBe(false);
++  });
++});
+ 
+ describe("TIMELINE_METHODS", () => {
+   it("names the compatible timeline methods and complete batch notification", () => {
+--- working-preimage/packages/shared/src/index.md
++++ current/packages/shared/src/index.md
+@@ -1,6 +1,6 @@
+ # shared/src/
+ - run-work-schema.ts — bounded accepted-work transition contracts and strict v3 lifecycle events; no publication authority
+-- prepared-publication-schema.ts — generic accepted-source/candidate, explicit Class A authorization scope, reference-only publication and exact edit-ticket data; serialized scope is not a live grant
++- prepared-publication-schema.ts — source-preserving candidate, accepted-source/Class A scope, reference-only publication and exact edit-ticket data; serialized scope is not a live grant
+ - co-watching-publication-schema.ts — isolated M51 accepted Co-Watching classification data for the business adapter; no public RPC or acceptance authority
+ - interaction-pattern-schema.ts / interaction-pattern-protocol.ts — finite definitions, immutable reviews, strict lifecycle/CAS and data-free invalidations
+ - initiative-wake-schema.ts — accepted source envelopes and bounded same-Monitor policy facts
+@@ -22,7 +22,7 @@
+ - chat-schema.ts — chat methods including ordered activity/read, accepted send identity, legacy cancellation/events, and in-flight image input
+ - chat-activity-schema.ts — strict ordered language/tool events, real phase/outcome vocabulary, bounded recovery snapshots and incremental UTF-8 accounting
+ - timeline-presentation-schema.ts — independently validated batch coverage and consistent canonical item references; corrupt references fall back without hiding history or losing handoff identity
+-- timeline-schema.ts — canonical Timeline history, optional stable presentation metadata, complete batch commits and compatible append/remove notifications
++- timeline-schema.ts — canonical Timeline history, optional source/presentation metadata, complete batch commits and compatible append/remove notifications
+ - config-schema.ts — CONFIG_METHODS + knob entry/list/set/subscribe/changed schemas + ConfigRefusalReason (settings store); operator-only, NO Rust mirror
+ - timing-policy-schema.ts — single D59/D61 timing-key vocabulary + cross-field policy schema + owner-approved development defaults; shared by Core registry and Desktop consumers
+ - media-schema.ts — MEDIA_METHODS + media.get/clear/usage param & result schemas (attachment byte serving + lifecycle); operator-only, NO Rust mirror
+@@ -89,7 +89,7 @@
+ - memory-policy-assessment-schema.ts — strict D77 memory-body and assessment contracts, plus the shared importance default
+ - memory-operation-schema.ts — MEMORY_OPERATION_METHODS + Core-minted durable operation identity/state/request/result contracts and the operator submit/status/list/cancel/subscribe/changed schemas (operator-only, NO Rust mirror)
+ - memory-authority-status-schema.ts — MEMORY_AUTHORITY_METHODS + the strict composite memory.authority.status read (authority, runtime availability, setup, per-Bank replica/Pending, operations, derivedFreshness literal unknown)
+-- initiative-schema.ts — bounded selected-context provenance, object-root model tool input normalized to strict domain decisions, delivery state and policy diagnostics
++- initiative-schema.ts — bounded selected context, object-root tool input, strict decisions, delivery state/source sidecars and policy diagnostics
+ - initiative-event-schema.ts — strict v2 initiative/delivery business facts; existing v1 event decoder and legacy Monitor projections remain supported
+ - presence-schema.ts — bounded authenticated source reports, input age, refusal vocabulary and independent aggregate presence facts
+ - timeline-presentation-report-schema.ts — ordinary committed Timeline exposure by source and sequence, without reading acknowledgements
+--- working-preimage/packages/core/src/db/timeline-repo.ts
++++ current/packages/core/src/db/timeline-repo.ts
+@@ -1,6 +1,6 @@
+ /**
+  * INPUT:  the Database wrapper + append/paging calls (characterId-scoped)
+- * OUTPUT: validated atomic Timeline batches, bounded display metadata, names-only calls and compatible legacy reads
++ * OUTPUT: atomic Timeline batches, immutable source context, names-only calls and compatible legacy reads
+  * POS:    core/db — timeline SQL and defense-in-depth privacy boundary; raw tool-call input never crosses the repo
+  */
+ import { randomUUID } from "node:crypto";
+@@ -8,12 +8,14 @@
+   getValidToolDisplayName,
+   TimelineEntrySchema,
+   TimelinePartSchema,
++  SourceContextSchema,
+   type TimelineEntry,
+   type TimelineHistoryParams,
+   type TimelineHistoryResult,
+   type TimelinePart,
+   type TimelineRole,
+   type TimelinePresentation,
++  type SourceContext,
+ } from "@taki/shared";
+ import type { Database, SqlRow, SqlStatement } from "./sqlite.ts";
+ 
+@@ -24,6 +26,7 @@
+   /** Structured model-replay fidelity (tool calls/results); omitted = plain text row (stored as NULL). */
+   parts?: TimelinePart[];
+   presentation?: TimelinePresentation;
++  sourceContext?: SourceContext;
+ }
+ 
+ export interface TimelineRepo {
+@@ -44,18 +47,18 @@
+ }
+ 
+ const INSERT_SQL =
+-  "INSERT INTO timeline_messages (id, character_id, role, content, parts, presentation, created_at) " +
+-  "VALUES (:id, :characterId, :role, :content, :parts, :presentation, :createdAt)";
++  "INSERT INTO timeline_messages (id, character_id, role, content, parts, presentation, source_context_json, created_at) " +
++  "VALUES (:id, :characterId, :role, :content, :parts, :presentation, :sourceContext, :createdAt)";
+ 
+ const DELETE_SQL = "DELETE FROM timeline_messages WHERE character_id = :characterId AND seq = :seq";
+ 
+ // (:before IS NULL OR seq < :before): one prepared statement serves both the newest and cursor pages.
+ const PAGE_SQL =
+-  "SELECT seq, id, character_id, role, content, parts, presentation, created_at FROM timeline_messages " +
++  "SELECT seq, id, character_id, role, content, parts, presentation, source_context_json, created_at FROM timeline_messages " +
+   "WHERE character_id = :characterId AND (:before IS NULL OR seq < :before) ORDER BY seq DESC LIMIT :limit";
+ 
+ const LATEST_SQL =
+-  "SELECT seq, id, character_id, role, content, parts, presentation, created_at FROM timeline_messages " +
++  "SELECT seq, id, character_id, role, content, parts, presentation, source_context_json, created_at FROM timeline_messages " +
+   "WHERE character_id = :characterId ORDER BY seq DESC LIMIT :limit";
+ 
+ const MAX_SEQ_SQL =
+@@ -63,7 +66,7 @@
+ 
+ // (after, through]: the segment about to leave the window (flush) or since the last summary (episodic).
+ const RANGE_SQL =
+-  "SELECT seq, id, character_id, role, content, parts, presentation, created_at FROM timeline_messages " +
++  "SELECT seq, id, character_id, role, content, parts, presentation, source_context_json, created_at FROM timeline_messages " +
+   "WHERE character_id = :characterId AND seq > :after AND seq <= :through ORDER BY seq ASC";
+ 
+ export function createTimelineRepo(db: Database): TimelineRepo {
+@@ -124,6 +127,7 @@
+           id: row.id, characterId: row.characterId, role: row.role, content: row.content, createdAt: row.createdAt,
+           parts: row.parts === undefined ? null : JSON.stringify(row.parts),
+           presentation: row.presentation === undefined ? null : JSON.stringify(row.presentation),
++          sourceContext: row.sourceContext === undefined ? null : JSON.stringify(row.sourceContext),
+         });
+         entries.push({ ...row, seq: lastInsertRowid });
+       }
+@@ -147,8 +151,18 @@
+     content: row.content,
+     parts: sanitizeParts(parseParts(row)),
+     presentation: parsePresentation(row.presentation),
++    ...(row.source_context_json == null ? {} : { sourceContext: parseSourceContext(row) }),
+     createdAt: row.created_at,
+   });
++}
++
++function parseSourceContext(row: SqlRow): SourceContext {
++  try {
++    return SourceContextSchema.parse(JSON.parse(String(row.source_context_json)));
++  } catch (error) {
++    // Attribution affects interpretation; corrupt evidence cannot silently become an unknown legacy source.
++    throw new Error(`timeline row seq=${String(row.seq)} has corrupt source context JSON`, { cause: error });
++  }
+ }
+ 
+ // NULL = legacy text-only row. A corrupt JSON cell must fail loudly with the row's seq, not as a bare SyntaxError.
+@@ -179,6 +193,7 @@
+     // Do not recurse into output: its business data must survive even when it has a displayName or input field.
+     return part.type === "tool-call"
+       ? { type: part.type, ...identity }
+-      : { type: part.type, ...identity, output: part.output };
++      : { type: part.type, ...identity, output: part.output,
++        ...(part.sourceMaterials === undefined ? {} : { sourceMaterials: part.sourceMaterials }) };
+   });
+ }
+--- working-preimage/packages/core/src/db/timeline-repo.test.ts
++++ current/packages/core/src/db/timeline-repo.test.ts
+@@ -126,6 +126,46 @@
+   });
+ });
+ 
++describe("timeline source preservation", () => {
++  it("keeps absent source context as SQL NULL and refuses malformed source evidence before a batch writes", () => {
++    const legacy = repo.append({ characterId: "taki", role: "user", content: "Original self-report." });
++    expect("sourceContext" in legacy).toBe(false);
++    expect(db.prepare("SELECT source_context_json AS source FROM timeline_messages WHERE seq=:seq").get({ seq: legacy.seq })?.source).toBeNull();
++    const malformed = { characterId: "taki", role: "assistant" as const, content: "Bad context", sourceContext: { materials: [{ label: "" }] } };
++    expect(() => repo.appendBatch([{ characterId: "taki", role: "assistant", content: "Must roll back" }, malformed])).toThrow();
++    expect(repo.latestAscending("taki", 10)).toEqual([legacy]);
++  });
++
++  it("does not silently discard corrupt stored source context", () => {
++    db.prepare(`INSERT INTO timeline_messages(id,character_id,role,content,source_context_json,created_at)
++      VALUES(:id,'taki','assistant','Original text','{"materials":[{"speaker":42}]}','2026-10-22T00:00:00.000Z')`)
++      .run({ id: "550e8400-e29b-41d4-a716-446655440000" });
++    expect(() => repo.latestAscending("taki", 10)).toThrow("corrupt source context JSON");
++  });
++
++  it("retains source context and exact tool material status without raw call inputs", () => {
++    const sourceContext = { generatedBy: { runId: "generation", attemptId: "attempt" },
++      materials: [{ label: "Interview", reference: "document:interview", speaker: "Guest" }] };
++    const sourceMaterials = [{ key: "interview", source: sourceContext.materials[0] }];
++    const output = { type: "json", value: { ok: false, reason: "unavailable" } };
++    const parts: TimelinePart[] = [
++      { type: "tool-call", toolCallId: "read", toolName: "read_file", input: { secret: "DO_NOT_RETAIN" } },
++      { type: "tool-result", toolCallId: "read", toolName: "read_file", output, sourceMaterials },
++    ];
++    const input = { characterId: "taki", role: "assistant" as const, content: "The guest's story.\n", sourceContext, parts };
++    const row = repo.append(input);
++    const expected = { ...input, parts: [{ type: "tool-call", toolCallId: "read", toolName: "read_file" }, parts[1]] };
++    expect(row).toMatchObject(expected);
++    for (const entry of [repo.latestAscending("taki", 10)[0], repo.rangeAscending("taki", 0, row.seq)[0],
++      repo.pageBefore({ characterId: "taki", limit: 10 }).entries[0]]) expect(entry).toMatchObject(expected);
++    expect(JSON.stringify(row)).not.toContain("DO_NOT_RETAIN");
++    sourceContext.materials[0]!.speaker = "Changed outside storage";
++    expect(repo.latestAscending("taki", 10)[0]?.sourceContext?.materials?.[0]?.speaker).toBe("Guest");
++    expect(() => db.prepare("UPDATE timeline_messages SET source_context_json='{}' WHERE seq=:seq").run({ seq: row.seq }))
++      .toThrow("timeline source context is immutable");
++  });
++});
++
+ describe("createTimelineRepo.deleteEntry", () => {
+   it("removes exactly the addressed row; later reads exclude it and other rows survive", () => {
+     repo.append({ characterId: "taki", role: "user", content: "keep-1" });
+--- working-preimage/packages/core/src/db/run-delivery-repo.ts
++++ current/packages/core/src/db/run-delivery-repo.ts
+@@ -1,11 +1,11 @@
+ /**
+  * INPUT: settled structural decisions, original Run identity and current publication policy
+- * OUTPUT: immutable delivery records, Run-bound atomic Timeline/budget publication and required business events
++ * OUTPUT: immutable delivery/source records, Run-bound atomic Timeline/budget publication and required business events
+  * POS: core/db — subordinate to Run/Attempt and ordinary Timeline; no transport inside transactions
+  */
+ import { randomUUID } from "node:crypto";
+-import { DeliveryRecordSchema, InitiativePolicyStatusSchema, type DeliveryRecord, type HeartbeatDecision,
+-  type InitiativeEventPayload, type InitiativePolicyStatus, type RunEvent, type TimelineEntry } from "@taki/shared";
++import { DeliveryRecordSchema, InitiativePolicyStatusSchema, SourceContextSchema, type DeliveryRecord, type HeartbeatDecision,
++  type InitiativeEventPayload, type InitiativePolicyStatus, type RunEvent, type SourceContext, type TimelineEntry } from "@taki/shared";
+ import type { Database } from "./sqlite.ts";
+ import type { RunEventRepo } from "./run-event-repo.ts";
+ import type { RunEventLiveBus } from "./run-event-live.ts";
+@@ -15,6 +15,7 @@
+ export interface DeliveryStage {
+   runId: string; attemptId: string; characterId: string; deliveryClass: "class_a" | "class_b";
+   decision: HeartbeatDecision; expiresAt: string; primaryVersion: number; consideredCount: number;
++  sourceContext?: SourceContext;
+ }
+ export interface RunDeliveryRepo {
+   get(runId: string): DeliveryRecord | undefined;
+@@ -22,7 +23,7 @@
+   stage(input: DeliveryStage): DeliveryRecord;
+   transition(input: { runId: string; expectedVersion: number; state?: DeliveryRecord["state"];
+     continuation?: DeliveryRecord["continuation"]; fact: Omit<InitiativeEventPayload, "deliveryId"> }): DeliveryRecord | undefined;
+-  commitPublication(input: { runId: string; policy: DeliveryPolicy; append(characterId: string, text: string): TimelineEntry;
++  commitPublication(input: { runId: string; policy: DeliveryPolicy; append(characterId: string, text: string, sourceContext?: SourceContext): TimelineEntry;
+     /** Pure synchronous final authority check; callbacks returning anything except true refuse publication. */
+     isCurrent?(record: DeliveryRecord): boolean }): TimelineEntry | undefined;
+   policy(characterId: string): InitiativePolicyStatus;
+@@ -37,6 +38,7 @@
+     return row ? DeliveryRecordSchema.parse({ deliveryId: row.delivery_id, runId: row.run_id, attemptId: row.attempt_id,
+       characterId: row.character_id, deliveryClass: row.delivery_class, version: row.version, decision: JSON.parse(String(row.decision_json)),
+       expiresAt: row.expires_at, state: row.state, continuation: row.continuation, primaryVersion: row.primary_version,
++      ...(row.source_context_json == null ? {} : { sourceContext: JSON.parse(String(row.source_context_json)) }),
+       timelineSeq: row.timeline_seq, chargedAt: row.charged_at, createdAt: row.created_at }) : undefined;
+   };
+   const commit = (write: (facts: RunEvent[]) => void) => {
+@@ -90,9 +92,11 @@
+ 
+ function stageDelivery(context: DeliveryWriteContext, candidate: DeliveryStage): DeliveryRecord {
+   const { db, get, now, commit, event } = context;
++  const sourceContext = SourceContextSchema.optional().parse(candidate.sourceContext);
+   const existing = get(candidate.runId);
+   if (existing) {
+-    if (existing.attemptId !== candidate.attemptId || JSON.stringify(existing.decision) !== JSON.stringify(candidate.decision)) throw new Error("DELIVERY_CONFLICT");
++    if (existing.attemptId !== candidate.attemptId || JSON.stringify(existing.decision) !== JSON.stringify(candidate.decision)
++      || JSON.stringify(existing.sourceContext) !== JSON.stringify(sourceContext)) throw new Error("DELIVERY_CONFLICT");
+     return existing;
+   }
+   const { consideredCount, ...stage } = candidate;
+@@ -104,10 +108,11 @@
+     if (run?.state !== "running" || run.active_attempt_id !== record.attemptId || run.character_id !== record.characterId
+       || run.delivery_class !== record.deliveryClass) throw new Error("DELIVERY_RUN_REFUSED");
+     db.prepare(`INSERT INTO run_deliveries (delivery_id,run_id,attempt_id,character_id,delivery_class,decision_json,
+-      expires_at,state,continuation,primary_version,created_at) VALUES
+-      (:id,:runId,:attemptId,:characterId,:class,:decision,:expiresAt,'staged',:continuation,:primary,:at)`)
++      source_context_json,expires_at,state,continuation,primary_version,created_at) VALUES
++      (:id,:runId,:attemptId,:characterId,:class,:decision,:sourceContext,:expiresAt,'staged',:continuation,:primary,:at)`)
+       .run({ id: record.deliveryId, runId: record.runId, attemptId: record.attemptId, characterId: record.characterId,
+         class: record.deliveryClass, decision: JSON.stringify(record.decision), expiresAt: record.expiresAt,
++        sourceContext: sourceContext === undefined ? null : JSON.stringify(sourceContext),
+         continuation: record.continuation, primary: record.primaryVersion, at: record.createdAt });
+     facts.push(event(record, { kind: "initiative.decision", state: "committed", outcome: record.decision.outcome,
+       selectedCount: record.decision.selectedCandidateIds.length, consideredCount }));
+@@ -132,7 +137,9 @@
+       || run.delivery_class !== current.deliveryClass) throw new Error("DELIVERY_RUN_REFUSED");
+     if (args.isCurrent && args.isCurrent(current) !== true) throw new Error("DELIVERY_SOURCE_REFUSED");
+     if (current.deliveryClass === "class_b") checkBudget(db, args.policy, at);
+-    entry = args.append(current.characterId, current.decision.text);
++    entry = current.sourceContext === undefined
++      ? args.append(current.characterId, current.decision.text)
++      : args.append(current.characterId, current.decision.text, current.sourceContext);
+     db.prepare(`UPDATE run_deliveries SET version=version+1,state='dispatch_committed',timeline_seq=:seq,charged_at=:at,charge_timezone=:zone
+       WHERE run_id=:runId AND version=:version`).run({ seq: entry.seq, at, zone: args.policy.timezone, runId: current.runId, version: current.version });
+     facts.push(event(current, { kind: "delivery.dispatch_committed", state: "dispatch_committed" }));
+--- working-preimage/packages/core/src/db/run-delivery-repo.test.ts
++++ current/packages/core/src/db/run-delivery-repo.test.ts
+@@ -15,6 +15,41 @@
+ }
+ 
+ describe("Run delivery atomicity", () => {
++  it("retains source context through exact staging and atomic Timeline publication", async () => {
++    const f = fixture(); const identity = await f.admit("class_a");
++    const sourceContext = { generatedBy: { runId: "child-generation", attemptId: "child-attempt" },
++      materials: [{ label: "Interview", reference: "document:interview", speaker: "Guest" }] };
++    const input = { ...identity, decision: spoken, sourceContext,
++      expiresAt: new Date(Date.now() + 60_000).toISOString(), primaryVersion: 0, consideredCount: 1 };
++    const staged = f.deliveries.stage(input);
++    expect(staged).toMatchObject({ sourceContext });
++    expect(f.deliveries.stage(input)).toEqual(staged);
++    expect(() => f.deliveries.stage({ ...input, sourceContext: { materials: [{ speaker: "Another guest" }] } }))
++      .toThrow("DELIVERY_CONFLICT");
++    f.runs.settle(staged.runId, staged.attemptId, "completed");
++    const entry = f.deliveries.commitPublication({ runId: staged.runId, policy, append: f.store.appendDelivery });
++    expect(entry).toMatchObject({ role: "assistant", content: spoken.outcome === "speak" ? spoken.text : "", sourceContext });
++    expect(f.deliveries.get(staged.runId)).toMatchObject({ sourceContext, timelineSeq: entry?.seq });
++    expect(f.timeline.latestAscending("taki", 10)[0]).toEqual(entry);
++    expect(() => f.db.prepare("UPDATE run_deliveries SET source_context_json='{}' WHERE run_id=:runId").run({ runId: staged.runId }))
++      .toThrow("delivery source context is immutable");
++  });
++
++  it("rolls sourced speech and linkage back together while retaining the immutable staged source", async () => {
++    const f = fixture(); const identity = await f.admit("class_a");
++    const sourceContext = { materials: [{ reference: "document:original" }] };
++    const input = { ...identity, decision: spoken, sourceContext,
++      expiresAt: new Date(Date.now() + 60_000).toISOString(), primaryVersion: 0, consideredCount: 1 };
++    const record = f.deliveries.stage(input);
++    sourceContext.materials[0]!.reference = "document:mutated";
++    expect(f.deliveries.get(record.runId)?.sourceContext).toEqual({ materials: [{ reference: "document:original" }] });
++    f.runs.settle(record.runId, record.attemptId, "completed");
++    const repo = createRunDeliveryRepo({ db: f.db, events: { ...f.events, append: () => { throw new Error("event write failed"); } } });
++    expect(() => repo.commitPublication({ runId: record.runId, policy, append: f.store.appendDelivery })).toThrow("event write failed");
++    expect(f.timeline.latestAscending("taki", 10)).toEqual([]);
++    expect(f.deliveries.get(record.runId)).toEqual(record);
++  });
++
+   it.each([false, 1, "true", {}, Promise.resolve(true)])("refuses non-true synchronous publication authority %s without writing", async (value) => {
+     const f = fixture(); const record = await staged(f);
+     f.runs.settle(record.runId, record.attemptId, "completed");
+--- working-preimage/packages/core/src/db/index.md
++++ current/packages/core/src/db/index.md
+@@ -23,7 +23,7 @@
+ - scheduled-task-repo.ts — revision-safe Scheduled Task definitions and occurrence outbox persistence
+ - sqlite.ts — DatabaseSync wrapper (open/pragmas/transaction/close); the ONLY node:sqlite importer; toSafeInteger; DatabaseSync wrapper with commit-failure rollback and aborted-transaction SQL isolation; the only node:sqlite importer
+ - migration-runner.ts — startup migration runner: applies version > max(applied), one transaction each, tracked; max-version migrations with conservative bare-TEXT guards, exact schema branches and atomic SQL/receipt tracking
+-- timeline-repo.ts — validated transactional Timeline batches, optional presentation round-trip, canonical paging and defense-in-depth raw-input scrubbing; timeline_messages SQL: append / deleteEntry / pageBefore / latestAscending / latestSeq / rangeAscending (zod-parse at the row boundary)
++- timeline-repo.ts — validated transactional Timeline batches, source/presentation round-trip, source-material retention, canonical paging and raw-input scrubbing; timeline_messages SQL: append / deleteEntry / pageBefore / latestAscending / latestSeq / rangeAscending
+ - memory-repo.ts — memory_entries + memory_fts SQL: upsert / deleteByPath / listHashes / listActiveByLayers / listActiveInLayer / countActiveSince / search / resolvePath; the 4-column bm25 weights are baked in at construction from config; the retention + tidy-trigger reads anchor on COALESCE(updated_at, created_at)
+ - memory-auto-repo.ts — memory_auto_state SQL: get / setEpisodic / setFlush / setTidy (per-character auto-write + tidy watermarks)
+ - memory-events-repo.ts — memory_events SQL: record / listByCharacter (the memory system's decision log — skips, reinforcements, searches, tidy passes; ids/counts only, never memory content or a query)
+@@ -119,5 +119,5 @@
+ - hindsight-runtime-admission-repo.ts — integrity-checked last-verified D77 and guarded-reflect support across restart
+ - hindsight-runtime-memory-view.ts — complete current Canonical memory rows for internal prompt/report staging
+ - initiative-opportunity-repo.ts — Core-wide model admission reservation, exact Run linkage and first-intent charging independent of delivery; canonical UTC windows
+-- run-delivery-repo.ts — immutable decision/output identity and exact held-slot lookup; final Attempt/Character/class/source guards, atomic Timeline/quota/evidence writes and civil-day-aware timezone charge carry
++- run-delivery-repo.ts — immutable decision/source identity and held-slot lookup; final Attempt/Character/class/source guards, atomic speech/source/quota/evidence writes and civil-day-aware timezone charge carry
+ - run-delivery-transition.ts — guarded Run/continuation hold/resume CAS preserving the original active Attempt and refusing unfinished Effects
+--- working-preimage/packages/core/src/db/migrations/057-source-context.ts
++++ current/packages/core/src/db/migrations/057-source-context.ts
+@@ -0,0 +1,22 @@
++/**
++ * INPUT: existing Timeline speech and staged delivery records through migration 056
++ * OUTPUT: optional immutable source sidecars without changing legacy text, identity or receipts
++ * POS: core/db/migrations — additive publication evidence; source descriptions grant no authority
++ */
++import type { Migration } from "../migration-runner.ts";
++
++export const sourceContextMigration057: Migration = {
++  version: 57,
++  ensureNullableTextColumns: [
++    { table: "timeline_messages", column: "source_context_json" },
++    { table: "run_deliveries", column: "source_context_json" },
++  ],
++  sql: `
++CREATE TRIGGER IF NOT EXISTS timeline_source_context_immutable BEFORE UPDATE OF source_context_json ON timeline_messages
++WHEN NEW.source_context_json IS NOT OLD.source_context_json
++BEGIN SELECT RAISE(ABORT, 'timeline source context is immutable'); END;
++CREATE TRIGGER IF NOT EXISTS delivery_source_context_immutable BEFORE UPDATE OF source_context_json ON run_deliveries
++WHEN NEW.source_context_json IS NOT OLD.source_context_json
++BEGIN SELECT RAISE(ABORT, 'delivery source context is immutable'); END;
++`,
++};
+--- working-preimage/packages/core/src/db/migrations/057-source-context.test.ts
++++ current/packages/core/src/db/migrations/057-source-context.test.ts
+@@ -0,0 +1,133 @@
++import { mkdtempSync } from "node:fs";
++import { tmpdir } from "node:os";
++import { basename, dirname, join, resolve } from "node:path";
++import { afterEach, describe, expect, it } from "vitest";
++import { RunSnapshotSchema, type TriggerRequest } from "@taki/shared";
++import { createRunServiceStub } from "../../testing/run-service-stub.ts";
++import { rmTempDir } from "../../testing/rm-temp.ts";
++import { createRunEventRepo } from "../run-event-repo.ts";
++import { createRunRepo } from "../run-repo.ts";
++import { openDatabase, type Database } from "../sqlite.ts";
++import { runMigrations, type Migration } from "../migration-runner.ts";
++import { createTimelineRepo } from "../timeline-repo.ts";
++import { createRunDeliveryRepo } from "../run-delivery-repo.ts";
++import { MIGRATIONS } from "./index-list.ts";
++import { sourceContextMigration057 } from "./057-source-context.ts";
++
++const databases: Database[] = [];
++const directories: string[] = [];
++const through056 = MIGRATIONS.filter(({ version }) => version <= 56);
++afterEach(() => {
++  for (const db of databases.splice(0)) db.close();
++  for (const directory of directories.splice(0)) {
++    const path = resolve(directory);
++    if (dirname(path) !== resolve(tmpdir()) || !basename(path).startsWith("taki-source-057-")) throw new Error("unsafe fixture path");
++    rmTempDir(path);
++  }
++});
++function open(path = ":memory:", migrations: Migration[] = MIGRATIONS) {
++  const db = openDatabase({ path, migrations }); databases.push(db); return db;
++}
++function columns(db: Database, table: string) {
++  return db.prepare(`PRAGMA table_info(${table})`).all();
++}
++async function seedDelivery(db: Database) {
++  const request: TriggerRequest = { triggerRequestId: "source-fixture", idempotencyKey: "source-fixture", characterId: "taki",
++    initiator: "scheduled", provenance: { provider: "test" }, contextMode: "autonomous", deliveryClass: "class_a" };
++  const captured = await createRunServiceStub().admit(request);
++  const snapshot = RunSnapshotSchema.omit({ snapshotId: true, runId: true, capturedAt: true, manifestDigest: true }).strip().parse(captured.snapshot);
++  const runs = createRunRepo(db, createRunEventRepo(db));
++  const { run, attempt } = runs.admit({ runId: "source-fixture-run", request, snapshot, provider: "test", modelId: "test" });
++  db.prepare(`INSERT INTO run_deliveries(delivery_id,run_id,attempt_id,character_id,delivery_class,decision_json,
++    expires_at,state,continuation,primary_version,timeline_seq,charged_at,created_at)
++    VALUES('delivery',:runId,:attemptId,'taki','class_a',:decision,'2026-10-23T00:00:00.000Z','unknown','none',0,7,
++      '2026-10-22T00:00:00.000Z','2026-10-22T00:00:00.000Z')`).run({ runId: run.runId, attemptId: attempt.attemptId,
++    decision: '{ "outcome":"speak", "selectedCandidateIds":["original"], "text":"Original speech", "presentation":null, "responseExpectation":"none" }' });
++}
++
++describe("source context migration 057", () => {
++  it("creates guarded nullable columns on a fresh install and reopens without work", () => {
++    const db = open();
++    for (const table of ["timeline_messages", "run_deliveries"]) {
++      expect(columns(db, table).find((column) => column.name === "source_context_json"))
++        .toMatchObject({ type: "TEXT", notnull: 0, dflt_value: null, pk: 0 });
++    }
++    expect(runMigrations(db, MIGRATIONS)).toEqual([]);
++    expect(db.prepare("PRAGMA foreign_key_check").all()).toEqual([]);
++  });
++
++  it("upgrades populated 056 records without changing original speech, delivery truth, sequence or receipts", async () => {
++    const directory = mkdtempSync(join(tmpdir(), "taki-source-057-")); directories.push(directory);
++    const path = join(directory, "state.db");
++    const old = open(path, through056);
++    old.exec(`INSERT INTO timeline_messages(seq,id,character_id,role,content,created_at)
++      VALUES(7,'550e8400-e29b-41d4-a716-446655440000','taki','assistant','Original speech','2026-10-22T00:00:00.000Z');
++      INSERT INTO timeline_messages(seq,id,character_id,role,content,created_at)
++      VALUES(90,'550e8400-e29b-41d4-a716-446655440001','taki','user','Deleted tail','2026-10-22T00:00:00.000Z');
++      DELETE FROM timeline_messages WHERE seq=90;`);
++    await seedDelivery(old);
++    const timeline = old.prepare("SELECT * FROM timeline_messages").get();
++    const delivery = old.prepare("SELECT * FROM run_deliveries").get();
++    const receipts = old.prepare("SELECT * FROM migrations ORDER BY version").all();
++    old.close();
++    const upgraded = open(path);
++    expect(upgraded.prepare("SELECT * FROM timeline_messages").get()).toEqual({ ...timeline, source_context_json: null });
++    expect(upgraded.prepare("SELECT * FROM run_deliveries").get()).toEqual({ ...delivery, source_context_json: null });
++    expect(upgraded.prepare("SELECT * FROM migrations WHERE version<=56 ORDER BY version").all()).toEqual(receipts);
++    const repo = createTimelineRepo(upgraded);
++    expect(repo.latestAscending("taki", 10)[0]).not.toHaveProperty("sourceContext");
++    expect(createRunDeliveryRepo({ db: upgraded, events: createRunEventRepo(upgraded) }).get("source-fixture-run"))
++      .toMatchObject({ state: "unknown", timelineSeq: 7 });
++    expect(repo.append({ characterId: "taki", role: "user", content: "Next" }).seq).toBe(91);
++    upgraded.close();
++    const reopened = open(path);
++    expect(runMigrations(reopened, MIGRATIONS)).toEqual([]);
++    expect(reopened.prepare("PRAGMA foreign_key_check").all()).toEqual([]);
++  });
++
++  it.each(["timeline_messages", "run_deliveries"])("refuses constrained pre-existing source columns on %s atomically", (table) => {
++    const db = open(":memory:", through056);
++    db.exec(`ALTER TABLE ${table} ADD COLUMN source_context_json TEXT DEFAULT NULL`);
++    expect(() => runMigrations(db, [sourceContextMigration057])).toThrow("migration 57 failed");
++    const other = table === "timeline_messages" ? "run_deliveries" : "timeline_messages";
++    expect(columns(db, other).some((column) => column.name === "source_context_json")).toBe(false);
++    expect(db.prepare("SELECT version FROM migrations WHERE version=57").get()).toBeUndefined();
++  });
++
++  it("preserves a recognized pre-existing bare source column and its bytes", () => {
++    const db = open(":memory:", through056);
++    db.exec(`ALTER TABLE timeline_messages ADD COLUMN source_context_json TEXT;
++      INSERT INTO timeline_messages(id,character_id,role,content,source_context_json,created_at)
++      VALUES('old','taki','assistant','Original','{ "materials": [{ "label": "Known" }] }','2026-10-22T00:00:00.000Z');`);
++    expect(runMigrations(db, [sourceContextMigration057])).toEqual([57]);
++    expect(db.prepare("SELECT source_context_json FROM timeline_messages").get()?.source_context_json)
++      .toBe('{ "materials": [{ "label": "Known" }] }');
++    expect(() => db.exec("UPDATE timeline_messages SET source_context_json=NULL"))
++      .toThrow("timeline source context is immutable");
++  });
++
++  it("rolls both columns and triggers back when migration receipt insertion fails", () => {
++    const db = open(":memory:", through056);
++    db.exec("CREATE TRIGGER refuse_source_receipt BEFORE INSERT ON migrations WHEN NEW.version=57 BEGIN SELECT RAISE(ABORT,'receipt failure'); END;");
++    expect(() => runMigrations(db, [sourceContextMigration057])).toThrow("migration 57 failed");
++    for (const table of ["timeline_messages", "run_deliveries"]) {
++      expect(columns(db, table).some((column) => column.name === "source_context_json")).toBe(false);
++    }
++    expect(db.prepare("SELECT name FROM sqlite_schema WHERE name LIKE '%source_context_immutable'").all()).toEqual([]);
++    expect(db.prepare("SELECT version FROM migrations WHERE version=57").get()).toBeUndefined();
++  });
++
++  it("rolls schema and receipt back on actual deferred-constraint COMMIT failure", () => {
++    const db = open(":memory:", through056);
++    const failed: Migration = { ...sourceContextMigration057, sql: sourceContextMigration057.sql + `
++      CREATE TABLE source_commit_parent(id TEXT PRIMARY KEY);
++      CREATE TABLE source_commit_child(id TEXT REFERENCES source_commit_parent(id) DEFERRABLE INITIALLY DEFERRED);
++      INSERT INTO source_commit_child(id) VALUES('missing');` };
++    expect(() => runMigrations(db, [failed])).toThrow("migration 57 failed");
++    for (const table of ["timeline_messages", "run_deliveries"]) {
++      expect(columns(db, table).some((column) => column.name === "source_context_json")).toBe(false);
++    }
++    expect(db.prepare("SELECT version FROM migrations WHERE version=57").get()).toBeUndefined();
++    expect(runMigrations(db, [sourceContextMigration057])).toEqual([57]);
++  });
++});
+--- working-preimage/packages/core/src/db/migrations/index-list.ts
++++ current/packages/core/src/db/migrations/index-list.ts
+@@ -60,6 +60,7 @@
+ import { initiativeIntentionsMigration054 } from "./054-initiative-intentions.ts";
+ import { initiativeBackoffMigration055 } from "./055-initiative-backoff.ts";
+ import { subagentConversationsMigration056 } from "./056-subagent-conversations.ts";
++import { sourceContextMigration057 } from "./057-source-context.ts";
+ 
+ export const MIGRATIONS: Migration[] = [
+   timelineMigration001,
+@@ -118,4 +119,5 @@
+   initiativeIntentionsMigration054,
+   initiativeBackoffMigration055,
+   subagentConversationsMigration056,
++  sourceContextMigration057,
+ ];
+--- working-preimage/packages/core/src/db/migrations/index-list.test.ts
++++ current/packages/core/src/db/migrations/index-list.test.ts
+@@ -4,7 +4,7 @@
+ describe("MIGRATIONS registry", () => {
+   it("is contiguous, strictly ascending, and uniquely versioned", () => {
+     const versions = MIGRATIONS.map((migration) => migration.version);
+-    expect(versions).toEqual(Array.from({ length: 56 }, (_, index) => index + 1));
++    expect(versions).toEqual(Array.from({ length: 57 }, (_, index) => index + 1));
+     expect(new Set(versions).size).toBe(versions.length);
+     expect(MIGRATIONS.every((migration) => migration.sql.trim().length > 0)).toBe(true);
+   });
+--- working-preimage/packages/core/src/db/migrations/index.md
++++ current/packages/core/src/db/migrations/index.md
+@@ -59,3 +59,4 @@
+ - 054-initiative-intentions.ts — finite source-bound plans, immutable source opportunities and exact canonical Run claim bindings
+ - 055-initiative-backoff.ts — reset fences and canonical Run admission-time timezone metadata; no duplicate quota ledger
+ - 056-subagent-conversations.ts — four private delegation record families with exact work, completion and input-receipt identities
++- 057-source-context.ts — guarded immutable nullable source sidecars on Timeline and Delivery, preserving original text and legacy rows
+--- working-preimage/packages/core/src/db/migrations/lineage-reopen-matrix.test.ts
++++ current/packages/core/src/db/migrations/lineage-reopen-matrix.test.ts
+@@ -46,6 +46,7 @@
+ import { initiativeIntentionsMigration054 } from "./054-initiative-intentions.ts";
+ import { initiativeBackoffMigration055 } from "./055-initiative-backoff.ts";
+ import { subagentConversationsMigration056 } from "./056-subagent-conversations.ts";
++import { sourceContextMigration057 } from "./057-source-context.ts";
+ import { canonicalPayloadHash } from "../../memory/legacy-migration/legacy-identities.ts";
+ import { createIntlSegmenterTokenizer } from "../../memory/search-tokenizer.ts";
+ import { createReplicaRecordStore } from "../hindsight-replica-record-store.ts";
+@@ -82,7 +83,7 @@
+ }
+ 
+ function expectFinalSchema(db: Database): void {
+-  expect(db.prepare("SELECT max(version) AS version FROM migrations").get()?.version).toBe(56);
++  expect(db.prepare("SELECT max(version) AS version FROM migrations").get()?.version).toBe(57);
+   expect(db.prepare("PRAGMA table_info(timeline_messages)").all().map((row) => row.name)).toContain("presentation");
+   const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map((row) => row.name);
+   expect(tables).toEqual(expect.arrayContaining([
+@@ -211,10 +212,10 @@
+     const firstApplied: number[][] = [];
+     const first = open(path, MIGRATIONS, (applied) => firstApplied.push(applied));
+     expectFinalSchema(first);
+-    expect(firstApplied).toEqual([Array.from({ length: 56 }, (_, index) => index + 1)]);
++    expect(firstApplied).toEqual([Array.from({ length: 57 }, (_, index) => index + 1)]);
+     close(first);
+     const reopened = expectReopenNoOp(path);
+-    expect(reopened.prepare("SELECT count(*) AS count FROM migrations").get()?.count).toBe(56);
++    expect(reopened.prepare("SELECT count(*) AS count FROM migrations").get()?.count).toBe(57);
+   });
+ 
+   it("converges the historical T4 17/18 MCP-Skill lineage through the current tail", () => {
+@@ -265,11 +266,12 @@
+       initiativeIntentionsMigration054,
+       initiativeBackoffMigration055,
+       subagentConversationsMigration056,
++      sourceContextMigration057,
+     ], (applied) => tailApplied.push(applied));
+-    expect(tailApplied).toEqual([[19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56]]);
++    expect(tailApplied).toEqual([[19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57]]);
+     expectFinalSchema(reopened);
+     expect(reopened.prepare("SELECT version FROM migrations ORDER BY version").all().map((row) => row.version)).toEqual(
+-      Array.from({ length: 56 }, (_, index) => index + 1),
++      Array.from({ length: 57 }, (_, index) => index + 1),
+     );
+     close(reopened);
+     expectReopenNoOp(path);
+@@ -282,7 +284,7 @@
+     close(first);
+     const tailApplied: number[][] = [];
+     const reopened = open(path, MIGRATIONS, (applied) => tailApplied.push(applied));
+-    expect(tailApplied).toEqual([[21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56]]);
++    expect(tailApplied).toEqual([[21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57]]);
+     expectFinalSchema(reopened);
+     expect(reopened.prepare("SELECT mode FROM memory_authority_selection WHERE singleton=1").get()?.mode)
+       .toBe("legacy-markdown");
+@@ -299,7 +301,7 @@
+ 
+     const applied: number[][] = [];
+     const upgraded = open(path, MIGRATIONS, (versions) => applied.push(versions));
+-    expect(applied).toEqual([[32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56]]);
++    expect(applied).toEqual([[32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57]]);
+     expect(upgraded.prepare(`SELECT through_seq,text,revision,last_operation_id,source_from_seq,source_through_seq,
+       source_digest,captured_tail_seq FROM conversation_summary WHERE character_id='taki'`).get()).toEqual({
+       through_seq: 12,
+@@ -363,7 +365,7 @@
+     const leases = first.prepare("SELECT * FROM hindsight_replica_sync_leases").all();
+     close(first); const applied: number[][] = [];
+     const upgraded = open(path, MIGRATIONS, (versions) => applied.push(versions));
+-    expect(applied).toEqual([[34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56]]);
++    expect(applied).toEqual([[34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57]]);
+     expectFinalSchema(upgraded);
+     expect(upgraded.prepare("SELECT * FROM hindsight_replica_sync_records").all()).toEqual(records);
+     expect(createReplicaRecordStore(upgraded, createIntlSegmenterTokenizer({ stoplist: true })).get({
+@@ -394,12 +396,12 @@
+ 
+     const applied: number[][] = [];
+     const upgraded = open(path, MIGRATIONS, (versions) => applied.push(versions));
+-    expect(applied).toEqual([history === "034" ? [35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56] : [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56]]);
++    expect(applied).toEqual([history === "034" ? [35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57] : [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57]]);
+     expectFinalSchema(upgraded);
+     expect(upgraded.prepare("SELECT version,applied_at FROM migrations WHERE version<=:version ORDER BY version")
+       .all({ version: history === "034" ? 34 : 35 })).toEqual(receipts);
+     const after = memoryTimelineData(upgraded);
+-    expect(after.timeline).toEqual(before.timeline.map((row) => ({ ...row, presentation: row.presentation ?? null })));
++    expect(after.timeline).toEqual(before.timeline.map((row) => ({ ...row, presentation: row.presentation ?? null, source_context_json: null })));
+     if (before.presentationBytes) expect(after.presentationBytes).toEqual(before.presentationBytes);
+     expect(after.pending).toEqual(before.pending);
+     expect(after.watermarks).toEqual(before.watermarks);
+--- working-preimage/packages/core/src/db/pending-memory-repo.test.ts
++++ current/packages/core/src/db/pending-memory-repo.test.ts
+@@ -169,7 +169,7 @@
+   it("applies the current migration tail after a populated version-34 database and reopens without changes", () => {
+     const f = fixture(true, 34); const records = f.db.prepare("SELECT * FROM hindsight_replica_sync_records").all();
+     const checkpoints = f.db.prepare("SELECT * FROM hindsight_replica_sync_checkpoints").all();
+-    const applied = f.reopen(); expect(applied).toEqual([35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56]);
++    const applied = f.reopen(); expect(applied).toEqual([35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);
+     const row = f.repo.enqueue(intent()); expect(f.reopen()).toEqual([]);
+     expect(f.repo.get(pendingMemoryRef(row))).toEqual(row);
+     expect(f.db.prepare("SELECT * FROM hindsight_replica_sync_records").all()).toEqual(records);
+--- working-preimage/packages/core/src/db/scheduled-task-repo.test.ts
++++ current/packages/core/src/db/scheduled-task-repo.test.ts
+@@ -9,5 +9,5 @@
+ describe("ScheduledTaskRepo", () => {
+   it("persists CRUD and revision conflicts", () => { const { repo } = fixture(); const task = repo.create({ characterId: "taki", name: "Daily", controlInput: "Check work", pattern: { kind: "cron", expression: "0 9 * * *" }, timezone: { kind: "fixed", timezone: "Asia/Shanghai" }, nextRunAt: "2026-08-26T01:00:00.000Z" }); expect(repo.list("taki")).toHaveLength(1); expect(() => repo.setState({ taskId: task.taskId, expectedRevision: 2, state: "paused" })).toThrow(ScheduledTaskConflictError); expect(repo.setState({ taskId: task.taskId, expectedRevision: 1, state: "paused" }).state).toBe("paused"); });
+   it("claims an occurrence once and scrubs payload after terminal", () => { const { db, repo } = fixture(); const task = repo.create({ characterId: "taki", name: "Once", controlInput: "secret prompt", pattern: { kind: "at", at: "2026-08-25T00:00:00.000Z" }, timezone: { kind: "user" }, nextRunAt: "2026-08-25T00:00:00.000Z" }); const input = { taskId: task.taskId, characterId: task.characterId, scheduledFor: "2026-08-25T00:00:00.000Z", taskRevision: 1, controlInput: task.controlInput, firedAt: "2026-08-25T00:00:01.000Z", late: true }; expect(repo.claimOccurrence(input)).toBeTruthy(); expect(repo.claimOccurrence(input)).toBeUndefined(); repo.settleOccurrence({ taskId: task.taskId, scheduledFor: input.scheduledFor, state: "missed" }); expect(db.prepare("SELECT state,control_input FROM schedule_occurrences").get()).toEqual({ state: "missed", control_input: null }); });
+-  it("backfills occurrence Character ownership when migration 030 follows an applied 029 database", () => { const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS.slice(0, 29) }); dbs.push(db); db.exec("INSERT INTO scheduled_tasks (task_id,character_id,name,control_input,pattern_json,timezone_json,enabled,state,revision,next_run_at,last_run_id,created_at,updated_at) VALUES ('task','taki','n','work','{\"kind\":\"at\",\"at\":\"2026-08-25T00:00:00.000Z\"}','{\"kind\":\"user\"}',1,'active',1,'2026-08-25T00:00:00.000Z',NULL,'2026-08-25T00:00:00.000Z','2026-08-25T00:00:00.000Z'); INSERT INTO schedule_occurrences (task_id,scheduled_for,task_revision,control_input,fired_at,late,state,created_at,updated_at) VALUES ('task','2026-08-25T00:00:00.000Z',1,'work','2026-08-25T00:00:00.000Z',0,'pending','2026-08-25T00:00:00.000Z','2026-08-25T00:00:00.000Z')"); expect(runMigrations(db, MIGRATIONS)).toEqual([30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56]); expect(db.prepare("SELECT character_id FROM schedule_occurrences").get()?.character_id).toBe("taki"); });
++  it("backfills occurrence Character ownership when migration 030 follows an applied 029 database", () => { const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS.slice(0, 29) }); dbs.push(db); db.exec("INSERT INTO scheduled_tasks (task_id,character_id,name,control_input,pattern_json,timezone_json,enabled,state,revision,next_run_at,last_run_id,created_at,updated_at) VALUES ('task','taki','n','work','{\"kind\":\"at\",\"at\":\"2026-08-25T00:00:00.000Z\"}','{\"kind\":\"user\"}',1,'active',1,'2026-08-25T00:00:00.000Z',NULL,'2026-08-25T00:00:00.000Z','2026-08-25T00:00:00.000Z'); INSERT INTO schedule_occurrences (task_id,scheduled_for,task_revision,control_input,fired_at,late,state,created_at,updated_at) VALUES ('task','2026-08-25T00:00:00.000Z',1,'work','2026-08-25T00:00:00.000Z',0,'pending','2026-08-25T00:00:00.000Z','2026-08-25T00:00:00.000Z')"); expect(runMigrations(db, MIGRATIONS)).toEqual([30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57]); expect(db.prepare("SELECT character_id FROM schedule_occurrences").get()?.character_id).toBe("taki"); });
+ });
+--- working-preimage/packages/core/src/db/migrations/048-memory-operations.test.ts
++++ current/packages/core/src/db/migrations/048-memory-operations.test.ts
+@@ -15,7 +15,7 @@
+ 
+ describe("migration 048 memory operations", () => {
+   it("applies on a fresh database and on a database at 047", () => {
+-    expect(open().prepare("SELECT max(version) AS v FROM migrations").get()?.v).toBe(56);
++    expect(open().prepare("SELECT max(version) AS v FROM migrations").get()?.v).toBe(57);
+     const upgraded = open(MIGRATIONS.slice(0, 47));
+     expect(upgraded.prepare("SELECT max(version) AS v FROM migrations").get()?.v).toBe(47);
+     upgraded.exec(MIGRATIONS[47]!.sql);
+--- working-preimage/packages/core/src/db/migrations/041-canonical-memory-maintenance.test.ts
++++ current/packages/core/src/db/migrations/041-canonical-memory-maintenance.test.ts
+@@ -54,7 +54,7 @@
+   it("applies a fresh ordered registry, enforces one pending span, and retains the exact eligibility baseline", () => {
+     const applied: number[][] = []; const db = open(":memory:", MIGRATIONS, (versions) => applied.push(versions));
+     expect(applied).toEqual([MIGRATIONS.map(({ version }) => version)]);
+-    expect(MIGRATIONS.at(-1)?.version).toBe(56);
++    expect(MIGRATIONS.at(-1)?.version).toBe(57);
+     const tables = db.prepare("SELECT name FROM sqlite_schema WHERE type='table'").all().map((row) => row.name);
+     expect(addedTables.every((table) => tables.includes(table))).toBe(true);
+     const value = createCanonicalMaintenanceFixture(db); value.seed();
+@@ -91,7 +91,7 @@
+     const historical = createCanonicalMemoryRepo(old).edit(editInput);
+     const before = { history: historyBytes(old), current: currentRows(old), receipts: migrationReceipts(old) }; old.close();
+     const applied: number[][] = []; const upgraded = open(file, MIGRATIONS, (versions) => applied.push(versions));
+-    expect(applied).toEqual([[41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56]]);
++    expect(applied).toEqual([[41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57]]);
+     expect(historyBytes(upgraded)).toEqual(before.history);
+     expect(currentRows(upgraded)).toEqual(before.current);
+     expect(migrationReceipts(upgraded).filter((row) => Number(row.version) <= 40)).toEqual(before.receipts);
+@@ -104,7 +104,7 @@
+     expect(records.edit(editInput)).toEqual(historical);
+     const after = historyBytes(upgraded); upgraded.close();
+     const reopened = open(file, MIGRATIONS, (versions) => applied.push(versions));
+-    expect(applied).toEqual([[41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56], []]);
++    expect(applied).toEqual([[41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57], []]);
+     expect(historyBytes(reopened)).toEqual(after);
+     expect(createCanonicalMemoryRepo(reopened).edit(editInput)).toEqual(historical);
+     expect(reopened.prepare("PRAGMA foreign_key_check").all()).toEqual([]);
+--- working-preimage/packages/core/src/delivery/prepared-publication-source.ts
++++ current/packages/core/src/delivery/prepared-publication-source.ts
+@@ -93,13 +93,27 @@
+     const result = PreparedPublicationCandidateSchema.safeParse(producer.resolve(input));
+     if (!result.success || result.data.candidateRef !== input.candidateRef || result.data.revision !== input.expectedRevision
+       || Date.now() >= Date.parse(result.data.expiresAt) || Date.parse(result.data.expiresAt) > Date.parse(state.accepted.expiresAt)) return undefined;
+-    return Object.freeze(result.data);
++    return freezeCandidate(result.data);
+   } catch { return undefined; }
+ }
+ 
+ function candidateCurrent(producer: PreparedPublicationProducer, state: SourceState, candidate: PreparedPublicationCandidate): boolean {
+   const live = resolveCandidate(producer, state, { candidateRef: candidate.candidateRef, expectedRevision: candidate.revision });
+-  return live !== undefined && live.text === candidate.text && live.expiresAt === candidate.expiresAt;
++  return live !== undefined && live.text === candidate.text && live.expiresAt === candidate.expiresAt
++    && JSON.stringify(live.sourceContext) === JSON.stringify(candidate.sourceContext);
++}
++
++function freezeCandidate(candidate: PreparedPublicationCandidate): PreparedPublicationCandidate {
++  const source = candidate.sourceContext;
++  if (source) {
++    if (source.generatedBy) Object.freeze(source.generatedBy);
++    if (source.materials) {
++      for (const material of source.materials) Object.freeze(material);
++      Object.freeze(source.materials);
++    }
++    Object.freeze(source);
++  }
++  return Object.freeze(candidate);
+ }
+ 
+ function confirmEdit(producer: PreparedPublicationProducer, state: SourceState,
+--- working-preimage/packages/core/src/delivery/prepared-publication.ts
++++ current/packages/core/src/delivery/prepared-publication.ts
+@@ -105,6 +105,7 @@
+   const record = existing ?? deps.repo.stage({ runId, attemptId, characterId: admitted.run.characterId, deliveryClass: admitted.run.deliveryClass,
+     decision: { outcome: "speak", text: admitted.candidate.text, selectedCandidateIds: [admitted.candidate.candidateRef],
+       presentation: null, responseExpectation: "none" }, expiresAt,
++    ...(admitted.candidate.sourceContext === undefined ? {} : { sourceContext: admitted.candidate.sourceContext }),
+     primaryVersion: deps.queue.primaryVersion(admitted.run.characterId), consideredCount: 1 });
+   const controller = deps.turns.begin(admitted.run.characterId, undefined, runId);
+   try { await deps.delivery.finish(record, deliveryBinding(deps, admitted)); }
+@@ -118,6 +119,7 @@
+     gate: () => deps.publication.gate(admitted.candidate),
+     publicationCurrent: (record) => record.runId === admitted.run.runId && record.attemptId === admitted.attempt.attemptId
+       && record.decision.outcome === "speak" && record.decision.text === admitted.candidate.text
++      && JSON.stringify(record.sourceContext) === JSON.stringify(admitted.candidate.sourceContext)
+       && record.decision.selectedCandidateIds.length === 1 && record.decision.selectedCandidateIds[0] === admitted.candidate.candidateRef
+       && record.decision.presentation === null && record.decision.responseExpectation === "none" && admitted.isCurrent(),
+     // This entry admits only trusted exact text. Presentation remains on its existing governed Effect path.
+--- working-preimage/packages/core/src/delivery/prepared-publication.test.ts
++++ current/packages/core/src/delivery/prepared-publication.test.ts
+@@ -27,6 +27,41 @@
+ }
+ 
+ describe("trusted prepared publication composition", () => {
++  it("copies immutable material and generation context through publication independently of transient producer data", async () => {
++    const f = await fixture();
++    const sourceContext = { generatedBy: { runId: "child-run", attemptId: "child-attempt" },
++      materials: [{ label: "External interview", reference: "document:interview", speaker: "Guest", time: "00:12" }] };
++    f.candidates.set("one", { ...f.candidates.get("one")!, sourceContext });
++    const captured = f.source.binding.publication!.resolve(first)!;
++    expect(captured.sourceContext).toEqual(sourceContext);
++    expect(Object.isFrozen(captured.sourceContext)).toBe(true);
++    expect(Object.isFrozen(captured.sourceContext?.materials?.[0])).toBe(true);
++    expect(captured.sourceContext).not.toBe(sourceContext);
++    const result = await f.owner.publish(first);
++    const record = f.deliveries.get(runId(result))!;
++    expect(record.sourceContext).toEqual(sourceContext);
++    const entry = f.timeline.latestAscending("taki", 10)[0]!;
++    expect(entry).toMatchObject({ content: "First prepared output.", role: "assistant", sourceContext });
++    expect(record.timelineSeq).toBe(entry.seq);
++    expect(record.runId).not.toBe(sourceContext.generatedBy.runId);
++    expect(f.effects.list?.(record.runId)).toEqual([]);
++    f.candidates.clear(); f.source.retire();
++    expect(f.timeline.latestAscending("taki", 10)[0]).toEqual(entry);
++    expect(f.deliveries.get(record.runId)).toEqual(record);
++  });
++
++  it("refuses source-only candidate drift at the final publication boundary", async () => {
++    const f = await fixture();
++    const sourceContext = { materials: [{ label: "Interview", speaker: "Original guest" }] };
++    f.candidates.set("one", { ...f.candidates.get("one")!, sourceContext });
++    f.hooks.beforeCommit = () => { sourceContext.materials[0]!.speaker = "Changed guest"; };
++    const result = await f.owner.publish(first);
++    expect(f.deliveries.get(runId(result))).toMatchObject({ state: "suppressed", timelineSeq: null,
++      sourceContext: { materials: [{ label: "Interview", speaker: "Original guest" }] } });
++    expect(f.timeline.latestAscending("taki", 10)).toEqual([]);
++    expect(f.send).not.toHaveBeenCalled();
++  });
++
+   it("publishes two explicitly requested non-media report outputs around a foreground Agent turn without new model Effects", async () => {
+     const f = await fixture({ hold: false });
+     const model = scriptedModel([{ kind: "text", deltas: ['["First prepared output.","Second prepared output."]'] },
+--- working-preimage/packages/core/src/delivery/index.md
++++ current/packages/core/src/delivery/index.md
+@@ -1,5 +1,5 @@
+ # core/delivery/
+ 
+ - delivery-coordinator.ts — same-Attempt holds/resumes, bounded waits, exact-Run pending retirement, synchronous final source/gate/content checks and factual post-commit transport outcomes
+-- prepared-publication-source.ts — generic immutable accepted-source/candidate views requiring a separate registered output authorization; strict currentness and gate-before-edit confirmation without business-policy classification
+-- prepared-publication.ts — inert reference-only prepared-text publication through existing Run/Delivery/Character-lane owners, exact child retirement and scoped Stop
++- prepared-publication-source.ts — immutable accepted-source/candidate views with source-sidecar equality, separate output authorization and gate-before-edit confirmation
++- prepared-publication.ts — reference-only prepared-text/source publication through existing Run/Delivery/Character-lane owners, exact child retirement and scoped Stop
+--- working-preimage/packages/core/src/agents/conversation-store.ts
++++ current/packages/core/src/agents/conversation-store.ts
+@@ -4,7 +4,7 @@
+  * POS:    core/agents — one conversational writer and Character-scoped canonical Replay View boundary (ADR 0008)
+  */
+ import type { ModelMessage } from "ai";
+-import type { TimelineCommitted, TimelineEntry } from "@taki/shared";
++import type { SourceContext, TimelineCommitted, TimelineEntry } from "@taki/shared";
+ import type { TimelineRepo } from "../db/timeline-repo.ts";
+ import { estimateMessageTokens } from "../memory/token-estimator.ts";
+ import { selectWindow } from "./context-window.ts";
+@@ -61,7 +61,7 @@
+ 
+ export interface ConversationStore {
+   /** Called only within the owning delivery transaction; the caller publishes after the outer commit. */
+-  appendDelivery(characterId: string, text: string): TimelineEntry;
++  appendDelivery(characterId: string, text: string, sourceContext?: SourceContext): TimelineEntry;
+   /**
+    * Persists the user turn and RETURNS the committed entry; images (#17) add image parts (mediaType + ref) — no
+    * images = a legacy text-only row. The seq is returned so a cancel-before-reply can retract exactly this row.
+@@ -142,7 +142,8 @@
+     return { messages: view.head === null ? messages : [view.head, ...messages], windowStartSeq: view.windowStartSeq, measurement: view.measurement };
+   };
+   return {
+-    appendDelivery: (characterId, text) => repo.append({ characterId, role: "assistant", content: text }),
++    appendDelivery: (characterId, text, sourceContext) => repo.append({ characterId, role: "assistant", content: text,
++      ...(sourceContext === undefined ? {} : { sourceContext }) }),
+     // No images = toUserEntryInput returns the legacy `{role:"user", content}` row (byte-identical to before #17).
+     appendUser: (characterId, text, images = []) => commit(characterId, toUserEntryInput(text, images)),
+       appendAssistant: (characterId, text, onCommitted) => {
+--- working-preimage/packages/core/src/agents/index.md
++++ current/packages/core/src/agents/index.md
+@@ -21,7 +21,7 @@
+ - replay-source-loader.ts — pages durable Timeline rows beyond the legacy 200-row view until token candidates are sufficient, a nearby summary bridge is reached, or history ends; a documented 10,000-row emergency ceiling emits an explicit degraded-source fact
+ - request-measurement.ts — provider-neutral complete request-envelope decomposition (assembled instructions/messages, Replay/history/summary/fold savings, prepared tool schemas, cache-read pressure, response reserve); no fabricated usage/cache values
+ - turn-usage-report.ts — detached committed-turn usage reporting; combines authoritative provider usage with request measurement for calibration without adding chat latency
+-- conversation-store.ts — atomic conversational writer and one unchanged `project()` computation for history/windowStart/pressure, with canonical paging/summary/fold/selection behavior; SQLite-backed conversation store with one `project()` computation shared by history/windowStart/pressure measurement and optional per-row commit receipts; measured Replay View uses the paged source loader, summary substitution, folds and balanced token selection; legacy no-budget mode retains the 200-row compatibility window
++- conversation-store.ts — atomic conversational writer with sourced delivery appends; one `project()` computation for history/windowStart/pressure, canonical paging/summary/folds and balanced selection; legacy no-budget mode retains the 200-row window
+ - overflow-error.ts — R2's pure overflow classifier: isContextOverflowError (APICallError + 4xx/absent status + sourced context-length phrase family; unrecognized fails open — no retry) + observedTokensOf (the failing request's provider-reported token count, never the advertised maximum)
+ - replay-folds.ts — foldUnderPressure(entries, budget) -> { entries, estimatedTokens }: T5-R4's pure under-pressure folds inside the replay view (ADR 0008 idempotent projection; copies only, stored rows untouched) — stage a snapshot-class results (Q5 capturedAt marker) beyond the newest 3 per toolName, stage b fact-class results oldest-first, stage c tool-call args over the ~200-char floor; Hermes-style one-line traces; under budget = zero folds
+ - turn-mapping.ts — privacy boundary between live AI SDK messages and TimelineEntry: tool calls persist/replay by name and call id only with empty replay inputs; raw arguments never enter timeline rows or reconstructed history; image parts replay as text projection
+--- working-preimage/packages/core/src/db/migrations/056-subagent-conversations.test.ts
++++ current/packages/core/src/db/migrations/056-subagent-conversations.test.ts
+@@ -20,7 +20,7 @@
+   it("keeps the registry strictly ascending and creates all four families on a fresh install", () => {
+     const versions = MIGRATIONS.map((migration) => migration.version);
+     expect(versions).toEqual([...new Set(versions)].sort((a, b) => a - b));
+-    expect(versions.at(-1)).toBe(56);
++    expect(versions.at(-1)).toBe(57);
+     const db = open(":memory:", MIGRATIONS);
+     for (const name of families) expect(db.prepare("SELECT name FROM sqlite_schema WHERE type='table' AND name=:name").get({ name })?.name).toBe(name);
+     expect(runMigrations(db, MIGRATIONS)).toEqual([]);
+@@ -38,7 +38,7 @@
+     const receipts = old.prepare("SELECT * FROM migrations ORDER BY version").all();
+     old.close();
+     const upgraded = open(path, MIGRATIONS);
+-    expect(upgraded.prepare("SELECT * FROM timeline_messages WHERE id='old'").get()).toEqual(text);
++    expect(upgraded.prepare("SELECT * FROM timeline_messages WHERE id='old'").get()).toEqual({ ...text, source_context_json: null });
+     expect(upgraded.prepare("SELECT * FROM migrations WHERE version<=:version ORDER BY version").all({ version: lineage === "current" ? 55 : 35 })).toEqual(receipts);
+     expect(upgraded.prepare("PRAGMA foreign_key_check").all()).toEqual([]);
+     upgraded.close();

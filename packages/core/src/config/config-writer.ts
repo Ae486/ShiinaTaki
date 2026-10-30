@@ -10,6 +10,8 @@ import type { ConfigRepo } from "../db/config-repo.ts";
 import { createConfigSource } from "./config-source.ts";
 import { findKnob, type KnobApply } from "./knob-registry.ts";
 import { validateTimingConfigChange } from "./timing-config-validation.ts";
+import { validateInitiativeConfigChange } from "./initiative-policy-config.ts";
+import { validateInitiativeWakeChange } from "./initiative-wake-config.ts";
 
 export interface ConfigWriteInput {
   key: string;
@@ -55,6 +57,10 @@ export function createConfigWriter(deps: ConfigWriterDeps) {
       }
       const timingIssue = validateTimingConfigChange(source, { key, value: accepted });
       if (timingIssue) return refuse("invalid-value", `${key}: timing policy is inconsistent (${timingIssue})`);
+      const initiativeIssue = validateInitiativeConfigChange(source, { key, value: accepted });
+      if (initiativeIssue) return refuse("invalid-value", `${key}: ${initiativeIssue}`);
+      const wakeIssue = validateInitiativeWakeChange(source, { key, value: accepted });
+      if (wakeIssue) return refuse("invalid-value", `${key}: ${wakeIssue}`);
 
       if (accepted === null) {
         deps.repo.delete(key);

@@ -1,0 +1,44 @@
+{
+  "name": "ai",
+  "version": "7.0.148",
+  "gitHead": null,
+  "repository": {
+    "url": "https://github.com/vercel/ai",
+    "type": "git",
+    "directory": "packages/ai"
+  },
+  "dependencies": {
+    "@ai-sdk/gateway": "4.0.121",
+    "@ai-sdk/provider": "4.0.31",
+    "@ai-sdk/provider-utils": "5.0.65"
+  },
+  "peerDependencies": {
+    "zod": "^3.25.76 || ^4.1.8"
+  },
+  "dist": {
+    "shasum": "3a2fa83c193d4ff9ed2c2753f0d4ea31ae5e7c77",
+    "tarball": "https://registry.npmjs.org/ai/-/ai-7.0.148.tgz",
+    "fileCount": 704,
+    "integrity": "sha512-FPgfIAhz/FrlzcvqTN7pGGibahR5rD19NXZWX9WQ1tskTic+CN+jxvubpreyq8uN1maIEHPwvZmil/3IYN8FIw==",
+    "signatures": [
+      {
+        "sig": "MEUCIQDQDlm0WZOHQOiZGfDIF7RIKFdpPLQveNTO9T7K0jtoaAIged8wQR3Sn+/YyNRxdf+EYAEy0mHlQ1SqE9paAd8osAw=",
+        "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+      },
+      {
+        "sig": "MEUCIFGDvp5ZeseontP7TJRW+SqxwmrlacRSnerBFvUO7yFoAiEA9DSPz8JBXHi2LKEU8Cbz6FMFRCtID86ka2O7Tk08Kjc=",
+        "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+      }
+    ],
+    "attestations": {
+      "url": "https://registry.npmjs.org/-/npm/v1/attestations/ai@7.0.148",
+      "provenance": {
+        "predicateType": "https://slsa.dev/provenance/v1"
+      }
+    },
+    "unpackedSize": 8271268
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

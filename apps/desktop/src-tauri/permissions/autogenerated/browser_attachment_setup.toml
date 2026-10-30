@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-browser-attachment-setup"
+description = "Enables the browser_attachment_setup command without any pre-configured scope."
+commands.allow = ["browser_attachment_setup"]
+
+[[permission]]
+identifier = "deny-browser-attachment-setup"
+description = "Denies the browser_attachment_setup command without any pre-configured scope."
+commands.deny = ["browser_attachment_setup"]

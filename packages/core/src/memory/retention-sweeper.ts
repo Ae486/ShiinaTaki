@@ -1,6 +1,6 @@
 /**
  * INPUT:  the memory subsystem's retention ops, the intentions fallback window, a Logger (+ an injected clock)
- * OUTPUT: startRetentionSweeper(deps) -> void; MemoryRetentionOps — one boot sweep plus the shared 6h interval
+ * OUTPUT: startRetentionSweeper(deps) -> { stop }; MemoryRetentionOps — one boot sweep plus the shared 6h interval
  * POS:    core/memory — T5-R8's enforcement arm and the layer registry's `retention` field's FIRST consumer. Decay
  *         means ARCHIVE (reversible, the file stays) everywhere except a rolling-window machine layer, which is the
  *         only sanctioned hard delete. Policy is registry DATA — this module adds no per-layer branches of its own
@@ -36,9 +36,9 @@ export interface RetentionSweeperDeps {
   enabled?: () => boolean;
 }
 
-export function startRetentionSweeper(deps: RetentionSweeperDeps): void {
+export function startRetentionSweeper(deps: RetentionSweeperDeps): { stop(): void } {
   const now = deps.now ?? Date.now;
-  startSweeper({
+  return startSweeper({
     name: "memory-retention",
     message: "memory retention swept",
     logger: deps.logger,
@@ -53,7 +53,7 @@ function sweepOnce(deps: RetentionSweeperDeps, at: number): SweepCounts | undefi
   for (const layer of V1_MEMORY_LAYERS) {
     if (layer.retention === "permanent") continue; // a permanent layer is never even listed
     for (const row of deps.ops.listActive(layer.id)) {
-      const verdict = decide(layer.retention, row, { at, intentionsDefaultDays: deps.intentionsDefaultDays });
+      const verdict = memoryRetentionVerdict(layer.retention, row, { at, intentionsDefaultDays: deps.intentionsDefaultDays });
       if (verdict === "archive") {
         deps.ops.archive(row.path);
         archived += 1;
@@ -72,7 +72,8 @@ interface SweepContext {
   intentionsDefaultDays: number;
 }
 
-function decide(retention: Retention, row: RetentionRow, ctx: SweepContext): Verdict {
+/** Shared policy judgment; canonical adapters supply metadata and wait for their authoritative write themselves. */
+export function memoryRetentionVerdict(retention: Retention, row: RetentionRow, ctx: SweepContext): Verdict {
   const age = ageMs(row, ctx.at);
   if (age === undefined) return "keep"; // a row we cannot date is a row we must not touch
   if (retention === "permanent") return "keep";

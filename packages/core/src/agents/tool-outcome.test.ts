@@ -15,6 +15,10 @@ describe("tool outcome before model-output conversion", () => {
     [{ ok: false, state: "cancelled", code: "CANCELLED" }, { outcome: "cancelled" }],
     [{ ok: false, code: "APPROVAL_REQUIRED" }, { outcome: "failed", errorClass: "governance" }],
     [{ ok: false, code: "MCP_STALE_GENERATION" }, { outcome: "failed", errorClass: "stale" }],
+    [{ ok: false, outcome: "rejected", code: "AVATAR_REJECTED", reason: "motion_busy" }, { outcome: "failed", errorClass: "execution", errorCode: "avatar_rejected" }],
+    [{ ok: false, outcome: "superseded", code: "CANCELLED", state: "cancelled" }, { outcome: "cancelled" }],
+    [{ ok: false, outcome: "unknown", code: "OUTCOME_UNKNOWN", state: "outcome_unknown" }, { outcome: "outcome_unknown" }],
+    [{ ok: true, outcome: "not_rendered" }, { outcome: "completed" }],
   ])("normalizes %j without retaining its content", (output, expected) => {
     const classified = classifyToolOutcome({ type: "tool-result", output });
     expect(classified).toMatchObject(expected);

@@ -1,9 +1,8 @@
 /**
- * INPUT:  an injected clock value (epoch-ms or Date) + an ISO createdAt for age formatting
+ * INPUT:  an injected clock value, optional explicit User Timezone and ISO createdAt for age formatting
  * OUTPUT: pure renderers — renderDayDate / renderCurrentTime (prompt lines), formatRelativeAge (memory age),
- *         renderWallClock (RESERVED for T4 heartbeat, not wired here)
- * POS:    core/time — the SINGLE home for prompt-facing time rendering; pure, injected-clock, OS-neutral
- *         (standard Date/Intl in the runtime's LOCAL timezone); zero provider awareness. No Date.now() inside.
+ *         renderWallClock and startOfUserDay (an absolute boundary in an explicitly supplied IANA zone)
+ * POS:    core/time — pure prompt rendering; legacy callers retain local time, User Timezone callers pass authority
  */
 
 // Weekday in the runtime's local timezone; a module-level formatter avoids re-allocating it per call.
@@ -29,14 +28,16 @@ function localYmd(date: Date): string {
 }
 
 /** The STABLE-prefix day line: byte-identical for a whole calendar day, so it never churns the prompt cache. */
-export function renderDayDate(at: number | Date): string {
+export function renderDayDate(at: number | Date, timezone?: string): string {
   const date = toDate(at);
+  if (timezone) { const parts = userClock(date, timezone); return `Today is ${parts.weekday}, ${parts.ymd}.`; }
   return `Today is ${WEEKDAY_FORMAT.format(date)}, ${localYmd(date)}.`;
 }
 
 /** The TAIL time line: minute granularity (never seconds), so within-minute recomposition stays byte-stable. */
-export function renderCurrentTime(at: number | Date): string {
+export function renderCurrentTime(at: number | Date, timezone?: string): string {
   const date = toDate(at);
+  if (timezone) return `Current local time: ${userClock(date, timezone).hm}.`;
   const hours = String(date.getHours()).padStart(2, "0");
   const minutes = String(date.getMinutes()).padStart(2, "0");
   return `Current local time: ${hours}:${minutes}.`;
@@ -62,12 +63,36 @@ function plural(count: number, unit: string): string {
 }
 
 /**
- * RESERVED for T4 (heartbeat/cron wall-clock injection) — a full weekday + date + time one-liner. Exported now so the
- * render shape is single-sourced here; NOT wired into any prompt in this task.
+ * Full weekday + date + time; an explicit zone keeps headless Core process-local time out of User Timezone prompts.
  */
-export function renderWallClock(at: number | Date): string {
+export function renderWallClock(at: number | Date, timezone?: string): string {
   const date = toDate(at);
+  if (timezone) { const parts = userClock(date, timezone); return `${parts.weekday}, ${parts.ymd} ${parts.hm}`; }
   const hours = String(date.getHours()).padStart(2, "0");
   const minutes = String(date.getMinutes()).padStart(2, "0");
   return `${WEEKDAY_FORMAT.format(date)}, ${localYmd(date)} ${hours}:${minutes}`;
+}
+
+function userClock(at: Date, timezone: string) {
+  const parts = new Intl.DateTimeFormat("en-US", { timeZone: timezone, weekday: "long", year: "numeric",
+    month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(at);
+  const value = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value ?? "";
+  return { weekday: value("weekday"), ymd: `${value("year")}-${value("month")}-${value("day")}`,
+    hm: `${value("hour")}:${value("minute")}` };
+}
+
+/** Find the day's first actual instant, including DST gaps at midnight and repeated hours. */
+export function startOfUserDay(at: number | Date, timezone: string): string {
+  const instant = toDate(at).getTime();
+  const format = new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit" });
+  const day = format.format(instant);
+  // A civil day can exceed 24 hours. Search the preceding 48-hour bound instead of subtracting a fixed offset.
+  let lower = instant - 2 * DAY_MS;
+  let upper = instant;
+  while (lower + 1 < upper) {
+    const middle = Math.floor((lower + upper) / 2);
+    if (format.format(middle) === day) upper = middle;
+    else lower = middle;
+  }
+  return new Date(upper).toISOString();
 }

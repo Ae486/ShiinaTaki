@@ -1,0 +1,30 @@
+{
+  "sha": "e6230e43ba9def164550eea562c457e23be9efa6",
+  "tree_url": "https://api.github.com/repos/vercel/ai/git/trees/e6230e43ba9def164550eea562c457e23be9efa6?recursive=1",
+  "paths": [
+    "content/docs/02-foundations/03-prompts.mdx",
+    "content/docs/03-agents/04-loop-control.mdx",
+    "content/docs/03-agents/06-subagents.mdx",
+    "packages/ai/src/agent/tool-loop-agent.ts",
+    "packages/ai/src/prompt/convert-to-language-model-prompt.ts",
+    "packages/ai/src/ui/unavailable-tool.ts",
+    "packages/code-mode/src/code-mode-tool.ts",
+    "packages/codemod/src/codemods/v4/remove-experimental-tool.ts",
+    "packages/harness-claude-code/src/bridge/question-tool.ts",
+    "packages/harness-grok-build/src/grok-build-question-tool.ts",
+    "packages/harness-opencode/src/bridge/question-tool.ts",
+    "packages/harness/src/v1/harness-v1-builtin-tool.ts",
+    "packages/harness/src/v1/harness-v1-questions-tool.ts",
+    "packages/openai-compatible/src/chat/convert-to-openai-compatible-chat-messages.ts",
+    "packages/provider-utils/src/types/executable-tool.ts",
+    "packages/provider-utils/src/types/execute-tool.ts",
+    "packages/provider-utils/src/types/tool.ts",
+    "packages/provider/src/language-model/v2/language-model-v2-function-tool.ts",
+    "packages/provider/src/language-model/v2/language-model-v2-provider-defined-tool.ts",
+    "packages/provider/src/language-model/v3/language-model-v3-function-tool.ts",
+    "packages/provider/src/language-model/v3/language-model-v3-provider-tool.ts",
+    "packages/provider/src/language-model/v4/language-model-v4-function-tool.ts",
+    "packages/provider/src/language-model/v4/language-model-v4-provider-tool.ts",
+    "packages/tool-bash/src/bash-tool.ts"
+  ]
+}

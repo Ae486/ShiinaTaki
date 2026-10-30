@@ -4,6 +4,9 @@
  * POS:    ui/chat — legacy display fallback; new invocations prefer Core's pre-conversion captured outcome
  */
 import type { ChatActivityToolStatus, TimelineToolOutput } from "@taki/shared";
+import { patternToolDetails } from "@/features/initiative-patterns/pattern-tool-display.js";
+import { followUpToolDetails } from "@/features/initiative-patterns/follow-up-tool-display.js";
+import { isSubagentTool, subagentToolDisplay } from "@/features/subagents/subagent-tool-display.js";
 
 function record(value: unknown): Record<string, unknown> | null {
   return isRecord(value) ? value : null;
@@ -30,9 +33,12 @@ export function historicalToolStatus(output?: TimelineToolOutput): ChatActivityT
   return { phase: "settled", outcome: output.type === "text" || output.type === "json" ? "completed" : "outcome_unknown" };
 }
 
-export function toolOutputDetails(output?: TimelineToolOutput): string | null {
-  if (!output) return null;
+export function toolOutputDetails(output?: TimelineToolOutput, toolName?: string): string | null {
+  if (!output) return toolName === "manage_interaction_pattern" || toolName === "plan_follow_up" ? "" : null;
   const value = output.type === "execution-denied" ? output.reason : output.value;
+  if (toolName && isSubagentTool(toolName)) return subagentToolDisplay(unwrapResult(value)).details;
+  if (toolName === "manage_interaction_pattern") return patternToolDetails(unwrapResult(value));
+  if (toolName === "plan_follow_up") return followUpToolDetails(unwrapResult(value));
   if (output.type === "content" && Array.isArray(value)) return contentText(value);
   const unwrapped = unwrapResult(value);
   if (typeof unwrapped === "string") return unwrapped.trim().length > 0 ? unwrapped : null;

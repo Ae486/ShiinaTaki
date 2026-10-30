@@ -9,7 +9,7 @@ Transparent, borderless, always-on-top pet overlay window (#14/#15/#16).
 - use-drag-release-guard.ts — ends the drag on a global release/cancel/blur the OS drag swallowed (split out of use-pet-drag)
 - use-pet-click.ts — click precedence: every click plays its region reaction; body opening reveals the retained reply without resetting live activity
 - use-core-connection.ts — publishes only restored fresh Pet generations into the window store; renderer lifetime keys the owner
-- restore-pet-connection.ts — generation-guarded avatar report/subscription followed by shared read-only Chat activity restoration
+- restore-pet-connection.ts — generation-guarded avatar report/subscription and outcomes, read-only Chat activity plus bounded ordinary committed Timeline restoration
 - initial-costume-promotion.ts — scene-lifetime promotion controller; interrupted pre-commit work retries on a replacement generation while an attached costume stays latched
 - use-initial-costume.ts — once connected, promotes the dev scene through the D61 whole-attempt and never reloads an already attached imported costume (#18)
 - use-render-governor.ts — wires Tauri onFocusChanged + DOM visibilitychange into the render governor

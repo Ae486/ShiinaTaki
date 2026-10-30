@@ -1,0 +1,13 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "--filter",
+    "@taki/desktop",
+    "test",
+    "--maxWorkers=4"
+  ],
+  "startedAt": "2026-09-26T11:35:26.165024+00:00",
+  "seconds": 44.703,
+  "exitCode": 0,
+  "log": "desktop-current-lock-tests-2026-09-26.log"
+}

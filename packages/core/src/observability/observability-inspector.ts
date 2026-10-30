@@ -7,12 +7,30 @@ import {
   getCapabilityLabel, getKnownToolDisplayName, observabilityLabel, observabilityLabels, observabilityUsageDetails,
   TrajectoryInspectorSchema, type MonitorMode, type RunEvent, type TrajectoryInspector,
 } from "@taki/shared";
+import { initiativeLabel } from "./observability-event-projection.ts";
 
 type Section = NonNullable<TrajectoryInspector["sections"]>[number];
 type Fields = Section["fields"];
 type Payload = RunEvent["payload"];
 
 export function inspectEvent(event: RunEvent, mode: MonitorMode): TrajectoryInspector {
+  if (event.schemaVersion === "run-event.v3") {
+    const fields = [{ label: "状态", value: event.payload.state === "waiting" ? "等待后续输入" : "继续执行" }];
+    return TrajectoryInspectorSchema.parse({ mode, title: "任务生命周期", sections: [{ key: "event", fields }],
+      detail: fields, technical: [], technicalCollapsed: true,
+      redactionNotice: "等待与继续是任务状态，不代表模型调用、工具执行或消息已发送。" });
+  }
+  if (event.schemaVersion === "run-event.v2") {
+    const fields = [{ label: "状态", value: initiativeLabel(event.payload.state) }];
+    if (event.payload.outcome) fields.push({ label: "决定", value: initiativeLabel(event.payload.outcome) });
+    if (event.payload.consideredCount !== undefined) fields.push({ label: "考虑的候选", value: String(event.payload.consideredCount) });
+    if (event.payload.selectedCount !== undefined) fields.push({ label: "采用的候选", value: String(event.payload.selectedCount) });
+    if (event.payload.opportunityMs !== undefined) fields.push({ label: "已记录有效回应机会", value: `${event.payload.opportunityMs >= 120_000 ? "至少 " : ""}${event.payload.opportunityMs / 1_000} 秒` });
+    if (event.payload.disposition) fields.push({ label: "互动观察", value: event.payload.disposition === "unknown"
+      ? "回应机会证据不足" : initiativeLabel(event.payload.disposition) });
+    return TrajectoryInspectorSchema.parse({ mode, title: initiativeLabel(event.kind), sections: [{ key: "event", fields }],
+      detail: fields, technical: [], technicalCollapsed: true, redactionNotice: "执行完成、传输接受、实际呈现和回应机会是独立事实；呈现不代表已阅读。" });
+  }
   const sections: Section[] = [{ key: "event", fields: eventFields(event.payload) }];
   const section = semanticSection(event.payload);
   if (section) sections.push(section);

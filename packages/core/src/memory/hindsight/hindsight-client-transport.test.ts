@@ -1,43 +1,34 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { createHindsightClient } from "./hindsight-client.ts";
+import { withHindsightHttpServer, withOpenHindsightResponse } from "../../testing/hindsight-http-test-fixture.ts";
 
 const context = { timeoutMs: 1_000 };
 const page = { provider_lineage: "11111111-1111-4111-8111-111111111111",
   bank_generation: "22222222-2222-4222-8222-222222222222", from_cursor: 8, next_cursor: 8,
   current_cursor: 8, minimum_available_cursor: 0, has_more: false, changes: [] };
 const limit = 512 * 1024;
-afterEach(() => vi.unstubAllGlobals());
-
-function client() {
-  return createHindsightClient({ endpoint: "http://127.0.0.1:8888", resolveApiKey: () => "fixture-key" });
+function client(endpoint: string) {
+  return createHindsightClient({ endpoint, resolveApiKey: () => "fixture-key" });
 }
 
 describe("Hindsight default HTTP response budget", () => {
   it("classifies an HTTP refusal without reading private response contents", async () => {
-    const cancel = vi.fn(); const pull = vi.fn();
-    const body = new ReadableStream<Uint8Array>({ pull, cancel }, { highWaterMark: 0 });
-    vi.stubGlobal("fetch", vi.fn(async () => new Response(body, { status: 401 })));
-    await expect(client().changesAfter?.({ bankId: "global", afterCursor: 8, limit: 500, context }))
-      .rejects.toMatchObject({ code: "HINDSIGHT_AUTHENTICATION_FAILED" });
-    expect(pull).not.toHaveBeenCalled(); expect(cancel).toHaveBeenCalledOnce();
+    await withOpenHindsightResponse({ status: 401, chunks: [], run: async (endpoint, response) => {
+      await expect(client(endpoint).changesAfter?.({ bankId: "global", afterCursor: 8, limit: 500, context }))
+        .rejects.toMatchObject({ code: "HINDSIGHT_AUTHENTICATION_FAILED" });
+      await expect.poll(() => response.closes).toBe(1);
+      expect(response).toMatchObject({ requests: 1, finishes: 0, chunksOffered: 0, bytesOffered: 0 });
+    } });
   });
 
   it("stops and cancels a response stream as soon as its byte budget is exceeded", async () => {
-    const cancel = vi.fn();
-    let pulls = 0;
-    const body = new ReadableStream<Uint8Array>({
-      pull(controller) {
-        pulls += 1;
-        if (pulls <= 4) controller.enqueue(new Uint8Array(limit / 2).fill(32));
-        else controller.close();
-      },
-      cancel,
-    }, { highWaterMark: 0 });
-    vi.stubGlobal("fetch", vi.fn(async () => new Response(body)));
-    await expect(client().changesAfter?.({ bankId: "global", afterCursor: 8, limit: 500, context }))
-      .rejects.toMatchObject({ code: "HINDSIGHT_RESPONSE_INVALID" });
-    expect(cancel).toHaveBeenCalledOnce();
-    expect(pulls).toBe(3);
+    const chunks = Array.from({ length: 3 }, () => new Uint8Array(limit / 2).fill(32));
+    await withOpenHindsightResponse({ status: 200, chunks, run: async (endpoint, response) => {
+      await expect(client(endpoint).changesAfter?.({ bankId: "global", afterCursor: 8, limit: 500, context }))
+        .rejects.toMatchObject({ code: "HINDSIGHT_RESPONSE_INVALID" });
+      await expect.poll(() => response.closes).toBe(1);
+      expect(response).toMatchObject({ requests: 1, finishes: 0, chunksOffered: 3, bytesOffered: 3 * limit / 2 });
+    } });
   });
 
   it("accepts exactly 512 KiB including multibyte JSON text split across stream chunks", async () => {
@@ -50,11 +41,18 @@ describe("Hindsight default HTTP response budget", () => {
     const encoder = new TextEncoder(); const json = JSON.stringify({ ...page, next_cursor: 9, current_cursor: 9, changes: [change] });
     const bytes = encoder.encode(json + " ".repeat(limit - encoder.encode(json).byteLength));
     const split = bytes.indexOf(0xe5) + 1;
-    const body = new ReadableStream<Uint8Array>({ start(controller) {
-      controller.enqueue(bytes.slice(0, split)); controller.enqueue(bytes.slice(split)); controller.close();
+    let requests = 0;
+    expect(bytes.byteLength).toBe(limit);
+    await withHindsightHttpServer({ handle: (_request, response) => {
+      requests++;
+      response.writeHead(200, { "content-length": bytes.byteLength });
+      response.write(bytes.slice(0, split));
+      const timer = setTimeout(() => response.end(bytes.slice(split)), 20);
+      response.once("close", () => clearTimeout(timer));
+    }, run: async (endpoint) => {
+      await expect(client(endpoint).changesAfter?.({ bankId: "global", afterCursor: 8, limit: 500, context }))
+        .resolves.toMatchObject({ changes: [{ payload: { value: { content: "\u5496\u5561" } } }] });
+      expect(requests).toBe(1);
     } });
-    vi.stubGlobal("fetch", vi.fn(async () => new Response(body)));
-    await expect(client().changesAfter?.({ bankId: "global", afterCursor: 8, limit: 500, context }))
-      .resolves.toMatchObject({ changes: [{ payload: { value: { content: "\u5496\u5561" } } }] });
   });
 });

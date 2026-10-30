@@ -15,6 +15,17 @@ import { createHash } from "node:crypto";
 import type { ToolEffectObserver } from "../observability/tool-effect-observer.ts";
 
 const CORE_TOOL_BINDINGS: Record<string, Omit<GovernedToolBinding["identity"], "ownerHostId"> & { cellKey: string }> = {
+  heartbeat_respond: { capabilityId: "core.initiative.decide", cellKey: "initiative-decide" },
+  delegate_subagent: { capabilityId: "core.subagent.manage", cellKey: "subagent-manage" },
+  send_subagent_message: { capabilityId: "core.subagent.manage", cellKey: "subagent-manage" },
+  stop_subagent: { capabilityId: "core.subagent.manage", cellKey: "subagent-manage" },
+  inspect_subagent: { capabilityId: "core.subagent.read", cellKey: "subagent-read" },
+  complete_subagent: { capabilityId: "core.subagent.result", cellKey: "subagent-result" },
+  interact_parent: { capabilityId: "core.subagent.result", cellKey: "subagent-result" },
+  read_self_history: { capabilityId: "core.subagent.read", cellKey: "subagent-read" },
+  read_agent_inbox: { capabilityId: "core.subagent.read", cellKey: "subagent-read" },
+  handle_agent_event: { capabilityId: "core.subagent.manage", cellKey: "subagent-manage" },
+  finish_parent_continuation: { capabilityId: "core.subagent.result", cellKey: "subagent-result" },
   get_current_time: { capabilityId: "core.time.read", cellKey: "get-current-time" },
   memory_search: { capabilityId: "core.memory.search", cellKey: "memory-search" },
   memory_write: { capabilityId: "core.memory.write", cellKey: "memory-write" },
@@ -30,10 +41,23 @@ const CORE_TOOL_BINDINGS: Record<string, Omit<GovernedToolBinding["identity"], "
   read_file: { capabilityId: "workspace.file.read", cellKey: "workspace-read" },
   write_file: { capabilityId: "fs-write", cellKey: "fs-write:in-workspace" },
   schedule_task: { capabilityId: "core.schedule.manage", cellKey: "schedule-manage" },
+  manage_interaction_pattern: { capabilityId: "core.initiative.pattern.manage", cellKey: "interaction-pattern-manage" },
+  plan_follow_up: { capabilityId: "core.initiative.intention.plan", cellKey: "intention-plan" },
+  manage_co_watching: { capabilityId: "core.co-watching.manage", cellKey: "co-watching-manage" },
+  manage_media_recommendations: { capabilityId: "core.co-watching.manage", cellKey: "co-watching-manage" },
 };
 
 export interface CoreToolGovernanceAdapter {
   wrap(tools: ToolSet, interactive?: { connection?: Connection; signal?: AbortSignal; runId?: string; attemptId?: string; effects?: EffectLifecycleService; toolObserver?: ToolEffectObserver }): ToolSet;
+}
+
+/** Classify the actual Memory operation before falling back to the trusted Core registry name. */
+export function coreToolCapability(name: string, tool: ToolSet[string]): string | undefined {
+  const operation = memoryEffectMetadata(tool)?.operation;
+  if (operation === "recall" || operation === "reflect") return "core.memory.search";
+  if (operation === "invalidate") return "core.memory.archive";
+  if (operation) return "core.memory.write";
+  return CORE_TOOL_BINDINGS[name]?.capabilityId;
 }
 
 export function createCoreToolGovernanceAdapter(
@@ -45,11 +69,15 @@ export function createCoreToolGovernanceAdapter(
     wrap(tools, interactive) {
       const wrapped: ToolSet = {};
       for (const [key, tool] of Object.entries(tools)) {
-        const binding = CORE_TOOL_BINDINGS[key];
         const memory = memoryEffectMetadata(tool);
+        const capability = coreToolCapability(key, tool);
+        const binding = memory && capability ? { capabilityId: capability,
+          cellKey: capability === "core.memory.search" ? "memory-search" : capability === "core.memory.archive" ? "memory-archive" : "memory-write" }
+          : CORE_TOOL_BINDINGS[key];
         wrapped[key] = binding
           ? wrapGovernedTool(tool, {
               service,
+              approval,
               binding: { identity: { capabilityId: binding.capabilityId, ownerHostId }, cellKey: binding.cellKey,
                 effect: memory ? { kind: "memory" as const, replayPosture: memory.replayPosture,
                   sourceRef: (_input, effectId) => ({ type: "memory" as const, requestId: effectId, authorityEpoch: memory.authorityEpochId, providerId: memory.providerId, providerLineageId: memory.providerLineageId, capabilityDigest: memory.capabilityDigest, operation: memory.operation }),
@@ -69,9 +97,9 @@ export function createCoreToolGovernanceAdapter(
   };
 }
 
-function effectContext(interactive: { runId?: string; attemptId?: string; effects?: EffectLifecycleService; toolObserver?: ToolEffectObserver } | undefined): GovernedEffectContext | undefined {
+function effectContext(interactive: { runId?: string; attemptId?: string; effects?: EffectLifecycleService; toolObserver?: ToolEffectObserver; signal?: AbortSignal } | undefined): GovernedEffectContext | undefined {
   return interactive?.runId && interactive.attemptId && interactive.effects
-    ? { runId: interactive.runId, attemptId: interactive.attemptId, effects: interactive.effects, toolObserver: interactive.toolObserver }
+    ? { runId: interactive.runId, attemptId: interactive.attemptId, effects: interactive.effects, toolObserver: interactive.toolObserver, signal: interactive.signal }
     : undefined;
 }
 

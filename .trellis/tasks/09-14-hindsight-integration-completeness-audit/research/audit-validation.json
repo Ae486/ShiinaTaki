@@ -1,0 +1,15 @@
+{
+  "checkedAt": "2026-09-15T17:06:35.517478+00:00",
+  "markdownFiles": 10,
+  "additionalLinkedTaskDocuments": 5,
+  "localLinks": 82,
+  "matrixEntries": 54,
+  "parentRequirementFamilies": 10,
+  "acceptanceCases": 16,
+  "sourceAnchors": 154,
+  "errors": [],
+  "scope": "Document/coverage/source-location validation only; no runtime test or manual acceptance.",
+  "finalRecordCheckedAt": "2026-09-15T17:18:26.743917+00:00",
+  "taskMetadataAndContextsValid": true,
+  "researchOnlyAcceptanceChecked": true
+}

@@ -8,6 +8,14 @@
 - Never log: API keys, full LLM prompts/responses (log token counts + ids instead), screenshot bytes, clipboard contents.
 - Model/provider/Utility exceptions may embed request content or credentials. Log a closed internal failure code and a
   bounded operation label; never pass raw `error.message`, response bodies, or serialized exceptions to ordinary logs.
+- Instrumentation must preserve the original provider response or exception. Metadata parsing, scalar validation,
+  serialization and storage belong in an independent failure boundary; an observer failure must not induce a retry
+  of an already completed model call. Preserve cancellation and process-control exceptions from the original call.
+- Observe only already buffered response content. Never consume an unread stream to obtain diagnostics. Validate
+  counters without unsafe numeric conversion; absent, malformed or out-of-range usage is unknown, not zero.
+- Report metadata, serialization and write failures under their actual categories. An incomplete observation is not
+  complete billing evidence even when the provider operation succeeded. Fault-injection tests must cover malformed
+  metadata as well as a full/unavailable log destination, and assert the exact original response/exception identity.
 
 ## Rust (Shell)
 

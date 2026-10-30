@@ -1,0 +1,19 @@
+{
+  "pnpm-lock.yaml": "2f66fc75926ca324f353dea4b01eb9fc81822202f8e7044721b87091a58b3391",
+  "packages/core/src/testing/source-live-evidence.ts": "08c034434974103754f3ba537920561c3a8d2ca19ba32feeb81c7fe86a3beabb",
+  "e2e/src/fixture/real-provider-observer.ts": "9671b8ab139dca8359350ad86cd25542287489c2f6ed2c01ceaf71ab67303fa5",
+  "e2e/src/fixture/paths.ts": "8ee024740471cb055973cca0f39d6e6fe68d9f21717e25e807575402244f8b18",
+  "packages/core/src/memory/source-local-memory-real.test.ts": "5c56e840aa38a2299a8a6f103c9cc7f231c79ab3eed837c22acb2271272f6ad1",
+  "packages/core/src/memory/canonical-local-ingestion.ts": "dea37d5b916a453500fb57be388b4b738da0f2deb0f506504560a3e7923afbdb",
+  "packages/core/src/memory/canonical-ingestion-model.ts": "8c08a2368cdc22ff7cd34d7447daf0024dba011e42186c283e6ae15cdf693853",
+  "packages/core/src/memory/canonical-ingestion-source.ts": "cb2457eb3a2b6522f90795aad2a9a110f2ee0a4fa6285e34508c84eb3578db0c",
+  "packages/core/src/memory/canonical-local-ingestion-batch.ts": "5abb6616ada7c5cf00e706705ab722f343676f376489b772a014cd10a0e7afc2",
+  "packages/core/src/memory/local-memory-provider.ts": "208eb8611bd2944dfeb3caba9f3425efe056dc83e2f9c9a497a5be617f71847d",
+  "packages/core/src/memory/write-convention.ts": "ac2be196441225623cbc7cef402ca0123293fb1fabbcafb3bc12796dc5ac36c1",
+  "packages/core/src/memory/memory-flush-port.ts": "4465118680bdc90c0753ee1dfc3daced83699237c7a179b64bb56c9d0321526e",
+  "packages/core/src/db/canonical-ingestion-source-repo.ts": "717ac3af64e9eecdecb05f8d1008a667541f7e8bd2f16edfe49b3de46f583e2a",
+  "packages/core/src/agents/source-interpretation.ts": "1c9c7eba1970b45223c0b189dec5fd4c90db5810aaff338d9b4e7607e023633d",
+  "packages/core/src/agents/chat-agent.ts": "c15c4a433ef48dbfb3c1d7ddbb427c9aa73bcfacf84217e5be866aa6c5bdecd1",
+  "packages/core/src/testing/co-watching-fixture.ts": "284f1c6e4c24fa97d13c6a1b9eea0835976a4f41c8a7f1bcd5dd884d80219d43",
+  "packages/core/src/workspace/read-file-tool.ts": "a796518419c0201f50f5cc9d59a09f422b83906e78c4eab02a3658df24b73d33"
+}

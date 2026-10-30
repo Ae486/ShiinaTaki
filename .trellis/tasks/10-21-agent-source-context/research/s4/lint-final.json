@@ -1,0 +1,4 @@
+{
+  "command": "pnpm exec eslint <all changed S4 TypeScript files>",
+  "exitCode": 0
+}

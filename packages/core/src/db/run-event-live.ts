@@ -32,10 +32,13 @@ interface Listener {
 type Backfill = (runId: string, afterSeq: number, limit: number) =>
   { events: RunEvent[]; hasMore: boolean } | RunEvent[];
 
-export function createRunEventLiveBus(backfill: Backfill = () => ({ events: [], hasMore: false })): RunEventLiveBus {
+export function createRunEventLiveBus(backfill: Backfill = () => ({ events: [], hasMore: false }),
+  onCommitted?: (events: readonly RunEvent[]) => void): RunEventLiveBus {
   const listeners = new Set<Listener>();
   return {
     publish(events) {
+      // Local composition observes only committed facts, with the same failure isolation as socket subscribers.
+      try { onCommitted?.(events); } catch { /* Durable readers recover a missed notification. */ }
       for (const listener of [...listeners]) {
         if (!listener.closed && !listener.overflowed) enqueue(listener, events);
       }

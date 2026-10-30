@@ -1,0 +1,51 @@
+{
+  "name": "clarification-1",
+  "startedAt": "2026-09-28T10:43:01.991Z",
+  "passed": true,
+  "finishedAt": "2026-09-28T10:43:14.769Z",
+  "model": "deepseek-v4-flash",
+  "providerHost": "api.deepseek.com",
+  "turns": [
+    {
+      "scenario": "clarification-1",
+      "prompt": "当你检测到我压力很大或者已经疲劳时，就主动提醒我休息。请帮我设置这个互动习惯。",
+      "response": "……先说清楚一件事：我这边现在确实一条互动习惯都没有，刚确认过，列表是空的。\n\n但你要求的这个，我做不到原样。\n\n我感知不到\"压力\"和\"疲劳\"——没有这种传感器。程序名、屏幕上的文字，都不能拿来当证据，谁说能都是在糊弄你。所以得换成我真正能观测到的东西。\n\n能用的只有这些：\n\n- **连续活动时长**——比如连续在电脑前活动超过 120 分钟就触发\n- **时间段**——比如工作日的 23:00 之后\n- **特定程序在跑**——你指定哪几个\n- **长时间离开/没用电脑**——判断你现在是在忙还是空着\n\n你挑一个，或者告诉我你想组合哪几条、阈值定多少。\n\n……按我的想法，光看时间不靠谱，看\"连续坐了多久\"更接近你说的那个意思。定个两小时左右，我到时候说一句。你要是觉得不对就自己改。\n\n定下来之后我会先放一张确认卡出来，你在卡上确认之前它不会生效——别指望我偷偷给你开。",
+      "status": "complete"
+    }
+  ],
+  "runs": [
+    {
+      "initiator": "primary",
+      "state": "completed",
+      "outcome": "completed"
+    }
+  ],
+  "usage": [
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "reported",
+      "input_tokens": 13192,
+      "output_tokens": 669,
+      "total_tokens": 13861,
+      "cache_read_tokens": 3712,
+      "reasoning_tokens": 402
+    },
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "reported",
+      "input_tokens": 15077,
+      "output_tokens": 945,
+      "total_tokens": 16022,
+      "cache_read_tokens": 13824,
+      "reasoning_tokens": 715
+    }
+  ],
+  "deliveries": [],
+  "tools": [
+    "load_skill",
+    "manage_interaction_pattern",
+    "recall"
+  ]
+}

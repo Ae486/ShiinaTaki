@@ -1,0 +1,48 @@
+
+> takiagent@0.0.0 lint H:\TakiAgent-worktrees\t4
+> eslint .
+
+
+H:\TakiAgent-worktrees\t4\apps\desktop\test\qqmm-home-native-smoke.mjs
+   14:25  error  'process' is not defined                                               no-undef
+   46:76  error  'process' is not defined                                               no-undef
+   47:18  error  'process' is not defined                                               no-undef
+   55:43  error  'console' is not defined                                               no-undef
+   59:76  error  Empty block statement                                                  no-empty
+   60:33  error  'setTimeout' is not defined                                            no-undef
+   67:87  error  'setTimeout' is not defined                                            no-undef
+   70:16  error  'process' is not defined                                               no-undef
+   74:22  error  'WebSocket' is not defined                                             no-undef
+   78:47  error  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+   82:19  error  'setTimeout' is not defined                                            no-undef
+   83:52  error  'clearTimeout' is not defined                                          no-undef
+  101:32  error  'fetch' is not defined                                                 no-undef
+  128:51  error  'Buffer' is not defined                                                no-undef
+  137:44  error  'fetch' is not defined                                                 no-undef
+  141:56  error  'fetch' is not defined                                                 no-undef
+  226:3   error  'console' is not defined                                               no-undef
+
+H:\TakiAgent-worktrees\t4\packages\core\src\db\run-delivery-repo.ts
+  29:8  error  Function 'createRunDeliveryRepo' has too many lines (88). Maximum allowed is 50  max-lines-per-function
+
+H:\TakiAgent-worktrees\t4\packages\core\src\harness\run-snapshot-capture.ts
+  34:5  error  Method 'capture' has too many parameters (4). Maximum allowed is 3  max-params
+
+H:\TakiAgent-worktrees\t4\packages\core\src\initiative\initiative-runtime.ts
+  79:1  error  Function 'refusal' has too many parameters (4). Maximum allowed is 3  max-params
+
+H:\TakiAgent-worktrees\t4\packages\core\src\server\timeline-subscriptions.ts
+  30:8  error  Function 'createTimelineSubscriptions' has too many lines (54). Maximum allowed is 50  max-lines-per-function
+
+H:\TakiAgent-worktrees\t4\packages\core\src\testing\initiative-fixture.ts
+  26:27  error  '_id' is assigned a value but never used      @typescript-eslint/no-unused-vars
+  26:39  error  '_run' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  26:57  error  '_at' is assigned a value but never used      @typescript-eslint/no-unused-vars
+  26:78  error  '_digest' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+H:\TakiAgent-worktrees\t4\packages\shared\src\index.ts
+  529:1  error  File has too many lines (503). Maximum allowed is 500  max-lines
+
+✖ 26 problems (26 errors, 0 warnings)
+
+ ELIFECYCLE  Command failed with exit code 1.

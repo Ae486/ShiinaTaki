@@ -16,6 +16,7 @@ import {
   CONNECT_METHOD,
   JSON_RPC_APP_ERROR,
   MEDIA_METHODS,
+  MEMORY_OPERATION_METHODS,
   PERMISSION_METHODS,
   TIMELINE_METHODS,
   TIMING_POLICY_DEVELOPMENT_DEFAULTS,
@@ -375,9 +376,23 @@ describe("createWsClient inbound routing", () => {
     h.deliver({
       jsonrpc: "2.0",
       method: AVATAR_METHODS.command,
-      params: { characterId: "taki", kind: "expression", name: "smile01" },
+      params: { characterId: "taki", commandId: "avatar-push-test", kind: "expression", name: "smile01" },
     });
-    expect(received).toEqual([{ characterId: "taki", kind: "expression", name: "smile01" }]);
+    expect(received).toEqual([{ characterId: "taki", commandId: "avatar-push-test", kind: "expression", name: "smile01" }]);
+  });
+
+  it("reportAvatarOutcome sends the Presentation Outcome for a commandId and parses the ok result", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    h.open();
+    const params = { characterId: "taki", commandId: "cmd-1", outcome: "rejected" as const, reason: "motion_busy" as const };
+    const done = client.reportAvatarOutcome(params);
+    await flush();
+    const sent = JSON.parse(h.sent[h.sent.length - 1] ?? "{}");
+    expect(sent.method).toBe(AVATAR_METHODS.outcome);
+    expect(sent.params).toEqual(params);
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { status: "ok" } });
+    await expect(done).resolves.toBeUndefined();
   });
 
   it("ignores a queued old-generation push after the transport has closed", () => {
@@ -730,21 +745,25 @@ describe("createWsClient config methods", () => {
     await expect(Promise.all([first, second])).resolves.toEqual([undefined, undefined]);
   });
 
-  it.each(["refused", "malformed"])("allows same-client config subscription recovery after %s setup", async (failure) => {
+  it.each([
+    { channel: "config", failure: "refused" }, { channel: "config", failure: "malformed" },
+    { channel: "memory", failure: "refused" }, { channel: "memory", failure: "malformed" },
+  ])("allows same-client $channel subscription recovery after $failure setup", async ({ channel, failure }) => {
     const h = harness();
     const client = createWsClient({ transport: h.transport });
+    const subscribe = channel === "config" ? client.subscribeConfig : client.subscribeMemoryOperations;
     h.open();
-    const first = client.subscribeConfig();
+    const first = subscribe();
     const rejected = expect(first).rejects.toThrow();
     h.deliver(failure === "refused"
       ? { jsonrpc: "2.0", id: lastRequestId(h.sent), error: { code: -32_000, message: "unavailable" } }
       : { jsonrpc: "2.0", id: lastRequestId(h.sent), result: { status: "invalid" } });
     await rejected;
-    const retry = client.subscribeConfig();
+    const retry = subscribe();
     expect(h.sent).toHaveLength(2);
     h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { status: "ok" } });
     await retry;
-    await client.subscribeConfig();
+    await subscribe();
     expect(h.sent).toHaveLength(2);
     client.close();
   });
@@ -792,22 +811,23 @@ describe("createWsClient config methods", () => {
     client.close();
   });
 
-  it("retries a lost config acknowledgement without letting its late response replace the new attempt", async () => {
+  it.each(["config", "memory"])("retries a lost %s acknowledgement without letting its late response replace the new attempt", async (channel) => {
     vi.useFakeTimers();
     const h = harness();
     const client = createWsClient({ transport: h.transport,
       timingPolicy: createTimingPolicyStore({ ...TIMING_POLICY_DEVELOPMENT_DEFAULTS, interactiveRpcMs: 10 }) });
+    const subscribe = channel === "config" ? client.subscribeConfig : client.subscribeMemoryOperations;
     try {
       h.open();
-      const first = client.subscribeConfig();
+      const first = subscribe();
       const oldId = lastRequestId(h.sent);
       const rejected = expect(first).rejects.toMatchObject({ name: "RpcDeadlineExceededError" });
       await vi.advanceTimersByTimeAsync(10);
       await rejected;
-      const second = client.subscribeConfig();
+      const second = subscribe();
       const currentId = lastRequestId(h.sent);
       h.deliver({ jsonrpc: "2.0", id: oldId, result: { status: "ok" } });
-      expect(client.subscribeConfig()).toBe(second);
+      expect(subscribe()).toBe(second);
       h.deliver({ jsonrpc: "2.0", id: currentId, result: { status: "ok" } });
       await second;
       expect(h.sent).toHaveLength(2);
@@ -815,5 +835,36 @@ describe("createWsClient config methods", () => {
       client.close();
       vi.useRealTimers();
     }
+  });
+
+  it("routes memory.operations.changed through the schema boundary, memoizes subscribe, and unwraps operation results", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    const received: unknown[] = [];
+    const unsubscribe = client.onMemoryOperationChanged((operation) => received.push(operation));
+    h.open();
+    const first = client.subscribeMemoryOperations();
+    const second = client.subscribeMemoryOperations();
+    await flush();
+    expect(h.sent.map((payload) => JSON.parse(payload).method)).toEqual([MEMORY_OPERATION_METHODS.subscribe]);
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { status: "ok" } });
+    await expect(Promise.all([first, second])).resolves.toEqual([undefined, undefined]);
+    const at = "2026-09-19T00:00:00.000Z";
+    const operation = {
+      operationId: "11111111-1111-4111-8111-111111111111", kind: "replica.sync", state: "admitted", reason: null, authorityEpochId: "epoch",
+      request: { kind: "replica.sync", bankId: "global", syncKind: "incremental" }, producer: { kind: "replica", bankId: "global", admittedAt: at },
+      result: null, errorCode: null, createdAt: at, updatedAt: at, terminalAt: null,
+    };
+    h.deliver({ jsonrpc: "2.0", method: MEMORY_OPERATION_METHODS.changed, params: { operation } });
+    h.deliver({ jsonrpc: "2.0", method: MEMORY_OPERATION_METHODS.changed, params: { operation: { ...operation, state: "completed" } } }); // invalid: terminal without terminalAt
+    expect(received).toEqual([operation]);
+    unsubscribe();
+    h.deliver({ jsonrpc: "2.0", method: MEMORY_OPERATION_METHODS.changed, params: { operation } });
+    expect(received).toHaveLength(1);
+    const submitted = client.memoryOperationSubmit({ kind: "replica.sync", bankId: "global", syncKind: "full" });
+    await flush();
+    expect(JSON.parse(h.sent[h.sent.length - 1]!)).toMatchObject({ method: MEMORY_OPERATION_METHODS.submit, params: { request: { kind: "replica.sync", bankId: "global", syncKind: "full" } } });
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { operation } });
+    expect(await submitted).toEqual(operation);
   });
 });

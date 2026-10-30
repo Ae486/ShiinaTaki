@@ -1,0 +1,42 @@
+# lib/
+- ws-client-initiative.ts — Shared-validated Pattern review/lifecycle, explicit setup, same-Monitor policy and separate backoff read/reset facade
+- ws-client-co-watching.ts — Shared-validated Co-Watching read/start/stop, contextual invitation read/respond and Character-specific retryable subscription setup
+- ws-client-presence.ts — Shared-validated presence and ordinary committed Timeline presentation-report RPC facade
+- ws-client-user-timezone.ts — Shared-validated Core timezone read/update/designated-source report RPC facade
+Cross-cutting Pet UI clients + seams (talk to the Agent Core / hold window-shared services). Framework-free apart from
+icons/ (the shared glyph set) and the two window-shared React hooks below.
+- ws-client.ts — operator WS client composition: exact initiating-request acknowledgement, independent activity/commit observers, handshake and typed request families; operator WS JSON-RPC client to the Core (browser WebSocket): public turn/handshake/monitor subscribe-unsubscribe wiring plus the memory-operation family
+- ws-client-routes.ts — strict inbound zod boundary, isolated typed push fan-out including Perception/Extension/backoff/Co-Watching hints, and physical-generation retirement; owns the D29 mid-turn-close abort
+- ws-client-methods.ts — command-display echo validation and schema-validated operator methods, including read-only activity recovery, optional exact-Run cancel and the avatar.outcome report; outbound half: handshake plus schema-validated operator methods including extension convergence
+- ws-chat-turn.ts — bounded acknowledgement-race buffering, exact Character/message matching and one initiating-request settlement
+- chat-activity-state.ts — shared immutable Chat/Pet activity reducer, stable item keys and missing-sequence detection
+- chat-activity-coalescer.ts — per-generation/message/attempt/segment text cadence with immediate semantic boundaries and cancellable publication
+- chat-activity-recovery.ts — subscribe/read/live reconciliation, bounded races, explicit unavailable state, read-only gap recovery and disposal
+- tool-activity-display.ts — shared captured-name and truthful phase/outcome vocabulary for Chat and Pet
+- ws-client-memory-operations.ts — outbound sibling: memory.authority.status + memory.operations.submit/status/list/cancel wrappers and shared, explicitly retryable memory.operations.subscribe
+- rpc-deadline.ts — method-class timing table + typed deadline error + json-rpc-2.0 native timeout requester seam
+- timing-policy.ts — window-owned bootstrap/last-good timing policy store; validates full Core config refreshes without persistence
+- timing-policy-sync.ts — serialized last-good full-policy refresh after changes and recovered config membership
+- ws-config-methods.ts — retryable physical-client config subscription and config.list sharing only until a verified change, successful write or recovered observation gap
+- ws-read-subscriptions.ts — shared physical-client Perception/Extension subscriptions, strict acknowledgements, explicit unsupported-Core outcome and deliberate retry after setup failure
+- connection-status.ts — discriminated operator connection states plus the one semantic notice-copy mapping shared by every surface
+- connection-generation-controller.ts — framework-free fresh-client generation lifecycle: auth/restore promotion, full-jitter retry, stability reset, stale guards, disposal
+- operator-auth.ts — shared Pet/Home/Chat authentication with per-generation display support and credential-preserving compatibility refusal
+- ws-transport.ts — browser-WebSocket wrapper with non-open send rejection before native dispatch; keeps ws-client node-testable and retired-socket RPCs bounded
+- device-identity.ts — the operator device identity (deviceId + reconnect token) persisted in localStorage
+- presentation-gate.ts — the ONE presentation gate (D21/TTS seam): reply text + avatar command surface together
+- active-character.ts — the pet window's active character id (data; M5 #24 makes it selectable)
+- last-costume.ts — the last-worn costume per character (localStorage) so restarts re-wear it, not the default (M5 #24 moves this into real config)
+- costume-report-sync.ts — window-local synchronization health for committed costume reports; newer tickets prevent stale report outcomes from overwriting the current costume
+- costume-switch-attempt.ts — D61's cancellable whole-attempt controller: resolution/Tauri stage admission, renderer attachment commit, and bounded recoverable avatar.report
+- promise-timeout.ts — withTimeout(promise, ms, label): labeled rejection for loads that can wedge (costume switches / boot promotion)
+- character-asset-url.ts — costume identity + settings/per-resource asset URLs (convertFileSrc per file); unresolvable/`..` refs are stripped before the engine (#18)
+- open-home-window.ts — pet→home window opener: creates home.html at the requested page or restores, navigates and focuses the open one (single instance by label); also owns the home:navigate event name
+- costume-switch-event.ts — the BIDIRECTIONAL home↔pet costume seam: the three pet-scoped event names (switch / cancel / result), their emit helpers and the payload gates each side reads through (the live PetScene exists only in the pet window, so the page commands and the pet reports back)
+- use-tauri-event.ts — the shared window-event plumbing: one stable listener per event name, handler read through a ref, unlisten on unmount
+- use-cached-fetch.ts — guarded snapshot adapter with explicit demand/invalidation, pre-paint scope retirement and retained content
+- cached-fetch-state.ts — actual running/retired/error phases, cold versus retained loading and local view updates
+- read-coordinator.ts — one owned read and one trailing dirty obligation, truthful per-attempt busy state, retired-result guards and newer push/echo protection
+- read-observation.ts — effect-owned invalidation membership, handler-before-ack ordering, monotonic hints and retryable readiness without domain data authority
+- cache-persist.ts — what the page cache may keep on disk: the persist allow-list (perception/chat payloads excluded by construction), the secret-knob scrub, and the schema-checked read that drops a drifted entry
+- icons/ — self-drawn inline-SVG glyphs (no icon package, no imported asset): the shared Glyph frame + one file per glyph

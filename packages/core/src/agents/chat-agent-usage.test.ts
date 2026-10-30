@@ -190,7 +190,7 @@ describe("chat-agent usage-capture seam (batch 6, R1 tier 2)", () => {
     expect(reports).toEqual([]);
   });
 
-  it("fires nothing on a THROW-ending stop (partial text persisted, but the committed tail is never reached)", async () => {
+  it("fires nothing on a cancelled stop when the SDK closes a rejecting provider gracefully", async () => {
     const f = fresh();
     const reports: TurnUsageReport[] = [];
     const controller = new AbortController();
@@ -213,8 +213,9 @@ describe("chat-agent usage-capture seam (batch 6, R1 tier 2)", () => {
     }
     await flushDetached();
 
-    expect(String(threw)).toContain("turn cancelled by operator");
+    // Owner-approved policy now uses Core cancellation, not a transport-dependent throw, to gate callbacks.
+    expect(threw).toBeNull();
     expect(deltas).toEqual(["par"]); // the partial the user saw is kept (D1 #5) ...
-    expect(reports).toEqual([]); // ... but a thrown ending fires no usage report
+    expect(reports).toEqual([]); // ... but a cancelled turn fires no post-turn usage report
   });
 });

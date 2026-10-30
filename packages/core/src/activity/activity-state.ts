@@ -38,6 +38,8 @@ export interface ActivityState {
    * can still say "the foreground left the entry we were tracking", and the record itself leaks nothing.
    */
   seal(): void;
+  /** Retire all cached context when consent or its source changes; the next sample starts new dwell. */
+  clear(): void;
   /** Reportable entries (>= dwellMinSamples), oldest-first, as defensive copies. */
   entries(): ActivityEntry[];
   /** The live entry still accepting merges, or undefined when the foreground is currently unavailable / empty. */
@@ -57,6 +59,12 @@ function prune(list: ActivityEntry[], config: ActivityConfig, at: number): void 
     head = list[0];
   }
   while (list.length > config.maxEntries) list.shift();
+}
+
+function clearEntries(list: ActivityEntry[], onChange?: () => void): void {
+  const changed = list.length > 0;
+  list.length = 0;
+  if (changed) notifyPerceptionChange(onChange);
 }
 
 export function createActivityState(config: ActivityConfig, onChange?: () => void): ActivityState {
@@ -103,12 +111,15 @@ export function createActivityState(config: ActivityConfig, onChange?: () => voi
       notifyPerceptionChange(onChange);
     },
     seal,
+    clear() {
+      sealed = true;
+      clearEntries(list, onChange);
+    },
     entries() {
       return list.filter((e) => e.samples >= config.dwellMinSamples).map((e) => ({ ...e }));
     },
     current() {
-      if (sealed) return undefined;
-      const live = list[list.length - 1];
+      const live = sealed ? undefined : list.at(-1);
       return live ? { ...live } : undefined;
     },
   };

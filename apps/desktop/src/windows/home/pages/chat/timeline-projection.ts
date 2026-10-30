@@ -70,7 +70,8 @@ function projectReferencedText(state: Projection, entry: TimelineEntry, input: {
     const previous = state.items.get(key);
     const text = (previousRef?.itemId === reference.itemId ? gap : "") + input.text.slice(reference.start, reference.end);
     state.items.set(key, { key, seq: input.seq, order: reference.order, createdAt: entry.createdAt,
-      kind: "text", role: "assistant", text: (previous?.kind === "text" ? previous.text : "") + text });
+      kind: "text", role: "assistant", text: (previous?.kind === "text" ? previous.text : "") + text,
+      committed: [...(previous?.kind === "text" ? previous.committed ?? [] : []), { characterId: entry.characterId, timelineSeq: entry.seq }] });
     cursor = reference.end;
     previousRef = reference;
   }
@@ -83,7 +84,7 @@ function addTextGap(state: Projection, entry: TimelineEntry, input: {
 }): void {
   const key = `timeline:${entry.id}:${input.index}:text:${input.start}`;
   state.items.set(key, { key, seq: input.seq, order: input.order, createdAt: entry.createdAt,
-    kind: "text", role: "assistant", text: input.text });
+    kind: "text", role: "assistant", text: input.text, committed: [{ characterId: entry.characterId, timelineSeq: entry.seq }] });
 }
 
 function projectPresentedTool(state: Projection, input: {
@@ -116,7 +117,8 @@ function projectLegacyPart(state: Projection, entry: TimelineEntry, input: { par
   const base = { key: `timeline:${entry.id}:${index}`, seq: entry.seq, order: index, createdAt: entry.createdAt };
   const role: "user" | "assistant" = entry.role === "user" ? "user" : "assistant";
   if (part.type === "text") {
-    if (part.text.length > 0) state.items.set(base.key, { ...base, kind: "text", role, text: part.text });
+    if (part.text.length > 0) state.items.set(base.key, { ...base, kind: "text", role, text: part.text,
+      ...(entry.role === "assistant" ? { committed: [{ characterId: entry.characterId, timelineSeq: entry.seq }] } : {}) });
   } else if (part.type === "image") state.items.set(base.key, { ...base, kind: "image", role, imageRef: part.ref });
   else {
     const identity = JSON.stringify([part.toolCallId, part.toolName]);

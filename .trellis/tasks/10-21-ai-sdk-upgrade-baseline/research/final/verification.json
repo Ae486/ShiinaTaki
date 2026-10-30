@@ -1,0 +1,11 @@
+{
+  "changedFiles": 15,
+  "reversePatchCheck": "passed",
+  "rollbackCopyRehearsal": {
+    "originalsRestoredByteIdentically": 13,
+    "newFilesRemoved": 2
+  },
+  "rustSourceAndCargoHashesUnchangedFromPassedRecovery": true,
+  "nativeFilesCompared": 54,
+  "installedInventoryMatchesTargetFinal": true
+}

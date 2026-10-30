@@ -1,12 +1,13 @@
 /**
  * INPUT:  candidate timeline.* params/event payloads (parsed WS frames + repo rows)
- * OUTPUT: canonical timeline rows, optional stable presentation references, and atomic turn-commit notifications
+ * OUTPUT: canonical timeline rows, optional source/presentation evidence, and atomic turn-commit notifications
  * POS:    shared/protocol — the timeline persistence contract (ADR 0005, invariants 3, 7); core repo + server + CLI
  */
 import { z } from "zod";
 import { IMAGE_MEDIA_TYPES } from "./chat-schema.ts";
 import { getValidToolDisplayName } from "./tool-presentation.ts";
 import { readTimelinePresentation, sanitizeTimelinePresentations } from "./timeline-presentation-schema.ts";
+import { SourceContextSchema, ToolSourceMaterialSchema } from "./context-source-schema.ts";
 
 export const TIMELINE_METHODS = {
   history: "timeline.history",
@@ -50,6 +51,8 @@ export const TimelinePartSchema = z.discriminatedUnion("type", [
     toolName: z.string().min(1),
     displayName: OptionalToolDisplayNameSchema,
     output: TimelineToolOutputSchema,
+    sourceMaterials: z.array(ToolSourceMaterialSchema).max(200).refine(
+      (items) => new Set(items.map((item) => item.key)).size === items.length, "material keys must be unique").optional(),
   }),
   // The image/file part (#17, advances D14): `ref` is a workspace-relative attachment path (attachments/<sha256>.<ext>),
   // never bytes — the model replays the row's TEXT projection; the chat window fetches bytes lazily via media.get.
@@ -70,6 +73,7 @@ const TimelineRowSchema = z.object({
   content: z.string(),
   // Additive, backward-compatible: absent on legacy text-only rows; present carries full model-replay fidelity.
   parts: z.array(TimelinePartSchema).optional(),
+  sourceContext: SourceContextSchema.optional(),
   createdAt: z.string().min(1),
   presentation: z.unknown().optional(),
 });

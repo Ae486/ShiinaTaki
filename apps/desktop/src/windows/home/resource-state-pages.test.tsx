@@ -1,5 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { localStatus } from "./pages/operations/memory-authority-fixtures.ts";
 import { OperationsPage } from "./pages/operations/operations-page.tsx";
 import { CostumePage } from "./pages/costume/costume-page.tsx";
 import { PerceptionPage } from "./pages/perception/perception-page.tsx";
@@ -10,7 +11,8 @@ import type { OperationsView } from "./pages/operations/use-operations.ts";
 import type { McpServersView } from "./pages/mcp/use-mcp.ts";
 import type { usePerception } from "./pages/perception/use-perception.ts";
 
-const hooks = vi.hoisted(() => ({ operations: vi.fn(), costume: vi.fn(), perception: vi.fn(), mcp: vi.fn() }));
+const hooks = vi.hoisted(() => ({ operations: vi.fn(), memoryOperations: vi.fn(), costume: vi.fn(), perception: vi.fn(), mcp: vi.fn() }));
+vi.mock("./pages/operations/use-memory-operations.ts", () => ({ useMemoryOperations: hooks.memoryOperations }));
 vi.mock("./pages/operations/use-operations.ts", () => ({ useOperations: hooks.operations }));
 vi.mock("./pages/costume/use-costume-page.ts", () => ({ useCostumePage: hooks.costume }));
 vi.mock("./pages/perception/use-perception.ts", () => ({ usePerception: hooks.perception }));
@@ -39,6 +41,8 @@ const mcp: McpServersView = {
 };
 beforeEach(() => {
   hooks.operations.mockReturnValue(ops);
+  hooks.memoryOperations.mockReturnValue({ status: localStatus(), loading: false, error: null, busyKey: null, feedback: null,
+    connectionReady: true, refresh: read, submitSync: read, cancel: read });
   hooks.costume.mockReturnValue(costume);
   hooks.perception.mockReturnValue(perception);
   hooks.mcp.mockReturnValue(mcp);

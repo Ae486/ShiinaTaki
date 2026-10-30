@@ -130,7 +130,9 @@ function foldResultPart(part: ToolResultPart): TimelinePart | null {
       : `[${part.toolName}] result folded — captured ${time}, ${chars} chars`;
   // A fold that does not shrink the payload is pure information loss — skip it (LOCAL guard).
   if (chars <= trace.length) return null;
-  return { ...part, output: { type: "text", value: trace } };
+  if (part.output.type === "execution-denied") return { ...part, output: { ...part.output, reason: trace } };
+  const failed = part.output.type === "error-text" || part.output.type === "error-json";
+  return { ...part, output: { type: failed ? "error-text" : "text", value: trace } };
 }
 
 function foldCallPart(part: ToolCallPart): TimelinePart {

@@ -1,0 +1,249 @@
+{
+  "name": "heartbeat-2",
+  "startedAt": "2026-09-28T14:23:38.242Z",
+  "passed": true,
+  "requests": [
+    {
+      "tools": [
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "heartbeat_respond",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "selectedMemoryPresent": true,
+      "primaryHistoryPresent": false,
+      "status": 200
+    },
+    {
+      "tools": [
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "heartbeat_respond",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "selectedMemoryPresent": true,
+      "primaryHistoryPresent": false,
+      "status": 200
+    },
+    {
+      "tools": [
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "heartbeat_respond",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "selectedMemoryPresent": true,
+      "primaryHistoryPresent": false,
+      "status": 200
+    }
+  ],
+  "finishedAt": "2026-09-28T14:23:51.599Z",
+  "model": "deepseek-v4-flash",
+  "providerHost": "api.deepseek.com",
+  "turns": [],
+  "runs": [
+    {
+      "initiator": "heartbeat",
+      "state": "completed",
+      "outcome": "completed"
+    }
+  ],
+  "usage": [
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "reported",
+      "input_tokens": 5455,
+      "output_tokens": 335,
+      "total_tokens": 5790,
+      "cache_read_tokens": 5120,
+      "reasoning_tokens": 297
+    },
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "reported",
+      "input_tokens": 5889,
+      "output_tokens": 142,
+      "total_tokens": 6031,
+      "cache_read_tokens": 5632,
+      "reasoning_tokens": 104
+    },
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "reported",
+      "input_tokens": 6130,
+      "output_tokens": 983,
+      "total_tokens": 7113,
+      "cache_read_tokens": 5888,
+      "reasoning_tokens": 831
+    }
+  ],
+  "deliveries": [
+    {
+      "delivery_class": "class_b",
+      "state": "sent",
+      "decision_json": "{\"outcome\":\"speak\",\"selectedCandidateIds\":[\"125fd833cb85c929393da27ea52066306adef9a492349ac38002bb061be87b0e\"],\"text\":\"……周五的演示。准备到哪一步了。\",\"presentation\":null,\"responseExpectation\":\"invitation\"}"
+    }
+  ],
+  "patterns": [
+    {
+      "state": "active",
+      "version": 2
+    }
+  ],
+  "schedules": [],
+  "authoringTrace": [],
+  "tools": []
+}

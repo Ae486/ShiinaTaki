@@ -14,7 +14,13 @@ import {
   CanonicalApprovalRequestSchema,
   AvatarCommandSchema,
   CHAT_METHODS,
+  INTERACTION_PATTERN_METHODS, INITIATIVE_SETUP_METHODS, INITIATIVE_WAKE_METHODS,
+  InteractionPatternChangedSchema,
+  INITIATIVE_BACKOFF_METHODS, InitiativeBackoffChangedSchema,
+  CO_WATCHING_METHODS, CoWatchingChangedSchema, type CoWatchingChanged,
   CONFIG_METHODS,
+  MEMORY_OPERATION_METHODS,
+  MemoryOperationChangedSchema,
   ChatCompleteSchema,
   ChatDeltaSchema,
   ChatErrorSchema,
@@ -32,12 +38,15 @@ import {
   TimelineRemovedSchema,
   TimelineCommittedSchema,
   type ChatActivity,
+  type InteractionPatternChanged,
+  type InitiativeBackoffChanged,
   type AvatarCommand,
   type ApprovalClosed,
   type CanonicalApprovalRequest,
   type ConfigChanged,
   type ExtensionChanged,
   type PerceptionChanged,
+  type MemoryOperation,
   type RunMonitorEvent,
   type JsonRpcClientFrame,
   type TimelineEntry,
@@ -45,9 +54,17 @@ import {
   type TimelineCommitted,
 } from "@taki/shared";
 import type { WsTransport } from "./ws-transport.ts";
+import { SUBAGENT_METHODS, SubagentChangedSchema, SubagentActivitySchema, type SubagentChanged, type SubagentActivity } from "@taki/shared";
 import { abortPendingChatTurn, routeChatNotification, type PendingChatTurn } from "./ws-chat-turn.ts";
 
 interface PushSlots {
+  subagentActivity: Set<(event: SubagentActivity) => void>;
+  subagents: Set<(change: SubagentChanged) => void>;
+  coWatching: Set<(change: CoWatchingChanged) => void>;
+  initiativePatterns: Set<(change: InteractionPatternChanged) => void>;
+  initiativeSetup: Set<(change: InteractionPatternChanged) => void>;
+  initiativePolicy: Set<(change: InteractionPatternChanged) => void>;
+  initiativeBackoff: Set<(change: InitiativeBackoffChanged) => void>;
   avatar: ((command: AvatarCommand) => void) | null;
   timeline: ((entry: TimelineEntry) => void) | null;
   timelineRemoved: ((ref: TimelineRemoved) => void) | null;
@@ -58,6 +75,7 @@ interface PushSlots {
   monitor: Set<(event: RunMonitorEvent) => void>;
   activity: Set<(event: ChatActivity) => void>;
   committed: Set<(batch: TimelineCommitted) => void>;
+  memoryOperation: Set<(operation: MemoryOperation) => void>;
 }
 
 export type ApprovalPushEvent =
@@ -70,8 +88,16 @@ export interface Routes {
 }
 
 export function createRoutes(): Routes {
-  return { current: null, push: { avatar: null, timeline: null, timelineRemoved: null, config: new Set(),
-    approval: new Set(), monitor: new Set(), activity: new Set(), committed: new Set(), perception: new Set(), extension: new Set() } };
+  return { current: null, push: { subagentActivity: new Set(), subagents: new Set(), coWatching: new Set(), avatar: null, timeline: null, timelineRemoved: null, config: new Set(),
+    initiativePatterns: new Set(), initiativeSetup: new Set(), initiativePolicy: new Set(), initiativeBackoff: new Set(),
+    approval: new Set(), monitor: new Set(), memoryOperation: new Set(), activity: new Set(), committed: new Set(), perception: new Set(), extension: new Set() } };
+}
+
+export function addInitiativeChangedHandler(state: Routes,
+  kind: "initiativePatterns" | "initiativeSetup" | "initiativePolicy" | "initiativeBackoff",
+  handler: (change: InteractionPatternChanged) => void): () => void {
+  state.push[kind].add(handler);
+  return () => state.push[kind].delete(handler);
 }
 
 export function addChatActivityHandler(state: Routes, handler: (event: ChatActivity) => void): () => void {
@@ -89,6 +115,21 @@ export function addConfigChangedHandler(state: Routes, handler: (changed: Config
   return () => state.push.config.delete(handler);
 }
 
+export function addCoWatchingChangedHandler(state: Routes, handler: (changed: CoWatchingChanged) => void): () => void {
+  state.push.coWatching.add(handler);
+  return () => state.push.coWatching.delete(handler);
+}
+
+export function addSubagentChangedHandler(state: Routes, handler: (changed: SubagentChanged) => void): () => void {
+  state.push.subagents.add(handler);
+  return () => state.push.subagents.delete(handler);
+}
+
+export function addSubagentActivityHandler(state: Routes, handler: (event: SubagentActivity) => void): () => void {
+  state.push.subagentActivity.add(handler);
+  return () => state.push.subagentActivity.delete(handler);
+}
+
 export function addPerceptionChangedHandler(state: Routes, handler: (changed: PerceptionChanged) => void): () => void {
   state.push.perception.add(handler);
   return () => state.push.perception.delete(handler);
@@ -104,6 +145,10 @@ export function addApprovalHandler(state: Routes, handler: (event: ApprovalPushE
   return () => state.push.approval.delete(handler);
 }
 export function addMonitorHandler(state: Routes, handler: (event: RunMonitorEvent) => void): () => void { state.push.monitor.add(handler); return () => state.push.monitor.delete(handler); }
+export function addMemoryOperationHandler(state: Routes, handler: (operation: MemoryOperation) => void): () => void {
+  state.push.memoryOperation.add(handler);
+  return () => state.push.memoryOperation.delete(handler);
+}
 
 function notifyMonitorHandlers(state: Routes, event: RunMonitorEvent): void {
   for (const handler of [...state.push.monitor]) {
@@ -113,6 +158,13 @@ function notifyMonitorHandlers(state: Routes, event: RunMonitorEvent): void {
 
 /** Retires every connection-scoped push sink before queued notifications can dispatch on a closed transport. */
 function clearPushHandlers(state: Routes): void {
+  state.push.subagentActivity.clear();
+  state.push.subagents.clear();
+  state.push.coWatching.clear();
+  state.push.initiativePatterns.clear();
+  state.push.initiativeSetup.clear();
+  state.push.initiativePolicy.clear();
+  state.push.initiativeBackoff.clear();
   state.push.avatar = null;
   state.push.timeline = null;
   state.push.timelineRemoved = null;
@@ -123,6 +175,7 @@ function clearPushHandlers(state: Routes): void {
   state.push.monitor.clear();
   state.push.activity.clear();
   state.push.committed.clear();
+  state.push.memoryOperation.clear();
 }
 
 /** Routes the Core's notifications (chat stream + avatar/timeline/config pushes) to their handlers; each zod-validated. */
@@ -152,6 +205,37 @@ export function installRoutes(rpc: JSONRPCServerAndClient, state: Routes): void 
   rpc.addMethod(TIMELINE_METHODS.removed, (params: unknown) => {
     state.push.timelineRemoved?.(TimelineRemovedSchema.parse(params));
   });
+  installFanOutRoutes(rpc, state);
+  installApprovalRoutes(rpc, state);
+  installInitiativeRoutes(rpc, state);
+}
+
+function installInitiativeRoutes(rpc: JSONRPCServerAndClient, state: Routes): void {
+  rpc.addMethod(INITIATIVE_BACKOFF_METHODS.changed, (params: unknown) => {
+    publishHandlers(state.push.initiativeBackoff, InitiativeBackoffChangedSchema.parse(params));
+  });
+  for (const [method, kind] of [
+    [INTERACTION_PATTERN_METHODS.changed, "initiativePatterns"],
+    [INITIATIVE_SETUP_METHODS.changed, "initiativeSetup"],
+    [INITIATIVE_WAKE_METHODS.changed, "initiativePolicy"],
+  ] as const) {
+    rpc.addMethod(method, (params: unknown) => {
+      publishHandlers(state.push[kind], InteractionPatternChangedSchema.parse(params));
+    });
+  }
+}
+
+/** Multi-handler pushes: one throwing handler never starves its siblings. */
+function installFanOutRoutes(rpc: JSONRPCServerAndClient, state: Routes): void {
+  rpc.addMethod(SUBAGENT_METHODS.activity, (params: unknown) => {
+    publishHandlers(state.push.subagentActivity, SubagentActivitySchema.parse(params));
+  });
+  rpc.addMethod(SUBAGENT_METHODS.changed, (params: unknown) => {
+    publishHandlers(state.push.subagents, SubagentChangedSchema.parse(params));
+  });
+  rpc.addMethod(CO_WATCHING_METHODS.changed, (params: unknown) => {
+    publishHandlers(state.push.coWatching, CoWatchingChangedSchema.parse(params));
+  });
   rpc.addMethod(CONFIG_METHODS.changed, (params: unknown) => {
     const changed = ConfigChangedSchema.parse(params);
     for (const handler of [...state.push.config]) {
@@ -172,6 +256,9 @@ export function installRoutes(rpc: JSONRPCServerAndClient, state: Routes): void 
     publishHandlers(state.push.extension, ExtensionChangedSchema.parse(params));
   });
   installApprovalRoutes(rpc, state);
+  rpc.addMethod(MEMORY_OPERATION_METHODS.changed, (params: unknown) => {
+    publishHandlers(state.push.memoryOperation, MemoryOperationChangedSchema.parse(params).operation);
+  });
 }
 
 function publishHandlers<T>(handlers: Set<(value: T) => void>, value: T): void {

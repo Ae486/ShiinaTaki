@@ -4,7 +4,17 @@ Headless end-to-end scenarios (PRD 07-11-e2e-test-harness layer B). Run with `pn
 (requires a debug `taki-node` build: `cargo build --bin taki-node --manifest-path apps/desktop/src-tauri/Cargo.toml`).
 
 - fixture/ — the reusable withStack harness (see fixture/index.md)
+- initiative-runtime.e2e.test.ts — scripted local provider and real Core composition exercise thin requests, structural decisions, same-Attempt held delivery, persisted model budgets, output/busy expiry, operator timezone invalidation, primary priority and Monitor replay
+- initiative-pattern.e2e.test.ts — unmodified Core startup, real primary proposal/confirmation, automatic finite wake conditions, explicit Skill setup, no-replay and zero-call policy refusals
+- initiative-pattern-real.e2e.test.ts — explicit paid opt-in over isolated production Core: real natural-language authoring/lifecycle, unsupported-source clarification, exact UTC reminder routing, and heartbeat Memory/history boundary probes with semantic-review artifacts
+- agent-context-real.e2e.test.ts — explicit real-model opt-in for selected private child context, addressed input, retained reuse and record-only completion; production RPC/SQLite/request evidence remains separate from owner acceptance
+- agent-context-runtime.e2e.test.ts — production Core with a loopback scripted provider verifies selected child work, actual addressed-input receipts, separate terminal Runs and record-only versus deduplicated internal parent continuation
+- agent-context-r2.e2e.test.ts — controlled HTTP timing and separately opted-in real inference verify independent parent/child controls, user-only continuation, original stopped-request reply and internal-only synthesis
+- agent-context-restart.e2e.test.ts — two actual production Core kills/restarts over one isolated Local database preserve user-stop/pending input, settle an interrupted model Effect as unknown, create new Runs only after public Continue and never automatically replay terminal work
+- initiative-recovery.e2e.test.ts — unmodified Core with scripted model: finite source-bound plans, consumption/restart, offline expiry, independent recalled follow-up, withdrawn Memory exclusion and actual admission-driven backoff invalidation
+- initiative-intention-real.e2e.test.ts — explicit paid opt-in over isolated production Core: natural finite planning, canonical delivery disposition, bounded actual Memory recall, new follow-up and per-request history exclusion
 - core-shutdown.e2e.test.ts — isolated real Core and local HTTP rejection prove natural graceful exit after SDK fetch, including Windows native async-handle cleanup
+- avatar-command-outcome.e2e.test.ts — real Core + scripted local provider: a subscribed fake Pet operator answers avatar.outcome{rejected,motion_busy} for the Core commandId and the persisted tool result / Chat activity terminal reflect it; no subscriber settles not_rendered before the deadline (D80)
 - perception-refresh.e2e.test.ts — real Core with separate operator sockets proves opt-in pause/absolute-expiry invalidation, duplicate subscription behavior and content-free frames without a sensing Host
 - extension-refresh.e2e.test.ts — real Core and synthetic local MCP/Skill sources prove targeted cross-operator commit/publication invalidation and quiet read paths
 - reconnect.e2e.test.ts — node pairs once, reconnects by persisted token (no second pairing code)

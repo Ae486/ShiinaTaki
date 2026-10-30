@@ -1,6 +1,8 @@
 # core/db/migrations/
+- 025-run-events.ts — additive ordered Run Event ledger with immutable rows and bounded event payloads
 - 026-run-effects.ts — additive Run-owned effect current state and authoritative usage persistence for Slice 3
 - 027-effect-approval-ref.ts — additive bounded Approval wait reference on Run Effects for Slice 3B
+- 028-recovery-admission.ts — process generations, durable Run recovery/admission controls, deadlines, cancellation, and budget state
 - 029-scheduled-tasks.ts — durable Scheduled Task definitions and occurrence outbox for Slice 5A
 - 030-scheduled-occurrence-character.ts — append-only Character ownership backfill for occurrence replay safety
 - 031-run-usage-details.ts — additive uncached/cache-read/cache-write/text-output/reasoning usage columns
@@ -19,7 +21,15 @@
 - 032-conversation-compaction-lifecycle.ts — migration 32: revisioned summary checkpoint, fenced per-Character operation cursor, and immutable bounded compaction events
 - 033-hindsight-replica-sync.ts — migration 33: canonical incremental replica records, FTS projection, checkpoints, and Bank leases
 - 034-hindsight-replica-scheduler.ts — migration 34: durable scheduler/run state and the current verified single-record snapshot cache
-- 035-timeline-presentation.ts — migration 35: additive nullable Timeline display metadata; canonical fields and prior migration lineages are unchanged
+- 035-timeline-presentation.ts — migration 35: additive nullable Timeline display metadata; historical-schema SQL regressions preserve canonical bytes and migration receipts without invoking newer repositories
+- 035-pending-memory.ts — migration 35: idempotent Pending Memory intents, persisted recovery phases, retry state, and safe terminal diagnostics
+- 036-memory-timeline-convergence.ts — preserves applied 035 histories while converging Pending Memory and nullable Timeline presentation
+- 037-hindsight-local-coverage.ts — immutable current Local manifest versions and lease-owned B4 run selection
+- 038-hindsight-source-evidence.ts — durable typed source/unit evidence and exact native-object bindings independent of replica caches
+- 039-hindsight-current-state.ts — immutable D78 Local captures, frozen transfers, mappings, finite verification and proven native invalidation evidence
+- 040-hindsight-cutover-convergence.ts — recognized early-023 convergence without changing authority or old receipts; unmappable imports refuse
+- 040-hindsight-cutover-schema.ts — explicit early/current B4 schema signatures and forward DDL for 040
+- 040-hindsight-cutover-convergence-fixtures.ts — independent schema-only historical 023 reproduction for migration tests
 - 013-config.ts — migration 13: config (the sparse operator-set settings store: key/JSON value/updated_at; a row exists only for a knob the panel actually set)
 - 014-governance-policy.ts — migration 14: Core-owned global Level/policy generation singleton + sparse validated cell overrides
 - 015-approval.ts — migration 15: Core Approval generation/revision singleton + canonical durable always-allow decisions
@@ -33,3 +43,25 @@
 - 023-hindsight-initial-cutover.ts — B4 cutover lifecycle lease, import mappings, logical replica/checkpoints, Hindsight marker, and activation receipts
 - 024-harness-runs.ts — Slice 1 additive Run, Attempt, immutable snapshot, and bounded Receipt current-state tables
 - index-list.ts — the explicit ordered MIGRATIONS registry (no fs/glob discovery)
+- 041-canonical-memory-maintenance.ts — deletion-independent canonical snapshots, shared maintenance request receipts, and durable ingestion plans
+- 042-hindsight-application-state.ts — immutable body/artifact/publication history, exact native heads and paired application checkpoint storage
+- 043-hindsight-ingestion.ts — independent Hindsight source witnesses, ingestion plans and source-coverage receipts
+- 044-hindsight-application-commands.ts — durable command identities, immutable byte-body preparation and historical remote receipts
+- 045-hindsight-policy-work.ts — durable curator claims, exact original targets, saved proposals and local retry state
+- 046-hindsight-runtime-admission.ts — durable last-verified runtime admission for truthful offline capability reporting
+- 047-hindsight-memory-writes.ts — durable original requests, exact mutation targets and stable whole-operation results
+- 048-memory-operations.ts — Core-minted durable memory operation ledger; partial unique index = single-flight per family; owner boot id drives restart reconciliation
+- 049-initiative-delivery.ts — same-Run delivery identities, bounded policy facts and User Timezone authority metadata
+- 050-initiative-model-opportunities.ts — Core-wide model-hour reservations and exactly-once first-intent charges, independent of utterance quotas
+- 051-initiative-feedback.ts — once-only delivery presentation, bounded response opportunity and terminal feedback; live source leases remain process-local
+- 052-interaction-patterns.ts — immutable Pattern revisions/reviews, exact primary source bindings and idempotent lifecycle commands
+- 053-initiative-wake-policy.ts — source-occurrence claims tied to canonical Runs and bounded policy diagnostics
+- 054-initiative-intentions.ts — finite source-bound plans, immutable source opportunities and exact canonical Run claim bindings
+- 055-initiative-backoff.ts — reset fences and canonical Run admission-time timezone metadata; no duplicate quota ledger
+- 056-subagent-conversations.ts — four private delegation record families with exact work, completion and input-receipt identities
+- 057-source-context.ts — guarded immutable nullable source sidecars on Timeline and Delivery, preserving original text and legacy rows
+
+- 058-agent-inbox.ts — exact legacy private table preservation, continuing validity and durable inbox/context records
+- 060-agent-conversation-order.ts — private source commit ordering, control history and immutable event frontiers
+- 061-subagent-presentation.ts — immutable native private message presentation references
+- 062-subagent-inbox-resume.ts — explicit operation-keyed successor consumer identity without automatic replay

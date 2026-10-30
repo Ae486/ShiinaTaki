@@ -20,6 +20,7 @@ function fakeState() {
   const state: ActivityState = {
     push: (sample, at) => void pushed.push({ sample, at }),
     seal: () => void seals.push(clock),
+    clear: () => { pushed.length = 0; },
     entries: () => [],
     current: () => undefined,
   };

@@ -1,0 +1,8 @@
+{"file":".trellis/tasks/10-25-agent-delegation-conversations/research/planning-brief.md","reason":"Original requirement coverage, reviewed design and topic-specific failure matrices"}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Actual required checks, responsibility review and no weakened regression expectations"}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Behavior and real UI evidence, bounded rendering and state isolation"}
+{"file":".trellis/spec/backend/shared-agent-delegation.md","reason":"Verify preserved controls, private authority and legacy feature behavior against proposed changes"}
+{"file":".trellis/spec/backend/sqlite-migration-lineage.md","reason":"Historical storage truth, no destructive migration or unproven main compatibility"}
+{"file":".trellis/spec/backend/e2e-harness.md","reason":"Keep deterministic, real provider, actual application and human evidence distinct"}
+{"file": ".trellis/spec/backend/private-agent-inbox.md", "reason": "Review current durable event and foreground/private recovery contracts"}
+{"file": ".trellis/spec/backend/private-worker-context.md", "reason": "Review pressure safety, complete pending input and retained-reference bounds"}

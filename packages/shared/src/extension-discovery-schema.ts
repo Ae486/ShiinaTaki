@@ -109,6 +109,7 @@ export type ExtensionDescribeParams = z.infer<typeof ExtensionDescribeParamsSche
 export const ExtensionDescribeResultSchema = z.strictObject({
   runId: HostIdSchema,
   entry: ExtensionDescriptorSchema.nullable(),
+  toolName: z.string().min(1).max(256).regex(/^[A-Za-z0-9_-]+$/).optional(),
 });
 export type ExtensionDescribeResult = z.infer<typeof ExtensionDescribeResultSchema>;
 

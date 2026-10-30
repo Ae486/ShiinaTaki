@@ -1,0 +1,342 @@
+{
+  "checks": [
+    "cold read failure shows unknown fields and disabled reset, never fabricated zero",
+    "real components render scripted 1x/2x/4x/daily stages, counts and exact next eligibility without remounting",
+    "held warm read retains the card and finite invalidations require one covering read",
+    "hidden Monitor keeps a dirty obligation without reading and refreshes on actual return",
+    "accepted reset preserves daily usage while failed refresh stays independently visible",
+    "lost reset acknowledgement reconnects and restores current data without replay or erasing uncertainty",
+    "actual Chat disclosure, native selected text and accessibility tree remain semantic without changing canonical parts"
+  ],
+  "passed": false,
+  "failure": "Error: Timed out: failed read raced by reset invalidation and echo",
+  "scope": "Real WebView2, production Home/Monitor/Chat/WsClient; scripted Shared-validated backoff/Monitor/Timeline data. No Core backoff/C2 human opportunity/model/owner acceptance.",
+  "artifacts": "H:\\TakiAgent-worktrees\\t4\\.trellis\\tasks\\09-11-initiative-intentions-acceptance\\research\\validation\\backoff-native-2026-09-28T14-23-17-597Z",
+  "directory": "G:\\Temp\\taki-c4-backoff-native-ukcc4n",
+  "sourceHashes": {
+    "test/c3-pattern-fixture.tsx": "b43a15cc163cc1c6a28d604ca112e592151dff454da7b84f1dd58e3e37a74537",
+    "test/c4-backoff-native-server.mjs": "93c669a613c2d29b2a897f058ddc232e1c5295d07839e2e3a321d0451a88af8a",
+    "test/c4-backoff-native-smoke.mjs": "6d6de962d1fcc38b9e59a94ce3235ce0e606b7c2d584ebc81823aa0148f8d8fe",
+    "src/windows/home/home-shell.tsx": "a96a2d06ca00e88091198102a7f4e543d2a85d158603333dd25b490733aa2527",
+    "src/features/initiative-patterns/initiative-backoff-controller.ts": "e2a717354007aa195d70c1edba165825153a31b931c325d97b934105437b45fd",
+    "src/features/initiative-patterns/initiative-backoff-view.tsx": "0937d085ec9124bbf42a6889d05cf2126846cbf25dcb55743ff00de71f4501c2",
+    "src/features/initiative-patterns/use-initiative-backoff.ts": "6cd6c40bb7629ccabd628932460074dfb36556fb15b44e62809971c0e0d7ad8b",
+    "src/features/initiative-patterns/initiative-policy-diagnostics.tsx": "7ecdd7891a3d1a6c14c5daa77f0a4610846b256a96577209cb298ed0721daca5",
+    "src/features/initiative-patterns/follow-up-tool-display.ts": "8abf64bad4750b7d6fadf4b9088ed322c4627cdead80e23ddb805aaca4ad06cf",
+    "src/windows/home/pages/chat/tool-result-display.ts": "3b85dab6844d50740f009785f88e2ce0f47e7b912b8aa2d755aab26e584af965",
+    "src/lib/ws-client.ts": "f107d9b7df3b0dfa602e06ebdafa0ef47c8256a82a11c4fe019d3fdcf080958e",
+    "src/lib/ws-client-routes.ts": "fb9c455ab9900622f2697aab6b07a940a820d8a7fee8cf909204aa81a0da660c",
+    "src/lib/ws-client-initiative.ts": "fb0b10d80f03570ee877ea9d51129c30087cf7e8dbdcec9b7e098724ea57caba"
+  },
+  "finalSourceHashes": {
+    "test/c3-pattern-fixture.tsx": "b43a15cc163cc1c6a28d604ca112e592151dff454da7b84f1dd58e3e37a74537",
+    "test/c4-backoff-native-server.mjs": "93c669a613c2d29b2a897f058ddc232e1c5295d07839e2e3a321d0451a88af8a",
+    "test/c4-backoff-native-smoke.mjs": "6d6de962d1fcc38b9e59a94ce3235ce0e606b7c2d584ebc81823aa0148f8d8fe",
+    "src/windows/home/home-shell.tsx": "a96a2d06ca00e88091198102a7f4e543d2a85d158603333dd25b490733aa2527",
+    "src/features/initiative-patterns/initiative-backoff-controller.ts": "e2a717354007aa195d70c1edba165825153a31b931c325d97b934105437b45fd",
+    "src/features/initiative-patterns/initiative-backoff-view.tsx": "0937d085ec9124bbf42a6889d05cf2126846cbf25dcb55743ff00de71f4501c2",
+    "src/features/initiative-patterns/use-initiative-backoff.ts": "6cd6c40bb7629ccabd628932460074dfb36556fb15b44e62809971c0e0d7ad8b",
+    "src/features/initiative-patterns/initiative-policy-diagnostics.tsx": "7ecdd7891a3d1a6c14c5daa77f0a4610846b256a96577209cb298ed0721daca5",
+    "src/features/initiative-patterns/follow-up-tool-display.ts": "8abf64bad4750b7d6fadf4b9088ed322c4627cdead80e23ddb805aaca4ad06cf",
+    "src/windows/home/pages/chat/tool-result-display.ts": "3b85dab6844d50740f009785f88e2ce0f47e7b912b8aa2d755aab26e584af965",
+    "src/lib/ws-client.ts": "f107d9b7df3b0dfa602e06ebdafa0ef47c8256a82a11c4fe019d3fdcf080958e",
+    "src/lib/ws-client-routes.ts": "fb9c455ab9900622f2697aab6b07a940a820d8a7fee8cf909204aa81a0da660c",
+    "src/lib/ws-client-initiative.ts": "fb0b10d80f03570ee877ea9d51129c30087cf7e8dbdcec9b7e098724ea57caba"
+  },
+  "shellSha256": "d945e7f8a4b6011eec4c8effa536e7d0a6030cde06dbefb565f7e32b8696027a",
+  "views": [
+    {
+      "当前阶段": "降低频率（2 倍间隔）",
+      "最近七天有效未回应记录": "3 次",
+      "当前日额度占用": "1 次判断",
+      "退避等待至": "2026/9/28 23:23:20"
+    },
+    {
+      "当前阶段": "降低频率（4 倍间隔）",
+      "最近七天有效未回应记录": "6 次",
+      "当前日额度占用": "1 次判断",
+      "退避等待至": "2026/9/28 23:23:20"
+    },
+    {
+      "当前阶段": "每天最多一次判断",
+      "最近七天有效未回应记录": "9 次",
+      "当前日额度占用": "1 次判断",
+      "退避等待至": "2026/9/29 22:23:20"
+    }
+  ],
+  "calls": [
+    {
+      "method": "connect",
+      "connection": 1
+    },
+    {
+      "method": "config.subscribe",
+      "connection": 1
+    },
+    {
+      "method": "timeline.subscribe",
+      "connection": 1
+    },
+    {
+      "method": "config.list",
+      "connection": 1
+    },
+    {
+      "method": "connect",
+      "connection": 2
+    },
+    {
+      "method": "chat.activity.read",
+      "connection": 1
+    },
+    {
+      "method": "config.subscribe",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 2
+    },
+    {
+      "method": "user-timezone.read",
+      "connection": 2
+    },
+    {
+      "method": "presence.report",
+      "connection": 2
+    },
+    {
+      "method": "presence.report",
+      "connection": 2
+    },
+    {
+      "method": "observability.state",
+      "connection": 2
+    },
+    {
+      "method": "timeline.history",
+      "connection": 1
+    },
+    {
+      "method": "initiative.setup.read",
+      "connection": 2
+    },
+    {
+      "method": "config.list",
+      "connection": 2
+    },
+    {
+      "method": "presence.report",
+      "connection": 1
+    },
+    {
+      "method": "presence.report",
+      "connection": 1
+    },
+    {
+      "method": "presence.report",
+      "connection": 2
+    },
+    {
+      "method": "presence.report",
+      "connection": 1
+    },
+    {
+      "method": "presence.report",
+      "connection": 1
+    },
+    {
+      "method": "observability.state",
+      "connection": 2
+    },
+    {
+      "method": "observability.list",
+      "connection": 2
+    },
+    {
+      "method": "observability.initiative-policy",
+      "connection": 2
+    },
+    {
+      "method": "observability.initiative-backoff",
+      "connection": 2
+    },
+    {
+      "method": "observability.initiative-backoff",
+      "connection": 2
+    },
+    {
+      "method": "observability.initiative-backoff",
+      "connection": 2
+    },
+    {
+      "method": "observability.initiative-backoff",
+      "connection": 2
+    },
+    {
+      "method": "observability.initiative-backoff",
+      "connection": 2
+    },
+    {
+      "method": "observability.initiative-backoff",
+      "connection": 2
+    },
+    {
+      "method": "observability.initiative-backoff",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 2
+    },
+    {
+      "method": "observability.unsubscribe",
+      "connection": 2
+    },
+    {
+      "method": "initiative.setup.read",
+      "connection": 2
+    },
+    {
+      "method": "presence.report",
+      "connection": 1
+    },
+    {
+      "method": "presence.report",
+      "connection": 1
+    },
+    {
+      "method": "observability.initiative-policy",
+      "connection": 2
+    },
+    {
+      "method": "observability.initiative-backoff",
+      "connection": 2
+    },
+    {
+      "method": "observability.state",
+      "connection": 2
+    },
+    {
+      "method": "observability.list",
+      "connection": 2
+    },
+    {
+      "method": "initiative.backoff.reset",
+      "connection": 2
+    },
+    {
+      "method": "observability.initiative-backoff",
+      "connection": 2
+    },
+    {
+      "method": "observability.initiative-backoff",
+      "connection": 2
+    },
+    {
+      "method": "observability.initiative-backoff",
+      "connection": 2
+    },
+    {
+      "method": "initiative.backoff.reset",
+      "connection": 2
+    },
+    {
+      "method": "connect",
+      "connection": 3
+    },
+    {
+      "method": "config.subscribe",
+      "connection": 3
+    },
+    {
+      "method": "observability.initiative-policy",
+      "connection": 3
+    },
+    {
+      "method": "observability.initiative-backoff",
+      "connection": 3
+    },
+    {
+      "method": "observability.state",
+      "connection": 3
+    },
+    {
+      "method": "user-timezone.read",
+      "connection": 3
+    },
+    {
+      "method": "presence.report",
+      "connection": 3
+    },
+    {
+      "method": "presence.report",
+      "connection": 3
+    },
+    {
+      "method": "observability.state",
+      "connection": 3
+    },
+    {
+      "method": "config.list",
+      "connection": 3
+    },
+    {
+      "method": "observability.list",
+      "connection": 3
+    },
+    {
+      "method": "presence.report",
+      "connection": 3
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 3
+    },
+    {
+      "method": "observability.unsubscribe",
+      "connection": 3
+    },
+    {
+      "method": "initiative.setup.read",
+      "connection": 3
+    },
+    {
+      "method": "presence.report",
+      "connection": 1
+    },
+    {
+      "method": "presence.report",
+      "connection": 1
+    },
+    {
+      "method": "observability.initiative-policy",
+      "connection": 3
+    },
+    {
+      "method": "observability.initiative-backoff",
+      "connection": 3
+    },
+    {
+      "method": "observability.state",
+      "connection": 3
+    },
+    {
+      "method": "observability.list",
+      "connection": 3
+    },
+    {
+      "method": "observability.initiative-backoff",
+      "connection": 3
+    },
+    {
+      "method": "initiative.backoff.reset",
+      "connection": 3
+    },
+    {
+      "method": "observability.initiative-backoff",
+      "connection": 3
+    }
+  ],
+  "guiOutput": ""
+}

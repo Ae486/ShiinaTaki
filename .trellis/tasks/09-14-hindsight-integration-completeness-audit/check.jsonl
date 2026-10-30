@@ -1,0 +1,7 @@
+{"file": ".trellis/tasks/08-09-hindsight-memory-provider/prd.md", "reason": "Check complete parent requirement coverage without adding unrequested product scope."}
+{"file": "docs/adr/0009-single-memory-authority-with-local-replica.md", "reason": "Check authority, incremental continuation, recovery, setup and takeover invariants."}
+{"file": ".trellis/tasks/08-09-memory-runtime-integration/grill.md", "reason": "Check accepted baseline/mapping/change reuse and the boundary between product decisions and engineering gaps."}
+{"file": ".trellis/tasks/08-09-memory-runtime-integration/research/b6-closeout-validation-2026-09-13.md", "reason": "Keep bounded B6 verification distinct from unimplemented B7 operations, manual acceptance and original activation."}
+{"file": ".trellis/tasks/08-09-memory-runtime-integration/research/memory-capability-followups-2026-09-13.md", "reason": "Ensure D79-D83 remain visible with the owner's existing sequencing and unresolved evidence."}
+{"file": ".trellis/tasks/09-14-hindsight-integration-completeness-audit/research/completeness-matrix.md", "reason": "Current 54-entry accepted-design completeness ledger; distinguish real implementation, reachable operations, explicit deferrals and unperformed acceptance."}
+{"file": ".trellis/tasks/09-14-hindsight-integration-completeness-audit/research/closure-plan.md", "reason": "Dependency order and 16 concrete acceptance cases for first activation, lifecycle, repeated switching, administration and multi-client use; no implementation authorization."}

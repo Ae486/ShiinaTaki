@@ -1,0 +1,25 @@
+{
+  "scope": "Task-owned disposable file copies only; no production or dependency rollback performed",
+  "command": [
+    "git",
+    "apply",
+    "--reverse",
+    "--directory=.trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/recovery/rollback-check",
+    "--",
+    "H:\\TakiAgent-worktrees\\t4\\.trellis\\tasks\\10-21-ai-sdk-upgrade-baseline\\research\\recovery\\sdk-scope.diff"
+  ],
+  "exitCode": 0,
+  "restoredByteIdentically": [
+    "packages/core/package.json",
+    "packages/core/src/agents/chat-agent.ts",
+    "packages/core/src/agents/index.md",
+    "packages/core/src/agents/run-observability-telemetry.test.ts",
+    "packages/core/src/mcp/index.md",
+    "packages/core/src/mcp/mcp-http.test.ts",
+    "pnpm-lock.yaml"
+  ],
+  "newTaskFilesRemovedFromSandbox": [
+    "packages/core/src/agents/provider-stream-failure.ts",
+    "packages/core/src/agents/sdk-wire-compatibility.test.ts"
+  ]
+}

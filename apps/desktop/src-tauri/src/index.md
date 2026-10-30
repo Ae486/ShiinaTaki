@@ -1,6 +1,7 @@
 # desktop/src-tauri/src/
 - main.rs — thin shim (windows_subsystem + mobile entry) calling taki_desktop_lib::run(); untouched
 - lib.rs — Tauri composition root: dirs/legacy-approver/status-sink resolution, TauriStatusEmitter, node::build_node call, commands; the retained approver is not consulted by the Slice-3 production WS execution path
+- qqmm.rs — Home-only finite management commands, source-WebView-bound Channel delivery and helper-only teardown using the shared QQMM runtime; independent from the Node/Core path
 - node.rs — tauri-FREE node assembly: NodeConfig + build_node, create-only stable device identity with winner adoption, tracing, and WsClient; shared by lib.rs and bin/taki-node
 - status.rs — StatusEmitter trait (status sink seam) + TracingStatusEmitter (headless log-only impl)
 - protocol.rs — stable crate-internal protocol import surface, non-Host serde mirrors, and the golden-fixture parity sweep
@@ -18,3 +19,7 @@
 - capabilities_impl.rs — capability handler registry (invariant 7; opaque Value output + optional dialog detail) + capabilities_impl/ executors
 - capabilities_impl/ — one executor per capability (screenshot, screenshot-ambient, process-list, clipboard read/write, shell-open, exec, foreground-window)
 - bin/ — extra crate roots (taki-node, the headless e2e/CI node)
+- browser_attachment.rs — optional loopback browser sensor with dedicated credential, Core privacy control and latest-value source lifecycle
+- browser_attachment/ — authenticated local transport, monotonic forwarding and source/cleanup regression tests
+- browser_playback_protocol.rs — strict selected-player/control serde mirrors preserving opaque Chromium document tokens and the Shared wire contract
+- browser_attachment_commands.rs — Home-only local setup/pairing commands and explicit isolated Shell data root

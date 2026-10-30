@@ -8,6 +8,10 @@ import type { HindsightCutoverLease } from "./hindsight-cutover-run-repo.ts";
 import type { Database, SqlRow } from "./sqlite.ts";
 import { readMemoryAuthoritySelection, type MemoryAuthoritySelection } from "../memory/legacy-migration/legacy-activation-repo.ts";
 import { canonicalPayloadHash } from "../memory/legacy-migration/legacy-identities.ts";
+import { reserveHindsightLocalWriter } from "./hindsight-local-coverage-repo.ts";
+import { requireHindsightLocalCoverage } from "./hindsight-local-coverage-guard.ts";
+import { requireHindsightLocalCoverageBanks } from "./hindsight-local-bank-binding.ts";
+import { hasHindsightCurrentCapture, requireHindsightCurrentCheckpointRetention } from "./hindsight-current-cutover-guard.ts";
 
 export interface HindsightPromotionBank {
   bankId: string;
@@ -35,6 +39,8 @@ export interface HindsightPromotionResult {
 export function promoteHindsightAuthority(db: Database, input: HindsightPromotionInput): HindsightPromotionResult {
   db.transaction(() => {
     validateInput(input);
+    // Canonical writers do not use the retired Markdown fence or the B4 lease. Reserve SQLite before reading them.
+    reserveHindsightLocalWriter(db, input.predecessorEpochId);
     const lineage = requirePreconditions(db, input);
     commitPromotion(db, input, lineage);
   });
@@ -56,14 +62,17 @@ function requirePreconditions(db: Database, input: HindsightPromotionInput): str
   requirePredecessor(db, input.predecessorEpochId);
   requireSourceActivation(db, input);
   requireReadyCutover(db, input);
-  requireImportsComplete(db, input.lease.runId);
+  const currentImport = hasHindsightCurrentCapture(db, input.lease.runId);
+  if (!currentImport) requireImportsComplete(db, input.lease.runId);
   const lineage = requireLineage(input.banks);
   requireConnection(db, input.configFingerprint, lineage);
   requireSetupBanks(db, input.banks);
-  requireImportBanks(db, input.lease.runId, input.banks);
-    requireCheckpoints(db, input);
-  requireReplicaMappings(db, input.lease.runId, input.banks);
+  if (!currentImport) requireImportBanks(db, input.lease.runId, input.banks);
+  requireCheckpoints(db, input);
+  if (!currentImport) requireReplicaMappings(db, input.lease.runId, input.banks);
   if (hindsightCheckpointSetDigest(input.banks) !== input.checkpointSetDigest) throw new Error("HINDSIGHT_CHECKPOINT_SET_STALE");
+  const coverage = requireHindsightLocalCoverage(db, { runId: input.lease.runId, readyBinding: true, now: input.now });
+  requireHindsightLocalCoverageBanks(db, { coverage, nativeBankIds: input.banks.map((bank) => bank.bankId) });
   return lineage;
 }
 
@@ -156,8 +165,10 @@ function requireCheckpoints(db: Database, input: HindsightPromotionInput): void 
     if (!row) throw new Error("HINDSIGHT_CHECKPOINT_MISSING");
     let checkpoint: HindsightReplicaCheckpoint;
     try { checkpoint = parseCheckpoint(row); } catch { throw new Error("HINDSIGHT_CHECKPOINT_STALE"); }
-    if (!sameCheckpoint(checkpoint, bank.checkpoint) || Date.parse(checkpoint.snapshotExpiresAt) <= Date.parse(input.now)) {
-      throw new Error("HINDSIGHT_CHECKPOINT_STALE");
+    if (!sameCheckpoint(checkpoint, bank.checkpoint)) throw new Error("HINDSIGHT_CHECKPOINT_STALE");
+    if (Date.parse(checkpoint.snapshotExpiresAt) <= Date.parse(input.now)) {
+      if (!hasHindsightCurrentCapture(db, input.lease.runId)) throw new Error("HINDSIGHT_CHECKPOINT_STALE");
+      requireHindsightCurrentCheckpointRetention(db, { runId: input.lease.runId, checkpoint, now: input.now });
     }
     const staged = db.prepare("SELECT run_id,status,manifest_digest,snapshot_id FROM hindsight_replica_staging_runs WHERE staging_id=:staging")
       .get({ staging: String(row.staging_id ?? "") });

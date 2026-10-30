@@ -1,0 +1,98 @@
+[
+  {
+    "name": "agent",
+    "path": "packages/harness/src/agent",
+    "sha": "937efc355b1d7c17ee8cf2a6a658eab3ea7e516e",
+    "size": 0,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/tree/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/trees/937efc355b1d7c17ee8cf2a6a658eab3ea7e516e",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/trees/937efc355b1d7c17ee8cf2a6a658eab3ea7e516e",
+      "html": "https://github.com/vercel/ai/tree/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent"
+    }
+  },
+  {
+    "name": "bridge",
+    "path": "packages/harness/src/bridge",
+    "sha": "881951c08ded2d92bd47d5fbac2744dc388c0875",
+    "size": 0,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/bridge?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/tree/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/bridge",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/trees/881951c08ded2d92bd47d5fbac2744dc388c0875",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/bridge?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/trees/881951c08ded2d92bd47d5fbac2744dc388c0875",
+      "html": "https://github.com/vercel/ai/tree/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/bridge"
+    }
+  },
+  {
+    "name": "errors",
+    "path": "packages/harness/src/errors",
+    "sha": "b3e3e1375141f68a0961d52f0a907eb0961ad939",
+    "size": 0,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/errors?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/tree/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/errors",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/trees/b3e3e1375141f68a0961d52f0a907eb0961ad939",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/errors?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/trees/b3e3e1375141f68a0961d52f0a907eb0961ad939",
+      "html": "https://github.com/vercel/ai/tree/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/errors"
+    }
+  },
+  {
+    "name": "index.ts",
+    "path": "packages/harness/src/index.ts",
+    "sha": "193977b21cfc689477cdb96f32aa6398c704e194",
+    "size": 248,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/index.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/index.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/193977b21cfc689477cdb96f32aa6398c704e194",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/index.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/index.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/193977b21cfc689477cdb96f32aa6398c704e194",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/index.ts"
+    }
+  },
+  {
+    "name": "utils",
+    "path": "packages/harness/src/utils",
+    "sha": "b33538ce2496ea3b7fb786590a14b472ce222ea8",
+    "size": 0,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/utils?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/tree/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/utils",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/trees/b33538ce2496ea3b7fb786590a14b472ce222ea8",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/utils?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/trees/b33538ce2496ea3b7fb786590a14b472ce222ea8",
+      "html": "https://github.com/vercel/ai/tree/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/utils"
+    }
+  },
+  {
+    "name": "v1",
+    "path": "packages/harness/src/v1",
+    "sha": "c78176e9d74171f3d85f393242519170a4eafac3",
+    "size": 0,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/v1?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/tree/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/v1",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/trees/c78176e9d74171f3d85f393242519170a4eafac3",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/v1?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/trees/c78176e9d74171f3d85f393242519170a4eafac3",
+      "html": "https://github.com/vercel/ai/tree/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/v1"
+    }
+  }
+]

@@ -1,0 +1,131 @@
+{
+  "mode": "target",
+  "node": "v24.18.0",
+  "source": "file:///H:/TakiAgent-worktrees/t4/packages/core/src/agents/chat-agent.ts",
+  "packages": {
+    "ai": "7.0.148",
+    "@ai-sdk/openai-compatible": "3.0.75",
+    "@ai-sdk/provider": "4.0.31",
+    "@ai-sdk/provider-utils": "5.0.65",
+    "@ai-sdk/gateway": "4.0.121"
+  },
+  "transport": "real Node fetch and local HTTP SSE, except explicitly labelled resolving fake",
+  "storage": "actual in-memory SQLite and ConversationStore",
+  "credentials": "none",
+  "results": [
+    {
+      "stage": "prefill",
+      "text": "",
+      "aborted": true,
+      "counts": {
+        "modelRequests": 1,
+        "maintenance": 0,
+        "usage": 0,
+        "primaryCommits": 0,
+        "retractions": 1
+      },
+      "history": [],
+      "failure": null,
+      "durationMs": 114
+    },
+    {
+      "stage": "partial",
+      "text": "partial",
+      "aborted": true,
+      "counts": {
+        "modelRequests": 1,
+        "maintenance": 1,
+        "usage": 0,
+        "primaryCommits": 1,
+        "retractions": 0
+      },
+      "history": [
+        {
+          "role": "user",
+          "content": "Fixture only"
+        },
+        {
+          "role": "assistant",
+          "content": "partial"
+        }
+      ],
+      "failure": null,
+      "durationMs": 24
+    },
+    {
+      "stage": "graceful-fake",
+      "text": "partial",
+      "aborted": true,
+      "counts": {
+        "modelRequests": 1,
+        "maintenance": 1,
+        "usage": 0,
+        "primaryCommits": 1,
+        "retractions": 0
+      },
+      "history": [
+        {
+          "role": "user",
+          "content": "Fixture only"
+        },
+        {
+          "role": "assistant",
+          "content": "partial"
+        }
+      ],
+      "failure": null,
+      "durationMs": 16
+    },
+    {
+      "stage": "success",
+      "text": "complete",
+      "aborted": false,
+      "counts": {
+        "modelRequests": 1,
+        "maintenance": 1,
+        "usage": 1,
+        "primaryCommits": 1,
+        "retractions": 0
+      },
+      "history": [
+        {
+          "role": "user",
+          "content": "Fixture only"
+        },
+        {
+          "role": "assistant",
+          "content": "complete"
+        }
+      ],
+      "failure": null,
+      "durationMs": 17
+    },
+    {
+      "stage": "provider-error",
+      "text": "",
+      "aborted": false,
+      "counts": {
+        "modelRequests": 1,
+        "maintenance": 0,
+        "usage": 0,
+        "primaryCommits": 1,
+        "retractions": 0
+      },
+      "history": [
+        {
+          "role": "user",
+          "content": "Fixture only"
+        }
+      ],
+      "failure": {
+        "isAbortReason": false,
+        "isApiCallError": true,
+        "statusCode": 401,
+        "type": "object",
+        "name": "AI_APICallError",
+        "message": "Fixture provider refusal"
+      },
+      "durationMs": 11
+    }
+  ]
+}

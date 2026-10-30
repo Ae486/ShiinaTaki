@@ -1,0 +1,173 @@
+{
+  "mode": "baseline",
+  "assertions": "passed",
+  "results": [
+    {
+      "stage": "prefill",
+      "text": "",
+      "aborted": true,
+      "counts": {
+        "modelRequests": 1,
+        "maintenance": 0,
+        "usage": 0,
+        "primaryCommits": 0,
+        "retractions": 1
+      },
+      "history": [],
+      "failure": null,
+      "durationMs": 110
+    },
+    {
+      "stage": "partial",
+      "text": "partial",
+      "aborted": true,
+      "counts": {
+        "modelRequests": 1,
+        "maintenance": 0,
+        "usage": 0,
+        "primaryCommits": 1,
+        "retractions": 0
+      },
+      "history": [
+        {
+          "role": "user",
+          "content": "Fixture only"
+        },
+        {
+          "role": "assistant",
+          "content": "partial"
+        }
+      ],
+      "failure": {
+        "isAbortReason": true,
+        "isApiCallError": false,
+        "statusCode": null,
+        "type": "string",
+        "name": null,
+        "message": "turn cancelled by operator"
+      },
+      "durationMs": 17
+    },
+    {
+      "stage": "graceful-fake",
+      "text": "partial",
+      "aborted": true,
+      "counts": {
+        "modelRequests": 1,
+        "maintenance": 1,
+        "usage": 0,
+        "primaryCommits": 1,
+        "retractions": 0
+      },
+      "history": [
+        {
+          "role": "user",
+          "content": "Fixture only"
+        },
+        {
+          "role": "assistant",
+          "content": "partial"
+        }
+      ],
+      "failure": null,
+      "durationMs": 42
+    },
+    {
+      "stage": "success",
+      "text": "complete",
+      "aborted": false,
+      "counts": {
+        "modelRequests": 1,
+        "maintenance": 1,
+        "usage": 1,
+        "primaryCommits": 1,
+        "retractions": 0
+      },
+      "history": [
+        {
+          "role": "user",
+          "content": "Fixture only"
+        },
+        {
+          "role": "assistant",
+          "content": "complete"
+        }
+      ],
+      "failure": null,
+      "durationMs": 16
+    },
+    {
+      "stage": "provider-error",
+      "text": "",
+      "aborted": false,
+      "counts": {
+        "modelRequests": 1,
+        "maintenance": 0,
+        "usage": 0,
+        "primaryCommits": 1,
+        "retractions": 0
+      },
+      "history": [
+        {
+          "role": "user",
+          "content": "Fixture only"
+        }
+      ],
+      "failure": {
+        "isAbortReason": false,
+        "isApiCallError": true,
+        "statusCode": 401,
+        "type": "object",
+        "name": "AI_APICallError",
+        "message": "Fixture provider refusal"
+      },
+      "durationMs": 12
+    }
+  ]
+}
+APICallError [AI_APICallError]: Fixture provider refusal
+    at file:///H:/TakiAgent-worktrees/t4/.trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/recovery/abort-baseline/node_modules/@ai-sdk/provider-utils/dist/index.js:3196:14
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async postToApi (file:///H:/TakiAgent-worktrees/t4/.trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/recovery/abort-baseline/node_modules/@ai-sdk/provider-utils/dist/index.js:2877:28)
+    at async postJsonToApi (file:///H:/TakiAgent-worktrees/t4/.trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/recovery/abort-baseline/node_modules/@ai-sdk/provider-utils/dist/index.js:2818:7)
+    at async _OpenAICompatibleChatLanguageModel.doStream (file:///H:/TakiAgent-worktrees/t4/.trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/recovery/abort-baseline/node_modules/@ai-sdk/openai-compatible/dist/index.js:705:50)
+    at async execute (file:///H:/TakiAgent-worktrees/t4/.trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/recovery/abort-baseline/node_modules/ai/dist/index.js:7993:26)
+    at async runWithTracingChannelSpan (file:///H:/TakiAgent-worktrees/t4/.trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/recovery/abort-baseline/node_modules/ai/dist/index.js:4037:12)
+    at async executeLanguageModelCall (file:///H:/TakiAgent-worktrees/t4/.trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/recovery/abort-baseline/node_modules/ai/dist/index.js:4245:14)
+    at async streamLanguageModelCall (file:///H:/TakiAgent-worktrees/t4/.trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/recovery/abort-baseline/node_modules/ai/dist/index.js:7991:7)
+    at async retryWithExponentialBackoffInternal (file:///H:/TakiAgent-worktrees/t4/.trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/recovery/abort-baseline/node_modules/@ai-sdk/provider-utils/dist/index.js:3103:12) {
+  cause: undefined,
+  url: 'http://127.0.0.1:2525/v1/chat/completions',
+  requestBodyValues: {
+    model: 'fixture',
+    user: undefined,
+    max_tokens: undefined,
+    temperature: undefined,
+    top_p: undefined,
+    frequency_penalty: undefined,
+    presence_penalty: undefined,
+    response_format: undefined,
+    stop: undefined,
+    seed: undefined,
+    reasoning_effort: undefined,
+    verbosity: undefined,
+    messages: [ [Object], [Object] ],
+    tools: undefined,
+    tool_choice: undefined,
+    stream: true,
+    stream_options: undefined
+  },
+  statusCode: 401,
+  responseHeaders: {
+    connection: 'keep-alive',
+    'content-type': 'application/json',
+    date: 'Thu, 22 Oct 2026 08:01:41 GMT',
+    'keep-alive': 'timeout=5',
+    'transfer-encoding': 'chunked'
+  },
+  responseBody: '{"error":{"message":"Fixture provider refusal"}}',
+  isRetryable: false,
+  data: { error: { message: 'Fixture provider refusal' } },
+  Symbol(vercel.ai.error): true,
+  Symbol(vercel.ai.error.AI_APICallError): true
+}

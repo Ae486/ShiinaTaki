@@ -4,10 +4,12 @@
  * POS: core/harness — the sole restart/reconciliation coordinator; external probes are always outside SQLite transactions
  */
 import { randomUUID } from "node:crypto";
-import { RecoveryReportSchema, type EffectLifecycle, type SnapshotReference, type RecoveryReport } from "@taki/shared";
+import { ACCEPTED_WORK_PROVIDER, RecoveryReportSchema, type EffectLifecycle, type SnapshotReference, type RecoveryReport } from "@taki/shared";
 import type { Database } from "../db/sqlite.ts";
 import type { RunRepo } from "../db/run-repo.ts";
 import type { EffectLifecycleService } from "./effect-lifecycle-service.ts";
+import { recoverInitiativeRun, recoverTerminalDeliveries } from "./initiative-recovery.ts";
+import { recoverSubagentRun } from "./subagent-recovery.ts";
 
 export interface RecoveryProbeResult { classification: "completed" | "failed" | "unknown" | "unavailable"; summary?: string; errorCode?: string; }
 export interface EffectRecoveryAdapter {
@@ -37,6 +39,7 @@ export function createRecoveryCoordinator(input: {
     async scan(options = {}) {
       if (closed) throw new Error("RECOVERY_CLOSED");
       const at = options.now ?? new Date().toISOString();
+      recoverTerminalDeliveries(input.db);
       const ids = input.runs.listRecoverable(maxRuns);
       input.db.prepare("UPDATE core_process_generations SET status='gone',finished_at=:at WHERE status='running'").run({ at });
       input.db.prepare("INSERT INTO core_process_generations (generation_id,started_at,status) VALUES (:id,:at,'running')").run({ id: generation, at });
@@ -44,6 +47,11 @@ export function createRecoveryCoordinator(input: {
       for (const runId of ids) {
         const status = input.runs.status(runId);
         if (["completed", "failed", "cancelled", "skipped", "deadline_exceeded", "outcome_unknown"].includes(status.run.state)) continue;
+        if (recoverSubagentRun(input, status, { now: at, generation })) { classified++; terminal++; continue; }
+        const acceptedWork = status.run.deliveryClass === "internal"
+          && status.run.provenance.provider === ACCEPTED_WORK_PROVIDER && Boolean(status.run.provenance.sourceRef);
+        // A trigger's initiator does not turn an accepted root into a Heartbeat decision Run.
+        if (!acceptedWork && recoverInitiativeRun(input, status)) { classified++; terminal++; continue; }
         const deadlineExpired = Boolean(status.run.deadlineAt && Date.parse(status.run.deadlineAt) <= Date.parse(at));
         const effects = input.effects.list?.(runId) ?? input.effects.unfinished(runId);
         const unfinished = effects.filter((effect) => !TERMINAL_EFFECT.has(effect.outcome ?? "") && effect.state !== "terminal");
@@ -68,6 +76,13 @@ export function createRecoveryCoordinator(input: {
           classified++; terminal++; continue;
         }
         if (unfinished.length === 0) {
+          // The immutable accepted purpose outlives its completed preparation Effects. Preserve
+          // viewable work without restoring lost executable authority or replaying a model call.
+          if (acceptedWork) {
+            input.runs.classifyRecovery({ runId, classification: "waiting_for_authority",
+              reason: "accepted work requires explicit continuation", now: at, generation });
+            classified++; continue;
+          }
           const lastTerminal = effects.at(-1);
           if (lastTerminal?.state === "terminal" && status.run.state !== "queued") {
             const outcome = lastTerminal.outcome === "completed" ? "completed" : lastTerminal.outcome === "deadline_exceeded" ? "deadline_exceeded" : lastTerminal.outcome === "cancelled" ? "cancelled" : lastTerminal.outcome === "failed" ? "failed" : "outcome_unknown";
@@ -91,6 +106,13 @@ export function createRecoveryCoordinator(input: {
           input.runs.settle({ runId, attemptId: classifiedStatus.run.activeAttemptId!, outcome: uncertain ? "outcome_unknown" : deadlineExpired ? "deadline_exceeded" : "failed", retryability: "not_retryable", summary: uncertain ? "effect outcome unknown after captured control expired" : deadlineExpired ? "captured deadline elapsed before dispatch" : "captured budget exhausted before dispatch", errorCode: deadlineExpired ? "deadline_exceeded" : "budget_exceeded" });
           classified++; terminal++;
           continue;
+        }
+        if (acceptedWork) {
+          // Even a newly available safe adapter lacks the retired accepted-source binding.
+          // Preserve unknown work for explicit continuation; do not infer root completion.
+          input.runs.classifyRecovery({ runId, classification: "reconciliation_required",
+            reason: "accepted work requires explicit effect reconciliation", now: at, generation });
+          classified++; continue;
         }
         let sawUnknown = false;
         for (const effect of unfinished) {

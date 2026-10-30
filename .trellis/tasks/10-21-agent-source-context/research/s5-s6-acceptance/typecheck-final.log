@@ -1,0 +1,8 @@
+
+> @taki/core@0.0.0 typecheck H:\TakiAgent-worktrees\t4\packages\core
+> tsc --noEmit
+
+src/testing/source-live-evidence.ts(26,23): error TS2883: The inferred type of 'openSourceLiveEvidence' cannot be named without a reference to 'LanguageModelV4' from '.pnpm/@ai-sdk+provider@4.0.31/node_modules/@ai-sdk/provider'. This is likely not portable. A type annotation is necessary.
+H:\TakiAgent-worktrees\t4\packages\core:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/core@0.0.0 typecheck: `tsc --noEmit`
+Exit status 2

@@ -19,6 +19,8 @@ export type ConnectionState =
 export type ConnectionNotify = (method: string, params: unknown) => void;
 
 export interface Connection {
+  /** Real socket write completion; absence is unknown, never evidence of delivery. */
+  notifyObserved?: (method: string, params: unknown) => Promise<"accepted" | "refused" | "unknown">;
   state: ConnectionState;
   notify?: ConnectionNotify;
   readonly remoteAddress?: string;

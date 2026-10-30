@@ -6,3 +6,18 @@
 {"file":"docs/adr/0010-separate-autonomous-run-history-from-relationship-timeline.md","reason":"Autonomous provenance and timeline separation for delivered speech and silent controls."}
 {"file":".trellis/tasks/08-09-memory-replica-sync-recovery/design.md","reason":"Stable B5 reader, Pending Memory, recovery, and checkpoint contracts consumed by B6."}
 {"file":".trellis/tasks/08-09-memory-replica-sync-recovery/research/runtime-baseline-2026-09-05.md","reason":"Current RunSnapshot, runtime composition, flush port, and Shared result baseline."}
+{"file":".trellis/tasks/08-09-memory-runtime-integration/research/local-runtime-reuse-2026-09-10.md","reason":"Verified Local reuse map, accepted T5 rules and canonical maintenance gaps."}
+{"file":".trellis/spec/backend/canonical-local-memory-runtime.md","reason":"Implemented exact-source Local ingestion, maintenance, immutable runtime binding and post-marker retirement contracts."}
+{"file":".trellis/spec/backend/hindsight-runtime-reads.md","reason":"Native read transport signatures and schema/error/fidelity boundaries; does not imply Canonical hydration or provider readiness."}
+{"file":".trellis/tasks/08-09-memory-runtime-integration/research/d77-hindsight-runtime-handoff-2026-09-11.md","reason":"Bounded source-verified Hindsight client/projection/extension context, with links to full evidence and the pending policy decision."}
+{"file":".trellis/tasks/08-09-memory-runtime-integration/grill.md","reason":"Accepted neutral recall before detailed assessment; preserve basic integrity, native/Pending distinctions and the separate B7 grill boundary."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"SQLite single-writer, atomic canonical mutations, FTS and authority fences."}
+{"file":".trellis/spec/backend/sqlite-transaction-isolation.md","reason":"Nested savepoints and rollback on commit failure; no partial maintenance success."}
+{"file":".trellis/spec/backend/sqlite-migration-lineage.md","reason":"Reserve new migrations serially and preserve applied migration history."}
+{"file":".trellis/spec/guides/source-grounding-guide.md","reason":"Verify actual interfaces and previous rulings before inventing adapters or asking product questions."}
+{"file":".trellis/tasks/08-09-memory-runtime-integration/research/d77-implementation-contract-2026-09-11.md","reason":"Frozen D77/B6 ownership, exact versions, neutral policy, guarded reflect and implementation gates"}
+{"file":".trellis/spec/backend/hindsight-application-runtime.md","reason":"Executable D77 application evidence, policy, write, ingestion, source recovery and runtime lifetime contracts"}
+{"file":".trellis/tasks/08-09-memory-runtime-integration/research/d77-owner-acceptance-validation-2026-09-12.md","reason":"Historical actual-data fidelity/recovery proof and initial runtime failures; later API results and owner sequencing supersede its next-work priority."}
+{"file":".trellis/tasks/08-09-memory-runtime-integration/research/memory-capability-followups-2026-09-13.md","reason":"Owner-approved B6 closeout -> existing B7 -> D79-D83 sequencing; distinguish preserved policy fields from deferred behavior and resolve the temporary guard without scope expansion."}
+{"file":".trellis/tasks/08-09-memory-runtime-integration/research/d77-siliconflow-validation-2026-09-13.md","reason":"Actual API/Recall/Reflect results, preserved derived-content failure and limits; do not claim unrun acceptance or reopen deferred capability work."}
+{"file":".trellis/tasks/08-09-memory-runtime-integration/research/b6-closeout-validation-2026-09-13.md","reason":"Final bounded B6 source/runtime/curator continuation evidence; preserve D81, failed reassessment, manual and original activation limits."}

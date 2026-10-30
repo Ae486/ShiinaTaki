@@ -27,6 +27,8 @@ export interface HindsightReplicaSchedulerRepo {
   get(bankId: string): MemoryReplicaSyncState | undefined;
   list(): MemoryReplicaSyncState[];
   requestManual(input: { bankId: string; kind: MemoryReplicaRunKind }): MemoryReplicaSyncState;
+  /** Clears an unclaimed manual request; a claimed run (`run !== null`) refuses with HINDSIGHT_REPLICA_BUSY. */
+  cancelManual(bankId: string): MemoryReplicaSyncState;
   requestCatchUp(bankId: string): MemoryReplicaSyncState;
   recover(bankId: string): MemoryReplicaSyncState;
   claim(input: ClaimInput): MemoryReplicaScheduledRun | undefined;
@@ -47,6 +49,10 @@ export function createHindsightReplicaSchedulerRepo(db: Database, now: () => str
       const kind = MemoryReplicaRunKindSchema.parse(input.kind);
       return mutate(context, input.bankId, (state) => ({ ...state, pendingManualKind: state.pendingManualKind === "full" ? "full" : kind }));
     },
+    cancelManual: (bankId) => mutate(context, bankId, (state) => {
+      if (state.run !== null) throw new Error("HINDSIGHT_REPLICA_BUSY");
+      return { ...state, pendingManualKind: null };
+    }),
     requestCatchUp: (bankId) => mutate(context, bankId, (state) => ({ ...state,
       catchUpRequested: state.automatic && state.run === null && (state.catchUpRequested || state.retryDueAt !== null
         || replicaScheduleDue(state, clock()) !== undefined) })),

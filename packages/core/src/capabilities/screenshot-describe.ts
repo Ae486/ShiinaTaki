@@ -7,13 +7,18 @@
  *         slot is configured. The text model reads the description in the tool result; pixels never reach it.
  */
 import { ToolLoopAgent, type LanguageModel } from "ai";
+import type { EffectLifecycle } from "@taki/shared";
+import { createRunObservabilityModel } from "../agents/run-observability-telemetry.ts";
+import { SOURCE_INTERPRETATION_RULE } from "../agents/source-interpretation.ts";
+import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 
 // Mirrors image-description-writer's faithful-and-concise posture; a screenshot's readable text and application
 // context are what the text model needs to answer "what's on my screen".
 const DESCRIBE_PROMPT =
   "You describe screenshots for an assistant that cannot see images. Describe the visible screen faithfully, " +
   "concisely and objectively — applications, windows, notable content, and any readable text that matters. " +
-  "Reply with ONLY the description, at most 200 words.";
+  "Preserve displayed title, speaker and quotations when relevant; distinguish visible material from interpretation. " +
+  "Reply with ONLY the description, at most 200 words.\n\n" + SOURCE_INTERPRETATION_RULE;
 
 // The caller focus is APPENDED to the base framing, never a replacement — the guardrails (objective,
 // only-the-description, 200-word cap) survive any caller-supplied prompt (T2b research §3.6).
@@ -27,7 +32,10 @@ export interface ScreenshotDescriberLogger {
 }
 
 export interface ScreenshotDescriber {
-  describe(input: { dataBase64: string; mediaType: string; prompt?: string }): Promise<string | null>;
+  describe(input: { dataBase64: string; mediaType: string; prompt?: string }, execution?: {
+    signal?: AbortSignal; runId: string; attemptId: string; effects: EffectLifecycleService;
+    onCommitModelIntent?: (effect: EffectLifecycle) => void;
+  }): Promise<string | null>;
 }
 
 export function createScreenshotDescriber(deps: {
@@ -35,10 +43,16 @@ export function createScreenshotDescriber(deps: {
   logger: ScreenshotDescriberLogger;
 }): ScreenshotDescriber {
   return {
-    async describe({ dataBase64, mediaType, prompt }) {
+    async describe({ dataBase64, mediaType, prompt }, execution) {
       try {
-        const agent = new ToolLoopAgent({ model: deps.model, instructions: composeInstructions(prompt) });
+        if (execution?.signal?.aborted) return null;
+        const observed = createRunObservabilityModel({ model: deps.model, lifecycle: execution?.effects,
+          runId: execution?.runId, attemptId: execution?.attemptId, onCommitModelIntent: execution?.onCommitModelIntent });
+        const agent = new ToolLoopAgent({ model: observed.model, instructions: composeInstructions(prompt),
+          ...(observed.observability ? { telemetry: { isEnabled: true, recordInputs: false, recordOutputs: false,
+            integrations: [observed.observability.telemetry] } } : {}) });
         const result = await agent.generate({
+          abortSignal: execution?.signal,
           messages: [
             {
               role: "user",
@@ -50,6 +64,8 @@ export function createScreenshotDescriber(deps: {
             },
           ],
         });
+        observed.observability?.assertHealthy();
+        if (execution?.signal?.aborted) return null;
         const text = result.text.trim();
         return text.length > 0 ? text : null;
       } catch (error) {

@@ -1,0 +1,162 @@
+[
+  {
+    "path": ".trellis/spec/frontend/home-window.md",
+    "sha256": "31a3a18b9e800352d7018cf74697aba76a0448184f65c70a8276b9a818ec9bd4"
+  },
+  {
+    "path": "apps/desktop/src/features/co-watching/chat-co-watching-invitation.test.tsx",
+    "sha256": "7294ed162f60fd3c1f9772aabd43f280ed5439f28bd17903bcc43d672e39b00e"
+  },
+  {
+    "path": "apps/desktop/src/features/co-watching/chat-co-watching-invitation.tsx",
+    "sha256": "ba0a64199d67eb2f5e0aa4e7211b02690237415a6f555e8fb11d71f70f974bdc"
+  },
+  {
+    "path": "apps/desktop/src/features/co-watching/index.md",
+    "sha256": "48a6bd6dd261079298c454d4bb477747f7cbac624d29b31c9037d95138c9613d"
+  },
+  {
+    "path": "apps/desktop/src/features/co-watching/use-co-watching-invitation.ts",
+    "sha256": "895819f3dc749f8b97fc9f861881072464bd88053b166eb7d5c6f2afada39aea"
+  },
+  {
+    "path": "apps/desktop/src/features/index.md",
+    "sha256": "7b1f34d52de3a57119193f7cd0198b64fa4a7f0dc3ec56cc1c7eecc21835e41d"
+  },
+  {
+    "path": "apps/desktop/src/features/subagents/index.md",
+    "sha256": "5b23c862e3374416f38c02adec0cfb3ca95b67eccf003f78fdfebcbfffa1da72"
+  },
+  {
+    "path": "apps/desktop/src/features/subagents/subagent-composer.tsx",
+    "sha256": "75d42b4c98101f5dd428cf918fbbe5c7cf71e66421fbbfbafc591b90c8b1cb8f"
+  },
+  {
+    "path": "apps/desktop/src/features/subagents/subagent-controller.test.ts",
+    "sha256": "6bc5a341ba869c02faeaa009f67b6ca4fbfc02bffc36385aa6841d1d9081e239"
+  },
+  {
+    "path": "apps/desktop/src/features/subagents/subagent-controller.ts",
+    "sha256": "4995e9f9b5248a42f0a8843fa9b5210c3fb39efc0c0fe8ddb6d271f48a124ec7"
+  },
+  {
+    "path": "apps/desktop/src/features/subagents/subagent-detail.tsx",
+    "sha256": "b1cc0f320d68966c2e15a4b03d07b02231a3e40c13e79658b627d26a0c08a006"
+  },
+  {
+    "path": "apps/desktop/src/features/subagents/subagent-inputs.tsx",
+    "sha256": "b12500c623e7035a21191055305f0867667f79d04ba9bcfb1d96cf66884de62d"
+  },
+  {
+    "path": "apps/desktop/src/features/subagents/subagent-labels.ts",
+    "sha256": "b672ff0a935b6e36e05728ce3960d046ed74f6bf46e5b9fc1c0184589f8823bc"
+  },
+  {
+    "path": "apps/desktop/src/features/subagents/subagent-list.tsx",
+    "sha256": "144e4c8fa81825f44c58249fa89280031a3a6223709bd6853293f28c3250dba9"
+  },
+  {
+    "path": "apps/desktop/src/features/subagents/subagent-navigation.ts",
+    "sha256": "c7956bb934498f6a901924533262d701f1bc31deecb506134acd524b12b0dc4b"
+  },
+  {
+    "path": "apps/desktop/src/features/subagents/subagent-presentation.test.tsx",
+    "sha256": "78e3decf303ca490b824d81a9585420ce1ed71e99924a3d9326e021b6c9854c7"
+  },
+  {
+    "path": "apps/desktop/src/features/subagents/subagent-reads.ts",
+    "sha256": "69fd9dac3fc885ba1726b234fb97a3ce1306a4760fc77e07ac1a24172b6657de"
+  },
+  {
+    "path": "apps/desktop/src/features/subagents/subagent-results.tsx",
+    "sha256": "4d0932c18c532bd77c4b97c5f2fa1ae763cf4d9037b38c786f58f66ea14b92da"
+  },
+  {
+    "path": "apps/desktop/src/features/subagents/subagent-state.ts",
+    "sha256": "938e0fbc2f6d731df764c455e339e46ec103f53bc53d27c18e614c80e264fff8"
+  },
+  {
+    "path": "apps/desktop/src/features/subagents/subagent-transcript.ts",
+    "sha256": "30d65434b4e021d40e39e24b35b329efaee8f65dd92f8cd61a6eb1b994b57a36"
+  },
+  {
+    "path": "apps/desktop/src/features/subagents/use-subagents.ts",
+    "sha256": "d0b464548e3ba9b442869cc3a015249e601bb5671e04112a94450e7c05b668fd"
+  },
+  {
+    "path": "apps/desktop/src/lib/index.md",
+    "sha256": "54343ab697ad30411371e2d41e83306932f07f0514f93669db2ba8ad6e4f20ae"
+  },
+  {
+    "path": "apps/desktop/src/lib/ws-client-methods.ts",
+    "sha256": "7d9544703c15b61c2aad9d6312d6d5f77f5fab9af7722d353414e11e526f4182"
+  },
+  {
+    "path": "apps/desktop/src/lib/ws-client-routes.ts",
+    "sha256": "ab7621b29cdf97dd42c71c682b7a54fbc59b4ca94bfe2b60724e5361859198cd"
+  },
+  {
+    "path": "apps/desktop/src/lib/ws-client-subagents.test.ts",
+    "sha256": "ab039929f3114281cd88d331df41faa69fc6dcf874c44f61de6d2bc07df187e1"
+  },
+  {
+    "path": "apps/desktop/src/lib/ws-client-subagents.ts",
+    "sha256": "9b5852fbe41c28007aeda52fe47a54005b66882ad6b0cc14d01c84e75a3c29ef"
+  },
+  {
+    "path": "apps/desktop/src/lib/ws-client.ts",
+    "sha256": "7ddd3d3be2af87ba9288b9021c3cb46278e194fe2a4bcfc9c7a95dab1ec92f29"
+  },
+  {
+    "path": "apps/desktop/src/windows/home/home-navigation.test.ts",
+    "sha256": "5fb0802e1b1227ed1534ff5b675c8f05a88ec736a31d07db40b7bb77ebbee7ff"
+  },
+  {
+    "path": "apps/desktop/src/windows/home/index.md",
+    "sha256": "8783f1544ef536bcbf89fdf259ed4577b983d5677c91f2750fc25e7abf942697"
+  },
+  {
+    "path": "apps/desktop/src/windows/home/pages.ts",
+    "sha256": "63763aacd56cdc8c0e924c0c4b2d278b42ebf6d12252f434df899219fe07e7a9"
+  },
+  {
+    "path": "apps/desktop/src/windows/home/pages/index.md",
+    "sha256": "a861ab31f0fb6346d93665e427b399f124c736984ec6c7bf821ee3db48ca9339"
+  },
+  {
+    "path": "apps/desktop/src/windows/home/pages/perception/co-watching-card.tsx",
+    "sha256": "47a53da01b5b342b0348c66de7472f9d6db4b18614d976a235e18bfa8f38696c"
+  },
+  {
+    "path": "apps/desktop/src/windows/home/pages/perception/index.md",
+    "sha256": "47717d9cfcf863925fff664473142c6b9eb156c6258351d0e5e741cd9d3a7b61"
+  },
+  {
+    "path": "apps/desktop/src/windows/home/pages/perception/use-co-watching.ts",
+    "sha256": "3b8da5da66edb35e495fee1c2ee855ff7385cf64eb486faa9ac63f918c4c039e"
+  },
+  {
+    "path": "apps/desktop/src/windows/home/pages/subagents/index.md",
+    "sha256": "1294a9334267b023462e9a6db4f4dad90cd83c3dd3c799489adb4bf034dd255d"
+  },
+  {
+    "path": "apps/desktop/src/windows/home/pages/subagents/subagents-page.tsx",
+    "sha256": "50e8eeb081c257e6453999983ea6be20587eac51dc0dac6ac83ffa43d01ed40c"
+  },
+  {
+    "path": "apps/desktop/test/index.md",
+    "sha256": "9915ab27abf0d489ef0237af41534c6d32c055c219d3a541d34d7089903b025f"
+  },
+  {
+    "path": "apps/desktop/test/s7-subagent-data.ts",
+    "sha256": "e479731d42f41b551723c626b0e64741211471ba918ad7d9280b9727451d7f32"
+  },
+  {
+    "path": "apps/desktop/test/s7-subagent-native-server.mjs",
+    "sha256": "5f7f8065da7bac8fd476a2f7b6df3b860cee99023062845f46effee2559f788b"
+  },
+  {
+    "path": "apps/desktop/test/s7-subagent-native-smoke.mjs",
+    "sha256": "090b8106e2e17072a78ff708ad7f1a17107ec336d2f5946b52d903c175d25d24"
+  }
+]

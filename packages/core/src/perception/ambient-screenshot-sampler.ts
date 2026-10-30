@@ -4,14 +4,14 @@
  * POS:    core/perception — default-off high-sensitivity sampler; deterministic pre-capture and semantic privacy gates
  */
 import { ScreenshotOutputSchema } from "@taki/shared";
-import type { RouteFailureCode, RouteResult } from "../capabilities/route-capability.ts";
+import type { CapabilityRouteProvenance, RouteFailureCode, RouteResult } from "../capabilities/route-capability.ts";
 import type { Logger } from "../logging/logger.ts";
 import type { AmbientShotStore } from "./ambient-shot-store.ts";
-import { foregroundKey, screenForegroundNow, FOREGROUND_CAPABILITY } from "./foreground-screen.ts";
-import { scrubPii } from "./pii-scrub.ts";
+import { foregroundKey, screenForegroundNow, FOREGROUND_CAPABILITY, type ForegroundScreen } from "./foreground-screen.ts";
+import { observeAmbientFrame } from "./ambient-observation.ts";
+import { samePerceptionSource, type PerceptionEvidence } from "./perception-evidence.ts";
 import { notifyPerceptionChange } from "./notify-perception-change.ts";
 import type { ScreenContext } from "./screen-context.ts";
-import { AMBIENT_DESCRIBE_FOCUS, isSensitiveScreenVerdict } from "./sensitive-screen.ts";
 
 const CAPABILITY = "screenshot-ambient";
 // Both refusals of the final screen, worded so neither discloses what it refused to look at.
@@ -41,7 +41,7 @@ export interface AmbientForeground {
 }
 
 export interface AmbientScreenshotSamplerDeps {
-  route: (capability: string, input: unknown) => Promise<RouteResult>;
+  route: (capability: string, input: unknown, targetHostId?: string) => Promise<RouteResult>;
   /** True iff a node currently provides `capability`; asked for BOTH the capture and its pre-capture foreground screen. */
   hasNode: (capability: string) => boolean;
   isPaused: () => boolean;
@@ -51,6 +51,7 @@ export interface AmbientScreenshotSamplerDeps {
   describe?: (input: { dataBase64: string; mediaType: string; prompt?: string }) => Promise<string | null>;
   store: AmbientShotStore;
   context: ScreenContext;
+  evidence?: PerceptionEvidence;
   logger: Logger;
   config: AmbientScreenshotSamplerConfig;
   /** Injected epoch-ms clock (defaults to Date.now); tests pass a synthetic clock. */
@@ -62,6 +63,8 @@ export interface AmbientScreenshotSamplerDeps {
 export interface AmbientScreenshotSampler {
   start(): void;
   stop(): void;
+  /** Consent/source retirement clears refresh suppression; it never restarts a stopped loop. */
+  reset(): void;
   /** True while the loop is scheduled — false when never enabled, degraded (no vision slot), stopped or denied. */
   running(): boolean;
 }
@@ -86,6 +89,16 @@ interface AmbientRuntime {
   lastCaptureAt: number;
 }
 
+interface CaptureAttempt {
+  at: number;
+  epoch: number | undefined;
+}
+
+function current(rt: AmbientRuntime, attempt: CaptureAttempt, source?: CapabilityRouteProvenance): boolean {
+  return !rt.stopped && !rt.deps.isPaused() && (source?.isCurrent() ?? true)
+    && (attempt.epoch === undefined || rt.deps.evidence?.isCurrent(attempt.epoch, source) === true);
+}
+
 function logOnce(rt: AmbientRuntime, flag: "skipLogged" | "screenLogged", message: string): void {
   if (rt[flag]) return;
   rt.log.debug(message);
@@ -106,7 +119,7 @@ function logOnce(rt: AmbientRuntime, flag: "skipLogged" | "screenLogged", messag
 function captureTarget(rt: AmbientRuntime, at: number): boolean {
   const { config, isSensitive, foreground } = rt.deps;
   const current = foreground();
-  if (current === undefined || at - current.observedAt > config.foregroundMaxAgeMs) {
+  if (current === undefined || at < current.observedAt || at - current.observedAt > config.foregroundMaxAgeMs) {
     logOnce(rt, "skipLogged", "foreground unknown or stale; ambient capture skipped");
     return false;
   }
@@ -127,6 +140,7 @@ function stop(rt: AmbientRuntime): void {
     rt.timer = undefined;
   }
   if (wasRunning) notifyPerceptionChange(rt.deps.onChange);
+  rt.deps.context.clear();
 }
 
 function handleFailure(rt: AmbientRuntime, code: RouteFailureCode, at: number): void {
@@ -155,44 +169,20 @@ function handleFailure(rt: AmbientRuntime, code: RouteFailureCode, at: number): 
 }
 
 /**
- * Persist → describe → screen → scrub → publish. The frame is written BEFORE the describe so a crash mid-description
- * leaves a file the retention sweeper can reclaim; under drop-after-describe it is deleted the moment the description
- * exists (or fails). The describe call carries the privacy focus (sensitive-screen.ts) — privacy layer TWO, which sees
- * inside a browser as an exe-name skip cannot. Scrub-then-fence (prd ruling 5): PII leaves the description HERE, at
- * the sense seam, so the prompt path (fenced by screen-context's renderer) only ever carries the minimized string.
- */
-async function observe(rt: AmbientRuntime, frame: { dataBase64: string; mediaType: string }, at: number): Promise<void> {
-  const describe = rt.deps.describe;
-  if (describe === undefined) return; // unreachable: start() refuses to schedule without a describe bridge
-  const { dataBase64, mediaType } = frame;
-  const saved = rt.deps.store.save(dataBase64, at);
-  const description = await describe({ dataBase64, mediaType, prompt: AMBIENT_DESCRIBE_FOCUS });
-  const sensitive = description !== null && isSensitiveScreenVerdict(description);
-  // A sensitive verdict overrides the retention config: the one frame we must never keep is the one the model just
-  // told us not to look at.
-  if (saved !== null && (sensitive || rt.deps.config.dropRawAfterDescribe)) rt.deps.store.discard(saved.name);
-  if (sensitive) {
-    // Neither the description nor the window identity may appear here — logging them would re-leak what the refusal
-    // protects. The previous observation stays: blanking the block would itself signal "something private is up now".
-    rt.log.debug("ambient screen judged sensitive by the vision pass; frame and description discarded");
-    return;
-  }
-  if (description === null) return; // the describer already warned; keep the previous observation rather than a blank
-  rt.deps.context.push(scrubPii(description), at);
-}
-
-/**
  * The FINAL gate, as late as possible: one fresh foreground-window route immediately before the capture, so the
  * decision rests on what is in front NOW, not on the entry T3a recorded a poll ago. Returns the identity to record,
  * or undefined to skip; fail-closed on everything it cannot read. NOT atomic — the user can still switch between this
  * reply and the capture's, which is D48's remaining residual (one round-trip, down from one poll interval).
  */
-async function screenNow(rt: AmbientRuntime): Promise<string | undefined> {
+async function screenNow(rt: AmbientRuntime, attempt: CaptureAttempt): Promise<Extract<ForegroundScreen, { status: "clear" }> | undefined> {
   const screened = await screenForegroundNow({ route: rt.deps.route, isSensitive: rt.deps.isSensitive });
+  if (!current(rt, attempt)) return undefined;
   if (screened.status === "clear") {
+    if (!current(rt, attempt, screened.provenance)) return undefined;
     rt.screenLogged = false;
-    return screened.key;
+    return screened;
   }
+  rt.deps.evidence?.reject();
   if (screened.status === "denied") {
     // Without a fresh foreground this sampler can never satisfy its safety precondition again, so continuing would
     // mean ticking forever only to skip forever — stop, exactly as a denial of its own capability does.
@@ -204,11 +194,18 @@ async function screenNow(rt: AmbientRuntime): Promise<string | undefined> {
   return undefined;
 }
 
-async function capture(rt: AmbientRuntime, key: string, at: number): Promise<void> {
-  const routed = await rt.deps.route(CAPABILITY, {});
+async function capture(rt: AmbientRuntime, screened: Extract<ForegroundScreen, { status: "clear" }>, attempt: CaptureAttempt): Promise<void> {
+  if (!current(rt, attempt, screened.provenance)) return;
+  const routed = await (screened.provenance
+    ? rt.deps.route(CAPABILITY, {}, screened.provenance.hostId) : rt.deps.route(CAPABILITY, {}));
+  if (!current(rt, attempt, screened.provenance)) return;
   if (!routed.ok) {
-    handleFailure(rt, routed.code, at);
+    handleFailure(rt, routed.code, attempt.at);
     return;
+  }
+  if (!current(rt, attempt, routed.provenance)) return;
+  if (screened.provenance || routed.provenance) {
+    if (!screened.provenance || !routed.provenance || !samePerceptionSource(screened.provenance, routed.provenance)) return;
   }
   rt.consecutiveErrors = 0;
   rt.backoffUntil = 0;
@@ -220,9 +217,16 @@ async function capture(rt: AmbientRuntime, key: string, at: number): Promise<voi
   }
   // The FRESH identity is what gets recorded (never the pre-filter's assumption) and it is recorded BEFORE the
   // description: a failing VLM must not turn every tick into a new capture — the refresh window is the retry.
-  rt.lastKey = key;
-  rt.lastCaptureAt = at;
-  await observe(rt, parsed.data, at);
+  rt.lastKey = screened.key;
+  rt.lastCaptureAt = attempt.at;
+  if (!rt.deps.describe) return;
+  await observeAmbientFrame({
+    describe: rt.deps.describe, store: rt.deps.store, context: rt.deps.context, logger: rt.log,
+    dropRawAfterDescribe: rt.deps.config.dropRawAfterDescribe, onRefused: () => rt.deps.evidence?.reject(),
+  }, parsed.data, {
+    observedAt: attempt.at,
+    isCurrent: () => current(rt, attempt, screened.provenance) && current(rt, attempt, routed.provenance),
+  });
 }
 
 async function tick(rt: AmbientRuntime): Promise<void> {
@@ -237,6 +241,7 @@ async function tick(rt: AmbientRuntime): Promise<void> {
     return;
   }
   rt.pausedLogged = false;
+  const attempt = { at, epoch: rt.deps.evidence?.generation() };
   if (!captureTarget(rt, at)) return;
   // Pre-flights (activity-sampler precedent): with no node providing a capability, routing would log a per-tick "tool
   // invoked" + NO_NODE pair. Skip it and take the same quiet once-per-streak arm — and no node for the final screen
@@ -251,9 +256,9 @@ async function tick(rt: AmbientRuntime): Promise<void> {
   }
   rt.inflight = true;
   try {
-    const key = await screenNow(rt);
-    if (key === undefined) return;
-    await capture(rt, key, at);
+    const screened = await screenNow(rt, attempt);
+    if (screened === undefined) return;
+    await capture(rt, screened, attempt);
   } catch (error) {
     // Defense-in-depth: routeCapability and the describer never throw, but the loop must survive any surprise.
     const message = error instanceof Error ? error.message : String(error);
@@ -297,6 +302,10 @@ export function createAmbientScreenshotSampler(deps: AmbientScreenshotSamplerDep
       notifyPerceptionChange(deps.onChange);
     },
     stop: () => stop(rt),
+    reset() {
+      rt.lastKey = undefined;
+      rt.lastCaptureAt = Number.NEGATIVE_INFINITY;
+    },
     running: () => rt.timer !== undefined && !rt.stopped,
   };
 }

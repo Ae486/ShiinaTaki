@@ -35,8 +35,14 @@ export const ErrorCodeSchema = z.enum([
   // Operator-only Hindsight setup refuses a request before/while reaching the external service. The bounded
   // HindsightError code rides error.data.reason; raw HTTP/provider/secret details never do.
   "HINDSIGHT_REFUSED",
+  // The memory operation owner refuses a submit/status/cancel on its own terms (busy family / running / settled /
+  // unsupported runtime / unknown Bank / not found); the closed MemoryOperationRefusalReason rides error.data.reason
+  // and a busy refusal also carries error.data.activeOperationId.
+  "MEMORY_OPERATION_REFUSED",
   // Tool execution outcomes are structured model-readable failures, not JSON-RPC envelope codes.
   "GOVERNANCE_DENIED",
   "APPROVAL_REQUIRED",
+  // A presentation tool whose Avatar Command the Pet UI's engine refused (reason rides beside it); normal, never retried.
+  "AVATAR_REJECTED",
 ]);
 export type ErrorCode = z.infer<typeof ErrorCodeSchema>;

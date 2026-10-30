@@ -30,6 +30,7 @@ import { createIntlSegmenterTokenizer, type SearchTokenizer } from "./search-tok
 import { createMemoryStore, type MemoryStore } from "./store.ts";
 import { createTidyTools, type TidyToolOps } from "./tidy-tools.ts";
 import type { ToolSet } from "ai";
+import type { InitiativeMemoryAssembler } from "./initiative-memory-assembly.ts";
 
 // How many memories a single memory_search tool call returns to the model.
 const SEARCH_LIMIT = 8;
@@ -38,6 +39,10 @@ const ALL_LAYER_IDS = V1_MEMORY_LAYERS.map((layer) => layer.id);
 
 /** The tidy pass's engine surface (batch 4b): deterministic report reads + the maintenance toolset. */
 export interface TidyEngineView {
+  /** Freeze canonical row and block revisions before the report can wait for the Utility Slot. */
+  captureReview?(characterId: string): TidyEngineView;
+  /** Failed canonical CAS/authority work keeps the report eligible for retry. */
+  reviewHealthy?(): boolean;
   /** Every active in-scope row across all layers — the report's raw material. */
   listActive(characterId: string): MemoryEntryRow[];
   /** Writes-since-mark for the trigger; updated_at counts — a reinforced store is a changed store. */
@@ -52,6 +57,8 @@ export interface MemoryEngine {
   reconcile(): ReconcileStats;
   /** The per-turn assembled context string (persona + emotion + blocks + pinned + intention) — deterministic push only. */
   assemble(params: AssembleParams): string;
+  /** Optional compatibility seam: freeze Persona and explicit scope Blocks without primary recall/pinned/intention logic. */
+  captureInitiative?(characterId: string): InitiativeMemoryAssembler;
   /** characterId-bound memory tools for one chat stream; `seq` overrides the engine's timeline for the event log. */
   createTools(characterId: string, seq?: TurnSeqGetter): ToolSet;
   /** The same set for an AUTOMATIC pass: memory_write restricted to the auto layers + importance ceiling (Q11-1). */
@@ -105,6 +112,7 @@ export function createMemoryEngine(deps: MemoryEngineDeps): MemoryEngine {
   return {
     reconcile: () => reconcile({ repo, tokenizer, store }),
     assemble: (params) => assembler.assemble(params),
+    captureInitiative: assembler.captureInitiative,
     createTools: (characterId, seq) => createMemoryTools(ops, characterId, seq ?? turnSeq(characterId)),
     createBackgroundTools: (characterId, seq) =>
       createBackgroundMemoryTools(ops, characterId, seq ?? turnSeq(characterId)),

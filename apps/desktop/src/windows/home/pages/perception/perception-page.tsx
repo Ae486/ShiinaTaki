@@ -14,6 +14,8 @@ import { PendingIndicator } from "@/components/ui/pending-indicator.js";
 import { PauseControls } from "./pause-controls.tsx";
 import { activityRows, samplingRows } from "./perception-view.ts";
 import { usePerception } from "./use-perception.ts";
+import { BrowserAttachmentCard } from "./browser-attachment-card.tsx";
+import { CoWatchingCard } from "./co-watching-card.tsx";
 
 const RETENTION_KNOBS = ["TAKI_AMBIENT_SCREENSHOT", "TAKI_AMBIENT_SCREENSHOT_RETENTION", "TAKI_ATTACHMENT_TTL_DAYS"];
 
@@ -73,6 +75,8 @@ export function PerceptionPage() {
           {!perception.card && !perception.loading && <p className="text-xs text-text-secondary">活动记录尚未读取。</p>}
         </PageCard>
         <RetentionCard onOpenSettings={() => navigate("settings")} />
+        <BrowserAttachmentCard />
+        <CoWatchingCard />
         <div className="flex justify-end"><ActionButton disabled={!perception.connectionReady} onClick={() => void perception.refresh()}>刷新状态</ActionButton></div>
       </PageBody>
     </>

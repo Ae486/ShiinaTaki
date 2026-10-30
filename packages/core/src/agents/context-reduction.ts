@@ -3,9 +3,10 @@
  * OUTPUT: deterministic projection-only reductions with bounded savings and privacy-safe rendering helpers
  * POS:    core/agents — Slice 4 Context Reduction stage; never mutates Timeline, Memory, or completed Tool Effects
  */
-import type { ModelMessage } from "ai";
+import type { ModelMessage, ToolResultPart } from "ai";
 import { estimateMessagesTokens, estimateTokens } from "../memory/token-estimator.ts";
 import type { TimelineEntry } from "@taki/shared";
+import { renderSourceContext, reduceSourcedToolResult } from "./source-context.ts";
 
 export type ReductionClass = "dialogue" | "summary" | "tool-result" | "snapshot" | "reasoning" | "media" | "observation";
 
@@ -120,16 +121,19 @@ export function projectExternalFact(input: { source: string; text: string; maxCh
 export function renderSafeTranscript(entries: TimelineEntry[]): string {
   return entries.map((entry) => {
     const bounded = headTail(scrubSensitive(entry.content), entry.role === "tool" ? 2_000 : 8_000);
-    if (entry.role !== "tool") return `${entry.role}: ${bounded}`;
+    const source = scrubSensitive(renderSourceContext(entry.sourceContext));
+    if (entry.role !== "tool") return [source, `${entry.role}: ${bounded}`].filter(Boolean).join("\n");
     const facts = (entry.parts ?? []).filter((part) => part.type === "tool-result").map((part) => {
       // Tool outputs may use AI SDK's `content` variant, whose nested file parts carry raw bytes. Project those
       // parts to a marker before serialization so the compaction prompt cannot receive media payloads.
       const output = part.output.value === undefined ? "" : stringifyValue(sanitizeToolValue(part.output.value));
-      return `${part.toolName}(${part.toolCallId}): ${headTail(scrubSensitive(output), 1_500)}`;
+      const material = scrubSensitive(renderSourceContext({ materials: part.sourceMaterials?.flatMap((item) => item.source ? [item.source] : []) }));
+      const body = projectExternalFact({ source: `${part.toolName}:${part.toolCallId}`, text:
+        `${part.toolName}(${part.toolCallId}): Outcome: ${part.output.type}. ${output || (typeof part.output.reason === "string" ? part.output.reason : "[no value]")}`, maxChars: 1_500 });
+      return [material, body].filter(Boolean).join("\n");
     }).join("\n");
-    const names = (entry.parts ?? []).filter((part) => part.type === "tool-result")
-      .map((part) => `${part.toolName}:${part.toolCallId}`).join(",");
-    return `${entry.role}: ${projectExternalFact({ source: names || "tool-result", text: facts || bounded, maxChars: 1_500 })}`;
+    return [source, `${entry.role}: ${facts || projectExternalFact({ source: "tool-result", text: bounded, maxChars: 1_500 })}`]
+      .filter(Boolean).join("\n");
   }).join("\n");
 }
 
@@ -183,7 +187,7 @@ function replaceMessage(message: ModelMessage, candidate: ReducedCandidate): Mod
   if (message.role !== "tool" || !Array.isArray(message.content)) return message;
   const content = message.content.map((part) => {
     if (part.type !== "tool-result") return part;
-    return { ...part, output: reduceToolOutput(part.output) };
+    return { ...part, output: reduceSourcedToolResult(part.output, (output) => reduceToolOutput(output) as ToolResultPart["output"]) };
   });
   return { ...message, content } as ModelMessage;
 }

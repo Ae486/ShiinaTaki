@@ -1,0 +1,22 @@
+{
+  "label": "review-desktop-final",
+  "command": [
+    "pnpm",
+    "--filter",
+    "@taki/desktop",
+    "exec",
+    "vitest",
+    "run",
+    "--maxWorkers=4",
+    "src/lib/ws-client.test.ts",
+    "src/lib/rpc-deadline.test.ts",
+    "src/windows/home/pages/operations",
+    "src/windows/home/resource-state-pages.test.tsx",
+    "src/windows/pet/restore-pet-connection.test.ts"
+  ],
+  "cwd": "H:\\TakiAgent-worktrees\\t4",
+  "startedAt": "2026-09-20T11:21:26.249643+00:00",
+  "seconds": 5.75,
+  "exitCode": 0,
+  "log": "logs/review-desktop-final.log"
+}

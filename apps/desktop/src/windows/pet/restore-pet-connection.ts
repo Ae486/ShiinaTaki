@@ -1,6 +1,7 @@
 /**
  * INPUT:  one authenticated candidate WsClient, the live PetScene, and its lifecycle generation guard.
- * OUTPUT: restorePetConnection() — guarded avatar report/subscription and read-only Chat activity restoration
+ * OUTPUT: restorePetConnection() — guarded avatar report/subscription (each received command's Presentation Outcome
+ *         is reported back while the generation is current) and read-only Chat activity restoration
  * POS:    ui/windows/pet — required per-generation restoration before the pet connection may publish connected.
  */
 
@@ -15,10 +16,12 @@ import { sharedPresentationGate } from "@/lib/presentation-gate.js";
 import type { WsClient } from "@/lib/ws-client.js";
 import type { PetScene } from "@/renderer/pet-scene.js";
 import { restoreBubbleActivity } from "@/features/chat-bubble/bubble-activity-binding.js";
+import type { AvatarCommand } from "@taki/shared";
+import { bindBubbleTimeline, type BubbleTimelineClient } from "@/features/chat-bubble/bubble-timeline-binding.js";
 
 export interface PetConnectionRestoration {
-  client: Pick<WsClient, "onAvatarCommand" | "reportAvatar" | "subscribeAvatar"
-    | "onChatActivity" | "chatActivityRead" | "subscribeTimeline" | "onClose">;
+  client: Pick<WsClient, "onAvatarCommand" | "reportAvatar" | "reportAvatarOutcome" | "subscribeAvatar"
+    | "onChatActivity" | "chatActivityRead" | "subscribeTimeline" | "onClose"> & BubbleTimelineClient;
   scene: Pick<PetScene, "applyAvatarCommand" | "reportSnapshot"> | null;
   context: ConnectionGenerationContext;
   reportSync?: CostumeReportSyncTracker;
@@ -39,20 +42,35 @@ async function reportCurrentScene(input: PetConnectionRestoration): Promise<void
   }
 }
 
+// Runs inside the presentation gate: apply, then report the outcome — but only while this generation is still the
+// live one (a retired generation's socket is gone; Core resolves that command truthfully as unknown at its deadline).
+async function presentCommand(input: PetConnectionRestoration, command: AvatarCommand): Promise<void> {
+  if (!input.context.isCurrent() || !input.scene) return;
+  const report = await input.scene.applyAvatarCommand(command, () => {
+    void reportCurrentScene(input).catch((cause: unknown) =>
+      console.warn("[pet] avatar vocabulary re-report failed", cause),
+    );
+  });
+  if (!input.context.isCurrent()) return;
+  try {
+    await input.client.reportAvatarOutcome({ characterId: command.characterId, commandId: command.commandId, ...report });
+  } catch (cause) {
+    console.warn("[pet] avatar outcome report failed", cause);
+  }
+}
+
 export async function restorePetConnection(input: PetConnectionRestoration): Promise<void> {
   input.client.onAvatarCommand((command) => {
     if (!input.context.isCurrent() || !input.scene) return;
-    sharedPresentationGate.present(() => {
-      if (!input.context.isCurrent() || !input.scene) return;
-      input.scene.applyAvatarCommand(command, () => {
-        void reportCurrentScene(input).catch((cause: unknown) =>
-          console.warn("[pet] avatar vocabulary re-report failed", cause),
-        );
-      });
-    });
+    sharedPresentationGate.present(() => void presentCommand(input, command));
   });
   await reportCurrentScene(input);
   if (!input.context.isCurrent()) return;
   await input.client.subscribeAvatar(ACTIVE_CHARACTER_ID);
-  if (input.context.isCurrent()) await restoreBubbleActivity(input.client, input.context);
+  if (!input.context.isCurrent()) return;
+  const timeline = bindBubbleTimeline(input.client, input.context);
+  try {
+    await restoreBubbleActivity(input.client, input.context);
+    if (input.context.isCurrent()) await timeline.restore();
+  } catch (cause) { timeline.dispose(); throw cause; }
 }

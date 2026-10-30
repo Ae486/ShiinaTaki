@@ -1,0 +1,9 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend pre-development rules and mandatory layer-specific reading."}
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend authority, component and connection/presentation contracts."}
+{"file": ".trellis/spec/guides/source-grounding-guide.md", "reason": "Resolve missing details from named sources and installed APIs; never invent behavior."}
+{"file": ".trellis/tasks/09-11-companion-initiative-implementation/research/domain-contracts.md", "reason": "Pattern/Intention authority, finite sources, review CAS and privacy generation."}
+{"file": ".trellis/spec/backend/skill-lifecycle.md", "reason": "Standard runtime Skill byte import, immutable packages and revision-bound replacement."}
+{"file": ".trellis/spec/frontend/reactive-read-models.md", "reason": "Stable drafts/selection, typed invalidations, no page polling and truthful conflicts."}
+{"file": ".trellis/spec/backend/observability-projection.md", "reason": "Producer-first bounded Monitor/Trajectory queries, safe fields and replay."}
+{"file": ".trellis/tasks/09-11-companion-initiative-implementation/research/decision-register.md", "reason": "Effective owner decisions, source precedence and superseded assumptions."}
+{"file": ".trellis/spec/backend/interaction-patterns.md", "reason": "Implemented Pattern authority, finite source policy, actual composition, explicit setup and lifecycle regressions."}

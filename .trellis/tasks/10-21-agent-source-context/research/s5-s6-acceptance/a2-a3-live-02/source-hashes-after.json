@@ -1,0 +1,21 @@
+{
+  "pnpm-lock.yaml": "2f66fc75926ca324f353dea4b01eb9fc81822202f8e7044721b87091a58b3391",
+  "packages/core/src/testing/source-live-evidence.ts": "08c034434974103754f3ba537920561c3a8d2ca19ba32feeb81c7fe86a3beabb",
+  "e2e/src/fixture/real-provider-observer.ts": "9671b8ab139dca8359350ad86cd25542287489c2f6ed2c01ceaf71ab67303fa5",
+  "e2e/src/fixture/paths.ts": "8ee024740471cb055973cca0f39d6e6fe68d9f21717e25e807575402244f8b18",
+  "packages/core/src/agents/chat-agent.ts": "c15c4a433ef48dbfb3c1d7ddbb427c9aa73bcfacf84217e5be866aa6c5bdecd1",
+  "packages/core/src/agents/base-prompt.ts": "3bc1c49611cf8990586da8fcc9a11edd49ab3787087dc2e5bb2769075b017567",
+  "packages/core/src/agents/source-context.ts": "4f2d95407393e2bde7d335bf98af16680a490a9af3dc639fc71a8e56c441b7e1",
+  "packages/core/src/agents/source-interpretation.ts": "1c9c7eba1970b45223c0b189dec5fd4c90db5810aaff338d9b4e7607e023633d",
+  "packages/core/src/agents/turn-mapping.ts": "3d878d0ecffbf8042838009e77eefec8e68a448e4f543532d4d792a701bff1d3",
+  "packages/core/src/agents/context-reduction.ts": "3aeaa69ce9a92d29306431dfdf25e6180cc24231c6bc43bb7799ae35eebba502",
+  "packages/core/src/agents/compaction-pass.ts": "fb2c9ebe7a73f4b10707aa10c174682514715b271d2ab6fbb860222e101a35f8",
+  "packages/core/src/agents/compaction-coordinator.ts": "b0b44906ac9fddc1143710520c631e870e4777cf53dec7f6899dc4da5f933161",
+  "packages/core/src/agents/conversation-store.ts": "c4602ac65a4e848886c1bec48aa58993051ef14e1ca45dca880b9ecee07a165d",
+  "packages/core/src/db/timeline-repo.ts": "a849278620b6430f51273c4adbbb58242963e9f5882715c0b5044aef702ce8de",
+  "packages/core/src/memory/write-convention.ts": "ac2be196441225623cbc7cef402ca0123293fb1fabbcafb3bc12796dc5ac36c1",
+  "packages/core/src/delivery/prepared-publication.ts": "afa5bd3668478c7bab4a10dd04b6876b177b0fac4f2ede8b85978dfd6c20319a",
+  "packages/core/src/db/run-delivery-repo.ts": "d0dc5ee66586ff911f37e36d0fb5e01d76d7b264245db1b5b084d29e2dd9f754",
+  "packages/core/src/agents/source-context-real.test.ts": "84aa8b3d5a0ea9dac7afa60c24b3d1390c4c9c3d355899954aa9c1df2e0c42bd",
+  "packages/core/src/testing/prepared-publication-fixture.ts": "5b57e27b04371db2a774492f076b19b31e4f43134e7955575430f3a7482d0dcf"
+}

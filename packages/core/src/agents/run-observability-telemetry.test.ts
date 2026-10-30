@@ -6,7 +6,7 @@ import { createRunEventRepo } from "../db/run-event-repo.ts";
 import { createEffectRepo } from "../db/effect-repo.ts";
 import { createEffectLifecycleService, type EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 import { createCompanionFixture, type CompanionFixture } from "../testing/companion-fixture.ts";
-import { failingMockModel, midStreamErrorModel, scriptedModel, streamingMockModel } from "../testing/mock-language-model.ts";
+import { abortRejectingModel, failingMockModel, midStreamErrorModel, scriptedModel, slowStreamingModel, streamingMockModel } from "../testing/mock-language-model.ts";
 import { createChatAgent } from "./chat-agent.ts";
 
 const fixtures: CompanionFixture[] = [];
@@ -48,6 +48,28 @@ async function drain(stream: AsyncIterable<string>): Promise<string> {
 }
 
 describe("Run observability telemetry", () => {
+  it.each([false, true])("settles one unknown model Effect without replay after partial cancel, rejecting=%s", async rejecting => {
+    const { companion, events, lifecycle } = fixture();
+    const controller = new AbortController();
+    const model = rejecting ? abortRejectingModel(["partial", "never"], 20) : slowStreamingModel(["partial", "never"], 20);
+    const agent = createChatAgent({ model, store: companion.conversation, memory: companion.memory, effectLifecycle: lifecycle });
+    let failure: unknown;
+    try {
+      for await (const delta of agent.stream({ characterId: "taki", message: "Fixture" }, {
+        runId: "run", attemptId: "attempt", signal: controller.signal,
+      })) { expect(delta).toBe("partial"); controller.abort("fixture cancel"); }
+    } catch (error) { failure = error; }
+    // Owner-approved SDK policy: immediate cancellation may close either provider gracefully;
+    // Core preserves the partial source and suppresses post-turn callbacks without inventing a throw.
+    expect(failure).toBeUndefined();
+    expect(model.doStreamCalls).toHaveLength(1);
+    expect(companion.db.prepare("SELECT state,outcome FROM run_effects WHERE kind='model'").all())
+      .toEqual([{ state: "terminal", outcome: "outcome_unknown" }]);
+    expect(events.list("run").filter(event => event.payload.kind === "model.response.settled")).toHaveLength(1);
+    expect(companion.conversation.history("taki")).toEqual([
+      { role: "user", content: "Fixture" }, { role: "assistant", content: "partial" },
+    ]);
+  });
   it("persists one successful model lifecycle with authoritative detailed usage and measured timing", async () => {
     const { companion, events, lifecycle } = fixture();
     const agent = createChatAgent({

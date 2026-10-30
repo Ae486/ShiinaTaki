@@ -1,7 +1,6 @@
 /**
  * INPUT:  the MAIN LanguageModel, an optional UtilityConfig, a Logger; background work handed to run()
- * OUTPUT: createUtilitySlot(deps) -> { model, run, usage } — the resolved background model, a GLOBAL serial task chain
- *         that never rejects outward, and cumulative token spend since boot
+ * OUTPUT: the resolved background model, a global serial task chain, real cumulative usage and stop/settle ownership
  * POS:    core/memory — T5-R11's utility slot: every background LLM pass (the episodic/flush writers today, the tidy
  *         pass next) runs through here, so which provider pays for background work is ONE operator choice
  */
@@ -34,7 +33,7 @@ export interface UtilitySlotDeps {
   logger: Logger;
 }
 
-export function createUtilitySlot(deps: UtilitySlotDeps): UtilitySlot {
+export function createUtilitySlot(deps: UtilitySlotDeps): UtilitySlot & { stop(): Promise<void>; settle(): Promise<void> } {
   const log = deps.logger.child({ mod: "utility-slot" });
   // Falling back to the MAIN model is the shipped default, not a degraded mode: Letta's sleep-time agent inherits the
   // primary's llm_config and "use a stronger model" is documentation guidance (rc §A2). A cheaper/stronger background
@@ -44,9 +43,12 @@ export function createUtilitySlot(deps: UtilitySlotDeps): UtilitySlot {
   // ONE global chain (R11: background tasks run serially): a tidy pass and a flush write must not bid for the same
   // provider at once, whichever characters they belong to.
   let chain: Promise<unknown> = Promise.resolve();
+  let stopped = false;
 
   function run<T>(label: string, task: () => Promise<T>): Promise<T | undefined> {
+    if (stopped) return Promise.resolve(undefined);
     const next = chain.then(async (): Promise<T | undefined> => {
+      if (stopped) return undefined;
       totals.calls += 1;
       try {
         const value = await task();
@@ -65,7 +67,11 @@ export function createUtilitySlot(deps: UtilitySlotDeps): UtilitySlot {
     return next;
   }
 
-  return { model, run, usage: () => ({ ...totals }) };
+  const settle = async () => {
+    let current: Promise<unknown>;
+    do { current = chain; await current; } while (current !== chain);
+  };
+  return { model, run, usage: () => ({ ...totals }), settle, stop: () => { stopped = true; return settle(); } };
 }
 
 function utilityModel(config: UtilityConfig): LanguageModel {

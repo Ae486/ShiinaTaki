@@ -3,7 +3,7 @@
  * OUTPUT: one validated transaction followed by legacy appends and an optional complete batch notification
  * POS:    core/agents — conversational write boundary; observers cannot change or partially expose durable truth
  */
-import { captureToolDisplayNames, validTimelinePresentation, type TimelineCommitted, type TimelineEntry, type TimelineItemReference } from "@taki/shared";
+import { captureToolDisplayNames, validTimelinePresentation, type SourceContext, type TimelineCommitted, type TimelineEntry, type TimelineItemReference } from "@taki/shared";
 import type { AppendInput, TimelineRepo } from "../db/timeline-repo.ts";
 import type { TurnEntryInput, TurnMessage } from "./turn-mapping.ts";
 import { toPresentedTurnEntry } from "./turn-presentation.ts";
@@ -12,6 +12,8 @@ export interface TurnCommitInput {
   characterId: string;
   messages: TurnMessage[];
   toolDisplayNames?: Readonly<Record<string, string>>;
+  /** Descriptive references to evidence actually supplied to this generation, without private bodies. */
+  sourceContext?(messageIndex: number): SourceContext | undefined;
   presentation?: {
     messageId: string;
     activitySeq: number;
@@ -40,7 +42,9 @@ export function commitConversationTurn(deps: TurnWriterDeps, input: TurnCommitIn
 function prepareRows(input: TurnCommitInput): AppendInput[] {
   const names = captureToolDisplayNames(input.toolDisplayNames);
   const rows = input.messages.flatMap((message, index) => {
-    const row = toPresentedTurnEntry(message, names);
+    const entry = toPresentedTurnEntry(message, names);
+    const sourceContext = message.role === "assistant" ? input.sourceContext?.(index) : undefined;
+    const row = entry && { ...entry, ...(sourceContext ? { sourceContext } : {}) };
     return row ? [{ row, index }] : [];
   });
   return rows.map(({ row, index }, entryIndex) => {

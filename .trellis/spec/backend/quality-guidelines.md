@@ -2,19 +2,31 @@
 
 ## Size and responsibility guard
 
-| Scope | Cap |
+| Scope | Default guard |
 | --- | --- |
-| TS file | 300-line baseline; 360-line review threshold (`max-lines`, skipBlankLines) |
-| TS function | 50 lines; max 3 params |
+| Production TS file | 300-line baseline; 360-line review threshold (`max-lines`, skipBlankLines, skipComments) |
+| Production TS function | 50-line review threshold; max 3 params |
 | Rust function | 100 lines (clippy `too_many_lines`) |
-| Rust file | 500 lines soft cap — split modules before crossing |
+| Rust file | 500-line soft review threshold — split by responsibility |
 
-Exemptions: generated code, migrations, test files.
+Generated-code and migration exemptions remain scoped to their existing treatment. Actual test/spec files and test-only
+trees have no file/function line caps: ESLint covers `*.{test,spec}.{js,jsx,mjs,cjs,ts,tsx,mts,cts}` and those extensions
+under `test/`, `tests/`, `__tests__/`, `testing/` and `e2e/`, including native smoke scripts and E2E fixtures. Other lint
+rules, including max 3 params, naming and type safety, remain enabled. Do not move production code into a test tree to
+obtain an exemption.
 
-The 300-line figure is a design signal, not a mechanical formatting target. A cohesive file may use the roughly 20%
-tolerance up to about 360 lines when that keeps one responsibility readable. Do not compress statements, remove useful
-whitespace, or create artificial helper files merely to pass the check. Split a file when it combines distinct
-responsibilities or materially exceeds the relaxed threshold; function and parameter limits remain strict.
+`packages/shared/src/index.ts` has a reviewed 500-line limit as the single public named-re-export entry, including the
+independently versioned D77 application-state contracts. This allowance
+applies only to that exact file: ESLint permits only source-bearing `ExportNamedDeclaration` statements and rejects
+`export *`, imports, local declarations and side effects. Implementation modules retain the default 360-line guard.
+
+Line counts are responsibility-review signals, not formatting targets. Do not compress statements, remove useful
+whitespace, or create artificial helper files merely to pass a check. Split coupled responsibilities. A modest excess
+in a cohesive production file/function may use a numeric ESLint override scoped to that exact file,
+with a reason naming the responsibility and explaining why a split would reduce clarity. Keep error severity and all
+unrelated rules; never disable size rules for an entire production subtree or downgrade them globally to warnings.
+Material growth requires another boundary review rather than repeated allowance increases. Parameter limits remain
+strict. Group tests by behavior, shared setup and isolation needs; never split tests or fixtures solely for line count.
 
 ## Anti-sprawl behavior
 
@@ -131,6 +143,25 @@ rm -f go.mod go.sum
 openapi-generator-cli generate ...
 go mod tidy
 ```
+
+### Generated-model semantics (G1)
+
+- With pinned OpenAPI Generator 7.10.0, nullable properties inside `additionalProperties: false` objects must take
+  a supported normalization path. The canonical OpenAPI helper hoists complete field schemas into named components;
+  it preserves required/nullability/validation and rejects name collisions. Do not relax the schema to unblock generation.
+- Python generated `from_dict` must preserve supplied wire keys before Pydantic validation. Filling omitted PATCH
+  fields with `None` changes request meaning and replay identity. Keep the canonical AST postprocessor and actual
+  nested `from_dict`/`from_json` omission-versus-null regressions; generated output is never the editing source.
+- Rust's OpenAPI 3.0 adapter represents nullable references with `allOf: [$ref]` and outer `nullable: true` because
+  `ReferenceOr` ignores `$ref` siblings. Compile-only tests miss the lost-null bug; exercise real generated serde code.
+- Source-qualify Taki enum titles as well as component names. Locked Typify reuses an existing type by title without
+  checking structural equality. `TakiNativeOperationStatus` and `TakiNativeReceiptReason` keep G1 values separate from
+  old native operation/compatibility enums; verify actual enum parsing and preserve native public type names.
+- Generated SHA-256 pattern validators require the Rust generator's `regress` runtime. A package already present in
+  a build-time lock graph is still a new runtime edge when declared directly. Follow the task's dependency authorization
+  boundary and then run the actual locked crate gate; a temporary proposal build is not that gate.
+- Windows documentation checks normalize CRLF input before frontmatter/heading parsing and generated-page comparison.
+  Preserve the checks themselves and compare generated SDK trees byte-for-byte after a clean rerun.
 
 #### Correct
 

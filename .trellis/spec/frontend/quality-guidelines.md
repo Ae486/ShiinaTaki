@@ -2,11 +2,18 @@
 
 ## Size and responsibility guard (same as backend TS)
 
-Use a 300-line baseline and a relaxed 360-line review threshold for source files; function/hook/component <= 50 lines and
-max 3 params remain strict; test files are exempt. The file threshold is a responsibility signal, not a formatting target:
-do not compress readable code or create artificial splits to satisfy a number. Split when distinct concerns become coupled
-or a file materially exceeds the relaxed threshold. Do not append to an existing file by default — distinct concern = new
-colocated file.
+Production source files use a 300-line baseline and a 360-line review threshold; functions/hooks/components use a
+50-line review threshold and max 3 params remains strict. Keep ESLint errors by default. A modest excess in a cohesive
+file/function may use a narrowly scoped numeric override with a reason identifying its responsibility and why splitting
+would reduce clarity; keep unrelated rules. No blanket production exemptions or global warning downgrade. Material growth
+requires renewed responsibility review rather than repeated limit increases. Do not compress readable code or create
+artificial splits to satisfy a number. Distinct concerns get separate colocated files.
+
+Actual test/spec files and test-only trees have no file/function line caps. This includes JS/TS module variants,
+`apps/desktop/test/*.mjs` native smoke scripts, and E2E harness/fixture trees; see the matching patterns in
+`eslint.config.js`. Group tests by behavior, shared setup and isolation needs, never line count. All non-size lint
+rules, including max 3 params, naming and type safety, still apply. Production code must not move into test trees
+to obtain an exemption.
 
 ## Performance rules (this window is ALWAYS ON — perf is a feature, not an optimization)
 

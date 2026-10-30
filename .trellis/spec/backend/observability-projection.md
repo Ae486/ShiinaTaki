@@ -174,6 +174,20 @@ applied, and defaults to `DISABLED`.
 
 ## 7. Wrong vs Correct
 
+### Initiative mixed-version facts
+
+Initiative/delivery facts use `run-event.v2` while existing producers and the v1 decoder remain unchanged. Mixed
+repository pages retain every original sequence. Existing client projections use valid semantic lifecycle rows
+and omit optional unsupported closed `eventKind` values; canonical facts are never dropped for cursor compatibility.
+See [Initiative Runtime and Delivery](./initiative-runtime.md) for the concrete decision/publication/recovery producers.
+
+`delivery.presented` and `delivery.feedback_settled` use the same versioned delivery stream. Their required events
+commit in the same transaction as the presentation/feedback state; the event bridge publishes only the exact
+successfully committed facts. A rolled-back fact cannot enter the live stream. Feedback settlement includes its
+recorded overlap duration and closed disposition; presentation of Class A or non-inviting speech does not manufacture
+an opportunity duration of zero. Inspector labels distinguish recorded opportunity (capped at the qualification
+threshold), subsequent interaction and insufficient evidence. No state claims human reading or topic resolution.
+
 ```typescript
 // Wrong: the early limit becomes a false end-of-history boundary for sparse filters.
 const runs = db.prepare("SELECT * FROM runs ORDER BY queued_at DESC LIMIT 500").all();

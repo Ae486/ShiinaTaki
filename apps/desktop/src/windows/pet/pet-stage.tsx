@@ -26,6 +26,8 @@ import { useRenderGovernor } from "./use-render-governor.ts";
 import { useClickThrough } from "./use-click-through.ts";
 import { useInitialCostume } from "./use-initial-costume.ts";
 import { useCostumeSwitchEvent } from "./use-costume-switch-event.ts";
+import { useSurfacePresence } from "@/features/presence/use-surface-presence.js";
+import { CommittedExposureContext } from "@/features/presence/committed-exposure-context.js";
 
 export function PetStage() {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -45,6 +47,7 @@ export function PetStage() {
   useInitialCostume(scene);
   useCostumeSwitchEvent(scene);
   const approvalDialog = useApprovalDialog(client);
+  const presence = useSurfacePresence(client, "pet");
 
   useEffect(() => {
     scene?.setAvatarState(avatarState);
@@ -68,7 +71,7 @@ export function PetStage() {
           )}
         </div>
       )}
-      <ChatBubble />
+      <CommittedExposureContext.Provider value={presence}><ChatBubble /></CommittedExposureContext.Provider>
       {wheelOpen && <OperationWheel point={wheelPoint} onClose={closeWheel} />}
       <ToastHost />
       {approvalDialog}

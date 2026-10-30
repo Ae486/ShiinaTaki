@@ -19,7 +19,7 @@ export function createExtensionTools(registry: ExtensionRegistry): ToolSet {
       execute: (input) => registry.discover(input),
     }),
     extension_describe: tool({
-      description: "Describe one extension id returned by extension_discover without changing its captured owner or generation.",
+      description: "Describe one extensionId returned by extension_discover without changing its captured owner or generation. For an available, current MCP binding, toolName identifies the exact direct tool made available on the next model step. The result contains bounded metadata, not a duplicate parameter schema; use that direct tool after it is disclosed. Unknown, unavailable, or stale entries disclose no toolName; extension_call remains the sealed compatibility bridge.",
       inputSchema: ExtensionDescribeParamsSchema,
       execute: (input) => registry.describe(input),
     }),

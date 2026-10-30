@@ -1,0 +1,118 @@
+--- suite-preimages/packages/core/src/initiative/backoff/initiative-backoff.test.ts
++++ packages/core/src/initiative/backoff/initiative-backoff.test.ts
+@@ -6,7 +6,6 @@
+ import { RunSnapshotSchema, type HeartbeatDecision } from "@taki/shared";
+ import { openDatabase, type Database } from "../../db/sqlite.ts";
+ import { MIGRATIONS } from "../../db/migrations/index-list.ts";
+-import { initiativeBackoffMigration055 } from "../../db/migrations/055-initiative-backoff.ts";
+ import { createRunRepo } from "../../db/run-repo.ts";
+ import { createRunEventRepo } from "../../db/run-event-repo.ts";
+ import { createRunDeliveryRepo } from "../../db/run-delivery-repo.ts";
+@@ -22,7 +21,6 @@
+ const BASE = Date.parse("2026-09-28T12:00:00.000Z");
+ const DAY = 86_400_000;
+ const dbs: Database[] = []; const roots: string[] = [];
+-const migrations = () => [...MIGRATIONS.filter((migration) => migration.version < 55), initiativeBackoffMigration055];
+ afterEach(() => {
+   vi.useRealTimers();
+   for (const db of dbs.splice(0)) db.close();
+@@ -34,7 +32,7 @@
+ 
+ function fixture(options: { path?: string; observer?: () => void } = {}) {
+   vi.useFakeTimers(); vi.setSystemTime(BASE);
+-  const db = openDatabase({ path: options.path ?? ":memory:", migrations: migrations() }); dbs.push(db);
++  const db = openDatabase({ path: options.path ?? ":memory:", migrations: MIGRATIONS }); dbs.push(db);
+   const config = { timezone: "UTC", modelIntervalMs: 900_000 };
+   const events = createRunEventRepo(db); const repo = createRunRepo(db, events);
+   const runs = createRunService({ repo, provider: "test", modelId: "test", snapshot: {
+--- suite-preimages/packages/core/src/initiative/backoff/index.md
++++ packages/core/src/initiative/backoff/index.md
+@@ -1,6 +1,6 @@
+ # Initiative feedback backoff
+ 
+-- initiative-backoff.ts — conservative qualified-feedback policy, semantic status, operator reset and engagement recovery
++- initiative-backoff.ts — conservative qualified-feedback policy, semantic status, operator reset and engagement recovery; owner regressions use the current registered database schema
+ - backoff-repo.ts — C2 producer reads and monotonic full-reset fences without feedback reclassification
+ - backoff-admissions.ts — canonical Class B admission counts, immutable timezone metadata and conservative day rollover
+ 
+--- suite-preimages/packages/core/src/db/migrations/035-timeline-presentation.test.ts
++++ packages/core/src/db/migrations/035-timeline-presentation.test.ts
+@@ -3,7 +3,6 @@
+ import { basename, dirname, join, resolve } from "node:path";
+ import { tmpdir } from "node:os";
+ import { openDatabase, type Database } from "../sqlite.ts";
+-import { createTimelineRepo } from "../timeline-repo.ts";
+ import { timelinePresentationMigration035 } from "./035-timeline-presentation.ts";
+ import { MIGRATIONS } from "./index-list.ts";
+ 
+@@ -23,23 +22,34 @@
+     const directory = mkdtempSync(join(tmpdir(), "taki-live-migration-")); directories.push(directory);
+     const path = join(directory, "fixture.db");
+     const old = openDatabase({ path, migrations: MIGRATIONS.filter((migration) => migration.version <= 34) });
++    databases.push(old);
+     old.exec(`INSERT INTO timeline_messages (id,character_id,role,content,parts,created_at)
+       VALUES ('550e8400-e29b-41d4-a716-446655440000','taki','assistant','canonical',NULL,'2026-09-07T00:00:00.000Z')`);
+     const canonical = old.prepare("SELECT seq,id,character_id,role,content,parts,created_at FROM timeline_messages").all();
+     old.close();
+     const applied: number[][] = [];
+     const upgraded = openDatabase({ path, migrations: historicalMigrations, onMigrated: (versions) => applied.push(versions) });
++    databases.push(upgraded);
+     expect(applied).toEqual([[35]]);
+     expect(upgraded.prepare("SELECT seq,id,character_id,role,content,parts,created_at FROM timeline_messages").all()).toEqual(canonical);
+     expect(upgraded.prepare("SELECT presentation FROM timeline_messages").get()?.presentation).toBeNull();
+-    createTimelineRepo(upgraded).append({ characterId: "taki", role: "assistant", content: "new", presentation: {
++    const presentation = JSON.stringify({
+       schemaVersion: "timeline-presentation.v1", messageId: "message", entryIndex: 0, entryCount: 1, activitySeq: 2,
+       references: [{ kind: "text", itemId: "segment", order: 0, start: 0, end: 3 }],
+-    } });
++    });
++    // This historical schema cannot use today's repository, which requires later migrations.
++    upgraded.prepare(`INSERT INTO timeline_messages (id,character_id,role,content,parts,presentation,created_at)
++      VALUES ('550e8400-e29b-41d4-a716-446655440001','taki','assistant','new',NULL,:presentation,'2026-09-07T00:00:01.000Z')`)
++      .run({ presentation });
++    const receipts = upgraded.prepare("SELECT version,applied_at FROM migrations ORDER BY version").all();
+     upgraded.close();
+     const reopened = openDatabase({ path, migrations: historicalMigrations, onMigrated: (versions) => applied.push(versions) }); databases.push(reopened);
+     expect(applied).toEqual([[35], []]);
+-    expect(createTimelineRepo(reopened).latestAscending("taki", 10).at(-1)).toMatchObject({ content: "new", presentation: { messageId: "message" } });
++    expect(reopened.prepare("SELECT version,applied_at FROM migrations ORDER BY version").all()).toEqual(receipts);
++    expect(reopened.prepare("SELECT content,presentation FROM timeline_messages ORDER BY seq DESC LIMIT 1").get())
++      .toEqual({ content: "new", presentation });
++    expect(reopened.prepare("SELECT seq,id,character_id,role,content,parts,created_at FROM timeline_messages ORDER BY seq LIMIT 1").all())
++      .toEqual(canonical);
+     expect(reopened.prepare("SELECT mode,active_epoch_id FROM memory_authority_selection").get()).toEqual({ mode: "legacy-markdown", active_epoch_id: null });
+   });
+ });
+--- suite-preimages/packages/core/src/db/migrations/index.md
++++ packages/core/src/db/migrations/index.md
+@@ -21,7 +21,7 @@
+ - 032-conversation-compaction-lifecycle.ts — migration 32: revisioned summary checkpoint, fenced per-Character operation cursor, and immutable bounded compaction events
+ - 033-hindsight-replica-sync.ts — migration 33: canonical incremental replica records, FTS projection, checkpoints, and Bank leases
+ - 034-hindsight-replica-scheduler.ts — migration 34: durable scheduler/run state and the current verified single-record snapshot cache
+-- 035-timeline-presentation.ts — migration 35: additive nullable Timeline display metadata; canonical fields and prior migration lineages are unchanged
++- 035-timeline-presentation.ts — migration 35: additive nullable Timeline display metadata; historical-schema SQL regressions preserve canonical bytes and migration receipts without invoking newer repositories
+ - 035-pending-memory.ts — migration 35: idempotent Pending Memory intents, persisted recovery phases, retry state, and safe terminal diagnostics
+ - 036-memory-timeline-convergence.ts — preserves applied 035 histories while converging Pending Memory and nullable Timeline presentation
+ - 037-hindsight-local-coverage.ts — immutable current Local manifest versions and lease-owned B4 run selection
+--- suite-preimages/packages/core/src/memory/hindsight/hindsight-policy-curator-lifetime.test.ts
++++ packages/core/src/memory/hindsight/hindsight-policy-curator-lifetime.test.ts
+@@ -29,7 +29,7 @@
+       { status: "rejected", reason: { message: "MEMORY_OPERATION_CANCELLED" } },
+     ]);
+     expect(f.db.prepare("SELECT state,prompt_version FROM hindsight_policy_work WHERE work_kind='policy'").get())
+-      .toMatchObject({ state: "claimed", prompt_version: "taki-hindsight-policy-curator/v1" });
++      .toMatchObject({ state: "claimed", prompt_version: "taki-hindsight-policy-curator/v2" });
+     expect(f.banks[0]!.server.calls).toHaveLength(0); await f.close(); const reads = prepare.mock.calls.length;
+     release.resolve(); await tick(); await tick();
+     expect(late).toEqual([{ ok: false, code: "MEMORY_OPERATION_CANCELLED", message: "The policy proposal was not accepted." }]);
+--- suite-preimages/packages/core/src/memory/hindsight/index.md
++++ packages/core/src/memory/hindsight/index.md
+@@ -102,7 +102,7 @@
+ - hindsight-policy-curator-context.ts — narrow curator dependency, review and run-state contracts
+ - hindsight-policy-curator-execution.ts — durable model proposals/failures with single-attempt evidence and no remote writes during generation
+ - hindsight-policy-curator-fixtures.ts — real curator/work/outbox/replica composition with deterministic byte-client and model substitutes
+-- hindsight-policy-curator-lifetime.ts — a shared deadline/abort lifetime and bounded awaits which cannot resume into late DB callbacks
++- hindsight-policy-curator-lifetime.ts — a shared deadline/abort lifetime and bounded awaits which cannot resume into late DB callbacks; cancellation regressions retain current-prompt admission evidence
+ - hindsight-policy-curator-model.ts — a bounded production AI SDK tool loop with actual completed-step/token usage
+ - hindsight-policy-curator-prompt.ts — dedicated source-aware policy-only instructions, fenced report and actual effective prompt hash; native extraction stays provider-owned
+ - hindsight-policy-curator-publication.ts — original-command recovery, verified replica refresh and truthful committed-effect counts

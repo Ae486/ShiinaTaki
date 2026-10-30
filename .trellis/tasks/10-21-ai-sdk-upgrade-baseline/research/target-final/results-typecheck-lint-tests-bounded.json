@@ -1,0 +1,21 @@
+[
+  {
+    "name": "typecheck",
+    "command": [
+      "pnpm.cmd",
+      "-r",
+      "typecheck"
+    ],
+    "exitCode": 0,
+    "seconds": 62.59
+  },
+  {
+    "name": "lint",
+    "command": [
+      "pnpm.cmd",
+      "lint"
+    ],
+    "exitCode": 1,
+    "seconds": 36.2
+  }
+]

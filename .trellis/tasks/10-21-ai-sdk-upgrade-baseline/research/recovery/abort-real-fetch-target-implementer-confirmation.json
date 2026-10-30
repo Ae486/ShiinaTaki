@@ -1,0 +1,90 @@
+{
+  "mode": "target",
+  "node": "v24.18.0",
+  "globalFetch": true,
+  "storage": "actual in-memory SQLite and ConversationStore",
+  "credentials": "none",
+  "packages": {
+    "ai": {
+      "version": "7.0.148",
+      "entry": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\ai@7.0.148_zod@4.4.3\\node_modules\\ai\\dist\\index.js"
+    },
+    "@ai-sdk/openai-compatible": {
+      "version": "3.0.75",
+      "entry": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+openai-compatible@3.0.75_zod@4.4.3\\node_modules\\@ai-sdk\\openai-compatible\\dist\\index.js"
+    },
+    "@ai-sdk/provider": {
+      "version": "4.0.31",
+      "entry": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+provider@4.0.31\\node_modules\\@ai-sdk\\provider\\dist\\index.js"
+    },
+    "@ai-sdk/provider-utils": {
+      "version": "5.0.65",
+      "entry": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+provider-utils@5.0.65_zod@4.4.3\\node_modules\\@ai-sdk\\provider-utils\\dist\\index.js"
+    },
+    "@ai-sdk/gateway": {
+      "version": "4.0.121",
+      "entry": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+gateway@4.0.121_zod@4.4.3\\node_modules\\@ai-sdk\\gateway\\dist\\index.js"
+    }
+  },
+  "results": [
+    {
+      "stage": "prefill",
+      "text": "",
+      "counts": {
+        "modelRequests": 1,
+        "maintenance": 0,
+        "usage": 0,
+        "primaryCommits": 0,
+        "retractions": 1
+      },
+      "history": [],
+      "failure": null,
+      "durationMs": 163
+    },
+    {
+      "stage": "partial",
+      "text": "partial",
+      "counts": {
+        "modelRequests": 1,
+        "maintenance": 1,
+        "usage": 0,
+        "primaryCommits": 1,
+        "retractions": 0
+      },
+      "history": [
+        {
+          "role": "user",
+          "content": "Fixture only"
+        },
+        {
+          "role": "assistant",
+          "content": "partial"
+        }
+      ],
+      "failure": null,
+      "durationMs": 67
+    },
+    {
+      "stage": "raw-provider",
+      "text": "partial",
+      "counts": {
+        "modelRequests": 1,
+        "maintenance": 0,
+        "usage": 0,
+        "primaryCommits": 0,
+        "retractions": 0
+      },
+      "history": [],
+      "failure": {
+        "isAbortReason": false,
+        "type": "object",
+        "name": "AI_APICallError",
+        "message": "Failed to process successful response",
+        "causeIsAbortReason": true,
+        "causeName": null,
+        "causeMessage": null
+      },
+      "durationMs": 49
+    }
+  ]
+}

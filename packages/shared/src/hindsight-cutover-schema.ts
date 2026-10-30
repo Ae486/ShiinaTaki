@@ -4,6 +4,9 @@
  * POS:    shared contract — durable migration state never carries secrets or raw provider payloads
  */
 import { z } from "zod";
+import { HindsightLocalCoverageStatusSchema } from "./hindsight-local-coverage-schema.ts";
+import { HindsightLogicalJsonObjectSchema } from "./hindsight-native-snapshot-schema.ts";
+import { HindsightCurrentStatusSchema } from "./hindsight-current-status-schema.ts";
 
 const Id = z.string().min(1).max(256);
 const Hash = z.string().regex(/^[a-f0-9]{64}$/);
@@ -38,9 +41,11 @@ export const HindsightCutoverStatusSchema = z.strictObject({
   status: CutoverStatus,
   expectedPredecessorEpochId: CutoverId,
   lease: z.strictObject({ active: z.boolean(), fence: z.int().min(0), expiresAt: Timestamp.nullable() }),
-  sourceCount: z.int().min(0),
+  sourceCount: z.int().min(0).nullable(),
   factMappingCount: z.int().min(0),
   checkpointCount: z.int().min(0),
+  localCoverage: HindsightLocalCoverageStatusSchema.optional(),
+  currentState: HindsightCurrentStatusSchema.optional(),
   operationCounts: HindsightCutoverOperationCountsSchema,
   authority: z.strictObject({ mode: z.enum(["legacy-markdown", "canonical-local", "hindsight"]), epochId: CutoverId.nullable() }),
   updatedAt: Timestamp,
@@ -178,16 +183,16 @@ export type HindsightLogicalObjectKind = z.infer<typeof HindsightLogicalObjectKi
 const HindsightSnapshotBankPayloadSchema = z.strictObject({
   bankId: Id, name: z.string().min(1).max(512),
   disposition: z.strictObject({ skepticism: z.int().min(1).max(5), literalism: z.int().min(1).max(5), empathy: z.int().min(1).max(5) }),
-  mission: z.string().max(16_384), config: BoundedJsonObject, createdAt: Timestamp, updatedAt: Timestamp,
+  mission: z.string().max(16_384), config: HindsightLogicalJsonObjectSchema, createdAt: Timestamp, updatedAt: Timestamp,
 });
 const HindsightSnapshotDocumentPayloadSchema = z.strictObject({
-  documentId: Id, bankId: Id, contentHash: Hash.nullable(), tags: Tags, metadata: BoundedJsonObject,
+  documentId: Id, bankId: Id, contentHash: z.string().max(256).nullable(), tags: Tags, metadata: HindsightLogicalJsonObjectSchema,
   observationScopes: ObservationScopes, createdAt: Timestamp, updatedAt: Timestamp,
 });
 const HindsightSnapshotMemoryPayloadSchema = z.strictObject({
   memoryId: Id, bankId: Id, documentId: Id.nullable(), chunkId: Id.nullable(), text: z.string().min(1).max(100_000),
   context: z.string().max(16_384).nullable(), factType: z.string().min(1).max(64), state: z.enum(["valid", "invalidated"]),
-  revision: z.int().min(1), tags: Tags, metadata: BoundedJsonObject, entities: Tags, sourceMemoryIds: z.array(Id).max(256),
+  revision: z.int().min(1), tags: Tags, metadata: HindsightLogicalJsonObjectSchema, entities: Tags, sourceMemoryIds: z.array(Id).max(256),
   observationScopes: ObservationScopes, eventDate: Timestamp.nullable(), occurredStart: Timestamp.nullable(),
   occurredEnd: Timestamp.nullable(), mentionedAt: Timestamp.nullable(), createdAt: Timestamp, updatedAt: Timestamp,
   editedAt: Timestamp.nullable(), consolidatedAt: Timestamp.nullable(), consolidationFailedAt: Timestamp.nullable(),
@@ -196,8 +201,8 @@ const HindsightSnapshotMemoryPayloadSchema = z.strictObject({
 const HindsightSnapshotMentalModelPayloadSchema = z.strictObject({
   mentalModelId: Id, bankId: Id, subtype: z.string().min(1).max(128), name: z.string().min(1).max(512),
   sourceQuery: z.string().max(16_384).nullable(), content: z.string().max(100_000).nullable(), tags: Tags,
-  maxTokens: z.int().min(1).nullable(), trigger: BoundedJsonObject.nullable(), lastRefreshedAt: Timestamp.nullable(),
-  createdAt: Timestamp, reflectResponse: BoundedJsonObject.nullable(), structuredContent: BoundedJsonObject.nullable(),
+  maxTokens: z.int().min(1).nullable(), trigger: HindsightLogicalJsonObjectSchema.nullable(), lastRefreshedAt: Timestamp.nullable(),
+  createdAt: Timestamp, reflectResponse: HindsightLogicalJsonObjectSchema.nullable(), structuredContent: HindsightLogicalJsonObjectSchema.nullable(),
 });
 const HindsightSnapshotDirectivePayloadSchema = z.strictObject({
   directiveId: Id, bankId: Id, name: z.string().min(1).max(512), content: z.string().max(100_000),

@@ -1,0 +1,9 @@
+{
+  "appliedToProduction": false,
+  "productionPreimageHashes": {
+    "packages/core/src/agents/chat-agent.ts": "766c4c99cf47f8f6d9d915ccaa446befda394c2a7d5b46a7a7872d4b06557af8",
+    "packages/core/src/agents/index.md": "a3ea9230c85abcb183f1c352e9cc747a25864f995c8d669d56ad034bab701e8e",
+    "packages/core/src/agents/provider-stream-failure.ts": "e5ba815d94944aaf3637cdca627f8d6e2b18172fc8776effc1ea0e0c93d2cc5a"
+  },
+  "candidateChatAgentHash": "ca270e331805a772605bc0d015cf3317c250697d27421a4816027e1a4ce97548"
+}

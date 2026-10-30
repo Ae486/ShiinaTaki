@@ -1,0 +1,8 @@
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "Shared model loop, typed replay and source fences"}
+{"file": ".trellis/spec/backend/accepted-work-lifecycle.md", "reason": "Existing continuation, cancellation and recovery boundaries"}
+{"file": ".trellis/spec/backend/permission-authorization.md", "reason": "Core remains the execution authority"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Single writer and durable compatible storage"}
+{"file": ".trellis/spec/backend/host-operation-lifecycle.md", "reason": "Stop/restart and unknown-effect constraints"}
+{"file": ".trellis/spec/frontend/home-window.md", "reason": "Existing navigation and disposable read-model UI"}
+{"file": ".trellis/spec/frontend/reactive-read-models.md", "reason": "Targeted controls, pending states and reconnect truth"}
+{"file": ".trellis/tasks/10-21-agent-delegation-source-context/research/planning-brief.md", "reason": "Reviewed package, lifecycle and source decisions; read linked full reports for the boundary being changed"}

@@ -1,0 +1,1 @@
+Error: {"exceptionId":1,"text":"Uncaught","lineNumber":0,"columnNumber":124,"scriptId":"81","exception":{"type":"object","subtype":"error","className":"TypeError","description":"TypeError: Cannot read properties of undefined (reading 'click')\n    at <anonymous>:1:125","objectId":"-848124585481112563.2.2"}}

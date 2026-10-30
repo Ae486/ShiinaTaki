@@ -1,0 +1,55 @@
+{
+  "id": "a2-self-report",
+  "stage": "initial-completed",
+  "question": "我被裁员了，我的项目也停了。请简短确认你理解的是谁的事情。",
+  "initial": "我理解的是你本人的事：你被裁员了，你手上的项目也停了。这是你自己告诉我的情况，不是别人的。",
+  "summary": null,
+  "followup": "仅根据当前提供的对话记录，回顾一下：谁失业了、谁的项目停了？",
+  "sourceRows": [
+    {
+      "seq": 1,
+      "id": "1a08113a-5d25-4024-a9b3-2510463050eb",
+      "characterId": "taki",
+      "role": "user",
+      "content": "我被裁员了，我的项目也停了。请简短确认你理解的是谁的事情。",
+      "createdAt": "2026-10-23T03:33:59.761Z"
+    },
+    {
+      "seq": 2,
+      "id": "6ec2194d-e2ee-4aa7-9e85-e47d44b00717",
+      "characterId": "taki",
+      "role": "assistant",
+      "content": "我理解的是你本人的事：你被裁员了，你手上的项目也停了。这是你自己告诉我的情况，不是别人的。",
+      "createdAt": "2026-10-23T03:34:01.142Z"
+    }
+  ],
+  "finalReplay": [
+    {
+      "role": "user",
+      "content": "我被裁员了，我的项目也停了。请简短确认你理解的是谁的事情。"
+    },
+    {
+      "role": "assistant",
+      "content": "我理解的是你本人的事：你被裁员了，你手上的项目也停了。这是你自己告诉我的情况，不是别人的。"
+    }
+  ],
+  "utilityUsage": {
+    "calls": 0,
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "usageUnknown": 0
+  },
+  "usage": [
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-flash",
+      "quality": "reported",
+      "input_tokens": 1225,
+      "output_tokens": 149,
+      "total_tokens": 1374
+    }
+  ],
+  "compaction": [],
+  "memoryFlush": "unexercised: no canonical witness callbacks installed; test-controlled flush seam",
+  "primaryWitnessCount": 0
+}

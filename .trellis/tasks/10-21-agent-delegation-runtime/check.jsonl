@@ -1,0 +1,6 @@
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Required checks and focused implementation quality"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Meaningful UI validation"}
+{"file": ".trellis/spec/backend/accepted-work-lifecycle.md", "reason": "Existing continuation, cancellation and recovery boundaries"}
+{"file": ".trellis/spec/backend/permission-authorization.md", "reason": "Core remains the execution authority"}
+{"file": ".trellis/spec/backend/e2e-harness.md", "reason": "Deterministic and real-agent evidence are distinct"}
+{"file": ".trellis/tasks/10-21-agent-delegation-source-context/research/planning-brief.md", "reason": "Reviewed package, lifecycle and source decisions; read linked full reports for the boundary being changed"}

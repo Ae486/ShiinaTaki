@@ -14,6 +14,8 @@ export interface EffectIntentInput {
   executorRef?: EffectLifecycle["executorRef"] | undefined; inputDigest?: string; replayPosture: EffectLifecycle["replayPosture"];
   capturedGenerationRef?: string; idempotencyKey?: string; reservedResultRef?: string; reservedUsageRef?: string; now?: string;
   approvalRef?: EffectLifecycle["approvalRef"];
+  /** Trusted synchronous guard/charge in the intent transaction; failures roll back before provider dispatch. */
+  onCommitIntent?: (effect: EffectLifecycle) => void;
 }
 export type EffectWaitingInput = Omit<EffectIntentInput, "approvalRef"> & { approvalRef: NonNullable<EffectLifecycle["approvalRef"]> };
 export interface EffectSettlementInput {
@@ -64,6 +66,7 @@ export function createEffectRepo(db: Database, eventRepo: RunEventRepo, liveBus?
         reservedUsageRef: input.reservedUsageRef ?? randomUUID(), startedAt: at });
       let events: RunEvent[] = [];
       db.transaction(() => {
+        input.onCommitIntent?.(effect);
         reserveRunBudget(db, input.runId);
         db.prepare(`INSERT INTO run_effects (effect_id,run_id,attempt_id,schema_version,kind,state,state_version,source_ref_json,executor_ref_json,approval_ref_json,input_digest,replay_posture,captured_generation_ref,idempotency_key,reserved_result_ref,reserved_usage_ref,started_at,created_at,updated_at) VALUES (:effectId,:runId,:attemptId,:schemaVersion,:kind,:state,0,:source,:executor,:approval,:digest,:replay,:generation,:idempotency,:result,:usage,:started,:at,:at)`).run({ effectId, runId: input.runId, attemptId: input.attemptId, schemaVersion: effect.schemaVersion, kind: effect.kind, state: effect.state, source: JSON.stringify(effect.sourceRef), executor: effect.executorRef ? JSON.stringify(effect.executorRef) : null, approval: effect.approvalRef ? JSON.stringify(effect.approvalRef) : null, digest: effect.inputDigest ?? null, replay: effect.replayPosture, generation: effect.capturedGenerationRef ?? null, idempotency: effect.idempotencyKey ?? null, result: effect.reservedResultRef ?? null, usage: effect.reservedUsageRef ?? null, started: at, at });
         const attemptChanged = db.prepare("UPDATE run_attempts SET state_version=state_version+1 WHERE attempt_id=:attemptId AND run_id=:runId AND state IN ('intent_committed','effect_running')").run({ attemptId: input.attemptId, runId: input.runId });

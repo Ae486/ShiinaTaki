@@ -1,0 +1,45 @@
+{
+  "name": "@ai-sdk/harness",
+  "version": "1.0.159",
+  "gitHead": null,
+  "repository": {
+    "url": "https://github.com/vercel/ai",
+    "type": "git",
+    "directory": "packages/harness"
+  },
+  "dependencies": {
+    "ai": "7.0.148",
+    "@ai-sdk/provider": "4.0.31",
+    "@ai-sdk/provider-utils": "5.0.65"
+  },
+  "peerDependencies": {
+    "ws": "^8.21.0",
+    "zod": "^3.25.76 || ^4.1.8"
+  },
+  "dist": {
+    "shasum": "929136df97f7de5735d89dffdf4b210c7efaea90",
+    "tarball": "https://registry.npmjs.org/@ai-sdk/harness/-/harness-1.0.159.tgz",
+    "fileCount": 120,
+    "integrity": "sha512-wOa+IzY6RTr4gbM3Nl98kANiSh1NVtwWtI7mFArMQxy0sNc5EF1kf11a8zQsdsOPYdCBLV6MMAGo9ubPAk54fw==",
+    "signatures": [
+      {
+        "sig": "MEYCIQCH2J1SZuxwj8EkAN9fEtXY0peowwB1jh73kiUIMCTwaQIhAPRLSRYG0PuGAUbB3dkew0IPKjC/AK3D4lrUt2f0n0/g",
+        "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+      },
+      {
+        "sig": "MEQCID0ZFDoHi/J5OTdy6dd6YjXh3XXQ3XEglhd3llU2lKjxAiB2QQFf7X73JWFhVcFtxigOQbk6qxbL3s1s6M2kKPDrdg==",
+        "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+      }
+    ],
+    "attestations": {
+      "url": "https://registry.npmjs.org/-/npm/v1/attestations/@ai-sdk%2fharness@1.0.159",
+      "provenance": {
+        "predicateType": "https://slsa.dev/provenance/v1"
+      }
+    },
+    "unpackedSize": 1864846
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -27,6 +27,19 @@ _Avoid_: mute, do-not-disturb
 A Companion-initiated message to the user, driven by Heartbeat, subject to rate limits and quiet hours.
 _Avoid_: notification, push
 
+**Co-Watching**:
+A shared-viewing experience in which the Companion uses prepared video understanding for optional, Character-voiced expression during viewing or at its natural conclusion, including bringing several moments together in one response. Approximate timing and selective expression are sufficient; exhaustive perception and a response to every moment are not part of this experience.
+_Avoid_: frame-by-frame watching, automatic commentary track
+
+**Viewing Moment**:
+A time-associated piece of video content or interpretation that can inform Co-Watching, individually or together with other moments. Its position locates the content; it does not prescribe a quip, an immediate response or a separate utterance.
+_Avoid_: mandatory trigger, scripted response
+
+**Companion Initiative**:
+The Companion's capacity to begin purposeful activity without a direct user message, including autonomous interaction,
+follow-up and user-scheduled work while preserving their different commitments to the user.
+_Avoid_: Heartbeat when referring to the whole capability; transport liveness
+
 **Heartbeat**:
 A no-user-message Agent Core judgment opportunity (OpenClaw-style), armed either by an approximate cadence or by a
 meaningful normalized Signal. Every source still passes deterministic Wake Policy before a model call; raw activity
@@ -55,6 +68,10 @@ dialogue. Shipped, user-authored, and Agent-proposed Patterns share one Core aut
 retired; a Pattern never grants permission or bypasses Wake Policy.
 _Avoid_: response template, Skill, Soul Prompt, intention
 
+**Intention**:
+A Character-scoped, one-shot plan to follow up on a conversation-derived matter, which the Companion may form automatically and which has a finite validity window. Expiration ends its eligibility as a Heartbeat wake reason, while the underlying user-reported matter remains subject to ordinary Memory policy and may inform later spontaneous follow-up in a new eligible interaction without being treated as resolved.
+_Avoid_: Scheduled Task, recurring Interaction Pattern, user-reported fact
+
 **Companion State**:
 A bounded, evolvable projection of the Character's current affective and relationship posture used when deciding how
 to interact. It may evolve from relationship evidence but is not the stable Character Persona, a permission source, or
@@ -69,6 +86,18 @@ _Avoid_: alarm, cron message, notification timer
 **Idle Motion**:
 A motion the Pet UI plays on its own while the Companion is idle — drawn at random intervals from a preset pool — plus the automatic return to the idle state after any one-shot motion finishes. A renderer reflex: deterministic, zero-LLM, zero-cost, works offline. The conscious counterpart (the agent choosing an expression because of context) is a Heartbeat outcome, not an Idle Motion.
 _Avoid_: idle animation (the engine's built-in breathing/blinking), screensaver
+
+**Avatar Command**:
+An expression or motion instruction the Agent Core issues to the Pet UI on the Companion's behalf. Publishing it is
+not playing it: the Pet UI checks the name against the worn costume's vocabulary, and the engine may still reject or
+supersede it. The conscious counterpart of an Idle Motion or a click reaction.
+_Avoid_: animation event, presentation push, tool success
+
+**Presentation Outcome**:
+What the Pet UI reports happened to one Avatar Command: applied, rejected (with a reason), superseded by a newer
+command of the same kind, not rendered (no Pet UI was showing), or unknown (no report arrived in time). Evidence about
+the screen only; never a permission, a Run Receipt, or proof the user saw it.
+_Avoid_: ack, delivery receipt, playback confirmation
 
 ### Architecture
 
@@ -116,6 +145,14 @@ _Avoid_: context window (the model-side size limit), compaction (one operation w
 **Autonomous Run**:
 A Core-owned Agent execution initiated without a live user message, such as a Heartbeat or Scheduled Task run. It has a stable identity and durable outcome independent of whether anything is shown to the user.
 _Avoid_: hidden conversation, background chat
+
+**Subagent**:
+A worker to which the Companion delegates focused work, using its own working context and returning task results while remaining part of the same Companion's activity. The delegating Agent organizes the work and material it supplies and decides whether to reuse the worker or create a new one.
+_Avoid_: separate Character, hidden relationship conversation, reusable role definition
+
+**Subagent Conversation**:
+A user-accessible working conversation with a Subagent, used to inspect progress, provide task input and stop or explicitly continue that Subagent. It is distinct from the Character's continuous relationship conversation.
+_Avoid_: new relationship conversation, parallel Character session
 
 **Run Receipt**:
 A durable, non-conversational projection of a user-expected Autonomous Run outcome into the Home conversation surface. It links back to the run evidence but is not a Companion utterance and does not enter the default Replay View.
@@ -181,7 +218,7 @@ The Companion's own directory (`%USERPROFILE%\.takiagent\workspace`) — the def
 _Avoid_: home, sandbox
 
 **Node**:
-A paired device or process that connects to the Agent Core declaring the Capabilities it provides (the desktop Shell, a future Android phone). Distinct from an operator client, which only converses and configures.
+A paired device or process that connects to the Agent Core declaring the Capabilities it provides, such as the desktop Shell or a future explicitly enabled mobile capability provider. A phone frontend is an operator client by default, distinct from this capability-providing role.
 _Avoid_: device, client (ambiguous — operators are also clients)
 
 **Execution Host**:
@@ -213,11 +250,19 @@ A Core-tracked operation whose capability, Workspace, Skill resource, MCP instan
 Execution Host. It is distinct from a Core-only operation and from a presentation/operator interaction.
 _Avoid_: remote task, device command, background chat
 
+**User Presence**:
+An evidence-backed, time-bounded indication that the user is present for interaction on one or more authenticated clients, aggregated by the Core with uncertainty preserved. Client connectivity, Host Availability, readiness for a specific action, and whether a message was read are separate facts.
+_Avoid_: Core uptime, Node online, connected, read receipt
+
 ### Character & Voice
 
 **Agent Context**:
 The complete per-turn input assembled from system and Character instructions, live or replayed conversation, Memory Blocks, retrieved long-term memory, current state, and relevant tool results. It provides immediate continuity but is transient and is not itself a durable memory authority.
 _Avoid_: memory (only one component), context window (the capacity limit rather than the assembled content)
+
+**Context Source**:
+The identifiable origin of material in the Companion's Agent Context, distinct from the message role that carries it and the subject described by it. Source identification describes where material came from, not a semantic explanation of what it is about.
+_Avoid_: message role, content subject, authority (when only origin is meant)
 
 **Long-term Memory**:
 Durable learned facts, observations, user-specific experiences, and relationship history that compress the Companion's longitudinal experience for use across sessions. Task-execution know-how is Procedural Knowledge, not Long-term Memory.
@@ -254,6 +299,14 @@ _Avoid_: replacement prompt (the Hindsight base remains authoritative), forked d
 **Memory Authority**:
 The one provider whose confirmed state determines durable searchable memory at a given time. Hindsight is the Memory Authority when enabled; otherwise the Local Memory Provider is, and an outage never transfers authority automatically.
 _Avoid_: primary database, active-active memory, source of truth (ambiguous about policy vs content)
+
+**Local Memory Provider**:
+Taki's standalone memory system, including its own memory maintenance, when Local is the Memory Authority. It is distinct from the Memory Replica used while Hindsight remains authoritative.
+_Avoid_: local replica (a copy without write authority), fallback-only memory
+
+**Hindsight Memory Provider**:
+The memory provider backed by Hindsight's native semantic memory service, with Taki-specific companion policy applied around it. It is the Memory Authority only after an explicit, verified activation.
+_Avoid_: second memory authority, Taki consolidation backend
 
 **Authority Epoch**:
 A contiguous history governed by one declared Memory Authority. An explicit disaster takeover starts a new epoch so a recovered former authority cannot merge or overwrite the new history automatically.

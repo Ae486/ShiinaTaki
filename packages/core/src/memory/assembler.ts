@@ -1,6 +1,6 @@
 /**
  * INPUT:  AssembleParams (characterId + currentMessage) + an injected MemoryRepo, PersonaProvider, BlockStore
- * OUTPUT: createAssembler(deps) -> { assemble(params) -> instructions string }
+ * OUTPUT: primary instructions plus immutable Persona/Block scope capture for initiative
  * POS:    core/memory — deterministic per-turn context assembly with per-section budgets (MEMORY-DESIGN §Context
  *         assembly); this section list IS the memory-source seam (no source registry — M-D1 declined); nothing
  *         search-driven renders here (T5-R6) — retrieval reaches the model only through memory_search
@@ -17,10 +17,11 @@ import { V1_MEMORY_LAYERS } from "./layer-registry.ts";
 import type { PersonaProvider } from "./persona-provider.ts";
 import { selectPinned } from "./pinned-block.ts";
 import { estimateTokens, fitToBudget } from "./token-estimator.ts";
+import { captureInitiativeMemoryAssembly, type InitiativeMemoryAssembler } from "./initiative-memory-assembly.ts";
 
 // Emotion capsule is a static placeholder (D9, docs/deferred-decisions.md); the persona card now loads from disk (#16).
-const EMOTION_CAPSULE = "Current mood: neutral.";
-const PINNED_HEADER = "Promises and facts you always keep in mind:";
+export const EMOTION_CAPSULE = "Current mood: neutral.";
+export const PINNED_HEADER = "Promises and facts you always keep in mind:";
 // A block over its budget is trimmed in the PROMPT only — the file on disk stays whole. The visible cut is the signal
 // to consolidate (an always-loaded curated file behaves the same way in OpenClaw), never a silent deletion.
 const BLOCK_TRIM_NOTE = "(… trimmed to fit this block's budget; the full text is still on disk.)";
@@ -50,6 +51,7 @@ export interface AssemblerDeps {
 
 export interface Assembler {
   assemble(params: AssembleParams): string;
+  captureInitiative(characterId: string): InitiativeMemoryAssembler;
 }
 
 export function createAssembler(deps: AssemblerDeps): Assembler {
@@ -57,6 +59,9 @@ export function createAssembler(deps: AssemblerDeps): Assembler {
   const pinnedBudget = deps.pinnedBudget ?? DEFAULT_PINNED_BUDGET;
 
   return {
+    captureInitiative: (characterId) => captureInitiativeMemoryAssembly({ characterId, persona,
+      global: { reference: "legacy:global-blocks", content: renderBlocks(blocks, characterId, "global").join("\n\n") },
+      character: { reference: `legacy:character-blocks:${characterId}`, content: renderBlocks(blocks, characterId, "per-character").join("\n\n") } }),
     assemble({ characterId, currentMessage }) {
       const nowMs = Date.now();
       const now = new Date(nowMs).toISOString();
@@ -82,10 +87,11 @@ export function createAssembler(deps: AssemblerDeps): Assembler {
  * budget number (the background pass that maintains it must see how close it is to the ceiling). A block whose file
  * is absent renders NOTHING — deleting the file removes that feature completely (D28).
  */
-function renderBlocks(blocks: BlockStore | undefined, characterId: string): string[] {
+function renderBlocks(blocks: BlockStore | undefined, characterId: string, ownership?: "global" | "per-character"): string[] {
   if (!blocks) return [];
   const sections: string[] = [];
   for (const block of V1_BLOCKS) {
+    if (ownership && block.ownership !== ownership) continue;
     const content = blocks.readBlock({
       id: block.id,
       characterId: block.ownership === "per-character" ? characterId : undefined,
@@ -124,7 +130,7 @@ interface RenderRow {
 // A reinforced entry (R9) ages from its LAST reinforcement: the duplicate write proved it was live again.
 // Observed-origin rows are grouped into ONE fence per section: the label is what makes the payload
 // data-never-instructions, and repeating it per bullet would cost tokens without adding a guarantee.
-function renderBlock(header: string, rows: RenderRow[], nowMs: number): string {
+export function renderBlock(header: string, rows: RenderRow[], nowMs: number): string {
   const bullet = (row: RenderRow): string =>
     `- (${formatRelativeAge(row.updatedAt ?? row.createdAt, nowMs)}) ${row.content}`;
   const parts = [header, ...rows.filter((row) => !isObserved(row)).map(bullet)];
@@ -135,7 +141,7 @@ function renderBlock(header: string, rows: RenderRow[], nowMs: number): string {
 
 // The single-row render site (the intention line) fences on the same rule, so no write path can ever put sensed
 // content in front of the model unfenced.
-function rowContent(row: MemoryEntryRow): string {
+export function rowContent(row: MemoryEntryRow): string {
   return isObserved(row) ? fenceUntrusted({ source: "memory", content: row.content }) : row.content;
 }
 

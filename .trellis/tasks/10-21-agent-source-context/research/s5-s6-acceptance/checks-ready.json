@@ -1,0 +1,19 @@
+{
+  "deterministicTests": "tests-ready.json",
+  "sourceAudit": "source-audit.json",
+  "scopedLint": {
+    "exitCode": 0,
+    "log": "lint-ready.log"
+  },
+  "scopedDiffCheck": {
+    "exitCode": 0,
+    "paths": [
+      "packages/core/src/testing/co-watching-fixture.ts",
+      "packages/core/src/testing/index.md"
+    ]
+  },
+  "coreTypecheck": {
+    "exitCode": 0,
+    "log": "typecheck-ready.log"
+  }
+}

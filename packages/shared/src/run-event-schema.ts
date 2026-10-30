@@ -4,6 +4,8 @@
  * POS:    shared/protocol — canonical observability vocabulary; protected raw payloads are unrepresentable
  */
 import { z } from "zod";
+import { RunEventV2Schema } from "./initiative-event-schema.ts";
+import { RunWorkEventSchema } from "./run-work-schema.ts";
 import {
   EffectSourceRefSchema,
   InputTokenDetailsSchema,
@@ -198,7 +200,7 @@ const ATTEMPT_EVENT_KINDS = new Set([
   "approval.requested", "approval.decided", "run.retry",
 ]);
 
-export const RunEventSchema = z.strictObject({
+export const RunEventV1Schema = z.strictObject({
   eventId: ID, runId: ID, attemptId: ID.optional(), seq: z.number().int().min(1).max(2_000_000_000),
   schemaVersion: z.literal(RUN_EVENT_SCHEMA_VERSION), category: RunEventCategorySchema, kind: RunEventKindSchema,
   occurredAt: TIMESTAMP, source: RunEventSourceSchema, correlation: CorrelationSchema.optional(),
@@ -233,6 +235,8 @@ function expectedCategoryAndSource(kind: z.infer<typeof RunEventKindSchema>): {
   return { category: "lifecycle", source: "core.run-repo" };
 }
 
+export const RunEventSchema = z.union([RunEventV1Schema, RunEventV2Schema, RunWorkEventSchema]);
+export type RunEventV1 = z.infer<typeof RunEventV1Schema>;
 export type RunEvent = z.infer<typeof RunEventSchema>;
 export type RunEventPayload = z.infer<typeof RunEventPayloadSchema>;
 export type RunEventKind = z.infer<typeof RunEventKindSchema>;

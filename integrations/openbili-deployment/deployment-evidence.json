@@ -1,0 +1,51 @@
+{
+  "checked_at": "2026-10-18T04:48:49.381168+00:00",
+  "container": "taki-openbili-backend",
+  "state": "running",
+  "health": "healthy",
+  "image_id": "sha256:b3adbab71a94f81b31123d8f1780237d1f46dde9fcc0c40bc5bf161191419d32",
+  "image_size_bytes": 131407103,
+  "base_amd64_digest": "sha256:89e6d66f7fa1d3a3acfd1052b801d1177e1dd9ccbc19398c6da6da3eb1baebdf",
+  "port_bindings": {
+    "8420/tcp": [
+      {
+        "HostIp": "127.0.0.1",
+        "HostPort": "18420"
+      }
+    ]
+  },
+  "mounts": [
+    {
+      "Name": "taki-openbili-runtime",
+      "Source": "/var/lib/docker/volumes/taki-openbili-runtime/_data",
+      "Destination": "/app/runtime"
+    },
+    {
+      "Name": "taki-openbili-data",
+      "Source": "/var/lib/docker/volumes/taki-openbili-data/_data",
+      "Destination": "/app/runtime/data"
+    },
+    {
+      "Name": "taki-openbili-logs",
+      "Source": "/var/lib/docker/volumes/taki-openbili-logs/_data",
+      "Destination": "/app/runtime/logs"
+    }
+  ],
+  "host_ping": {
+    "http_status": 200,
+    "status": "ok",
+    "reason": "llm_registry_unavailable"
+  },
+  "host_anonymous_peek": {
+    "http_status": 401,
+    "status": null,
+    "reason": "auth_required"
+  },
+  "host_authenticated_peek": {
+    "http_status": 503,
+    "status": "degraded",
+    "reason": "llm_registry_unavailable"
+  },
+  "docker_data_vhdx": "G:/DockerDesktopData/DockerDesktopWSL/disk/docker_data.vhdx",
+  "docker_data_vhdx_bytes": 39292239872
+}

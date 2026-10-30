@@ -13,6 +13,7 @@ interface ModelEffectContext {
   runId: string;
   attemptId: string;
   observer?: ModelEffectObserver;
+  onCommitModelIntent?: (effect: EffectLifecycle) => void;
 }
 
 type WrapStreamArgs = Parameters<NonNullable<LanguageModelMiddleware["wrapStream"]>>[0];
@@ -81,6 +82,7 @@ function prepareBinding(
     executorRef: { type: "provider", provider: model.provider },
     inputDigest: digestForModelRequest(params),
     replayPosture: "never",
+    onCommitIntent: context.onCommitModelIntent,
   });
   return context.observer?.bindEffect({ effect, provider: model.provider, modelId: model.modelId })
     ?? { effect, callId: effect.effectId };

@@ -48,7 +48,7 @@ export interface CoreBootstrap {
 }
 
 /** The data root is read BEFORE the store exists, so it is the one knob env alone governs (registry: env-only). */
-function openStore(env: Record<string, string | undefined>): { db: Database; applied: number[]; dataDir: string } {
+function openStore(env: Record<string, string | undefined>, onAfterCommitError: () => void): { db: Database; applied: number[]; dataDir: string } {
   const { dataDir } = loadServerConfig(env);
   // The composition root ensures the app data root exists before opening the db (first-boot);
   // the db layer itself stays fs-free (invariant). Mirrors the paired-device-store sanctioned site.
@@ -57,6 +57,7 @@ function openStore(env: Record<string, string | undefined>): { db: Database; app
   const db = openDatabase({
     path: join(dataDir, "taki.db"),
     migrations: MIGRATIONS,
+    onAfterCommitError,
     // The logger's level is itself a knob, so it cannot exist yet — report the versions once it does.
     onMigrated: (versions) => {
       applied = versions;
@@ -65,8 +66,10 @@ function openStore(env: Record<string, string | undefined>): { db: Database; app
   return { db, applied, dataDir };
 }
 
-export function bootstrapCore(processEnv: Record<string, string | undefined>): CoreBootstrap {
-  const { db, applied, dataDir } = openStore(processEnv);
+export function bootstrapCore(processEnv: Record<string, string | undefined>, options: { onConfigChanged?(key: string): void } = {}): CoreBootstrap {
+  let pendingCommitErrors = 0;
+  let reportCommitError = () => { pendingCommitErrors += 1; };
+  const { db, applied, dataDir } = openStore(processEnv, () => reportCommitError());
   const repo = createConfigRepo(db);
   const source = createConfigSource({ env: processEnv, repo });
   const subscriptions = createConfigSubscriptions();
@@ -76,6 +79,8 @@ export function bootstrapCore(processEnv: Record<string, string | undefined>): C
   const serverConfig = { ...loadServerConfig(env), dataDir };
   const contextConfig = loadContextConfig(env);
   const logger = createLogger(serverConfig.logLevel);
+  reportCommitError = () => logger.warn({ code: "SQLITE_AFTER_COMMIT_FAILED" }, "Committed database callback failed");
+  if (pendingCommitErrors > 0) logger.warn({ code: "SQLITE_AFTER_COMMIT_FAILED", count: pendingCommitErrors }, "Committed database callbacks failed during bootstrap");
   logger
     .child({ mod: "db" })
     .info({ applied }, applied.length > 0 ? "migrations applied" : "schema already up to date");
@@ -93,7 +98,12 @@ export function bootstrapCore(processEnv: Record<string, string | undefined>): C
     env,
     logger,
     db,
-    config: { source, repo, subscriptions, writer: createConfigWriter({ env: processEnv, repo, onChanged: (change) => subscriptions.publish(change) }) },
+    config: { source, repo, subscriptions, writer: createConfigWriter({ env: processEnv, repo, onChanged: (change) => {
+      try { subscriptions.publish(change); }
+      catch { logger.warn({ code: "CONFIG_NOTIFICATION_FAILED" }, "Config notification failed"); }
+      // A committed setting must remain successful even when a local consumer fails.
+      try { options.onConfigChanged?.(change.key); } catch { logger.warn({ code: "CONFIG_OBSERVER_FAILED" }, "Config observer failed"); }
+    } }) },
     serverConfig,
     agentConfig: loadAgentConfig(env),
     attachmentConfig: loadAttachmentConfig(env),

@@ -1,0 +1,267 @@
+[
+  {
+    "path": "packages/core/src/agents/chat-agent.ts",
+    "existed": true,
+    "sha256": "ca270e331805a772605bc0d015cf3317c250697d27421a4816027e1a4ce97548"
+  },
+  {
+    "path": "packages/core/src/agents/turn-recording.ts",
+    "existed": true,
+    "sha256": "dc8648ba035c87435753f2a686ba32846f780120637476cc9c5f71fa9c905058"
+  },
+  {
+    "path": "packages/core/src/agents/turn-registry.ts",
+    "existed": true,
+    "sha256": "784911576d7820c76e63854c4f426a01a9a6dc13dc13737f7ca509b4a4e4a5ae"
+  },
+  {
+    "path": "packages/core/src/agents/turn-queue.ts",
+    "existed": true,
+    "sha256": "99e59f86e9f7f7295b7f2b2db54f5a24a5308da1843e7f081aa5cc5b8701f4c5"
+  },
+  {
+    "path": "packages/core/src/agents/model-effect-middleware.ts",
+    "existed": true,
+    "sha256": "61cc2a6002a149e123c4027ec61a9ac6181121e2e87c7078df65490f718c8c9e"
+  },
+  {
+    "path": "packages/core/src/agents/run-observability-telemetry.ts",
+    "existed": true,
+    "sha256": "f0ba59041b1a66b4578787187f3d32c6844c95f9766065bb697f408ce0c08327"
+  },
+  {
+    "path": "packages/core/src/agents/index.md",
+    "existed": true,
+    "sha256": "f84ddcd5223f631a45f1e22b7e9c9b892568c4e4e3cd5a945962d3717889021d"
+  },
+  {
+    "path": "packages/core/src/harness/run-snapshot-capture.ts",
+    "existed": true,
+    "sha256": "53b78b67e4588facf6d96b8e426b83eae28eedfdf0bf45b2d89421a07b7cefdc"
+  },
+  {
+    "path": "packages/core/src/harness/run-service.ts",
+    "existed": true,
+    "sha256": "891bf7cd2181db1441829795ebd374891ee08e2264f3124db968868e0082f847"
+  },
+  {
+    "path": "packages/core/src/harness/recovery-coordinator.ts",
+    "existed": true,
+    "sha256": "1bc3cc541f1c8e466c005907c133d6c7c95d4fee04a2f887548ca0466a36a0ae"
+  },
+  {
+    "path": "packages/core/src/harness/index.md",
+    "existed": true,
+    "sha256": "502b17f5c4aa9a5eb2b357faaa98894ef29e55d59ce0d37f177b19f2cdd52f43"
+  },
+  {
+    "path": "packages/core/src/main.ts",
+    "existed": true,
+    "sha256": "93b44a1cbfdfd10fec837176d39b244db708cc0d7bf968fbddc621a160a7e9f4"
+  },
+  {
+    "path": "packages/core/src/index.md",
+    "existed": true,
+    "sha256": "09ab77f106c3a62f3e31cf13a91921ff4555f00719486ba8252b6f03c942a27e"
+  },
+  {
+    "path": "packages/core/src/server/methods/chat-cancel.ts",
+    "existed": true,
+    "sha256": "97b65ea4f1bc3b133c63ab807d0584b7bc7112b676bf098b126042333ff71f08"
+  },
+  {
+    "path": "packages/core/src/server/methods/index.md",
+    "existed": true,
+    "sha256": "59ffb44ad156f742c7978cc2baef3d1b206b4e697891669d3ec7aa2e0f311669"
+  },
+  {
+    "path": "packages/core/src/delivery/index.md",
+    "existed": true,
+    "sha256": "a6400802055c9d59f26d694d310b664919985d147cd790e05a311b2ce63fa34e"
+  },
+  {
+    "path": "packages/core/src/governance/core-tool-governance-adapter.ts",
+    "existed": true,
+    "sha256": "c16e6eab5c50d39c60090d2cd9f9d293e4aea8e2b25f5dc428932e04f6050979"
+  },
+  {
+    "path": "packages/core/src/governance/governed-tool.ts",
+    "existed": true,
+    "sha256": "b3deb64c2e2bf43bcb16ec7c136373b65c3b1dff59cf7f1f16a1434a3a628c46"
+  },
+  {
+    "path": "packages/core/src/governance/index.md",
+    "existed": true,
+    "sha256": "ebba4a400a025b74857623fc077559a5a8f32012c09411f34c0e5e3ad3661b69"
+  },
+  {
+    "path": "packages/shared/src/index.ts",
+    "existed": true,
+    "sha256": "dee8e11fa7c623288cac8a036698e4d8e8be2f3afad769ee8a59ccb3fc0ec86f"
+  },
+  {
+    "path": "packages/shared/src/index.md",
+    "existed": true,
+    "sha256": "75f847736502049f89860c2462918e8d419fdf28c68197166d3ebbd5fd0e726f"
+  },
+  {
+    "path": "packages/shared/src/governance-registry.ts",
+    "existed": true,
+    "sha256": "b6d91b1defa38950227ea786a1b1b6ddd986fb6b1a50302e5399ae8334999b95"
+  },
+  {
+    "path": "packages/shared/src/governance-presentation.ts",
+    "existed": true,
+    "sha256": "706faf2a8fc50552cbb1ccc82fd6dd59f7a8c9c7412f91cd67e4a8a602a877ed"
+  },
+  {
+    "path": "packages/shared/src/tool-presentation.ts",
+    "existed": true,
+    "sha256": "3777dde5a8976122547d7eb051325401b93b9f2b21c9031a4a21146558648a3a"
+  },
+  {
+    "path": "packages/shared/src/subagent-api-schema.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/shared/src/subagent-tool-schema.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/agents/work-context.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/agents/run-message-store.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/agents/subagent-result-tool.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/agents/parent-continuation-result-tool.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/agents/subagent-tools.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/agents/subagent-delegate-tool.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/agents/subagent-message-tool.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/agents/subagent-stop-tool.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/agents/subagent-inspect-tool.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/harness/delegation-tools.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/harness/subagent-service.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/harness/subagent-execution.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/harness/subagent-state.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/harness/subagent-completion.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/harness/subagent-tool-materials.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/harness/subagent-subscriptions.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/harness/subagent-queries.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/server/methods/subagent-methods.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/delivery/direct-request-report.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/delivery/direct-request-report-state.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/agents/work-scope.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/agents/turn-mapping.ts",
+    "existed": true,
+    "sha256": "0ef8f6ec8eb42d3c6b0d9c368c1fc7101a71b59d695cb251f88b4b28c762eaf4"
+  },
+  {
+    "path": "packages/core/src/agents/context-window.ts",
+    "existed": true,
+    "sha256": "98c0f54d7db57617b7759d2d50226dce3a846a501d2a7503de311b308bb0211e"
+  },
+  {
+    "path": "packages/core/src/db/run-message-repo.ts",
+    "existed": true,
+    "sha256": "827c69dba55184beb77ca5299d506eab877b3ab4e938c1984a47dd7101ad8543"
+  },
+  {
+    "path": "packages/core/src/db/index.md",
+    "existed": true,
+    "sha256": "71380255d1dc777119b733a8be44451066ffbcd24e0ed3833ad8f5649301b976"
+  },
+  {
+    "path": "packages/core/src/capabilities/screenshot-describe.ts",
+    "existed": true,
+    "sha256": "90313183cf36df9351f8a857d2402642b3e023397c67310dab1074feb8a7999d"
+  },
+  {
+    "path": "packages/core/src/capabilities/index.md",
+    "existed": true,
+    "sha256": "7128a852dc44868dc5d6c42ab09ec471a490643f6bcb975d982c754143f19ccb"
+  },
+  {
+    "path": "packages/core/src/testing/subagent-fixture.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/testing/index.md",
+    "existed": true,
+    "sha256": "879a6ea07638e76d358def2eebe8179e714345df348b4c72541e945612454103"
+  },
+  {
+    "path": "packages/core/src/harness/subagent-service.test.ts",
+    "existed": false
+  },
+  {
+    "path": "packages/core/src/agents/turn-registry.test.ts",
+    "existed": true,
+    "sha256": "910ed0ac87bbb7d4b5b04c8bc694f66f3cacba9ac7cf40181ac15cb654480598"
+  },
+  {
+    "path": "packages/core/src/agents/context-window.test.ts",
+    "existed": true,
+    "sha256": "36df5dd58c1ea229bb0ffdb5b435a238d3a0fe84270865c8701a89fd7ab3a768"
+  }
+]

@@ -21,7 +21,13 @@ import {
   type TimingPolicyField,
 } from "@taki/shared";
 import { DEFAULT_MAX_STEPS } from "./agent-config.ts";
+import { INITIATIVE_POLICY_FIELDS } from "./initiative-policy-config.ts";
+import { INITIATIVE_WAKE_KNOBS } from "./initiative-wake-knobs.ts";
+import { VIEWING_INVITATION_KNOBS } from "./viewing-invitation-config.ts";
+import { INTENTION_WINDOW_KNOB } from "./initiative-intention-config.ts";
+import { DEFAULT_HINDSIGHT_POLICY_PROMPT, DEFAULT_HINDSIGHT_POLICY_TIMEOUT_MS } from "./hindsight-policy-config.ts";
 import { DEFAULT_TTL_DAYS } from "./attachment-config.ts";
+import { AVATAR_OUTCOME_DEADLINE_KEY, DEFAULT_AVATAR_OUTCOME_DEADLINE_MS } from "./avatar-config.ts";
 import { DEFAULT_COMPACT_KEEP_MESSAGES, DEFAULT_COMPACT_TRIGGER_RATIO, DEFAULT_CONTEXT_TOKENS, DEFAULT_HISTORY_RATIO } from "./context-config.ts";
 import { DEFAULT_LOG_LEVEL, DEFAULT_TRUST_LOOPBACK, LOG_LEVELS } from "./server-config.ts";
 import {
@@ -98,6 +104,12 @@ function pattern(spec: { regex: RegExp; message: string }): Pick<Knob, "schema" 
 }
 
 export const CONFIG_KNOBS: Knob[] = [
+  ...INITIATIVE_WAKE_KNOBS,
+  INTENTION_WINDOW_KNOB,
+  { key: "TAKI_INITIATIVE_ENABLED", ...bool(), default: false, apply: "live", description: "Enable Class B initiative admission and delivery; requires a valid Core opportunity source." },
+  ...Object.entries(INITIATIVE_POLICY_FIELDS).map(([field, entry]): Knob => ({ ...entry,
+    ...int({ min: 1, max: 2_147_483_647 }), apply: "live",
+    description: `Initiative ${field}; effective for later admissions and publication checks.` })),
   // --- server / bootstrap ---
   {
     key: "TAKI_WS_HOST",
@@ -156,8 +168,12 @@ export const CONFIG_KNOBS: Knob[] = [
   // --- agent loop + media ---
   { key: "TAKI_MAX_STEPS", ...int({ min: 1, max: 50 }), default: DEFAULT_MAX_STEPS, apply: "restart", description: "Tool-loop step cap per turn." },
   { key: "TAKI_ATTACHMENT_TTL_DAYS", ...int({ min: 1 }), default: DEFAULT_TTL_DAYS, apply: "restart", description: "Days raw attachment bytes are kept (descriptions are permanent)." },
+  // Read on every avatar tool call (the outcomes factory takes a deadline reader), hence live.
+  { key: AVATAR_OUTCOME_DEADLINE_KEY, ...int({ min: 100, max: 10_000 }), default: DEFAULT_AVATAR_OUTCOME_DEADLINE_MS, apply: "live", description: "How long an avatar tool waits for the Pet window's presentation outcome." },
 
   // --- ambient perception (privacy) ---
+  { key: "TAKI_BROWSER_PLAYBACK_ENABLED", ...bool(), default: false, apply: "live", description: "Accept selected browser playback observations from paired Hosts; Privacy Pause still applies." },
+  ...VIEWING_INVITATION_KNOBS,
   { key: "TAKI_AMBIENT_SCREENSHOT", ...bool(), default: false, apply: "restart", description: "Enable ambient screen sampling (default off)." },
   {
     key: "TAKI_AMBIENT_SCREENSHOT_RETENTION",
@@ -199,6 +215,10 @@ export const CONFIG_KNOBS: Knob[] = [
   { key: "TAKI_HINDSIGHT_EMBEDDING_MODEL", ...str(), default: null, apply: "live", description: "Desired managed-deployment embedding model identifier." },
   { key: "TAKI_HINDSIGHT_RERANKER_PROVIDER", ...str(), default: null, apply: "live", description: "Desired managed-deployment reranker provider identifier." },
   { key: "TAKI_HINDSIGHT_RERANKER_MODEL", ...str(), default: null, apply: "live", description: "Desired managed-deployment reranker model identifier." },
+  { key: "TAKI_HINDSIGHT_POLICY_TIMEOUT_MS", ...int({ min: 1, max: 2_147_483_647 }), default: DEFAULT_HINDSIGHT_POLICY_TIMEOUT_MS,
+    apply: "live", description: "Whole-pass deadline for the narrow Hindsight policy curator; captured at each pass." },
+  { key: "TAKI_HINDSIGHT_POLICY_PROMPT", schema: z.string(), input: { kind: "string" }, default: DEFAULT_HINDSIGHT_POLICY_PROMPT,
+    apply: "live", description: "Additional Hindsight policy review instructions; the fixed ownership and safety rules remain in force." },
 ];
 
 const BY_KEY = new Map(CONFIG_KNOBS.map((knob) => [knob.key, knob]));

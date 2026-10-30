@@ -1,62 +1,97 @@
 /**
- * INPUT:  canonical Local SQLite repositories and one prepared active epoch selected by the migration marker
- * OUTPUT: MemoryEngine-compatible canonical assembly/tools plus inert legacy maintenance surfaces
- * POS:    core/memory — post-activation runtime; no Markdown store, BlockStore, reconcile, or legacy writer dependency
+ * INPUT:  canonical Local repositories, active epoch and memory policy configuration
+ * OUTPUT: Local engine surfaces and admission-bound tools/recall/primary and selected initiative prompt capture
+ * POS:    core/memory — canonical Local composition; no Markdown store or direct replica mutation
  */
 import type { ToolSet } from "ai";
 import type { Database } from "../db/sqlite.ts";
-import type { MemoryEngine, TidyEngineView } from "./memory-engine.ts";
-import type { MemoryRetentionOps } from "./retention-sweeper.ts";
+import { CANONICAL_MEMORY_SYSTEM_PROMPT } from "../agents/chat-agent.ts";
+import { loadMemoryConfig, type MemoryConfig } from "../config/memory-config.ts";
 import { createCanonicalMemoryAuthorityRepo } from "../db/canonical-memory-authority-repo.ts";
 import { createCanonicalMemoryRepo } from "../db/canonical-memory-repo.ts";
+import { createCanonicalMemoryMaintenanceRepo } from "../db/canonical-memory-maintenance-repo.ts";
 import { createCanonicalMemorySparseRepo } from "../db/canonical-memory-sparse-repo.ts";
-import { createLocalMemoryProvider } from "./local-memory-provider.ts";
-import { createMemoryCoordinator } from "./memory-coordinator.ts";
+import { createStructuredMemoryBlockRepo } from "../db/structured-memory-block-repo.ts";
 import { createCanonicalMemoryToolsWithCapabilities } from "./canonical-tools/canonical-memory-tools.ts";
+import { createCanonicalLocalRetention } from "./canonical-local-retention.ts";
+import { createCanonicalLocalTidyView } from "./canonical-local-tidy.ts";
+import { ensureCanonicalLocalBanks } from "./canonical-local-banks.ts";
+import { captureCanonicalMemoryAssembly } from "./canonical-memory-assembly.ts";
+import { createCanonicalMemoryRun } from "./canonical-memory-run.ts";
+import { createLocalRecallEvidence, createRecallEvidenceRegistry } from "./memory-recall-evidence.ts";
+import { captureInitiativeMemoryAssembly, captureTrackedInitiativeAssembly } from "./initiative-memory-assembly.ts";
+import { canonicalMemoryRow } from "./canonical-memory-view.ts";
+import { writeCanonicalObservedMemory } from "./canonical-observed-write.ts";
+import { createLocalMemoryProvider, LOCAL_MEMORY_CAPABILITIES } from "./local-memory-provider.ts";
+import { createMemoryCoordinator } from "./memory-coordinator.ts";
+import type { MemoryEngine } from "./memory-engine.ts";
+import { createPersonaProvider, createFallbackPersonaProvider } from "./persona-provider.ts";
 import { createIntlSegmenterTokenizer } from "./search-tokenizer.ts";
-import { createPersonaProvider, createFallbackPersonaProvider, type PersonaProvider } from "./persona-provider.ts";
-import { V1_BLOCKS } from "./block-registry.ts";
-import { estimateTokens, fitToBudget } from "./token-estimator.ts";
 
-const EMPTY_RETENTION: MemoryRetentionOps = { listActive: () => [], archive: () => undefined, hardDelete: () => undefined };
-const EMPTY_TIDY: TidyEngineView = { listActive: () => [], countSince: () => 0, readBlock: () => undefined, createTools: () => ({}) };
+interface RuntimeInput { db: Database; epochId: string; promptDir?: string; config?: MemoryConfig; }
+export type CanonicalLocalRuntime = ReturnType<typeof createCanonicalLocalRuntime>;
+type LocalState = ReturnType<typeof createLocalState>;
 
-export function createCanonicalLocalRuntime(input: { db: Database; epochId: string; promptDir?: string }): MemoryEngine {
-  const authority = createCanonicalMemoryAuthorityRepo(input.db); authority.activeEpoch(input.epochId);
-  const persona = input.promptDir ? createPersonaProvider({ promptDir: input.promptDir }) : createFallbackPersonaProvider();
-  const tokenizer = createIntlSegmenterTokenizer({ stoplist: true });
-  const provider = createLocalMemoryProvider({ authority, records: createCanonicalMemoryRepo(input.db), sparse: createCanonicalMemorySparseRepo(input.db), tokenizer });
-  const coordinator = createMemoryCoordinator({ authority, providers: new Map([["local", provider]]) });
-  return {
-    reconcile: () => ({ upserted: 0, deleted: 0, total: 0, invalid: [] }),
-    assemble: ({ characterId }) => assemble({ db: input.db, epochId: input.epochId, characterId, persona }),
-    createTools: (characterId) => toolsFor({ db: input.db, coordinator, authority, epochId: input.epochId, characterId }),
-    createBackgroundTools: () => ({}),
-    writeEntry: () => { throw new Error("MEMORY_LEGACY_WRITE_RETIRED"); },
-    retention: EMPTY_RETENTION,
-    tidy: EMPTY_TIDY,
+export function createCanonicalLocalRuntime(input: RuntimeInput) {
+  const state = createLocalState(input);
+  const { authority, provider, records, maintenanceStore, blocks, tokenizer, config, coordinator } = state;
+  const banks = (characterId: string) => ensureCanonicalLocalBanks({ authority, epochId: input.epochId, characterId });
+  const router = (characterId: string) => {
+    const scope = banks(characterId);
+    return { globalBankId: () => scope.global.bankId, characterBankId: () => scope.character.bankId, characterId: () => characterId };
   };
+  const retention = createCanonicalLocalRetention({ repo: maintenanceStore, authority, epochId: input.epochId,
+    intentionsDefaultDays: config.intentionsDefaultDays });
+  const tidy = createCanonicalLocalTidyView({ repo: maintenanceStore, records, authority, blocks, tokenizer, epochId: input.epochId });
+  const engine: MemoryEngine = {
+    reconcile: () => ({ upserted: 0, deleted: 0, total: maintenanceStore.listRetention({ epochId: input.epochId }).length, invalid: [] }),
+    assemble: ({ characterId, currentMessage }) => captureAssembly(state, characterId)(currentMessage),
+    createTools: (characterId): ToolSet => createCanonicalMemoryToolsWithCapabilities({ coordinator,
+      authority: authority.activeEpoch(input.epochId), router: router(characterId) }, LOCAL_MEMORY_CAPABILITIES),
+    createBackgroundTools: (characterId) => { banks(characterId); return tidy.createTools(characterId); },
+    writeEntry: (request) => writeCanonicalObservedMemory({ provider, epochId: input.epochId, banks }, request),
+    retention: retention.ops,
+    tidy,
+  };
+  return { ...engine, provider, authority, maintenanceStore, banks, retentionSweep: retention.sweep,
+    captureRun: (characterId: string) => {
+      const capturedRouter = router(characterId);
+      const initiative = captureTrackedInitiativeAssembly(() => captureInitiativeAssembly(state, characterId));
+      return createCanonicalMemoryRun({ coordinator, router: capturedRouter, captureRecallEvidence: state.recallEvidence.read,
+        assemble: captureAssembly(state, characterId), assembleInitiative: initiative.assemble, initiativeCurrent: initiative.isCurrent,
+        prompt: CANONICAL_MEMORY_SYSTEM_PROMPT });
+    } };
 }
 
-function assemble(input: { db: Database; epochId: string; characterId: string; persona: PersonaProvider }): string {
-  const { db, epochId, characterId, persona } = input;
-  const sections = [persona.assistantLayer(), persona.persona(characterId)];
-  const blocks = db.prepare("SELECT block_id,content FROM taki_memory_blocks WHERE scope_kind='global' OR (scope_kind='character' AND character_id=:character) ORDER BY CASE block_id WHEN 'user-card' THEN 0 WHEN 'user-model' THEN 1 ELSE 2 END").all({ character: characterId });
-  for (const row of blocks) {
-    const definition = V1_BLOCKS.find((block) => block.id === row.block_id);
-    if (!definition) continue;
-    const content = fitToBudget(String(row.content).split("\n"), definition.budgetTokens, (line) => line).join("\n");
-    if (content.length > 0) sections.push(`${definition.header} [budget: ${estimateTokens(content)}/${definition.budgetTokens} tokens]\n${content}`);
-  }
-  const pinned = db.prepare("SELECT u.text FROM canonical_memory_units u JOIN canonical_memory_policy p ON p.authority_epoch_id=u.authority_epoch_id AND p.bank_id=u.bank_id AND p.memory_id=u.memory_id JOIN canonical_memory_banks b ON b.authority_epoch_id=u.authority_epoch_id AND b.bank_id=u.bank_id WHERE u.authority_epoch_id=:epoch AND u.state='valid' AND p.visibility='pinned' AND (b.scope_kind='global' OR b.character_id=:character) ORDER BY p.importance DESC,u.updated_at DESC LIMIT 32").all({ epoch: epochId, character: characterId }).map((row) => String(row.text));
-  sections.push(...pinned);
-  return sections.filter(Boolean).join("\n\n");
+function captureInitiativeAssembly(state: LocalState, characterId: string) {
+  const banks = state.authority.listBanks(state.epochId);
+  const global = banks.find((bank) => bank.scope.kind === "global");
+  const character = banks.find((bank) => bank.scope.kind === "character" && bank.scope.characterId === characterId);
+  return captureInitiativeMemoryAssembly({ characterId, persona: state.persona,
+    global: global ? { reference: global.bankId, content: state.blocks.render([{ kind: "global", characterId: null }]) } : undefined,
+    character: character ? { reference: character.bankId, content: state.blocks.render([{ kind: "character", characterId }]) } : undefined });
 }
 
-function toolsFor(input: { db: Database; coordinator: ReturnType<typeof createMemoryCoordinator>; authority: ReturnType<typeof createCanonicalMemoryAuthorityRepo>; epochId: string; characterId: string }): ToolSet {
-  const banks = input.db.prepare("SELECT bank_id,scope_kind FROM canonical_memory_banks WHERE authority_epoch_id=:epoch AND (scope_kind='global' OR character_id=:character)").all({ epoch: input.epochId, character: input.characterId });
-  const global = banks.find((row) => row.scope_kind === "global"); const character = banks.find((row) => row.scope_kind === "character");
-  if (!global || !character) return {};
-  const caps = { providerId: "local", contractVersion: 1 as const, retain: true, recall: true, reflect: false, edit: true, invalidate: true, restore: true, conditionalMutation: true, idempotentWrites: true, sparseRetrieval: true, vectorRetrieval: "unavailable" as const, derivedMemoryRead: false };
-  return createCanonicalMemoryToolsWithCapabilities({ coordinator: input.coordinator, authority: input.authority.activeEpoch(input.epochId), router: { globalBankId: () => String(global.bank_id), characterBankId: () => String(character.bank_id), characterId: () => input.characterId } }, caps);
+function createLocalState(input: RuntimeInput) {
+  const authority = createCanonicalMemoryAuthorityRepo(input.db);
+  authority.activeEpoch(input.epochId);
+  const config = input.config ?? loadMemoryConfig({});
+  const persona = input.promptDir ? createPersonaProvider({ promptDir: input.promptDir }) : createFallbackPersonaProvider();
+  const tokenizer = createIntlSegmenterTokenizer({ stoplist: config.stoplist });
+  const records = createCanonicalMemoryRepo(input.db);
+  const maintenanceStore = createCanonicalMemoryMaintenanceRepo(input.db, tokenizer);
+  const blocks = createStructuredMemoryBlockRepo(input.db);
+  const recallEvidence = createRecallEvidenceRegistry(createLocalRecallEvidence(input.db));
+  const provider = createLocalMemoryProvider({ authority, records, sparse: createCanonicalMemorySparseRepo(input.db), tokenizer,
+    maintenance: maintenanceStore, intentionsDefaultDays: config.intentionsDefaultDays, observeRecallEvidence: recallEvidence.observe });
+  const coordinator = createMemoryCoordinator({ authority, providers: new Map([["local", provider]]) });
+  return { ...input, authority, config, persona, tokenizer, records, maintenanceStore, blocks, provider, coordinator, recallEvidence };
+}
+
+function captureAssembly(state: LocalState, characterId: string) {
+  const scope = ensureCanonicalLocalBanks({ authority: state.authority, epochId: state.epochId, characterId });
+  const rows = state.maintenanceStore.list({ epochId: state.epochId, characterId }).map((record) =>
+    canonicalMemoryRow(record, record.unit.bankId === scope.global.bankId ? null : characterId));
+  return captureCanonicalMemoryAssembly({ characterId, rows, persona: state.persona, pinnedBudget: state.config.pinnedBudget,
+    blocks: state.blocks.render([{ kind: "global", characterId: null }, { kind: "character", characterId }]) });
 }

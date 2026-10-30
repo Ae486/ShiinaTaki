@@ -25,7 +25,7 @@ const compatibility: HindsightCompatibilityProjection = {
   contracts: { changeJournal: versioned, conditionalMutation: versioned, logicalSnapshot: versioned, additiveObservationInstructions: versioned, controlledLayerProjection: versioned },
 };
 
-function build(options: { failDryRunBank?: string; failApplyBank?: string; operationPending?: boolean } = {}) {
+function build(options: { failDryRunBank?: string; failApplyBank?: string; operationPending?: boolean; failValidate?: boolean } = {}) {
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
   dbs.push(db);
   db.prepare("UPDATE memory_authority_selection SET mode='canonical-local',active_epoch_id='epoch',verified_snapshot_id='snapshot',activation_transaction_id='tx' WHERE singleton=1").run();
@@ -64,7 +64,10 @@ function build(options: { failDryRunBank?: string; failApplyBank?: string; opera
   };
   const service = createHindsightSetupService({
     config: () => ({ state: "ready", projection: connection }), secret: { resolve: () => "sentinel", marker: () => "marker" },
-    client: () => client, compatibility: { validate: async () => ({ fingerprint: hindsightConnectionFingerprint(connection, "marker"), compatibility }) },
+    client: () => client, compatibility: { validate: async () => {
+      if (options.failValidate) throw new Error("private outage detail");
+      return { fingerprint: hindsightConnectionFingerprint(connection, "marker"), compatibility };
+    } },
     connectionRepo: createHindsightConnectionRepo(db), bankRepo: createHindsightBankSetupRepo(db),
     authorityMode: () => String(db.prepare("SELECT mode FROM memory_authority_selection WHERE singleton=1").get()?.mode),
     now: () => "2026-08-21T00:00:00.000Z", attemptId: () => "attempt-1", wait: async () => undefined,
@@ -130,5 +133,21 @@ describe("Hindsight setup service", () => {
     const h = build();
     h.db.prepare("UPDATE memory_authority_selection SET mode='legacy-markdown',active_epoch_id=NULL,verified_snapshot_id=NULL,activation_transaction_id=NULL WHERE singleton=1").run();
     await expect(h.service.validate({ expectedRevision: 0 })).rejects.toMatchObject({ code: "HINDSIGHT_STATE_CONFLICT" });
+  });
+
+  it("a failed validate withdraws compatibility evidence but keeps the fingerprint, so setup and llmHealth refuse until a fresh success", async () => {
+    const h = build();
+    const configured = await validateAndSetup(h);
+    expect(configured.phase).toBe("configured");
+    h.options.failValidate = true;
+    const failed = await h.service.validate({ expectedRevision: configured.revision });
+    expect(failed).toMatchObject({ phase: "failed", compatibility: null, configFingerprint: configured.configFingerprint, lastSuccessfulPhase: "configured" });
+    expect(JSON.stringify(failed)).not.toContain("private outage detail");
+    await expect(h.service.setup({ expectedRevision: failed.revision, characterId: "taki" })).rejects.toMatchObject({ code: "HINDSIGHT_EXTENSION_UNSUPPORTED" });
+    await expect(h.service.llmHealth({ expectedRevision: failed.revision, acknowledgeProviderCalls: true })).rejects.toMatchObject({ code: "HINDSIGHT_LLM_HEALTH_UNAVAILABLE" });
+    h.options.failValidate = false;
+    const revalidated = await h.service.validate({ expectedRevision: failed.revision });
+    expect(revalidated).toMatchObject({ phase: "compatible", compatibility: configured.compatibility });
+    expect(revalidated.banks.every((bank) => bank.status === "verified")).toBe(true);
   });
 });

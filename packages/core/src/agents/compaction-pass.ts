@@ -16,12 +16,14 @@ import {
 
 /*
  * The summary prompt is research/re-compaction-prompts.md Part D (the owner-reviewed draft), transcribed with the
- * three ruled amendments and NOTHING else changed:
+ * three ruled amendments, plus the source-preservation clarification below:
  *   (a) the closing "Aim for about {TAKI_COMPACT_SUMMARY_TOKENS} tokens." line is DELETED (owner 2026-08-02: no
  *       length limit, no truncation, no knob) and REPLACED with Letta's quality closer;
  *   (b) the WHAT TO LET GO block gains the permanent-facts drop line (design §3.2b — the summarizer never reads
  *       the memory store; this line removes the identity-fact duplication class instead);
  *   (c) {MEMORY_VOICE_RULE} stays a whole-constant import (the tidy-pass precedent — one voice, R10).
+ * The source clarification preserves relevant reported events/negations across different subjects and avoids
+ * inventing correction history from native roles. It does not change Memory eligibility or summary quality gates.
  * Plus one post-probe owner ruling OUTSIDE the constant (2026-08-02): the prompt INPUT carries a current-date
  * anchor line (renderDayDate, the base-prompt convention) — the one-shot gateway probe showed the model INVENTS a
  * year when the material has month-day anchors only (Hermes TEMPORAL ANCHORING precedent).
@@ -79,6 +81,13 @@ been answered out of the open threads.  Drop something only when it is clearly f
 superseded.
 
 Do not invent.  If something is unclear in the material, leave it out rather than guess.
+
+For events relevant to the retained thread, keep the source/person attached to each
+reported event and explicit negation when similar events involve different people.
+A user's clarification does not retract another person's sourced event unless the
+transcript says so. An assistant-role message with a supplied material source is not
+evidence of a previous attribution mistake. Do not invent a correction narrative from
+that role alone.
 
 This record is the only thing that survives of that stretch of conversation. Every word
 should enable future continuity.`;

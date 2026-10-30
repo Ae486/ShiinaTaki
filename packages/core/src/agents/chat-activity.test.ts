@@ -19,6 +19,19 @@ function fixture() {
 const call = (toolCallId: string) => ({ type: "tool-call", toolCallId, toolName: "echo", input: { secret: "RAW_INPUT" } });
 
 describe("ordered foreground activity producer", () => {
+  it("releases durable private segment references while preserving sequence and later partial activity", () => {
+    const f = fixture();
+    f.part({ type: "text-delta", id: "old", text: "old" });
+    expect(f.attempt.references(0, { role: "assistant", content: "old" })).toHaveLength(1);
+    expect(() => f.attempt.releaseThrough!(1)).toThrow("CHAT_ACTIVITY_FRONTIER_UNOBSERVED");
+    f.part({ type: "finish-step" }); f.attempt.releaseThrough!(0); f.tools.releaseCompleted();
+    expect(f.attempt.references(0, { role: "assistant", content: "old" })).toEqual([]);
+    f.part({ type: "start-step" }); f.part({ type: "text-delta", id: "new", text: "new" });
+    expect(f.attempt.references(1, { role: "assistant", content: "new" })).toHaveLength(1);
+    expect(f.events.map((event) => event.seq)).toEqual(f.events.map((_, index) => index + 1));
+    f.attempt.close(true);
+  });
+
   it("buffers execution callbacks until ordered receipt after preceding language", async () => {
     const f = fixture();
     const toolCall = call("one");
@@ -36,6 +49,15 @@ describe("ordered foreground activity producer", () => {
     expect(f.events.at(-1)).toMatchObject({ outcome: "failed", message: "工具返回了错误" });
     expect(JSON.stringify(f.events)).not.toMatch(/RAW_INPUT|RAW_RESULT|secret|input|output/);
     expect(f.events.map((event) => event.seq)).toEqual(f.events.map((_, index) => index + 1));
+  });
+
+  it("labels a rejected avatar command as not adopted by the display rather than a generic failure", () => {
+    const f = fixture();
+    const toolCall = call("one");
+    f.part(toolCall);
+    f.tools.end({ toolCall, toolOutput: { type: "tool-result", output: { ok: false, outcome: "rejected", code: "AVATAR_REJECTED", reason: "motion_busy" } }, toolExecutionMs: 4 } as never);
+    expect(f.events.at(-1)).toMatchObject({ kind: "tool.terminal", outcome: "failed", message: "画面未采用这次表情或动作" });
+    expect(JSON.stringify(f.events)).not.toContain("motion_busy");
   });
 
   it("keeps concurrent invocations ordered while results finish in reverse, and separates later language", () => {

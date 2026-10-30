@@ -1,0 +1,20 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "--filter",
+    "@taki/core",
+    "exec",
+    "vitest",
+    "run",
+    "src/server/methods/chat-send-sdk-transport.test.ts",
+    "src/agents/chat-agent-lifecycle.test.ts",
+    "src/agents/chat-agent-tail.test.ts",
+    "src/agents/chat-agent-usage.test.ts",
+    "src/agents/run-observability-telemetry.test.ts",
+    "src/agents/parallel-tool-effect.test.ts",
+    "src/agents/chat-agent-overflow.test.ts",
+    "src/agents/sdk-wire-compatibility.test.ts",
+    "--maxWorkers=4"
+  ],
+  "exitCode": 0
+}

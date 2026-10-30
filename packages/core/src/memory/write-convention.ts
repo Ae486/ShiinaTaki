@@ -4,6 +4,7 @@
  * POS:    core/memory — the ONE wording convention for the write side; episodic + flush import it (compaction joins in
  *         batch 7). Three prompts must never grow three different voices, so the text lives here, not in the writers.
  */
+import { SOURCE_INTERPRETATION_RULE } from "../agents/source-interpretation.ts";
 
 /**
  * T5-R15. The gate is a BEHAVIOUR-CHANGE test, not a production quota: the old "extract 1 to 3 summaries" asked for
@@ -19,7 +20,7 @@ export const WRITE_GATE_RULE =
   "or summarize.\n" +
   "Override: when the user explicitly asked you to remember something, save it even if it looks trivial or already known.\n" +
   "Most stretches of conversation are worth nothing at all. Writing nothing is the normal, expected outcome — prefer " +
-  "it over reaching for something to say.";
+  "it over reaching for something to say.\n\n" + SOURCE_INTERPRETATION_RULE;
 
 /**
  * T5-R10. One person/wording convention across every write path. The second reason is the decisive one: with a single
@@ -31,4 +32,6 @@ export const MEMORY_VOICE_RULE =
   "Keep the user's actual words (他说「很烦」, not 「表达了负面情绪」; 「卡住了」, not 「遇到技术障碍」).\n" +
   "Write only what appears in the transcript. Never infer, guess, or fill in what was not said.\n" +
   "Use absolute dates and times (2026-07-28, 周五晚上), never 「今天」/「最近」 — the memory is kept indefinitely and " +
-  "will be read long after the relative word stops being true.";
+  "will be read long after the relative word stops being true.\n" +
+  "The first-person narrator is the Companion remembering. Keep the actual subject of the remembered event; " +
+  "a discussion of an external person's experience does not make it the user's biography.\n\n" + SOURCE_INTERPRETATION_RULE;

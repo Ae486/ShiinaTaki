@@ -1,8 +1,12 @@
 # core/src/
+- initiative/ — bounded trusted opportunities over the existing Run, ChatAgent, authority and quota contracts
+- presence/ — independent authenticated source leases, same-device observed intervals and durable response-opportunity settlement
+- delivery/ — shared same-Run presentation continuations and ordinary Timeline publication
+- co-watching/ — explicit single-video invitations, governed native analysis/reconciliation and registered-result reads, ordinary-chat context and preparation over existing Run/Effect/Character queue and shared prepared publication
 - harness/ — Core-owned Trigger admission and Run/Attempt lifecycle service above the existing ToolLoopAgent
 - scheduler/ — durable Scheduled Task definitions, calendar evaluation, occurrence outbox, and canonical Run adapter
 - index.ts — package public entry; empty until an external consumer exists (core runs as a process)
-- main.ts — process entry with unchanged Memory/Replay authorities, atomic Timeline/activity delivery, opt-in Perception and extension observation before producer boot, operator registries and orderly resource disposal
+- main.ts — process entry with Memory/Replay authorities, atomic Timeline/activity delivery, primary private-inbox consumption and cooperative background yield, shared Utility task summaries, opt-in observation, Skill-disclosed media controls and operator registries; drains captured work and MCP clients before closing SQLite
 - config/ — env → validated boot config; plus the operator-facing settings store (knob registry, precedence source, writer, change fan-out)
 - boot/ — the composition root's config+storage phase: open the DB on the env-only data root, then resolve every other knob (env > stored > default) for the loaders
 - logging/ — pino root logger factory

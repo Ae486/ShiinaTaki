@@ -1,6 +1,6 @@
 /**
  * INPUT:  independent Operations read states and explicit maintenance actions from useOperations.
- * OUTPUT: retained memory/storage cards with distinct loading, error/retry and unavailable presentation.
+ * OUTPUT: retained memory/storage cards and durable Memory operations with distinct loading, error/retry and unavailable presentation.
  * POS:    Home Operations — presentation only; Core counters and actual mutation outcomes supply every claim.
  */
 
@@ -8,20 +8,25 @@ import { ActionButton } from "../../action-button.tsx";
 import { LabeledRows, PageCard } from "../../page-card.tsx";
 import { PageAlert, PageBody, PageHeader } from "../../page-chrome.tsx";
 import { Skeleton } from "@/components/ui/skeleton.js";
+import { MemoryAuthorityCard } from "./memory-authority-card.tsx";
 import { statusRows, tidyDefectRows } from "./operations-state.ts";
 import { StorageCard } from "./storage-card.tsx";
+import { useMemoryOperations } from "./use-memory-operations.ts";
 import { useOperations } from "./use-operations.ts";
 
 export function OperationsPage() {
   const ops = useOperations();
+  const memoryOps = useMemoryOperations();
 
   return (
     <>
-      <PageHeader title="运维" hint="手动整理记忆、查看压缩与校准状态、管理附件占用。" busy={ops.refreshing} />
+      <PageHeader title="运维" hint="手动整理记忆、查看压缩与校准状态、管理附件占用。" busy={ops.refreshing || (memoryOps.connectionReady && memoryOps.loading)} />
       <PageBody>
         {ops.error && (
           <PageAlert>{ops.error}</PageAlert>
         )}
+
+        <MemoryAuthorityCard ops={memoryOps} />
 
         <PageCard title="记忆整理">
           <ActionButton

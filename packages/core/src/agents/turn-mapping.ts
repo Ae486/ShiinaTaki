@@ -5,6 +5,8 @@
  */
 import type { AssistantModelMessage, ModelMessage, ToolModelMessage, ToolResultPart } from "ai";
 import type { TimelineEntry, TimelinePart, TimelineRole, TimelineToolOutput } from "@taki/shared";
+import { renderSourceContext, renderToolResult } from "./source-context.ts";
+import { toolSourceMaterials } from "./tool-source-materials.ts";
 
 /** What `result.responseMessages` yields (the SDK's ResponseMessage union, which it does not export). */
 export type TurnMessage = AssistantModelMessage | ToolModelMessage;
@@ -59,12 +61,14 @@ function toolEntry(message: ToolModelMessage): TurnEntryInput | null {
   const parts: TimelinePart[] = [];
   for (const part of message.content) {
     if (part.type !== "tool-result") continue; // approval responses carry no transcript value
+    const sources = toolSourceMaterials(part.output) ?? toolSourceMaterials("value" in part.output ? part.output.value : undefined);
     // The SDK's tagged ToolResultOutput is persisted as-is; the zod schema re-validates it on read.
     parts.push({
       type: "tool-result",
       toolCallId: part.toolCallId,
       toolName: part.toolName,
       output: part.output as TimelineToolOutput,
+      ...(sources ? { sourceMaterials: [...sources] } : {}),
     });
   }
   return parts.length > 0 ? { role: "tool", content: summarize(parts), parts } : null;
@@ -85,16 +89,18 @@ function summarize(parts: TimelinePart[]): string {
 }
 
 /** Null = unreplayable row (a tool row without parts cannot be reconstructed — defensive, we never write one). */
-export function toModelMessage(entry: TimelineEntry): ModelMessage | null {
-  if (entry.role === "user") return { role: "user", content: entry.content };
+export function toModelMessage(entry: Pick<TimelineEntry, "role" | "content" | "parts" | "sourceContext">): ModelMessage | null {
+  const header = renderSourceContext(entry.sourceContext);
+  const text = header ? `${header}\n${entry.content}` : entry.content;
+  if (entry.role === "user") return { role: "user", content: text };
   if (entry.role === "tool") {
     const content = (entry.parts ?? []).filter((part) => part.type === "tool-result").map(toSdkToolResult);
     return content.length > 0 ? { role: "tool", content } : null;
   }
-  if (!entry.parts || entry.parts.length === 0) return { role: "assistant", content: entry.content };
+  if (!entry.parts || entry.parts.length === 0) return { role: "assistant", content: text };
   return {
     role: "assistant",
-    content: entry.parts
+    content: [...(header ? [{ type: "text" as const, text: header }] : []), ...entry.parts
       // text|tool-call only: assistant rows never carry image parts (those live on user rows) — the explicit predicate
       // keeps the inferred type guard tight now that TimelinePart includes the image variant.
       .filter((part) => part.type === "text" || part.type === "tool-call")
@@ -102,7 +108,7 @@ export function toModelMessage(entry: TimelineEntry): ModelMessage | null {
         part.type === "text"
           ? { type: "text" as const, text: part.text }
           : { type: "tool-call" as const, toolCallId: part.toolCallId, toolName: part.toolName, input: {} },
-      ),
+      )],
   };
 }
 
@@ -112,6 +118,6 @@ function toSdkToolResult(part: Extract<TimelinePart, { type: "tool-result" }>): 
     toolCallId: part.toolCallId,
     toolName: part.toolName,
     // Round-trip of the tagged union the SDK wrote; the zod boundary guaranteed {type, value} shape.
-    output: part.output as ToolResultPart["output"],
+    output: renderToolResult(part.output as ToolResultPart["output"], part.sourceMaterials),
   };
 }

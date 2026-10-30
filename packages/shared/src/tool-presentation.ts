@@ -4,7 +4,14 @@
  * POS:    shared/presentation — names only; unknown routing keys are never decoded or used as display fallbacks
  */
 const TOOL_NAMES: ReadonlyMap<string, string> = new Map([
+  ["delegate_subagent", "委派助手工作"],
+  ["send_subagent_message", "补充助手说明"],
+  ["stop_subagent", "暂停助手工作"],
+  ["inspect_subagent", "查看助手工作"],
+  ["complete_subagent", "记录助手结果"],
+  ["finish_parent_continuation", "完成协作处理"],
   ["get_current_time", "读取当前时间"],
+  ["heartbeat_respond", "决定主动表达"],
   ["memory_search", "搜索记忆"],
   ["memory_write", "写入记忆"],
   ["memory_archive", "归档记忆"],
@@ -19,6 +26,10 @@ const TOOL_NAMES: ReadonlyMap<string, string> = new Map([
   ["read_file", "读取工作区文件"],
   ["write_file", "写入工作区文件"],
   ["schedule_task", "管理定时任务"],
+  ["manage_interaction_pattern", "管理互动习惯"],
+  ["plan_follow_up", "安排后续跟进"],
+  ["manage_co_watching", "查询分析或管理共看"],
+  ["manage_media_recommendations", "管理推荐视频预分析"],
   ["screenshot", "屏幕截图"],
   ["process_list", "查看进程"],
   ["clipboard_read", "读取剪贴板"],

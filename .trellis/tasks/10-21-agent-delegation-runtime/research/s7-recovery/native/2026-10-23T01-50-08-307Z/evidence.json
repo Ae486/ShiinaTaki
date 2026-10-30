@@ -1,0 +1,73 @@
+{
+  "checks": [
+    "Home registry opens private conversation with distinct queued and consumed receipts",
+    "held same-child refresh keeps draft and transcript nodes with immediately disabled actions",
+    "paused Co-Watching opens the exact child/work without resuming it",
+    "stop is child-specific; queued input does not resume; deliberate Continue uses exact idle Run/version",
+    "lost send acknowledgement reconnects without mutation replay and preserves draft plus unknown outcome",
+    "failed refresh retains child detail; explicit retry restores it; empty list and undelivered parent synthesis remain truthful"
+  ],
+  "artifacts": "H:\\TakiAgent-worktrees\\t4\\.trellis\\tasks\\10-21-agent-delegation-runtime\\research\\s7-recovery\\native\\2026-10-23T01-50-08-307Z",
+  "directory": "G:\\Temp\\taki-s7-subagent-native-vdqbKo",
+  "scope": "Actual WebView2 and production Home/WsClient/controller. Shared-validated scripted child RPC state; no model, real Runtime execution or owner acceptance.",
+  "calls": [
+    {
+      "method": "subagent.stop",
+      "params": {
+        "characterId": "taki",
+        "target": {
+          "subagentId": "00000000-0000-4000-8000-000000000001",
+          "workInputId": "00000000-0000-4000-8000-000000000011",
+          "expectedControlVersion": 2,
+          "expectedRunId": "run-child-a"
+        }
+      }
+    },
+    {
+      "method": "subagent.send",
+      "params": {
+        "characterId": "taki",
+        "target": {
+          "subagentId": "00000000-0000-4000-8000-000000000001",
+          "workInputId": "00000000-0000-4000-8000-000000000011",
+          "expectedControlVersion": 3,
+          "expectedRunId": null
+        },
+        "operationKey": "611c78e5-9f0f-4aab-b29f-82804a2dcb92",
+        "direction": "保留中的补充草稿",
+        "materials": []
+      }
+    },
+    {
+      "method": "subagent.continue",
+      "params": {
+        "characterId": "taki",
+        "target": {
+          "subagentId": "00000000-0000-4000-8000-000000000001",
+          "workInputId": "00000000-0000-4000-8000-000000000011",
+          "expectedControlVersion": 3,
+          "expectedRunId": null
+        },
+        "operationKey": "4fb19767-b8c2-4c15-9a5e-e84795a9ad38",
+        "direction": "",
+        "materials": []
+      }
+    },
+    {
+      "method": "subagent.send",
+      "params": {
+        "characterId": "taki",
+        "target": {
+          "subagentId": "00000000-0000-4000-8000-000000000001",
+          "workInputId": "00000000-0000-4000-8000-000000000011",
+          "expectedControlVersion": 4,
+          "expectedRunId": null
+        },
+        "operationKey": "1ab4f2eb-3f68-42d5-ba6a-ec40f75c53fd",
+        "direction": "断线也要保留的输入",
+        "materials": []
+      }
+    }
+  ],
+  "guiOutput": ""
+}

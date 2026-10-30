@@ -10,10 +10,12 @@ import { MonitorRunBrowser } from "./monitor-run-browser.tsx";
 import { TrajectoryWorkspace } from "./trajectory-workspace.tsx";
 import { useMonitorController } from "./use-monitor-controller.ts";
 import css from "./monitor-workspace.module.css";
+import type { ReactNode } from "react";
+import { InitiativePolicyDiagnostics } from "@/features/initiative-patterns/initiative-policy-diagnostics.js";
 
 export function MonitorPage() {
   const monitor = useMonitorController();
-  return <MonitorWorkspace {...monitor} />;
+  return <MonitorWorkspace {...monitor} policy={<InitiativePolicyDiagnostics enabled={monitor.view.mode !== "DISABLED"} />} />;
 }
 
 interface MonitorWorkspaceProps {
@@ -21,10 +23,12 @@ interface MonitorWorkspaceProps {
   controller: MonitorController;
   connectionKind: string;
   visible: boolean;
+  policy?: ReactNode;
 }
 
-export function MonitorWorkspace({ view, controller, connectionKind, visible }: MonitorWorkspaceProps) {
+export function MonitorWorkspace({ view, controller, connectionKind, visible, policy }: MonitorWorkspaceProps) {
   return <section className={css.root} aria-label="运行监视">
+    {policy}
     {view.error && <div className={css.notice} role="alert"><span>{view.error}</span>
       <button type="button" onClick={() => void (view.retryRunKey ? controller.select(view.retryRunKey) : controller.refresh())}>
         {view.retryRunKey ? "重试切换" : "重试"}

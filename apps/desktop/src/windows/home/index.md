@@ -1,9 +1,10 @@
 # windows/home/
 The home window: one instance, left menu / right page content. Pages are registry-driven — adding a page is one row
-in pages.ts. Holds no state of record (invariant 4); every page talks to the Core over the window's own operator WS.
+in pages.ts. Holds no state of record (invariant 4); Core pages use the window's operator WS, while QQ history uses its own local native QQMM attachment.
 - main.tsx — React root mounting <HomeShell> into home.html #root, on the page named by the `?page=` boot param
 - home-shell.tsx — two-pane shell, retained pages with pre-paint route publication, shared client/Approval owner, and connection feedback; Monitor survives transient client retirement, initial unresolved routes stay pending, and confirmed disable removes its surface
-- pages.ts — THE page registry (id/label/icon/component rows) + the derived PageId union + isPageId
+- pages.ts — THE page registry, including initiative management and private child conversations (id/label/icon/component rows), derived PageId and runtime gate
+- pages/qqmm/ — local QQ history, native-only transport and effective visibility disposal; exempt from the Core connection banner
 - pages/monitor/ — full-height DSH Run browser/Toolbar/Overview/measured-ledger/temporary-Inspector port with semantic filters, independent history/live recovery, and no user-facing internal metadata
 - default-page-id.ts — dependency-leaf default page id shared by navigation consumers without loading page components
 - visited-page-ids.ts — dependency-leaf visited-page sequence used by the Home keep-alive host
@@ -12,7 +13,7 @@ in pages.ts. Holds no state of record (invariant 4); every page talks to the Cor
 - home-store.ts — zustand nav store: currentPage + navigate(id)
 - boot-page.ts — pure `?page=` parse with a fallback to the default page
 - use-home-navigate-event.ts — listens for the home:navigate Tauri event (openHome on an already-open window)
-- use-home-connection.ts — the shared settings-family connection owner using fresh authenticated generations plus one stable last-good timing accessor; independent from Pet and Chat
+- use-home-connection.ts — independent settings-family connection, source-bound Home presence and designated User Timezone reporter, plus the last-good timing accessor
 - use-monitor-availability.ts — generation-safe typed Monitor availability, retained across transient null clients; config changes supersede stale reads and only confirmed disable redirects a requested Monitor route
 - home-client-context.ts — React context exposing the client, status, and window-owned timing accessor to settings pages (chat keeps its own socket)
 - page-chrome.tsx — shared page frame: stable title/hint with delayed non-displacing pending indication, keyboard-scrollable content and persistent actionable errors

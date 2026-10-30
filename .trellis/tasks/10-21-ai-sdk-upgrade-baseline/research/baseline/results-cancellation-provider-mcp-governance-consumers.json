@@ -1,0 +1,100 @@
+[
+  {
+    "name": "cancellation",
+    "command": [
+      "pnpm.cmd",
+      "--filter",
+      "@taki/core",
+      "exec",
+      "vitest",
+      "run",
+      "src/agents/chat-agent-lifecycle.test.ts",
+      "src/agents/chat-agent-tail.test.ts",
+      "src/agents/chat-agent-baseline-integration.test.ts",
+      "src/agents/chat-agent-overflow.test.ts",
+      "src/agents/parallel-tool-effect.test.ts",
+      "src/agents/model-observability.test.ts",
+      "src/agents/run-observability-telemetry.test.ts"
+    ],
+    "exitCode": 0,
+    "seconds": 7.97
+  },
+  {
+    "name": "provider",
+    "command": [
+      "pnpm.cmd",
+      "--filter",
+      "@taki/core",
+      "exec",
+      "vitest",
+      "run",
+      "src/agents/tool-disclosure.test.ts",
+      "src/agents/chat-agent-prefix-cache.test.ts",
+      "src/agents/chat-agent-images.test.ts",
+      "src/agents/chat-agent-non-primary.test.ts",
+      "src/agents/turn-mapping.test.ts",
+      "src/agents/replay-source-loader.test.ts",
+      "src/config/provider-factory.test.ts"
+    ],
+    "exitCode": 0,
+    "seconds": 8.87
+  },
+  {
+    "name": "mcp",
+    "command": [
+      "pnpm.cmd",
+      "--filter",
+      "@taki/core",
+      "exec",
+      "vitest",
+      "run",
+      "src/mcp/mcp-manager.test.ts",
+      "src/mcp/mcp-generations.test.ts",
+      "src/mcp/mcp-manager-change.test.ts",
+      "src/mcp/mcp-generation-close.test.ts",
+      "src/mcp/mcp-http.test.ts",
+      "src/mcp/mcp-schema-compat.test.ts",
+      "src/mcp/mcp-turn-tools.test.ts",
+      "src/mcp/mcp-stdio-launch.test.ts",
+      "src/mcp/mcp-stdio-relay.test.ts"
+    ],
+    "exitCode": 0,
+    "seconds": 4.74
+  },
+  {
+    "name": "governance",
+    "command": [
+      "pnpm.cmd",
+      "--filter",
+      "@taki/core",
+      "exec",
+      "vitest",
+      "run",
+      "src/governance/governed-tool.test.ts",
+      "src/governance/governed-tool-unattended.test.ts",
+      "src/governance/captured-tool-execution.test.ts",
+      "src/harness/run-service.test.ts",
+      "src/harness/recovery-coordinator.test.ts"
+    ],
+    "exitCode": 0,
+    "seconds": 5.7
+  },
+  {
+    "name": "consumers",
+    "command": [
+      "pnpm.cmd",
+      "--filter",
+      "@taki/core",
+      "exec",
+      "vitest",
+      "run",
+      "src/agents/compaction-pass.test.ts",
+      "src/agents/chat-agent-compaction-seam.test.ts",
+      "src/memory/canonical-local-ingestion.test.ts",
+      "src/memory/hindsight/hindsight-policy-curator.test.ts",
+      "src/co-watching/runtime.test.ts"
+    ],
+    "exitCode": 0,
+    "seconds": 23.44
+  }
+]

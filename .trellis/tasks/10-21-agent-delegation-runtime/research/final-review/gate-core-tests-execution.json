@@ -1,0 +1,7 @@
+{
+  "finishedAt": "2026-10-23T03:40:06.8532715Z",
+  "startedAt": "2026-10-23T03:40:04.3826781Z",
+  "command": "pnpm --filter @taki/core exec vitest run src/agents/turn-registry.test.ts --reporter=default --reporter=json --outputFile.json=../../.trellis/tasks/10-21-agent-delegation-runtime/research/final-review/gate-core-tests.json",
+  "cwd": "H:/TakiAgent-worktrees/t4",
+  "exitCode": 0
+}

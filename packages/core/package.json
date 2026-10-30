@@ -11,10 +11,10 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@ai-sdk/mcp": "^2.0.10",
-    "@ai-sdk/openai-compatible": "^3.0.5",
+    "@ai-sdk/mcp": "2.0.81",
+    "@ai-sdk/openai-compatible": "3.0.75",
     "@taki/shared": "workspace:*",
-    "ai": "^7.0.17",
+    "ai": "7.0.148",
     "croner": "^10.0.1",
     "cross-spawn": "7.0.6",
     "fflate": "^0.8.3",

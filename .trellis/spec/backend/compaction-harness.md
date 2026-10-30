@@ -82,6 +82,19 @@
 - Summary output is rejected when blank, provider-truncated/filter/error-finished, non-shrinking against the exact safe
   source projection, secret/tag-bearing, or copied from configured protected prompt content. Rejection keeps the prior
   checkpoint authoritative and records only the existing closed `SUMMARY_EMPTY` or `SUMMARY_GENERATION_FAILED` class.
+- Optional Timeline `sourceContext` and tool-result `sourceMaterials` are interpretation evidence. Include them in the
+  captured/final source digest; omit an absent source property so legacy-null v1 digest bytes remain unchanged.
+  Source-only drift refuses summary commitment just as canonical content drift does.
+- `renderSafeTranscript` keeps source descriptions beside the bounded associated text, with explicit native tool
+  outcome. `reduceSourcedToolResult` uses the projection's retained original-output association; do not parse arbitrary
+  tool text as metadata or drop the only source header while retaining its body. Replay folds preserve sidecars and
+  failure/denial status even when replacing a payload with an omission trace.
+- Source-aware summary instructions share the Memory voice/source convention. Original Timeline text is unchanged,
+  existing pre-retirement Memory flush remains required, and a summary is never a new original-primary Memory source.
+  Actual request/CAS regressions and live semantic observations are separate evidence levels.
+- For relevant retained threads, preserve the source/person of each reported event and explicit negation. Similar
+  events affecting two people remain separate; a user's clarification does not retract the external person's event.
+  An assistant-role sourced material row alone is not evidence that an attribution mistake previously occurred.
 - Retry budget and cooldown are derived from durable operation rows. The same operation exhausts its own attempt budget;
   a changed source gets a new operation identity but remains subject to the latest Character-wide failure cooldown.
   Cancellation can retry later without inheriting an unrelated permanent budget exhaustion.

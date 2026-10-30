@@ -1,0 +1,174 @@
+{
+  "name": "heartbeat-2",
+  "startedAt": "2026-09-28T10:56:38.328Z",
+  "passed": true,
+  "requests": [
+    {
+      "tools": [
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "heartbeat_respond",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "status": 200
+    },
+    {
+      "tools": [
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "heartbeat_respond",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "status": 200
+    }
+  ],
+  "finishedAt": "2026-09-28T10:56:48.511Z",
+  "model": "deepseek-v4-flash",
+  "providerHost": "api.deepseek.com",
+  "turns": [],
+  "runs": [
+    {
+      "initiator": "heartbeat",
+      "state": "completed",
+      "outcome": "completed"
+    }
+  ],
+  "usage": [
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "reported",
+      "input_tokens": 5587,
+      "output_tokens": 258,
+      "total_tokens": 5845,
+      "cache_read_tokens": 5248,
+      "reasoning_tokens": 158
+    },
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "reported",
+      "input_tokens": 6115,
+      "output_tokens": 795,
+      "total_tokens": 6910,
+      "cache_read_tokens": 5760,
+      "reasoning_tokens": 569
+    }
+  ],
+  "deliveries": [
+    {
+      "delivery_class": "class_b",
+      "state": "sent",
+      "decision_json": "{\"outcome\":\"speak\",\"selectedCandidateIds\":[\"b0fc39a85934714f18c7de0606033b7d218732892c46d2b6c6f5fe1e636995f8\"],\"text\":\"……喂。周五的演示，进度到哪了。索引那块不是已经弄完了吗——剩下的别攒到最后一天再赶。……就提一句。\",\"presentation\":{\"kind\":\"expression\",\"name\":\"smile\"},\"responseExpectation\":\"invitation\"}"
+    }
+  ],
+  "patterns": [
+    {
+      "state": "active",
+      "version": 2
+    }
+  ],
+  "schedules": [],
+  "authoringTrace": [],
+  "tools": []
+}

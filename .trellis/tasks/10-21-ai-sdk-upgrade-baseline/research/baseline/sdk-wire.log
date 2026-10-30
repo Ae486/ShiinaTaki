@@ -1,0 +1,104 @@
+
+ RUN  v4.1.10 H:/TakiAgent-worktrees/t4/packages/core
+
+ ❯ src/agents/sdk-wire-compatibility.test.ts (7 tests | 7 failed) 2326ms
+     × executes only the complete final argument when a JSON number prefix is already parseable 364ms
+     × keeps distinct invocations and ordered replay for repeated wire IDs and noncontiguous indexes 182ms
+     × does not execute proposed tools on finish_reason=length 201ms
+     × does not execute proposed tools on finish_reason=content_filter 192ms
+     × does not execute proposed tools on finish_reason=error 182ms
+     × does not execute proposed tools on finish_reason=unexpected 190ms
+     × settles aggregate results and closes iteration after abort even when the provider cancel promise stalls 1010ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/agents/sdk-wire-compatibility.test.ts > existing SDK consumers over actual compatible-provider SSE > executes only the complete final argument when a JSON number prefix is already parseable
+AssertionError: expected 1 to be 12 // Object.is equality
+
+- Expected
++ Received
+
+- 12
++ 1
+
+ ❯ src/agents/sdk-wire-compatibility.test.ts:47:40
+     45|     const { execute, requests } = await run(firstResponse);
+     46|     expect(execute).toHaveBeenCalledOnce();
+     47|     expect(execute.mock.calls[0]?.[0]).toBe(12);
+       |                                        ^
+     48|     expect(requests).toHaveLength(2);
+     49|     expect(JSON.stringify(requests[1]?.messages)).toContain('"input":1…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  src/agents/sdk-wire-compatibility.test.ts > existing SDK consumers over actual compatible-provider SSE > keeps distinct invocations and ordered replay for repeated wire IDs and noncontiguous indexes
+TypeError: Cannot read properties of undefined (reading 'hasFinished')
+ ❯ StreamingToolCallTracker.flush ../../node_modules/.pnpm/@ai-sdk+provider-utils@5.0.5_zod@4.4.3/node_modules/@ai-sdk/provider-utils/src/streaming-tool-call-tracker.ts:124:20
+ ❯ Object.flush ../../node_modules/.pnpm/@ai-sdk+openai-compatible@3.0.5_zod@4.4.3/node_modules/@ai-sdk/openai-compatible/src/chat/openai-compatible-chat-language-model.ts:699:28
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  src/agents/sdk-wire-compatibility.test.ts > existing SDK consumers over actual compatible-provider SSE > does not execute proposed tools on finish_reason=length
+ FAIL  src/agents/sdk-wire-compatibility.test.ts > existing SDK consumers over actual compatible-provider SSE > does not execute proposed tools on finish_reason=content_filter
+ FAIL  src/agents/sdk-wire-compatibility.test.ts > existing SDK consumers over actual compatible-provider SSE > does not execute proposed tools on finish_reason=error
+ FAIL  src/agents/sdk-wire-compatibility.test.ts > existing SDK consumers over actual compatible-provider SSE > does not execute proposed tools on finish_reason=unexpected
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array [
+      1,
+      Object {
+        "abortSignal": undefined,
+        "context": undefined,
+        "experimental_sandbox": undefined,
+        "messages": Array [
+          Object {
+            "content": "Run the fixture
+    
+    <turn-context>
+    Current local time: 21:32.
+    </turn-context>",
+            "role": "user",
+          },
+        ],
+        "toolCallId": "unsafe",
+      },
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/agents/sdk-wire-compatibility.test.ts:67:25
+     65|   it.each(["length", "content_filter", "error", "unexpected"])("does n…
+     66|     const { execute, fixture } = await run(chunk({ tool_calls: [call(0…
+     67|     expect(execute).not.toHaveBeenCalled();
+       |                         ^
+     68|     const toolRows = fixture.conversation.history("taki").filter(messa…
+     69|     expect(toolRows).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  src/agents/sdk-wire-compatibility.test.ts > existing SDK consumers over actual compatible-provider SSE > settles aggregate results and closes iteration after abort even when the provider cancel promise stalls
+Error: abort results did not settle
+ ❯ Timeout._onTimeout src/agents/sdk-wire-compatibility.test.ts:87:72
+     85|     const settled = await Promise.race([
+     86|       Promise.all([aggregates, consumed]),
+     87|       new Promise<never>((_resolve, reject) => setTimeout(() => reject…
+       |                                                                        ^
+     88|     ]);
+     89|     expect(settled[0]).toHaveLength(4);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  7 failed (7)
+   Start at  21:32:26
+   Duration  5.87s (transform 2.31s, setup 0ms, import 3.16s, tests 2.33s, environment 0ms)
+
+undefined
+H:\TakiAgent-worktrees\t4\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/agents/sdk-wire-compatibility.test.ts

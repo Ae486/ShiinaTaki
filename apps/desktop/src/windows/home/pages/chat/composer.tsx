@@ -7,13 +7,14 @@
  *         ui/ primitives (batch-2: the private ActionButton is gone; hit targets ≥32px per A7).
  */
 
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ImageAttachment } from "@taki/shared";
 import { pushToast } from "@/components/toast/toast-store.js";
 import { ActionButton } from "../../action-button.tsx";
 import { IconButton } from "@/components/ui/icon-button.js";
 import { ImagePlusIcon } from "@/lib/icons/image-plus-icon.js";
 import { useImageAttach, type PickedAttachment } from "./use-image-attach.ts";
+import { ConversationComposer } from "./conversation-composer.tsx";
 
 interface ComposerProps {
   onSend: (message: string, attachments: ImageAttachment[]) => void;
@@ -68,12 +69,6 @@ function Thumbnails({ attachments, onRemove }: { attachments: PickedAttachment[]
   );
 }
 
-// A2 IME safety: an IME composition's Enter (pinyin candidate confirmation) must never send;
-// plain Enter sends, Shift+Enter stays a newline. Exported so the regression test rides the real decision.
-export function enterSends(key: string, shiftKey: boolean, isComposing: boolean): boolean {
-  return !isComposing && key === "Enter" && !shiftKey;
-}
-
 export function Composer({ onSend, onCancel, isSending, retractedDraft, consumeRetractedDraft, connectionReady }: ComposerProps) {
   const [draft, setDraft] = useState("");
   const { attachments, pick, remove, clear } = useImageAttach();
@@ -94,31 +89,11 @@ export function Composer({ onSend, onCancel, isSending, retractedDraft, consumeR
     setDraft("");
     clear();
   };
-  const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (enterSends(event.key, event.shiftKey, event.nativeEvent.isComposing)) {
-      event.preventDefault();
-      submit();
-    }
-  };
-
-  return (
-    <div className="border-t border-border bg-surface p-3">
-      {attachments.length > 0 && <Thumbnails attachments={attachments} onRemove={remove} />}
-      <div className="flex items-end gap-2">
-        <AttachButton onPick={(files) => void pick(files)} />
-        <textarea
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          onKeyDown={onKeyDown}
-          rows={1}
-          placeholder="跟 taki 说点什么…"
-          className="max-h-40 min-h-[2.5rem] flex-1 resize-none rounded-2xl bg-surface-sunken px-3.5 py-2 text-sm text-text-strong"
-        />
-        {/* The action slot: 发送 while idle (accent pill), 中断 (abort via chat.cancel) while streaming — same position. */}
-        {isSending
-          ? <ActionButton shape="pill" size="lg" onClick={onCancel}>中断</ActionButton>
-          : <ActionButton tone="accent" shape="pill" size="lg" disabled={!canSend} onClick={submit}>发送</ActionButton>}
-      </div>
-    </div>
-  );
+  return <ConversationComposer editor={{ value: draft, onChange: setDraft, placeholder: "跟 taki 说点什么…" }}
+    submit={{ enabled: canSend, run: submit }}
+    attachments={attachments.length > 0 ? <Thumbnails attachments={attachments} onRemove={remove} /> : null}
+    leading={<AttachButton onPick={(files) => void pick(files)} />}
+    actions={isSending
+      ? <ActionButton shape="pill" size="lg" onClick={onCancel}>中断</ActionButton>
+      : <ActionButton tone="accent" shape="pill" size="lg" disabled={!canSend} onClick={submit}>发送</ActionButton>} />;
 }

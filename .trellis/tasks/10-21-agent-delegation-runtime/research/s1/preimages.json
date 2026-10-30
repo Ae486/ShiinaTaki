@@ -1,0 +1,152 @@
+[
+  {
+    "path": "packages/shared/src/context-source-schema.ts",
+    "existed": false,
+    "sha256": null
+  },
+  {
+    "path": "packages/shared/src/subagent-schema.ts",
+    "existed": false,
+    "sha256": null
+  },
+  {
+    "path": "packages/shared/src/subagent-result-schema.ts",
+    "existed": false,
+    "sha256": null
+  },
+  {
+    "path": "packages/shared/src/run-message-schema.ts",
+    "existed": false,
+    "sha256": null
+  },
+  {
+    "path": "packages/shared/src/timeline-schema.ts",
+    "existed": true,
+    "sha256": "1dd51c3aafaaf8f8532e3c121a0739919eef3ec5041c53639c96505a1cfb9b0f"
+  },
+  {
+    "path": "packages/shared/src/index.ts",
+    "existed": true,
+    "sha256": "5312b669a006740dd8f633a1b64f83b41871fb63078f3f43de844eb64993a0e6"
+  },
+  {
+    "path": "packages/shared/src/index.md",
+    "existed": true,
+    "sha256": "3c239725a733559d9a5a28bdc8e630e3ec56186ac5cd173f7634410eeb6f1be2"
+  },
+  {
+    "path": "packages/core/src/db/subagent-repo.ts",
+    "existed": false,
+    "sha256": null
+  },
+  {
+    "path": "packages/core/src/db/subagent-input-repo.ts",
+    "existed": false,
+    "sha256": null
+  },
+  {
+    "path": "packages/core/src/db/subagent-execution-repo.ts",
+    "existed": false,
+    "sha256": null
+  },
+  {
+    "path": "packages/core/src/db/subagent-terminal.ts",
+    "existed": false,
+    "sha256": null
+  },
+  {
+    "path": "packages/core/src/db/subagent-readers.ts",
+    "existed": false,
+    "sha256": null
+  },
+  {
+    "path": "packages/core/src/db/run-message-repo.ts",
+    "existed": false,
+    "sha256": null
+  },
+  {
+    "path": "packages/core/src/db/run-linked-state.ts",
+    "existed": false,
+    "sha256": null
+  },
+  {
+    "path": "packages/core/src/db/run-repo.ts",
+    "existed": true,
+    "sha256": "c6330d5208262596f068ccf0bea49aff76f60f6e3638ae23a0983d1977aa8b1e"
+  },
+  {
+    "path": "packages/core/src/db/effect-repo.ts",
+    "existed": true,
+    "sha256": "a69e89803439180db03f4a441b9233f9ea4106ee4ff6cf261c043fb70530845c"
+  },
+  {
+    "path": "packages/core/src/db/sqlite.ts",
+    "existed": true,
+    "sha256": "c09b947abb063bd66efbbbb2981662b96a7f3ede9cb2feb278b0dd1dca5bfe05"
+  },
+  {
+    "path": "packages/core/src/db/sqlite.test.ts",
+    "existed": true,
+    "sha256": "92ab02baf1579dd05f76ece9f3af69c200a93b4608de8add058f9b4a4921272b"
+  },
+  {
+    "path": "packages/core/src/db/index.md",
+    "existed": true,
+    "sha256": "73650cb20b37b70b6044b516a178211ef7a5161eb70940ae8c0277d5fd043612"
+  },
+  {
+    "path": "packages/core/src/db/migrations/056-subagent-conversations.ts",
+    "existed": false,
+    "sha256": null
+  },
+  {
+    "path": "packages/core/src/db/migrations/index-list.ts",
+    "existed": true,
+    "sha256": "b9e0a90eadb591224c062f5462ded0dec8a8085ec14cbab90194c5c796cebaaf"
+  },
+  {
+    "path": "packages/core/src/db/migrations/index.md",
+    "existed": true,
+    "sha256": "a78d24f8ced42510a636b9214c0d15d5f2cba0c5a40477d9872a28c072054d0b"
+  },
+  {
+    "path": "packages/core/src/harness/run-service.ts",
+    "existed": true,
+    "sha256": "7a3e4e09a221946a93ad65ef9f1bfe14bab2c7db90f29fa88367ae3dee0e03b9"
+  },
+  {
+    "path": "packages/core/src/harness/index.md",
+    "existed": true,
+    "sha256": "dee99295c3c2d4ac1b567759288d69518731dec5360f8409f4233e44b8045bba"
+  },
+  {
+    "path": "packages/core/src/boot/core-bootstrap.ts",
+    "existed": true,
+    "sha256": "970803e2e7af85c4afd06ec05347dc889f655131f530e65f4ad5d328d2b7a21c"
+  },
+  {
+    "path": "packages/core/src/boot/core-bootstrap.test.ts",
+    "existed": true,
+    "sha256": "c35c3f463564193839646ec60409f6835f8af0d140817a4ba15f197e957ae89f"
+  },
+  {
+    "path": "packages/core/src/boot/index.md",
+    "existed": true,
+    "sha256": "3f182162ee1e292118d1924da36f481ad0dc98ede906b1a60b54dd9ba30c80cc"
+  },
+  {
+    "path": "packages/core/src/db/run-terminal-transition.ts",
+    "existed": false,
+    "sha256": null
+  },
+  {
+    "path": "packages/core/src/testing/run-service-stub.ts",
+    "existed": true,
+    "sha256": "088638aa94bf6313b60d1bb54059a27164964ccef951e2a9959913657beb0bbf"
+  },
+  {
+    "path": "packages/core/src/testing/index.md",
+    "existed": true,
+    "sha256": "380aad50efad8d53e7138be2db7d150a26c4e232de8fb7df9a8843b25ebb26f8"
+  }
+]

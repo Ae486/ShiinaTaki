@@ -5,10 +5,26 @@ import { createCanonicalMemorySparseRepo } from "./canonical-memory-sparse-repo.
 import { createCanonicalMemoryAuthorityRepo } from "./canonical-memory-authority-repo.ts";
 import { createCanonicalMemoryRepo } from "./canonical-memory-repo.ts";
 import { createIntlSegmenterTokenizer } from "../memory/search-tokenizer.ts";
+import { createCanonicalMaintenanceFixture } from "./canonical-memory-maintenance-fixtures.ts";
 
 describe("canonical sparse repository", () => {
-  it("keeps projection rebuildable and excludes invalidated units", () => {
-    const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS }); const repo = createCanonicalMemorySparseRepo(db); repo.upsert({ epochId: "e", bankId: "b", memoryId: "m", text: "拉面", context: null, searchTerms: "拉面" }); expect(db.prepare("SELECT count(*) AS n FROM canonical_memory_fts").get()?.n).toBe(1); repo.remove({ epochId: "e", bankId: "b", memoryId: "m" }); expect(db.prepare("SELECT count(*) AS n FROM canonical_memory_fts").get()?.n).toBe(0); db.close();
+  it("keeps projections rebuildable and refuses orphan or invalidated units", () => {
+    const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS }); const repo = createCanonicalMemorySparseRepo(db);
+    repo.upsert({ epochId: "missing", bankId: "missing", memoryId: "missing", text: "拉面", context: null, searchTerms: "拉面" });
+    expect(db.prepare("SELECT count(*) AS n FROM canonical_memory_fts").get()?.n).toBe(0);
+    const value = createCanonicalMaintenanceFixture(db); value.seed({ unit: { text: "拉面", context: null } });
+    const projection = { epochId: value.epochId, bankId: "global", memoryId: "memory", text: "拉面", context: null, searchTerms: "拉面" };
+    repo.upsert(projection);
+    expect(db.prepare("SELECT count(*) AS n FROM canonical_memory_fts").get()?.n).toBe(1);
+    repo.remove(projection);
+    expect(db.prepare("SELECT count(*) AS n FROM canonical_memory_fts").get()?.n).toBe(0);
+    repo.rebuild(value.epochId, value.tokenizer);
+    expect(db.prepare("SELECT count(*) AS n FROM canonical_memory_fts").get()?.n).toBe(1);
+    value.maintenance.invalidate({ ...projection, characterId: null, requestId: "invalidate", expectedRevision: 1,
+      now: "2026-02-01T00:00:00.000Z", reason: null });
+    repo.upsert(projection);
+    expect(db.prepare("SELECT count(*) AS n FROM canonical_memory_fts").get()?.n).toBe(0);
+    db.close();
   });
   it("filters before limit, deduplicates upserts, and preserves CJK results after rebuild", () => {
     const at = "2026-08-19T00:00:00.000Z"; const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });

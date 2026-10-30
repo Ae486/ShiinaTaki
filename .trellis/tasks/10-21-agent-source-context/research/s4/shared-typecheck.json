@@ -1,0 +1,4 @@
+{
+  "command": "pnpm --filter @taki/shared typecheck",
+  "exitCode": 0
+}

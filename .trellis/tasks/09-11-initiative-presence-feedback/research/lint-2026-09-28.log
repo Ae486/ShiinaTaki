@@ -1,0 +1,11 @@
+
+> takiagent@0.0.0 lint H:\TakiAgent-worktrees\t4
+> eslint .
+
+
+H:\TakiAgent-worktrees\t4\packages\shared\src\index.ts
+  529:1  error  File has too many lines (503). Maximum allowed is 500  max-lines
+
+✖ 1 problem (1 error, 0 warnings)
+
+ ELIFECYCLE  Command failed with exit code 1.

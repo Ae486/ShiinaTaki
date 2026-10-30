@@ -149,6 +149,13 @@ config flip, not a refactor.
 > logged exemption (**D40**), while `additionalProperties:false` is already met and every other property is required.
 > `avatar_set_expression` and `screenshot` are strict-ready as authored.
 
+**S8. Provider function parameters must render a root `type: "object"`.** Inspect the installed SDK's
+`asSchema(inputSchema).jsonSchema`; accepting inputs in Zod does not establish provider compatibility. Keep domain
+unions where they belong and normalize a separate strict object-shaped tool input at the execution boundary.
+`heartbeat_respond` uses all-required nullable fields with outcome-specific validation, then maps into its unchanged
+persisted decision union. C3 real DeepSeek compatible-endpoint evidence accepts this non-strict wire shape and rejects
+the former untyped root `oneOf`; nullable support in that endpoint is not proof of DeepSeek strict-mode support (D40).
+
 ## R — Result & error
 
 **R1. Never-throw `execute`: every failure degrades into a structured `{ok:false, code, message}` the model can read;
@@ -218,10 +225,24 @@ metrics + m5 §C1): the SDK has **no consecutive-failure brake** — a tool fail
 
 ## B — Birth checklist
 
-**B1. Classify at birth: presentation (fire-and-forget, `{ok:true}` only, name into `PRESENTATION_TOOL_NAMES`) vs
+**B1. Classify at birth: presentation (returns only a Presentation Outcome, name into `PRESENTATION_TOOL_NAMES`) vs
 informational (the loop must continue).** Our `./agent-runtime.md` "Classify every tool" (T1 1c); industry mirror = MCP
 read/write separation `[GOOG]`. — Our precedent: `avatar/presentation-stop.ts` + `PRESENTATION_TOOL_NAMES`; an
 informational tool must NEVER enter that set (a step co-calling it last would stop the loop with its result unread).
+
+**B1a. A presentation tool returns the Presentation Outcome, never a publication ack (D80, 2026-09-19).** Its
+`execute` publishes with a Core-generated `commandId`, awaits `avatar-outcomes.ts` (bounded by
+`TAKI_AVATAR_OUTCOME_DEADLINE_MS`; instant `not_rendered` with zero subscribers; `unknown` on deadline or turn abort)
+and returns exactly one of: `{ok:true, outcome:"applied"|"not_rendered"}`, `{ok:false, outcome:"rejected",
+code:"AVATAR_REJECTED", reason}`, `{ok:false, outcome:"superseded", code:"CANCELLED", state:"cancelled"}`,
+`{ok:false, outcome:"unknown", code:"OUTCOME_UNKNOWN", state:"outcome_unknown"}` (`avatar-tool-result.ts`). The
+description states that a busy rejection is normal and must not be retried or apologized for (D3). Never queue,
+escalate priority, or re-publish on a rejection; `toolCallId` is correlation only, never the command identity.
+
+**B1b. One correction per turn for an invalid presentation call (D69).** `presentationTailStop` does not stop on a
+step whose presentation call carries the SDK `invalid` marker, so the model reads the validation error once; a second
+invalid presentation step in the same turn stops. A VALID call stops as before regardless of its outcome — a
+rejection is never a reason to re-generate.
 
 **B2. One tool per `x-tool.ts` exporting `createXTool(deps): ToolSet`, wired at exactly one registry site; the handler is
 thin — it delegates to a capability client / subscription, no business logic inline.** Our `CLAUDE.md` (naming +

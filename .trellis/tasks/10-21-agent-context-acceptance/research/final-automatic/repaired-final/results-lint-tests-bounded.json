@@ -1,0 +1,22 @@
+[
+  {
+    "name": "lint",
+    "command": [
+      "pnpm.cmd",
+      "lint"
+    ],
+    "exitCode": 0,
+    "seconds": 28.38
+  },
+  {
+    "name": "tests-bounded",
+    "command": [
+      "pnpm.cmd",
+      "-r",
+      "test",
+      "--maxWorkers=4"
+    ],
+    "exitCode": 0,
+    "seconds": 244.28
+  }
+]

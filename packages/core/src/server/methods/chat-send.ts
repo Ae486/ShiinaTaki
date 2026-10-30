@@ -21,7 +21,7 @@ import {
 import type { ChatAgent } from "../../agents/chat-agent.ts";
 import type { RunService } from "../../harness/run-service.ts";
 import type { TurnInteractive } from "../../mcp/mcp-turn-tools.ts";
-import type { TurnQueue } from "../../agents/turn-queue.ts";
+import type { PrimaryReservation, TurnQueue } from "../../agents/turn-queue.ts";
 import type { TurnRegistry } from "../../agents/turn-registry.ts";
 import type { Logger } from "../../logging/logger.ts";
 import type { MethodContext, MethodDefinition } from "../method-registry.ts";
@@ -51,6 +51,7 @@ export function chatSendMethod(
     handler: async (params, ctx): Promise<ChatSendResult> => {
       const messageId = randomUUID();
       const controller = new AbortController();
+      const reservation = controls.queue.reservePrimary(params.characterId, controller.signal);
       const runIdRef: { value?: string } = {};
       let closed = false;
       ctx.onClose(() => {
@@ -64,7 +65,7 @@ export function chatSendMethod(
         deliveryClass: "class_a", contextMode: "primary",
       });
       const interactive: TurnInteractive = { connection: ctx.connection, signal: controller.signal };
-      const admitted = await runs.admit(request, interactive);
+      const admitted = await runs.admit(request, interactive).catch((error: unknown) => { reservation.cancel(); throw error; });
       const runId = admitted.run.runId;
       const attemptId = admitted.attempt.attemptId;
       interactive.runId = runId;
@@ -80,7 +81,7 @@ export function chatSendMethod(
       // Defer streaming to the next macrotask so the ack — sent by the server as
       // this dispatch's result, a couple of microtask hops later — is flushed to
       // the socket before the first delta notification.
-      setImmediate(() => void runQueued({ chatAgent, log, params, ctx, messageId, runId, attemptId, controller, controls, runs, interactive, activity }));
+      setImmediate(() => void runQueued({ chatAgent, log, params, ctx, messageId, runId, attemptId, controller, controls, runs, interactive, activity, reservation }));
       return { messageId, runId };
     },
   };
@@ -99,13 +100,20 @@ interface PumpArgs {
   runs: RunService<TurnInteractive>;
   interactive: TurnInteractive;
   activity?: ChatTurnActivity;
+  reservation: PrimaryReservation;
 }
 
 // A turn fully commits (append user -> stream -> append turn) before the character's next send starts; concurrent
 // sends for one character would otherwise interleave appends and read each other's half-written history (D1 #3).
 async function runQueued(args: PumpArgs): Promise<void> {
   const { controls, params } = args;
-  const release = await controls.queue.acquire(params.characterId);
+  let release: () => void;
+  try { release = await args.reservation.acquire(); }
+  catch {
+    args.runs.requestCancel(args.runId, "cancelled before acquisition");
+    args.runs.settle(args.runId, args.attemptId, "cancelled", { retryable: false });
+    return;
+  }
   const controller = controls.turns.begin(params.characterId, args.controller, args.runId);
   try {
     // A queued admission must not replace the running turn or suppress its remaining events. The prior owner

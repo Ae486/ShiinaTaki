@@ -1,0 +1,29 @@
+{
+  "name": "takiagent",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.22.0",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=10"
+  },
+  "scripts": {
+    "typecheck": "pnpm -r --parallel typecheck",
+    "lint": "eslint .",
+    "test": "pnpm -r --parallel test",
+    "desktop:dev": "pnpm --filter @taki/desktop tauri dev",
+    "desktop:build": "pnpm --filter @taki/desktop tauri build",
+    "core:dev": "pnpm --filter @taki/core dev",
+    "cli:dev": "pnpm --filter @taki/cli start"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24.13.0",
+    "eslint": "^10.6.0",
+    "eslint-plugin-unicorn": "^71.1.0",
+    "typescript": "^6.0.0",
+    "typescript-eslint": "^8.63.0",
+    "vitest": "^4.1.0"
+  }
+}

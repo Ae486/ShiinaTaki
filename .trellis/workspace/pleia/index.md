@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 32
+- **Total Sessions**: 33 (branch-qualified histories)
 - **Last Active**: 2026-09-19
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~1480 | Active |
+| `journal-1.md` | ~1525 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -30,7 +30,8 @@
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
 | 32 | 2026-09-19 | Avatar lab panel acceptance, native lip-sync verdict and closeout | `8694355`, `328c5ea`, `7814a5e` | `task/t4-skills-mcp-productization` |
-| 31 | 2026-09-08 | Home continuity closeout and Heartbeat planning entry | `d6ddf2e5f932a096ff6162d31b05caeb16e7286e` | `task/t4-skills-mcp-productization` |
+| T4-31 | 2026-09-08 | Home continuity closeout and Heartbeat planning entry | `d6ddf2e5f932a096ff6162d31b05caeb16e7286e` | `task/t4-skills-mcp-productization` |
+| main-31 | 2026-09-19 | Hindsight closure Stage 1: durable memory operations | `406d7cd`, `eb20c58`, `4b2694f`, `7d80d87`, `18fe4d4` | `main` |
 | 30 | 2026-09-06 | Memory replica Waves 0-2 checkpoint | `69ca779`, `e5d1bb5` | `main` |
 | 29 | 2026-09-05 | Compaction Harness final check and archive | `6761090`, `94407cf`, `34fd3bc` | `task/t4-skills-mcp-productization` |
 | 28 | 2026-08-27 | Monitor acceptance follow-up planning | - | `task/t4-skills-mcp-productization` |

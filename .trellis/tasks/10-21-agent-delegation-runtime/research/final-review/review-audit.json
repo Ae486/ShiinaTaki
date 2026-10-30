@@ -1,0 +1,167 @@
+{
+  "report": ".trellis/tasks/10-21-agent-delegation-runtime/research/final-review/integrated-review.md",
+  "reportSha256": "575514f0c9aa8303961ae6ca5882160a6c53689de6aa475a85e6f652c59c4319",
+  "utf8NoBom": true,
+  "noTrailingWhitespace": true,
+  "links": [
+    {
+      "target": "independent-review.md",
+      "exists": true
+    },
+    {
+      "target": "spec-preimages.json",
+      "exists": true
+    },
+    {
+      "target": "spec-changes.json",
+      "exists": true
+    },
+    {
+      "target": "gate-preimages.json",
+      "exists": true
+    },
+    {
+      "target": "gate-repair.diff",
+      "exists": true
+    },
+    {
+      "target": "gate-changes.json",
+      "exists": true
+    },
+    {
+      "target": "suite-preimages.json",
+      "exists": true
+    },
+    {
+      "target": "suite-repair.diff",
+      "exists": true
+    },
+    {
+      "target": "suite-changes.json",
+      "exists": true
+    },
+    {
+      "target": "../../../10-21-agent-context-acceptance/research/r2-20261023/implementation.md",
+      "exists": true
+    },
+    {
+      "target": "../../../10-21-agent-context-acceptance/research/r2-20261023/live-summary.json",
+      "exists": true
+    },
+    {
+      "target": "../../../10-21-agent-context-acceptance/research/native-runtime/report.md",
+      "exists": true
+    },
+    {
+      "target": "../../../10-21-agent-context-acceptance/research/restart-20261023/first.json",
+      "exists": true
+    },
+    {
+      "target": "../../../10-21-agent-source-context/research/source-acceptance-results.md",
+      "exists": true
+    },
+    {
+      "target": "source-final-independent-check.json",
+      "exists": true
+    },
+    {
+      "target": "../../../10-21-agent-source-context/research/s5-s6-acceptance/live-usage-summary.json",
+      "exists": true
+    },
+    {
+      "target": "../../../10-21-agent-source-context/research/s5-s6-acceptance/checks-final-delivery.json",
+      "exists": true
+    },
+    {
+      "target": "../../../10-21-agent-context-acceptance/research/final-automatic/results-typecheck-lint-tests-bounded.json",
+      "exists": true
+    },
+    {
+      "target": "../../../10-21-agent-context-acceptance/research/final-automatic/repaired-final/core-typecheck.json",
+      "exists": true
+    },
+    {
+      "target": "../../../10-21-agent-context-acceptance/research/final-automatic/repaired-final/results-lint-tests-bounded.json",
+      "exists": true
+    },
+    {
+      "target": "../../../10-21-agent-context-acceptance/research/final-automatic/repaired-final/tests-bounded.log",
+      "exists": true
+    },
+    {
+      "target": "../../../10-21-agent-context-acceptance/research/final-automatic/repaired-final/deterministic-e2e.json",
+      "exists": true
+    },
+    {
+      "target": "../../../10-21-agent-context-acceptance/research/final-automatic/repaired-final/results-e2e-build.json",
+      "exists": true
+    },
+    {
+      "target": "../../../10-21-agent-context-acceptance/research/final-automatic/native-input-parity.json",
+      "exists": true
+    }
+  ],
+  "currentOwnedManifests": {
+    "spec-changes.json": [
+      ".trellis/spec/backend/agent-runtime.md",
+      ".trellis/spec/backend/compaction-harness.md",
+      ".trellis/spec/backend/canonical-local-memory-runtime.md"
+    ],
+    "gate-changes.json": [
+      "packages/core/src/agents/turn-registry.ts",
+      "packages/core/src/agents/turn-registry.test.ts",
+      "packages/core/src/agents/index.md",
+      "packages/shared/src/governance-presentation.test.ts",
+      "packages/shared/src/governance-registry.test.ts",
+      "packages/shared/src/index.md"
+    ],
+    "suite-changes.json": [
+      "packages/core/src/initiative/backoff/initiative-backoff.test.ts",
+      "packages/core/src/initiative/backoff/index.md",
+      "packages/core/src/db/migrations/035-timeline-presentation.test.ts",
+      "packages/core/src/db/migrations/index.md",
+      "packages/core/src/memory/hindsight/hindsight-policy-curator-lifetime.test.ts",
+      "packages/core/src/memory/hindsight/index.md"
+    ]
+  },
+  "checks": [
+    {
+      "finishedAt": "2026-10-23T03:40:06.8532715Z",
+      "startedAt": "2026-10-23T03:40:04.3826781Z",
+      "command": "pnpm --filter @taki/core exec vitest run src/agents/turn-registry.test.ts --reporter=default --reporter=json --outputFile.json=../../.trellis/tasks/10-21-agent-delegation-runtime/research/final-review/gate-core-tests.json",
+      "cwd": "H:/TakiAgent-worktrees/t4",
+      "exitCode": 0
+    },
+    {
+      "exitCode": 0,
+      "cwd": "H:/TakiAgent-worktrees/t4",
+      "command": "pnpm --filter @taki/core typecheck",
+      "finishedAt": "2026-10-23T03:40:35.6461625Z",
+      "startedAt": "2026-10-23T03:40:04.3859975Z"
+    },
+    {
+      "exitCode": 0,
+      "cwd": "H:/TakiAgent-worktrees/t4",
+      "startedAt": "2026-10-23T03:40:04.4170114Z",
+      "command": "pnpm exec eslint packages/core/src/agents/turn-registry.ts packages/core/src/agents/turn-registry.test.ts packages/shared/src/governance-presentation.test.ts packages/shared/src/governance-registry.test.ts",
+      "finishedAt": "2026-10-23T03:40:08.5086548Z"
+    },
+    {
+      "command": "pnpm --filter @taki/shared exec vitest run src/governance-registry.test.ts src/governance-presentation.test.ts --reporter=default --reporter=json --outputFile.json=../../.trellis/tasks/10-21-agent-delegation-runtime/research/final-review/gate-shared-tests.json",
+      "startedAt": "2026-10-23T03:40:04.4037681Z",
+      "exitCode": 0,
+      "cwd": "H:/TakiAgent-worktrees/t4",
+      "finishedAt": "2026-10-23T03:40:07.0441090Z"
+    },
+    {
+      "exitCode": 0,
+      "startedAt": "2026-10-23T03:40:04.4034386Z",
+      "cwd": "H:/TakiAgent-worktrees/t4",
+      "finishedAt": "2026-10-23T03:40:11.7144210Z",
+      "command": "pnpm --filter @taki/shared typecheck"
+    }
+  ],
+  "status": "complete; automatic gates passed; stopped before human acceptance",
+  "coordinatorGateSummary": ".trellis/tasks/10-21-agent-context-acceptance/research/final-automatic/repaired-final/final-gate-summary.json",
+  "additionalChecksExecuted": false
+}

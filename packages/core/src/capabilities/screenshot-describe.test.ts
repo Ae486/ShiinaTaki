@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { failingGenerateModel, generatingModel } from "../testing/mock-language-model.ts";
 import { createScreenshotDescriber } from "./screenshot-describe.ts";
+import { initiativeFixture } from "../testing/initiative-fixture.ts";
 
 const INPUT = { dataBase64: "AAAA", mediaType: "image/png" };
 
@@ -14,6 +15,28 @@ function systemInstructions(model: ReturnType<typeof generatingModel>): string {
 }
 
 describe("createScreenshotDescriber", () => {
+  it("records an invitation vision call in the original Run and charges through its existing callback", async () => {
+    const fixture = initiativeFixture();
+    try {
+      const admitted = await fixture.admit(); const charge = vi.fn();
+      const describer = createScreenshotDescriber({ model: generatingModel("A video is playing."), logger: captureWarn() });
+      expect(await describer.describe(INPUT, { ...admitted, effects: fixture.effects, onCommitModelIntent: charge }))
+        .toBe("A video is playing.");
+      expect(charge).toHaveBeenCalledOnce();
+      expect(fixture.db.prepare("SELECT run_id,kind,state,outcome FROM run_effects WHERE run_id=:runId").all({ runId: admitted.runId }))
+        .toEqual([expect.objectContaining({ run_id: admitted.runId, kind: "model", state: "terminal", outcome: "completed" })]);
+    } finally { fixture.db.close(); }
+  });
+
+  it("does not invoke vision after cancellation", async () => {
+    const fixture = initiativeFixture();
+    try {
+      const admitted = await fixture.admit(); const model = generatingModel("Unused");
+      const describer = createScreenshotDescriber({ model, logger: captureWarn() });
+      expect(await describer.describe(INPUT, { ...admitted, effects: fixture.effects, signal: AbortSignal.abort() })).toBeNull();
+      expect(model.doGenerateCalls).toHaveLength(0);
+    } finally { fixture.db.close(); }
+  });
   it("returns the VLM's trimmed description", async () => {
     const describer = createScreenshotDescriber({
       model: generatingModel("  A code editor with all tests passing.  "),

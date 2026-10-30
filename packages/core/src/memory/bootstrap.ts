@@ -59,7 +59,8 @@ export interface MemorySubsystem {
   /** The entry tree's root; media.usage reports its byte footprint (D27). */
   memoryRoot: string;
   /** The bound write op the image-description bridge reuses (#17 decision 6). */
-  writeMemory: MemoryWriteOp;
+  writeMemory(input: Parameters<MemoryWriteOp>[0]): { id: string };
+  stop?(): void;
 }
 
 export function createMemorySubsystem(deps: MemorySubsystemDeps): MemorySubsystem {
@@ -86,7 +87,7 @@ export function createMemorySubsystem(deps: MemorySubsystemDeps): MemorySubsyste
   // Automatic memory writes (#7): episodic summaries + pre-compaction flush, fired detached after each chat turn.
   // All writes ride the engine's store API (never raw fs) through ONE bound op — the writer chooses the layer
   // (T5 Q11-1), so the binding no longer pins one.
-  const writeMemory: MemoryWriteOp = ({ layer, ...rest }) => engine.writeEntry({ ...rest, type: layer });
+  const writeMemory: MemorySubsystem["writeMemory"] = ({ layer, ...rest }) => engine.writeEntry({ ...rest, type: layer });
   // ONE flush writer instance: auto-memory's leaving-the-window trigger and the compactor's flush-before-retire
   // step must share the watermark-guarded path, or the same span could be judged twice (batch 7 §3.2).
   const flush = createFlushWriter({ model: utility.model, createTools: (id) => engine.createBackgroundTools(id), slot: utility });
@@ -114,14 +115,14 @@ export function createMemorySubsystem(deps: MemorySubsystemDeps): MemorySubsyste
   });
 
   // T5-R8: the layer registry's `retention` field finally gets its consumer — boot sweep + 6h, counts-only log.
-  startRetentionSweeper({
+  const retention = startRetentionSweeper({
     ops: engine.retention,
     intentionsDefaultDays: config.intentionsDefaultDays,
     logger,
     enabled: () => !(deps.isCanonical?.() ?? false),
   });
 
-  return { engine, maintenance, memoryFlush, utility, tidy, memoryRoot: memoryRootOf(deps.dataDir), writeMemory };
+  return { engine, maintenance, memoryFlush, utility, tidy, memoryRoot: memoryRootOf(deps.dataDir), writeMemory, stop: retention.stop };
 }
 
 // The Workspace's memory tree: markdown files under the app data root (beside the db, NOT in it — invariant 1).

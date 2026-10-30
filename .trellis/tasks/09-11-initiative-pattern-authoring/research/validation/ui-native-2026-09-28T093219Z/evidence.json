@@ -1,0 +1,482 @@
+{
+  "checks": [
+    "actual Chat candidate append preserves historical reader scroll and row node",
+    "concrete review contains units and limits, hides identifiers, and close does not activate",
+    "concurrent proposal cannot activate unseen content; explicit reread confirms exact real SQLite revision",
+    "held and failed warm refresh preserve editor DOM, focus, selection and unsaved draft",
+    "manual revision preserves draft through CAS conflict and uses real pause/resume authority",
+    "history rollback creates a reviewable new revision; lost acknowledgement reconnects without replay",
+    "reconnect retains the same draft node and selection; retirement needs an explicit second action",
+    "new manual authoring saves complete supported data and remains inactive when review closes"
+  ],
+  "scope": "Real WebView2 + production Home modules + production PatternService/SQLite; scripted transport/setup/Timeline; no primary model or owner acceptance",
+  "artifacts": "H:\\TakiAgent-worktrees\\t4\\apps\\desktop\\src-tauri\\target\\c3-pattern-native-evidence\\2026-09-28T09-32-19-095Z",
+  "directory": "G:\\Temp\\taki-c3-pattern-native-PteGDx",
+  "calls": [
+    {
+      "method": "connect",
+      "connection": 1
+    },
+    {
+      "method": "config.subscribe",
+      "connection": 1
+    },
+    {
+      "method": "timeline.subscribe",
+      "connection": 1
+    },
+    {
+      "method": "config.list",
+      "connection": 1
+    },
+    {
+      "method": "chat.activity.read",
+      "connection": 1
+    },
+    {
+      "method": "timeline.history",
+      "connection": 1
+    },
+    {
+      "method": "connect",
+      "connection": 2
+    },
+    {
+      "method": "config.subscribe",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 2
+    },
+    {
+      "method": "presence.report",
+      "connection": 1
+    },
+    {
+      "method": "presence.report",
+      "connection": 1
+    },
+    {
+      "method": "user-timezone.read",
+      "connection": 2
+    },
+    {
+      "method": "presence.report",
+      "connection": 2
+    },
+    {
+      "method": "presence.report",
+      "connection": 2
+    },
+    {
+      "method": "observability.state",
+      "connection": 2
+    },
+    {
+      "method": "initiative.setup.read",
+      "connection": 2
+    },
+    {
+      "method": "config.list",
+      "connection": 2
+    },
+    {
+      "method": "presence.report",
+      "connection": 1
+    },
+    {
+      "method": "presence.report",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.confirm",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.get",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.history",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.get",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.history",
+      "connection": 2
+    },
+    {
+      "method": "presence.report",
+      "connection": 1
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 2
+    },
+    {
+      "method": "initiative.setup.read",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.get",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.history",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.get",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.history",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.get",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.history",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.get",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.history",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.propose",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.get",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.history",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.get",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.history",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.confirm",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.get",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.history",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.get",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.history",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.change-state",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.get",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.history",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.get",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.history",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.change-state",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.get",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.history",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.get",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.history",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.rollback",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.get",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.history",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.get",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.history",
+      "connection": 2
+    },
+    {
+      "method": "interaction-pattern.confirm",
+      "connection": 2
+    },
+    {
+      "method": "connect",
+      "connection": 3
+    },
+    {
+      "method": "config.subscribe",
+      "connection": 3
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 3
+    },
+    {
+      "method": "interaction-pattern.get",
+      "connection": 3
+    },
+    {
+      "method": "interaction-pattern.history",
+      "connection": 3
+    },
+    {
+      "method": "user-timezone.read",
+      "connection": 3
+    },
+    {
+      "method": "presence.report",
+      "connection": 3
+    },
+    {
+      "method": "presence.report",
+      "connection": 3
+    },
+    {
+      "method": "observability.state",
+      "connection": 3
+    },
+    {
+      "method": "initiative.setup.read",
+      "connection": 3
+    },
+    {
+      "method": "config.list",
+      "connection": 3
+    },
+    {
+      "method": "presence.report",
+      "connection": 3
+    },
+    {
+      "method": "connect",
+      "connection": 4
+    },
+    {
+      "method": "config.subscribe",
+      "connection": 4
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 4
+    },
+    {
+      "method": "interaction-pattern.get",
+      "connection": 4
+    },
+    {
+      "method": "interaction-pattern.history",
+      "connection": 4
+    },
+    {
+      "method": "user-timezone.read",
+      "connection": 4
+    },
+    {
+      "method": "presence.report",
+      "connection": 4
+    },
+    {
+      "method": "presence.report",
+      "connection": 4
+    },
+    {
+      "method": "observability.state",
+      "connection": 4
+    },
+    {
+      "method": "initiative.setup.read",
+      "connection": 4
+    },
+    {
+      "method": "config.list",
+      "connection": 4
+    },
+    {
+      "method": "presence.report",
+      "connection": 4
+    },
+    {
+      "method": "interaction-pattern.change-state",
+      "connection": 4
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 4
+    },
+    {
+      "method": "interaction-pattern.get",
+      "connection": 4
+    },
+    {
+      "method": "interaction-pattern.history",
+      "connection": 4
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 4
+    },
+    {
+      "method": "interaction-pattern.get",
+      "connection": 4
+    },
+    {
+      "method": "interaction-pattern.history",
+      "connection": 4
+    },
+    {
+      "method": "interaction-pattern.propose",
+      "connection": 4
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 4
+    },
+    {
+      "method": "interaction-pattern.get",
+      "connection": 4
+    },
+    {
+      "method": "interaction-pattern.history",
+      "connection": 4
+    },
+    {
+      "method": "interaction-pattern.get",
+      "connection": 4
+    },
+    {
+      "method": "interaction-pattern.history",
+      "connection": 4
+    },
+    {
+      "method": "interaction-pattern.list",
+      "connection": 4
+    }
+  ],
+  "guiOutput": ""
+}

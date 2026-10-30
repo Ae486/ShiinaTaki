@@ -2,6 +2,14 @@
 
 Hard-won from D1 (the tool-call hallucination that shipped). These are invariants for the chat loop, not style.
 
+## Model tool visibility
+
+Follow [Skill and MCP tool disclosure](./tool-disclosure.md). The complete governed registry remains available to
+execution owners; the disclosure part of `ToolLoopAgent.prepareStep` selects `activeTools` from current-generation
+completed results. Shared delegation WorkContext may also compose its addressed message projection in that callback;
+disclosure itself does not rewrite messages or weaken full-turn persistence. Dedicated Skill/MCP schemas are initially hidden;
+ordinary request measurement uses the same initial visible subset. D70 message reduction remains deferred.
+
 ## A turn's tool records MUST be persisted, not just its text
 
 The agent acts only through tools; if a turn's **tool-call and tool-result** messages are dropped from the timeline,
@@ -13,6 +21,10 @@ references the outcome, **fabricates that it already acted**. This surfaces only
   `parts` (tool-call identity/name and tool-result output) must survive the DB round-trip for faithful model replay.
   Raw tool-call input is privacy-excluded from durable Timeline rows and replays as `{}`; never weaken the identity,
   ordering, or result fidelity to achieve that minimization.
+- The foreground private inbox is a deliberate storage boundary: registered private call/result pairs persist in
+  the associated private Run transcript, while public text and ordinary tools persist in Timeline. Keep the complete
+  combined native history within the live SDK turn. A private Effect or delivered inbox intent still fences whole-turn
+  automatic retry even when the public projection is empty. See [Shared Agent Delegation](shared-agent-delegation.md).
 - `history()` reconstructs the full multi-part `ModelMessage[]`. A window cut that strands a leading `tool` row
   (its assistant tool-call fell outside the window) is invalid replay input — drop leading orphan tool rows.
 - Token-window selection treats one assistant call group and every matching result row as an atomic unit. Multiple
@@ -26,6 +38,23 @@ references the outcome, **fabricates that it already acted**. This surfaces only
 The stable base prompt (before per-turn memory context) must state, explicitly, that the model may **never claim a
 tool ran / a result was obtained unless a matching tool-result is present in the transcript** — earlier text is not
 proof. This is the direct behavioural guard; persistence is the structural one. Ship both.
+
+## Source meaning across shared execution and replay
+
+- `SourceContext` separates known generation identity from optional material descriptions. `source-context.ts` renders
+  those facts beside their associated model content through the existing untrusted-data fence; labels never grant
+  authority or prove that an external first-person experience belongs to the user.
+- Preserve native roles, tool call/result identity and complete output/error status. `retainStepToolSources` matches
+  converted messages to actual completed tool call IDs/names, restoring producer metadata that SDK conversion discards.
+  Persist that metadata as `sourceMaterials`; never recover trusted sidecars by parsing model-authored tool text.
+- `turn-mapping.ts` rebuilds source-aware model messages from retained sidecars without changing canonical speech or
+  sending the replay header to UI/TTS. Unknown historical sources stay absent; corrupt stored source data is an error.
+- Compose `SOURCE_INTERPRETATION_RULE` into response/description prompts and the shared Memory writing conventions.
+  Keep explicit self-reports, quotations, generated material and corrections distinct. Private work eligibility and
+  executable tool authority remain governed by [Shared Agent Delegation](./shared-agent-delegation.md).
+- Verify the actual SDK/provider-bound message, source-aware reduction and durable replay. Scripted source carriage
+  does not establish semantic model accuracy; [Compaction](./compaction-harness.md) and
+  [Local Memory](./canonical-local-memory-runtime.md) preserve their separate source/authority contracts.
 
 ## Test the deterministic root cause, not the probabilistic symptom
 
@@ -62,35 +91,42 @@ discipline: the frozen regions are off-limits.
   operator-only (no Rust mirror — see [Server-Push & Connection Auth](./server-push-and-connection-auth.md)). Retained
   bytes are swept on a configurable TTL; the description memory is never swept.
 
-## A cancel has TWO stream endings — cover both, and mock the transport faithfully (#17 cancel-retract)
+## Cancellation: Core owns post-turn callback eligibility (approved 2026-10-22)
 
-`ai@7.0.17` ends an aborted stream in either of two ways; which fires is decided by the SDK's `isAbortError` name
-check (provider-utils: an Error/DOMException named AbortError/ResponseAborted/TimeoutError), not by us:
+Historical SDK 7.0.17 behavior had two endings: a resolving/AbortError-shaped body ended gracefully, while a real
+Node fetch body rejected a string cancellation reason through the iterator. Core formerly inferred whether to run
+post-turn callbacks from that transport-dependent throw. SDK 7.0.148 immediately cancels its internal reader and
+rejects aggregate promises; it may finish gracefully before a physical fetch failure crosses provider transforms.
+Its raw provider also wraps body failures in APICallError. Do not recreate the old ending with timers, polling,
+synthetic throws or an outer physical-failure observer: those observations do not reliably survive cancellation.
 
-- **Graceful**: the model read resolves (or rejects AbortError-shaped) → the SDK enqueues an `abort` part and closes;
-  the for-await ends cleanly.
-- **Throw**: the read rejects with anything else. Our abort reason is a PLAIN STRING ("turn cancelled by operator")
-  and undici rejects the in-flight body read with `signal.reason` verbatim — a string fails `isAbortError`, the SDK
-  errors the stream, the for-await THROWS the reason. This is the COMMON production ending for a prefill cancel (no
-  chunk ever arrived); the old "turn cancelled by operator" error toast was this ending's fingerprint.
+The owner explicitly approved these contracts for the coordinated SDK upgrade:
 
-Consequences (all load-bearing):
+- Keep the original signal and the SDK's supported immediate cancellation. A public graceful end remains graceful;
+  a genuine surfaced error still propagates. Never change the reason into a synthetic AbortError or delay cancellation
+  to recover a hypothetical physical failure. Tool cancellation and aggregate settlement retain their existing owners.
+- Always finish the existing capture/commit `finally`. Delivered partial text and completed tool evidence survive;
+  completed Effects are never replayed. Cancel with nothing produced retracts the exact user row and emits
+  `chat.error{retracted:true}` so the client can restore the draft. Retraction remains identical for both endings.
+- After persistence, retraction and surfaced failure handling, the outer turn owner calls `state.afterCommit` only if
+  its signal is not aborted. This gates the existing bundle: request-pressure remeasurement, auto-memory/compaction
+  maintenance, optional image-description maintenance and the detached turn-usage callback. An aborted turn starts
+  none of that bundle, including a previously graceful partial cancellation.
+- This is **not a ban on all memory ingestion**. `finishRecordedTurn` still calls `onPrimaryCommitted` with the exact
+  eligible retained primary rows before the callback guard. Source witnessing, later extraction/maintenance policy,
+  authority, eligibility, transcript identity and raw-input minimization remain unchanged.
+- For partial real-fetch cancellation, `chat-send` normally emits `chat.complete` on the SDK's graceful return;
+  Run, Attempt, Receipt and activity outcome remain `cancelled` through the existing signal checks. A genuine provider
+  failure still emits `chat.error` and settles failed. A notification name is not the Run outcome.
+- Ordinary success continues invoking the existing callback bundle. Observer/storage failures never justify replaying
+  an already completed provider/tool action; model/tool Effects retain exactly-once terminal settlement.
 
-- Post-loop logic that must run on cancel (the retract seam) lives on BOTH endings: an additive catch wrapper around
-  the frozen try/finally + the clean-path check, sharing ONE predicate (`retractIfCancelledSilent` = aborted AND zero
-  completed steps AND no partial text). Do NOT "fix" the string reason into an AbortError to force the graceful path —
-  correctness must not depend on SDK-internal name lists surviving the next major.
-- **Mock-green ≠ prod-correct.** `simulateReadableStream` reads always RESOLVE, so mock tests structurally see only
-  the graceful ending — the throw ending stayed invisible under 513 green tests. Abort-path tests use the
-  transport-faithful `abortRejectingModel` (errors the model stream with `signal.reason` on abort, mirroring undici).
-  The cancel matrix is 2×2 (graceful/throw × retract/stop) — keep all four pinned.
-- Before relying on any SDK runtime behavior, read the INSTALLED dist (`node_modules/.pnpm/ai@*/**/dist/index.js`) —
-  not the mock's behavior, not training memory. An observed packaged-runtime symptom (which error text, which
-  notification arrived) is evidence about which path actually fires; reconcile a probe against it before believing it.
-- Retract semantics (user-approved 2026-07-17): cancel with NOTHING produced → delete the just-appended user row
-  (DB + `timeline.removed` push), pump sends `chat.error{retracted:true}`, the UI restores the draft (never
-  overwriting newly typed text), autoMemory/imageMemory never fire. Cancel after ANY output → stop, today's behavior
-  byte-identical. "Produced nothing" is exactly "persistTurn would persist nothing beyond the user row".
+`server/methods/chat-send-sdk-transport.test.ts` exercises actual Node fetch + local HTTP SSE, authenticated real
+WebSocket send/cancel, SQLite/ConversationStore, Run/Receipt/activity, and model/tool Effect settlement. Cover prefill,
+partial text/image, completed-tool-then-partial cancellation, resolving/rejecting model fixtures, ordinary success and
+real provider failure. Assert notification, canonical rows, exact primary witness, callback counts and no effect replay.
+`abortRejectingModel` is a scripted rejecting body, not proof of modern fetch transformation behavior. Keep direct
+error/retraction tests as well; mocks and Vitest transformation do not replace the real Node boot/transport evidence.
 
 ## Classify every tool: presentation (fire-and-forget) vs informational (T1 1c)
 
@@ -108,9 +144,11 @@ message (owner evidence 2026-07-18, one user message → 5 assistant segments).
   are ALL presentation tools once the turn has produced text. The `spoke` guard preserves express-first-then-talk (a
   tool-only leading step does not stop the turn — the reply still comes).
 - **Convention for every NEW tool — classify it at birth.** Presentation tool: name added to `PRESENTATION_TOOL_NAMES`,
-  description states fire-and-forget ("no result to read"), execute returns `{ok:true}`/structured error only. An
+  execute returns the Presentation Outcome (`tool-design.md` B1a; since D80 no longer a bare `{ok:true}`) or a
+  structured error only. An
   informational tool must NEVER enter `PRESENTATION_TOOL_NAMES` — a step co-calling it last would stop the loop with
   its result unread. Mixed-tail steps (presentation + informational together) intentionally do NOT stop (`.every`).
+  An INVALID presentation call (SDK `invalid` marker) gets one correction chance per turn (`tool-design.md` B1b).
 - Prompt rules alone are unreliable across models (QwenPaw #4838: "only use the tool, don't write text" ignored by
   Qwen/GPT/Claude alike) — ship the structural stop as the guarantee; the avatar-vocabulary usage rules are bias only.
 - Tests: the taxonomy edge (mixed tail must not stop) is pinned in `presentation-stop.test.ts`; the turn-level fix is
@@ -223,7 +261,8 @@ explicit in-the-moment consent through the Gate, and the pause never gates them.
 - **One identity rule, single-sourced.** The stale pre-filter and the fresh pre-capture screen compare foregrounds with
   the SAME key (`foregroundKey`, over the already-SCRUBBED title) or they drift — and a drift here is a capture taken
   on an assumption nobody re-checked. An ambient observation also carries its age and stops rendering once stale
-  (`perception/screen-context.ts`), so a paused or stopped sampler bleeds out of the prompt instead of lingering.
+  (`perception/screen-context.ts`). Successful consent/source retirement clears the cached screen immediately;
+  staleness remains a fallback. See [Accepted Perception Evidence](./perception-evidence.md) for post-await checks.
 
 ## Time enters prompts from ONE module, stable-early / volatile-late (time-awareness task)
 
@@ -242,6 +281,11 @@ practice; the pull-only shape was rejected on evidence (models never proactively
   `(3 days ago)` via `formatRelativeAge`; future/unparseable timestamps degrade to "just now", never negative/NaN.
 - **`get_current_time` is an informational pure-Core tool** (no OS crossing → no Gate); its description tells the
   model NOT to call it for the date/rough time (already injected) — pull covers only precision/timezone.
+- **User Timezone comes from its existing service**, never the headless Core's process zone. Ordinary ChatAgent
+  requests capture the optional live port once per attempt for both day/time lines and label the zone explicitly;
+  the exact-time tool reads that same authority once per invocation. A settings update requires no primary cancellation:
+  the captured attempt stays coherent and the next attempt/invocation reads the new zone. Omitted ports retain legacy
+  behavior. See [User Timezone Authority](user-timezone.md) for composition and regression requirements.
 - Prompt WORDING about time discipline (awareness norms) is deliberately absent — it lands with T4's prompt-design
   pass, as one optimization, not piecemeal.
 

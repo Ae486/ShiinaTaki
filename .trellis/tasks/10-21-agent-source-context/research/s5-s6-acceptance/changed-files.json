@@ -1,0 +1,68 @@
+[
+  {
+    "path": "packages/core/src/agents/compaction-pass.ts",
+    "newAtAcceptanceResume": false,
+    "beforeSha256": "fb2c9ebe7a73f4b10707aa10c174682514715b271d2ab6fbb860222e101a35f8",
+    "afterSha256": "dee0a85ff5ec7c3266a1ec0396d246ede9391c7c619aab08a40bbf073ee34480"
+  },
+  {
+    "path": "packages/core/src/agents/source-compaction.test.ts",
+    "newAtAcceptanceResume": false,
+    "beforeSha256": "17687253c8429a71a12eca2ab708312c1aa4a6949ca54491460113c2bd2345fb",
+    "afterSha256": "e07860f3f709849df1f75cd76771be607716050d59e8187bea15d70ce373c599"
+  },
+  {
+    "path": "packages/core/src/agents/index.md",
+    "newAtAcceptanceResume": false,
+    "beforeSha256": "55610fe05f322dbd933e14cb828b7513116a6933d738f240473513d424757bef",
+    "afterSha256": "ccbb05e60aa68367fcbfe8d5a6debd4009e6d45fac9d8e44270506498e0c2c6d"
+  },
+  {
+    "path": "packages/core/src/agents/source-context-real.test.ts",
+    "newAtAcceptanceResume": false,
+    "beforeSha256": "3837b5bd3326d34e6e92fa15f9b07dfc7a85c74da61e1387795ca97e3aee87ad",
+    "afterSha256": "d1bd2b7052b511ba048a418562939250d537045f613ca34347d357848c6d572d"
+  },
+  {
+    "path": "packages/core/src/co-watching/source-preparation-real.test.ts",
+    "newAtAcceptanceResume": true,
+    "beforeSha256": null,
+    "afterSha256": "8b1b8e44bbd7018ccaccc428c46c873af67aeeba0eb2bced99167e96fbe5595f"
+  },
+  {
+    "path": "packages/core/src/memory/source-local-memory-real.test.ts",
+    "newAtAcceptanceResume": true,
+    "beforeSha256": null,
+    "afterSha256": "5c56e840aa38a2299a8a6f103c9cc7f231c79ab3eed837c22acb2271272f6ad1"
+  },
+  {
+    "path": "packages/core/src/testing/co-watching-fixture.ts",
+    "newAtAcceptanceResume": false,
+    "beforeSha256": "ada2eebc15b3d991a2ad9adb3111f8b2863081dc37f4a9d46bc067e22ee6cfe2",
+    "afterSha256": "284f1c6e4c24fa97d13c6a1b9eea0835976a4f41c8a7f1bcd5dd884d80219d43"
+  },
+  {
+    "path": "packages/core/src/testing/co-watching-tool-fixture.ts",
+    "newAtAcceptanceResume": true,
+    "beforeSha256": null,
+    "afterSha256": "2deb3c38a4d5f8c9f42d2dc190c4c0163ccdad131b3a04de4fc7639cb3cae563"
+  },
+  {
+    "path": "packages/core/src/testing/source-live-evidence.ts",
+    "newAtAcceptanceResume": true,
+    "beforeSha256": null,
+    "afterSha256": "28ac14cafad0d476d2c55e065ad98b9cebfc97b2080ab703521492bf881c6002"
+  },
+  {
+    "path": "packages/core/src/testing/source-live-evidence.test.ts",
+    "newAtAcceptanceResume": true,
+    "beforeSha256": null,
+    "afterSha256": "dee73ae38e9a3983aa6a9b988a94bfb2cf25b7ef005ebe0dfb0c5d7e2ea435b9"
+  },
+  {
+    "path": "packages/core/src/testing/index.md",
+    "newAtAcceptanceResume": false,
+    "beforeSha256": "dfe9156489145e200c9934358b6489366fe9b1d160166b9afb4fcfbf64681692",
+    "afterSha256": "837cbc6f42b00136756d400f5126e098df4967bf32ba15df27f54863ce6fba24"
+  }
+]

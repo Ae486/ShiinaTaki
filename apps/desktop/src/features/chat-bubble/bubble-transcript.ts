@@ -6,10 +6,12 @@
 import type { ChatActivityItem, ChatActivityReadResult, ChatActivityTerminal, ChatActivityToolStatus } from "@taki/shared";
 import { activityItemKey, activityMessageId, type ChatActivityView } from "@/lib/chat-activity-state.js";
 import type { BubbleReply } from "./chat-bubble-store.ts";
+import type { CommittedTextTarget } from "@/features/presence/surface-presence.js";
+import type { CommittedBubble } from "./bubble-committed-timeline.ts";
 
 interface BubbleItemIdentity { key: string; order: number }
 export type BubbleTranscriptItem = BubbleItemIdentity & (
-  | { kind: "text"; text: string }
+  | { kind: "text"; text: string; committed?: CommittedTextTarget[] }
   | { kind: "tool"; toolName: string; displayName?: string; status: ChatActivityToolStatus; stale: boolean }
   | { kind: "error" | "notice"; text: string }
   | { kind: "waiting" }
@@ -24,9 +26,11 @@ export interface BubbleTranscriptInput {
   reply: BubbleReply;
   replyMessageId: string | null;
   legacyEpoch: number;
+  committed?: CommittedBubble | null;
 }
 
 export function projectBubbleTranscript(input: BubbleTranscriptInput): BubbleTranscript {
+  if (input.committed) return input.committed.transcript;
   const source = input.activitySource;
   if (!source || source.snapshot.status === "idle") return legacyTranscript(input);
   const messageId = source.snapshot.messageId;

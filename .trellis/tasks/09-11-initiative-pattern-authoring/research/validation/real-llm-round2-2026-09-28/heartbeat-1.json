@@ -1,0 +1,105 @@
+{
+  "name": "heartbeat-1",
+  "startedAt": "2026-09-28T10:56:31.782Z",
+  "passed": true,
+  "requests": [
+    {
+      "tools": [
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "heartbeat_respond",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "status": 200
+    }
+  ],
+  "finishedAt": "2026-09-28T10:56:38.287Z",
+  "model": "deepseek-v4-flash",
+  "providerHost": "api.deepseek.com",
+  "turns": [],
+  "runs": [
+    {
+      "initiator": "heartbeat",
+      "state": "completed",
+      "outcome": "completed"
+    }
+  ],
+  "usage": [
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "reported",
+      "input_tokens": 5570,
+      "output_tokens": 277,
+      "total_tokens": 5847,
+      "cache_read_tokens": 0,
+      "reasoning_tokens": 131
+    }
+  ],
+  "deliveries": [
+    {
+      "delivery_class": "class_b",
+      "state": "staged",
+      "decision_json": "{\"outcome\":\"silent\",\"selectedCandidateIds\":[\"615547dce20b4e505a7575b36dcb611045515939e6fed14378b42d4ec6318c64\"]}"
+    }
+  ],
+  "patterns": [
+    {
+      "state": "active",
+      "version": 2
+    }
+  ],
+  "schedules": [],
+  "authoringTrace": [],
+  "tools": []
+}

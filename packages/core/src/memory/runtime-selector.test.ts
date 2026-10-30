@@ -20,11 +20,35 @@ describe("memory runtime selector", () => {
     legacy.assemble = () => "legacy"; canonical.assemble = () => "canonical";
     const selected = selectMemoryRuntime({ db, createLegacy: () => ({ engine: legacy } as never), createCanonical: () => canonical });
     expect(selected.memory.assemble({ characterId: "taki", currentMessage: "" })).toBe("legacy");
+    db.exec("UPDATE memory_authority_selection SET mode='canonical-local',active_epoch_id='epoch',verified_snapshot_id='snapshot',activation_transaction_id='tx' WHERE singleton=1");
     selected.bindCanonical("epoch");
     expect(selected.memory.assemble({ characterId: "taki", currentMessage: "" })).toBe("canonical");
     expect(selected.legacy).toBeNull();
   });
   it("fails closed for a missing marker instead of silently selecting legacy", () => { const db = open(); db.exec("DELETE FROM memory_authority_selection"); expect(() => selectMemoryRuntime({ db, createLegacy: () => ({ engine: engine() } as never), createCanonical: engine })).toThrow("MEMORY_INTEGRITY_ERROR"); });
+  it("rejects pre-commit binding and keeps a mismatched post-commit callback unavailable", () => {
+    const db = open(); const legacy = engine();
+    const createCanonical = vi.fn(engine); const onLegacyRetired = vi.fn();
+    const selected = selectMemoryRuntime({ db, createLegacy: () => ({ engine: legacy } as never), createCanonical, onLegacyRetired });
+    expect(() => selected.bindCanonical("epoch")).toThrow("MEMORY_AUTHORITY_MISMATCH");
+    expect(selected.canonical).toBe(false); expect(selected.legacy?.engine).toBe(legacy);
+    expect(onLegacyRetired).not.toHaveBeenCalled();
+    db.exec("UPDATE memory_authority_selection SET mode='canonical-local',active_epoch_id='different',verified_snapshot_id='snapshot',activation_transaction_id='tx' WHERE singleton=1");
+    expect(() => selected.bindCanonical("epoch")).toThrow("MEMORY_AUTHORITY_MISMATCH");
+    expect(selected.canonical).toBe(true); expect(selected.legacy).toBeNull();
+    expect(() => selected.memory.createTools("taki")).toThrow("MEMORY_INTEGRITY_ERROR");
+    expect(createCanonical).not.toHaveBeenCalled(); expect(onLegacyRetired).toHaveBeenCalledOnce();
+  });
+  it("keeps a truthful unavailable facade when post-construction handoff fails", () => {
+    const db = open(); const retired = vi.fn(); const failed = new Error("handoff failed");
+    const selected = selectMemoryRuntime({ db, createLegacy: () => ({ engine: engine() } as never), createCanonical: engine,
+      onLegacyRetired: retired, onCanonicalBound: () => { throw failed; } });
+    db.exec("UPDATE memory_authority_selection SET mode='canonical-local',active_epoch_id='epoch',verified_snapshot_id='snapshot',activation_transaction_id='tx' WHERE singleton=1");
+    expect(() => selected.bindCanonical("epoch")).toThrow(failed);
+    expect(retired).toHaveBeenCalledOnce(); expect(selected.canonical).toBe(true); expect(selected.legacy).toBeNull();
+    expect(() => selected.memory.assemble({ characterId: "taki", currentMessage: "" })).toThrow("MEMORY_INTEGRITY_ERROR");
+    expect(() => selected.bindCanonical("epoch")).toThrow("MEMORY_INTEGRITY_ERROR");
+  });
   it("fails closed for Hindsight authority before runtime integration without constructing either Local runtime", () => {
     const db = openDatabase({ path: ":memory:", migrations: [canonicalMemoryMigration017, memoryLegacyMigration021, hindsightInitialCutoverMigration023] }); dbs.push(db);
     seedHindsightSelection(db);

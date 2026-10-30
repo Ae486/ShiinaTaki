@@ -1,0 +1,13 @@
+{
+  "label": "recovery-typecheck",
+  "command": [
+    "pnpm",
+    "-r",
+    "typecheck"
+  ],
+  "cwd": "H:\\TakiAgent-worktrees\\t4",
+  "startedAt": "2026-09-20T02:49:29.081644+00:00",
+  "seconds": 52.922,
+  "exitCode": 0,
+  "log": "logs/recovery-typecheck.log"
+}

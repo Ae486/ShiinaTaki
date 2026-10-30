@@ -1,6 +1,6 @@
 /**
  * INPUT:  the Database wrapper + append/paging calls (characterId-scoped)
- * OUTPUT: validated atomic Timeline batches, bounded display metadata, names-only calls and compatible legacy reads
+ * OUTPUT: atomic Timeline batches, immutable source context, names-only calls and compatible legacy reads
  * POS:    core/db — timeline SQL and defense-in-depth privacy boundary; raw tool-call input never crosses the repo
  */
 import { randomUUID } from "node:crypto";
@@ -8,12 +8,14 @@ import {
   getValidToolDisplayName,
   TimelineEntrySchema,
   TimelinePartSchema,
+  SourceContextSchema,
   type TimelineEntry,
   type TimelineHistoryParams,
   type TimelineHistoryResult,
   type TimelinePart,
   type TimelineRole,
   type TimelinePresentation,
+  type SourceContext,
 } from "@taki/shared";
 import type { Database, SqlRow, SqlStatement } from "./sqlite.ts";
 
@@ -24,6 +26,7 @@ export interface AppendInput {
   /** Structured model-replay fidelity (tool calls/results); omitted = plain text row (stored as NULL). */
   parts?: TimelinePart[];
   presentation?: TimelinePresentation;
+  sourceContext?: SourceContext;
 }
 
 export interface TimelineRepo {
@@ -44,18 +47,18 @@ export interface TimelineRepo {
 }
 
 const INSERT_SQL =
-  "INSERT INTO timeline_messages (id, character_id, role, content, parts, presentation, created_at) " +
-  "VALUES (:id, :characterId, :role, :content, :parts, :presentation, :createdAt)";
+  "INSERT INTO timeline_messages (id, character_id, role, content, parts, presentation, source_context_json, created_at) " +
+  "VALUES (:id, :characterId, :role, :content, :parts, :presentation, :sourceContext, :createdAt)";
 
 const DELETE_SQL = "DELETE FROM timeline_messages WHERE character_id = :characterId AND seq = :seq";
 
 // (:before IS NULL OR seq < :before): one prepared statement serves both the newest and cursor pages.
 const PAGE_SQL =
-  "SELECT seq, id, character_id, role, content, parts, presentation, created_at FROM timeline_messages " +
+  "SELECT seq, id, character_id, role, content, parts, presentation, source_context_json, created_at FROM timeline_messages " +
   "WHERE character_id = :characterId AND (:before IS NULL OR seq < :before) ORDER BY seq DESC LIMIT :limit";
 
 const LATEST_SQL =
-  "SELECT seq, id, character_id, role, content, parts, presentation, created_at FROM timeline_messages " +
+  "SELECT seq, id, character_id, role, content, parts, presentation, source_context_json, created_at FROM timeline_messages " +
   "WHERE character_id = :characterId ORDER BY seq DESC LIMIT :limit";
 
 const MAX_SEQ_SQL =
@@ -63,7 +66,7 @@ const MAX_SEQ_SQL =
 
 // (after, through]: the segment about to leave the window (flush) or since the last summary (episodic).
 const RANGE_SQL =
-  "SELECT seq, id, character_id, role, content, parts, presentation, created_at FROM timeline_messages " +
+  "SELECT seq, id, character_id, role, content, parts, presentation, source_context_json, created_at FROM timeline_messages " +
   "WHERE character_id = :characterId AND seq > :after AND seq <= :through ORDER BY seq ASC";
 
 export function createTimelineRepo(db: Database): TimelineRepo {
@@ -124,6 +127,7 @@ function batchAppender(db: Database, insert: SqlStatement): TimelineRepo["append
           id: row.id, characterId: row.characterId, role: row.role, content: row.content, createdAt: row.createdAt,
           parts: row.parts === undefined ? null : JSON.stringify(row.parts),
           presentation: row.presentation === undefined ? null : JSON.stringify(row.presentation),
+          sourceContext: row.sourceContext === undefined ? null : JSON.stringify(row.sourceContext),
         });
         entries.push({ ...row, seq: lastInsertRowid });
       }
@@ -147,8 +151,18 @@ function toEntry(row: SqlRow): TimelineEntry {
     content: row.content,
     parts: sanitizeParts(parseParts(row)),
     presentation: parsePresentation(row.presentation),
+    ...(row.source_context_json == null ? {} : { sourceContext: parseSourceContext(row) }),
     createdAt: row.created_at,
   });
+}
+
+function parseSourceContext(row: SqlRow): SourceContext {
+  try {
+    return SourceContextSchema.parse(JSON.parse(String(row.source_context_json)));
+  } catch (error) {
+    // Attribution affects interpretation; corrupt evidence cannot silently become an unknown legacy source.
+    throw new Error(`timeline row seq=${String(row.seq)} has corrupt source context JSON`, { cause: error });
+  }
 }
 
 // NULL = legacy text-only row. A corrupt JSON cell must fail loudly with the row's seq, not as a bare SyntaxError.
@@ -179,6 +193,7 @@ function sanitizeParts(parts: TimelinePart[] | undefined): TimelinePart[] | unde
     // Do not recurse into output: its business data must survive even when it has a displayName or input field.
     return part.type === "tool-call"
       ? { type: part.type, ...identity }
-      : { type: part.type, ...identity, output: part.output };
+      : { type: part.type, ...identity, output: part.output,
+        ...(part.sourceMaterials === undefined ? {} : { sourceMaterials: part.sourceMaterials }) };
   });
 }

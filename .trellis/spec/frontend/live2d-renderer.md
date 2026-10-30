@@ -34,6 +34,55 @@ app.destroy(true);
 Required regression points: two `dispose()` calls do not throw; model removal/destruction occur exactly once before
 application destruction; a real Tauri development reload has exactly one canvas and no teardown exception.
 
+## Cubism 2 mask context ownership (verified 2026-10-16)
+
+Engine 1.3.1's `Live2DModel.generateUID()` counts per model, starting at 1, while the vendored Cubism 2 SDK stores
+`frameBuffers[glno]` and `fTexture[glno]` in realm-global arrays. Two asynchronous StrictMode scenes therefore overwrite
+the same slot. After the late probe is disposed, the live context rejects the foreign framebuffer and keeps its
+previous target (often the main canvas) bound. Colored mask-channel shapes and failed pupil clipping are the visible
+symptoms; one remaining canvas does not prove mask ownership is correct.
+
+`renderer/live2d/legacy-mask-context.ts` wraps the legacy internal model's `updateWebGLContext` before the loader adds
+the model to the stage. This must precede even the first forced click-through RenderTexture capture. Each initialization
+gets a unique realm slot; `Symbol.for` keeps allocation and duplicate-install guards stable across Vite HMR. Cubism 3+
+continues through its own engine path. Keep the locked engine/runtime and model assets unchanged for this workaround.
+
+On context reinitialization or internal-model destruction, release only the captured framebuffer, renderbuffer and
+textures. Remove cache references only when identities still match; validate handles against their owning GL context
+and delete a shared texture once. Never call the SDK's realm-wide cache disposal for one scene or costume. This adapter
+owns mask allocations only, not all SDK GPU resources or the renderer's context-restoration policy.
+
+Regression coverage: `legacy-mask-context.test.ts` reproduces the original rejected-binding leak, then covers multiple
+contexts, shared-context costumes, late StrictMode teardown, reinitialization, lost contexts, foreign replacements,
+failed initialization, duplicate installation and HMR. `load-character-model.test.ts` covers attachment ordering, a late
+async model and the Cubism 3+ branch. Live evidence must check `gl.isFramebuffer` / `gl.isTexture` from the visible
+canvas's context as well as a screenshot; screenshots alone cannot establish that mask draws target the right buffer.
+
+## Avatar Command outcome classification (established D80, 2026-09-19)
+
+`renderer/live2d/avatar-commands.ts` resolves every Avatar Command to a Presentation Outcome report and never throws.
+The engine promise decides `applied`; a `false` is classified best-effort from state read BEFORE the call, mirroring
+the engine 1.3.1 rules verified in `dist/index.js`:
+
+- **Motion** (`MotionManager.startMotion`): `state.reserve(group, index, priority)` refuses a non-FORCE priority that is
+  `<= state.currentPriority` or `<= state.reservePriority` (and an already playing/reserved same motion); after a
+  successful reserve, `currentAudio.isPlaying && priority != FORCE` refuses too. Classification order: `speaking`
+  (audio playing, non-FORCE) → `motion_busy` (priority at/below current or reserved) → `superseded` (a newer motion
+  command for this model started before this one resolved) → `unavailable`.
+- **Expression** (`ExpressionManager.setExpression`): an index equal to the current expression returns `false` before
+  the reserve slot is touched; a pending load whose `reserveExpressionIndex` moved on returns `false`. Classification:
+  `already_active` (target index === pre-call current index) → `superseded` (newer expression command started) →
+  `unavailable`. `already_active` is checked first because it is deterministic; a back-to-back pair would otherwise
+  mislabel it.
+- Unknown name → `rejected/unknown_name` plus the vocabulary drift re-report (1b). A throw → `rejected/unavailable`.
+- Agent motions keep NORMAL by default: never escalate to FORCE or queue to turn a rejection into an apply — the
+  rejection is the truthful outcome and the tool description tells the model not to retry.
+- The report leaves the window only while the connection generation is current (`restore-pet-connection.ts`); a
+  retired generation reports nothing and Core resolves `unknown` at its deadline.
+
+Regression fixtures: `avatar-commands.test.ts` reproduces the Lab table (same expression twice, NORMAL over NORMAL,
+two un-awaited expressions, speaking, unknown name, throw) with a fake model.
+
 ## Generation split — raw parameter access (the gotcha)
 
 The API differs by model generation; any param-driven feature (head tracking, lip-sync, click feedback) MUST branch:

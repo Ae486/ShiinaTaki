@@ -37,6 +37,7 @@ const RECONNECT_MAX: Duration = Duration::from_secs(30);
 
 /// Everything the WS task needs; assembled by node::build_node (fields are crate-internal wiring).
 pub struct WsClient {
+    pub(crate) browser_attachment: Arc<crate::browser_attachment::BrowserAttachment>,
     pub(crate) url: String,
     pub(crate) device_id: String,
     pub(crate) device_name: String,
@@ -54,6 +55,7 @@ pub struct WsClient {
 impl WsClient {
     /// The reconnect loop: connect, run until the socket drops, back off, retry (tokenless-free after pairing).
     pub async fn run(self, mut pairing_rx: Receiver<String>) {
+        let _browser_server = self.browser_attachment.spawn();
         let mut backoff = RECONNECT_MIN;
         loop {
             self.emit_status("connecting");
@@ -61,6 +63,7 @@ impl WsClient {
                 Ok(()) => backoff = RECONNECT_MIN,
                 Err(error) => tracing::warn!(error = %error, "ws session ended"),
             }
+            self.browser_attachment.set_core_enabled(false);
             self.emit_status("disconnected");
             tokio::time::sleep(backoff).await;
             backoff = (backoff * 2).min(RECONNECT_MAX);
@@ -80,21 +83,46 @@ impl WsClient {
         self.emit_status("connected");
 
         let session = Arc::new(Mutex::new(HostSession::new(
-            negotiation.host_id,
+            negotiation.host_id.clone(),
             negotiation.connection_generation,
             catalog_generation,
         )));
         let (write, mut read) = socket.split();
         let write = Arc::new(Mutex::new(write));
-        while let Some(message) = read.next().await {
-            let message = message.map_err(|error| error.to_string())?;
-            match message {
-                Message::Text(text) => self.dispatch(text.as_str(), &write, &session).await,
-                Message::Ping(payload) => {
-                    let _ = write.lock().await.send(Message::Pong(payload)).await;
-                }
-                Message::Close(_) => break,
-                _ => {}
+        let mut browser = self.browser_attachment.subscribe();
+        let mut forwarder = crate::browser_attachment::forwarder::Forwarder::default();
+        let mut browser_revision = 0;
+        if self.browser_attachment.configured() {
+            write.lock().await.send(Message::text(json!({ "jsonrpc": "2.0", "id": "browser-playback-ready",
+                "method": "browser.playback.ready", "params": { "schemaVersion": "taki.browser-playback.v1" } }).to_string()))
+                .await.map_err(|_| "Browser attachment readiness send failed")?;
+        }
+        loop {
+            tokio::select! {
+                message = read.next() => {
+                    let Some(message) = message else { break; };
+                    match message.map_err(|error| error.to_string())? {
+                        Message::Text(text) => {
+                            if !self.browser_attachment.handle_core_frame(text.as_str(), &negotiation, &mut browser_revision) {
+                                self.dispatch(text.as_str(), &write, &session).await;
+                            }
+                        },
+                        Message::Ping(payload) => { let _ = write.lock().await.send(Message::Pong(payload)).await; },
+                        Message::Close(_) => break,
+                        _ => {},
+                    }
+                },
+                changed = browser.changed(), if self.browser_attachment.configured() => {
+                    if changed.is_err() { break; }
+                    let mut writer = write.lock().await;
+                    let observation = browser.borrow_and_update().clone();
+                    if let Some(report) = forwarder.frame(observation, catalog_generation) {
+                        let frame = Message::text(json!({ "jsonrpc": "2.0", "id": format!("browser-playback-report:{}", uuid::Uuid::new_v4()),
+                            "method": "browser.playback.report", "params": report }).to_string());
+                        tokio::time::timeout(Duration::from_secs(2), writer.send(frame)).await
+                            .map_err(|_| "Browser observation send deadline")?.map_err(|_| "Browser observation send failed")?;
+                    }
+                },
             }
         }
         Ok(())
@@ -801,9 +829,11 @@ mod tests {
     use crate::gate::decisions::DecisionStore;
     use crate::gate::GatePolicy;
 
+    type AuditRecord = (String, String, Decision, Option<String>);
+
     #[derive(Default)]
     struct RecordingAudit {
-        records: StdMutex<Vec<(String, String, Decision, Option<String>)>>,
+        records: StdMutex<Vec<AuditRecord>>,
     }
 
     impl AuditSink for RecordingAudit {
@@ -1003,7 +1033,7 @@ mod tests {
             registry.register(handler.clone());
             let secrets = Arc::new(crate::secrets::InMemoryStore::new());
             secrets.set(TOKEN_KEY, "existing-test-token").unwrap();
-            let client = WsClient { url, device_id: host_id.clone(), device_name: "Disclosure test".into(),
+            let client = WsClient { browser_attachment: crate::browser_attachment::BrowserAttachment::disabled(), url, device_id: host_id.clone(), device_name: "Disclosure test".into(),
                 capabilities: vec!["exec".into()], secrets: secrets.clone(), gate: Arc::new(gate),
                 handlers: Arc::new(registry), status: Arc::new(crate::status::TracingStatusEmitter), exec_policy: Arc::new(policy) };
             let server = tokio::spawn(async move {
@@ -1045,7 +1075,7 @@ mod tests {
             registry.register(handler.clone());
             let secrets = Arc::new(crate::secrets::InMemoryStore::new());
             secrets.set(TOKEN_KEY, "existing-test-token").unwrap();
-            let client = WsClient { url, device_id: host_id.clone(), device_name: "Resume test".into(),
+            let client = WsClient { browser_attachment: crate::browser_attachment::BrowserAttachment::disabled(), url, device_id: host_id.clone(), device_name: "Resume test".into(),
                 capabilities: vec!["exec".into()], secrets: secrets.clone(), gate: Arc::new(gate),
                 handlers: Arc::new(registry), status: Arc::new(crate::status::TracingStatusEmitter), exec_policy: Arc::new(policy) };
             let server = tokio::spawn(async move {

@@ -39,10 +39,10 @@ describe("avatarSubscribeMethod", () => {
     const ctx = fakeCtx();
 
     expect(avatarSubscribeMethod(subs).handler({ characterId: "taki" }, ctx)).toEqual({ status: "ok" });
-    subs.publish({ characterId: "taki", kind: "expression", name: "smile01" });
+    subs.publish({ characterId: "taki", commandId: "cmd", kind: "expression", name: "smile01" });
 
     expect(ctx.notified).toEqual([
-      { method: AVATAR_METHODS.command, params: { characterId: "taki", kind: "expression", name: "smile01" } },
+      { method: AVATAR_METHODS.command, params: { characterId: "taki", commandId: "cmd", kind: "expression", name: "smile01" } },
     ]);
   });
 
@@ -52,7 +52,7 @@ describe("avatarSubscribeMethod", () => {
     avatarSubscribeMethod(subs).handler({ characterId: "taki" }, ctx);
 
     ctx.fireClose();
-    subs.publish({ characterId: "taki", kind: "expression", name: "smile01" });
+    subs.publish({ characterId: "taki", commandId: "cmd", kind: "expression", name: "smile01" });
 
     expect(ctx.notified).toHaveLength(0);
     expect(subs.count("taki")).toBe(0);

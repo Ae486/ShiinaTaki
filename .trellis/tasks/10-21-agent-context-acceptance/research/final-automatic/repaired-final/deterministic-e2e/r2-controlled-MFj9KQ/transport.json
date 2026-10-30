@@ -1,0 +1,152 @@
+{
+  "kind": "transparent-request-hold-relay",
+  "requests": [
+    {
+      "requestNumber": 1,
+      "bodySha256": "0fc62c6e6cd1db4e2eb44d154abfed98e0fda3d0bcd44304b2b3d75f6e6955c0",
+      "gate": null,
+      "heldAt": null,
+      "releasedAt": null,
+      "forwardedAt": "2026-10-23T03:55:37.761Z",
+      "finishedAt": "2026-10-23T03:55:37.773Z",
+      "status": 200,
+      "aborted": null,
+      "failure": null
+    },
+    {
+      "requestNumber": 2,
+      "bodySha256": "b264d4bf0dda7f1f3bcbdbffdcdaa9aa47e30e72f8220feb7bd9018cec28fd45",
+      "gate": "child-a",
+      "heldAt": "2026-10-23T03:55:38.033Z",
+      "releasedAt": null,
+      "forwardedAt": null,
+      "finishedAt": "2026-10-23T03:55:38.339Z",
+      "status": null,
+      "aborted": "client-closed",
+      "failure": null
+    },
+    {
+      "requestNumber": 3,
+      "bodySha256": "b1b8acb3ed0d24a613b4dc1a3a2b6438587077cf070faaa3e3e6b2235bdccdee",
+      "gate": "child-b",
+      "heldAt": "2026-10-23T03:55:38.035Z",
+      "releasedAt": "2026-10-23T03:55:38.732Z",
+      "forwardedAt": "2026-10-23T03:55:38.732Z",
+      "finishedAt": "2026-10-23T03:55:38.739Z",
+      "status": 200,
+      "aborted": null,
+      "failure": null
+    },
+    {
+      "requestNumber": 4,
+      "bodySha256": "4e127b55ddaf85110e6bd2bb4a187aa2858492db14ea91e10ca62c4bc4ce07c9",
+      "gate": "original-parent",
+      "heldAt": "2026-10-23T03:55:38.040Z",
+      "releasedAt": null,
+      "forwardedAt": null,
+      "finishedAt": "2026-10-23T03:55:38.194Z",
+      "status": null,
+      "aborted": "client-closed",
+      "failure": null
+    },
+    {
+      "requestNumber": 5,
+      "bodySha256": "6a035657e2e12ca1bed38af49a9537c8bbff54c34775811ca2f51159f7d61811",
+      "gate": null,
+      "heldAt": null,
+      "releasedAt": null,
+      "forwardedAt": "2026-10-23T03:55:38.437Z",
+      "finishedAt": "2026-10-23T03:55:38.456Z",
+      "status": 200,
+      "aborted": null,
+      "failure": null
+    },
+    {
+      "requestNumber": 6,
+      "bodySha256": "0595fd8175c857879b48d776ff602f0ce19111c834b5021b74f9fa90ecf9ac5a",
+      "gate": null,
+      "heldAt": null,
+      "releasedAt": null,
+      "forwardedAt": "2026-10-23T03:55:38.515Z",
+      "finishedAt": "2026-10-23T03:55:38.533Z",
+      "status": 200,
+      "aborted": null,
+      "failure": null
+    },
+    {
+      "requestNumber": 7,
+      "bodySha256": "db42b8ee7f864165b52c90427fc7d6cc2d83c3ad9e38c9e2183599f240fce59a",
+      "gate": null,
+      "heldAt": null,
+      "releasedAt": null,
+      "forwardedAt": "2026-10-23T03:55:38.829Z",
+      "finishedAt": "2026-10-23T03:55:38.846Z",
+      "status": 200,
+      "aborted": null,
+      "failure": null
+    },
+    {
+      "requestNumber": 8,
+      "bodySha256": "013e3f1d00575859b93c34df1441bdcb77a5da9d88e7e044d41346a970abfed7",
+      "gate": "child-a",
+      "heldAt": null,
+      "releasedAt": null,
+      "forwardedAt": "2026-10-23T03:55:39.126Z",
+      "finishedAt": "2026-10-23T03:55:39.142Z",
+      "status": 200,
+      "aborted": null,
+      "failure": null
+    },
+    {
+      "requestNumber": 9,
+      "bodySha256": "0ec89d901771a11c4bf5a8f6d268e7a7a4a3438353663290ef969086012177f1",
+      "gate": null,
+      "heldAt": null,
+      "releasedAt": null,
+      "forwardedAt": "2026-10-23T03:55:39.330Z",
+      "finishedAt": "2026-10-23T03:55:39.344Z",
+      "status": 200,
+      "aborted": null,
+      "failure": null
+    },
+    {
+      "requestNumber": 10,
+      "bodySha256": "700313b845ca81b3c08570b7b6da62e4d38ea2d34a867e4c24149a8cda66b589",
+      "gate": "child-b",
+      "heldAt": null,
+      "releasedAt": null,
+      "forwardedAt": "2026-10-23T03:55:39.451Z",
+      "finishedAt": "2026-10-23T03:55:39.459Z",
+      "status": 200,
+      "aborted": null,
+      "failure": null
+    },
+    {
+      "requestNumber": 11,
+      "bodySha256": "8c3f34f20440b2726ff54cd5846ecfc91257148bc10d6b4530ed24a486448dcf",
+      "gate": null,
+      "heldAt": null,
+      "releasedAt": null,
+      "forwardedAt": "2026-10-23T03:55:39.454Z",
+      "finishedAt": "2026-10-23T03:55:39.461Z",
+      "status": 200,
+      "aborted": null,
+      "failure": null
+    },
+    {
+      "requestNumber": 12,
+      "bodySha256": "6f8602e08312f3e15cd086bc9707951c9a0eae6888ddc05d2204af28585935dd",
+      "gate": null,
+      "heldAt": null,
+      "releasedAt": null,
+      "forwardedAt": "2026-10-23T03:55:39.649Z",
+      "finishedAt": "2026-10-23T03:55:39.656Z",
+      "status": 200,
+      "aborted": null,
+      "failure": null
+    }
+  ],
+  "physicalUpstreamAttempts": 10,
+  "active": 0,
+  "closed": true
+}

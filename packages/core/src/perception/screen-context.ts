@@ -20,6 +20,8 @@ export interface ScreenObservation {
 export interface ScreenContext {
   /** Replace the current observation (only the latest screen matters; older frames are already dropped). */
   push(description: string, at: number): void;
+  /** Retire cached context immediately on consent/source invalidation. */
+  clear(): void;
   /** The current observation, or undefined once it is older than staleAfterMs (a stopped/paused sampler bleeds out). */
   latest(now: number): ScreenObservation | undefined;
 }
@@ -30,11 +32,12 @@ export function createScreenContext(config: { staleAfterMs: number }): ScreenCon
     push(description, at) {
       observation = { description, at };
     },
+    clear() { observation = undefined; },
     // Staleness is applied on READ, not on a timer: a paused core must stay silent, and there is nothing to wake up.
     // Without it a pause (or a denied grant) would leave the last screen in every future prompt, indefinitely.
     latest(now) {
       if (observation === undefined) return undefined;
-      return now - observation.at <= config.staleAfterMs ? observation : undefined;
+      return now >= observation.at && now - observation.at <= config.staleAfterMs ? { ...observation } : undefined;
     },
   };
 }

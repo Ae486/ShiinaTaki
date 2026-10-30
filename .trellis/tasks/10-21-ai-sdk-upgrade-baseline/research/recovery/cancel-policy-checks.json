@@ -1,0 +1,32 @@
+[
+  {
+    "mode": "baseline",
+    "command": [
+      "node",
+      "H:\\TakiAgent-worktrees\\t4\\.trellis\\tasks\\10-21-ai-sdk-upgrade-baseline\\research\\recovery\\cancel-policy-probe.mjs",
+      "baseline"
+    ],
+    "exitCode": 0,
+    "seconds": 1.66
+  },
+  {
+    "mode": "target",
+    "command": [
+      "node",
+      "H:\\TakiAgent-worktrees\\t4\\.trellis\\tasks\\10-21-ai-sdk-upgrade-baseline\\research\\recovery\\cancel-policy-probe.mjs",
+      "target"
+    ],
+    "exitCode": 0,
+    "seconds": 1.69
+  },
+  {
+    "mode": "candidate",
+    "command": [
+      "node",
+      "H:\\TakiAgent-worktrees\\t4\\.trellis\\tasks\\10-21-ai-sdk-upgrade-baseline\\research\\recovery\\cancel-policy-probe.mjs",
+      "candidate"
+    ],
+    "exitCode": 0,
+    "seconds": 1.75
+  }
+]

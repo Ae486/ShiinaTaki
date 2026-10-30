@@ -1,0 +1,42 @@
+{
+  "checks": [],
+  "passed": false,
+  "failure": "Error: Timed out: ready action 运行监视",
+  "scope": "Real WebView2, production Home/Monitor/Chat/WsClient; scripted Shared-validated backoff/Monitor/Timeline data. No Core backoff/C2 human opportunity/model/owner acceptance.",
+  "artifacts": "H:\\TakiAgent-worktrees\\t4\\.trellis\\tasks\\09-11-initiative-intentions-acceptance\\research\\validation\\backoff-native-2026-09-28T14-27-33-153Z",
+  "directory": "G:\\Temp\\taki-c4-backoff-native-03OUMi",
+  "sourceHashes": {
+    "test/c3-pattern-fixture.tsx": "b43a15cc163cc1c6a28d604ca112e592151dff454da7b84f1dd58e3e37a74537",
+    "test/c4-backoff-native-server.mjs": "b676401aef138eea7468a8a59c3e5638ffecf94f19e66363a413eab9fc7bb9a9",
+    "test/c4-backoff-native-smoke.mjs": "6d6de962d1fcc38b9e59a94ce3235ce0e606b7c2d584ebc81823aa0148f8d8fe",
+    "src/windows/home/home-shell.tsx": "a96a2d06ca00e88091198102a7f4e543d2a85d158603333dd25b490733aa2527",
+    "src/features/initiative-patterns/initiative-backoff-controller.ts": "b2e503424ba34e7cfe566292c50a94709c3344f410bd51b58d6c82f851f74f0d",
+    "src/features/initiative-patterns/initiative-backoff-view.tsx": "0937d085ec9124bbf42a6889d05cf2126846cbf25dcb55743ff00de71f4501c2",
+    "src/features/initiative-patterns/use-initiative-backoff.ts": "6cd6c40bb7629ccabd628932460074dfb36556fb15b44e62809971c0e0d7ad8b",
+    "src/features/initiative-patterns/initiative-policy-diagnostics.tsx": "7ecdd7891a3d1a6c14c5daa77f0a4610846b256a96577209cb298ed0721daca5",
+    "src/features/initiative-patterns/follow-up-tool-display.ts": "8abf64bad4750b7d6fadf4b9088ed322c4627cdead80e23ddb805aaca4ad06cf",
+    "src/windows/home/pages/chat/tool-result-display.ts": "3b85dab6844d50740f009785f88e2ce0f47e7b912b8aa2d755aab26e584af965",
+    "src/lib/ws-client.ts": "f107d9b7df3b0dfa602e06ebdafa0ef47c8256a82a11c4fe019d3fdcf080958e",
+    "src/lib/ws-client-routes.ts": "fb9c455ab9900622f2697aab6b07a940a820d8a7fee8cf909204aa81a0da660c",
+    "src/lib/ws-client-initiative.ts": "fb0b10d80f03570ee877ea9d51129c30087cf7e8dbdcec9b7e098724ea57caba"
+  },
+  "finalSourceHashes": {
+    "test/c3-pattern-fixture.tsx": "b43a15cc163cc1c6a28d604ca112e592151dff454da7b84f1dd58e3e37a74537",
+    "test/c4-backoff-native-server.mjs": "b676401aef138eea7468a8a59c3e5638ffecf94f19e66363a413eab9fc7bb9a9",
+    "test/c4-backoff-native-smoke.mjs": "6d6de962d1fcc38b9e59a94ce3235ce0e606b7c2d584ebc81823aa0148f8d8fe",
+    "src/windows/home/home-shell.tsx": "a96a2d06ca00e88091198102a7f4e543d2a85d158603333dd25b490733aa2527",
+    "src/features/initiative-patterns/initiative-backoff-controller.ts": "b2e503424ba34e7cfe566292c50a94709c3344f410bd51b58d6c82f851f74f0d",
+    "src/features/initiative-patterns/initiative-backoff-view.tsx": "0937d085ec9124bbf42a6889d05cf2126846cbf25dcb55743ff00de71f4501c2",
+    "src/features/initiative-patterns/use-initiative-backoff.ts": "6cd6c40bb7629ccabd628932460074dfb36556fb15b44e62809971c0e0d7ad8b",
+    "src/features/initiative-patterns/initiative-policy-diagnostics.tsx": "7ecdd7891a3d1a6c14c5daa77f0a4610846b256a96577209cb298ed0721daca5",
+    "src/features/initiative-patterns/follow-up-tool-display.ts": "8abf64bad4750b7d6fadf4b9088ed322c4627cdead80e23ddb805aaca4ad06cf",
+    "src/windows/home/pages/chat/tool-result-display.ts": "3b85dab6844d50740f009785f88e2ce0f47e7b912b8aa2d755aab26e584af965",
+    "src/lib/ws-client.ts": "f107d9b7df3b0dfa602e06ebdafa0ef47c8256a82a11c4fe019d3fdcf080958e",
+    "src/lib/ws-client-routes.ts": "fb9c455ab9900622f2697aab6b07a940a820d8a7fee8cf909204aa81a0da660c",
+    "src/lib/ws-client-initiative.ts": "fb0b10d80f03570ee877ea9d51129c30087cf7e8dbdcec9b7e098724ea57caba"
+  },
+  "shellSha256": "d945e7f8a4b6011eec4c8effa536e7d0a6030cde06dbefb565f7e32b8696027a",
+  "views": [],
+  "calls": [],
+  "guiOutput": ""
+}

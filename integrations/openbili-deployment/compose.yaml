@@ -1,0 +1,22 @@
+name: taki-openbili
+services:
+  backend:
+    image: taki-openbili-backend:0.3.205-peek-20261018
+    build:
+      context: ../..
+      dockerfile: integrations/openbili-deployment/Dockerfile
+    container_name: taki-openbili-backend
+    ports:
+      - "127.0.0.1:18420:8420"
+    volumes:
+      - runtime:/app/runtime
+      - data:/app/runtime/data
+      - logs:/app/runtime/logs
+    restart: unless-stopped
+volumes:
+  runtime:
+    name: taki-openbili-runtime
+  data:
+    name: taki-openbili-data
+  logs:
+    name: taki-openbili-logs

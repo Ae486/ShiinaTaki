@@ -6,6 +6,9 @@
 import type { PermissionCellState, PermissionPosture } from "./permission-level-schema.ts";
 
 const CAPABILITY_LABELS: ReadonlyMap<string, string> = new Map([
+  ["core.subagent.manage", "安排助手协作"],
+  ["core.subagent.read", "查看助手工作"],
+  ["core.subagent.result", "记录助手结果"],
   ["shell-open", "打开外部目标"],
   ["exec", "执行命令"],
   ["fs-write", "写入文件"],
@@ -18,6 +21,10 @@ const CAPABILITY_LABELS: ReadonlyMap<string, string> = new Map([
   ["skill.load", "读取技能资料"],
   ["mcp.tool.call", "调用 MCP 工具"],
   ["core.time.read", "读取当前时间"],
+  ["core.initiative.decide", "决定主动表达"],
+  ["core.initiative.pattern.manage", "管理互动习惯"],
+  ["core.co-watching.manage", "查询分析或管理共看"],
+  ["core.initiative.intention.plan", "安排后续跟进"],
   ["core.schedule.manage", "管理定时任务"],
   ["core.memory.search", "查询记忆"],
   ["core.memory.write", "写入记忆"],
@@ -30,6 +37,9 @@ const CAPABILITY_LABELS: ReadonlyMap<string, string> = new Map([
 type PermissionCellDisplay = { label: string; description: string };
 
 const CELL_DISPLAYS: ReadonlyMap<string, PermissionCellDisplay> = new Map([
+  ["subagent-manage", { label: "安排助手协作", description: "委派工作、发送补充说明或暂停指定助手；使用的工具仍遵循原有权限。" }],
+  ["subagent-read", { label: "查看助手工作", description: "读取当前角色的助手会话、进展与保留结果。" }],
+  ["subagent-result", { label: "记录助手结果", description: "记录本次工作的结果或后续处理建议；记录本身不会发送消息。" }],
   ["shell-open:url-safe", {
     label: "打开网页或邮件链接",
     description: "按 http、https 或 mailto 协议分类的链接；此分类不验证网页或邮件内容是否安全。",
@@ -126,9 +136,25 @@ const CELL_DISPLAYS: ReadonlyMap<string, PermissionCellDisplay> = new Map([
     label: "读取当前时间",
     description: "读取当前时间与时区信息。",
   }],
+  ["initiative-decide", {
+    label: "决定主动表达",
+    description: "为本次主动判断提交保持安静、表情或完整话语；实际表达仍须通过当前交付条件与权限检查。",
+  }],
   ["schedule-manage", {
     label: "管理定时任务",
     description: "查看、创建、修改、暂停、恢复或删除当前角色的定时任务。",
+  }],
+  ["interaction-pattern-manage", {
+    label: "管理互动习惯",
+    description: "按当前对话请求查看或调整互动习惯；新提案仍须由你确认，不改变工具权限。",
+  }],
+  ["co-watching-manage", {
+    label: "查询分析或管理共看",
+    description: "查询已有分析、分析指定网址或预分析少量精选推荐；共看仍需明确请求，原生分析工具遵循已有权限。",
+  }],
+  ["intention-plan", {
+    label: "安排后续跟进",
+    description: "基于当前对话形成一次有明确起止窗口的后续关心计划；不保证发言，不替代你要求的定时任务。",
   }],
   ["memory-search", {
     label: "查询或分析记忆",

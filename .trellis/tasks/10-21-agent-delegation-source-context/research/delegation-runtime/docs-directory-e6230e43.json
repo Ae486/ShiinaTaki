@@ -1,0 +1,146 @@
+[
+  {
+    "name": "01-overview.mdx",
+    "path": "content/docs/03-ai-sdk-harnesses/01-overview.mdx",
+    "sha": "f4b6cf1db6487f4c1a847dfc8ee2b0d610c271ef",
+    "size": 4593,
+    "url": "https://api.github.com/repos/vercel/ai/contents/content/docs/03-ai-sdk-harnesses/01-overview.mdx?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/01-overview.mdx",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/f4b6cf1db6487f4c1a847dfc8ee2b0d610c271ef",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/01-overview.mdx",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/content/docs/03-ai-sdk-harnesses/01-overview.mdx?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/f4b6cf1db6487f4c1a847dfc8ee2b0d610c271ef",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/01-overview.mdx"
+    }
+  },
+  {
+    "name": "02-harness-agent.mdx",
+    "path": "content/docs/03-ai-sdk-harnesses/02-harness-agent.mdx",
+    "sha": "ab438ebcbde0012ffb166060d01da46f85634d14",
+    "size": 27182,
+    "url": "https://api.github.com/repos/vercel/ai/contents/content/docs/03-ai-sdk-harnesses/02-harness-agent.mdx?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/02-harness-agent.mdx",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/ab438ebcbde0012ffb166060d01da46f85634d14",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/02-harness-agent.mdx",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/content/docs/03-ai-sdk-harnesses/02-harness-agent.mdx?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/ab438ebcbde0012ffb166060d01da46f85634d14",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/02-harness-agent.mdx"
+    }
+  },
+  {
+    "name": "03-tools.mdx",
+    "path": "content/docs/03-ai-sdk-harnesses/03-tools.mdx",
+    "sha": "1d52d12773e141d0870ba8b2e8574b67290c5ebc",
+    "size": 8832,
+    "url": "https://api.github.com/repos/vercel/ai/contents/content/docs/03-ai-sdk-harnesses/03-tools.mdx?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/03-tools.mdx",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/1d52d12773e141d0870ba8b2e8574b67290c5ebc",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/03-tools.mdx",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/content/docs/03-ai-sdk-harnesses/03-tools.mdx?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/1d52d12773e141d0870ba8b2e8574b67290c5ebc",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/03-tools.mdx"
+    }
+  },
+  {
+    "name": "04-skills.mdx",
+    "path": "content/docs/03-ai-sdk-harnesses/04-skills.mdx",
+    "sha": "a48b276f796d8099717b54bbc632ce2f9195625f",
+    "size": 2121,
+    "url": "https://api.github.com/repos/vercel/ai/contents/content/docs/03-ai-sdk-harnesses/04-skills.mdx?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/04-skills.mdx",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/a48b276f796d8099717b54bbc632ce2f9195625f",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/04-skills.mdx",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/content/docs/03-ai-sdk-harnesses/04-skills.mdx?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/a48b276f796d8099717b54bbc632ce2f9195625f",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/04-skills.mdx"
+    }
+  },
+  {
+    "name": "05-harness-adapters.mdx",
+    "path": "content/docs/03-ai-sdk-harnesses/05-harness-adapters.mdx",
+    "sha": "b21b4ee5eef71313e5b356eb40481c96bec7e9c7",
+    "size": 4066,
+    "url": "https://api.github.com/repos/vercel/ai/contents/content/docs/03-ai-sdk-harnesses/05-harness-adapters.mdx?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/05-harness-adapters.mdx",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/b21b4ee5eef71313e5b356eb40481c96bec7e9c7",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/05-harness-adapters.mdx",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/content/docs/03-ai-sdk-harnesses/05-harness-adapters.mdx?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/b21b4ee5eef71313e5b356eb40481c96bec7e9c7",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/05-harness-adapters.mdx"
+    }
+  },
+  {
+    "name": "06-workflow-utilities.mdx",
+    "path": "content/docs/03-ai-sdk-harnesses/06-workflow-utilities.mdx",
+    "sha": "95e0ca9eb8b87e18e875b2e9dd10a9a371053f14",
+    "size": 14537,
+    "url": "https://api.github.com/repos/vercel/ai/contents/content/docs/03-ai-sdk-harnesses/06-workflow-utilities.mdx?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/06-workflow-utilities.mdx",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/95e0ca9eb8b87e18e875b2e9dd10a9a371053f14",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/06-workflow-utilities.mdx",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/content/docs/03-ai-sdk-harnesses/06-workflow-utilities.mdx?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/95e0ca9eb8b87e18e875b2e9dd10a9a371053f14",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/06-workflow-utilities.mdx"
+    }
+  },
+  {
+    "name": "07-ui.mdx",
+    "path": "content/docs/03-ai-sdk-harnesses/07-ui.mdx",
+    "sha": "0eea5f8d09dba6ead405b7d4ee482086cd0cfa4a",
+    "size": 7478,
+    "url": "https://api.github.com/repos/vercel/ai/contents/content/docs/03-ai-sdk-harnesses/07-ui.mdx?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/07-ui.mdx",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/0eea5f8d09dba6ead405b7d4ee482086cd0cfa4a",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/07-ui.mdx",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/content/docs/03-ai-sdk-harnesses/07-ui.mdx?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/0eea5f8d09dba6ead405b7d4ee482086cd0cfa4a",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/07-ui.mdx"
+    }
+  },
+  {
+    "name": "08-terminal-ui.mdx",
+    "path": "content/docs/03-ai-sdk-harnesses/08-terminal-ui.mdx",
+    "sha": "819b2e02a59ad4e91680a3fdc2503569bf2f151d",
+    "size": 2276,
+    "url": "https://api.github.com/repos/vercel/ai/contents/content/docs/03-ai-sdk-harnesses/08-terminal-ui.mdx?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/08-terminal-ui.mdx",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/819b2e02a59ad4e91680a3fdc2503569bf2f151d",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/08-terminal-ui.mdx",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/content/docs/03-ai-sdk-harnesses/08-terminal-ui.mdx?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/819b2e02a59ad4e91680a3fdc2503569bf2f151d",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/08-terminal-ui.mdx"
+    }
+  },
+  {
+    "name": "index.mdx",
+    "path": "content/docs/03-ai-sdk-harnesses/index.mdx",
+    "sha": "7633d825b9c9388c6862e7ce2ddc80a4472fd69f",
+    "size": 1818,
+    "url": "https://api.github.com/repos/vercel/ai/contents/content/docs/03-ai-sdk-harnesses/index.mdx?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/index.mdx",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/7633d825b9c9388c6862e7ce2ddc80a4472fd69f",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/index.mdx",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/content/docs/03-ai-sdk-harnesses/index.mdx?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/7633d825b9c9388c6862e7ce2ddc80a4472fd69f",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-ai-sdk-harnesses/index.mdx"
+    }
+  }
+]

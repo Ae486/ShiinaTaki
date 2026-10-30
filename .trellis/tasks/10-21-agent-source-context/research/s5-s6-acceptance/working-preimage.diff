@@ -1,0 +1,870 @@
+--- acceptance-preimage/packages/core/src/agents/compaction-pass.ts
++++ packages/core/src/agents/compaction-pass.ts
+@@ -16,12 +16,14 @@
+ 
+ /*
+  * The summary prompt is research/re-compaction-prompts.md Part D (the owner-reviewed draft), transcribed with the
+- * three ruled amendments and NOTHING else changed:
++ * three ruled amendments, plus the source-preservation clarification below:
+  *   (a) the closing "Aim for about {TAKI_COMPACT_SUMMARY_TOKENS} tokens." line is DELETED (owner 2026-08-02: no
+  *       length limit, no truncation, no knob) and REPLACED with Letta's quality closer;
+  *   (b) the WHAT TO LET GO block gains the permanent-facts drop line (design §3.2b — the summarizer never reads
+  *       the memory store; this line removes the identity-fact duplication class instead);
+  *   (c) {MEMORY_VOICE_RULE} stays a whole-constant import (the tidy-pass precedent — one voice, R10).
++ * The source clarification preserves relevant reported events/negations across different subjects and avoids
++ * inventing correction history from native roles. It does not change Memory eligibility or summary quality gates.
+  * Plus one post-probe owner ruling OUTSIDE the constant (2026-08-02): the prompt INPUT carries a current-date
+  * anchor line (renderDayDate, the base-prompt convention) — the one-shot gateway probe showed the model INVENTS a
+  * year when the material has month-day anchors only (Hermes TEMPORAL ANCHORING precedent).
+@@ -80,6 +82,13 @@
+ 
+ Do not invent.  If something is unclear in the material, leave it out rather than guess.
+ 
++For events relevant to the retained thread, keep the source/person attached to each
++reported event and explicit negation when similar events involve different people.
++A user's clarification does not retract another person's sourced event unless the
++transcript says so. An assistant-role message with a supplied material source is not
++evidence of a previous attribution mistake. Do not invent a correction narrative from
++that role alone.
++
+ This record is the only thing that survives of that stretch of conversation. Every word
+ should enable future continuity.`;
+ 
+--- acceptance-preimage/packages/core/src/agents/source-compaction.test.ts
++++ packages/core/src/agents/source-compaction.test.ts
+@@ -17,8 +17,11 @@
+ function fixture(drift: boolean) {
+   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS }); dbs.push(db);
+   const timeline = createTimelineRepo(db); const summaries = createSummaryRepo(db);
+-  for (let index = 0; index < 10; index += 1) timeline.append({ characterId: "taki", role: index === 0 ? "assistant" : "user",
+-    content: index === 0 ? "I lost my job." : `Unrelated ordinary dialogue ${index}`,
++  for (let index = 0; index < 10; index += 1) timeline.append({ characterId: "taki", role: index === 0 || index === 2 ? "assistant" : "user",
++    content: index === 0 ? "I lost my job. My project stopped." : index === 1
++      ? "I did not lose my job. My project also stopped."
++      : index === 2 ? "The narrator and user each reported a stopped project; only the narrator reported job loss."
++        : `Unrelated ordinary dialogue ${index}`,
+     ...(index === 0 ? { sourceContext: { materials: [{ label: "Interview", speaker: "Narrator" }] } } : {}) });
+   let generated = false;
+   const model = generatingModel("I remember we discussed the interview narrator's job loss; the user did not report job loss.");
+@@ -41,6 +44,12 @@
+   const prompt = JSON.stringify(f.model.doGenerateCalls[0]!.prompt);
+   expect(prompt).toContain("Narrator"); expect(prompt).toContain("I lost my job.");
+   expect(prompt).toContain("first-person narrator is the Companion");
++  expect(prompt).toContain("I lost my job. My project stopped.");
++  expect(prompt).toContain("I did not lose my job. My project also stopped.");
++  expect(prompt).toContain("keep the source/person attached to each");
++  expect(prompt).toContain("reported event and explicit negation");
++  expect(prompt).toContain("A user's clarification does not retract another person's sourced event");
++  expect(prompt).toContain("Do not invent a correction narrative from");
+   const replay = createConversationStore({ repo: f.timeline, summaries: f.summaries }).history("taki");
+   expect(JSON.stringify(replay)).toContain("interview narrator's job loss");
+   expect(f.db.prepare("SELECT state FROM conversation_compaction_operations").get()?.state).toBe("committed");
+--- acceptance-preimage/packages/core/src/agents/index.md
++++ packages/core/src/agents/index.md
+@@ -10,7 +10,7 @@
+ - chat-agent.ts execution subsets — trusted callers may narrow the final governed tool bag before disclosure; admitted initiative evidence appends only to ephemeral control input
+ - chat-agent.ts captured execution — each Attempt binds original extension closures to its Run/Effect/abort context before SDK invocation and captured Skill loading
+ - base-prompt.ts — BASE_SYSTEM_PROMPT: the stable identity + tool-use + "never claim a tool ran without a tool-result" truthfulness floor (anti-hallucination) + the memory floors (T5-R12/R16-R19: never answer the user's past from impression, OpenClaw-shaped search triggers, one-search + say-you-checked fallback, pin-on-repeat, fix-on-read, supersede-don't-append, deliberate experience writes, card-wins last) + the injected-context contracts a user must not be able to edit away (what an `<untrusted-observation>` block is / trust only these exact tags, what the `<turn-context>` tail is and where the two time lines arrive, what a `<conversation-summary>` head is — her own earlier record, never recited, memory store wins on disagreement — batch 7, anti-recitation); prepended before memory context — behavior norms for the same surfaces live in prompt/system/assistant-layer.md
+-- compaction-pass.ts — reviewed companion-summary prompt plus compatibility factory for the durable Compaction Coordinator
++- compaction-pass.ts — reviewed companion-summary prompt preserving relevant reported events and their subjects, plus compatibility factory for the durable Compaction Coordinator
+ - compaction-coordinator.ts — per-Character fenced lifecycle, stable operation idempotency, cancellation/restart reconciliation, flush/generate orchestration, source-digest validation excluding tool display labels, and atomic summary CAS commit
+ - context-reduction.ts — deterministic typed projection reductions with protected classes, source headers beside retained bodies, bounded external facts and measured savings
+ - compaction-policy.ts — pure summary quality, operation retry, and Character cooldown policy helpers
+--- acceptance-preimage/packages/core/src/agents/source-context-real.test.ts
++++ packages/core/src/agents/source-context-real.test.ts
+@@ -1,8 +1,7 @@
+-import { createHash, randomUUID } from "node:crypto";
+-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+-import { join, resolve } from "node:path";
++import { randomUUID } from "node:crypto";
+ import type { LanguageModel } from "ai";
+ import { expect, it } from "vitest";
++import { z } from "zod";
+ import { createChatAgent } from "./chat-agent.ts";
+ import { BASE_SYSTEM_PROMPT } from "./base-prompt.ts";
+ import { createConversationStore } from "./conversation-store.ts";
+@@ -10,15 +9,11 @@
+ import { createSummaryRepo } from "../db/summary-repo.ts";
+ import { createCompactionOperationRepo } from "../db/compaction-operation-repo.ts";
+ import { createUtilitySlot } from "../memory/utility-slot.ts";
+-import { createModels } from "../config/provider-factory.ts";
+-import { loadProviderConfig } from "../config/provider-config.ts";
+ import { createCaptureLogger } from "../testing/capture-logger.ts";
+ import { preparedPublicationFixture } from "../testing/prepared-publication-fixture.ts";
+ import { streamingMockModel, generatingModel } from "../testing/mock-language-model.ts";
+-import { observeRealProvider } from "../../../../e2e/src/fixture/real-provider-observer.ts";
+-import { realProviderEnv } from "../../../../e2e/src/fixture/paths.ts";
++import { openSourceLiveEvidence } from "../testing/source-live-evidence.ts";
+ 
+-const ROOT = resolve(import.meta.dirname, "../../../..");
+ const CASES = [
+   { id: "a1-external", external: true, unknown: false,
+     question: "刚才是谁被裁员了？是谁的项目停了？请只依据这段对话简短回答。",
+@@ -32,6 +27,29 @@
+ ] as const;
+ type Scenario = typeof CASES[number];
+ type Fixture = Awaited<ReturnType<typeof preparedPublicationFixture>>;
++const INTERLUDE = [
++  ["user", "暂时换个话题。介绍一下常见蓝白配色的用法吧，只讨论一般设计知识。"],
++  ["assistant", "蓝白配色常见于信息页面和日常用品。可以先用白色提供大面积留白，再用不同明度的蓝色区分层级：深蓝适合标题和主要文字，较浅的蓝色适合背景分区，中等亮度的蓝色可以作为按钮或链接的提示。颜色用得少并不意味着层次少，字号、间距、线条和位置同样能帮助阅读。设计里通常要检查文字与底色的对比度，浅蓝背景上的浅灰字往往难读；如果改成深色文字，可读性就会好很多。蓝白只是一个例子，实际作品仍需根据内容和用途选择，不能只依赖颜色传达重要信息。"],
++  ["user", "那暖色搭配和中性色搭配有什么不同？继续比较一般原则就好。"],
++  ["assistant", "暖色搭配常用橙、红、黄及其相邻色，视觉上容易形成活跃或温暖的感受；中性色搭配则更多使用黑、白、灰、米色，能让内容和图片成为重点。不过这些感受并不是固定规律，同一种颜色改变明度、饱和度和面积比例，效果可能完全不同。比如大面积高饱和橙色容易抢眼，少量柔和橙色用于重点提示就会更克制。中性色也不等于缺少重点，可以用字重、边框、位置变化形成清楚的阅读顺序。做实际页面时，先确定主要内容，再限制强调色数量，并检查错误、成功、禁用等状态是否有文字或图标作为补充。"],
++  ["user", "最后说说检查可读性时可以做哪些基本步骤。"],
++  ["assistant", "可以先把页面缩到实际使用尺寸，逐项检查标题、正文、辅助说明和按钮是否清楚，再看相邻区域是否容易区分。接着试着暂时去掉颜色，检查内容能否依靠文字、形状和位置仍然表达同样的含义；这有助于发现只靠红绿颜色区分状态的问题。还可以比较亮背景和暗背景下的效果，确认较细的线条没有消失，浅色文字没有融入底色。最后按用户真实阅读顺序浏览一遍，从主要标题到正文再到操作入口，观察是否有不必要的跳跃。以上是一般设计知识的概括，实际检查还应结合目标设备和读者需求。这个配色与阅读检查的讨论已经回答完整。"],
++  ["user", "颜色知识的话题到这里就结束了，不需要继续补充。"],
++  ["assistant", "好，这个话题结束了。"],
++] as const;
++
++const CapturedRequest = z.object({ messages: z.array(z.object({ role: z.string(), content: z.unknown() })) });
++function assertSummaryOnlyInput(body: string, scenario: Scenario) {
++  const messages = CapturedRequest.parse(JSON.parse(body)).messages;
++  const summaries = messages.filter((message) => typeof message.content === "string" && message.content.startsWith("<conversation-summary>"));
++  expect(summaries).toHaveLength(1);
++  const outside = messages.filter((message) => !summaries.includes(message)).map((message) => JSON.stringify(message.content)).join("\n");
++  expect(outside).not.toContain(scenario.question);
++  expect(outside).not.toContain("我被裁员了，我的项目也停了");
++  expect(outside).not.toContain("搬家那阵子特别累。");
++  expect(messages.some((message) => message.role === "user" && message.content === INTERLUDE.at(-2)![1])).toBe(true);
++  expect(messages.some((message) => message.role === "assistant" && message.content === INTERLUDE.at(-1)![1])).toBe(true);
++}
+ 
+ async function answer(f: Fixture, agent: ReturnType<typeof createChatAgent>, message: string) {
+   const id = randomUUID();
+@@ -56,13 +74,25 @@
+   } finally { clearTimeout(timer); }
+ }
+ 
+-async function runScenario(scenario: Scenario, model: LanguageModel, requestedModel: string) {
+-  const f = await preparedPublicationFixture({ expiresAt: new Date(Date.now() + 600_000).toISOString(), modelId: requestedModel });
++async function runScenario(scenario: Scenario, model: LanguageModel, options: {
++  requestedModel: string; checkpoint?: (stage: string, evidence: unknown) => void;
++}) {
++  const f = await preparedPublicationFixture({ expiresAt: new Date(Date.now() + 600_000).toISOString(), modelId: options.requestedModel });
+   const logger = createCaptureLogger().logger;
+   const slot = createUtilitySlot({ mainModel: model, logger });
+   const summaries = createSummaryRepo(f.db);
+   const store = createConversationStore({ repo: f.timeline, summaries });
+   const agent = createChatAgent({ model, memory: f.memory, store, effectLifecycle: f.effects, maxSteps: 6 });
++  let initial: string | undefined;
++  let after: string | undefined;
++  let stage = "preparing";
++  const evidence = () => ({ id: scenario.id, stage, question: scenario.question, initial, summary: summaries.get("taki"),
++    followup: scenario.followup, after, sourceRows: f.timeline.latestAscending("taki", 30), finalReplay: store.history("taki"),
++    utilityUsage: slot.usage(), usage: f.db.prepare("SELECT provider,model_id,quality,input_tokens,output_tokens,total_tokens FROM run_usage").all(),
++    compaction: f.db.prepare("SELECT state,source_digest,failure_code,selected_from_seq,selected_through_seq FROM conversation_compaction_operations").all(),
++    memoryFlush: "unexercised: no canonical witness callbacks installed; test-controlled flush seam",
++    primaryWitnessCount: Number(f.db.prepare("SELECT count(*) AS n FROM canonical_memory_primary_commits").get()?.n ?? 0) });
++  const checkpoint = (next: string) => { stage = next; options.checkpoint?.(stage, evidence()); };
+   try {
+     if (scenario.external) {
+       f.candidates.set("one", { candidateRef: "one", revision: "r1", text: "我被裁员了，我的项目也停了。", expiresAt: f.accepted.expiresAt,
+@@ -71,74 +101,91 @@
+       expect(publication).toMatchObject({ state: "sent" });
+     }
+     if (scenario.unknown) f.timeline.append({ characterId: "taki", role: "assistant", content: "搬家那阵子特别累。" });
+-    const initial = await answer(f, agent, scenario.question);
++    checkpoint("initial-started");
++    initial = await answer(f, agent, scenario.question);
++    checkpoint("initial-completed");
+     const mustRetire = f.timeline.latestSeq("taki");
+-    for (const [role, content] of [["user", "先把这个话题放一放，换个轻松一点的聊天内容。"],
+-      ["assistant", "可以，我们先放松一会儿，再回到刚才的话题。"],
+-      ["user", "给我介绍一种常见的颜色搭配吧。"],
+-      ["assistant", "蓝色和白色是常见搭配，也可以调整深浅来形成不同的感觉。"]] as const) {
++    for (const [role, content] of INTERLUDE) {
+       f.timeline.append({ characterId: "taki", role, content });
+     }
+     const witnesses = Number(f.db.prepare("SELECT count(*) AS n FROM canonical_memory_primary_commits").get()?.n ?? 0);
+     expect(witnesses).toBe(0);
+-    const before = f.timeline.latestAscending("taki", 30);
+     const pass = createCompactionPass({ timeline: f.timeline, summaries, operations: createCompactionOperationRepo(f.db), slot, logger,
+-      view: { estimatedTokens: () => 1000, budget: () => 100 }, config: { triggerRatio: 0.8, keepMessages: 1, summaryQuality: true, retryBudget: 1 },
++      view: { estimatedTokens: () => 1000, budget: () => 100 }, config: { triggerRatio: 0.8, keepMessages: 2, summaryQuality: true, retryBudget: 1 },
+       // This fixture never installs canonical primary eligibility. It tests projection, not Memory flush.
+       flush: { prepareRetirement: async () => ({ status: "not_required", reason: "before_canonical_ingestion_eligibility" }) } });
++    checkpoint("compaction-started");
+     await pass.maybeRun("taki");
++    checkpoint("compaction-settled");
+     const summary = summaries.get("taki");
+     expect(summary?.throughSeq).toBeGreaterThanOrEqual(mustRetire);
+     expect(summary?.text.trim()).toBeTruthy();
+-    const after = await answer(f, agent, scenario.followup);
+-    return { id: scenario.id, question: scenario.question, initial, summary, followup: scenario.followup, after,
+-      sourceRows: before, finalReplay: store.history("taki"), utilityUsage: slot.usage(),
+-      usage: f.db.prepare("SELECT provider,model_id,quality,input_tokens,output_tokens,total_tokens FROM run_usage").all(),
+-      compaction: f.db.prepare("SELECT state,source_digest,failure_code,selected_from_seq,selected_through_seq FROM conversation_compaction_operations").all(),
+-      memoryFlush: "unexercised: no canonical witness callbacks installed; test-controlled flush seam", primaryWitnessCount: witnesses };
++    expect(store.history("taki").slice(1)).toEqual(INTERLUDE.slice(-2).map(([role, content]) => ({ role, content })));
++    checkpoint("followup-started");
++    after = await answer(f, agent, scenario.followup);
++    checkpoint("completed");
++    return evidence();
++  } catch (error) {
++    options.checkpoint?.("failed", { ...evidence(), failedAt: stage });
++    throw error;
+   } finally { await slot.stop(); f.cleanup(); }
+ }
+ 
+-function sourceHashes() {
+-  const paths = ["pnpm-lock.yaml", "packages/core/src/agents/chat-agent.ts", "packages/core/src/agents/base-prompt.ts",
++const PATHS = ["packages/core/src/agents/chat-agent.ts", "packages/core/src/agents/base-prompt.ts",
+     "packages/core/src/agents/source-context.ts", "packages/core/src/agents/source-interpretation.ts", "packages/core/src/agents/turn-mapping.ts",
+     "packages/core/src/agents/context-reduction.ts", "packages/core/src/agents/compaction-pass.ts", "packages/core/src/agents/compaction-coordinator.ts",
+     "packages/core/src/agents/conversation-store.ts", "packages/core/src/db/timeline-repo.ts", "packages/core/src/memory/write-convention.ts",
+-    "packages/core/src/delivery/prepared-publication.ts", "packages/core/src/db/run-delivery-repo.ts", "packages/core/src/agents/source-context-real.test.ts"];
+-  return Object.fromEntries(paths.map((path) => [path, createHash("sha256").update(readFileSync(join(ROOT, path))).digest("hex")]));
+-}
++    "packages/core/src/delivery/prepared-publication.ts", "packages/core/src/db/run-delivery-repo.ts", "packages/core/src/agents/source-context-real.test.ts",
++    "packages/core/src/testing/prepared-publication-fixture.ts"];
+ 
+ it("exercises all source semantic fixture paths without paying for model calls", async () => {
+   for (const scenario of CASES) {
+     const model = streamingMockModel(["合成回答保留人物归属。"]);
+     model.doGenerate = generatingModel("我们讨论了材料中的人物及用户明确说过的情况。来源不明的旧话没有确定主体。").doGenerate;
+-    const result = await runScenario(scenario, model, "scripted");
++    const result = await runScenario(scenario, model, { requestedModel: "scripted" });
+     expect(result.compaction).toEqual([expect.objectContaining({ state: "committed" })]);
+     expect(model.doStreamCalls).toHaveLength(2);
+     expect(result.utilityUsage.calls).toBe(1);
++    assertSummaryOnlyInput(JSON.stringify({ messages: model.doStreamCalls[1]!.prompt.map((message) => ({ role: message.role,
++      content: typeof message.content === "string" ? message.content : message.content.flatMap((part) => part.type === "text" ? [part.text] : []).join("") })) }), scenario);
+   }
+ });
+ 
+ it.skipIf(process.env.TAKI_E2E_REAL_SOURCE_CONTEXT !== "1")("observes three bounded candidate-only real source and post-compaction cases", async () => {
+-  const environment = realProviderEnv(); if (!environment) throw new Error("SOURCE_PROVIDER_CONFIGURATION_MISSING");
+-  const config = loadProviderConfig(environment);
+-  const output = resolve(process.env.TAKI_E2E_SOURCE_EVIDENCE_DIR ?? "");
+-  const allowed = resolve(ROOT, ".trellis/tasks/10-21-agent-source-context/research");
+-  if (!output.startsWith(allowed + (process.platform === "win32" ? "\\" : "/"))) throw new Error("SOURCE_EVIDENCE_PATH_REQUIRED");
+-  mkdirSync(output, { recursive: true });
+-  const save = (name: string, value: unknown) => writeFileSync(join(output, name), JSON.stringify(value, null, 2) + "\n", "utf8");
+-  const before = sourceHashes(); save("source-hashes-before.json", before);
+-  const relay = await observeRealProvider({ baseUrl: config.baseUrl, apiKey: config.apiKey, syntheticCapture: {
+-    maxUpstreamRequests: 12, onRequest(request) { writeFileSync(join(output, `request-${request.requestNumber}.json`), request.body, "utf8"); },
+-  } });
+-  const model = createModels({ provider: { ...config, baseUrl: relay.baseUrl, apiKey: "synthetic-observer-only" }, vision: null, includeUsage: true }).model;
++  const requested = process.env.TAKI_E2E_SOURCE_CASES?.split(",");
++  if (requested?.some((id) => !CASES.some((scenario) => scenario.id === id))) throw new Error("SOURCE_CASE_SELECTION_INVALID");
++  const scenarios = CASES.filter((scenario) => !requested || requested.includes(scenario.id));
++  if (!scenarios.length) throw new Error("SOURCE_CASE_SELECTION_EMPTY");
++  const campaign = z.enum(["source-semantics", "a3-compaction-fix", "final-prompt-regression"])
++    .parse(process.env.TAKI_E2E_SOURCE_CAMPAIGN ?? "source-semantics");
++  const repair = campaign === "a3-compaction-fix";
++  if (repair && (scenarios.length !== 1 || scenarios[0]!.id !== "a3-mixed-unknown")) throw new Error("SOURCE_REPAIR_CASE_SELECTION_INVALID");
++  if (campaign === "final-prompt-regression" && (scenarios.length !== 2 || scenarios.some((scenario) => scenario.id === "a3-mixed-unknown"))) {
++    throw new Error("SOURCE_REGRESSION_CASE_SELECTION_INVALID");
++  }
++  let followup: Scenario | undefined;
++  const live = await openSourceLiveEvidence({ maxRequests: repair ? 4 : requested ? 7 : 12, paths: PATHS,
++    inspectRequest(request) {
++      if (!followup) return;
++      assertSummaryOnlyInput(request.body, followup);
++      live.save(`${followup.id}-actual-followup-input.json`, { requestNumber: request.requestNumber,
++        retiredMaterialOnlyInSummary: true, retainedRecentPair: true });
++    } });
+   const completed: string[] = [];
+   try {
+-    for (const scenario of CASES) { save(`${scenario.id}.json`, await runScenario(scenario, model, config.model)); completed.push(scenario.id); }
+-    expect(sourceHashes()).toEqual(before);
++    for (const scenario of scenarios) {
++      followup = undefined;
++      live.save(`${scenario.id}.json`, await runScenario(scenario, live.model, { requestedModel: live.requestedModel,
++        checkpoint: (stage, evidence) => {
++          if (stage === "followup-started") followup = scenario;
++          live.save(`${scenario.id}-${stage}.json`, evidence);
++        } }));
++      completed.push(scenario.id);
++    }
+   } finally {
+-    await relay.close(); save("requests.json", relay.requests); save("source-hashes-after.json", sourceHashes());
+-    save("run.json", { requestedModel: config.model, completed, candidateOnly: true, sourceAndPlayback: "synthetic accepted source; no actual playback",
+-      logicalGenerationsLimit: 9, physicalRequestsLimit: 12, semanticReview: "Review saved outputs; deterministic checks alone do not pass semantics." });
++    await live.close({ completed, candidateOnly: true, sourceAndPlayback: "synthetic accepted source; no actual playback",
++      selectedCases: scenarios.map((scenario) => scenario.id), logicalGenerationsLimit: scenarios.length * 3,
++      campaign,
++      semanticReview: "Review saved outputs; deterministic checks alone do not pass semantics." });
+   }
+ }, 600_000);
+--- acceptance-preimage/packages/core/src/co-watching/source-preparation-real.test.ts
++++ packages/core/src/co-watching/source-preparation-real.test.ts
+@@ -0,0 +1,107 @@
++import { readFileSync } from "node:fs";
++import { join } from "node:path";
++import type { LanguageModel } from "ai";
++import { MockLanguageModelV4 } from "ai/test";
++import { expect, it, vi } from "vitest";
++import { CoWatchingPlanSchema } from "@taki/shared";
++import { coWatchingFixture } from "../testing/co-watching-fixture.ts";
++import { scriptedModel } from "../testing/mock-language-model.ts";
++import { openSourceLiveEvidence } from "../testing/source-live-evidence.ts";
++
++const PATHS = ["packages/core/src/co-watching/source-preparation-real.test.ts", "packages/core/src/co-watching/child-adapter.ts",
++  "packages/core/src/co-watching/task-workspace.ts", "packages/core/src/testing/co-watching-fixture.ts",
++  "packages/core/src/testing/co-watching-tool-fixture.ts", "packages/core/src/agents/chat-agent.ts",
++  "packages/core/src/harness/subagent-service.ts", "packages/core/src/harness/subagent-execution.ts",
++  "packages/core/src/agents/source-context.ts", "packages/core/src/agents/source-interpretation.ts",
++  "packages/core/src/skills/skills-loader.ts", "packages/core/src/workspace/read-file-tool.ts", "packages/core/src/workspace/write-file-tool.ts",
++  "packages/core/src/governance/core-tool-governance-adapter.ts", "integrations/taki-co-watching/SKILL.md"];
++
++function scriptedPreparationModel() {
++  let stage = 0;
++  return new MockLanguageModelV4({ doStream: async (options) => {
++    const prompt = options.prompt.flatMap((message) => typeof message.content === "string" ? [message.content]
++      : message.content.flatMap((part) => part.type === "text" ? [part.text] : [])).join("\n");
++    const output = /to (co-watching\/[^\s]+\.json) with revision ([0-9a-f-]+)/.exec(prompt)!;
++    const analysis = /Read (co-watching-inputs\/[^\s]+\/analysis\.json)/.exec(prompt)!;
++    const steps = [
++      { kind: "tool" as const, toolCallId: "load", toolName: "load_skill", input: { name: "taki-co-watching" } },
++      { kind: "tool" as const, toolCallId: "read", toolName: "read_file", input: { path: analysis[1] } },
++      { kind: "tool" as const, toolCallId: "write", toolName: "write_file", input: { path: output[1], content: JSON.stringify({ revision: output[2],
++        candidates: [{ candidateRef: "narrator", momentId: "first", text: "视频里林述的遭遇真不容易。" }] }) } },
++      { kind: "text" as const, deltas: ["准备好了。"] },
++    ];
++    return scriptedModel([steps[stage++]!]).doStream(options);
++  } });
++}
++
++async function runPreparation(model: LanguageModel, options: {
++  modelId: string; provider?: string; save?: (name: string, value: unknown) => void;
++}) {
++  const f = await coWatchingFixture({ preparation: { model, modelId: options.modelId, provider: options.provider } });
++  f.raw.structuredContent.result.analysis.markdown = "合成访谈：讲述者林述说自己被裁员、自己的项目停了；后来决定重新学习并开始下一段生活。";
++  f.raw.structuredContent.result.analysis.moments[0]!.content = "林述（视频讲述者）说：我被裁员了，我的项目也停了。";
++  f.raw.structuredContent.result.analysis.moments[1]!.content = "林述整理资料，决定重新学习。视频没有说明观看者的工作或经历。";
++  let stage = "starting";
++  const evidence = () => ({ stage, session: f.runtime.read("taki").session, skillRevision: f.skillRevision,
++    privateMessages: f.db.prepare("SELECT role,content,parts_json,source_context_json FROM run_messages ORDER BY seq").all(),
++    executions: f.session()?.subagentId ? f.executions!.list({ subagentId: f.session().subagentId! }) : [],
++    timeline: f.timeline.latestAscending("taki", 20), errors: f.errors,
++    effects: f.db.prepare("SELECT kind,state,outcome,source_ref_json,error_code FROM run_effects").all(),
++    usage: f.db.prepare("SELECT provider,model_id,quality,input_tokens,output_tokens,total_tokens FROM run_usage").all(),
++    directMockArtifactWrites: f.generate.mock.calls.length });
++  try {
++    f.start();
++    await vi.waitFor(() => expect(["ready", "failed", "stopped"]).toContain(f.session().status), { timeout: 240_000, interval: 50 });
++    stage = "preparation-settled"; options.save?.(`${stage}.json`, evidence());
++    expect(f.session().status).toBe("ready"); expect(f.errors).toEqual([]); expect(f.generate).not.toHaveBeenCalled();
++    const current = f.subagents.summary(f.session().subagentId!);
++    const result = f.subagents.result({ characterId: "taki", completionId: current.latestCompletionId! }).result;
++    expect(result.child).toMatchObject({ outcome: "completed", outputKind: "validated" });
++    const artifact = result.child.artifact!;
++    const plan = CoWatchingPlanSchema.parse(JSON.parse(readFileSync(join(f.workspaceRoot, artifact.reference), "utf8")));
++    options.save?.("artifact.json", plan);
++    expect(plan.revision).toBe(artifact.revision);
++    expect(plan.candidates.length).toBeGreaterThan(0);
++    expect(f.timeline.latestAscending("taki", 10)).toEqual([]);
++    const privateRows = f.messages.history({ subagentId: current.subagentId });
++    const completedTools = privateRows.flatMap((row) => row.parts ?? []).flatMap((part) => part.type === "tool-result" ? [part.toolName] : []);
++    expect(completedTools).toEqual(expect.arrayContaining(["load_skill", "read_file", "write_file"]));
++    const first = [...plan.candidates].sort((left, right) => {
++      const moments = f.raw.structuredContent.result.analysis.moments;
++      return moments.find((item) => item.moment_id === left.momentId)!.at_seconds - moments.find((item) => item.moment_id === right.momentId)!.at_seconds;
++    })[0]!;
++    const moment = f.raw.structuredContent.result.analysis.moments.find((item) => item.moment_id === first.momentId)!;
++    f.playback.sample.state = "playing"; f.playback.sample.positionSeconds = moment.at_seconds + 1; f.runtime.playbackChanged();
++    await vi.waitFor(() => expect(f.session().sentCount).toBeGreaterThan(0));
++    const speech = f.timeline.latestAscending("taki", 10)[0]!;
++    const original = f.db.prepare("SELECT run_id FROM runs WHERE trigger_request_id=:id").get({ id: f.input.requestId })!;
++    const delivery = f.db.prepare("SELECT r.parent_run_id FROM run_deliveries d JOIN runs r ON r.run_id=d.run_id WHERE d.timeline_seq=:seq").get({ seq: speech.seq });
++    expect(delivery?.parent_run_id).toBe(original.run_id); expect(original.run_id).not.toBe(result.child.runId);
++    expect(speech.sourceContext?.generatedBy?.runId).toBe(result.child.runId);
++    expect(JSON.stringify(speech.sourceContext)).toContain(`moment ${first.momentId}`);
++    stage = "completed";
++    return { ...evidence(), plan, originalRootRunId: original.run_id, publicationParentRunId: delivery?.parent_run_id };
++  } catch (error) {
++    options.save?.("failure.json", evidence());
++    throw error;
++  } finally { await f.cleanup(); }
++}
++
++it("loads the actual Skill and executes governed file tools through the shared child without direct fixture writes", async () => {
++  const model = scriptedPreparationModel();
++  const result = await runPreparation(model, { modelId: "scripted" });
++  expect(model.doStreamCalls).toHaveLength(4);
++  expect(model.doStreamCalls[0]!.tools!.every((entry) => entry.type !== "function" || entry.inputSchema.type === "object")).toBe(true);
++  expect(result.directMockArtifactWrites).toBe(0);
++  expect(result.skillRevision).toMatch(/^sha256\./);
++});
++
++it.skipIf(process.env.TAKI_E2E_REAL_SOURCE_PREPARATION !== "1")("observes one real shared-child Skill/file plan and original-root publication", async () => {
++  const live = await openSourceLiveEvidence({ maxRequests: 8, paths: PATHS, deadlineMs: 260_000 });
++  let completed = false;
++  try {
++    live.save("result.json", await runPreparation(live.model, { modelId: live.requestedModel, provider: live.provider, save: live.save }));
++    completed = true;
++  } finally { await live.close({ completed, maxModelSteps: 6, nativeAnalysisAndPlayback: "isolated synthetic producers",
++    modelSkillFileTools: "real", semanticReview: "Review candidate wording separately; transport acceptance is not owner acceptance." }); }
++}, 300_000);
+--- acceptance-preimage/packages/core/src/memory/source-local-memory-real.test.ts
++++ packages/core/src/memory/source-local-memory-real.test.ts
+@@ -0,0 +1,158 @@
++import { randomUUID } from "node:crypto";
++import { writeFileSync } from "node:fs";
++import { join } from "node:path";
++import type { LanguageModel } from "ai";
++import { expect, it, vi } from "vitest";
++import { createChatAgent, CANONICAL_MEMORY_SYSTEM_PROMPT } from "../agents/chat-agent.ts";
++import { createCanonicalIngestionRepo } from "../db/canonical-ingestion-repo.ts";
++import { createCanonicalMemoryAuthorityRepo } from "../db/canonical-memory-authority-repo.ts";
++import { createCanonicalMemoryMaintenanceRepo } from "../db/canonical-memory-maintenance-repo.ts";
++import { createCanonicalMemoryRepo } from "../db/canonical-memory-repo.ts";
++import { createCanonicalMemorySparseRepo } from "../db/canonical-memory-sparse-repo.ts";
++import { createMemoryAutoRepo } from "../db/memory-auto-repo.ts";
++import { createMemoryEventsRepo } from "../db/memory-events-repo.ts";
++import { createGovernancePolicyRepo } from "../governance/governance-policy-repo.ts";
++import { createGovernancePolicyService } from "../governance/governance-policy-service.ts";
++import { createCoreToolGovernanceAdapter } from "../governance/core-tool-governance-adapter.ts";
++import { createReadFileTool } from "../workspace/read-file-tool.ts";
++import { createWorkspacePaths } from "../workspace/workspace-paths.ts";
++import { coWatchingFixture } from "../testing/co-watching-fixture.ts";
++import { createCaptureLogger } from "../testing/capture-logger.ts";
++import { scriptedGenerateModel, scriptedModel } from "../testing/mock-language-model.ts";
++import { openSourceLiveEvidence } from "../testing/source-live-evidence.ts";
++import { createCanonicalLocalIngestion } from "./canonical-local-ingestion.ts";
++import { createLocalMemoryProvider } from "./local-memory-provider.ts";
++import { createIntlSegmenterTokenizer } from "./search-tokenizer.ts";
++import { createUtilitySlot } from "./utility-slot.ts";
++import { SanitizedCommittedSpanSchema, type PrimaryConversationCommit } from "./canonical-ingestion-source.ts";
++
++const USER = "请记住：视频里的林述说‘我被裁员了，我的项目也停了’，那是他的经历。我本人没有被裁员，但是我的‘星河’项目停了。以后聊到我的工作，请保留这个区别。";
++const REPLY = "我分清楚了：林述在视频里讲的是他被裁员、项目停止；你本人没有被裁员，但你的‘星河’项目停了。";
++const PATHS = ["packages/core/src/memory/source-local-memory-real.test.ts", "packages/core/src/memory/canonical-local-ingestion.ts",
++  "packages/core/src/memory/canonical-ingestion-model.ts", "packages/core/src/memory/canonical-ingestion-source.ts",
++  "packages/core/src/memory/canonical-local-ingestion-batch.ts", "packages/core/src/memory/local-memory-provider.ts",
++  "packages/core/src/memory/write-convention.ts", "packages/core/src/memory/memory-flush-port.ts",
++  "packages/core/src/db/canonical-ingestion-source-repo.ts", "packages/core/src/agents/source-interpretation.ts",
++  "packages/core/src/agents/chat-agent.ts", "packages/core/src/testing/co-watching-fixture.ts",
++  "packages/core/src/workspace/read-file-tool.ts"];
++type Fixture = Awaited<ReturnType<typeof coWatchingFixture>>;
++
++function localMemory(f: Fixture, model: LanguageModel) {
++  const authority = createCanonicalMemoryAuthorityRepo(f.db);
++  const epoch = authority.initializeLocalAuthority(new Date().toISOString());
++  for (const [bankId, characterId] of [["global", null], ["character:taki", "taki"]] as const) {
++    authority.createBank({ authorityEpochId: epoch.epochId, bankId,
++      scope: characterId === null ? { kind: "global", characterId: null } : { kind: "character", characterId },
++      name: bankId, disposition: { skepticism: 3, literalism: 3, empathy: 3 }, mission: "Isolated synthetic source acceptance", config: {} });
++  }
++  const tokenizer = createIntlSegmenterTokenizer({ stoplist: true });
++  const maintenance = createCanonicalMemoryMaintenanceRepo(f.db, tokenizer);
++  const provider = createLocalMemoryProvider({ authority, maintenance, tokenizer,
++    records: createCanonicalMemoryRepo(f.db), sparse: createCanonicalMemorySparseRepo(f.db) });
++  const logger = createCaptureLogger().logger;
++  const slot = createUtilitySlot({ mainModel: model, logger });
++  const journal = createCanonicalIngestionRepo({ db: f.db, maintenance });
++  const ingestion = createCanonicalLocalIngestion({ provider, authority, maintenance, journal, timeline: f.timeline,
++    autoState: createMemoryAutoRepo(f.db), events: createMemoryEventsRepo(f.db), slot });
++  ingestion.initializeBaseline("taki");
++  return { authority, epoch, maintenance, provider, slot, journal, ingestion, logger };
++}
++
++async function primaryTurn(f: Fixture, local: ReturnType<typeof localMemory>) {
++  const commits: PrimaryConversationCommit[] = [];
++  const model = scriptedModel([
++    { kind: "tool", toolCallId: "read-source", toolName: "read_file", input: { path: "tool-only.txt" } },
++    { kind: "text", deltas: [REPLY] },
++  ]);
++  writeFileSync(join(f.workspaceRoot, "tool-only.txt"), "EXCLUDED_TOOL_MARKER: external file content is not user biography.", "utf8");
++  const governance = createGovernancePolicyService(createGovernancePolicyRepo(f.db));
++  const agent = createChatAgent({ model, store: f.store, memory: f.memory, effectLifecycle: f.effects,
++    coreTools: createReadFileTool({ paths: createWorkspacePaths({ root: f.workspaceRoot }), logger: local.logger }),
++    coreToolGovernance: createCoreToolGovernanceAdapter(governance, randomUUID()),
++    onPrimaryCommitted(input) { local.ingestion.recordPrimaryCommitted(input); commits.push(input); } });
++  const id = randomUUID();
++  const admitted = await f.runs.admit({ triggerRequestId: id, idempotencyKey: id, characterId: "taki", initiator: "primary",
++    provenance: { provider: "chat" }, deliveryClass: "class_a", contextMode: "primary" });
++  f.runs.start(admitted.run.runId, admitted.attempt.attemptId);
++  let text = "";
++  for await (const delta of agent.stream({ characterId: "taki", message: USER }, {
++    runId: admitted.run.runId, attemptId: admitted.attempt.attemptId,
++    runContext: { ...f.runs.context(admitted.run.runId), tools: {}, memoryTools: {}, memoryPrompt: CANONICAL_MEMORY_SYSTEM_PROMPT,
++      assembleMemory: () => "Isolated synthetic source acceptance. No prior user memories." },
++  })) text += delta;
++  f.runs.settle(admitted.run.runId, admitted.attempt.attemptId, "completed", { retryable: false });
++  expect(text).toBe(REPLY); expect(commits).toHaveLength(1);
++  expect(commits[0]!.entries.map((entry) => entry.role)).toEqual(["user", "assistant", "tool", "assistant"]);
++  expect(model.doStreamCalls).toHaveLength(2);
++  return { commits, text, modelCalls: model.doStreamCalls.length, answerProducer: "scripted; not a real primary semantic trial" };
++}
++
++async function runLocalMemory(model: LanguageModel, save?: (name: string, value: unknown) => void) {
++  const f = await coWatchingFixture();
++  const local = localMemory(f, model);
++  let stage = "seed-private-and-publication";
++  const evidence = () => ({ stage, utilityUsage: local.slot.usage(),
++    primaryWitnesses: f.db.prepare("SELECT timeline_seq,entry_id,entry_digest,run_id,committed_through_seq FROM canonical_memory_primary_commits").all(),
++    timeline: f.timeline.latestAscending("taki", 20),
++    privateMessages: f.db.prepare("SELECT role,content FROM run_messages ORDER BY seq").all(),
++    spans: f.db.prepare("SELECT source_json,gate_json,extraction_json,state FROM canonical_memory_ingestion_spans").all(),
++    sources: f.db.prepare("SELECT bank_id,retained_text,metadata_json FROM canonical_memory_sources").all(),
++    memories: local.maintenance.list({ epochId: local.epoch.epochId, characterId: "taki" }) });
++  try {
++    f.plans[0]!.text = "EXCLUDED_PUBLICATION_MARKER";
++    f.start(); await vi.waitFor(() => expect(f.session().status).toBe("ready"));
++    f.playback.sample.state = "playing"; f.playback.sample.positionSeconds = 12; f.runtime.playbackChanged();
++    await vi.waitFor(() => expect(f.session().sentCount).toBe(1));
++    f.runtime.stop("taki", f.session().sessionId);
++    expect(f.db.prepare("SELECT count(*) AS n FROM canonical_memory_primary_commits").get()?.n).toBe(0);
++    expect(f.db.prepare("SELECT count(*) AS n FROM run_messages").get()?.n).toBeGreaterThan(0);
++    const primary = await primaryTurn(f, local);
++    stage = "primary-committed"; save?.(`${stage}.json`, { ...evidence(), primary });
++    const throughSeq = f.timeline.latestSeq("taki");
++    expect(evidence().primaryWitnesses.map((row) => row.timeline_seq)).not.toContain(1);
++    const flush = await local.ingestion.flushPort.prepareRetirement({ characterId: "taki", fromSeq: 1, throughSeq, operationId: randomUUID() });
++    stage = "flush-settled"; save?.(`${stage}.json`, { ...evidence(), flush });
++    expect(flush.status).toBe("success"); expect(local.slot.usage().calls).toBe(2);
++    const state = evidence(); expect(state.spans).toHaveLength(1);
++    const source = SanitizedCommittedSpanSchema.parse(JSON.parse(String(state.spans[0]!.source_json)));
++    expect(source.messages.map((message) => message.text)).toEqual([USER, REPLY]);
++    expect(source.excludedRows).toBe(2);
++    expect(JSON.stringify(state.spans)).not.toContain("EXCLUDED_");
++    expect(JSON.stringify(state.sources)).not.toContain("EXCLUDED_");
++    expect(state.sources.length).toBeGreaterThan(0);
++    expect(state.sources.every((row) => row.retained_text === `${USER}\n${REPLY}`)).toBe(true);
++    const recall = [];
++    for (const bank of local.authority.listBanks(local.epoch.epochId)) {
++      recall.push(await local.provider.recall({ authorityEpochId: local.epoch.epochId, requestId: randomUUID(), actor: "foreground-agent" },
++        { bankId: bank.bankId, query: "星河 项目", queryTimestamp: null, budget: "low", limit: 10, maxTokens: 1000,
++          factTypes: ["experience", "world"], layerIds: [], includeInvalidated: false }));
++    }
++    expect(recall.every((result) => result.ok)).toBe(true);
++    expect(recall.some((result) => result.ok && result.data.returned > 0)).toBe(true);
++    expect(state.memories.some((record) => record.unit.text.includes("星河"))).toBe(true);
++    expect(state.memories.every((record) => record.policy.visibility !== "hidden")).toBe(true);
++    stage = "completed";
++    return { ...evidence(), primary, flush, recall, scriptedPrivatePreparationCalls: f.generate.mock.calls.length,
++      nativeHindsight: "external unverified dependency; not invoked" };
++  } catch (error) { save?.("failure.json", evidence()); throw error; }
++  finally { await local.slot.stop(); await f.cleanup(); }
++}
++
++it("uses real primary commit witnesses and flush/recall while excluding private, tool and publication material", async () => {
++  const model = scriptedGenerateModel([
++    { kind: "text", deltas: [JSON.stringify({ decision: "keep", route: "character", fromSeq: 2, throughSeq: 5 })] },
++    { kind: "text", deltas: [JSON.stringify([{ layer: "episodes", content: "我记得用户说自己的星河项目停了，但本人没有被裁员；被裁员的是视频中的林述。", importance: 5, disclosure: "星河项目停了" }])] },
++  ]);
++  const result = await runLocalMemory(model);
++  expect(model.doGenerateCalls).toHaveLength(2);
++  expect(JSON.stringify(model.doGenerateCalls)).not.toContain("EXCLUDED_");
++  expect(result.utilityUsage.usageUnknown).toBe(0);
++});
++
++it.skipIf(process.env.TAKI_E2E_REAL_SOURCE_MEMORY !== "1")("observes one real Local gate and extraction followed by actual recall", async () => {
++  const live = await openSourceLiveEvidence({ maxRequests: 4, paths: PATHS, deadlineMs: 300_000 });
++  let completed = false;
++  try { live.save("result.json", await runLocalMemory(live.model, live.save)); completed = true; }
++  finally { await live.close({ completed, logicalGenerationsLimit: 2, primaryAnswer: "scripted",
++    privatePublicationToolSources: "isolated synthetic fixtures", semanticReview: "Review retained facts and recall against source subjects." }); }
++}, 360_000);
+--- acceptance-preimage/packages/core/src/testing/co-watching-fixture.ts
++++ packages/core/src/testing/co-watching-fixture.ts
+@@ -1,14 +1,14 @@
+ /**
+- * INPUT: deterministic native/tool/model port overrides for explicit Co-Watching
++ * INPUT: synthetic native/playback ports and optional actual-model/Skill/file composition
+  * OUTPUT: real accepted Run, queue and shared Delivery owners with an isolated proposal workspace
+- * POS: core/testing — synthetic browser/native/model ports; never real acceptance evidence
++ * POS: core/testing — synthetic browser/native ports; default model directly writes fixture artifacts
+  */
+ import { randomUUID } from "node:crypto";
+ import { join } from "node:path";
+ import { writeFile } from "node:fs/promises";
+ import { vi } from "vitest";
+ import { z } from "zod";
+-import { tool } from "ai";
++import { tool, type LanguageModel } from "ai";
+ import type { BrowserPlaybackView, CoWatchingAnalysis, CoWatchingStart } from "@taki/shared";
+ import { createChatAgent } from "../agents/chat-agent.ts";
+ import { createCoWatchingCatalog } from "../co-watching/analysis-catalog.ts";
+@@ -21,6 +21,7 @@
+ import { createRunMessageRepo } from "../db/run-message-repo.ts";
+ import { createSubagentService } from "../harness/subagent-service.ts";
+ import { streamingMockModel } from "./mock-language-model.ts";
++import { coWatchingToolFixture } from "./co-watching-tool-fixture.ts";
+ 
+ export function coWatchingInput() {
+   const analysis: CoWatchingAnalysis = { analysisId: randomUUID(), revision: 1, title: "Fixture video",
+@@ -35,14 +36,19 @@
+   return { analysis, raw };
+ }
+ 
+-export async function coWatchingFixture(options: { fresh?: boolean } = {}) {
++export async function coWatchingFixture(options: { fresh?: boolean;
++  preparation?: { model: LanguageModel; modelId: string; provider?: string };
++} = {}) {
+   const hooks: { yieldToPrimary?: (key: string) => void } = {};
+-  const base = await preparedPublicationFixture({ linkedSubagents: true, onPrimaryReserved: (key) => hooks.yieldToPrimary?.(key) });
++  const base = await preparedPublicationFixture({ linkedSubagents: true, onPrimaryReserved: (key) => hooks.yieldToPrimary?.(key),
++    ...(options.preparation ? { modelId: options.preparation.modelId, provider: options.preparation.provider,
++      expiresAt: new Date(Date.now() + 600_000).toISOString() } : {}) });
++  const actualTools = options.preparation ? coWatchingToolFixture(base) : undefined;
+   const { analysis, raw } = coWatchingInput();
+   const flags = { source: true, native: true, skill: true };
+   const playback: BrowserPlaybackView = { sourceRef: randomUUID(), hostId: randomUUID(), connectionGeneration: 1, catalogGeneration: 1,
+     attachmentId: randomUUID(), attachmentGeneration: 1, sequence: 1, receivedAt: new Date().toISOString(),
+-    freshUntil: new Date(Date.now() + 60_000).toISOString(), source: { tabId: 1, frameId: 0, documentId: randomUUID(), playerId: randomUUID(), media: { ...analysis.media } },
++    freshUntil: new Date(Date.now() + (options.preparation ? 600_000 : 60_000)).toISOString(), source: { tabId: 1, frameId: 0, documentId: randomUUID(), playerId: randomUUID(), media: { ...analysis.media } },
+     sample: { state: "paused", positionSeconds: 0, durationSeconds: 300, playbackRate: 1, visible: true, pictureInPicture: false } };
+   const catalog = createCoWatchingCatalog(join(base.workspaceRoot, "catalog.json"));
+   if (!options.fresh) catalog.register({ analysisId: analysis.analysisId, title: analysis.title, media: analysis.media,
+@@ -62,10 +68,10 @@
+     const captured = await capture(request);
+     return { ...captured, snapshot: { ...captured.snapshot, hosts: [{ hostId: playback.hostId,
+       available: true, connectionGeneration: 1, catalogGeneration: 1 }] }, context: { ...captured.context,
+-      tools: { native_result: tool({ inputSchema: z.unknown(), execute: readNative }),
+-        native_submit: tool({ inputSchema: z.unknown(), execute: submitNative }),
+-        native_lookup: tool({ inputSchema: z.unknown(), execute: lookupNative }),
+-        native_status: tool({ inputSchema: z.unknown(), execute: statusNative }) } } };
++      tools: { native_result: tool({ inputSchema: z.object({}).passthrough(), execute: readNative }),
++        native_submit: tool({ inputSchema: z.object({}).passthrough(), execute: submitNative }),
++        native_lookup: tool({ inputSchema: z.object({}).passthrough(), execute: lookupNative }),
++        native_status: tool({ inputSchema: z.object({}).passthrough(), execute: statusNative }) } } };
+   });
+   const plans: Array<{ candidateRef: string; momentId: string; text: string }> = [
+     { candidateRef: "one", momentId: "first", text: "First response" }, { candidateRef: "two", momentId: "second", text: "Second response" }];
+@@ -82,10 +88,13 @@
+     await generate(control, options.abortSignal);
+     return stream(options);
+   };
+-  const realAgent = createChatAgent({ model, store: base.store, memory: base.memory, effectLifecycle: base.effects });
++  const realAgent = createChatAgent({ model: options.preparation?.model ?? model,
++    store: base.store, memory: base.memory, effectLifecycle: base.effects, maxSteps: options.preparation ? 6 : undefined,
++    ...(actualTools ? { coreTools: actualTools.coreTools, extraTools: actualTools.extraTools,
++      coreToolGovernance: actualTools.coreToolGovernance, instructionsExtra: actualTools.instructionsExtra } : {}) });
+   const agent: typeof realAgent = { async *stream(params, turn) {
+     try { yield* realAgent.stream(params, turn); }
+-    catch (error) { errors.push(String(error)); throw error; }
++    catch (error) { errors.push(options.preparation ? "CO_WATCHING_ACCEPTANCE_AGENT_FAILED" : String(error)); throw error; }
+   } };
+   const onChanged = vi.fn<(characterId: string) => void>();
+   const children = createSubagentRepo(base.db); const inputs = createSubagentInputRepo(base.db); const messages = createRunMessageRepo(base.db);
+@@ -97,7 +106,7 @@
+     resultTool: () => ({ toolKey: "native_result", isCurrent: () => flags.native }),
+     analysisTools: () => [{ serverId: analysis.serverId, submit: "native_submit", lookup: "native_lookup",
+       status: "native_status", result: "native_result", isCurrent: () => flags.native }],
+-    skills: { renderList: () => "", load: () => ({ ok: true, content: "fixture", contentRevision: "r1", files: [] }),
++    skills: actualTools?.skills ?? { renderList: () => "", load: () => ({ ok: true, content: "fixture", contentRevision: "r1", files: [] }),
+       describe: () => flags.skill ? { name: "taki-co-watching", contentRevision: "r1" } : undefined },
+     sources: { report: () => ({ accepted: false, reason: "disabled" }), close() {}, refresh() {}, retireConnection() {},
+       read: () => ({ enabled: flags.source, sources: flags.source ? [structuredClone(playback)] : [] }),
+@@ -107,7 +116,8 @@
+   hooks.yieldToPrimary = runtime.yieldToPrimary;
+   const input: CoWatchingStart = { characterId: "taki", requestId: randomUUID(), sourceRef: playback.sourceRef, analysisId: analysis.analysisId, lifetimeMinutes: 5 };
+   const interactive = { connection: { state: { status: "authenticated" as const, deviceId: "fixture", role: "operator" as const, capabilities: [] } } };
+-  return { ...base, subagents, children, inputs, messages, errors, get runtime() { return runtime; }, catalog, analysis, raw, flags, playback, readNative, submitNative, lookupNative, statusNative, generate, plans, onChanged, input, interactive,
++  return { ...base, subagents, children, inputs, messages, errors, skillRevision: actualTools?.skillRevision,
++    get runtime() { return runtime; }, catalog, analysis, raw, flags, playback, readNative, submitNative, lookupNative, statusNative, generate, plans, onChanged, input, interactive,
+     restart: async () => { await runtime.close(); runtime = createRuntime(); hooks.yieldToPrimary = runtime.yieldToPrimary; },
+     start: () => runtime.start(input, interactive), session: () => runtime.read("taki").session!,
+     cleanup: async () => { await runtime.close(); await subagents.close(); base.cleanup(); } };
+--- acceptance-preimage/packages/core/src/testing/co-watching-tool-fixture.ts
++++ packages/core/src/testing/co-watching-tool-fixture.ts
+@@ -0,0 +1,40 @@
++/**
++ * INPUT: isolated SQLite and Workspace root for a Co-Watching acceptance fixture
++ * OUTPUT: actual shipped Skill loader and governed Workspace file tools
++ * POS: core/testing — test-only composition; native media and playback remain separate synthetic producers
++ */
++import { randomUUID } from "node:crypto";
++import { join, resolve } from "node:path";
++import type { Database } from "../db/sqlite.ts";
++import { createGovernancePolicyRepo } from "../governance/governance-policy-repo.ts";
++import { createGovernancePolicyService } from "../governance/governance-policy-service.ts";
++import { createCoreToolGovernanceAdapter } from "../governance/core-tool-governance-adapter.ts";
++import { scanSkills } from "../skills/skill-scanner.ts";
++import { createSkillsState } from "../skills/skills-state.ts";
++import { createSkillsLoader } from "../skills/skills-loader.ts";
++import { createLoadSkillTool } from "../skills/load-skill-tool.ts";
++import { createWorkspacePaths } from "../workspace/workspace-paths.ts";
++import { createReadFileTool } from "../workspace/read-file-tool.ts";
++import { createWriteFileTool } from "../workspace/write-file-tool.ts";
++import { createCaptureLogger } from "./capture-logger.ts";
++
++export function coWatchingToolFixture(input: { db: Database; workspaceRoot: string }) {
++  const { logger } = createCaptureLogger();
++  const governance = createGovernancePolicyService(createGovernancePolicyRepo(input.db));
++  const ownerHostId = randomUUID();
++  const scanned = scanSkills(resolve(import.meta.dirname, "../../../../integrations"));
++  const meta = scanned.skills.find((skill) => skill.name === "taki-co-watching");
++  if (!meta) throw new Error("CO_WATCHING_ACCEPTANCE_SKILL_MISSING");
++  const skills = createSkillsLoader({ skills: [meta], state: createSkillsState({
++    filePath: join(input.workspaceRoot, "skills-state.json"), logger,
++  }) });
++  return { skills, skillRevision: meta.contentRevision,
++    coreToolGovernance: createCoreToolGovernanceAdapter(governance, ownerHostId),
++    coreTools: {
++      ...createReadFileTool({ paths: createWorkspacePaths({ root: input.workspaceRoot }), logger }),
++      ...createWriteFileTool({ paths: createWorkspacePaths({ root: input.workspaceRoot, forbiddenPrefixes: ["co-watching-inputs"] }), logger }),
++    },
++    extraTools: createLoadSkillTool(skills, { service: governance, ownerHostId }),
++    instructionsExtra: () => skills.renderList(),
++  };
++}
+--- acceptance-preimage/packages/core/src/testing/source-live-evidence.ts
++++ packages/core/src/testing/source-live-evidence.ts
+@@ -0,0 +1,99 @@
++/**
++ * INPUT: explicitly enabled synthetic Source trial, provider settings and owned evidence directory
++ * OUTPUT: physically capped observed model, incremental synthetic evidence and source freeze hashes
++ * POS: core/testing — paid acceptance helper only; never used by production logging
++ */
++import { createHash } from "node:crypto";
++import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
++import { join, resolve, sep } from "node:path";
++import { pathToFileURL } from "node:url";
++import { wrapLanguageModel, type LanguageModel, type LanguageModelMiddleware } from "ai";
++import { createModels } from "../config/provider-factory.ts";
++import { loadProviderConfig } from "../config/provider-config.ts";
++
++const ROOT = resolve(import.meta.dirname, "../../../..");
++type SourceObserver = (input: { baseUrl: string; apiKey: string;
++  syntheticCapture: { maxUpstreamRequests: number; onRequest(request: { requestNumber: number; body: string }): undefined };
++}) => Promise<{ baseUrl: string; requests: readonly unknown[]; close(): Promise<void> }>;
++
++// The E2E helpers have their own TypeScript root. Load their existing runtime exports without importing that tree into Core's emit graph.
++export async function sourceObserverPorts() {
++  const observe: SourceObserver = (await import(pathToFileURL(join(ROOT, "e2e/src/fixture/real-provider-observer.ts")).href)).observeRealProvider;
++  const environment: () => Record<string, string> | null = (await import(pathToFileURL(join(ROOT, "e2e/src/fixture/paths.ts")).href)).realProviderEnv;
++  return { observe, environment };
++}
++
++interface SourceLiveEvidence {
++  model: LanguageModel; requestedModel: string; provider: string;
++  save(name: string, value: unknown): void;
++  close(metadata: Record<string, unknown>): Promise<void>;
++}
++
++export async function openSourceLiveEvidence(input: { maxRequests: number; paths: string[]; deadlineMs?: number;
++  inspectRequest?: (request: { requestNumber: number; body: string }) => void;
++}): Promise<SourceLiveEvidence> {
++  const ports = await sourceObserverPorts();
++  const environment = ports.environment();
++  if (!environment) throw new Error("SOURCE_PROVIDER_CONFIGURATION_MISSING");
++  const config = loadProviderConfig(environment);
++  const output = resolve(process.env.TAKI_E2E_SOURCE_EVIDENCE_DIR ?? "");
++  const allowed = resolve(ROOT, ".trellis/tasks/10-21-agent-source-context/research");
++  if (!output.startsWith(allowed + sep)) throw new Error("SOURCE_EVIDENCE_PATH_REQUIRED");
++  if (existsSync(output) && readdirSync(output).length) throw new Error("SOURCE_EVIDENCE_DIRECTORY_NOT_EMPTY");
++  mkdirSync(output, { recursive: true });
++  const save = (name: string, value: unknown) => writeFileSync(join(output, name), JSON.stringify(value, null, 2) + "\n", "utf8");
++  const paths = [...new Set(["pnpm-lock.yaml", "packages/core/src/testing/source-live-evidence.ts",
++    "e2e/src/fixture/real-provider-observer.ts", "e2e/src/fixture/paths.ts", ...input.paths])];
++  const hashes = () => Object.fromEntries(paths.map((path) => [path, createHash("sha256").update(readFileSync(join(ROOT, path))).digest("hex")]));
++  const before = hashes(); save("source-hashes-before.json", before);
++  const relay = await ports.observe({ baseUrl: config.baseUrl, apiKey: config.apiKey, syntheticCapture: {
++    maxUpstreamRequests: input.maxRequests,
++    onRequest(request) {
++      writeFileSync(join(output, `request-${request.requestNumber}.json`), request.body, "utf8");
++      input.inspectRequest?.(request);
++    },
++  } });
++  const supplied = createModels({ provider: { ...config, baseUrl: relay.baseUrl, apiKey: "synthetic-observer-only" }, vision: null, includeUsage: true }).model;
++  if (typeof supplied === "string" || supplied.specificationVersion !== "v4") {
++    await relay.close(); throw new Error("SOURCE_ACCEPTANCE_MODEL_VERSION_UNEXPECTED");
++  }
++  const generations: unknown[] = []; const observationFailures: string[] = [];
++  const model = wrapLanguageModel({ model: supplied, middleware: sourceGenerationMiddleware({
++    record(value) { generations.push(value); save("generations.json", generations); },
++    failed() { observationFailures.push("SOURCE_GENERATION_OBSERVATION_FAILED"); },
++  }) });
++  let deadlineExceeded = false;
++  const deadlineMs = input.deadlineMs ?? 540_000;
++  const deadlineAt = Date.now() + deadlineMs;
++  const timer = setTimeout(() => {
++    deadlineExceeded = true;
++    void relay.close().catch(() => { observationFailures.push("SOURCE_DEADLINE_CLOSE_FAILED"); });
++  }, deadlineMs);
++  return { model, requestedModel: config.model, provider: "openai-compatible", save,
++    async close(metadata: Record<string, unknown>) {
++      clearTimeout(timer);
++      await relay.close();
++      deadlineExceeded ||= Date.now() >= deadlineAt;
++      const after = hashes();
++      save("requests.json", relay.requests); save("source-hashes-after.json", after);
++      save("run.json", { ...metadata, requestedModel: config.model, physicalRequestsLimit: input.maxRequests,
++        sourceUnchanged: JSON.stringify(before) === JSON.stringify(after), deadlineExceeded, observationFailures });
++      if (deadlineExceeded) throw new Error("SOURCE_ACCEPTANCE_DEADLINE_EXCEEDED");
++      if (observationFailures.length) throw new Error("SOURCE_ACCEPTANCE_OBSERVATION_INCOMPLETE");
++      if (JSON.stringify(before) !== JSON.stringify(after)) throw new Error("SOURCE_ACCEPTANCE_SOURCE_CHANGED");
++    },
++  };
++}
++
++/** Observe already completed Utility generations; evidence failure never turns success into a provider retry. */
++export function sourceGenerationMiddleware(sink: { record(value: unknown): void; failed(): void }): LanguageModelMiddleware {
++  return { specificationVersion: "v4", async wrapGenerate({ doGenerate }) {
++    const result = await doGenerate();
++    try {
++      sink.record({ modelId: result.response?.modelId ?? null, finishReason: result.finishReason.unified,
++        text: result.content.flatMap((part) => part.type === "text" ? [part.text] : []).join(""),
++        inputTokens: result.usage.inputTokens.total ?? null, outputTokens: result.usage.outputTokens.total ?? null });
++    } catch { sink.failed(); }
++    return result;
++  } };
++}
+--- acceptance-preimage/packages/core/src/testing/source-live-evidence.test.ts
++++ packages/core/src/testing/source-live-evidence.test.ts
+@@ -0,0 +1,51 @@
++import { wrapLanguageModel } from "ai";
++import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
++import { join, resolve } from "node:path";
++import { expect, it, vi } from "vitest";
++import { generatingModel, failingGenerateModel } from "./mock-language-model.ts";
++import { openSourceLiveEvidence, sourceGenerationMiddleware, sourceObserverPorts } from "./source-live-evidence.ts";
++import { rmTempDir } from "./rm-temp.ts";
++
++it("fails a completed structural trial that crosses its total deadline with zero upstream calls", async () => {
++  const root = mkdtempSync(join(resolve(import.meta.dirname, "../../../../.trellis/tasks/10-21-agent-source-context/research"), "deadline-fixture-"));
++  const output = join(root, "evidence");
++  const environment = join(root, "synthetic.env");
++  writeFileSync(environment, "TAKI_PROVIDER_BASE_URL=http://127.0.0.1:1/v1\nTAKI_PROVIDER_API_KEY=synthetic-unused\nTAKI_PROVIDER_MODEL=synthetic-model\n", "utf8");
++  vi.stubEnv("TAKI_E2E_REAL_ENV_FILE", environment); vi.stubEnv("TAKI_E2E_SOURCE_EVIDENCE_DIR", output);
++  vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "Date"] });
++  try {
++    const live = await openSourceLiveEvidence({ maxRequests: 1, paths: [], deadlineMs: 5 });
++    await vi.advanceTimersByTimeAsync(6);
++    await expect(live.close({ completed: true })).rejects.toThrow("SOURCE_ACCEPTANCE_DEADLINE_EXCEEDED");
++    expect(JSON.parse(readFileSync(join(output, "run.json"), "utf8"))).toMatchObject({ completed: true, deadlineExceeded: true });
++    expect(JSON.parse(readFileSync(join(output, "requests.json"), "utf8"))).toEqual([]);
++  } finally { vi.useRealTimers(); vi.unstubAllEnvs(); rmTempDir(root); }
++});
++
++it("loads the existing E2E observation ports without dispatching an upstream request", async () => {
++  const ports = await sourceObserverPorts();
++  expect(typeof ports.environment).toBe("function");
++  const relay = await ports.observe({ baseUrl: "http://127.0.0.1:1/v1", apiKey: "synthetic-unused",
++    syntheticCapture: { maxUpstreamRequests: 1, onRequest() { return undefined; } } });
++  try { expect(relay.baseUrl).toMatch(/^http:\/\/127\.0\.0\.1:/); expect(relay.requests).toEqual([]); }
++  finally { await relay.close(); }
++});
++
++it("preserves one completed generation when synthetic evidence recording fails", async () => {
++  const original = generatingModel("synthetic result");
++  const failed = vi.fn();
++  const model = wrapLanguageModel({ model: original, middleware: sourceGenerationMiddleware({
++    record() { throw new Error("synthetic disk failure"); }, failed,
++  }) });
++  const result = await model.doGenerate({ prompt: [] });
++  expect(result.content).toEqual([{ type: "text", text: "synthetic result" }]);
++  expect(original.doGenerateCalls).toHaveLength(1); expect(failed).toHaveBeenCalledOnce();
++});
++
++it("preserves the exact provider error without observing it or retrying", async () => {
++  const error = new Error("provider detail must not enter evidence");
++  const original = failingGenerateModel(error); const record = vi.fn(); const failed = vi.fn();
++  const model = wrapLanguageModel({ model: original, middleware: sourceGenerationMiddleware({ record, failed }) });
++  await expect(model.doGenerate({ prompt: [] })).rejects.toBe(error);
++  expect(original.doGenerateCalls).toHaveLength(1); expect(record).not.toHaveBeenCalled(); expect(failed).not.toHaveBeenCalled();
++});
+--- acceptance-preimage/packages/core/src/testing/index.md
++++ packages/core/src/testing/index.md
+@@ -20,5 +20,7 @@
+ - initiative-fixture.ts — isolated real SQLite Run/Attempt/Effect/Timeline/delivery owners for lifecycle and transaction tests
+ - prepared-publication-fixture.ts — explicit-report fixture with synthetic authorization, real SQLite/Character queue, optional linked-child participant and business adapter; test-only
+ - real-playback-client.ts — explicit loopback Core/CDP connection for owner-authorized real-player controls and Shared-validated current playback; test-only, no credentials
+-- co-watching-fixture.ts — synthetic native/artifact/browser producers over real ChatAgent/SubagentService/Run/SQLite/Delivery owners, exact private input receipts and runtime recreation
++- co-watching-fixture.ts — synthetic native/browser producers over real ChatAgent/SubagentService/Run/SQLite/Delivery owners; optional actual model/Skill/file composition, default scripted artifact producer
++- co-watching-tool-fixture.ts — actual shipped Co-Watching Skill loader and governed Workspace tools for isolated acceptance fixtures
++- source-live-evidence.ts — physically capped real-provider observation, synthetic request capture and immutable per-trial Source evidence directories
+ - subagent-fixture.ts — synthetic real SQLite/Effect/ToolLoopAgent/child-service fixture without external calls or user Memory

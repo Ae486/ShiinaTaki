@@ -1,7 +1,7 @@
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createConfigRepo } from "../db/config-repo.ts";
 import { MIGRATIONS } from "../db/migrations/index-list.ts";
 import { openDatabase } from "../db/sqlite.ts";
@@ -44,6 +44,30 @@ function boot(env: Record<string, string | undefined>): CoreBootstrap {
 }
 
 describe("bootstrapCore", () => {
+  it("reports committed callback failures with a bounded code and preserves later cleanup", () => {
+    const result = boot({ TAKI_DATA_DIR: tempDataDir() });
+    const warning = vi.spyOn(result.logger, "warn").mockImplementation(() => {});
+    let cleaned = false;
+    expect(() => result.db.transaction(() => {
+      result.db.afterCommit(() => { throw new Error("private callback text must not enter logs"); });
+      result.db.afterCommit(() => { cleaned = true; });
+    })).not.toThrow();
+    expect(cleaned).toBe(true);
+    expect(warning).toHaveBeenCalledExactlyOnceWith({ code: "SQLITE_AFTER_COMMIT_FAILED" }, "Committed database callback failed");
+    warning.mockRestore();
+  });
+  it("notifies local policy after commit despite a failed socket or local observer", () => {
+    const seen: unknown[] = [];
+    const result = bootstrapCore({ ...PROVIDER_ENV, TAKI_DATA_DIR: tempDataDir() }, { onConfigChanged(key) {
+      seen.push(result.config.source.resolve(key)?.value); throw new Error("local observer failed");
+    } });
+    booted.push(result);
+    result.config.subscriptions.subscribe({ state: { status: "awaiting" } }, () => { throw new Error("socket failed"); });
+    expect(result.config.writer.set({ key: "TAKI_INITIATIVE_ENABLED", value: true })).toMatchObject({ ok: true });
+    expect(seen).toEqual([true]);
+    expect(result.config.repo.get("TAKI_INITIATIVE_ENABLED")).toBe(true);
+  });
+
   it("boots on defaults when neither env nor store says otherwise", () => {
     const result = boot({ TAKI_DATA_DIR: tempDataDir() });
 

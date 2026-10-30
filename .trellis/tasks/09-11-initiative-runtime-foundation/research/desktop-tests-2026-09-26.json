@@ -1,0 +1,13 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "--filter",
+    "@taki/desktop",
+    "test",
+    "--maxWorkers=4"
+  ],
+  "startedAt": "2026-09-26T11:10:53.677926+00:00",
+  "seconds": 39.453,
+  "exitCode": 0,
+  "log": "desktop-tests-2026-09-26.log"
+}

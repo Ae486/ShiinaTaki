@@ -1,7 +1,7 @@
 import { tool, type ToolExecutionOptions } from "ai";
 import { z } from "zod";
 import { describe, expect, it, vi } from "vitest";
-import { EXTENSION_DISCOVERY_BUDGET } from "@taki/shared";
+import { EXTENSION_DISCOVERY_BUDGET, ExtensionDescribeResultSchema, ExtensionDiscoverResultSchema } from "@taki/shared";
 import type { GovernancePolicyService } from "../governance/governance-policy-service.ts";
 import { createHostCatalogStore } from "../hosts/host-catalog.ts";
 import type { McpManager } from "../mcp/mcp-manager.ts";
@@ -46,6 +46,20 @@ describe("extension Run context", () => {
     expect(Object.isFrozen(context.toolDisplayNames)).toBe(true);
 
     const skill = context.snapshot.entries.find((entry) => entry.identity.kind === "skill")!;
+    const mcpEntry = context.snapshot.entries.find((entry) => entry.identity.kind === "mcp-tool")!;
+    expect(context.toolDisclosure).toEqual({
+      deferredToolNames: ["server_echo"],
+      describedTools: { [mcpEntry.identity.extensionId]: "server_echo" },
+      skills: { "standard-skill": { extensionId: skill.identity.extensionId, contentRevision: "sha256.skill" } },
+    });
+    expect(Object.isFrozen(context.toolDisclosure)).toBe(true);
+    expect(Object.isFrozen(context.toolDisclosure.deferredToolNames)).toBe(true);
+    expect(Object.isFrozen(context.toolDisclosure.describedTools)).toBe(true);
+    expect(Object.isFrozen(context.toolDisclosure.skills)).toBe(true);
+    expect(Object.isFrozen(context.toolDisclosure.skills["standard-skill"])).toBe(true);
+    const described = await context.tools.extension_describe?.execute?.({ extensionId: mcpEntry.identity.extensionId }, options as never);
+    expect(ExtensionDescribeResultSchema.parse(described).toolName).toBe("server_echo");
+    expect(await context.tools.server_echo?.execute?.({ text: "direct" }, options as never)).toEqual({ echo: "direct" });
     await expect(callExtension(context.tools, skill.identity.extensionId, {})).resolves.toMatchObject({
       ok: true,
       owner: skill.identity,
@@ -73,7 +87,7 @@ describe("extension Run context", () => {
     });
   });
 
-  it("captures every direct MCP name from the same snapshot even when discovery budgets omit entries", () => {
+  it("retains overflow execution closures while the bounded discovery catalogue limits model disclosure", async () => {
     const seed = mcpManager().snapshot()[0]!;
     const entries = Array.from({ length: EXTENSION_DISCOVERY_BUDGET.maxEntries + 1 }, (_, index) => ({
       ...seed,
@@ -93,12 +107,44 @@ describe("extension Run context", () => {
     expect(snapshot).toHaveBeenCalledOnce();
     expect(context.snapshot.entries).toHaveLength(EXTENSION_DISCOVERY_BUDGET.maxEntries);
     expect(Object.keys(context.toolDisplayNames ?? {})).toHaveLength(entries.length);
+    expect(context.toolDisclosure.deferredToolNames).toHaveLength(entries.length);
+    const discoverResult = await context.tools.extension_discover?.execute?.({}, options as never);
+    expect(ExtensionDiscoverResultSchema.parse(discoverResult).truncated).toBe(true);
+    expect(Object.keys(context.toolDisclosure.describedTools).length).toBeLessThanOrEqual(EXTENSION_DISCOVERY_BUDGET.maxEntries);
     const selected = new Set(context.snapshot.entries.map((entry) => entry.identity.subjectId));
     expect(entries.some((entry) => !selected.has(entry.ref.subjectId))).toBe(true);
     for (const entry of entries) {
       expect(context.tools[entry.toolKey]).toBe(entry.tool);
       expect(context.toolDisplayNames?.[entry.toolKey]).toBe(`server · ${entry.ref.toolName}`);
+      expect(context.toolDisclosure.deferredToolNames).toContain(entry.toolKey);
+      if (!selected.has(entry.ref.subjectId)) {
+        expect(Object.values(context.toolDisclosure.describedTools)).not.toContain(entry.toolKey);
+      }
     }
+  });
+
+  it("keeps captured MCP names and execution when the source snapshot row changes", async () => {
+    const source = mcpManager().snapshot()[0]!;
+    const entry = { ...source, ref: { ...source.ref } };
+    const capturedTool = entry.tool;
+    const context = createExtensionRunContext({
+      runId: RUN,
+      coreHostId: CORE,
+      catalogs: createHostCatalogStore(),
+      skills: { catalog: skillCatalog(() => 1), loader: skillLoader(), governance: allowGovernance() },
+      mcp: { snapshot: () => [entry] } as unknown as McpManager,
+      route: async () => ({ ok: true }),
+    });
+    entry.toolKey = "replacement";
+    entry.ref.toolName = "replacement";
+    entry.tool = tool({ inputSchema: z.strictObject({}), execute: () => ({ unexpected: true }) });
+    const mcpEntry = context.snapshot.entries.find((item) => item.identity.kind === "mcp-tool")!;
+
+    expect(context.tools.server_echo).toBe(capturedTool);
+    expect(context.toolDisclosure.describedTools[mcpEntry.identity.extensionId]).toBe("server_echo");
+    expect(context.toolDisclosure.deferredToolNames).toEqual(["server_echo"]);
+    await expect(callExtension(context.tools, mcpEntry.identity.extensionId, { text: "captured" }))
+      .resolves.toMatchObject({ ok: true, output: { echo: "captured" } });
   });
 });
 

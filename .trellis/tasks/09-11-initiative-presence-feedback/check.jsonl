@@ -1,0 +1,11 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend pre-development rules and mandatory layer-specific reading."}
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend authority, component and connection/presentation contracts."}
+{"file": ".trellis/spec/guides/source-grounding-guide.md", "reason": "Resolve missing details from named sources and installed APIs; never invent behavior."}
+{"file": ".trellis/tasks/09-11-companion-initiative-implementation/research/presence-contracts.md", "reason": "Authenticated source evidence, device association, exposure, feedback and calibration."}
+{"file": ".trellis/spec/backend/observability-projection.md", "reason": "Producer-first bounded Monitor/Trajectory queries, safe fields and replay."}
+{"file": ".trellis/spec/frontend/foreground-chat-feedback.md", "reason": "Actual Chat/Pet rendering and stable Timeline handoff; avoid synthetic primary activity."}
+{"file": ".trellis/spec/frontend/operator-connection-recovery.md", "reason": "Independent window generations, no mutation replay and source retirement."}
+{"file": ".trellis/tasks/09-11-companion-initiative-implementation/research/decision-register.md", "reason": "Effective owner decisions, source precedence and superseded assumptions."}
+{"file": ".trellis/spec/backend/perception-evidence.md", "reason": "Implemented nullable native evidence, consent/source epochs and post-await retirement contracts."}
+{"file": ".trellis/spec/backend/user-presence.md", "reason": "Authenticated source lifetimes, conservative interval unions and transactional feedback contracts."}
+{"file": ".trellis/spec/frontend/user-presence-feedback.md", "reason": "Client-owned source lifetimes, actual text exposure and designated-device timezone producer contracts."}

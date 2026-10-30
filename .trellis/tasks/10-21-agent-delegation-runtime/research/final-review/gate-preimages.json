@@ -1,0 +1,32 @@
+[
+  {
+    "path": "packages/core/src/agents/turn-registry.ts",
+    "preimage": "gate-preimages/packages/core/src/agents/turn-registry.ts",
+    "sha256": "d718cea1513219295bf8218db2f033f2138dde42fecf812d5f5d85a59de77571"
+  },
+  {
+    "path": "packages/core/src/agents/turn-registry.test.ts",
+    "preimage": "gate-preimages/packages/core/src/agents/turn-registry.test.ts",
+    "sha256": "6f4ac2065878893cebb173cf0df628cf0194eb3be0cad674968feb9ccc5e7866"
+  },
+  {
+    "path": "packages/core/src/agents/index.md",
+    "preimage": "gate-preimages/packages/core/src/agents/index.md",
+    "sha256": "ccbb05e60aa68367fcbfe8d5a6debd4009e6d45fac9d8e44270506498e0c2c6d"
+  },
+  {
+    "path": "packages/shared/src/governance-presentation.test.ts",
+    "preimage": "gate-preimages/packages/shared/src/governance-presentation.test.ts",
+    "sha256": "1dbaf19cca376329b931d0cf5428ccb2939020ca992d4a414fae3c258bea3ef2"
+  },
+  {
+    "path": "packages/shared/src/governance-registry.test.ts",
+    "preimage": "gate-preimages/packages/shared/src/governance-registry.test.ts",
+    "sha256": "fed73b49c81ca0433034d8223b01e7d5622eb5d08a7fa58b55f344d22fa51b50"
+  },
+  {
+    "path": "packages/shared/src/index.md",
+    "preimage": "gate-preimages/packages/shared/src/index.md",
+    "sha256": "a58b3446a16b0a59e37ce7c8a9f0015e2775de086e74e171b74b984f16a15a28"
+  }
+]

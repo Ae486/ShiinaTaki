@@ -26,6 +26,8 @@ export interface ChatActivityAttempt {
   observe(part: unknown, invocations: ToolInvocationBridge): void;
   references(stepNumber: number, row: TurnEntryInput): TimelineItemReference[];
   close(cancelled: boolean): void;
+  /** Release presentation aliases only after a complete private SDK segment has drained durably. */
+  releaseThrough?(stepNumber: number): void;
 }
 export interface ChatTurnActivity {
   readonly messageId: string;
@@ -85,6 +87,14 @@ function beginAttempt(turn: TurnState, attemptId?: string): ChatActivityAttempt 
     },
     observe: (part, invocations) => observePart(state, part, invocations),
     references: (stepNumber, row) => stepActivityReferences(row, state.steps.get(stepNumber), state.tools),
+    releaseThrough(stepNumber) {
+      if (stepNumber > state.step) throw new Error("CHAT_ACTIVITY_FRONTIER_UNOBSERVED");
+      for (const [step, source] of state.steps) if (step <= stepNumber) {
+        for (const invocation of source.tools) state.tools.delete(invocation.invocationId);
+        state.steps.delete(step);
+      }
+      for (const [id, tool] of state.tools) if (tool.terminal) state.tools.delete(id);
+    },
     close(cancelled) {
       if (!current(state)) return;
       for (const tool of state.tools.values()) {
@@ -139,6 +149,7 @@ function outcomeMessage(value: ToolOutcome): string | undefined {
   if (value.errorClass === "governance") return "操作未获授权";
   if (value.errorClass === "validation") return "工具参数未通过校验";
   if (value.errorClass === "stale") return "操作目标已不可用";
+  if (value.errorCode === "avatar_rejected") return "画面未采用这次表情或动作";
   return value.errorCode === "mcp_tool_error" ? "工具返回了错误" : "工具调用失败";
 }
 

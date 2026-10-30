@@ -1,0 +1,48 @@
+{
+  "reports": [
+    {
+      "report": "focused-first.json",
+      "passed": 26,
+      "failed": 0,
+      "files": 5
+    },
+    {
+      "report": "adapter-controls.json",
+      "passed": 21,
+      "failed": 0,
+      "files": 4
+    },
+    {
+      "report": "compatibility.json",
+      "passed": 168,
+      "failed": 2,
+      "files": 9
+    },
+    {
+      "report": "consumers-final.json",
+      "passed": 59,
+      "failed": 39,
+      "files": 10
+    },
+    {
+      "report": "consumers-repaired.json",
+      "passed": 51,
+      "failed": 0,
+      "files": 3
+    },
+    {
+      "report": "shared-final.json",
+      "passed": 2,
+      "failed": 0,
+      "files": 1
+    }
+  ],
+  "latestUniqueTests": 290,
+  "latestPassed": 290,
+  "remainingFailures": [],
+  "consumerInitialFailureReasons": {
+    "Error: table timeline_messages has no column named source_context_json": 38,
+    "AssertionError: expected { policy_basis: 'curated', \u2026(6) } to match object { policy_basis: 'curated', \u2026(2) }": 1
+  },
+  "interpretation": "Last tested status per file and full test name across listed scoped reports; not a new full-suite run."
+}

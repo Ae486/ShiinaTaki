@@ -1,0 +1,4 @@
+
+> @taki/desktop@0.0.0 typecheck H:\TakiAgent-worktrees\t4\apps\desktop
+> tsc --noEmit
+

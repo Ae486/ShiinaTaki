@@ -1,0 +1,25 @@
+# core/config/
+- initiative-wake-config.ts / initiative-wake-knobs.ts — shared finite-source cadence policy, explicit target and live registry validation
+- provider-config.ts — TAKI_PROVIDER_* env → { baseUrl, apiKey, model }; fatal-fast, names missing var
+- provider-factory.ts — createModels({provider, vision, includeUsage?}) → { model, visionModel }; provider/model construction lifted out of main.ts (batch-6 line-cap relief); includeUsage=true (Q14) adds stream_options:{include_usage:true} to main-slot streams
+- vision-config.ts — TAKI_VLM_* env → { baseUrl, apiKey, model } | null (feature off); the optional vision slot, partial = fatal
+- utility-config.ts — TAKI_UTILITY_* env → { baseUrl, apiKey, model } | null (no separate slot); the optional BACKGROUND model slot (T5-R11), partial = fatal; absent means background work rides the main model
+- attachment-config.ts — TAKI_ATTACHMENT_TTL_DAYS env → { ttlDays, ttlMs }; image-retention TTL (default 14; fail-closed parse)
+- context-config.ts — TAKI_*_CONTEXT_TOKENS / TAKI_CONTEXT_HISTORY_RATIO / TAKI_PROVIDER_INCLUDE_USAGE / TAKI_COMPACT_TRIGGER_RATIO / TAKI_COMPACT_KEEP_MESSAGES env → { contextTokens: {main, vision, utility}, historyRatio, includeUsage, compact: {triggerRatio, keepMessages} }; the per-slot declared windows (T5-R1 tier 1, default 131072 — batch-7 optimistic rider), the history slice (default 0.7), the Q14 streaming-usage opt-in (default OFF), and compaction's 0.8 trigger plus DSH-grounded 0.16 token-priced tail; keepMessages is only a minimum-tail/emergency guard. Garbage = fatal
+- memory-config.ts — TAKI_MEMORY_PINNED_BUDGET / _BM25_WEIGHTS / _STOPLIST / _INTENTIONS_DEFAULT_DAYS / _TIDY_* env → { pinnedBudget, bm25Weights, stoplist, intentionsDefaultDays, tidyWriteThreshold, tidyMaxSteps, tidyStaleDays, reportClassCap }; the pinned-row safety valve (default 800), the 4-column bm25 weights (default 2/1/2, disclosure+search_terms above content), the segmenter stoplist toggle (default on), retention's fallback window for an intention with no explicit expiry (default 30) and the tidy pass's four numbers (threshold 40 / steps 12 / stale 45 / report cap 10). Garbage = fatal. Per-block budgets and per-layer retention are registry rows, not env vars
+- server-config.ts — TAKI_WS_* / TAKI_LOG_LEVEL / TAKI_DATA_DIR / TAKI_PROMPT_DIR / TAKI_TRUST_LOOPBACK_OPERATOR env → { host, port, logLevel, dataDir, promptDir, trustLoopbackOperator } with defaults
+- agent-config.ts — TAKI_MAX_STEPS env → { maxSteps } per-turn tool-loop cap (default 10; D11 config-ization)
+- avatar-config.ts — TAKI_AVATAR_OUTCOME_DEADLINE_MS live reader over ConfigSource → () => number (default 1000, 100..10000; garbage falls back to the default); consumed per open by the avatar outcomes registry (D80)
+- ambient-screenshot-config.ts — TAKI_AMBIENT_SCREENSHOT / _RETENTION env → { enabled, retention }; ambient screen sampling is OFF by default and its raw frames drop right after describe (keep / N days are the opt-ins; garbage = fatal)
+- knob-registry.ts — CONFIG_KNOBS: one declarative row per operator-visible env knob (key/value schema/default/apply class/secret/input hint/description) + findKnob; the SINGLE source config.list renders from (#26 batch 1)
+- config-source.ts — createConfigSource({env, repo}) → { env(), resolve(key), effectiveAll() }; the ONE place precedence lives: env (explicitly set) > stored > built-in default; secrets masked to presence only
+- config-writer.ts — createConfigWriter({env, repo, onChanged}) → { set }; the store's only write path, with five distinct fail-closed refusals (unknown key / invalid value / env-locked / secret / env-only)
+- timing-config-validation.ts — validates a proposed timing-row set/reset against the shared full-policy relationships before config-writer mutates the sparse store
+- config-subscriptions.ts — createConfigSubscriptions() → { subscribe, unsubscribe, publish, count }; the config.changed fan-out registry (global, not character-scoped)
+- hindsight-config.ts — sparse non-secret TAKI_HINDSIGHT_* projection; disabled/unconfigured/ready states with fixed Secret Catalog reference
+- hindsight-policy-config.ts — validated whole-pass timeout and optional additional policy instructions
+- initiative-policy-config.ts — validated independent Class B model/utterance budgets, output lifetimes and busy-hold limits; set/reset validation uses the effective whole policy
+- initiative-wake-config.ts — validated periodic/event evaluation controls, global model cadence/jitter and User Timezone quiet hours
+- viewing-invitation-config.ts — live registered effective-viewing, remaining-time and invitation-lifetime settings
+- initiative-intention-config.ts — live maximum active duration for new finite follow-up plans; existing deadlines never slide
+- Browser playback opt-in is registered in knob-registry.ts and read live by the Perception source receiver; default false and subordinate to Privacy Pause.

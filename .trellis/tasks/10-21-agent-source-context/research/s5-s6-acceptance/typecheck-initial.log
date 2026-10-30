@@ -1,0 +1,11 @@
+
+> @taki/core@0.0.0 typecheck H:\TakiAgent-worktrees\t4\packages\core
+> tsc --noEmit
+
+src/testing/source-live-evidence.ts(12,37): error TS6059: File 'H:/TakiAgent-worktrees/t4/e2e/src/fixture/real-provider-observer.ts' is not under 'rootDir' 'H:/TakiAgent-worktrees/t4/packages/core/src'. 'rootDir' is expected to contain all source files.
+  File is ECMAScript module because 'H:/TakiAgent-worktrees/t4/e2e/package.json' has field "type" with value "module"
+src/testing/source-live-evidence.ts(13,33): error TS6059: File 'H:/TakiAgent-worktrees/t4/e2e/src/fixture/paths.ts' is not under 'rootDir' 'H:/TakiAgent-worktrees/t4/packages/core/src'. 'rootDir' is expected to contain all source files.
+  File is ECMAScript module because 'H:/TakiAgent-worktrees/t4/e2e/package.json' has field "type" with value "module"
+H:\TakiAgent-worktrees\t4\packages\core:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/core@0.0.0 typecheck: `tsc --noEmit`
+Exit status 2

@@ -6,9 +6,21 @@ import { createAvatarSubscriptions } from "./avatar-subscriptions.ts";
 function fakeConnection(): Connection {
   return { state: { status: "awaiting" } };
 }
-const expr = (characterId: string, name: string): AvatarCommand => ({ characterId, kind: "expression", name });
+const expr = (characterId: string, name: string): AvatarCommand => ({ characterId, commandId: "cmd", kind: "expression", name });
 
 describe("createAvatarSubscriptions", () => {
+  it("isSubscribed reflects membership per character and connection", () => {
+    const subs = createAvatarSubscriptions();
+    const conn = fakeConnection();
+    expect(subs.isSubscribed("taki", conn)).toBe(false);
+    subs.subscribe("taki", conn, () => undefined);
+    expect(subs.isSubscribed("taki", conn)).toBe(true);
+    expect(subs.isSubscribed("other", conn)).toBe(false);
+    expect(subs.isSubscribed("taki", fakeConnection())).toBe(false);
+    subs.unsubscribe("taki", conn);
+    expect(subs.isSubscribed("taki", conn)).toBe(false);
+  });
+
   it("fans a published command to every sink subscribed to its character", () => {
     const subs = createAvatarSubscriptions();
     const a: AvatarCommand[] = [];

@@ -43,7 +43,7 @@ export function createScheduleEngine(input: { repo: ScheduledTaskRepo; patterns:
     if (missed) { input.repo.settleOccurrence({ taskId: task.taskId, scheduledFor, state: "missed" }); return; }
     await input.runs.dispatch(task.taskId, occurrence);
   };
-  const executeDue = async () => { try { input.runs.reconcile(); const fired = now(); for (const occurrence of input.repo.unsettled()) await input.runs.dispatch(occurrence.taskId, occurrence); for (const task of input.repo.due(fired.toISOString())) await processTask(task, fired); } catch (error) { input.logger.error({ errorCode: error instanceof Error ? error.name : "unknown" }, "schedule timer callback failed"); } };
+  const executeDue = () => dispatchDueTasks({ ...input, now, processTask });
   const runDue = () => {
     if (stopped) return Promise.resolve();
     if (activeRun) return activeRun;
@@ -52,4 +52,20 @@ export function createScheduleEngine(input: { repo: ScheduledTaskRepo; patterns:
     return execution;
   };
   return { async start() { stopped = false; await runDue(); }, rearm: arm, async stop() { stopped = true; if (timer) clearTimer(timer); timer = undefined; await activeRun; }, runDue };
+}
+
+async function dispatchDueTasks(input: {
+  repo: ScheduledTaskRepo; runs: ScheduledRunAdapter; logger: Logger; now: () => Date;
+  processTask: (task: ScheduledTask, fired: Date) => Promise<void>;
+}): Promise<void> {
+  try {
+    input.runs.reconcile(); const fired = input.now();
+    for (const occurrence of input.repo.unsettled()) await input.runs.dispatch(occurrence.taskId, occurrence);
+    for (const candidate of input.repo.due(fired.toISOString())) {
+      // Dispatch can await a busy Run. A timezone/settings change in that gap invalidates the captured due row.
+      const task = input.repo.get(candidate.taskId);
+      if (!task || !task.enabled || task.state !== "active" || !task.nextRunAt || Date.parse(task.nextRunAt) > fired.getTime()) continue;
+      await input.processTask(task, fired);
+    }
+  } catch (error) { input.logger.error({ errorCode: error instanceof Error ? error.name : "unknown" }, "schedule timer callback failed"); }
 }

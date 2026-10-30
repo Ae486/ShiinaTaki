@@ -65,10 +65,10 @@ describe("MemoryFlushPort", () => {
     expect(fixture.autoState.get("taki").lastFlushSeq).toBe(0);
   });
 
-  it("states the verified canonical and unavailable Hindsight contracts explicitly", async () => {
+  it("refuses an unconfigured canonical flush and unavailable Hindsight explicitly", async () => {
     await expect(canonicalLocalMemoryFlushPort().prepareRetirement(request)).resolves.toEqual({
-      status: "not_required",
-      reason: "canonical_local_records_are_authoritative",
+      status: "retryable_failure",
+      code: "MEMORY_FLUSH_INCOMPLETE",
     });
     await expect(unavailableHindsightMemoryFlushPort().prepareRetirement(request)).resolves.toEqual({
       status: "permanent_unavailable",

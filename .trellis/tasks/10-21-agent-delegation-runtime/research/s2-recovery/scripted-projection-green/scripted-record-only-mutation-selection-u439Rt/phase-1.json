@@ -1,0 +1,46 @@
+{
+  "phase": "ready",
+  "state": {
+    "available": true,
+    "runs": [],
+    "attempts": [],
+    "effects": [],
+    "deliveries": [],
+    "subagent_conversations": [],
+    "subagent_inputs": [],
+    "subagent_executions": [],
+    "run_messages": [],
+    "timeline_messages": [
+      {
+        "seq": 1,
+        "id": "49a72c8f-b8a2-42a0-a474-71e0cc8b6125",
+        "character_id": "taki",
+        "role": "user",
+        "content": "EXCLUDED_PARENT_CONTEXT_381",
+        "parts": null,
+        "created_at": "2026-10-23T02:08:55.129Z",
+        "presentation": null,
+        "source_context_json": null
+      },
+      {
+        "seq": 2,
+        "id": "b77e8dfe-90c8-4f95-9815-a1cb945bf60f",
+        "character_id": "taki",
+        "role": "assistant",
+        "content": "Previous unrelated conversation.",
+        "parts": null,
+        "created_at": "2026-10-23T02:08:55.135Z",
+        "presentation": null,
+        "source_context_json": null
+      }
+    ],
+    "run_usage": [],
+    "canonical_memory_sources": [],
+    "canonical_memory_units": [],
+    "canonical_memory_policy": [],
+    "canonical_memory_operation_receipts": [],
+    "canonical_memory_primary_commits": []
+  },
+  "requests": [],
+  "turns": []
+}

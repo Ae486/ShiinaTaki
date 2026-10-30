@@ -27,6 +27,9 @@ import { hindsightConnectionFingerprint } from "./hindsight-compatibility-servic
 import { normalizeError } from "./hindsight-setup-errors.ts";
 import { dryRunTemplates, setupTargets } from "./hindsight-setup-stages.ts";
 
+/** Phases with a remote attempt in flight; a snapshot left in one by a dead process can never complete (see hindsight-setup-recovery). */
+export const BUSY_SETUP_PHASES = ["validating", "validating-templates", "initializing-banks", "applying-templates", "waiting-template-operations"] as const;
+
 export interface HindsightConnectionSecret {
   resolve(): string | null;
   marker(): string;
@@ -102,7 +105,9 @@ async function validate(input: {
     }, updatedAt: runtime.now() });
     return read(deps);
   } catch (error) {
-    return persistFailure({ deps, current: working, error: normalizeError(error), updatedAt: runtime.now() });
+    // Failed validation withdraws the compatibility evidence (setup/llmHealth refuse until a fresh success) while
+    // the fingerprint stays so a later successful validate still detects a changed connection.
+    return persistFailure({ deps, current: { ...working, compatibility: null }, error: normalizeError(error), updatedAt: runtime.now() });
   }
 }
 
@@ -227,7 +232,7 @@ function requireRevision(snapshot: HindsightSetupSnapshot, expected: number): Hi
 }
 
 function requireIdle(snapshot: HindsightSetupSnapshot): void {
-  if (["validating", "validating-templates", "initializing-banks", "applying-templates", "waiting-template-operations"].includes(snapshot.phase)) {
+  if ((BUSY_SETUP_PHASES as readonly string[]).includes(snapshot.phase)) {
     throw hindsightError("HINDSIGHT_STATE_CONFLICT");
   }
 }

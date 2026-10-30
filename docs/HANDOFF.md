@@ -1,15 +1,98 @@
 # TakiAgent T4 Leader Handoff — Skills/MCP First
 
-> Main-worktree Memory continuation (2026-09-06): `H:/TakiAgent` owns the active
-> `.trellis/tasks/08-09-memory-replica-sync-recovery` B5 task. Waves 0-2 have passed independent offline checks;
-> Wave 2 scheduling/reconciliation recovery passed with five fixes. Full TS tests/typechecks, root lint, and isolated
-> Core startup with migrations 1..34 passed. Read the child's execution record for exact evidence, cache/API limits,
-> and unrun platform/live gates; its executable contract is `.trellis/spec/backend/memory-replica-sync.md`.
-> Waves 0-2 are committed as `69ca779`; B5 remains `in_progress` for Wave 3.
-> The active execution plan is compact; complete prior evidence is preserved in the task research archive.
-> Preserve existing changes and the protected legacy backup. Wave 3 recovery, B6 runtime wiring, B4 current-Local
-> coverage/final fence, and owner-approved live activation remain outstanding. The T4 snapshot below does not select
-> the active Memory task or authorize work outside the main worktree.
+> D78 commit checkpoint and pre-B7 continuation (2026-09-10): the owner authorized committing the completed work and
+> continuing clear requirements before B7. Reuse existing decisions; apply `grill-with-docs` to unresolved product
+> choices, and complete an explicit grill before any B7 implementation. No push or production authority switch is
+> authorized. Native D78 is committed as `6a749ba3e7d8719e336d9d1d8735a8e09da4366b`; this Taki commit is its companion.
+> The completed actual-data task is `.trellis/tasks/08-09-hindsight-initial-cutover` in `H:/TakiAgent`; native work stays
+> in `H:/hindsight`. Continue the existing B6 task after its bounded plan/context review, without revisiting T4.
+> The owner subsequently authorized a consistent copy of actual Local data, a new isolated native target and the
+> configured real models. That authorization supersedes the older offline-only boundary for this explicit test.
+> The current execution contract and factual record are B4 `research/d78-real-data-execution.md` and
+> `research/d78-real-data-validation-2026-09-09.md`. Do not restart investigation or request that authorization again.
+> Both earlier actual targets are stopped and retained. Both imported every source; the first correctly refused
+> unreceipted ordinary maintenance, while the second lost its consumer during a long HTTP request. The second
+> Global Bank produced a genuine certificate, but Character and overall B4 readiness remained incomplete.
+> Migration 040, native maintenance ownership, bounded SQL-stage retries, production HTTP deadlines and failure
+> supervision address the reproduced mechanisms. Existing source/proof guards remain authoritative. Final Core
+> 2317, five typechecks, lint and isolated startup pass. Final supervisor validation passed 76 harness cases, including
+> 22 actual-process cases; the unchanged observer retains its independently verified 53-case gate. Independent review
+> is closed. The final source manifest freezes 950 Taki and 324 native files for private run `654131f0175a`.
+> The third configured-model run passed on 2026-09-10: all 722 sources/units were imported, 701 valid sources maintained,
+> 21 invalidated units preserved, both certificates and all 1944 raw records verified. Import and verification ACK loss
+> recovered without replay; B4 readiness passed after the third SQLite reopen. Source/B2/Canonical digests stayed equal.
+> Consumer and supervisor exited 0 with valid completion evidence and no forced cleanup; all owned services stopped.
+> The 110 returned model attempts reported 1346264 tokens and complete observation metadata. Both repository source
+> manifests stayed frozen. All three isolated targets remain retained; the first two remain failed historical evidence.
+> Current Local authority stayed active. D77/B6/B7, production/manual activation and full-envelope latency remain separate.
+> Do not repeat completed actual-data work or infer those remaining gates are passed. No original-user-storage writes, live
+> authority activation, push/rebase/reset, new dependencies, finish/archive or other-worktree work is authorized.
+>
+> Previous offline Memory slice (2026-09-09): `.trellis/tasks/08-09-hindsight-initial-cutover` remains the session-bound B4 task
+> in `H:/TakiAgent` on `main`, continuing from Taki `dd2e15b98b6661a01b1f951cfb85f718f2aea75d` and Hindsight
+> `8ab65b4c2ea238223eeef84cbdcc012ca7601e86`. The owner authorized D78 cross-repository implementation and later
+> requested recovery after interruption. The current contract is B4 `research/d78-execution-contract.md`.
+> D78 implements complete structured current-state import, native finite source/scope/model proof, retained snapshot
+> certificates, full Taki evidence/raw replica staging, durable invalidation and the actual final B4 guards, including
+> empty Banks. Build `taki-memory-hindsight-0.9.0-d78-v1` publishes two independent 1.0.0 contracts; old G1 semantics
+> and B2 history stay intact. Taki migration 039 follows the completed 036-038 first slice.
+> Taki Shared 414 / Core 2230 / CLI 47 / Desktop 548 tests, five typechecks, root lint and isolated startup through 039
+> pass. Native result aggregate, real two-Bank HTTP/SQLite response-loss recovery, backup and generated SDK contracts
+> pass. Final gate records, generator corrections and the unchanged native Windows full-typecheck diagnostics are in
+> B4 `research/d78-validation-2026-09-09.md`. All 528 repeated generated files match; final diff, manifest and preservation
+> audits pass. Use that report's scoped results and platform limitations rather than historical counts.
+> D78 stages the real raw logical replica; it does not invent Taki policy for new native observations. D77 provider-only
+> provenance recovery/rebinding, B6 projection/runtime readiness, B7 and live/manual activation remain open.
+> Both D78 working trees remain uncommitted; no new task, push, finish/archive, real model call or actual cutover was
+> performed. Preserve protected B2/user data and other worktrees. Continue the remaining D77/B6/B7/B4 acceptance work;
+> do not repeat completed D78/first-slice implementation or select the historical T4 snapshot below.
+>
+> Previous G1 follow-up (2026-09-08): `.trellis/tasks/09-07-hindsight-recovery-evidence` was the session-bound in-progress
+> child of B5. The owner approved cross-repository work in `H:/TakiAgent` and `H:/hindsight` on recovery/append evidence,
+> requiring source-backed necessity, a clear minimal direction and maintained
+> upgrade records. `H:/hindsight/TAKI_PATCHES.md` is the live ledger; the old Taki compatibility archive stays historical.
+> Preserve the prior B5 changes, the protected legacy backup and the unrelated Hindsight control-plane `bin/cli.js` edit.
+> No live provider/LLM use, user-data migration, authority activation, push or task archival is authorized here.
+> The owner approved a provider-only local Git checkpoint after remote verification: `H:/hindsight` on `main`,
+> origin `https://github.com/Ae486/hindsight.git`, commit `8ab65b4c2ea238223eeef84cbdcc012ca7601e86`.
+> It includes the reviewed provider/SDK/test/ledger changes, preserves unrelated `bin/cli.js` bytes, and is not pushed.
+> The coordinated Taki changes were subsequently checkpointed as `dd2e15b` under the owner's next approval; task
+> finish/archive and push remain outside the approved first slice.
+> Latest owner steering: G1's second option is accepted. Confirm routine writes after reliable native-result evidence
+> and local factual application; observation/model work may finish later. Initial activation and a healthy switch to
+> Local keep independent required-maintenance and completeness gates. The reviewed B5 baseline uses the older wait;
+> G1 implementation and independent source review are complete: seven confirmed findings closed, one withdrawn.
+> Final native 69/Shared 396/Core 2036 and scoped quality gates pass. Native/HTTP/SQLite and SDK evidence is in
+> the child's `research/g1-routine-implementation.md` and `research/g1-validation-results.md`. The owner approved
+> the exact Rust dependency patch on 2026-09-08. Actual-source locked/offline build and four generated-model tests
+> pass in `d31d069c8e07`, independently reviewed; package versions/checksums are unchanged. G1 offline work is complete.
+> Before any further grill question, read prior discussion records and reuse settled rulings. `grill.md` indexes T5
+> decisions/kickoff, T4 G2-08, ADR 0009 and the parent PRD; no second product question is ready after that review.
+> The child task's `grill.md` records interoperability as the goal, public logical field alignment, full Canonical Local
+> maintenance in B6, Hindsight-native semantic ownership, adapter/official-extension-first integration and permission for
+> source-backed design refinements. Keep generic native hooks limited to demonstrated remaining gaps. The three
+> research reports remain evidence; the approximately 20-file atomic-retain and source-triggered automatic-MM design
+> is not the selected routine protocol. `design.md` selects tracked extension routes plus exact native per-commit
+> receipts, preserving native streaming and background maintenance. Direct implementer `hindsight_g1_implement`
+> owns that routine slice; `hindsight_g1_independent_check` completed its independent source review. Cutover research
+> is complete as a separate proposal and does not implement its additional producer/fence protocol.
+> The leader provides owned PostgreSQL fixtures and canonical generator tooling. Resume these agents and the task's
+> current plan rather than duplicating work, repeating research or asking again for execution authorization.
+>
+> Main-worktree Memory continuation (2026-09-07): `H:/TakiAgent` owns the active
+> `.trellis/tasks/08-09-memory-replica-sync-recovery` B5 task. Waves 0-2 are committed as `69ca779`.
+> Wave 3's implemented offline mechanics passed independent review with three fixes and 14 added regressions;
+> its 38 source/test/index files remain uncommitted on base `c3f8bc4`. Shared 392/Core 2016/CLI 47/Desktop 548,
+> all five TS typechecks, root lint and isolated Core startup through migrations 1..35 passed. Owned resources were
+> cleaned; provider requests were zero. Startup does not prove graceful shutdown, Host behavior or live acceptance.
+> G1 closes Wave 3's routine native-result/append implementation gaps. Parent/B4/B6/B7/runtime and live criteria
+> remain separate from the verified routine tests; do not report overall Memory interoperability as finished.
+> The reviewed code's unavailable derived fence is a historical baseline, not G1's routine condition. Preserve successful
+> native receipts while awaiting the required evidence; never substitute queue emptiness or
+> silently repeat writes. B4 current-Local coverage/final fence, B6 runtime wiring and owner-approved activation remain open.
+> Read the compact task plan and `research/wave-3-review-2026-09-07.md`; prior evidence is preserved separately.
+> The executable contract is `.trellis/spec/backend/memory-replica-sync.md`. Preserve current changes and the protected
+> legacy backup. The historical T4 snapshot below does not select this task or authorize other-worktree changes.
 >
 > Continuation checkpoint (2026-09-05): the current Compaction Harness state, final verification, and closeout boundary
 > are recorded in Section 0 of `docs/T4-HANDOFF.md`. The Skills/MCP snapshot below is historical context.
@@ -97,12 +180,19 @@ generation and restore through D59, never create a second reconnect system.
 
 ### 3.2 Memory/Hindsight program
 
-The active main-worktree task is `.trellis/tasks/08-09-hindsight-compatibility-extensions`. In the separate Hindsight
-repository, Slice 0A and PostgreSQL Slice 0B have Leader acceptance; Slice 0C and the final combined gate remain the
-recorded next work. Treat that statement as a handoff clue and verify the live task and repository.
+Batches B0-B6 plus the D77/D78 rulings are committed on `main` (through `118d87f`). The completeness audit
+`.trellis/tasks/09-14-hindsight-integration-completeness-audit` is the requirement ledger (54-entry matrix, C01-C16,
+closure stages S1-S6) and its `research/plan-review-2026-09-18.md` fixes the delivery allocation and the PR01-PR05
+amendments. Stage 1 (durable memory operations, setup recovery, manual sync control, composite
+`memory.authority.status`, Home operations card) is archived as `09-19-hindsight-durable-operations`; its contract is
+`.trellis/spec/backend/memory-operations.md` and its known limits are D84. Stage 2 (Local-only onboarding,
+existing-instance first activation with PR03 source custody, active Bank/configuration lifecycle) is the next work.
+Owner questions still open: PR02 administration custody before Stage 3 and U1 before Stage 4. Under the owner's
+2026-09-19 autonomy grant the Leader may run the Trellis flow, commit and archive cleanly completed stages without
+per-step consent; manual acceptance is never marked passed and nothing is pushed.
 
-The Hindsight production patch has no T4 production-file overlap because it lives under `H:/hindsight`. Later
-TakiAgent Memory provider children can overlap T4 integration seams. The main merge hotspots are expected to be:
+The Hindsight production patch lives under `H:/hindsight` and has no T4 production-file overlap. Later Memory children
+can overlap T4 integration seams. The main merge hotspots are expected to be:
 
 - `packages/core/src/main.ts`;
 - `packages/core/src/agents/chat-agent.ts`;

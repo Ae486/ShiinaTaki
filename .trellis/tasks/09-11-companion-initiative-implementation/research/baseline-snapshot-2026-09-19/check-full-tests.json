@@ -1,0 +1,13 @@
+{
+  "label": "full-tests",
+  "command": [
+    "pnpm",
+    "-r",
+    "test"
+  ],
+  "cwd": "H:\\TakiAgent-worktrees\\t4",
+  "startedAt": "2026-09-19T11:51:30.203166+00:00",
+  "seconds": 46.047,
+  "exitCode": 1,
+  "log": "logs/full-tests.log"
+}

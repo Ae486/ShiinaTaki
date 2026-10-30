@@ -10,8 +10,8 @@ describe("governance presentation vocabulary", () => {
   it("covers every canonical capability and cell without changing registry authority", () => {
     const before = JSON.stringify(CANONICAL_GOVERNANCE_REGISTRY);
     const { descriptors } = CANONICAL_GOVERNANCE_REGISTRY;
-    expect(descriptors).toHaveLength(19);
-    expect(descriptors.flatMap((descriptor) => descriptor.cells)).toHaveLength(31);
+    expect(descriptors).toHaveLength(26);
+    expect(descriptors.flatMap((descriptor) => descriptor.cells)).toHaveLength(38);
     for (const descriptor of descriptors) {
       expect(getCapabilityLabel(descriptor.capabilityId)).not.toBe(getCapabilityLabel("unknown"));
       expect(getCapabilityLabel(descriptor.capabilityId)).not.toContain(descriptor.capabilityId);

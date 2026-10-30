@@ -7,6 +7,9 @@ import { createHash } from "node:crypto";
 import {
   HINDSIGHT_API_VERSION,
   HINDSIGHT_COMPATIBILITY_BUILD,
+  HINDSIGHT_NATIVE_RESULT_BUILD,
+  HINDSIGHT_CURRENT_STATE_BUILD,
+  HINDSIGHT_APPLICATION_STATE_BUILD,
   HINDSIGHT_COMPATIBILITY_VERSION,
   HindsightCompatibilityProjectionSchema,
   type HindsightCompatibilityProjection,
@@ -48,13 +51,14 @@ async function validateCompatibility(input: {
   const version = await input.client.version(context);
   if (version.apiVersion !== HINDSIGHT_API_VERSION) throw hindsightError("HINDSIGHT_VERSION_UNSUPPORTED");
   const manifest = await input.client.compatibility(context);
-  const compatibility = projectManifest(manifest);
+  const compatibility = projectHindsightCompatibilityManifest(manifest);
   return { fingerprint: fingerprint(input.connection, input.secretMarker), compatibility };
 }
 
-function projectManifest(manifest: HindsightCompatibilityWire): HindsightCompatibilityProjection {
+export function projectHindsightCompatibilityManifest(manifest: HindsightCompatibilityWire): HindsightCompatibilityProjection {
+  const build = manifest.source_identity.compatibility_build;
   if (manifest.base_api_version !== HINDSIGHT_API_VERSION || manifest.compatibility_version !== HINDSIGHT_COMPATIBILITY_VERSION ||
-      manifest.source_identity.compatibility_build !== HINDSIGHT_COMPATIBILITY_BUILD) {
+      ![HINDSIGHT_COMPATIBILITY_BUILD, HINDSIGHT_NATIVE_RESULT_BUILD, HINDSIGHT_CURRENT_STATE_BUILD, HINDSIGHT_APPLICATION_STATE_BUILD].includes(build)) {
     throw hindsightError("HINDSIGHT_EXTENSION_UNSUPPORTED");
   }
   if (manifest.provider.database_dialect !== "postgresql" || manifest.provider.storage_mode !== "sql_rows" || manifest.provider.lineage === null) {
@@ -63,7 +67,8 @@ function projectManifest(manifest: HindsightCompatibilityWire): HindsightCompati
   if (!supported(manifest.support) || manifest.journal.schema_version !== 1 || !manifest.journal.cursor_reset_supported || manifest.snapshot.schema_version !== 1) {
     throw hindsightError("HINDSIGHT_EXTENSION_UNSUPPORTED");
   }
-  const contracts = Object.values(manifest.contracts);
+  const contracts = [manifest.contracts.change_journal, manifest.contracts.conditional_mutation, manifest.contracts.logical_snapshot,
+    manifest.contracts.additive_observation_instructions, manifest.contracts.controlled_layer_projection];
   if (contracts.some((contract) => contract.version !== CONTRACT_VERSION || !supported(contract.support))) {
     throw hindsightError("HINDSIGHT_EXTENSION_UNSUPPORTED");
   }
@@ -83,6 +88,13 @@ function projectManifest(manifest: HindsightCompatibilityWire): HindsightCompati
       logicalSnapshot: manifest.contracts.logical_snapshot,
       additiveObservationInstructions: manifest.contracts.additive_observation_instructions,
       controlledLayerProjection: manifest.contracts.controlled_layer_projection,
+      ...(manifest.contracts.native_results ? { nativeResults: manifest.contracts.native_results } : {}),
+      ...(manifest.contracts.current_state_transfer ? { currentStateTransfer: manifest.contracts.current_state_transfer } : {}),
+      ...(manifest.contracts.cutover_verification ? { cutoverVerification: manifest.contracts.cutover_verification } : {}),
+      ...(manifest.contracts.application_state ? { applicationState: {
+        version: manifest.contracts.application_state.version, support: manifest.contracts.application_state.support } } : {}),
+      ...(manifest.contracts.application_reflect ? { applicationReflect: {
+        version: manifest.contracts.application_reflect.version, support: manifest.contracts.application_reflect.support } } : {}),
     },
   });
 }
@@ -96,6 +108,8 @@ export function hindsightConnectionFingerprint(connection: HindsightConnectionPr
 }
 
 function fingerprint(connection: HindsightConnectionProjection, secretMarker: string): string {
+  // This is the established settings/secret identity, not a hash of the accepted-build list. New independently
+  // negotiated cutover capabilities must not change already-frozen G1 dispatch or B3 configuration identities.
   return createHash("sha256").update(JSON.stringify({
     endpoint: connection.endpoint,
     deploymentMode: connection.deploymentMode,
@@ -107,5 +121,6 @@ function fingerprint(connection: HindsightConnectionProjection, secretMarker: st
     apiVersion: HINDSIGHT_API_VERSION,
     compatibilityVersion: HINDSIGHT_COMPATIBILITY_VERSION,
     compatibilityBuild: HINDSIGHT_COMPATIBILITY_BUILD,
+    nativeResultBuild: HINDSIGHT_NATIVE_RESULT_BUILD,
   })).digest("hex");
 }

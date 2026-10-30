@@ -1,0 +1,52 @@
+
+ RUN  v4.1.10 H:/TakiAgent-worktrees/t4/packages/core
+
+ ❯ src/server/methods/chat-send-sdk-transport.test.ts (9 tests | 5 failed) 1460ms
+     × 'partial', image=false: terminal notification, primary witness and one Effect settlement 149ms
+     × 'partial', image=true: terminal notification, primary witness and one Effect settlement 139ms
+     × 'tool-partial', image=false: terminal notification, primary witness and one Effect settlement 171ms
+     × 'graceful', image=false: terminal notification, primary witness and one Effect settlement 158ms
+     × 'rejecting', image=false: terminal notification, primary witness and one Effect settlement 158ms
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 4 passed (9)
+   Start at  16:23:41
+   Duration  4.78s (transform 2.08s, setup 0ms, import 2.97s, tests 1.46s, environment 0ms)
+
+undefined
+H:\TakiAgent-worktrees\t4\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/server/methods/chat-send-sdk-transport.test.ts --maxWorkers=4
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/server/methods/chat-send-sdk-transport.test.ts > approved cancellation policy over real HTTP and WebSocket transports > 'partial', image=false: terminal notification, primary witness and one Effect settlement
+ FAIL  src/server/methods/chat-send-sdk-transport.test.ts > approved cancellation policy over real HTTP and WebSocket transports > 'partial', image=true: terminal notification, primary witness and one Effect settlement
+ FAIL  src/server/methods/chat-send-sdk-transport.test.ts > approved cancellation policy over real HTTP and WebSocket transports > 'tool-partial', image=false: terminal notification, primary witness and one Effect settlement
+ FAIL  src/server/methods/chat-send-sdk-transport.test.ts > approved cancellation policy over real HTTP and WebSocket transports > 'graceful', image=false: terminal notification, primary witness and one Effect settlement
+AssertionError: expected "vi.fn()" to be called +0 times, but got 1 times
+ ❯ src/server/methods/chat-send-sdk-transport.test.ts:186:27
+    184|     expect(f.runs.status(ack.runId)).toMatchObject({ run: { state: out…
+    185|     expect(f.activity.read("taki")).toMatchObject({ status: "terminal"…
+    186|     expect(f.maintenance).toHaveBeenCalledTimes(scenario === "success"…
+       |                           ^
+    187|     expect(f.imageMaintenance).toHaveBeenCalledTimes(scenario === "suc…
+    188|     if (cancelled || scenario === "error") expect(f.usage).not.toHaveB…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/server/methods/chat-send-sdk-transport.test.ts > approved cancellation policy over real HTTP and WebSocket transports > 'rejecting', image=false: terminal notification, primary witness and one Effect settlement
+AssertionError: expected 'chat.error' to be 'chat.complete' // Object.is equality
+
+Expected: "chat.complete"
+Received: "chat.error"
+
+ ❯ src/server/methods/chat-send-sdk-transport.test.ts:181:33
+    179|     const terminal = notes.filter(note => note.method === CHAT_METHODS…
+    180|     expect(terminal).toHaveLength(1);
+    181|     expect(terminal[0]?.method).toBe(scenario === "prefill" || scenari…
+       |                                 ^
+    182|     if (scenario === "prefill") expect(ChatErrorSchema.parse(terminal[…
+    183|     const outcome = cancelled ? "cancelled" : scenario === "error" ? "…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+

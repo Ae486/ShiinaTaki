@@ -7,7 +7,7 @@ describe("tool presentation names", () => {
     "get_current_time", "memory_search", "memory_write", "memory_archive", "recall", "reflect", "retain",
     "update_memory", "restore_memory", "invalidate_memory", "avatar_set_expression", "avatar_play_motion",
     "read_file", "write_file", "schedule_task", "screenshot", "process_list", "clipboard_read", "clipboard_write",
-    "shell_open", "exec", "load_skill", "read_skill_resource", "extension_discover", "extension_describe", "extension_call",
+    "shell_open", "exec", "load_skill", "read_skill_resource", "extension_discover", "extension_describe", "extension_call", "manage_media_recommendations",
   ])("names the registered fixed tool %s", (key) => {
     expect(getKnownToolDisplayName(key)).toMatch(/\p{Script=Han}/u);
   });

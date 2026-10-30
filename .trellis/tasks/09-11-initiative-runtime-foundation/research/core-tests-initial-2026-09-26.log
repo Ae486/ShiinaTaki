@@ -1,0 +1,473 @@
+
+> @taki/core@0.0.0 test H:\TakiAgent-worktrees\t4\packages\core
+> vitest run "--maxWorkers=4"
+
+
+ RUN  v4.1.10 H:/TakiAgent-worktrees/t4/packages/core
+
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts (10 tests | 10 failed) 2183ms
+     × converges a fresh database and is a no-op after reopen 210ms
+     × converges the historical T4 17/18 MCP-Skill lineage through 024 234ms
+     × applies the committed main 021-023 tail to the pre-main database 217ms
+     × upgrades a version-31 database with an existing summary and reopens as a no-op 211ms
+     × preserves a legal Hindsight authority marker and activation receipt on reopen 215ms
+     × adds the current tail without rewriting an existing replica, checkpoint, or usable lease 242ms
+     × preserves the 034 history and data through all B4 storage and reopen 208ms
+     × preserves the main history and data through all B4 storage and reopen 220ms
+     × preserves the t4 history and data through all B4 storage and reopen 207ms
+     × preserves the both history and data through all B4 storage and reopen 215ms
+ ❯ src/db/pending-memory-repo.test.ts (23 tests | 1 failed) 2764ms
+     × applies the current migration tail after a populated version-34 database and reopens without changes 230ms
+ ❯ src/db/migrations/041-canonical-memory-maintenance.test.ts (10 tests | 2 failed) 1316ms
+     × applies a fresh ordered registry, enforces one pending span, and retains the exact eligibility baseline 122ms
+     × upgrades a real 040 Local/B2 history byte-for-byte, replays after deletion, and reopens without another migration 278ms
+ ❯ src/perception/privacy-pause-writer.test.ts (2 tests | 1 failed) 300ms
+     × finds pause mutations only in the operator-only perception.pauseSet method 201ms
+ ❯ src/db/migrations/048-memory-operations.test.ts (2 tests | 1 failed) 253ms
+     × applies on a fresh database and on a database at 047 141ms
+ ❯ src/db/scheduled-task-repo.test.ts (3 tests | 1 failed) 359ms
+     × backfills occurrence Character ownership when migration 030 follows an applied 029 database 102ms
+ ❯ src/config/knob-registry.test.ts (8 tests | 2 failed) 40ms
+     × covers exactly the research table's knob set, with no duplicates 21ms
+     × keeps apply metadata truthful for timing rows with and without current production consumers 2ms
+ ❯ src/memory/hindsight-runtime-composition.test.ts (22 tests | 1 failed) 11899ms
+     × refuses captured execution after epoch drift without changing provider or consulting Legacy 440ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 19 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/config/knob-registry.test.ts > CONFIG_KNOBS > covers exactly the research table's knob set, with no duplicates
+AssertionError: expected [ 'TAKI_AMBIENT_SCREENSHOT', …(70) ] to deeply equal [ 'TAKI_AMBIENT_SCREENSHOT', …(62) ]
+
+- Expected
++ Received
+
+@@ -24,10 +24,17 @@
+    "TAKI_HINDSIGHT_RERANKER_MODEL",
+    "TAKI_HINDSIGHT_RERANKER_PROVIDER",
+    "TAKI_HINDSIGHT_SETUP_TIMEOUT_MS",
+    "TAKI_HINDSIGHT_TEMPLATE_REVISION",
+    "TAKI_HOME_RESULT_TIMEOUT_MS",
++   "TAKI_INITIATIVE_BUSY_MAX_WAIT_MS",
++   "TAKI_INITIATIVE_ENABLED",
++   "TAKI_INITIATIVE_MODEL_HOUR_LIMIT",
++   "TAKI_INITIATIVE_OUTPUT_TTL_MS",
++   "TAKI_INITIATIVE_UTTERANCE_DAY_LIMIT",
++   "TAKI_INITIATIVE_UTTERANCE_GAP_MS",
++   "TAKI_INITIATIVE_UTTERANCE_HOUR_LIMIT",
+    "TAKI_LOG_LEVEL",
+    "TAKI_MAX_STEPS",
+    "TAKI_MEMORY_BM25_WEIGHTS",
+    "TAKI_MEMORY_INTENTIONS_DEFAULT_DAYS",
+    "TAKI_MEMORY_PINNED_BUDGET",
+@@ -48,10 +55,11 @@
+    "TAKI_RECONNECT_CAP_MS",
+    "TAKI_RECONNECT_STABILITY_RESET_MS",
+    "TAKI_RENDERER_LOAD_TIMEOUT_MS",
+    "TAKI_RPC_INTERACTIVE_TIMEOUT_MS",
+    "TAKI_RPC_LONG_TIMEOUT_MS",
++   "TAKI_SCHEDULED_OUTPUT_TTL_MS",
+    "TAKI_TRUST_LOOPBACK_OPERATOR",
+    "TAKI_UTILITY_API_KEY",
+    "TAKI_UTILITY_BASE_URL",
+    "TAKI_UTILITY_CONTEXT_TOKENS",
+    "TAKI_UTILITY_MODEL",
+
+ ❯ src/config/knob-registry.test.ts:78:30
+     76|   "TAKI_HINDSIGHT_RERANKER_PROVIDER",
+     77|   "TAKI_HINDSIGHT_RERANKER_MODEL",
+     78|   "TAKI_HINDSIGHT_POLICY_TIMEOUT_MS",
+       |                              ^
+     79|   "TAKI_HINDSIGHT_POLICY_PROMPT",
+     80| ];
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/19]⎯
+
+ FAIL  src/config/knob-registry.test.ts > CONFIG_KNOBS > keeps apply metadata truthful for timing rows with and without current production consumers
+AssertionError: expected [ 'TAKI_INITIATIVE_ENABLED', …(36) ] to deeply equal [ 'TAKI_MONITOR_MODE', …(28) ]
+
+- Expected
++ Received
+
+@@ -1,6 +1,14 @@
+  [
++   "TAKI_INITIATIVE_ENABLED",
++   "TAKI_INITIATIVE_MODEL_HOUR_LIMIT",
++   "TAKI_INITIATIVE_UTTERANCE_HOUR_LIMIT",
++   "TAKI_INITIATIVE_UTTERANCE_DAY_LIMIT",
++   "TAKI_INITIATIVE_UTTERANCE_GAP_MS",
++   "TAKI_INITIATIVE_BUSY_MAX_WAIT_MS",
++   "TAKI_INITIATIVE_OUTPUT_TTL_MS",
++   "TAKI_SCHEDULED_OUTPUT_TTL_MS",
+    "TAKI_MONITOR_MODE",
+    "TAKI_RECONNECT_BASE_MS",
+    "TAKI_RECONNECT_CAP_MS",
+    "TAKI_RECONNECT_STABILITY_RESET_MS",
+    "TAKI_WS_OPEN_AUTH_TIMEOUT_MS",
+
+ ❯ src/config/knob-registry.test.ts:92:90
+     92|       "TAKI_PROVIDER_API_KEY",
+     93|       "TAKI_VLM_API_KEY",
+     94|       "TAKI_UTILITY_API_KEY",
+       |                               ^
+     95|     ]);
+     96|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/19]⎯
+
+ FAIL  src/db/pending-memory-repo.test.ts > Pending Memory repository > applies the current migration tail after a populated version-34 database and reopens without changes
+AssertionError: expected [ Array(16) ] to deeply equal [ Array(14) ]
+
+- Expected
++ Received
+
+@@ -11,6 +11,8 @@
+    44,
+    45,
+    46,
+    47,
+    48,
++   49,
++   50,
+  ]
+
+ ❯ src/db/pending-memory-repo.test.ts:172:49
+    170|     const f = fixture(true, 34); const records = f.db.prepare("SELECT …
+    171|     const checkpoints = f.db.prepare("SELECT * FROM hindsight_replica_…
+    172|     const applied = f.reopen(); expect(applied).toEqual([35, 36, 37, 3…
+       |                                                 ^
+    173|     const row = f.repo.enqueue(intent()); expect(f.reopen()).toEqual([…
+    174|     expect(f.repo.get(pendingMemoryRef(row))).toEqual(row);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/19]⎯
+
+ FAIL  src/db/scheduled-task-repo.test.ts > ScheduledTaskRepo > backfills occurrence Character ownership when migration 030 follows an applied 029 database
+AssertionError: expected [ 30, 31, 32, 33, 34, 35, 36, …(14) ] to deeply equal [ 30, 31, 32, 33, 34, 35, 36, …(12) ]
+
+- Expected
++ Received
+
+@@ -16,6 +16,8 @@
+    44,
+    45,
+    46,
+    47,
+    48,
++   49,
++   50,
+  ]
+
+ ❯ src/db/scheduled-task-repo.test.ts:12:907
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/19]⎯
+
+ FAIL  src/perception/privacy-pause-writer.test.ts > privacy pause has exactly one production writer > finds pause mutations only in the operator-only perception.pauseSet method
+AssertionError: expected [ …(2) ] to deeply equal [ Array(1) ]
+
+- Expected
++ Received
+
+  [
++   "initiative\\initiative-runtime.ts",
+    "server\\methods\\perception-pause-set.ts",
+  ]
+
+ ❯ src/perception/privacy-pause-writer.test.ts:28:21
+     26|   it("finds pause mutations only in the operator-only perception.pause…
+     27|     const writers = productionFiles().filter((file) => MUTATORS.test(r…
+     28|     expect(writers).toEqual([ONLY_WRITER]);
+       |                     ^
+     29|   });
+     30|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/19]⎯
+
+ FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > refuses captured execution after epoch drift without changing provider or consulting Legacy
+AssertionError: expected [Function] to throw error including 'MEMORY_AUTHORITY_MISMATCH' but got 'MEMORY_INTEGRITY_ERROR'
+
+Expected: "MEMORY_AUTHORITY_MISMATCH"
+Received: "MEMORY_INTEGRITY_ERROR"
+
+ ❯ src/memory/hindsight-runtime-composition.test.ts:110:45
+    108|     if (change === "secret") f.secrets.catalog.set("memory.hindsight.c…
+    109|     if (change === "epoch") f.db.exec("UPDATE canonical_memory_authori…
+    110|     await expect(runtime.captureRun("taki")).rejects.toThrow("MEMORY_A…
+       |                                             ^
+    111|     const result = await recall(run); expect(result).toMatchObject({ o…
+    112|     expect(await run.automaticRecall!({ query: "fact", visibleContext:…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/19]⎯
+
+ FAIL  src/db/migrations/041-canonical-memory-maintenance.test.ts > 041 canonical maintenance history and ingestion schema > applies a fresh ordered registry, enforces one pending span, and retains the exact eligibility baseline
+AssertionError: expected 50 to be 48 // Object.is equality
+
+- Expected
++ Received
+
+- 48
++ 50
+
+ ❯ src/db/migrations/041-canonical-memory-maintenance.test.ts:57:40
+     55|     const applied: number[][] = []; const db = open(":memory:", MIGRAT…
+     56|     expect(applied).toEqual([MIGRATIONS.map(({ version }) => version)]…
+     57|     expect(MIGRATIONS.at(-1)?.version).toBe(50);
+       |                                        ^
+     58|     const tables = db.prepare("SELECT name FROM sqlite_schema WHERE ty…
+     59|     expect(addedTables.every((table) => tables.includes(table))).toBe(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/19]⎯
+
+ FAIL  src/db/migrations/041-canonical-memory-maintenance.test.ts > 041 canonical maintenance history and ingestion schema > upgrades a real 040 Local/B2 history byte-for-byte, replays after deletion, and reopens without another migration
+AssertionError: expected [ Array(1) ] to deeply equal [ [ 41, 42, 43, 44, 45, 46, 47, 48 ] ]
+
+- Expected
++ Received
+
+@@ -6,7 +6,9 @@
+      44,
+      45,
+      46,
+      47,
+      48,
++     49,
++     50,
+    ],
+  ]
+
+ ❯ src/db/migrations/041-canonical-memory-maintenance.test.ts:94:21
+     92|     const before = { history: historyBytes(old), current: currentRows(…
+     93|     const applied: number[][] = []; const upgraded = open(file, MIGRAT…
+     94|     expect(applied).toEqual([[41, 42, 43, 44, 45, 46, 47, 48, 49, 50]]…
+       |                     ^
+     95|     expect(historyBytes(upgraded)).toEqual(before.history);
+     96|     expect(currentRows(upgraded)).toEqual(before.current);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/19]⎯
+
+ FAIL  src/db/migrations/048-memory-operations.test.ts > migration 048 memory operations > applies on a fresh database and on a database at 047
+AssertionError: expected 50 to be 48 // Object.is equality
+
+- Expected
++ Received
+
+- 48
++ 50
+
+ ❯ src/db/migrations/048-memory-operations.test.ts:18:81
+     16| describe("migration 048 memory operations", () => {
+     17|   it("applies on a fresh database and on a database at 047", () => {
+     18|     expect(open().prepare("SELECT max(version) AS v FROM migrations").…
+       |                                                                                 ^
+     19|     const upgraded = open(MIGRATIONS.slice(0, 47));
+     20|     expect(upgraded.prepare("SELECT max(version) AS v FROM migrations"…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/19]⎯
+
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > converges a fresh database and is a no-op after reopen
+AssertionError: expected 50 to be 48 // Object.is equality
+
+- Expected
++ Received
+
+- 48
++ 50
+
+ ❯ expectFinalSchema src/db/migrations/lineage-reopen-matrix.test.ts:77:87
+     77|
+     78| function expectFinalSchema(db: Database): void {
+     79|   expect(db.prepare("SELECT max(version) AS version FROM migrations").…
+       |                                     ^
+     80|   expect(db.prepare("PRAGMA table_info(timeline_messages)").all().map(…
+     81|   const tables = db.prepare("SELECT name FROM sqlite_master WHERE type…
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts:196:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/19]⎯
+
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > converges the historical T4 17/18 MCP-Skill lineage through 024
+AssertionError: expected 50 to be 48 // Object.is equality
+
+- Expected
++ Received
+
+- 48
++ 50
+
+ ❯ expectFinalSchema src/db/migrations/lineage-reopen-matrix.test.ts:77:87
+     77|
+     78| function expectFinalSchema(db: Database): void {
+     79|   expect(db.prepare("SELECT max(version) AS version FROM migrations").…
+       |                                     ^
+     80|   expect(db.prepare("PRAGMA table_info(timeline_messages)").all().map(…
+     81|   const tables = db.prepare("SELECT name FROM sqlite_master WHERE type…
+ ❯ expectReopenNoOp src/db/migrations/lineage-reopen-matrix.test.ts:147:3
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts:250:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/19]⎯
+
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > applies the committed main 021-023 tail to the pre-main database
+AssertionError: expected [ [ 21, 22, 23, 24, 25, 26, …(24) ] ] to deeply equal [ [ 21, 22, 23, 24, 25, 26, …(22) ] ]
+
+- Expected
++ Received
+
+@@ -26,7 +26,9 @@
+      44,
+      45,
+      46,
+      47,
+      48,
++     49,
++     50,
+    ],
+  ]
+
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts:260:25
+    258|   });
+    259|
+    260|   it("applies the committed main 021-023 tail to the pre-main database…
+       |                         ^
+    261|     const path = createPath();
+    262|     const first = open(path, MIGRATIONS.slice(0, 20));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/19]⎯
+
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > upgrades a version-31 database with an existing summary and reopens as a no-op
+AssertionError: expected [ [ 32, 33, 34, 35, 36, 37, …(13) ] ] to deeply equal [ [ 32, 33, 34, 35, 36, 37, …(11) ] ]
+
+- Expected
++ Received
+
+@@ -15,7 +15,9 @@
+      44,
+      45,
+      46,
+      47,
+      48,
++     49,
++     50,
+    ],
+  ]
+
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts:277:21
+    275|   it("upgrades a version-31 database with an existing summary and reop…
+    276|     const path = createPath();
+    277|     const first = open(path, MIGRATIONS.slice(0, 31));
+       |                     ^
+    278|     first.prepare(`INSERT INTO conversation_summary (character_id,thro…
+    279|       VALUES ('taki',12,'historical summary','2026-08-30T00:00:00.000Z…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/19]⎯
+
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > preserves a legal Hindsight authority marker and activation receipt on reopen
+AssertionError: expected 50 to be 48 // Object.is equality
+
+- Expected
++ Received
+
+- 48
++ 50
+
+ ❯ expectFinalSchema src/db/migrations/lineage-reopen-matrix.test.ts:77:87
+     77|
+     78| function expectFinalSchema(db: Database): void {
+     79|   expect(db.prepare("SELECT max(version) AS version FROM migrations").…
+       |                                     ^
+     80|   expect(db.prepare("PRAGMA table_info(timeline_messages)").all().map(…
+     81|   const tables = db.prepare("SELECT name FROM sqlite_master WHERE type…
+ ❯ expectReopenNoOp src/db/migrations/lineage-reopen-matrix.test.ts:147:3
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts:318:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/19]⎯
+
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > adds the current tail without rewriting an existing replica, checkpoint, or usable lease
+AssertionError: expected [ [ 34, 35, 36, 37, 38, 39, …(11) ] ] to deeply equal [ Array(1) ]
+
+- Expected
++ Received
+
+@@ -13,7 +13,9 @@
+      44,
+      45,
+      46,
+      47,
+      48,
++     49,
++     50,
+    ],
+  ]
+
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts:341:21
+    339|     const lease = createHindsightReplicaLeaseRepo(first, () => at).acq…
+    340|     const checkpoint = { bankId: "bank", providerLineageId: uuid, bank…
+    341|       replicaEpochId: uuid, endCursor: 12, snapshotId: uuid, snapshotC…
+       |                     ^
+    342|       manifestDigest: createReplicaRecordStore(first, createIntlSegmen…
+    343|     first.transaction(() => publishReplicaCheckpoint(first, { previous…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/19]⎯
+
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > preserves the 034 history and data through all B4 storage and reopen
+AssertionError: expected [ [ 35, 36, 37, 38, 39, 40, …(10) ] ] to deeply equal [ Array(1) ]
+
+- Expected
++ Received
+
+@@ -12,7 +12,9 @@
+      44,
+      45,
+      46,
+      47,
+      48,
++     49,
++     50,
+    ],
+  ]
+
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts:372:21
+    370|     if (history !== "034") runMigrations(first, [history === "t4" ? ti…
+    371|     if (history === "both") first.exec(timeline035.sql);
+    372|     seedMemoryTimelineData(first, history);
+       |                     ^
+    373|     const receipts = first.prepare("SELECT version,applied_at FROM mig…
+    374|     const before = memoryTimelineData(first);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/19]⎯
+
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > preserves the main history and data through all B4 storage and reopen
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > preserves the t4 history and data through all B4 storage and reopen
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > preserves the both history and data through all B4 storage and reopen
+AssertionError: expected [ Array(1) ] to deeply equal [ Array(1) ]
+
+- Expected
++ Received
+
+@@ -11,7 +11,9 @@
+      44,
+      45,
+      46,
+      47,
+      48,
++     49,
++     50,
+    ],
+  ]
+
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts:372:21
+    370|     if (history !== "034") runMigrations(first, [history === "t4" ? ti…
+    371|     if (history === "both") first.exec(timeline035.sql);
+    372|     seedMemoryTimelineData(first, history);
+       |                     ^
+    373|     const receipts = first.prepare("SELECT version,applied_at FROM mig…
+    374|     const before = memoryTimelineData(first);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/19]⎯
+
+
+ Test Files  8 failed | 409 passed (417)
+      Tests  19 failed | 3334 passed | 1 skipped (3354)
+   Start at  19:11:17
+   Duration  169.42s (transform 22.73s, setup 0ms, import 236.30s, tests 278.43s, environment 70ms)
+
+H:\TakiAgent-worktrees\t4\packages\core:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/core@0.0.0 test: `vitest run "--maxWorkers=4"`
+Exit status 1

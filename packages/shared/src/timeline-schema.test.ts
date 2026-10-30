@@ -20,6 +20,15 @@ const entry = {
   createdAt: "2026-07-10T00:00:00.000Z",
 };
 
+describe("TimelineEntry source context", () => {
+  it("preserves optional known facts separately from role and original speech", () => {
+    const sourceContext = { generatedBy: { runId: "run", attemptId: "attempt" }, materials: [{ label: "Interview" }] };
+    expect(TimelineEntrySchema.parse({ ...entry, sourceContext })).toEqual({ ...entry, sourceContext });
+    expect(TimelineEntrySchema.parse(entry)).toEqual(entry);
+    expect(TimelineEntrySchema.safeParse({ ...entry, sourceContext: { materials: [{ speaker: 42 }] } }).success).toBe(false);
+  });
+});
+
 describe("TIMELINE_METHODS", () => {
   it("names the compatible timeline methods and complete batch notification", () => {
     expect(TIMELINE_METHODS).toEqual({

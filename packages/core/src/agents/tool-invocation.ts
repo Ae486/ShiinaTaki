@@ -37,6 +37,7 @@ export interface ToolInvocationBridge {
   get(object: object): ToolInvocationSnapshot | undefined;
   result(object: ToolCallIdentity): ToolInvocationSnapshot;
   alias(object: object, invocation: ToolInvocationSnapshot): void;
+  releaseCompleted(): void;
 }
 
 interface BridgeInput {
@@ -58,6 +59,8 @@ export function createToolInvocationBridge(input: BridgeInput): ToolInvocationBr
     get: (object) => state.objects.get(object),
     result: (object) => resultSnapshot(state, object),
     alias: (object, invocation) => { state.objects.set(object, invocation); },
+    // Called only after a complete SDK segment is drained; object aliases remain weak for late readers.
+    releaseCompleted() { state.requests.clear(); state.candidates.clear(); state.invocations.clear(); },
   };
 }
 

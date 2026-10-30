@@ -1,10 +1,10 @@
 /**
- * INPUT:  TimelineRepo, captured turn metadata, post-commit sinks, and optional Replay View policies
+ * INPUT:  TimelineRepo, captured turn metadata, exact commit receipts, post-commit sinks, and optional Replay View policies
  * OUTPUT: atomic turn/append/remove APIs and one project() source for all Replay View consumers
  * POS:    core/agents — one conversational writer and Character-scoped canonical Replay View boundary (ADR 0008)
  */
 import type { ModelMessage } from "ai";
-import type { TimelineCommitted, TimelineEntry } from "@taki/shared";
+import type { SourceContext, TimelineCommitted, TimelineEntry } from "@taki/shared";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
 import { estimateMessageTokens } from "../memory/token-estimator.ts";
 import { selectWindow } from "./context-window.ts";
@@ -60,17 +60,19 @@ export interface SourceBackstopHit {
 }
 
 export interface ConversationStore {
+  /** Called only within the owning delivery transaction; the caller publishes after the outer commit. */
+  appendDelivery(characterId: string, text: string, sourceContext?: SourceContext): TimelineEntry;
   /**
    * Persists the user turn and RETURNS the committed entry; images (#17) add image parts (mediaType + ref) — no
    * images = a legacy text-only row. The seq is returned so a cancel-before-reply can retract exactly this row.
    */
   appendUser(characterId: string, text: string, images?: UserImageInput[]): TimelineEntry;
-  appendAssistant(characterId: string, text: string): void;
+  appendAssistant(characterId: string, text: string, onCommitted?: (entry: TimelineEntry) => void): void;
   /**
    * Persists a whole turn's response tail (names-only assistant tool-call parts + tool-result messages + final text),
    * oldest-first, as returned by `result.responseMessages` — the fix for cross-turn tool-record loss (D1 #1).
    */
-  appendTurn(characterId: string, messages: TurnMessage[], toolDisplayNames?: Readonly<Record<string, string>>): void;
+  appendTurn(characterId: string, messages: TurnMessage[], options?: Readonly<Record<string, string>> | ((entry: TimelineEntry) => void)): void;
   commitTurn(input: TurnCommitInput): TimelineEntry[];
   /** Deletes one row by seq (cancel-retract) + fires onRemove; single Workspace/DB writer (invariant 2). */
   removeEntry(characterId: string, seq: number): void;
@@ -140,11 +142,20 @@ export function createConversationStore(deps: ConversationStoreDeps): Conversati
     return { messages: view.head === null ? messages : [view.head, ...messages], windowStartSeq: view.windowStartSeq, measurement: view.measurement };
   };
   return {
+    appendDelivery: (characterId, text, sourceContext) => repo.append({ characterId, role: "assistant", content: text,
+      ...(sourceContext === undefined ? {} : { sourceContext }) }),
     // No images = toUserEntryInput returns the legacy `{role:"user", content}` row (byte-identical to before #17).
     appendUser: (characterId, text, images = []) => commit(characterId, toUserEntryInput(text, images)),
-    appendAssistant: (characterId, text) => void commit(characterId, { role: "assistant", content: text }),
-    appendTurn: (characterId, messages, toolDisplayNames) => void commitConversationTurn(deps, { characterId, messages, toolDisplayNames }),
-    commitTurn: (input) => commitConversationTurn(deps, input),
+      appendAssistant: (characterId, text, onCommitted) => {
+        const entry = commit(characterId, { role: "assistant", content: text });
+        onCommitted?.(entry);
+      },
+      appendTurn: (characterId, messages, options) => {
+        const entries = commitConversationTurn(deps, { characterId, messages,
+          ...(typeof options === "function" ? {} : { toolDisplayNames: options }) });
+        if (typeof options === "function") for (const entry of entries) options(entry);
+      },
+      commitTurn: (input) => commitConversationTurn(deps, input),
     removeEntry: (characterId, seq) => {
       repo.deleteEntry(characterId, seq);
       onRemove?.({ characterId, seq });

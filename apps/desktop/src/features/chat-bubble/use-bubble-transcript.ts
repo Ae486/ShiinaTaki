@@ -14,7 +14,8 @@ export function useBubbleTranscript() {
   const replyMessageId = useChatBubbleStore((state) => state.replyMessageId);
   const legacyEpoch = useChatBubbleStore((state) => state.legacyEpoch);
   const presentationVersion = useChatBubbleStore((state) => state.presentationVersion);
-  const transcript = useMemo(() => projectBubbleTranscript({ activitySource, activity, reply, replyMessageId, legacyEpoch }),
-    [activitySource, activity, reply, replyMessageId, legacyEpoch]);
+  const committed = useChatBubbleStore((state) => state.committed);
+  const transcript = useMemo(() => projectBubbleTranscript({ activitySource, activity, reply, replyMessageId, legacyEpoch, committed }),
+    [activitySource, activity, reply, replyMessageId, legacyEpoch, committed]);
   return { transcript, presentationVersion };
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { enterSends } from "./composer.tsx";
+import { enterSends } from "./conversation-composer.tsx";
 
 describe("composer Enter-to-send gate (A2 IME safety)", () => {
   it("sends on plain Enter outside an IME composition", () => {

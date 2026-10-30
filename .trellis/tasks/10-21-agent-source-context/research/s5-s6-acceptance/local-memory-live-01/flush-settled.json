@@ -1,0 +1,339 @@
+{
+  "stage": "flush-settled",
+  "utilityUsage": {
+    "calls": 2,
+    "inputTokens": 1346,
+    "outputTokens": 496,
+    "usageUnknown": 0
+  },
+  "primaryWitnesses": [
+    {
+      "timeline_seq": 2,
+      "entry_id": "2db509de-f754-4706-b32b-9e52cb5d2602",
+      "entry_digest": "9fd5f05266b89bc57febf7afc2f8895970dabafd6c8de68c6194fc91e4b9e403",
+      "run_id": "1d91974e-e6e3-4e01-be19-50915fb6789b",
+      "committed_through_seq": 5
+    },
+    {
+      "timeline_seq": 3,
+      "entry_id": "30a9eb18-a48a-4390-9383-200347b2d0a2",
+      "entry_digest": "68fe561eb17ad1f8e5ec6ce73725d2322978413829bc8586666c09d0931da354",
+      "run_id": "1d91974e-e6e3-4e01-be19-50915fb6789b",
+      "committed_through_seq": 5
+    },
+    {
+      "timeline_seq": 4,
+      "entry_id": "d6669329-03df-4b6b-955e-e401788f0f7a",
+      "entry_digest": "d0bcffc6133925adf96e16fe309c05cab06c8987c0a38df1a4a8a1722797f553",
+      "run_id": "1d91974e-e6e3-4e01-be19-50915fb6789b",
+      "committed_through_seq": 5
+    },
+    {
+      "timeline_seq": 5,
+      "entry_id": "3f8d7906-9d8a-4ee5-a7b3-4606ec3a19dc",
+      "entry_digest": "558efce37fd2964fbf6b50320c0017021cd8de57d8f012da46611727ccccbc68",
+      "run_id": "1d91974e-e6e3-4e01-be19-50915fb6789b",
+      "committed_through_seq": 5
+    }
+  ],
+  "timeline": [
+    {
+      "seq": 1,
+      "id": "c76ff5cc-0c3b-4bbe-a77d-165ac4c5919c",
+      "characterId": "taki",
+      "role": "assistant",
+      "content": "EXCLUDED_PUBLICATION_MARKER",
+      "sourceContext": {
+        "generatedBy": {
+          "runId": "bb9eef29-6a4a-4508-945e-29fcb4651a29",
+          "attemptId": "fa5392ed-d6fc-4c7d-a44e-7f335533ee0d",
+          "subagentId": "faf5df1d-9bb6-4cc3-bdc2-08cb8151255e"
+        },
+        "materials": [
+          {
+            "label": "Fixture video",
+            "reference": "https://www.bilibili.com/video/BV1UEaq6qEZt/?p=1",
+            "time": "10-20 seconds; moment first"
+          }
+        ]
+      },
+      "createdAt": "2026-10-23T03:22:46.027Z"
+    },
+    {
+      "seq": 2,
+      "id": "2db509de-f754-4706-b32b-9e52cb5d2602",
+      "characterId": "taki",
+      "role": "user",
+      "content": "请记住：视频里的林述说‘我被裁员了，我的项目也停了’，那是他的经历。我本人没有被裁员，但是我的‘星河’项目停了。以后聊到我的工作，请保留这个区别。",
+      "createdAt": "2026-10-23T03:22:46.075Z"
+    },
+    {
+      "seq": 3,
+      "id": "30a9eb18-a48a-4390-9383-200347b2d0a2",
+      "characterId": "taki",
+      "role": "assistant",
+      "content": "[tool-call: read_file]",
+      "parts": [
+        {
+          "type": "tool-call",
+          "toolCallId": "read-source",
+          "toolName": "read_file",
+          "displayName": "读取工作区文件"
+        }
+      ],
+      "createdAt": "2026-10-23T03:22:46.188Z"
+    },
+    {
+      "seq": 4,
+      "id": "d6669329-03df-4b6b-955e-e401788f0f7a",
+      "characterId": "taki",
+      "role": "tool",
+      "content": "[tool-result: read_file -> json]",
+      "parts": [
+        {
+          "type": "tool-result",
+          "toolCallId": "read-source",
+          "toolName": "read_file",
+          "displayName": "读取工作区文件",
+          "output": {
+            "type": "json",
+            "value": {
+              "ok": true,
+              "path": "tool-only.txt",
+              "content": "EXCLUDED_TOOL_MARKER: external file content is not user biography.",
+              "bytes": 66,
+              "truncated": false
+            }
+          },
+          "sourceMaterials": [
+            {
+              "key": "result",
+              "source": {
+                "label": "Workspace file",
+                "reference": "tool-only.txt"
+              }
+            }
+          ]
+        }
+      ],
+      "createdAt": "2026-10-23T03:22:46.189Z"
+    },
+    {
+      "seq": 5,
+      "id": "3f8d7906-9d8a-4ee5-a7b3-4606ec3a19dc",
+      "characterId": "taki",
+      "role": "assistant",
+      "content": "我分清楚了：林述在视频里讲的是他被裁员、项目停止；你本人没有被裁员，但你的‘星河’项目停了。",
+      "createdAt": "2026-10-23T03:22:46.191Z"
+    }
+  ],
+  "privateMessages": [
+    {
+      "role": "user",
+      "content": "Prepare grounded companion reactions for this accepted video."
+    },
+    {
+      "role": "assistant",
+      "content": "private"
+    }
+  ],
+  "spans": [
+    {
+      "source_json": "{\"schemaVersion\":1,\"characterId\":\"taki\",\"fromSeq\":1,\"throughSeq\":5,\"messages\":[{\"id\":\"2db509de-f754-4706-b32b-9e52cb5d2602\",\"seq\":2,\"role\":\"user\",\"text\":\"请记住：视频里的林述说‘我被裁员了，我的项目也停了’，那是他的经历。我本人没有被裁员，但是我的‘星河’项目停了。以后聊到我的工作，请保留这个区别。\",\"createdAt\":\"2026-10-23T03:22:46.075Z\"},{\"id\":\"3f8d7906-9d8a-4ee5-a7b3-4606ec3a19dc\",\"seq\":5,\"role\":\"assistant\",\"text\":\"我分清楚了：林述在视频里讲的是他被裁员、项目停止；你本人没有被裁员，但你的‘星河’项目停了。\",\"createdAt\":\"2026-10-23T03:22:46.191Z\"}],\"excludedRows\":2,\"proofs\":[{\"id\":\"2db509de-f754-4706-b32b-9e52cb5d2602\",\"seq\":2,\"digest\":\"9fd5f05266b89bc57febf7afc2f8895970dabafd6c8de68c6194fc91e4b9e403\"},{\"id\":\"30a9eb18-a48a-4390-9383-200347b2d0a2\",\"seq\":3,\"digest\":\"68fe561eb17ad1f8e5ec6ce73725d2322978413829bc8586666c09d0931da354\"},{\"id\":\"d6669329-03df-4b6b-955e-e401788f0f7a\",\"seq\":4,\"digest\":\"d0bcffc6133925adf96e16fe309c05cab06c8987c0a38df1a4a8a1722797f553\"},{\"id\":\"3f8d7906-9d8a-4ee5-a7b3-4606ec3a19dc\",\"seq\":5,\"digest\":\"558efce37fd2964fbf6b50320c0017021cd8de57d8f012da46611727ccccbc68\"}]}",
+      "gate_json": "{\"decision\":\"keep\",\"route\":\"global\",\"fromSeq\":2,\"throughSeq\":5}",
+      "extraction_json": "{\"facts\":[{\"layer\":\"profile\",\"content\":\"2026-10-23，用户让我记住：视频里的林述说「我被裁员了，我的项目也停了」，那是林述自己的经历。\",\"importance\":7,\"disclosure\":\"林述被裁员那个视频\"},{\"layer\":\"profile\",\"content\":\"用户本人没有被裁员，但他自己的「星河」项目停了——他特意要求把这个区别记清楚。\",\"importance\":7,\"disclosure\":\"我的「星河」项目停了\"},{\"layer\":\"profile\",\"content\":\"用户要求以后聊到他的工作时，保留他不是被裁员、只是「星河」项目停了这一区别。\",\"importance\":7,\"disclosure\":\"聊到我的工作时\"}],\"batches\":[{\"epochId\":\"e954e94c-02cf-4fa1-8a07-d83dad631dbc\",\"bankId\":\"global\",\"characterId\":\"taki\",\"requestId\":\"local-ingest-bank:2286a1a7802918e52f3e4932d82990ae99d2eb1fe8bb881eb25b7a0e7bb53da3\",\"now\":\"2026-10-23T03:22:50.310Z\",\"source\":{\"authorityEpochId\":\"e954e94c-02cf-4fa1-8a07-d83dad631dbc\",\"bankId\":\"global\",\"documentId\":\"auto-source:c80caa71ac8b209b25952547de3f891f3d60541a05b2c32354163aad3512e534\",\"contentHash\":\"d055e48944b91de040d38c9016623a511d622a5cf24c61826c5ca313be060318\",\"retainedText\":\"请记住：视频里的林述说‘我被裁员了，我的项目也停了’，那是他的经历。我本人没有被裁员，但是我的‘星河’项目停了。以后聊到我的工作，请保留这个区别。\\n我分清楚了：林述在视频里讲的是他被裁员、项目停止；你本人没有被裁员，但你的‘星河’项目停了。\",\"context\":null,\"tags\":[],\"metadata\":{\"taki:conversation-source:v1\":{\"version\":1,\"spanId\":\"local-ingest:240dcae788d3b188bbedca999fa3e4a2bb7f4f396413940c5160dd4e48f8c0f1\",\"entries\":[{\"id\":\"2db509de-f754-4706-b32b-9e52cb5d2602\",\"seq\":2,\"role\":\"user\",\"createdAt\":\"2026-10-23T03:22:46.075Z\",\"utf16Start\":0,\"utf16Length\":73},{\"id\":\"3f8d7906-9d8a-4ee5-a7b3-4606ec3a19dc\",\"seq\":5,\"role\":\"assistant\",\"createdAt\":\"2026-10-23T03:22:46.191Z\",\"utf16Start\":74,\"utf16Length\":46}]}},\"observationScopes\":null,\"provenance\":{\"actor\":\"agent\",\"origin\":\"auto-gate\",\"characterId\":\"taki\",\"timelineFromSeq\":2,\"timelineToSeq\":5,\"capturedAt\":\"2026-10-23T03:22:46.191Z\",\"sanitized\":true,\"sourceRef\":\"timeline:taki:2:5\"},\"revision\":1,\"createdAt\":\"2026-10-23T03:22:46.191Z\",\"updatedAt\":\"2026-10-23T03:22:50.310Z\"},\"units\":[{\"unit\":{\"authorityEpochId\":\"e954e94c-02cf-4fa1-8a07-d83dad631dbc\",\"bankId\":\"global\",\"memoryId\":\"local-fact:dd1ccf35a407224e4baeee60db33c77dbcd804d03490df81abd9b2d41e531b36\",\"documentId\":\"auto-source:c80caa71ac8b209b25952547de3f891f3d60541a05b2c32354163aad3512e534\",\"chunkId\":null,\"text\":\"2026-10-23，用户让我记住：视频里的林述说「我被裁员了，我的项目也停了」，那是林述自己的经历。\",\"context\":null,\"factType\":\"world\",\"state\":\"valid\",\"revision\":1,\"tags\":[\"taki-layer:profile\"],\"metadata\":{},\"entities\":[],\"sourceMemoryIds\":[],\"observationScopes\":null,\"eventDate\":\"2026-10-23T03:22:46.191Z\",\"occurredStart\":null,\"occurredEnd\":null,\"mentionedAt\":\"2026-10-23T03:22:46.191Z\",\"createdAt\":\"2026-10-23T03:22:50.310Z\",\"updatedAt\":\"2026-10-23T03:22:50.310Z\",\"editedAt\":null,\"consolidatedAt\":null,\"consolidationFailedAt\":null,\"invalidationReason\":null,\"invalidatedAt\":null,\"proofCount\":1},\"policy\":{\"authorityEpochId\":\"e954e94c-02cf-4fa1-8a07-d83dad631dbc\",\"bankId\":\"global\",\"memoryId\":\"local-fact:dd1ccf35a407224e4baeee60db33c77dbcd804d03490df81abd9b2d41e531b36\",\"layerId\":\"profile\",\"importance\":7,\"visibility\":\"retrieved\",\"disclosure\":\"林述被裁员那个视频\",\"origin\":\"self\",\"emotionalWeight\":null,\"retention\":{\"kind\":\"permanent\"},\"policyVersion\":1,\"updatedAt\":\"2026-10-23T03:22:50.310Z\"},\"searchTerms\":\"2026 10 23 用户 让 记住 视频 里 林 述 说 我被 裁员 我的 项目 停了 那是 经历 被 那个\"},{\"unit\":{\"authorityEpochId\":\"e954e94c-02cf-4fa1-8a07-d83dad631dbc\",\"bankId\":\"global\",\"memoryId\":\"local-fact:7ce8e690dcee9539e7b2470bddf775a598f97ce5ba54e7b47e101d3c1e6a1d8f\",\"documentId\":\"auto-source:c80caa71ac8b209b25952547de3f891f3d60541a05b2c32354163aad3512e534\",\"chunkId\":null,\"text\":\"用户本人没有被裁员，但他自己的「星河」项目停了——他特意要求把这个区别记清楚。\",\"context\":null,\"factType\":\"world\",\"state\":\"valid\",\"revision\":1,\"tags\":[\"taki-layer:profile\"],\"metadata\":{},\"entities\":[],\"sourceMemoryIds\":[],\"observationScopes\":null,\"eventDate\":\"2026-10-23T03:22:46.191Z\",\"occurredStart\":null,\"occurredEnd\":null,\"mentionedAt\":\"2026-10-23T03:22:46.191Z\",\"createdAt\":\"2026-10-23T03:22:50.310Z\",\"updatedAt\":\"2026-10-23T03:22:50.310Z\",\"editedAt\":null,\"consolidatedAt\":null,\"consolidationFailedAt\":null,\"invalidationReason\":null,\"invalidatedAt\":null,\"proofCount\":1},\"policy\":{\"authorityEpochId\":\"e954e94c-02cf-4fa1-8a07-d83dad631dbc\",\"bankId\":\"global\",\"memoryId\":\"local-fact:7ce8e690dcee9539e7b2470bddf775a598f97ce5ba54e7b47e101d3c1e6a1d8f\",\"layerId\":\"profile\",\"importance\":7,\"visibility\":\"retrieved\",\"disclosure\":\"我的「星河」项目停了\",\"origin\":\"self\",\"emotionalWeight\":null,\"retention\":{\"kind\":\"permanent\"},\"policyVersion\":1,\"updatedAt\":\"2026-10-23T03:22:50.310Z\"},\"searchTerms\":\"用户 本人 没有 被 裁员 但 星河 项目 停了 特意 要求 把 这个 区别 记 清楚 我的\"},{\"unit\":{\"authorityEpochId\":\"e954e94c-02cf-4fa1-8a07-d83dad631dbc\",\"bankId\":\"global\",\"memoryId\":\"local-fact:56f57cdf03a15e4e7f2e40ae9f0ba781f8a9a63f1c8d32db9658a51860fca6f3\",\"documentId\":\"auto-source:c80caa71ac8b209b25952547de3f891f3d60541a05b2c32354163aad3512e534\",\"chunkId\":null,\"text\":\"用户要求以后聊到他的工作时，保留他不是被裁员、只是「星河」项目停了这一区别。\",\"context\":null,\"factType\":\"world\",\"state\":\"valid\",\"revision\":1,\"tags\":[\"taki-layer:profile\"],\"metadata\":{},\"entities\":[],\"sourceMemoryIds\":[],\"observationScopes\":null,\"eventDate\":\"2026-10-23T03:22:46.191Z\",\"occurredStart\":null,\"occurredEnd\":null,\"mentionedAt\":\"2026-10-23T03:22:46.191Z\",\"createdAt\":\"2026-10-23T03:22:50.310Z\",\"updatedAt\":\"2026-10-23T03:22:50.310Z\",\"editedAt\":null,\"consolidatedAt\":null,\"consolidationFailedAt\":null,\"invalidationReason\":null,\"invalidatedAt\":null,\"proofCount\":1},\"policy\":{\"authorityEpochId\":\"e954e94c-02cf-4fa1-8a07-d83dad631dbc\",\"bankId\":\"global\",\"memoryId\":\"local-fact:56f57cdf03a15e4e7f2e40ae9f0ba781f8a9a63f1c8d32db9658a51860fca6f3\",\"layerId\":\"profile\",\"importance\":7,\"visibility\":\"retrieved\",\"disclosure\":\"聊到我的工作时\",\"origin\":\"self\",\"emotionalWeight\":null,\"retention\":{\"kind\":\"permanent\"},\"policyVersion\":1,\"updatedAt\":\"2026-10-23T03:22:50.310Z\"},\"searchTerms\":\"用户 要求 以后 聊到 他的 工作 时 保留 不是 被 裁员 只是 星河 项目 停了 一 区别 我的\"}],\"duplicates\":[]}]}",
+      "state": "complete"
+    }
+  ],
+  "sources": [
+    {
+      "bank_id": "global",
+      "retained_text": "请记住：视频里的林述说‘我被裁员了，我的项目也停了’，那是他的经历。我本人没有被裁员，但是我的‘星河’项目停了。以后聊到我的工作，请保留这个区别。\n我分清楚了：林述在视频里讲的是他被裁员、项目停止；你本人没有被裁员，但你的‘星河’项目停了。",
+      "metadata_json": "{\"taki:conversation-source:v1\":{\"version\":1,\"spanId\":\"local-ingest:240dcae788d3b188bbedca999fa3e4a2bb7f4f396413940c5160dd4e48f8c0f1\",\"entries\":[{\"id\":\"2db509de-f754-4706-b32b-9e52cb5d2602\",\"seq\":2,\"role\":\"user\",\"createdAt\":\"2026-10-23T03:22:46.075Z\",\"utf16Start\":0,\"utf16Length\":73},{\"id\":\"3f8d7906-9d8a-4ee5-a7b3-4606ec3a19dc\",\"seq\":5,\"role\":\"assistant\",\"createdAt\":\"2026-10-23T03:22:46.191Z\",\"utf16Start\":74,\"utf16Length\":46}]}}"
+    }
+  ],
+  "memories": [
+    {
+      "unit": {
+        "authorityEpochId": "e954e94c-02cf-4fa1-8a07-d83dad631dbc",
+        "bankId": "global",
+        "memoryId": "local-fact:56f57cdf03a15e4e7f2e40ae9f0ba781f8a9a63f1c8d32db9658a51860fca6f3",
+        "documentId": "auto-source:c80caa71ac8b209b25952547de3f891f3d60541a05b2c32354163aad3512e534",
+        "chunkId": null,
+        "text": "用户要求以后聊到他的工作时，保留他不是被裁员、只是「星河」项目停了这一区别。",
+        "context": null,
+        "factType": "world",
+        "state": "valid",
+        "revision": 1,
+        "tags": [
+          "taki-layer:profile"
+        ],
+        "metadata": {},
+        "entities": [],
+        "sourceMemoryIds": [],
+        "observationScopes": null,
+        "eventDate": "2026-10-23T03:22:46.191Z",
+        "occurredStart": null,
+        "occurredEnd": null,
+        "mentionedAt": "2026-10-23T03:22:46.191Z",
+        "createdAt": "2026-10-23T03:22:50.310Z",
+        "updatedAt": "2026-10-23T03:22:50.310Z",
+        "editedAt": null,
+        "consolidatedAt": null,
+        "consolidationFailedAt": null,
+        "invalidationReason": null,
+        "invalidatedAt": null,
+        "proofCount": 1
+      },
+      "policy": {
+        "authorityEpochId": "e954e94c-02cf-4fa1-8a07-d83dad631dbc",
+        "bankId": "global",
+        "memoryId": "local-fact:56f57cdf03a15e4e7f2e40ae9f0ba781f8a9a63f1c8d32db9658a51860fca6f3",
+        "layerId": "profile",
+        "importance": 7,
+        "visibility": "retrieved",
+        "disclosure": "聊到我的工作时",
+        "origin": "self",
+        "emotionalWeight": null,
+        "retention": {
+          "kind": "permanent"
+        },
+        "policyVersion": 1,
+        "updatedAt": "2026-10-23T03:22:50.310Z"
+      },
+      "provenance": {
+        "actor": "agent",
+        "origin": "auto-gate",
+        "characterId": "taki",
+        "timelineFromSeq": 2,
+        "timelineToSeq": 5,
+        "capturedAt": "2026-10-23T03:22:46.191Z",
+        "sanitized": true,
+        "sourceRef": "timeline:taki:2:5"
+      }
+    },
+    {
+      "unit": {
+        "authorityEpochId": "e954e94c-02cf-4fa1-8a07-d83dad631dbc",
+        "bankId": "global",
+        "memoryId": "local-fact:7ce8e690dcee9539e7b2470bddf775a598f97ce5ba54e7b47e101d3c1e6a1d8f",
+        "documentId": "auto-source:c80caa71ac8b209b25952547de3f891f3d60541a05b2c32354163aad3512e534",
+        "chunkId": null,
+        "text": "用户本人没有被裁员，但他自己的「星河」项目停了——他特意要求把这个区别记清楚。",
+        "context": null,
+        "factType": "world",
+        "state": "valid",
+        "revision": 1,
+        "tags": [
+          "taki-layer:profile"
+        ],
+        "metadata": {},
+        "entities": [],
+        "sourceMemoryIds": [],
+        "observationScopes": null,
+        "eventDate": "2026-10-23T03:22:46.191Z",
+        "occurredStart": null,
+        "occurredEnd": null,
+        "mentionedAt": "2026-10-23T03:22:46.191Z",
+        "createdAt": "2026-10-23T03:22:50.310Z",
+        "updatedAt": "2026-10-23T03:22:50.310Z",
+        "editedAt": null,
+        "consolidatedAt": null,
+        "consolidationFailedAt": null,
+        "invalidationReason": null,
+        "invalidatedAt": null,
+        "proofCount": 1
+      },
+      "policy": {
+        "authorityEpochId": "e954e94c-02cf-4fa1-8a07-d83dad631dbc",
+        "bankId": "global",
+        "memoryId": "local-fact:7ce8e690dcee9539e7b2470bddf775a598f97ce5ba54e7b47e101d3c1e6a1d8f",
+        "layerId": "profile",
+        "importance": 7,
+        "visibility": "retrieved",
+        "disclosure": "我的「星河」项目停了",
+        "origin": "self",
+        "emotionalWeight": null,
+        "retention": {
+          "kind": "permanent"
+        },
+        "policyVersion": 1,
+        "updatedAt": "2026-10-23T03:22:50.310Z"
+      },
+      "provenance": {
+        "actor": "agent",
+        "origin": "auto-gate",
+        "characterId": "taki",
+        "timelineFromSeq": 2,
+        "timelineToSeq": 5,
+        "capturedAt": "2026-10-23T03:22:46.191Z",
+        "sanitized": true,
+        "sourceRef": "timeline:taki:2:5"
+      }
+    },
+    {
+      "unit": {
+        "authorityEpochId": "e954e94c-02cf-4fa1-8a07-d83dad631dbc",
+        "bankId": "global",
+        "memoryId": "local-fact:dd1ccf35a407224e4baeee60db33c77dbcd804d03490df81abd9b2d41e531b36",
+        "documentId": "auto-source:c80caa71ac8b209b25952547de3f891f3d60541a05b2c32354163aad3512e534",
+        "chunkId": null,
+        "text": "2026-10-23，用户让我记住：视频里的林述说「我被裁员了，我的项目也停了」，那是林述自己的经历。",
+        "context": null,
+        "factType": "world",
+        "state": "valid",
+        "revision": 1,
+        "tags": [
+          "taki-layer:profile"
+        ],
+        "metadata": {},
+        "entities": [],
+        "sourceMemoryIds": [],
+        "observationScopes": null,
+        "eventDate": "2026-10-23T03:22:46.191Z",
+        "occurredStart": null,
+        "occurredEnd": null,
+        "mentionedAt": "2026-10-23T03:22:46.191Z",
+        "createdAt": "2026-10-23T03:22:50.310Z",
+        "updatedAt": "2026-10-23T03:22:50.310Z",
+        "editedAt": null,
+        "consolidatedAt": null,
+        "consolidationFailedAt": null,
+        "invalidationReason": null,
+        "invalidatedAt": null,
+        "proofCount": 1
+      },
+      "policy": {
+        "authorityEpochId": "e954e94c-02cf-4fa1-8a07-d83dad631dbc",
+        "bankId": "global",
+        "memoryId": "local-fact:dd1ccf35a407224e4baeee60db33c77dbcd804d03490df81abd9b2d41e531b36",
+        "layerId": "profile",
+        "importance": 7,
+        "visibility": "retrieved",
+        "disclosure": "林述被裁员那个视频",
+        "origin": "self",
+        "emotionalWeight": null,
+        "retention": {
+          "kind": "permanent"
+        },
+        "policyVersion": 1,
+        "updatedAt": "2026-10-23T03:22:50.310Z"
+      },
+      "provenance": {
+        "actor": "agent",
+        "origin": "auto-gate",
+        "characterId": "taki",
+        "timelineFromSeq": 2,
+        "timelineToSeq": 5,
+        "capturedAt": "2026-10-23T03:22:46.191Z",
+        "sanitized": true,
+        "sourceRef": "timeline:taki:2:5"
+      }
+    }
+  ],
+  "flush": {
+    "status": "success",
+    "writes": 3,
+    "throughSeq": 5
+  }
+}

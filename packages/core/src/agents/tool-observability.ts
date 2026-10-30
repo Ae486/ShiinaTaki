@@ -46,6 +46,7 @@ export function createToolObserver(input: ToolObserverInput, now: () => number) 
   return {
     invocations,
     execute,
+    currentInvocation: () => execution.getStore(),
     bindEffect({ toolCallId, effectId }: { toolCallId: string; effectId: string }) {
       const invocation = execution.getStore();
       if (invocation?.toolCallId === toolCallId) state.effectIds.set(invocation.invocationId, effectId);
@@ -64,6 +65,10 @@ export function createToolObserver(input: ToolObserverInput, now: () => number) 
     },
     end: (event: ToolExecutionEndEvent) => observeTerminal({ event, invocations, recorder }),
     observeStreamPart: (part: unknown) => observeToolPart({ part, invocations, recorder }),
+    releaseCompleted() {
+      state.started.clear(); state.settled.clear(); state.effectIds.clear(); state.processingStartedAt.clear();
+      invocations.releaseCompleted();
+    },
   };
 }
 

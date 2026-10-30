@@ -9,7 +9,7 @@
 ## Schema conventions
 
 - Tables and columns: `snake_case`. Timestamps: `*_at`, ISO-8601 UTC strings.
-- Migrations: numbered TS modules `db/migrations/NNN-description.ts`, each exporting `{ version, sql }` (plain SQL string constants — keeps the db layer fs-free and bundle-safe), aggregated in one explicit ordered list (no fs/glob discovery), applied at startup each inside a transaction, tracked in a `migrations` table. No ORM — hand-written SQL in repository modules (`db/timeline-repo.ts`, `db/memory-repo.ts`), one repo per aggregate.
+- Migrations: numbered TS modules `db/migrations/NNN-description.ts`, exporting `{ version, sql }` with optional declarative `ensureNullableTextColumns: [{table, column}]` or exact `schemaBranches`. Constant SQL and guarded DDL keep the layer fs-free and bundle-safe. One explicit ordered registry applies each migration inside a transaction and records it in `migrations`. No ORM — hand-written SQL in repositories, one repo per aggregate.
 - Memory search: SQLite **FTS5** virtual table indexing Workspace markdown files; markdown is the source of truth, the index is rebuildable.
 
 ## Patterns
@@ -21,65 +21,15 @@
 
 ## Scenario: Parallel Branch Migration Convergence
 
-### 1. Scope / Trigger
+See [SQLite Migration Lineage and Convergence](./sqlite-migration-lineage.md) before assigning or merging
+migration versions, adding conditional schema branches, or supporting databases with an older meaning of an
+already-recorded version. Applied receipts remain immutable; convergence requires a higher guarded migration.
 
-- Trigger: two long-lived branches add SQLite migrations after the same shared base, or a merge discovers that one
-  numeric version represented different schemas in databases already exercised by either branch.
-- Treat an applied migration number as immutable history. Renaming files in Git does not rename versions already
-  recorded in a user's `migrations` table.
+## Transaction Failure Isolation
 
-### 2. Signatures
-
-- Migration module: `db/migrations/NNN-description.ts` exporting `{ version: NNN, sql: string }`.
-- Registry: `MIGRATIONS` in `db/migrations/index-list.ts`, strictly ascending and containing one entry per version.
-- Compatibility bridge: a new higher-numbered migration whose idempotent SQL guarantees the union of both historical
-  schemas without deleting or rewriting either lineage.
-
-### 3. Contracts
-
-- Before assigning a migration version, compare the target branch registry and every branch expected to merge before
-  release. Never reserve a number only in a local task document.
-- If conflicting versions have reached a real database, choose one canonical forward numbering for new installs and
-  append a convergence migration after both histories. Use additive `IF NOT EXISTS` DDL where the bridge must tolerate
-  either schema already being present.
-- The migration runner remains max-version based. Therefore the convergence sequence must explicitly create anything
-  skipped by the historical max; it cannot rely on replaying a lower version.
-
-### 4. Validation & Error Matrix
-
-| Condition | Required result |
-| --- | --- |
-| Conflict found before either migration ran anywhere | Renumber one branch before merge and update tests/registry. |
-| Both meanings of a version reached developer or user databases | Preserve recorded history and add a higher convergence migration. |
-| Bridge DDL fails when one lineage already owns a table/index | Make the bridge idempotent; do not drop or replace the existing object. |
-| Registry contains duplicate or non-ascending versions | Fail review; migration order is not merge-ready. |
-| Old-lineage reopen lacks any schema from the merged product | Fail the migration gate and add/repair the convergence bridge. |
-
-### 5. Good/Base/Bad Cases
-
-- Good: simulate each historical lineage in a temporary file, reopen with the merged registry, and prove every required
-  table plus the final migration version exists.
-- Base: a fresh database applies the canonical ordered registry once and a second open applies nothing.
-- Bad: mechanically rename `017-feature-a.ts` to `018-feature-a.ts` after a database recorded version 17, or resolve the
-  registry conflict with whole-file ours/theirs selection.
-
-### 6. Tests Required
-
-- Focused tests for every renumbered migration and the convergence migration.
-- Temporary-file reopen tests for lineage A, lineage B, and a fresh install; assert final versions and required tables.
-- Full Core tests plus a real Core boot against an isolated data directory after synchronization.
-- `git diff --check` and a registry review proving unique, ascending versions and matching module names/exports.
-
-### 7. Wrong vs Correct
-
-```ts
-// Wrong: version 17 now means a different schema to databases that already recorded it.
-export const skillMigration = { version: 17, sql: "CREATE TABLE skill_packages (...)" };
-
-// Correct: preserve the canonical sequence and append an idempotent bridge for historical databases.
-export const skillMigration = { version: 19, sql: "CREATE TABLE IF NOT EXISTS skill_packages (...)" };
-export const convergenceMigration = { version: 20, sql: canonicalMemoryMigration.sql };
-```
+See [SQLite Transaction Failure Isolation](./sqlite-transaction-isolation.md) before changing the wrapper or relying
+on nested savepoints/deferred constraints. It defines COMMIT-failure rollback, logical-depth restoration and the
+SQL-entry guards that prevent auto-commit escape after SQLite aborts an enclosing transaction.
 
 ## Scenario: Run Event Ledger and Post-Commit Live Plane
 
@@ -100,7 +50,8 @@ export const convergenceMigration = { version: 20, sql: canonicalMemoryMigration
 
 - Lifecycle state mutation, Attempt/Receipt mutation, and corresponding RunEvent append occur in one short synchronous
   `db.transaction` callback. Event validation or insert failure rolls back the state transition.
-- Publish only after commit. Live delivery is best effort; bounded asynchronous queues expose overflow/lag state and
+- Register publication with `db.afterCommit` so a surrounding transaction cannot leak events after a savepoint
+  RELEASE and before the outer COMMIT. Live delivery is best effort; bounded asynchronous queues expose overflow/lag state and
   consumers recover gaps from the durable cursor. Observer errors never change Run correctness.
 - Idempotent admission reuses the existing Run/Attempt and returns its unchanged event tail; it does not append a second
   admission fact.
@@ -151,9 +102,29 @@ let committed: RunEvent[] = [];
 db.transaction(() => {
   updateRunState(db);
   committed = eventRepo.appendMany(events);
+  db.afterCommit(() => liveBus.publish(committed));
 });
-liveBus.publish(committed);
 ```
+
+### Linked private delegation records
+
+`subagent_conversations`, `subagent_inputs`, `run_messages` and `subagent_executions` hold private Runtime evidence,
+not relationship Timeline or semantic Memory. Install the configured `RunLinkedState` before linked admission and
+recovery. Its admission and canonical terminal participants are required synchronous writes; failure rolls back
+Run/Attempt/Receipt/events and linked result/pointer changes together. Start/dispatch refusal, explicit settlement
+and direct recovery settlement must all use the final cancellation/deadline-adjusted terminal outcome.
+
+Exact `workInputId`/`workSeq` controls input eligibility; child-global sequence is display order. Independent queued
+work cannot supersede another work's completion. Capture the work expiry once at input acceptance and preserve it
+through messages, continuation, retries and linked Run deadlines. First Effect receipts remain immutable, while
+every actual later model intent retains its own receipt and replay deduplicates the logical input.
+
+Persist child proposals against the exact active Attempt and work-token digest. A newer active identity may replace
+the proposal slot; same-identity edits and stale callbacks refuse. Canonical terminal results remain immutable.
+Discard stale proposal body/source instead of relabelling it as covering newer input. Missing current output still
+produces an explicit terminal status and does not suppress the captured completion policy. Real work-watermark
+supersession is separate from proposal availability. Private transcript/result writes never grant Memory or reply
+authority; the shared execution and publication owners enforce those contracts.
 
 ## Scenario: Run-Owned Effect Intent, Settlement, and Usage
 
@@ -440,5 +411,16 @@ await fence.quiesce({ timeoutMs }, () => activateCanonicalLocal(db, {
 
 ## Canonical Memory Replica Synchronization
 
+See [Current Local Cutover Coverage](./memory-local-cutover-coverage.md) for B4 current-state manifests, additive
+037/038 evidence tables, writer reservations, typed field bindings, and readiness refusals independent of B2 counts.
+See [Current-State Transfer and First Activation](./memory-current-state-cutover.md) for migration 039, complete typed
+captures/imports, native maintenance evidence, retained snapshot/raw checkpoint publication and durable known-drift refusal.
+
 See [Memory Replica Sync](./memory-replica-sync.md) for the B5 journal, response bounds, canonical projection,
-lease/transaction/checkpoint, restart-read, and result-receipt contracts.
+lease/transaction/checkpoint, captured Authority/Bank publication guards, and restart-read contracts. It also defines
+migration 035 Pending Memory identity/CAS, native/derived/local-completion phases, separate unconfirmed overlays,
+same-lease reset continuation, and the explicit provider evidence required before recovery can be called complete.
+G1 adds an explicit tracked dispatch and compact verified factual-result receipt to existing JSON state; migration 035
+and old intent/receipt bytes remain unchanged. Only the original identity and an actual transactionally matching
+checkpoint may confirm a new tracked write. Legacy derived-wait rows are not promoted automatically.
+See [G1 Native Result Recovery](./memory-native-result-recovery.md) for the current tracked protocol.

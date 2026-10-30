@@ -80,7 +80,7 @@ function appendBatch(db: Database, events: Array<Omit<RunEvent, "eventId" | "seq
         eventId: event.eventId, runId: event.runId, attemptId: event.attemptId ?? null, seq: event.seq,
         schemaVersion: event.schemaVersion, category: event.category, kind: event.kind,
         occurredAt: event.occurredAt, source: event.source,
-        correlation: event.correlation ? JSON.stringify(event.correlation) : null, payload: JSON.stringify(event.payload),
+        correlation: "correlation" in event && event.correlation ? JSON.stringify(event.correlation) : null, payload: JSON.stringify(event.payload),
       });
       return event;
     });

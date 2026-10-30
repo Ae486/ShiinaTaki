@@ -1,0 +1,45 @@
+{
+  "workspace": "H:\\TakiAgent-worktrees\\t4",
+  "branch": "task/t4-skills-mcp-productization",
+  "implementationFiles": 33,
+  "reviewTestFiles": 6,
+  "reviewSpecs": [
+    ".trellis/spec/backend/sqlite-transaction-isolation.md",
+    ".trellis/spec/backend/database-guidelines.md"
+  ],
+  "finalHashMismatches": [],
+  "utf8BomWhitespaceViolations": [],
+  "diffCheck": { "command": "git diff --check", "exitCode": 0, "log": "diff-check.log" },
+  "lint": {
+    "command": "pnpm lint",
+    "exitCode": 0,
+    "log": "lint-final.log"
+  },
+  "typecheck": {
+    "command": "pnpm -r typecheck",
+    "exitCode": 0,
+    "log": "typecheck-final.log"
+  },
+  "tests": {
+    "fullCommand": "pnpm -r test --maxWorkers=4",
+    "fullExitCode": 1,
+    "fullLog": "tests.log",
+    "fullFailures": 16,
+    "failureCause": "Migration 056 missing from six existing current-tail assertions and one explicit historical sequence",
+    "repairedFiles": 6,
+    "focusedPassed": 49,
+    "focusedFailed": 0,
+    "focusedReport": "migration-regressions.json",
+    "combinedPassed": 6017,
+    "combinedSkipped": 2,
+    "secondFullRunClaimed": false
+  },
+  "taskContextValidation": {
+    "exitCode": 0,
+    "implementEntries": 8,
+    "checkEntries": 6
+  },
+  "sourceChangedAfterBoot": false,
+  "realModelCalls": 0,
+  "disposition": "pass_s1_foundation"
+}

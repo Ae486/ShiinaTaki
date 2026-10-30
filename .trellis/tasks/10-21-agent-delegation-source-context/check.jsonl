@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Required checks and focused implementation quality"}
+{"file": ".trellis/spec/backend/e2e-harness.md", "reason": "Deterministic and real-agent evidence are distinct"}
+{"file": ".trellis/spec/backend/co-watching.md", "reason": "Preserve media revision and playback delivery behavior"}
+{"file": ".trellis/tasks/10-21-agent-delegation-source-context/research/planning-brief.md", "reason": "Reviewed package, lifecycle and source decisions; read linked full reports for the boundary being changed"}

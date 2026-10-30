@@ -1,0 +1,386 @@
+[
+  {
+    "name": "create-harness-sandbox-template.test.ts",
+    "path": "packages/harness/src/agent/create-harness-sandbox-template.test.ts",
+    "sha": "e3e0bb87aecad654c86f0f2342050deaf7848890",
+    "size": 4910,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/create-harness-sandbox-template.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/create-harness-sandbox-template.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/e3e0bb87aecad654c86f0f2342050deaf7848890",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/create-harness-sandbox-template.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/create-harness-sandbox-template.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/e3e0bb87aecad654c86f0f2342050deaf7848890",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/create-harness-sandbox-template.test.ts"
+    }
+  },
+  {
+    "name": "create-harness-sandbox-template.ts",
+    "path": "packages/harness/src/agent/create-harness-sandbox-template.ts",
+    "sha": "62697c2a164354896a318662677f0b898235a920",
+    "size": 2546,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/create-harness-sandbox-template.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/create-harness-sandbox-template.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/62697c2a164354896a318662677f0b898235a920",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/create-harness-sandbox-template.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/create-harness-sandbox-template.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/62697c2a164354896a318662677f0b898235a920",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/create-harness-sandbox-template.ts"
+    }
+  },
+  {
+    "name": "get-harness-error-message.test.ts",
+    "path": "packages/harness/src/agent/get-harness-error-message.test.ts",
+    "sha": "709684c0347ee72cf4d7e3e242e1d99a78a82ab8",
+    "size": 1417,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/get-harness-error-message.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/get-harness-error-message.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/709684c0347ee72cf4d7e3e242e1d99a78a82ab8",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/get-harness-error-message.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/get-harness-error-message.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/709684c0347ee72cf4d7e3e242e1d99a78a82ab8",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/get-harness-error-message.test.ts"
+    }
+  },
+  {
+    "name": "get-harness-error-message.ts",
+    "path": "packages/harness/src/agent/get-harness-error-message.ts",
+    "sha": "8cc6fb5db4f2e9a5c6c29bd13a443e25ac0408d7",
+    "size": 911,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/get-harness-error-message.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/get-harness-error-message.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/8cc6fb5db4f2e9a5c6c29bd13a443e25ac0408d7",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/get-harness-error-message.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/get-harness-error-message.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/8cc6fb5db4f2e9a5c6c29bd13a443e25ac0408d7",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/get-harness-error-message.ts"
+    }
+  },
+  {
+    "name": "harness-agent-session.ts",
+    "path": "packages/harness/src/agent/harness-agent-session.ts",
+    "sha": "cbb4e5f4f9fb6b0c61852c982924669971bf278c",
+    "size": 31614,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent-session.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-session.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/cbb4e5f4f9fb6b0c61852c982924669971bf278c",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-session.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent-session.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/cbb4e5f4f9fb6b0c61852c982924669971bf278c",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-session.ts"
+    }
+  },
+  {
+    "name": "harness-agent-settings.test-d.ts",
+    "path": "packages/harness/src/agent/harness-agent-settings.test-d.ts",
+    "sha": "9c14ddb323c60623db805cc2f8b0d0baefcd3bc2",
+    "size": 11861,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent-settings.test-d.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-settings.test-d.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/9c14ddb323c60623db805cc2f8b0d0baefcd3bc2",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-settings.test-d.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent-settings.test-d.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/9c14ddb323c60623db805cc2f8b0d0baefcd3bc2",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-settings.test-d.ts"
+    }
+  },
+  {
+    "name": "harness-agent-settings.ts",
+    "path": "packages/harness/src/agent/harness-agent-settings.ts",
+    "sha": "039f6d27bcce9eb8d105f0bf5ddbf2f40f68a08b",
+    "size": 13060,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent-settings.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-settings.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/039f6d27bcce9eb8d105f0bf5ddbf2f40f68a08b",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-settings.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent-settings.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/039f6d27bcce9eb8d105f0bf5ddbf2f40f68a08b",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-settings.ts"
+    }
+  },
+  {
+    "name": "harness-agent-tool-approval-continuation.test.ts",
+    "path": "packages/harness/src/agent/harness-agent-tool-approval-continuation.test.ts",
+    "sha": "5e537511478481394124197869c25a3e7cedc22b",
+    "size": 3391,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent-tool-approval-continuation.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-tool-approval-continuation.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/5e537511478481394124197869c25a3e7cedc22b",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-tool-approval-continuation.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent-tool-approval-continuation.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/5e537511478481394124197869c25a3e7cedc22b",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-tool-approval-continuation.test.ts"
+    }
+  },
+  {
+    "name": "harness-agent-tool-approval-continuation.ts",
+    "path": "packages/harness/src/agent/harness-agent-tool-approval-continuation.ts",
+    "sha": "621d3c94ceb87bf6c4895d8157481d2cf06c172d",
+    "size": 2719,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent-tool-approval-continuation.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-tool-approval-continuation.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/621d3c94ceb87bf6c4895d8157481d2cf06c172d",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-tool-approval-continuation.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent-tool-approval-continuation.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/621d3c94ceb87bf6c4895d8157481d2cf06c172d",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-tool-approval-continuation.ts"
+    }
+  },
+  {
+    "name": "harness-agent-tool-result-continuation.test.ts",
+    "path": "packages/harness/src/agent/harness-agent-tool-result-continuation.test.ts",
+    "sha": "d2338191d7e5461f55d16a70974d084609279a77",
+    "size": 2402,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent-tool-result-continuation.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-tool-result-continuation.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/d2338191d7e5461f55d16a70974d084609279a77",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-tool-result-continuation.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent-tool-result-continuation.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/d2338191d7e5461f55d16a70974d084609279a77",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-tool-result-continuation.test.ts"
+    }
+  },
+  {
+    "name": "harness-agent-tool-result-continuation.ts",
+    "path": "packages/harness/src/agent/harness-agent-tool-result-continuation.ts",
+    "sha": "6fd8103c2a2dff733c5efde6fb39b1e0ceca10c3",
+    "size": 463,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent-tool-result-continuation.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-tool-result-continuation.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/6fd8103c2a2dff733c5efde6fb39b1e0ceca10c3",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-tool-result-continuation.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent-tool-result-continuation.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/6fd8103c2a2dff733c5efde6fb39b1e0ceca10c3",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-tool-result-continuation.ts"
+    }
+  },
+  {
+    "name": "harness-agent-tool-types.ts",
+    "path": "packages/harness/src/agent/harness-agent-tool-types.ts",
+    "sha": "dd161ec24ae87e2d5e0efae8428679df3cd790a3",
+    "size": 601,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent-tool-types.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-tool-types.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/dd161ec24ae87e2d5e0efae8428679df3cd790a3",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-tool-types.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent-tool-types.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/dd161ec24ae87e2d5e0efae8428679df3cd790a3",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-tool-types.ts"
+    }
+  },
+  {
+    "name": "harness-agent-types.ts",
+    "path": "packages/harness/src/agent/harness-agent-types.ts",
+    "sha": "4471e4fd5a3bce51ffccded6ae5b7d5c129de228",
+    "size": 2099,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent-types.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-types.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/4471e4fd5a3bce51ffccded6ae5b7d5c129de228",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-types.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent-types.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/4471e4fd5a3bce51ffccded6ae5b7d5c129de228",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent-types.ts"
+    }
+  },
+  {
+    "name": "harness-agent.test-d.ts",
+    "path": "packages/harness/src/agent/harness-agent.test-d.ts",
+    "sha": "6ec3fa614ffb867cdcf617e3fecbc3a898acefa5",
+    "size": 592,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent.test-d.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent.test-d.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/6ec3fa614ffb867cdcf617e3fecbc3a898acefa5",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent.test-d.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent.test-d.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/6ec3fa614ffb867cdcf617e3fecbc3a898acefa5",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent.test-d.ts"
+    }
+  },
+  {
+    "name": "harness-agent.test.ts",
+    "path": "packages/harness/src/agent/harness-agent.test.ts",
+    "sha": "ff2fa218b50757f07ea5579d6f0d6f53ecb9d01c",
+    "size": 159187,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/ff2fa218b50757f07ea5579d6f0d6f53ecb9d01c",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/ff2fa218b50757f07ea5579d6f0d6f53ecb9d01c",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent.test.ts"
+    }
+  },
+  {
+    "name": "harness-agent.ts",
+    "path": "packages/harness/src/agent/harness-agent.ts",
+    "sha": "df505cb9433243cc1da196eb3c6bc2792c49ec30",
+    "size": 46304,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/df505cb9433243cc1da196eb3c6bc2792c49ec30",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/harness-agent.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/df505cb9433243cc1da196eb3c6bc2792c49ec30",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/harness-agent.ts"
+    }
+  },
+  {
+    "name": "index.ts",
+    "path": "packages/harness/src/agent/index.ts",
+    "sha": "9ae521b385fb84ab91e9f2c7f035f3b8e91980a1",
+    "size": 2123,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/index.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/index.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/9ae521b385fb84ab91e9f2c7f035f3b8e91980a1",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/index.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/index.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/9ae521b385fb84ab91e9f2c7f035f3b8e91980a1",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/index.ts"
+    }
+  },
+  {
+    "name": "internal",
+    "path": "packages/harness/src/agent/internal",
+    "sha": "4aca44a5c84ba12a89fc35f449a255a8a174e8a0",
+    "size": 0,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/internal?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/tree/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/internal",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/trees/4aca44a5c84ba12a89fc35f449a255a8a174e8a0",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/internal?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/trees/4aca44a5c84ba12a89fc35f449a255a8a174e8a0",
+      "html": "https://github.com/vercel/ai/tree/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/internal"
+    }
+  },
+  {
+    "name": "observability",
+    "path": "packages/harness/src/agent/observability",
+    "sha": "d5fef12fb7eb02f347ec0f15f3d0910cbb09c9d4",
+    "size": 0,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/observability?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/tree/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/observability",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/trees/d5fef12fb7eb02f347ec0f15f3d0910cbb09c9d4",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/observability?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/trees/d5fef12fb7eb02f347ec0f15f3d0910cbb09c9d4",
+      "html": "https://github.com/vercel/ai/tree/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/observability"
+    }
+  },
+  {
+    "name": "prepare-harness-sandbox-template.test.ts",
+    "path": "packages/harness/src/agent/prepare-harness-sandbox-template.test.ts",
+    "sha": "bb4539cd4c9d5dbc98bf6af2c19d66b711bf2f69",
+    "size": 4040,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/prepare-harness-sandbox-template.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/prepare-harness-sandbox-template.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/bb4539cd4c9d5dbc98bf6af2c19d66b711bf2f69",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/prepare-harness-sandbox-template.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/prepare-harness-sandbox-template.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/bb4539cd4c9d5dbc98bf6af2c19d66b711bf2f69",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/prepare-harness-sandbox-template.test.ts"
+    }
+  },
+  {
+    "name": "prepare-harness-sandbox-template.ts",
+    "path": "packages/harness/src/agent/prepare-harness-sandbox-template.ts",
+    "sha": "7ca944c3fbf4bdd5c6061b6482a9ae5b17515a3c",
+    "size": 3517,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/prepare-harness-sandbox-template.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/prepare-harness-sandbox-template.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/7ca944c3fbf4bdd5c6061b6482a9ae5b17515a3c",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/prepare-harness-sandbox-template.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/prepare-harness-sandbox-template.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/7ca944c3fbf4bdd5c6061b6482a9ae5b17515a3c",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/prepare-harness-sandbox-template.ts"
+    }
+  },
+  {
+    "name": "prepare-sandbox-for-harness.test.ts",
+    "path": "packages/harness/src/agent/prepare-sandbox-for-harness.test.ts",
+    "sha": "50180cba8fc002a005af224a6550b19b45b2b7b6",
+    "size": 6353,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/prepare-sandbox-for-harness.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/prepare-sandbox-for-harness.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/50180cba8fc002a005af224a6550b19b45b2b7b6",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/prepare-sandbox-for-harness.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/prepare-sandbox-for-harness.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/50180cba8fc002a005af224a6550b19b45b2b7b6",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/prepare-sandbox-for-harness.test.ts"
+    }
+  },
+  {
+    "name": "prepare-sandbox-for-harness.ts",
+    "path": "packages/harness/src/agent/prepare-sandbox-for-harness.ts",
+    "sha": "617dd308997edde7166468702849940f91caa850",
+    "size": 4876,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/prepare-sandbox-for-harness.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/prepare-sandbox-for-harness.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/617dd308997edde7166468702849940f91caa850",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/prepare-sandbox-for-harness.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/prepare-sandbox-for-harness.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/617dd308997edde7166468702849940f91caa850",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/prepare-sandbox-for-harness.ts"
+    }
+  },
+  {
+    "name": "telemetry-integration.test.ts",
+    "path": "packages/harness/src/agent/telemetry-integration.test.ts",
+    "sha": "d0420aa5d367f28924e4278449aa0cc8365bebd1",
+    "size": 26107,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/telemetry-integration.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/telemetry-integration.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/d0420aa5d367f28924e4278449aa0cc8365bebd1",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/telemetry-integration.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/harness/src/agent/telemetry-integration.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/d0420aa5d367f28924e4278449aa0cc8365bebd1",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/harness/src/agent/telemetry-integration.test.ts"
+    }
+  }
+]

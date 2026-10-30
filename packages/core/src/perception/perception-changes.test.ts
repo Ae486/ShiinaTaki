@@ -22,6 +22,32 @@ describe("Perception absolute pause projection deadline", () => {
   beforeEach(() => { vi.useFakeTimers(); vi.setSystemTime(1_000); });
   afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); });
 
+  it("delivers one local invalidation after a batch without acquiring operator interest", () => {
+    const local = vi.fn(() => { throw new Error("local observer failed"); });
+    const changes = createPerceptionChanges({ pauseState: () => ({ paused: false, until: null }), onChanged: local });
+    expect(() => changes.batch(() => { changes.changed(); changes.changed(); })).not.toThrow();
+    expect(local).toHaveBeenCalledTimes(1);
+    expect(changes.subscriptions.count()).toBe(0);
+    expect(vi.getTimerCount()).toBe(0);
+    changes.dispose(); changes.changed();
+    expect(local).toHaveBeenCalledTimes(1);
+  });
+
+  it("exposes a compound consent retirement once, after all synchronous producers settle", () => {
+    const h = harness(); h.subscribe();
+    h.changes.batch(() => {
+      h.changes.changed();
+      h.changes.batch(() => h.changes.changed());
+      h.pause.pauseUntil(5_000);
+      expect(h.sink).not.toHaveBeenCalled();
+    });
+    expect(h.sink).toHaveBeenCalledExactlyOnceWith({ revision: 1 });
+    expect(vi.getTimerCount()).toBe(1);
+    vi.advanceTimersByTime(4_000);
+    expect(h.sink.mock.calls).toEqual([[{ revision: 1 }], [{ revision: 2 }]]);
+    h.changes.dispose();
+  });
+
   it("does no read or timer work with zero interested connections", () => {
     const h = harness();
     h.changes.changed();

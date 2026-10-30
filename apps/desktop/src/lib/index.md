@@ -1,14 +1,21 @@
 # lib/
+- ws-client-subagents.ts — Shared-validated child read/control RPCs and retryable physical-client subscription; no mutation replay
+- ws-client-subagent-inbox.ts — Shared-validated explicit parent-event recovery inspection and idempotent continuation RPCs
+- ws-client-initiative.ts — Shared-validated Pattern review/lifecycle, explicit setup, same-Monitor policy and separate backoff read/reset facade
+- ws-client-co-watching.ts — Shared-validated Co-Watching read/start/stop, contextual invitation read/respond and Character-specific retryable subscription setup
+- ws-client-presence.ts — Shared-validated presence and ordinary committed Timeline presentation-report RPC facade
+- ws-client-user-timezone.ts — Shared-validated Core timezone read/update/designated-source report RPC facade
 Cross-cutting Pet UI clients + seams (talk to the Agent Core / hold window-shared services). Framework-free apart from
 icons/ (the shared glyph set) and the two window-shared React hooks below.
-- ws-client.ts — operator WS client composition: exact initiating-request acknowledgement, independent activity/commit observers, handshake and typed request families
-- ws-client-routes.ts — strict inbound zod boundary, isolated typed push fan-out including Perception/Extension hints, and physical-generation retirement
-- ws-client-methods.ts — command-display echo validation and schema-validated operator methods, including read-only activity recovery and optional exact-Run cancel
+- ws-client.ts — operator WS client composition: exact initiating-request acknowledgement, independent activity/commit observers, handshake and typed request families; operator WS JSON-RPC client to the Core (browser WebSocket): public turn/handshake/monitor subscribe-unsubscribe wiring plus the memory-operation family
+- ws-client-routes.ts — strict inbound zod boundary, isolated typed push fan-out including Perception/Extension/backoff/Co-Watching hints, and physical-generation retirement; owns the D29 mid-turn-close abort
+- ws-client-methods.ts — command-display echo validation and schema-validated operator methods, including read-only activity recovery, optional exact-Run cancel and the avatar.outcome report; outbound half: handshake plus schema-validated operator methods including extension convergence
 - ws-chat-turn.ts — bounded acknowledgement-race buffering, exact Character/message matching and one initiating-request settlement
 - chat-activity-state.ts — shared immutable Chat/Pet activity reducer, stable item keys and missing-sequence detection
 - chat-activity-coalescer.ts — per-generation/message/attempt/segment text cadence with immediate semantic boundaries and cancellable publication
 - chat-activity-recovery.ts — subscribe/read/live reconciliation, bounded races, explicit unavailable state, read-only gap recovery and disposal
 - tool-activity-display.ts — shared captured-name and truthful phase/outcome vocabulary for Chat and Pet
+- ws-client-memory-operations.ts — outbound sibling: memory.authority.status + memory.operations.submit/status/list/cancel wrappers and shared, explicitly retryable memory.operations.subscribe
 - rpc-deadline.ts — method-class timing table + typed deadline error + json-rpc-2.0 native timeout requester seam
 - timing-policy.ts — window-owned bootstrap/last-good timing policy store; validates full Core config refreshes without persistence
 - timing-policy-sync.ts — serialized last-good full-policy refresh after changes and recovered config membership

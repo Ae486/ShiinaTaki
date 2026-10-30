@@ -1424,7 +1424,7 @@ Committed the independently verified offline Waves 0-2 implementation and associ
 - B4 current-Local coverage/final fence, B6 wiring and live activation remain gated. No task finish/archive, push, real Hindsight/LLM call, existing-user-data migration or protected-backup access occurred.
 
 
-## Session 31: Home continuity closeout and Heartbeat planning entry
+## Session T4-31: Home continuity closeout and Heartbeat planning entry
 
 **Date**: 2026-09-08
 **Task**: Home continuity closeout and Heartbeat planning entry
@@ -1478,3 +1478,45 @@ Implemented and formally checked the Lab three-arm mouth comparison, pose previe
 ### Status
 
 [OK] **Completed**
+
+
+## Session main-31: Hindsight closure Stage 1: durable memory operations
+
+**Date**: 2026-09-19
+**Task**: Hindsight closure Stage 1: durable memory operations
+**Branch**: `main`
+
+### Summary
+
+Core-owned durable operation owner (setup validate/apply, manual replica sync), interrupted-setup recovery, composite memory.authority.status read and a Home operations card; archived 09-19-hindsight-durable-operations.
+
+### Main Changes
+
+- memory_operations table (migration 048) with single-flight partial index; settlement derived only from persisted producer state; stage-aware cancel; boot reconciliation
+- HINDSIGHT_SETUP_INTERRUPTED for busy phases found at boot; failed validate clears compatibility
+- memory.operations.* methods, changed push fan-out, memory.authority.status read; Home card refetches on push/reconnect/remount
+- Spec memory-operations.md; D84 records replica.sync attribution limits
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `406d7cd` | (see git log) |
+| `eb20c58` | (see git log) |
+| `4b2694f` | (see git log) |
+| `7d80d87` | (see git log) |
+| `18fe4d4` | (see git log) |
+
+### Testing
+
+- [OK] typecheck 5/5, lint clean, Shared 512 / Core 3088 / Desktop 567 tests green
+- [OK] Isolated boot through migration 048 on a non-default port with clean SIGINT exit; manual acceptance not run
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Stage 2: Local-only onboarding, existing-instance first activation (PR03 source custody, PR05 Local-only slice), active Bank/configuration lifecycle
+- Scoped grill for PR02 before Stage 3; U1 before Stage 4

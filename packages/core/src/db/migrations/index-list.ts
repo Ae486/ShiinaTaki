@@ -4,6 +4,7 @@
  * POS:    core/db/migrations — the single registry of migrations; append each new NNN module here in version order
  */
 import type { Migration } from "../migration-runner.ts";
+import { agentConversationOrderMigration060 } from "./060-agent-conversation-order.ts";
 import { timelineMigration001 } from "./001-timeline.ts";
 import { memoryMigration002 } from "./002-memory.ts";
 import { memoryAutoStateMigration003 } from "./003-memory-auto-state.ts";
@@ -38,7 +39,34 @@ import { runUsageDetailsMigration031 } from "./031-run-usage-details.ts";
 import { conversationCompactionLifecycleMigration032 } from "./032-conversation-compaction-lifecycle.ts";
 import { hindsightReplicaSyncMigration033 } from "./033-hindsight-replica-sync.ts";
 import { hindsightReplicaSchedulerMigration034 } from "./034-hindsight-replica-scheduler.ts";
-import { timelinePresentationMigration035 } from "./035-timeline-presentation.ts";
+import { pendingMemoryMigration035 } from "./035-pending-memory.ts";
+import { memoryTimelineConvergenceMigration036 } from "./036-memory-timeline-convergence.ts";
+import { hindsightLocalCoverageMigration037 } from "./037-hindsight-local-coverage.ts";
+import { hindsightSourceEvidenceMigration038 } from "./038-hindsight-source-evidence.ts";
+import { hindsightCurrentStateMigration039 } from "./039-hindsight-current-state.ts";
+import { hindsightCutoverConvergenceMigration040 } from "./040-hindsight-cutover-convergence.ts";
+import { canonicalMemoryMaintenanceMigration041 } from "./041-canonical-memory-maintenance.ts";
+import { hindsightApplicationStateMigration042 } from "./042-hindsight-application-state.ts";
+import { hindsightIngestionMigration043 } from "./043-hindsight-ingestion.ts";
+import { hindsightApplicationCommandsMigration044 } from "./044-hindsight-application-commands.ts";
+import { hindsightPolicyWorkMigration045 } from "./045-hindsight-policy-work.ts";
+import { hindsightRuntimeAdmissionMigration046 } from "./046-hindsight-runtime-admission.ts";
+import { hindsightMemoryWritesMigration047 } from "./047-hindsight-memory-writes.ts";
+import { memoryOperationsMigration048 } from "./048-memory-operations.ts";
+import { initiativeDeliveryMigration049 } from "./049-initiative-delivery.ts";
+import { initiativeModelOpportunitiesMigration050 } from "./050-initiative-model-opportunities.ts";
+import { initiativeFeedbackMigration051 } from "./051-initiative-feedback.ts";
+import { interactionPatternsMigration052 } from "./052-interaction-patterns.ts";
+import { initiativeWakePolicyMigration053 } from "./053-initiative-wake-policy.ts";
+import { initiativeIntentionsMigration054 } from "./054-initiative-intentions.ts";
+import { initiativeBackoffMigration055 } from "./055-initiative-backoff.ts";
+import { subagentConversationsMigration056 } from "./056-subagent-conversations.ts";
+import { sourceContextMigration057 } from "./057-source-context.ts";
+import { agentInboxMigration058 } from "./058-agent-inbox.ts";
+
+import { subagentPresentationMigration061 } from "./061-subagent-presentation.ts";
+
+import { subagentInboxResumeMigration062 } from "./062-subagent-inbox-resume.ts";
 
 export const MIGRATIONS: Migration[] = [
   timelineMigration001,
@@ -75,5 +103,31 @@ export const MIGRATIONS: Migration[] = [
   conversationCompactionLifecycleMigration032,
   hindsightReplicaSyncMigration033,
   hindsightReplicaSchedulerMigration034,
-  timelinePresentationMigration035,
+  pendingMemoryMigration035,
+  memoryTimelineConvergenceMigration036,
+  hindsightLocalCoverageMigration037,
+  hindsightSourceEvidenceMigration038,
+  hindsightCurrentStateMigration039,
+  hindsightCutoverConvergenceMigration040,
+  canonicalMemoryMaintenanceMigration041,
+  hindsightApplicationStateMigration042,
+  hindsightIngestionMigration043,
+  hindsightApplicationCommandsMigration044,
+  hindsightPolicyWorkMigration045,
+  hindsightRuntimeAdmissionMigration046,
+  hindsightMemoryWritesMigration047,
+  memoryOperationsMigration048,
+  initiativeDeliveryMigration049,
+  initiativeModelOpportunitiesMigration050,
+  initiativeFeedbackMigration051,
+  interactionPatternsMigration052,
+  initiativeWakePolicyMigration053,
+  initiativeIntentionsMigration054,
+  initiativeBackoffMigration055,
+  subagentConversationsMigration056,
+  sourceContextMigration057,
+  agentInboxMigration058,
+  agentConversationOrderMigration060,
+  subagentPresentationMigration061,
+  subagentInboxResumeMigration062,
 ];

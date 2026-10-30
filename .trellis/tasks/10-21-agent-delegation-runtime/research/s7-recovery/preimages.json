@@ -1,0 +1,92 @@
+[
+  {
+    "path": "apps/desktop/src/lib/ws-client-routes.ts",
+    "sha256": "4bcde7f294799b89d9872283a206fbab2c81d965fde29f912c105fe6a741edea",
+    "preimage": "preimages/apps/desktop/src/lib/ws-client-routes.ts.preimage"
+  },
+  {
+    "path": "apps/desktop/src/lib/ws-client-methods.ts",
+    "sha256": "b5d8fb7b577198efc35a28dcf0a938879b380c3516ecbb62f308f1a061da5c0f",
+    "preimage": "preimages/apps/desktop/src/lib/ws-client-methods.ts.preimage"
+  },
+  {
+    "path": "apps/desktop/src/lib/ws-client.ts",
+    "sha256": "f292a896183f95c22a92341710048d12eb6f408ea77c139935a8f4f255d39da6",
+    "preimage": "preimages/apps/desktop/src/lib/ws-client.ts.preimage"
+  },
+  {
+    "path": "apps/desktop/src/lib/index.md",
+    "sha256": "4f29cee5ccea84f5623d0432657ab42f7412d870fb4c9d324181eca9c67b0c53",
+    "preimage": "preimages/apps/desktop/src/lib/index.md.preimage"
+  },
+  {
+    "path": "apps/desktop/src/windows/home/pages.ts",
+    "sha256": "24d43f8e9f2ad606f72db43ecc4ff2527ac1c9b8356983b0b2f721a36bcd854b",
+    "preimage": "preimages/apps/desktop/src/windows/home/pages.ts.preimage"
+  },
+  {
+    "path": "apps/desktop/src/windows/home/home-navigation.test.ts",
+    "sha256": "b4e0bcf8142d9f84f57397b486249abf39e7f47a37bc94048e61048267c4416b",
+    "preimage": "preimages/apps/desktop/src/windows/home/home-navigation.test.ts.preimage"
+  },
+  {
+    "path": "apps/desktop/src/windows/home/index.md",
+    "sha256": "8111c4e0f20f5de122377970f71d7914bc83da6c221ad75aa7e7e2a9d906f04b",
+    "preimage": "preimages/apps/desktop/src/windows/home/index.md.preimage"
+  },
+  {
+    "path": "apps/desktop/src/windows/home/pages/index.md",
+    "sha256": "d5e86601f6502d8498cf1b10d2bd8b094cba7cce235f13486a736e87b5d2b193",
+    "preimage": "preimages/apps/desktop/src/windows/home/pages/index.md.preimage"
+  },
+  {
+    "path": "apps/desktop/src/features/index.md",
+    "sha256": "5e19369f42b6bda81da7fb43d7ca3d5f665904d693f7f4ba3fb7745fd528f34c",
+    "preimage": "preimages/apps/desktop/src/features/index.md.preimage"
+  },
+  {
+    "path": "apps/desktop/test/index.md",
+    "sha256": "c6cd909a50bb26bee026a0a8cef6ebfcc1725055ac731ec70c35ebd48a5e4913",
+    "preimage": "preimages/apps/desktop/test/index.md.preimage"
+  },
+  {
+    "path": "apps/desktop/src/features/co-watching/chat-co-watching-invitation.tsx",
+    "sha256": "4fefac375728e6a62979a55965199385f85d6aa2afa2333dd79b6ce79c199928",
+    "preimage": "preimages/apps/desktop/src/features/co-watching/chat-co-watching-invitation.tsx.preimage"
+  },
+  {
+    "path": "apps/desktop/src/features/co-watching/use-co-watching-invitation.ts",
+    "sha256": "178a7d73a54b8881780b227ef2bd507a1758391b70e8674ebc2c6d8dec61f424",
+    "preimage": "preimages/apps/desktop/src/features/co-watching/use-co-watching-invitation.ts.preimage"
+  },
+  {
+    "path": "apps/desktop/src/features/co-watching/chat-co-watching-invitation.test.tsx",
+    "sha256": "6693878fb5d21195ac7f226080142d71580317e8b365c1d77d2e3ac2f21432c0",
+    "preimage": "preimages/apps/desktop/src/features/co-watching/chat-co-watching-invitation.test.tsx.preimage"
+  },
+  {
+    "path": "apps/desktop/src/features/co-watching/index.md",
+    "sha256": "919d2beb6c0beb52404bee3d45b52f40048359e3e42c35d52bd2762c7d681114",
+    "preimage": "preimages/apps/desktop/src/features/co-watching/index.md.preimage"
+  },
+  {
+    "path": "apps/desktop/src/windows/home/pages/perception/co-watching-card.tsx",
+    "sha256": "270d8aeb0af5f7dd63ba0170a457ac44ef68454590b52b50df31d27533fc1e6d",
+    "preimage": "preimages/apps/desktop/src/windows/home/pages/perception/co-watching-card.tsx.preimage"
+  },
+  {
+    "path": "apps/desktop/src/windows/home/pages/perception/use-co-watching.ts",
+    "sha256": "abdf79688e2639b5d65b58dedb8221c430537da34f19c6152fe535e57a04adee",
+    "preimage": "preimages/apps/desktop/src/windows/home/pages/perception/use-co-watching.ts.preimage"
+  },
+  {
+    "path": "apps/desktop/src/windows/home/pages/perception/index.md",
+    "sha256": "2cb9e11cebc2b54d924318175ad1d82762271e81dec3a2d25ed955d79e24f5cb",
+    "preimage": "preimages/apps/desktop/src/windows/home/pages/perception/index.md.preimage"
+  },
+  {
+    "path": ".trellis/spec/frontend/home-window.md",
+    "sha256": "68f19a4ac9d61cc9bbbdbefaf0218df8ba5a5962028b92762bce5eb1f649a3d6",
+    "preimage": "preimages/.trellis/spec/frontend/home-window.md.preimage"
+  }
+]

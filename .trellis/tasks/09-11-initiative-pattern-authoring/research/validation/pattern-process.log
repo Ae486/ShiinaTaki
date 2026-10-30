@@ -1,0 +1,13 @@
+
+> @taki/e2e@0.0.0 test:e2e H:\TakiAgent-worktrees\t4\e2e
+> vitest run "src/initiative-pattern.e2e.test.ts"
+
+
+ RUN  v4.1.10 H:/TakiAgent-worktrees/t4/e2e
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  18:01:24
+   Duration  20.30s (transform 1.07s, setup 0ms, import 1.62s, tests 18.33s, environment 0ms)
+

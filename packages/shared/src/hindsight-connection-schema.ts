@@ -51,6 +51,9 @@ export const HindsightSupportReasonSchema = z.enum([
   "backend_capability_probe_failed", "alternative_memory_store", "memory_store_capability_missing",
   "memory_store_capability_probe_failed", "provider_lineage_unavailable", "authentication_not_required",
   "authentication_capability_probe_failed",
+  "native_result_schema_unavailable",
+  "current_state_transfer_schema_unavailable", "cutover_verification_schema_unavailable",
+  "application_state_schema_unavailable", "application_reflect_unavailable",
 ]);
 export const HindsightCompatibilitySupportSchema = z.strictObject({ state: HindsightSupportSchema, reason: HindsightSupportReasonSchema });
 export type HindsightCompatibilitySupport = z.infer<typeof HindsightCompatibilitySupportSchema>;
@@ -58,6 +61,15 @@ export type HindsightCompatibilitySupport = z.infer<typeof HindsightCompatibilit
 export const HindsightVersionedContractSchema = z.strictObject({
   version: boundedText.max(40),
   support: HindsightCompatibilitySupportSchema,
+});
+export const HindsightApplicationStateContractSchema = HindsightVersionedContractSchema.extend({
+  body_part_bytes: z.int().positive(), max_response_bytes: z.int().positive(), max_preparation_bytes: z.int().positive(),
+  state_cursor_reset_supported: z.boolean(), capture_mode: z.literal("explicit_generation_initialization"),
+});
+export const HindsightApplicationReflectContractSchema = HindsightVersionedContractSchema.extend({
+  policy_context_schema: z.literal("application-read-context.v1"),
+  withheld_inputs: z.array(z.enum(["bank_profile", "directives", "mental_models", "whole_sources", "entities"])),
+  linearization: z.literal("before_each_model_submission"),
 });
 export const HindsightCompatibilityProjectionSchema = z.strictObject({
   baseApiVersion: boundedText.max(40),
@@ -75,6 +87,11 @@ export const HindsightCompatibilityProjectionSchema = z.strictObject({
     logicalSnapshot: HindsightVersionedContractSchema,
     additiveObservationInstructions: HindsightVersionedContractSchema,
     controlledLayerProjection: HindsightVersionedContractSchema,
+    nativeResults: HindsightVersionedContractSchema.optional(),
+    currentStateTransfer: HindsightVersionedContractSchema.optional(),
+    cutoverVerification: HindsightVersionedContractSchema.optional(),
+    applicationState: HindsightVersionedContractSchema.optional(),
+    applicationReflect: HindsightVersionedContractSchema.optional(),
   }),
 });
 export type HindsightCompatibilityProjection = z.infer<typeof HindsightCompatibilityProjectionSchema>;
@@ -86,7 +103,7 @@ export const HINDSIGHT_ERROR_CODES = [
   "HINDSIGHT_TEMPLATE_CONFLICT", "HINDSIGHT_LLM_HEALTH_UNAVAILABLE", "HINDSIGHT_STATE_CONFLICT", "HINDSIGHT_RESPONSE_INVALID",
   "HINDSIGHT_SNAPSHOT_EXPIRED", "HINDSIGHT_SNAPSHOT_NOT_FOUND", "HINDSIGHT_SNAPSHOT_PAGE_MISSING",
   "HINDSIGHT_CURSOR_RESET_REQUIRED", "HINDSIGHT_SNAPSHOT_INTEGRITY",
-  "HINDSIGHT_OPERATION_IDENTITY_CONFLICT",
+  "HINDSIGHT_OPERATION_IDENTITY_CONFLICT", "HINDSIGHT_SETUP_INTERRUPTED",
 ] as const;
 export const HindsightErrorCodeSchema = z.enum(HINDSIGHT_ERROR_CODES);
 export type HindsightErrorCode = z.infer<typeof HindsightErrorCodeSchema>;

@@ -6,11 +6,17 @@
 
 import { JSONRPCClient, JSONRPCServer, JSONRPCServerAndClient } from "json-rpc-2.0";
 import { CHAT_METHODS, ChatSendResultSchema } from "@taki/shared";
+import type { SubagentActivity, SubagentChanged } from "@taki/shared";
+import type { SubagentMethods } from "./ws-client-subagents.ts";
+import { addSubagentChangedHandler, addSubagentActivityHandler } from "./ws-client-routes.ts";
 import type {
+  CoWatchingChanged,
+  BrowserPlaybackReadResult,
   AvatarCommand,
   ApprovalListResult,
   ApprovalRevokeParams,
   ApprovalRevokeResult,
+  AvatarOutcomeParams,
   AvatarReportParams,
   CharacterCostumeResolutionResult,
   CharacterCostumesResult,
@@ -19,11 +25,14 @@ import type {
   CharacterListResult,
   ChatSendParams,
   ChatActivity,
+  InteractionPatternChanged,
+  InitiativeBackoffChanged,
   ChatActivityReadResult,
   CanonicalApprovalRespondParams,
   CanonicalApprovalRespondResult,
   ConfigChanged,
   ConfigListResult,
+  MemoryOperation,
   ConfigSetParams,
   ConfigSetResult,
   ConnectParams,
@@ -82,14 +91,22 @@ import { requestWithDeadline } from "./rpc-deadline.ts";
 import type { ReadSubscriptionSupport } from "./ws-read-subscriptions.ts";
 import { createTimingPolicyStore, type TimingPolicyStore } from "./timing-policy.ts";
 import { createTimingPolicySync, type TimingPolicySync } from "./timing-policy-sync.ts";
+import type { MemoryOperationMethods } from "./ws-client-memory-operations.ts";
+import type { UserTimezoneMethods } from "./ws-client-user-timezone.ts";
+import type { PresenceMethods } from "./ws-client-presence.ts";
+import type { InitiativeMethods } from "./ws-client-initiative.ts";
+import type { CoWatchingMethods } from "./ws-client-co-watching.ts";
 import { handshake, requestMethods, type ConnectOutcome } from "./ws-client-methods.ts";
 import {
   addConfigChangedHandler,
+  addInitiativeChangedHandler,
   addPerceptionChangedHandler,
+  addCoWatchingChangedHandler,
   addExtensionChangedHandler,
   addChatActivityHandler,
   addTimelineCommittedHandler,
   addApprovalHandler,
+  addMemoryOperationHandler,
   addMonitorHandler,
   bindTransport,
   createRoutes,
@@ -103,7 +120,15 @@ import { sendChatTurn, type ChatHandlers } from "./ws-chat-turn.ts";
 
 export type { ChatHandlers, ConnectOutcome };
 
-export interface WsClient {
+export interface WsClient extends MemoryOperationMethods, UserTimezoneMethods, PresenceMethods, InitiativeMethods, CoWatchingMethods, SubagentMethods {
+  onSubagentChanged(handler: (change: SubagentChanged) => void): () => void;
+  onSubagentActivity(handler: (event: SubagentActivity) => void): () => void;
+  onCoWatchingChanged(handler: (change: CoWatchingChanged) => void): () => void;
+  browserPlaybackRead(): Promise<BrowserPlaybackReadResult>;
+  onInitiativePatternsChanged(handler: (change: InteractionPatternChanged) => void): () => void;
+  onInitiativeSetupChanged(handler: (change: InteractionPatternChanged) => void): () => void;
+  onInitiativeWakePolicyChanged(handler: (change: InteractionPatternChanged) => void): () => void;
+  onInitiativeBackoffChanged(handler: (change: InitiativeBackoffChanged) => void): () => void;
   connect(params: ConnectParams): Promise<ConnectOutcome>;
   chat(params: ChatSendParams, handlers: ChatHandlers): Promise<void>;
   /** Cancels the character's in-flight turn (idempotent; false = nothing was running). The composer's abort entry. */
@@ -114,6 +139,8 @@ export interface WsClient {
   onTimelineCommitted(handler: (batch: TimelineCommitted) => void): () => void;
   subscribeAvatar(characterId: string): Promise<void>;
   reportAvatar(params: AvatarReportParams): Promise<void>;
+  /** Reports one received Avatar Command's Presentation Outcome (interactive deadline; the caller never replays it). */
+  reportAvatarOutcome(params: AvatarOutcomeParams): Promise<void>;
   /** Fetches one newest-first page of a character's timeline (the chat page's history paging). */
   timelineHistory(params: TimelineHistoryParams): Promise<TimelineHistoryResult>;
   /** Subscribes this socket to a character's live timeline.appended pushes (chat page backlog + live). */
@@ -203,6 +230,8 @@ export interface WsClient {
   subscribeMonitor(params: RunMonitorSubscribeParams): Promise<void>;
   unsubscribeMonitor(): Promise<void>;
   onMonitorEvent(handler: (event: RunMonitorEvent) => void): () => void;
+  /** Registers a memory.operations.changed sink (the Operations page refetches the composite status on each push). */
+  onMemoryOperationChanged(handler: (operation: MemoryOperation) => void): () => void;
   /** Registers the fire-and-forget avatar command sink (core -> operator push). Replaces any prior handler. */
   onAvatarCommand(handler: (command: AvatarCommand) => void): void;
   /** Registers the optional live-timeline sink (shared with the chat page server-side). */
@@ -291,18 +320,32 @@ export function createWsClient(deps: WsClientDeps): WsClient {
         request: async () => ChatSendResultSchema.parse(await requestWithDeadline({ rpc, timing, method: CHAT_METHODS.send, params })) });
     },
     ...methods,
-    onAvatarCommand: (handler) => (state.push.avatar = handler),
-    onTimelineAppended: (handler) => (state.push.timeline = handler),
-    onTimelineRemoved: (handler) => (state.push.timelineRemoved = handler),
-    onChatActivity: (handler) => addChatActivityHandler(state, handler),
-    onTimelineCommitted: (handler) => addTimelineCommittedHandler(state, handler),
-    onConfigChanged: (handler) => addConfigChangedHandler(state, handler),
-    onPerceptionChanged: (handler) => addPerceptionChangedHandler(state, handler),
-    onExtensionChanged: (handler) => addExtensionChangedHandler(state, handler),
-    onApproval: (handler) => addApprovalHandler(state, handler),
-    onMonitorEvent: (handler) => addMonitorHandler(state, handler),
+    ...pushRegistrations(state),
     currentTimingPolicy: timing,
     onClose: (handler) => transport.onClose(handler),
     close: () => closeClient(timingSync, retire, transport),
+  };
+}
+
+function pushRegistrations(state: ReturnType<typeof createRoutes>) {
+  return {
+    onSubagentActivity: (handler: (event: SubagentActivity) => void) => addSubagentActivityHandler(state, handler),
+    onSubagentChanged: (handler: (change: SubagentChanged) => void) => addSubagentChangedHandler(state, handler),
+    onCoWatchingChanged: (handler: (change: CoWatchingChanged) => void) => addCoWatchingChangedHandler(state, handler),
+    onInitiativePatternsChanged: (handler: (change: InteractionPatternChanged) => void) => addInitiativeChangedHandler(state, "initiativePatterns", handler),
+    onInitiativeSetupChanged: (handler: (change: InteractionPatternChanged) => void) => addInitiativeChangedHandler(state, "initiativeSetup", handler),
+    onInitiativeWakePolicyChanged: (handler: (change: InteractionPatternChanged) => void) => addInitiativeChangedHandler(state, "initiativePolicy", handler),
+    onInitiativeBackoffChanged: (handler: (change: InitiativeBackoffChanged) => void) => addInitiativeChangedHandler(state, "initiativeBackoff", handler),
+    onChatActivity: (handler: (event: ChatActivity) => void) => addChatActivityHandler(state, handler),
+    onTimelineCommitted: (handler: (batch: TimelineCommitted) => void) => addTimelineCommittedHandler(state, handler),
+    onPerceptionChanged: (handler: (changed: PerceptionChanged) => void) => addPerceptionChangedHandler(state, handler),
+    onExtensionChanged: (handler: (changed: ExtensionChanged) => void) => addExtensionChangedHandler(state, handler),
+    onAvatarCommand: (handler: (command: AvatarCommand) => void) => void (state.push.avatar = handler),
+    onTimelineAppended: (handler: (entry: TimelineEntry) => void) => void (state.push.timeline = handler),
+    onTimelineRemoved: (handler: (ref: TimelineRemoved) => void) => void (state.push.timelineRemoved = handler),
+    onConfigChanged: (handler: (changed: ConfigChanged) => void) => addConfigChangedHandler(state, handler),
+    onApproval: (handler: (event: ApprovalPushEvent) => void) => addApprovalHandler(state, handler),
+    onMonitorEvent: (handler: (event: RunMonitorEvent) => void) => addMonitorHandler(state, handler),
+    onMemoryOperationChanged: (handler: (operation: MemoryOperation) => void) => addMemoryOperationHandler(state, handler),
   };
 }

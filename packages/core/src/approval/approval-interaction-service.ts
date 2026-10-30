@@ -1,7 +1,7 @@
 /**
  * INPUT:  canonical Approval requests, exact operator Connection objects, and the durable ApprovalDecisionService
- * OUTPUT: connection-owned Approval lifecycle, targeted notifications, and a bounded read-only named list projection
- * POS:    core/approval — transient Core authority for interactive Core/MCP asks; raw execution input never enters here
+ * OUTPUT: connection-owned Approval lifecycle, current durable-only lookup, targeted notifications and named lists
+ * POS:    core/approval — shared canonical authority facade; unattended reads never promote once/session decisions
  */
 import {
   type ApprovalDecisionBinding,
@@ -23,7 +23,7 @@ import {
   revokeDurableDecision,
   type ApprovalInteractionState,
 } from "./approval-interaction-state.ts";
-import { sameApprovalBinding } from "./approval-interaction-binding.ts";
+import { hasUsableDurableAuthority, sameApprovalBinding } from "./approval-interaction-binding.ts";
 import { approvalDecisionLabels, type ApprovalLabelResolver } from "./approval-labels.ts";
 
 export type ApprovalInteractionDecision =
@@ -58,6 +58,8 @@ export interface ApprovalInteractionService {
   invalidatePolicy(policyGeneration: number): void;
   disconnect(connection: Connection): void;
   approvalGeneration(): number;
+  /** Read current durable authority only; connection-owned once/session decisions never apply to background Runs. */
+  hasDurableAuthority(binding: ApprovalDecisionBinding): boolean;
   onApprovalGenerationChanged(listener: (approvalGeneration: number) => void): void;
   onPolicyInvalidated(listener: (policyGeneration: number) => void): void;
   isCurrentAuthority(input: {
@@ -113,6 +115,7 @@ export function createApprovalInteractionService(
       notifyGeneration(before);
     },
     approvalGeneration: () => authority.snapshot().approvalGeneration,
+    hasDurableAuthority: (binding) => hasUsableDurableAuthority(authority, binding),
     onApprovalGenerationChanged: (listener) => generationListeners.push(listener),
     onPolicyInvalidated: (listener) => policyListeners.push(listener),
     isCurrentAuthority: (input) => isCurrentAuthority(state, authority, input),

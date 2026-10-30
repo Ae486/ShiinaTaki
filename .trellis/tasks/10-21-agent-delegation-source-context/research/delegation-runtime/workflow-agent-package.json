@@ -1,0 +1,46 @@
+{
+  "name": "@ai-sdk/workflow",
+  "version": "2.0.80",
+  "gitHead": null,
+  "repository": {
+    "url": "https://github.com/vercel/ai",
+    "type": "git",
+    "directory": "packages/workflow"
+  },
+  "dependencies": {
+    "ai": "7.0.148",
+    "ajv": "^8.20.0",
+    "@ai-sdk/provider": "4.0.31",
+    "@ai-sdk/provider-utils": "5.0.65"
+  },
+  "peerDependencies": {
+    "zod": "^3.25.76 || ^4.1.8",
+    "workflow": "^5.1.0"
+  },
+  "dist": {
+    "shasum": "99729a07cfacfcad629383128fd2a142954da6d4",
+    "tarball": "https://registry.npmjs.org/@ai-sdk/workflow/-/workflow-2.0.80.tgz",
+    "fileCount": 54,
+    "integrity": "sha512-P9TwqqqSm3nNz+utZAYdyY55K9qECn5LE9wSKSGnIItWRClT4ZiFHUq/OGKw2r4jSgfKAzhlhmyN25AKXfp5OA==",
+    "signatures": [
+      {
+        "sig": "MEQCIGgbZQqlVteEKpktzRmXpCGSeUII3L4iYJvYA/IsRrs8AiAXMQL6TIRgJsno01HFuCjklvj+HBGbsYl7zgxwqHcWRA==",
+        "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+      },
+      {
+        "sig": "MEUCIHlG6isepQX6HFpzzb9MuiW1hyWsMelxwgCrxrNS5kidAiEA5SyhpEtIOmxKHGYGP1geX+dxB3+6O0VsPvXlu+Yycpo=",
+        "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+      }
+    ],
+    "attestations": {
+      "url": "https://registry.npmjs.org/-/npm/v1/attestations/@ai-sdk%2fworkflow@2.0.80",
+      "provenance": {
+        "predicateType": "https://slsa.dev/provenance/v1"
+      }
+    },
+    "unpackedSize": 933278
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -6,6 +6,7 @@
 import { z } from "zod";
 import { ExtensionCallModeSchema, ExtensionKindSchema } from "./extension-discovery-schema.ts";
 import { MemoryProviderCapabilitiesSchema } from "./memory-provider-domain-schema.ts";
+import { InitiativeContextManifestSchema } from "./initiative-schema.ts";
 
 const Id = z.string().min(1).max(200);
 const Timestamp = z.string().datetime({ offset: true });
@@ -142,6 +143,7 @@ export const RunSnapshotSchema = z.object({
   governance: RunGovernanceReferenceSchema,
   memory: RunMemoryReferenceSchema,
   contextDecision: RunContextDecisionSchema,
+  initiativeContext: InitiativeContextManifestSchema.optional(),
   replayDecision: RunReplayDecisionSchema,
   budget: RunBudgetReferenceSchema,
   implementation: RunImplementationReferenceSchema,

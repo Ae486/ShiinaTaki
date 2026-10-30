@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createCanonicalMemoryAuthorityRepo } from "../../db/canonical-memory-authority-repo.ts";
+import { seedLocalB2CoverageFixture } from "../../db/hindsight-local-coverage-fixtures.ts";
 import { createHindsightCutoverRunRepo } from "../../db/hindsight-cutover-run-repo.ts";
 import { hindsightCheckpointSetDigest, type HindsightPromotionInput } from "../../db/hindsight-authority-repo.ts";
 import { MIGRATIONS } from "../../db/migrations/index-list.ts";
@@ -19,7 +19,7 @@ const manifest = "c".repeat(64);
 const payload = "d".repeat(64);
 
 describe("Hindsight authority promotion service", () => {
-  it("times out a busy Local write fence without changing authority and reopens admissions", async () => {
+  it("times out a busy legacy admission fence without changing authority and reopens admissions", async () => {
     const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS }); const fence = createMemoryAuthorityFence();
     const promotion = seedReadyPromotion(db); let release: () => void = () => undefined;
     const held = fence.admit(() => new Promise<void>((resolve) => { release = resolve; }));
@@ -38,13 +38,13 @@ describe("Hindsight authority promotion service", () => {
     db.close();
   });
 
-  it("retires Local admissions only after the promotion transaction commits", async () => {
+  it("keeps admissions open when current Local import proof refuses an old B2-only ready run", async () => {
     const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS }); const fence = createMemoryAuthorityFence();
     const promotion = seedReadyPromotion(db);
-    await expect(promoteHindsightWithFence({ db, fence, timeoutMs: 100, promotion })).resolves.toMatchObject({
-      selection: { mode: "hindsight", epochId: promotion.hindsightEpochId },
-    });
-    await expect(fence.admit(async () => "must not run")).rejects.toThrow("MEMORY_AUTHORITY_FENCED");
+    await expect(promoteHindsightWithFence({ db, fence, timeoutMs: 100, promotion })).rejects.toThrow("HINDSIGHT_LOCAL_COVERAGE_UNPROVEN");
+    await expect(fence.admit(async () => "admission remains open")).resolves.toBe("admission remains open");
+    expect(db.prepare("SELECT mode,active_epoch_id FROM memory_authority_selection WHERE singleton=1").get())
+      .toMatchObject({ mode: "canonical-local", active_epoch_id: promotion.predecessorEpochId });
     db.close();
   });
 });
@@ -56,35 +56,20 @@ function invalidPromotion(): HindsightPromotionInput {
 }
 
 function seedReadyPromotion(db: Database): HindsightPromotionInput {
-  const predecessor = createCanonicalMemoryAuthorityRepo(db).initializeLocalAuthority(now);
-  seedB2(db, predecessor.epochId); seedSetup(db); seedReplicaAndMapping(db);
+  const local = seedLocalB2CoverageFixture(db);
+  seedSetup(db); seedReplicaAndMapping(db, local.sourceId);
   const runs = createHindsightCutoverRunRepo(db);
-  runs.create({ runId: "run", expectedPredecessorEpochId: predecessor.epochId, now });
+  runs.create({ runId: "run", expectedPredecessorEpochId: local.epochId, now });
   const lease = runs.acquireLease({ runId: "run", owner: "cutover", now, expiresAt: later });
   const checkpoint = { providerLineage: lineage, bankId: "bank", bankGeneration: generation, replicaEpochId: replicaEpoch,
     snapshotId, endCursor: 7, manifestDigest: manifest, capturedAt: now, snapshotExpiresAt: later, publishedAt: now };
   const banks = [{ bankId: "bank", templateDigest: template, checkpoint }];
   const checkpointSetDigest = hindsightCheckpointSetDigest(banks);
-  runs.markReady({ lease, configFingerprint: config, checkpointSetDigest, now });
-  return { lease, predecessorEpochId: predecessor.epochId, hindsightEpochId: "55555555-5555-4555-8555-555555555555",
+  // Historical B2-only readiness is input to the new refusal path, never evidence of a current import.
+  db.prepare(`UPDATE hindsight_cutover_runs SET phase='ready',status='ready',config_fingerprint=:config,
+    checkpoint_set_digest=:digest WHERE run_id='run'`).run({ config, digest: checkpointSetDigest });
+  return { lease, predecessorEpochId: local.epochId, hindsightEpochId: "55555555-5555-4555-8555-555555555555",
     transactionId: "66666666-6666-4666-8666-666666666666", configFingerprint: config, checkpointSetDigest, banks, now };
-}
-
-function seedB2(db: Database, epochId: string): void {
-  db.prepare(`INSERT INTO memory_migration_runs
-    (run_id,snapshot_id,epoch_id,phase,status,requested_at,updated_at,lease_fence,activation_transaction_id)
-    VALUES ('run','legacy-snapshot',:epoch,'activated','completed',:now,:now,1,'local-tx')`).run({ epoch: epochId, now });
-  db.prepare(`INSERT INTO memory_migration_activation_receipts
-    (run_id,transaction_id,snapshot_id,manifest_digest,readiness_digest,epoch_id,lease_fence,committed_at,marker_mode)
-    VALUES ('run','local-tx','legacy-snapshot',:hash,:hash,:epoch,1,:now,'canonical-local')`)
-    .run({ hash: "e".repeat(64), epoch: epochId, now });
-  db.prepare(`UPDATE memory_authority_selection SET mode='canonical-local',active_epoch_id=:epoch,
-    verified_snapshot_id='legacy-snapshot',activation_transaction_id='local-tx',updated_at=:now WHERE singleton=1`)
-    .run({ epoch: epochId, now });
-  db.prepare(`INSERT INTO memory_migration_sources
-    (run_id,source_id,kind,relative_path,raw_sha256,byte_length,phase,disposition,result_count,updated_at)
-    VALUES ('run','source','entry','memory/source.md',:hash,1,'verified','converted-one',1,:now)`)
-    .run({ hash: "f".repeat(64), now });
 }
 
 function seedSetup(db: Database): void {
@@ -96,7 +81,7 @@ function seedSetup(db: Database): void {
     VALUES ('global','global','bank','v1',:template,'verified','[]',:now)`).run({ template, now });
 }
 
-function seedReplicaAndMapping(db: Database): void {
+function seedReplicaAndMapping(db: Database, sourceId: string): void {
   db.prepare(`INSERT INTO hindsight_replica_staging_runs
     (staging_id,run_id,replica_epoch_id,provider_lineage,bank_id,bank_generation,snapshot_id,end_cursor,manifest_digest,
      manifest_json,snapshot_expires_at,status,created_at,updated_at)
@@ -112,10 +97,10 @@ function seedReplicaAndMapping(db: Database): void {
   db.prepare(`INSERT INTO hindsight_import_operations
     (run_id,source_id,bank_id,document_id,operation_identity,remote_operation_id,content_identity,provider_content_hash,
      lease_fence,attempt_no,status,derived_unit_count,mapping_complete,updated_at)
-    VALUES ('run','source','bank','document','operation','remote',:content,:hash,1,1,'mapped',1,1,:now)`)
-    .run({ content: `sha256:${"a".repeat(64)}`, hash: "b".repeat(64), now });
+    VALUES ('run',:source,'bank','document','operation','remote',:content,:hash,1,1,'mapped',1,1,:now)`)
+    .run({ source: sourceId, content: `sha256:${"a".repeat(64)}`, hash: "b".repeat(64), now });
   db.prepare(`INSERT INTO hindsight_import_facts (run_id,source_id,fact_ordinal,fact_id,revision,payload_hash)
-    VALUES ('run','source',0,'fact',2,:payload)`).run({ payload });
+    VALUES ('run',:source,0,'fact',2,:payload)`).run({ source: sourceId, payload });
 }
 
 function seedRecord(db: Database, record: { kind: string; id: string; revision: number; hash: string }): void {

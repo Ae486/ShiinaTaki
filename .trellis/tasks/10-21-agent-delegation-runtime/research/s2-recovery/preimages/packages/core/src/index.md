@@ -1,0 +1,31 @@
+# core/src/
+- initiative/ — bounded trusted opportunities over the existing Run, ChatAgent, authority and quota contracts
+- presence/ — independent authenticated source leases, same-device observed intervals and durable response-opportunity settlement
+- delivery/ — shared same-Run presentation continuations and ordinary Timeline publication
+- co-watching/ — explicit single-video invitations, governed native analysis/reconciliation and registered-result reads, ordinary-chat context and preparation over existing Run/Effect/Character queue and shared prepared publication
+- harness/ — Core-owned Trigger admission and Run/Attempt lifecycle service above the existing ToolLoopAgent
+- scheduler/ — durable Scheduled Task definitions, calendar evaluation, occurrence outbox, and canonical Run adapter
+- index.ts — package public entry; empty until an external consumer exists (core runs as a process)
+- main.ts — process entry with unchanged Memory/Replay authorities, atomic Timeline/activity delivery, opt-in Perception and extension observation before producer boot, independent Skill-disclosed media preparation controls, operator registries and orderly resource disposal; process entry: secret/config context and selected memory runtime → Replay View/request measurement → operator registries → ws-server; drains captured memory/background work and MCP clients before closing SQLite
+- config/ — env → validated boot config; plus the operator-facing settings store (knob registry, precedence source, writer, change fan-out)
+- boot/ — the composition root's config+storage phase: open the DB on the env-only data root, then resolve every other knob (env > stored > default) for the loaders
+- logging/ — pino root logger factory
+- server/ — WS JSON-RPC server + method table + connection auth state
+- devices/ — paired-device store + pairing/token registry (device identity security state)
+- db/ — SQLite wrapper + migrations + repos (the only node:sqlite importer; single-writer durable store)
+- agents/ — streaming chat agent + SQLite-backed conversation store + collision-safe governed ToolSet assembly
+- extensions/ — immutable per-Run Skill/MCP/Host discovery/call/transfer and a separate bounded, opt-in operator invalidation projection
+- activity/ — OS-neutral perception activity layer (#19 T3a): foreground-sample rolling state + system-initiated poll sampler + fenced prompt renderer
+- perception/ — shared ambient privacy/sampling composition, durable Privacy Pause, human-facing card and opt-in content-free producer invalidation; interested-operator expiry observation never becomes a pause writer or capture trigger
+- memory/ — layer-generic memory engine: files-as-truth store + FTS5 index + retriever + assembler + tools + the always-visible block tier, its boot wiring, the background utility slot and the retention sweeper
+- media/ — content-addressed attachment store (chat image bytes) under the Workspace; the DB never holds bytes (#17)
+- scheduler/ — the shared sweep runner every retention arm rides (boot sweep + unref'd interval + count-only log)
+- mcp/ — MCP client: connect operator servers at boot, namespace + error-wrap their tools (ADR 0006 spawn carve-out)
+- secrets/ — Core-owned encrypted credential catalog: TSC1 secretstream envelope, staged fsync/rename publication, bootstrap master-key seam (systemd credentials / taki-secret-key helper), write-only operator surface, and the AC4-ordered legacy plaintext migration
+- approval/ — canonical durable plus exact-Connection interactive Approval authority, production composition, targeted lifecycle, and retained dormant legacy compatibility modules
+- governance/ — Core-owned global policy repository/service plus trusted Core/MCP/Skill execution adapters
+- capabilities/ — core→node capability channel: ask/await broker + route helper + screenshot/process-list/clipboard/shell-open tools + sanctioned Workspace PNG write site
+- workspace/ — core-side Workspace-confined file RW tools + the path-escape confinement security core
+- skills/ — SKILL.md discovery + enable/disable state + lazy load_skill tool
+- time/ — the single home for prompt-facing time rendering: day-date + current-time prompt lines + relative memory-age formatter + the pure get_current_time tool (injected-clock, OS-neutral, provider-neutral)
+- testing/ — test-only mock-model factories + memory/companion fixtures + capture logger + MCP stdio fixture

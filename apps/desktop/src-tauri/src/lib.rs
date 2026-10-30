@@ -6,12 +6,17 @@
 // audit/gate/node/secrets/status/ws_client are pub: the headless taki-node bin (a separate crate root) composes
 // the same node from them; capability handlers and the wire protocol stay crate-internal.
 pub mod audit;
+mod browser_attachment;
+mod browser_attachment_commands;
+mod browser_playback_protocol;
 mod capabilities_impl;
 mod exec_command_disclosure;
 pub mod gate;
 mod host_session;
 pub mod node;
 mod protocol;
+// Public so the isolated native fixture can exercise the production adapter without booting the Node.
+pub mod qqmm;
 pub mod secrets;
 pub mod status;
 pub mod ws_client;
@@ -76,7 +81,8 @@ fn submit_pairing_code(code: String, state: State<'_, PairingState>) -> Result<(
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     node::init_tracing();
-    tauri::Builder::default()
+    let app = tauri::Builder::default()
+        .manage(qqmm::runtime())
         .plugin(tauri_plugin_dialog::init())
         // Persist ONLY the pet overlay's position across restarts (leader decision (a), issue #14). The `main`
         // pairing/status window is denied so its geometry is not tracked; SIZE is omitted because the pet is
@@ -96,6 +102,7 @@ pub fn run() {
             app.manage(status.clone());
 
             let client = build_client(handle.clone(), status)?;
+            app.manage(browser_attachment_commands::BrowserAttachmentHandle(client.browser_attachment.clone()));
             // The long-lived node client runs on Tauri's tokio runtime; closing the Pet UI never stops it (invariant 4).
             tauri::async_runtime::spawn(async move { client.run(rx).await });
             Ok(())
@@ -103,10 +110,17 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             ping,
             submit_pairing_code,
-            get_status
+            get_status,
+            browser_attachment_commands::browser_attachment_setup,
+            browser_attachment_commands::browser_attachment_pair,
+            qqmm::qqmm_open,
+            qqmm::qqmm_request,
+            qqmm::qqmm_close
         ])
-        .run(tauri::generate_context!())
+        .on_window_event(qqmm::on_window_event)
+        .build(tauri::generate_context!())
         .expect("error while running tauri application");
+    app.run(qqmm::on_app_event);
 }
 
 #[derive(Serialize, Clone)]
@@ -135,7 +149,12 @@ fn build_client(
     handle: tauri::AppHandle,
     status: StatusHandle,
 ) -> Result<WsClient, Box<dyn std::error::Error>> {
-    let data_dir = handle.path().app_data_dir()?; // Shell-owned, outside the Workspace by construction (D7)
+    let data_dir = browser_attachment_commands::data_dir(&handle)?; // Explicit isolated profile or Shell-owned default (D7).
+    let secrets = if std::env::var_os("TAKI_SHELL_DATA_DIR").is_some() {
+        use sha2::{Digest, Sha256};
+        let suffix = format!("{:x}", Sha256::digest(data_dir.to_string_lossy().as_bytes()));
+        KeyringStore::with_service(format!("TakiAgent-{}", &suffix[..24]))
+    } else { KeyringStore::new() };
     let exec_cwd = resolve_exec_cwd(&handle, &data_dir);
     let emitter: Arc<dyn StatusEmitter> = Arc::new(TauriStatusEmitter {
         app: handle.clone(),
@@ -144,11 +163,11 @@ fn build_client(
     node::build_node(node::NodeConfig {
         data_dir,
         exec_cwd,
-        url: node::DEFAULT_WS_URL.to_string(),
+        url: std::env::var("TAKI_WS_URL").unwrap_or_else(|_| node::DEFAULT_WS_URL.to_string()),
         device_name: DEVICE_NAME.to_string(),
         capabilities: node::default_capabilities(),
         approver: select_approver(handle),
-        secrets: Arc::new(KeyringStore::new()) as Arc<dyn SecretStore>,
+        secrets: Arc::new(secrets) as Arc<dyn SecretStore>,
         status: emitter,
     })
 }

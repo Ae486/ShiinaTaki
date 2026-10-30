@@ -1,0 +1,62 @@
+Scope: 2 of 6 workspace projects
+
+> @taki/shared@0.0.0 test H:\TakiAgent-worktrees\t4\packages\shared
+> vitest run "--maxWorkers=4"
+
+
+ RUN  v4.1.10 H:/TakiAgent-worktrees/t4/packages/shared
+
+ ❯ src/governance-presentation.test.ts (9 tests | 1 failed) 22ms
+     × covers every canonical capability and cell without changing registry authority 16ms
+ ❯ src/governance-registry.test.ts (3 tests | 1 failed) 16ms
+     × contains the complete factory inventory plus explicit extension adapters 11ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/governance-presentation.test.ts > governance presentation vocabulary > covers every canonical capability and cell without changing registry authority
+AssertionError: expected [ { …(5) }, …(19) ] to have a length of 19 but got 20
+
+- Expected
++ Received
+
+- 19
++ 20
+
+ ❯ src/governance-presentation.test.ts:13:25
+     11|     const before = JSON.stringify(CANONICAL_GOVERNANCE_REGISTRY);
+     12|     const { descriptors } = CANONICAL_GOVERNANCE_REGISTRY;
+     13|     expect(descriptors).toHaveLength(19);
+       |                         ^
+     14|     expect(descriptors.flatMap((descriptor) => descriptor.cells)).toHa…
+     15|     for (const descriptor of descriptors) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/governance-registry.test.ts > canonical governance registry > contains the complete factory inventory plus explicit extension adapters
+AssertionError: expected [ { …(4) }, { …(4) }, { …(4) }, …(29) ] to have a length of 31 but got 32
+
+- Expected
++ Received
+
+- 31
++ 32
+
+ ❯ src/governance-registry.test.ts:12:19
+     10|   it("contains the complete factory inventory plus explicit extension …
+     11|     const cells = CANONICAL_GOVERNANCE_REGISTRY.descriptors.flatMap((d…
+     12|     expect(cells).toHaveLength(31);
+       |                   ^
+     13|     expect(governanceDescriptor(CANONICAL_GOVERNANCE_REGISTRY, "skill.…
+     14|     expect(governanceDescriptor(CANONICAL_GOVERNANCE_REGISTRY, "mcp.to…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 59 passed (61)
+      Tests  2 failed | 595 passed (597)
+   Start at  19:09:27
+   Duration  8.98s (transform 1.85s, setup 0ms, import 11.64s, tests 1.43s, environment 9ms)
+
+H:\TakiAgent-worktrees\t4\packages\shared:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/shared@0.0.0 test: `vitest run "--maxWorkers=4"`
+Exit status 1

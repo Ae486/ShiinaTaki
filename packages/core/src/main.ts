@@ -3,11 +3,13 @@
  * INPUT:  process env (bootstrap) + the config store's resolved knobs, and OS signals
  * OUTPUT: a running headless Agent Core — WS server bound to loopback; exits 0 on SIGINT/SIGTERM
  * POS:    core — the process entry/composition root; wires boot (config store → logger → model(s) → db) →
- *         Timeline/activity delivery, Perception/extension invalidation, bounded Run-event backfill, and MCP names → WS
+ *         Timeline/activity delivery, Perception/extension invalidation, ephemeral Co-Watching chat context,
+ *         cooperative media preparation, Skill-disclosed recommendation controls, bounded Run-event backfill, and MCP names → WS
  */
 import { join } from "node:path";
+import { randomUUID } from "node:crypto";
 import type { ToolSet } from "ai";
-import { MONITOR_MODE_CONFIG_KEY, MonitorModeSchema } from "@taki/shared";
+import { BROWSER_PLAYBACK_ENABLED_KEY, CO_WATCHING_SKILL, MONITOR_MODE_CONFIG_KEY, MonitorModeSchema } from "@taki/shared";
 import { CANONICAL_MEMORY_SYSTEM_PROMPT, createChatAgent } from "./agents/chat-agent.ts";
 import { BASE_SYSTEM_PROMPT } from "./agents/base-prompt.ts";
 import { createConversationStore } from "./agents/conversation-store.ts";
@@ -15,10 +17,18 @@ import { createChatActivityProjection } from "./agents/chat-activity-projection.
 import { mergeToolSets } from "./agents/tool-set-assembly.ts";
 import { createTurnQueue } from "./agents/turn-queue.ts";
 import { createTurnRegistry } from "./agents/turn-registry.ts";
+import { createSubagentTools } from "./agents/subagent-tools.ts";
+import { createSubagentRepo } from "./db/subagent-repo.ts";
+import { createSubagentInputRepo } from "./db/subagent-input-repo.ts";
+import { createSubagentExecutionRepo } from "./db/subagent-execution-repo.ts";
+import { createRunMessageRepo } from "./db/run-message-repo.ts";
+import { composeSubagents } from "./harness/subagent-composition.ts";
+import { isSubagentLane } from "./agents/work-scope.ts";
 import { createWindowCalibrator } from "./agents/window-calibrator.ts";
 import type { RequestMeasurement } from "./agents/request-measurement.ts";
 import { reduceMessages } from "./agents/context-reduction.ts";
 import { reductionTargetTokens } from "./agents/request-preparation.ts";
+import { createAvatarOutcomes } from "./avatar/avatar-outcomes.ts";
 import { createAvatarSubscriptions } from "./avatar/avatar-subscriptions.ts";
 import { createAvatarTools } from "./avatar/avatar-tools.ts";
 import { createAvatarVocabulary } from "./avatar/avatar-vocabulary.ts";
@@ -28,6 +38,7 @@ import { createCapabilityTools } from "./capabilities/capability-tools.ts";
 import { routeCapability } from "./capabilities/route-capability.ts";
 import { createScreenshotDescriber } from "./capabilities/screenshot-describe.ts";
 import { bootstrapCore } from "./boot/core-bootstrap.ts";
+import { avatarOutcomeDeadlineMs } from "./config/avatar-config.ts";
 import { composeHindsightSetup } from "./boot/hindsight-setup-boot.ts";
 import { createPrivacyPauseRepo } from "./db/privacy-pause-repo.ts";
 import { composeApprovalRuntime } from "./approval/approval-runtime.ts";
@@ -62,12 +73,24 @@ import { createAttachmentStore } from "./media/attachment-store.ts";
 import { directoryByteSize } from "./media/directory-size.ts";
 import { composeMemoryRuntime } from "./memory/runtime-composition.ts";
 import { createImageDescriptionWriter } from "./memory/image-description-writer.ts";
+import { readMemoryAuthorityStatus } from "./memory/operations/memory-authority-status.ts";
+import { createMemoryOperationService } from "./memory/operations/memory-operation-service.ts";
 import { createPerceptionLayer } from "./perception/perception-layer.ts";
+import { createBrowserPlaybackSources } from "./perception/browser-playback-sources.ts";
+import { registerBrowserPlaybackMethods } from "./server/methods/browser-playback-methods.ts";
+import { createCoWatchingCatalog } from "./co-watching/analysis-catalog.ts";
+import { createCoWatchingAnalysisReader } from "./co-watching/read-analysis.ts";
+import { createCoWatchingRuntime, type CoWatchingRuntime } from "./co-watching/runtime.ts";
+import { createManageCoWatchingTool } from "./co-watching/manage-co-watching-tool.ts";
+import { createManageMediaRecommendationsTool, MEDIA_RECOMMENDATIONS_SKILL } from "./co-watching/manage-media-recommendations-tool.ts";
+import { selectCoWatchingAnalysisTools } from "./co-watching/mcp-analysis-tools.ts";
+import { createCoWatchingSubscriptions, registerCoWatchingMethods } from "./server/methods/co-watching-methods.ts";
 import { migrateMcpPlaintextSecrets } from "./secrets/mcp-secret-migration.ts";
 import { resolveMasterKeySource } from "./secrets/master-key.ts";
 import { createSecretCatalogService } from "./secrets/secret-catalog-service.ts";
 import { createConnectionRegistry } from "./server/connection-registry.ts";
 import { createMethodRegistry } from "./server/method-registry.ts";
+import { avatarOutcomeMethod } from "./server/methods/avatar-outcome.ts";
 import { avatarReportMethod } from "./server/methods/avatar-report.ts";
 import { avatarSubscribeMethod } from "./server/methods/avatar-subscribe.ts";
 import { chatCancelMethod } from "./server/methods/chat-cancel.ts";
@@ -88,6 +111,8 @@ import { hostCatalogPublishMethod } from "./server/methods/host-catalog-publish.
 import { mediaClearMethod } from "./server/methods/media-clear.ts";
 import { mediaGetMethod } from "./server/methods/media-get.ts";
 import { mediaUsageMethod } from "./server/methods/media-usage.ts";
+import { memoryAuthorityStatusMethod } from "./server/methods/memory-authority-status.ts";
+import { registerMemoryOperationMethods } from "./server/methods/memory-operation-methods.ts";
 import { memoryTidyMethod } from "./server/methods/memory-tidy.ts";
 import { memoryStatusMethod } from "./server/methods/memory-status.ts";
 import { runStatusMethod } from "./server/methods/run-status.ts";
@@ -103,6 +128,7 @@ import { timelineSubscribeMethod } from "./server/methods/timeline-subscribe.ts"
 import { bootSkillLifecycle } from "./skills/skill-boot.ts";
 import { createCurrentTimeTool } from "./time/current-time-tool.ts";
 import { createTimelineSubscriptions } from "./server/timeline-subscriptions.ts";
+import { createMemoryOperationSubscriptions } from "./server/memory-operation-subscriptions.ts";
 import { startWsServer } from "./server/ws-server.ts";
 import { createReadFileTool } from "./workspace/read-file-tool.ts";
 import { createWorkspacePaths } from "./workspace/workspace-paths.ts";
@@ -116,17 +142,54 @@ import { createScheduleEngine } from "./scheduler/schedule-engine.ts";
 import { registerScheduledTaskMethods } from "./server/methods/scheduled-task-methods.ts";
 import { createObservabilityQueryService } from "./observability/observability-query-service.ts";
 import { registerObservabilityMethods } from "./server/methods/observability-methods.ts";
+import { composeInitiativeRuntime } from "./initiative/initiative-composition.ts";
+import { composePresenceRuntime } from "./initiative/presence-composition.ts";
+import { registerPresenceMethods } from "./server/methods/presence-methods.ts";
+import { createUserTimezoneRepo } from "./db/user-timezone-repo.ts";
+import { createUserTimezoneService } from "./time/user-timezone-service.ts";
+import { registerUserTimezoneMethods } from "./server/methods/user-timezone-methods.ts";
+import { createInteractionPatternService } from "./initiative/patterns/pattern-service.ts";
+import { createManagePatternTool } from "./initiative/manage-pattern-tool.ts";
+import { composePatternRuntime } from "./initiative/pattern-composition.ts";
+import { createIntentionService } from "./initiative/intentions/intention-service.ts";
+import { createPlanFollowUpTool } from "./initiative/plan-follow-up-tool.ts";
+import { readIntentionMaximumWindow } from "./config/initiative-intention-config.ts";
+import { readViewingInvitationPolicy } from "./config/viewing-invitation-config.ts";
+import { createViewingInvitationSource, type ViewingInvitationSource } from "./co-watching/viewing-invitation-source.ts";
+import { createViewingInvitationEvidence } from "./co-watching/viewing-invitation-evidence.ts";
+import { createAmbientShotStore } from "./perception/ambient-shot-store.ts";
+import { createMediaAnalysisRuntime, type MediaAnalysisRuntime } from "./co-watching/media-analysis-runtime.ts";
+import { validatePatternActor } from "./initiative/patterns/pattern-source.ts";
 
 // Boot phase (batch-1 #26): the data root comes from env alone, the DB opens on it, and every other knob is then
 // resolved as env > stored > built-in default — so a value the settings panel stored takes effect at THIS boot.
-const boot = bootstrapCore(process.env);
+const patternLifecycle: { current?: ReturnType<typeof composePatternRuntime> } = {};
+const browserPlaybackLifecycle: { current?: { refresh(): void; close(): void } } = {};
+const coWatchingLifecycle: { current?: CoWatchingRuntime } = {};
+const viewingLifecycle: { current?: ViewingInvitationSource } = {};
+const mediaAnalysisLifecycle: { current?: MediaAnalysisRuntime } = {};
+const subagentLifecycle: { current?: ReturnType<typeof composeSubagents> } = {};
+const coWatchingSubscriptions = createCoWatchingSubscriptions();
+const boot = bootstrapCore(process.env, { onConfigChanged: (key) => {
+  if (key.startsWith("TAKI_INITIATIVE_")) patternLifecycle.current?.policyChanged();
+  if (key === BROWSER_PLAYBACK_ENABLED_KEY) browserPlaybackLifecycle.current?.refresh();
+} });
 const { logger, db, serverConfig, contextConfig, model, visionModel } = boot;
 const coreHostId = loadOrCreateHostIdentity(join(serverConfig.dataDir, "host-identity.json"));
 logger.info("Core Host identity loaded");
+// The selected memory runtime and inactive B3 setup share the same just-in-time
+// connection secret source. Opening the catalog itself performs no model/network work.
+const secretLog = logger.child({ mod: "secrets" });
+const secretCatalog = await createSecretCatalogService({
+  filePath: join(serverConfig.dataDir, "secret-catalog.bin"), storeId: coreHostId,
+  keySource: resolveMasterKeySource(process.env), logger: secretLog,
+});
 const governance = createGovernancePolicyService(createGovernancePolicyRepo(db));
 const runEventRepo = createRunEventRepo(db);
-const runEventLive = createRunEventLiveBus((runId, afterSeq, limit) => runEventRepo.page({ runId, afterSeq, limit }));
-const runRepo = createRunRepo(db, runEventRepo, runEventLive);
+const runEventLive = createRunEventLiveBus((runId, afterSeq, limit) => runEventRepo.page({ runId, afterSeq, limit }),
+  (events) => { patternLifecycle.current?.committed(events); viewingLifecycle.current?.changed(); });
+const subagentExecutions = createSubagentExecutionRepo(db);
+const runRepo = createRunRepo(db, runEventRepo, { liveBus: runEventLive, linkedState: subagentExecutions.linkedState });
 const observability = createObservabilityQueryService({ db, events: runEventRepo, mode: () => MonitorModeSchema.parse(boot.config.source.resolve(MONITOR_MODE_CONFIG_KEY)?.value ?? "DISABLED") });
 const effectLifecycle = createEffectLifecycleService(
   createEffectRepo(db, runEventRepo, runEventLive),
@@ -146,11 +209,15 @@ const chatLog = logger.child({ mod: "chat" });
 const historyBudget = () => Math.floor(windowCalibrator.effectiveWindow() * contextConfig.historyRatio);
 const summaryRepo = createSummaryRepo(db);
 const latestRequestMeasurements = new Map<string, RequestMeasurement>();
+const presenceLifecycle: { current?: ReturnType<typeof composePresenceRuntime> } = {};
 const conversationStore = createConversationStore({
   repo: timelineRepo,
-  onAppend: (entry) => timelineSubscriptions.publish(entry),
+  onAppend: (entry) => {
+    timelineSubscriptions.publish(entry); presenceLifecycle.current?.observeEntry(entry);
+    if (entry.role === "user") patternLifecycle.current?.primaryObserved(entry.characterId);
+  },
   onCommit: (batch) => timelineSubscriptions.publishCommitted(batch),
-  onRemove: (ref) => timelineSubscriptions.publishRemoved(ref),
+  onRemove: (ref) => { timelineSubscriptions.publishRemoved(ref); patternLifecycle.current?.sourceChanged(); },
   window: { budget: historyBudget },
   // R3: the rolling summary substitutes as the replay head; the wall-hit warn means the compactor is being outrun.
   summaries: summaryRepo,
@@ -160,8 +227,10 @@ const conversationStore = createConversationStore({
 
 // Avatar channel (#16): LLM-driven expression/motion commands fan out to subscribed Pet UI operators (mirrors the
 // timeline fan-out); the vocabulary store holds each character's reported manifest names, injected into turn prompts.
+// The outcomes registry (D80) lets each tool await the Pet UI's Presentation Outcome, bounded by the live deadline knob.
 const avatarSubscriptions = createAvatarSubscriptions();
 const avatarVocabulary = createAvatarVocabulary();
+const avatarOutcomes = createAvatarOutcomes({ deadlineMs: avatarOutcomeDeadlineMs(boot.config.source) });
 
 // Marker-first composition owns every legacy/canonical reader, writer, prompt, scheduler, and migration cutover seam.
 const memoryRuntime = composeMemoryRuntime({ db, dataDir: serverConfig.dataDir, promptDir: serverConfig.promptDir, model,
@@ -169,7 +238,8 @@ const memoryRuntime = composeMemoryRuntime({ db, dataDir: serverConfig.dataDir, 
   estimatedTokens: conversationStore.estimatedTokens, budget: historyBudget,
   measureRequest: (characterId) => latestRequestMeasurements.get(characterId),
   effectiveWindowTokens: () => windowCalibrator.effectiveWindow(),
-  compact: contextConfig.compact, env: boot.env, logger });
+  compact: contextConfig.compact, env: boot.env, logger,
+  hindsight: { source: boot.config.source, secrets: secretCatalog } });
 const { selected: selectedMemory, memory, autoMemory, tidy, memoryRoot, writeMemory } = memoryRuntime;
 
 // Attachment store (#17): the sanctioned content-addressed Workspace R/W site for chat image attachments — the DB never
@@ -193,12 +263,14 @@ const imageDescriptionWriter = visionModel && writeMemory
     })
   : undefined;
 
-const deviceRegistry = createDeviceRegistry({
-  store: createPairedDeviceStore(join(serverConfig.dataDir, "devices.json")),
-});
+const pairedDeviceStore = createPairedDeviceStore(join(serverConfig.dataDir, "devices.json"));
+const deviceRegistry = createDeviceRegistry({ store: pairedDeviceStore });
 const connectionRegistry = createConnectionRegistry();
 const extensionSubscriptions = createExtensionSubscriptions();
-const hostCatalogs = createHostCatalogStore({ onChange: extensionSubscriptions.publish });
+const hostCatalogs = createHostCatalogStore({ onChange: (change) => {
+  extensionSubscriptions.publish(change);
+  browserPlaybackLifecycle.current?.refresh();
+} });
 const registry = createMethodRegistry();
 // Approval boots first; its read-only MCP name source is attached only after the manager exists.
 let resolveApprovalLabels: ApprovalLabelResolver = () => new Map();
@@ -209,17 +281,11 @@ const { approval, coreToolGovernance } = composeApprovalRuntime({
 });
 
 // Skills: durable lifecycle rows plus an immutable runtime catalog. Legacy files are read once as a seed and never written.
-const skillBoot = await bootSkillLifecycle({ db, dataDir: serverConfig.dataDir, ownerHostId: coreHostId, logger, onChange: extensionSubscriptions.publish });
+const skillBoot = await bootSkillLifecycle({ db, dataDir: serverConfig.dataDir, ownerHostId: coreHostId, logger, onChange: (change) => {
+  extensionSubscriptions.publish(change); patternLifecycle.current?.sourceChanged();
+} });
 const { loader: skillsLoader, service: skillLifecycle, log: skillsLog } = skillBoot;
 
-// Secret catalog (08-12): the Core-owned encrypted credential store. Master key from the credentials directory
-// (systemd) or the taki-secret-key helper; no key source = locked, every mutation fails closed — never a fresh
-// store over existing ciphertext. Boot survives a locked/unreadable catalog (integrations degrade, core lives).
-const secretLog = logger.child({ mod: "secrets" });
-const secretCatalog = await createSecretCatalogService({
-  filePath: join(serverConfig.dataDir, "secret-catalog.bin"), storeId: coreHostId,
-  keySource: resolveMasterKeySource(process.env), logger: secretLog,
-});
 // AC4 ordering: copy env/headers into the catalog, verify the encrypted read-back, only then rewrite the source
 // to opaque refs (every failure leaves the source untouched); refs resolve just-in-time at connect below.
 migrateMcpPlaintextSecrets({ catalog: secretCatalog, configPath: join(serverConfig.dataDir, "mcp-servers.json"), logger: secretLog });
@@ -236,7 +302,17 @@ registerMcpMethods(registry, { service: createMcpLifecycleService({ repo: mcpBoo
 registerSkillMethods(registry, { service: skillLifecycle, logger: skillsLog });
 // Hindsight B3 setup is an operator-only inactive control plane. Composition registers methods and SQLite state only;
 // it makes no boot request, performs no LLM health probe, and has no Memory Authority writer/provider registration.
-composeHindsightSetup({ db, config: boot.config.source, secrets: secretCatalog, registry, logger });
+const hindsightSetup = composeHindsightSetup({ db, config: boot.config.source, secrets: secretCatalog, registry, logger });
+// Durable memory operations (Stage 1): one Core-owned owner over the B3 setup service and the B5 scheduler. Construction
+// reconciles rows another boot left open (outcome_unknown); the per-process boot id is what tells those rows apart.
+const memoryOperationSubscriptions = createMemoryOperationSubscriptions();
+const memoryOperations = createMemoryOperationService({
+  db, live: memoryRuntime.operations, setup: hindsightSetup, bootId: randomUUID(), logger,
+  onChanged: memoryOperationSubscriptions.publish,
+});
+registerMemoryOperationMethods(registry, { service: memoryOperations, subscriptions: memoryOperationSubscriptions, logger });
+registry.register(memoryAuthorityStatusMethod({ logger,
+  read: () => readMemoryAuthorityStatus({ db, live: memoryRuntime.operations, setup: hindsightSetup, operations: memoryOperations }) }));
 
 // Capability channel (#10): the screenshot tool routes to a connected node via the broker, which pushes a
 // capability.request notification and awaits the node's capability.respond. A node disconnect denies its pending
@@ -281,7 +357,7 @@ const ambientCapabilityDeps = {
 // sensitive-process skip + the PII scrub — that gate every ambient sampler. On-demand chat captures stay ungated
 // (explicit consent through the Gate); the pause/skip/retention operator surfaces land with the settings panel (#26).
 const perception = createPerceptionLayer({
-  route: (capability, input) => routeCapability(ambientCapabilityDeps, { capabilityId: capability, input }),
+  route: (capability, input, targetHostId) => routeCapability(ambientCapabilityDeps, { capabilityId: capability, input, targetHostId }),
   hasNode: (capability) => hostCatalogs.hostsForCapability(capability).length > 0,
   describe: describeScreenshot,
   ambient: boot.ambientConfig,
@@ -289,9 +365,23 @@ const perception = createPerceptionLayer({
   // A pause is a withdrawal of consent, so it lives in the DB (single writer, invariant 2) and is restored at boot —
   // a crash/upgrade/reboot must never silently resume observation.
   pauseStore: createPrivacyPauseRepo(db),
+  onChanged: () => { patternLifecycle.current?.sourceChanged(); browserPlaybackLifecycle.current?.refresh(); },
   logger,
 });
 perception.start();
+const browserPlayback = createBrowserPlaybackSources({ connections: connectionRegistry, catalogs: hostCatalogs,
+  enabled: () => boot.config.source.resolve(BROWSER_PLAYBACK_ENABLED_KEY)?.value === true && !perception.pause.isPaused(),
+  onChanged: () => { coWatchingLifecycle.current?.playbackChanged(); viewingLifecycle.current?.changed(); patternLifecycle.current?.sourceChanged(); } });
+const browserPlaybackMethods = registerBrowserPlaybackMethods(registry, { sources: browserPlayback, connections: connectionRegistry, catalogs: hostCatalogs });
+browserPlaybackLifecycle.current = {
+  refresh() { browserPlayback.refresh(); browserPlaybackMethods.refresh(); },
+  close() { browserPlayback.close(); browserPlaybackMethods.close(); },
+};
+const presenceRuntime = composePresenceRuntime({ db, events: runEventRepo, live: runEventLive,
+  connections: connectionRegistry, evidence: perception.evidence, logger: logger.child({ mod: "presence" }),
+  onSourceChanged: () => patternLifecycle.current?.sourceChanged() });
+presenceLifecycle.current = presenceRuntime;
+registerPresenceMethods(registry, { service: presenceRuntime.service, connections: connectionRegistry });
 
 // Workspace file RW (#11): CORE-side tools (no broker/gate) confined to the Workspace root — the agent's own scratch
 // space, the same subtree memory/ and screenshots/ live under. read+write are auto-allowed within it (ruling 1/8).
@@ -302,13 +392,21 @@ const workspacePaths = createWorkspacePaths({
   forbiddenPrefixes: () => selectedMemory.canonical ? ["memory", "blocks", "memory-migration"] : ["memory-migration"],
 });
 const readFileTool = createReadFileTool({ paths: workspacePaths, logger });
-const writeFileTool = createWriteFileTool({ paths: workspacePaths, logger });
-const staticCoreTools: ToolSet = { ...createCurrentTimeTool(), ...readFileTool, ...writeFileTool };
+const writeFileTool = createWriteFileTool({ paths: createWorkspacePaths({
+  root: join(serverConfig.dataDir, "workspace"),
+  // Native input/current-plan views are Core-published evidence. Models may write proposals, never these inputs.
+  forbiddenPrefixes: () => selectedMemory.canonical
+    ? ["memory", "blocks", "memory-migration", "co-watching-inputs", "media-analysis-inputs"]
+    : ["memory-migration", "co-watching-inputs", "media-analysis-inputs"],
+}), logger });
+const staticCoreTools: ToolSet = { ...createCurrentTimeTool({ userTimezone: () => userTimezoneService.timezone() }), ...readFileTool, ...writeFileTool };
 const extensions = createExtensionComposition({
   coreHostId, catalogs: hostCatalogs,
   skills: { catalog: skillBoot.catalog, loader: skillsLoader, governance },
   mcp: mcpBoot.manager,
-  route: (request, interactive) => routeCapability({ ...ambientCapabilityDeps, interactive }, { ...request, runId: interactive?.runId, attemptId: interactive?.attemptId }),
+  route: (request, interactive) => routeCapability({ ...ambientCapabilityDeps, effects: effectLifecycle, interactive }, {
+    ...request, runId: request.runId ?? interactive?.runId, attemptId: request.attemptId ?? interactive?.attemptId,
+  }),
 });
 const modelProvider = "openai-compatible";
 const modelId = boot.env.TAKI_PROVIDER_MODEL ?? "configured-main-model";
@@ -320,7 +418,7 @@ const runService = createRunService({
     extensions,
     governance,
     approval,
-    memory: { snapshot: memoryRuntime.snapshot, createTools: (characterId) => memory.createTools(characterId) },
+    memory: { captureRun: memoryRuntime.captureRun },
     provider: modelProvider,
     modelId,
     effects: effectLifecycle,
@@ -331,13 +429,27 @@ const recovery = createRecoveryCoordinator({ db, runs: runRepo, effects: effectL
 await recovery.scan();
 
 // Turn lifecycle (D1 #3/#4): per-character serialization + the cancellable-turn registry shared by send/cancel.
-const turnControls = { queue: createTurnQueue(), turns: createTurnRegistry(),
+const turnControls = { queue: createTurnQueue({ onPrimaryReserved: (characterId) => {
+  if (isSubagentLane(characterId)) return;
+  coWatchingLifecycle.current?.yieldToPrimary(characterId); mediaAnalysisLifecycle.current?.yieldToPrimary(characterId);
+  subagentLifecycle.current?.service.yieldInbox(characterId);
+}, onAvailable: (key) => {
+  if (isSubagentLane(key)) return;
+  subagentLifecycle.current?.released();
+  patternLifecycle.current?.released(); coWatchingLifecycle.current?.released(); mediaAnalysisLifecycle.current?.released();
+} }), turns: createTurnRegistry(),
   live: { activity: chatActivity, subscriptions: timelineSubscriptions } };
 const scheduleRepo = createScheduledTaskRepo(db);
+const userTimezoneRepo = createUserTimezoneRepo(db);
 const schedulePatterns = createSchedulePatternAdapter();
 const scheduleLifecycle: { engine?: ReturnType<typeof createScheduleEngine> } = {};
 const scheduleService = createScheduledTaskService({ repo: scheduleRepo, patterns: schedulePatterns,
-  userTimezone: scheduleRepo.userTimezone, rearm: () => scheduleLifecycle.engine?.rearm() });
+  userTimezone: () => userTimezoneRepo.read().timezone, rearm: () => scheduleLifecycle.engine?.rearm() });
+const userTimezoneService = createUserTimezoneService({ db, repo: userTimezoneRepo, schedules: scheduleService,
+  isOperatorDevice: (id) => pairedDeviceStore.find(id)?.role === "operator", logger,
+  onEffectiveZoneChange: () => scheduleLifecycle.engine?.rearm(),
+  onChanged: () => patternLifecycle.current?.policyChanged() });
+registerUserTimezoneMethods(registry, { service: userTimezoneService, connections: connectionRegistry });
 // The pairing code is the one sanctioned secret-ish value in a log: short-lived, single-purpose,
 // and the operator console is the trust anchor for first pairing (prd §4). Tokens are never logged.
 const pairingLog = logger.child({ mod: "pairing" });
@@ -354,13 +466,22 @@ registry.register(
       pairingLog.info({ deviceId, deviceName, remoteAddress }, "loopback operator auto-trusted"),
   }),
 );
+const interactionPatterns = createInteractionPatternService({ db,
+  onChanged: (change) => patternLifecycle.current?.patternChanged(change) });
+const intentions = createIntentionService({ db, sourceState: memoryRuntime.sourceState,
+  maximumWindowMs: () => readIntentionMaximumWindow(boot.config.source),
+  onChanged: () => patternLifecycle.current?.sourceChanged() });
 const chatAgent = createChatAgent({
+      userTimezone: userTimezoneService.timezone,
       model,
       effectLifecycle,
       store: conversationStore,
       memory,
        memoryPrompt: () => selectedMemory.canonical ? CANONICAL_MEMORY_SYSTEM_PROMPT : BASE_SYSTEM_PROMPT,
       autoMemory,
+      onPrimaryCommitted: memoryRuntime.recordPrimaryCommitted,
+      foregroundInbox: (input) => subagentLifecycle.current?.service.prepareInbox(input),
+      contextWindowTokens: () => windowCalibrator.effectiveWindow(),
       maxSteps: boot.agentConfig.maxSteps,
       // Presentation tools (avatar expression/motion) return nothing to read; stop the loop after a spoken,
       // presentation-only step so the SDK does not force a padded filler generation (1c). See presentation-stop.ts.
@@ -371,7 +492,7 @@ const chatAgent = createChatAgent({
       attachments: attachmentStore,
       // Detached, fire-and-forget (mirrors autoMemory) — present only when a vision slot is configured.
       imageMemory: imageDescriptionWriter
-        ? { onImageTurn: (input) => { if (!selectedMemory.canonical) void imageDescriptionWriter.onImageTurn(input); } }
+        ? { onImageTurn: (input) => { void imageDescriptionWriter.onImageTurn(input); } }
         : undefined,
       // Compatibility tools remain available when no interactive socket exists. The same Skill tools are reused in
       // the interactive bag below; MCP and progressive discovery are captured by runContext once per Run.
@@ -388,15 +509,30 @@ const chatAgent = createChatAgent({
       // Stable Core-local tools join per-turn memory/avatar tools behind the explicit Core binding table.
       coreTools: (primary, characterId) => primary ? mergeToolSets(staticCoreTools, createScheduleTaskTool(scheduleService, characterId)) : staticCoreTools,
       coreToolGovernance,
+      primaryTools: ({ characterId, userEntry, turn }) => mergeToolSets(
+        ...(subagents && turn ? [createSubagentTools({ service: subagents.service, characterId, userEntry, turn,
+          captureReply: subagents.reports.capturePrimary })] : []),
+        createManagePatternTool({ service: interactionPatterns, characterId, userEntry, turn }),
+        createPlanFollowUpTool({ service: intentions, characterId, userEntry, turn })),
+      skillTools: ({ characterId, userEntry, turn }) => [
+        ...(coWatchingLifecycle.current && userEntry
+          ? [{ skillName: CO_WATCHING_SKILL, tools: createManageCoWatchingTool({ runtime: coWatchingLifecycle.current, characterId, userEntry, turn,
+          analysisRuntime: mediaAnalysisLifecycle.current,
+          readAnalysis: createCoWatchingAnalysisReader({ catalog: coWatchingCatalog, ownerHostId: coreHostId }) }) }] : []),
+        ...(mediaAnalysisLifecycle.current && userEntry
+          ? [{ skillName: MEDIA_RECOMMENDATIONS_SKILL, tools: createManageMediaRecommendationsTool({ runtime: mediaAnalysisLifecycle.current,
+            characterId, userEntry, turn }) }] : []),
+      ],
       // Per-character avatar tools bind their publish target (the turn's characterId) here — same lifetime as memory tools.
       // vocab makes `name` a dynamic enum of the worn costume's live names (1e), so a costume swap rejects stale names.
       characterTools: (characterId) =>
-        createAvatarTools({ subscriptions: avatarSubscriptions, characterId, logger, vocab: avatarVocabulary.get(characterId) }),
+        createAvatarTools({ subscriptions: avatarSubscriptions, outcomes: avatarOutcomes, characterId, logger, vocab: avatarVocabulary.get(characterId) }),
       // Skills list + the active character's reported avatar vocabulary (ruling 10 — non-memory sections enter HERE,
       // never via the memory assembler); blanks contribute nothing. Boot/costume-stable → the instructions stay
       // day-stable (T5 Q4).
       instructionsExtra: (characterId) =>
-        [skillsLoader.renderList(), avatarVocabulary.render(characterId)]
+        [skillsLoader.renderList(), avatarVocabulary.render(characterId), coWatchingLifecycle.current?.context(characterId) ?? "",
+          mediaAnalysisLifecycle.current?.context(characterId) ?? ""]
           .filter((section) => section.length > 0)
           .join("\n\n"),
       // The fenced perception context (T3a activity + T3b screen) is minute-volatile, so it rides the <turn-context>
@@ -445,6 +581,7 @@ registry.register(timelineHistoryMethod(timelineRepo));
 registry.register(timelineSubscribeMethod(timelineSubscriptions));
 registry.register(avatarSubscribeMethod(avatarSubscriptions));
 registry.register(avatarReportMethod(avatarVocabulary));
+registry.register(avatarOutcomeMethod({ subscriptions: avatarSubscriptions, outcomes: avatarOutcomes, logger }));
 // Media methods (#17): serve attachment bytes for scroll-back, purge on demand, and report cache usage (usage RESERVED
 // for the M5 settings UI, D27). Operator-only, NO Rust mirror — the ref confinement is single-sourced in attachment-store.
 registry.register(mediaGetMethod(attachmentStore));
@@ -472,10 +609,85 @@ registerConfigMethods(registry, { ...boot.config, logger });
 registerObservabilityMethods(registry, { service: observability, live: runEventLive });
 registerScheduledTaskMethods(registry, scheduleService);
 
+const { runtime: initiativeRuntime, finishScheduled, delivery: sharedDelivery, deliveries: sharedDeliveries } = composeInitiativeRuntime({ db, events: runEventRepo, live: runEventLive,
+  runs: runService, effects: effectLifecycle, agent: chatAgent, queue: turnControls.queue, turns: turnControls.turns,
+  store: conversationStore, subscriptions: timelineSubscriptions, timezone: userTimezoneService, config: boot.config.source,
+  avatar: { vocabulary: avatarVocabulary, subscriptions: avatarSubscriptions,
+    outcomes: avatarOutcomes, logger, governance: coreToolGovernance } });
+const subagents = composeSubagents({ db, runRepo, runs: runService, effects: effectLifecycle, agent: chatAgent,
+  children: createSubagentRepo(db), inputs: createSubagentInputRepo(db), executions: subagentExecutions, messages: createRunMessageRepo(db),
+  queue: turnControls.queue, turns: turnControls.turns, store: conversationStore, historyBudget, timeline: timelineRepo,
+  utility: memoryRuntime.utility,
+  deliveries: sharedDeliveries, delivery: sharedDelivery, registry, connections: connectionRegistry,
+  reportError: (code) => logger.error({ code }, "Delegation operation failed") });
+subagentLifecycle.current = subagents;
+const coWatchingCatalog = createCoWatchingCatalog(join(serverConfig.dataDir, "co-watching", "analyses.json"));
+const coWatchingRuntime = createCoWatchingRuntime({ catalog: coWatchingCatalog, sources: browserPlayback,
+  subagents: subagents.service,
+  analysisTools: () => selectCoWatchingAnalysisTools(mcpBoot.manager.snapshot()),
+  runs: runService, agent: chatAgent, queue: turnControls.queue, turns: turnControls.turns,
+  delivery: sharedDelivery, deliveries: sharedDeliveries, workspaceRoot: join(serverConfig.dataDir, "workspace"),
+  skills: skillsLoader, logger: logger.child({ mod: "co-watching" }),
+  resultTool(serverId) {
+    const tool = mcpBoot.manager.snapshot().find((entry) => entry.serverId === serverId && entry.ref.toolName === "bilinote_read_result");
+    return tool ? { toolKey: tool.toolKey, isCurrent: tool.isCurrent } : undefined;
+  },
+  targetReady: (id) => id === "taki" || characterStore.list().some((character) => character.characterId === id),
+  onChanged: coWatchingSubscriptions.publish });
+coWatchingLifecycle.current = coWatchingRuntime;
+const mediaAnalysisRuntime = createMediaAnalysisRuntime({ catalog: coWatchingCatalog, ownerHostId: coreHostId,
+  analysisTools: () => selectCoWatchingAnalysisTools(mcpBoot.manager.snapshot()),
+  runs: runService, agent: chatAgent, queue: turnControls.queue, turns: turnControls.turns,
+  delivery: sharedDelivery, deliveries: sharedDeliveries, workspaceRoot: join(serverConfig.dataDir, "workspace"),
+  primarySource: {
+    register: interactionPatterns.registerPrimarySource,
+    isCurrent: (source) => validatePatternActor(db, source.characterId, { kind: "agent", runId: source.runId,
+      attemptId: source.attemptId, toolCallId: "media-recommendation-preparation" }) === null,
+  },
+  targetReady: (id) => id === "taki" || characterStore.list().some((character) => character.characterId === id),
+  onChanged: coWatchingSubscriptions.publish, logger: logger.child({ mod: "media-analysis" }) });
+mediaAnalysisLifecycle.current = mediaAnalysisRuntime;
+const viewing = createViewingInvitationSource({ db, sources: browserPlayback,
+  policy: () => readViewingInvitationPolicy(boot.config.source),
+  ready: () => boot.ambientConfig.enabled && visionModel !== null && visionModel !== undefined
+    && skillsLoader.describe(CO_WATCHING_SKILL) !== undefined
+    && selectCoWatchingAnalysisTools(mcpBoot.manager.snapshot()).length === 1
+    && mcpBoot.manager.snapshot().some((entry) => entry.ref.toolName === "bilinote_probe_media" && entry.isCurrent())
+    && hostCatalogs.hostsForCapability("screenshot-ambient").length > 0,
+  presence: () => presenceRuntime.service.snapshot().state === "present" ? "present" : "unknown",
+  acceptedSource: (id) => coWatchingRuntime.read(id).session?.sourceRef,
+  activeSession: (id) => {
+    const session = coWatchingRuntime.read(id).session;
+    return session !== null && !["stopped", "expired", "failed"].includes(session.status);
+  },
+  prepareEvidence: createViewingInvitationEvidence({ ownerHostId: coreHostId,
+    nativeTarget: () => {
+      const targets = selectCoWatchingAnalysisTools(mcpBoot.manager.snapshot());
+      return targets.length === 1 ? targets[0] : undefined;
+    },
+    enabled: () => boot.ambientConfig.enabled,
+    perception, describe: visionModel ? createScreenshotDescriber({ model: visionModel, logger }) : undefined,
+    effects: effectLifecycle, store: createAmbientShotStore({ ambientDir: join(serverConfig.dataDir, "workspace", "ambient-screenshots") }),
+    dropRawAfterDescribe: boot.ambientConfig.retention.mode === "drop-after-describe", logger,
+  }),
+  startAccepted: (input, interactive) => coWatchingRuntime.invite({ ...input, lifetimeMinutes: 120 }, interactive),
+  onChanged: coWatchingSubscriptions.publish });
+viewingLifecycle.current = viewing;
+registerCoWatchingMethods(registry, { runtime: coWatchingRuntime, catalog: coWatchingCatalog,
+  connections: connectionRegistry, subscriptions: coWatchingSubscriptions, invitations: viewing });
+const patternRuntime = composePatternRuntime({ db, config: boot.config.source, timezone: userTimezoneService,
+  perception, presence: presenceRuntime.service, patterns: interactionPatterns, intentions, skills: skillLifecycle,
+  connections: connectionRegistry, registry, queue: turnControls.queue, turns: turnControls.turns,
+  runtime: initiativeRuntime, logger, captureMemory: memoryRuntime.captureRun, avatarContext: avatarVocabulary.render, viewing,
+  // The bundled single-Character frontend has a real built-in target. Other explicit targets require
+  // a valid imported Character marker; neither imports nor avatar reports select the speaker.
+  targetReady: (id) => id === "taki" || characterStore.list().some((character) => character.characterId === id),
+  monitorEnabled: () => boot.config.source.resolve(MONITOR_MODE_CONFIG_KEY)?.value !== "DISABLED" });
+patternLifecycle.current = patternRuntime;
 const scheduledRuns = createScheduledRunAdapter({ repo: scheduleRepo, runs: runService, agent: chatAgent,
-  queue: turnControls.queue, turns: turnControls.turns, logger: logger.child({ mod: "scheduled-run" }) });
+  queue: turnControls.queue, turns: turnControls.turns, logger: logger.child({ mod: "scheduled-run" }), deliver: finishScheduled });
 const scheduleEngine = createScheduleEngine({ repo: scheduleRepo, patterns: schedulePatterns, runs: scheduledRuns,
-  userTimezone: scheduleRepo.userTimezone, logger: logger.child({ mod: "scheduler" }) });
+  userTimezone: userTimezoneService.timezone, logger: logger.child({ mod: "scheduler" }) });
 scheduleLifecycle.engine = scheduleEngine;
 await scheduleEngine.start();
 
@@ -510,20 +722,34 @@ const server = await startWsServer({
   connectionRegistry,
   logger,
 });
+memoryRuntime.start();
+patternRuntime.start();
 
 let shuttingDown = false;
 function shutdown(signal: string): void {
   if (shuttingDown) return;
   shuttingDown = true;
   logger.info({ signal }, "shutting down");
+  const patternStopped = patternRuntime.close();
+  const coWatchingStopped = coWatchingRuntime.close();
+  const mediaAnalysisStopped = mediaAnalysisRuntime.close();
+  const subagentsStopped = subagents?.close();
+  viewing.close();
+  browserPlaybackLifecycle.current?.close();
   perception.dispose();
+  presenceRuntime.close();
   const schedulerStopped = scheduleEngine.stop();
   runService.seal();
+  const initiativeStopped = initiativeRuntime.close();
   recovery.close();
   cancelDurableWorkForShutdown();
-  void turnControls.turns.drain(5_000).then(() => schedulerStopped).then(() => server.close()).then(async () => {
+  const memoryStopped = memoryRuntime.stop();
+  // The memory runtime stop settles the scheduler (and any manual tick an operation awaits); the operation owner then
+  // has nothing left in flight to wait for except setup calls bounded by their own deadlines.
+  void turnControls.turns.drain(5_000).then(() => patternStopped).then(() => coWatchingStopped).then(() => mediaAnalysisStopped).then(() => subagentsStopped).then(() => schedulerStopped).then(() => initiativeStopped).then(() => memoryStopped).then(() => memoryOperations.stop()).then(() => server.close()).then(async () => {
     chatActivity.dispose();
     extensionSubscriptions.dispose();
+    coWatchingSubscriptions.close();
     skillBoot.catalog.close();
     // Stop MCP publication → cancel candidates → drain under one budget → force-close remaining clients
     // (each exactly once), before the db handle and process go away.
@@ -532,6 +758,9 @@ function shutdown(signal: string): void {
     // Let pending native I/O retire after application teardown. Forced exit after fetch can abort Windows libuv
     // while its async handles are closing; natural exit also lets buffered diagnostics finish writing.
     process.exitCode = 0;
+  }).catch(() => {
+    logger.error({ code: "CORE_SHUTDOWN_FAILED" }, "Core shutdown could not settle all owned work");
+    process.exitCode = 1;
   });
 }
 

@@ -48,6 +48,9 @@ identity, order, recovery and canonical persistence. Read it before changing con
   language leaves one message-only error bubble alongside any earlier language, with no embedded action.
 - Observing a turn never automatically opens Pet. Preserve existing opening, input, visibility and
   presentation gates; reconnect or a late animation event cannot reopen a user-closed bubble.
+- Ordinary committed autonomous speech also arrives through Timeline append/history, without synthetic ChatActivity.
+  Its bounded consumer preserves complete groups, canonical keys and the existing presentation gate. Actual text
+  exposure follows [User Presence and Presentation Feedback](user-presence-feedback.md), never receipt alone.
 - Top-anchor the transcript. Earlier fitting text and the composer/frame remain stable as the tail
   changes. Long content scrolls inside the existing window rather than resizing the native window.
 
@@ -114,3 +117,39 @@ onTimelineCommitted((batch) => commitCoveredMessage(batch));
 
 The source-backed motion rationale is in the task's
 [motion design](../../tasks/08-22-t4-agent-architecture-observability/research/uiux-motion-continuity-2026-09-05.md).
+
+## Private delegated conversations
+
+- `features/subagents` owns its controller and Core conversation read model. It uses the narrow `ConversationTimeline`
+  presentation contract, `TimelineMessage`, default-safe Markdown/tool cards and `ConversationComposer`; never mount
+  `ChatPage`, primary `useChatTimeline`, presence or Memory/exposure owners inside a private child view.
+- Conversation history is continuous across work and Run boundaries. Work selection changes the explicitly addressed
+  target, not which history rows are visible. Use Core conversation sequence and sender attribution; never join message
+  visibility against independently paged execution records or infer same-timestamp historical order.
+- Keep newest, older and forward-gap coverage separately. Load long entry bodies through the exact scoped sequence,
+  digest and advancing offset until complete; a preview, failure and exhausted body are distinct. Preserve fully read
+  content through unrelated invalidations and keep mutable acceptance/disposition facts current when refreshed.
+- Private activity uses the real selected-child subscription and shared recovery reducer, with listener installation
+  before acknowledgement/snapshot. Retire observation on hidden/rebind and retain already observed content through
+  connection gaps. Neither main/Pet activity nor primary Timeline publication receives private events.
+- Additional live history is window-wide bounded to 4 retained snapshots and 4 MiB of serialized snapshot/metadata
+  content. A new observation that cannot fit suspends disposable observation and reports capacity unavailability;
+  it never evicts previously displayed text or treats a canonical preview as complete. Hidden children count against
+  the same budget. Terminal/obsolete Runs trigger serialized full-body recovery into the existing canonical reading
+  cache, at most 4 entries / 256,000 characters per pass. Only complete exact batches retire live references. Failed
+  unchanged body identities do not retry on tokens; reconnect or explicit retry can try again. Larger individual
+  bodies remain available through the explicit complete-body reader.
+- A native item keeps `activityItemKey(messageId,itemId)` through live-to-durable handoff. A first persisted row or
+  `coveredThroughStep` alone is insufficient: every `batch.entrySeqs` row must be loaded in full before live replacement.
+  Preserve tool pairing by Run/Attempt/invocation, and present accepted reports once in their conversation position.
+- Drafts live only in window memory, keyed by Character/child/work with captured control target, editor revision and
+  submitted operation identity. Navigation and reconnect preserve them. Explicit target confirmation is required after
+  target drift. Confirmed accepted input reconciles the same submitted identity; unknown outcomes never auto-replay.
+- Running children accept asynchronous input while Stop remains available. A user-stopped child has `Continue` for an
+  empty draft and `Send and continue` for a nonempty draft; both use one authoritative continuation RPC. A current input
+  wait is addressed with its exact `replyToEventId`. Parent input does not clear the user-stop latch.
+- Explicit parent inbox recovery lives in a compact disclosure on the existing child page. It is separate from child
+  Stop/Continue, obeys fresh Core `canResume`/reason, serializes mutations and reuses the same operation identity for an
+  explicitly requested unknown-outcome readback. Read/reconnect never starts recovery execution.
+- Shared scrolling preserves per-conversation reading positions and captures anchors for both top-reach and explicit
+  older loading. Native WebView2 evidence and owner acceptance remain separate from deterministic projection tests.

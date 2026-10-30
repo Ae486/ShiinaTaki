@@ -1,0 +1,19 @@
+# Source acceptance supplement
+
+The owner authorized finishing the remaining implementation and machine-observable validation, stopping before human acceptance. The previous paused S5/S6 report is historical. No commit, push, archive, main migration or real-user data mutation is authorized by this work.
+
+All fixtures use isolated synthetic data in the T4 worktree. Provider credentials are read only by the existing E2E environment helper from the coordinator-selected file. Evidence contains synthetic request/response text, bounded usage and source hashes, never credentials, response headers or raw provider exceptions. Every live attempt uses a new evidence directory; failures are preserved before considering any retry.
+
+| Batch | Actual consumers | Limits | Limits of the claim |
+| --- | --- | --- | --- |
+| A1–A3 | Real prepared publication, ChatAgent/SQLite, Compaction Utility pass, later ordinary ChatAgent | Three cases, at most nine logical generations, twelve upstream requests, six steps per answer | Candidate-only. Native source/playback are synthetic. No canonical witness callback is installed, so Memory flush is explicitly unexercised. |
+| Co-Watching | Real shared child, shipped Skill loader, governed Workspace file tools, plan validator and original accepted-root publication | One preparation, six model steps, eight upstream requests | Native analysis and playback are synthetic. Transport acceptance does not prove owner observation or UI acceptance. |
+| Canonical Local Memory | Real primary ChatAgent persistence and exact witness callback, forced pre-retirement Write Gate/extraction, Local provider recall | Two real Utility generations, four upstream requests | Primary reply and private/publication/tool source producers are scripted. Native Hindsight extraction/reflection remain external and unverified. |
+
+The semantic criteria distinguish a video's first-person narrator, explicit user self-report, mixed corrections and unknown historical source. Original wording and source eligibility remain unchanged. An external narrator's event must not become user biography, genuine user information must remain available, and private/tool/publication rows must not become eligible original-primary sources.
+
+The prior 290-result scoped evidence summary remains under `s5-s6-recovery/`; this supplement does not reinterpret it as a whole-tree gate. `preimages.json` records the working state before acceptance-fixture changes. `dry-first.json` preserves the first local run: A1–A3 machinery passed; the Co-Watching flow and publication assertions passed, then the fixture's call-count assertion failed because replacing `doStream` bypassed MockLanguageModelV4's call recorder. The test now constructs its scripted stream through the supported mock constructor.
+
+`tests-ready.json` records 27 passed tests across eight files, with the three explicitly enabled live tests skipped. This includes the actual Skill/file-tool dry path, Local primary-witness/flush/recall path, observer-error non-interference, runtime loading of the borrowed E2E ports with zero upstream requests, and 21 existing Co-Watching regressions. `typecheck-ready.log` and `lint-ready.log` both exited zero. Earlier Core checks exposed a fixture import crossing Core's TypeScript `rootDir`, then a nonportable inferred provider type; the helper now loads the existing E2E exports by file URL and advertises the existing public `LanguageModel` type. No compiler option or check was disabled.
+
+The synthetic native tools now explicitly accept object input instead of advertising an empty JSON schema to a real compatible provider. Their passthrough behavior retains the original native-stage fixture arguments. The dry path checks actual SDK-visible function schemas have object roots. This does not claim the synthetic native implementation is a deployed service.

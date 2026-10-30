@@ -43,6 +43,13 @@ This distinction is intentional: the architecture task establishes reusable infr
 implements product-specific providers and policies against those contracts. The current task must not accidentally turn
 the first T4 slice into the final Harness design.
 
+Downstream initiative planning (2026-09-11) is consolidated in
+`.trellis/tasks/09-11-companion-initiative-implementation/`, linked to the earlier `09-08-t4-heartbeat` discovery task.
+It owns the first initiative delivery and the necessary shared context/admission/delivery/presence adaptations through
+four ordered implementation children. Existing Run/Agent/Effect and Monitor/Trajectory remain the execution and
+observability path; business facts extend real producers and typed projections. This is a prepared development plan,
+not a claim that Heartbeat, presentation feedback or the new delivery continuations are already implemented.
+
 ## 2. Architectural Invariants
 
 1. TakiAgent has one Agent Runtime execution pipeline. User messages, Heartbeat, Scheduled Task, Webhook, system
@@ -238,8 +245,13 @@ returns a bounded structured result and linked evidence to the parent Run; the p
 that result. Child execution does not append its private transcript directly to the Relationship Timeline or claim
 ordinary user delivery by default. `parentRunId` supplies lineage, while `runId` remains the child execution/query key.
 
-Later implementation work must define one-shot/continuable result contracts, resource scope, delegation depth,
-cancellation cascade, context seeding/fork rules, and only then consider DSH-style Task DAG/mailbox coordination. Any
+The owner-approved behavioral refinements are recorded in [Agent Delegation Research](AGENT-DELEGATION-RESEARCH.md):
+parent-directed reuse/input, completion intent, isolation from main-request stops, and a user-accessible Subagent
+Conversation with manual child stop. This work-specific view/control surface reuses the same Runtime and does not
+replace the Character's continuous relationship Timeline.
+
+Later implementation work must map those decisions into one-shot/continuable result contracts, resource scope,
+delegation depth, cancellation scope and context seeding/fork rules, and only then consider DSH-style Task DAG/mailbox coordination. Any
 SDK-specific child-session handle is an internal adapter detail and must not become a user-visible Session authority.
 
 ### 6.11 Provider, Model, and Usage Routing
@@ -318,13 +330,15 @@ Implementation status (2026-08-25): Slice 5A installs the first production Sched
 Harness path, including durable definitions/outbox, `at`/`every`/`cron`, coalesced catch-up, primary-only management,
 and non-primary ChatAgent dispatch. Heartbeat, delivery/projections, Child Runs, and Timezone Authority Device updates
 remain later consumers; they do not introduce another runtime or execution ledger.
-| 3. Heartbeat | periodic/event Signal Providers, deterministic Wake Policy, typed Interaction Patterns, Class-B policy, structural silence, bounded Character-aware context and delivery | Companion State, feedback-driven Pattern evolution, future proactive providers and calibration |
-| 4. Delivery/reliability | Timeline/Receipt/Pet/Home convergence, reconnect and stale-result handling | future clients and remote delivery |
+| 3. Heartbeat | periodic/event Signal Providers, deterministic Wake Policy, typed Interaction Patterns, Class-B policy, structural silence, bounded Character-aware context, evidence-backed User Presence and delivery | Companion State, feedback-driven Pattern evolution, multi-device/mobile presence sources, Character-specific non-response behavior (D79, reusing Heartbeat), future proactive providers and calibration |
+| 4. Delivery/reliability | Timeline/Receipt/Pet/Home convergence, real presentation feedback, presence-aware interaction readiness, reconnect and stale-result handling | future operator/phone frontends, cross-device aggregation and remote delivery |
 | 5. Subagent/context lineage | parent/child Run, isolated child context, bounded result return, one-shot/continuable contracts | team/task coordination |
 | 6. Task coordination | generic work items, dependencies, claim/revision, mailbox and multi-agent coordination | domain-specific orchestration |
 | 7. Advanced operations | cost routing, richer trajectory, procedural knowledge, experience review, policy analytics | future product features |
 
 ### 8.1 Post-acceptance productization follow-ups
+
+The 2026-09-08 Heartbeat grill confirms User Presence as a Core-aggregated, time-bounded signal about the user across clients, distinct from Core/Host connectivity and per-message presentation. The VPS deployment and future phone frontend share the existing Core authority. Presence/report expiry, unknown states and cross-device deduplication must be reserved now; desktop-source integration belongs in Heartbeat planning, while a mobile application and its platform-specific producers remain later delivery work. User absence prevents false non-response attribution but does not globally stop permitted Core-only work. See `.trellis/tasks/09-08-t4-heartbeat/prd.md` and its grill decision record.
 
 The first DSH-style Monitor slice is a usable read-only projection, not the final observability or client-experience
 design. Owner acceptance on 2026-08-27 identified three follow-up tracks. They remain separate slices so each can be

@@ -103,6 +103,9 @@ interface TimingPolicy {
   unbounded authentication loop. Disposal cancels retry/stability timers and retires the current candidate.
 - Late callbacks from generation N must pass `isCurrent()` before changing UI state or the live scene after generation
   N+1 exists.
+- The presence source belongs to the physical client for its entire lifetime. React cleanup/remount suspends local
+  evidence without rotating or permanently retiring that source; socket retirement does end it. See
+  [User Presence and Presentation Feedback](user-presence-feedback.md).
 
 ### Retirement and request deadlines
 

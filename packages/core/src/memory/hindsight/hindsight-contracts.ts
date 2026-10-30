@@ -4,16 +4,13 @@
  * POS:    core/memory/hindsight — the only Hindsight response-validation vocabulary
  */
 import { z } from "zod";
+import { HindsightCompatibilitySupportSchema, HindsightApplicationStateContractSchema,
+  HindsightApplicationReflectContractSchema } from "@taki/shared";
 
 const text = z.string().min(1).max(512);
 const support = z.object({
   state: z.enum(["supported", "unsupported"]),
-  reason: z.enum([
-    "all_contracts_available", "backend_unavailable", "database_dialect_unsupported", "backend_capability_missing",
-    "backend_capability_probe_failed", "alternative_memory_store", "memory_store_capability_missing",
-    "memory_store_capability_probe_failed", "provider_lineage_unavailable", "authentication_not_required",
-    "authentication_capability_probe_failed",
-  ]),
+  reason: HindsightCompatibilitySupportSchema.shape.reason,
 });
 const versioned = z.object({ version: text, support });
 
@@ -50,6 +47,11 @@ export const HindsightCompatibilityWireSchema = z.object({
     logical_snapshot: versioned,
     additive_observation_instructions: versioned,
     controlled_layer_projection: versioned,
+    native_results: versioned.optional(),
+    current_state_transfer: versioned.optional(),
+    cutover_verification: versioned.optional(),
+    application_state: HindsightApplicationStateContractSchema.optional(),
+    application_reflect: HindsightApplicationReflectContractSchema.optional(),
   }),
 });
 export type HindsightCompatibilityWire = z.infer<typeof HindsightCompatibilityWireSchema>;

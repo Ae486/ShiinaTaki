@@ -1,0 +1,13 @@
+--- packages/core/src/agents/compaction-pass.ts
++++ packages/core/src/agents/compaction-pass.ts
+@@
+ Do not invent.  If something is unclear in the material, leave it out rather than guess.
+ 
++For events relevant to the retained thread, keep each person's experience and explicit
++negation separate when similar events involve different people. A user's clarification
++does not retract another person's sourced event unless the transcript says so.
++An assistant-role message with a supplied material source is not evidence of a previous
++attribution mistake. Do not invent a correction narrative from that role alone.
++
+ This record is the only thing that survives of that stretch of conversation. Every word
+ should enable future continuity.`;

@@ -8,6 +8,7 @@ import type { Logger } from "../logging/logger.ts";
 import type { RouteFailureCode, RouteResult } from "../capabilities/route-capability.ts";
 import { scrubPii } from "../perception/pii-scrub.ts";
 import { notifyPerceptionChange } from "../perception/notify-perception-change.ts";
+import type { PerceptionEvidence } from "../perception/perception-evidence.ts";
 import type { ActivityState } from "./activity-state.ts";
 
 const CAPABILITY = "foreground-window";
@@ -30,6 +31,7 @@ export interface ActivitySamplerDeps {
   /** True when the sampled app is on the sensitive skip list; its whole sample (title included) is dropped. */
   isSensitive: (processName: string | null) => boolean;
   state: ActivityState;
+  evidence?: PerceptionEvidence;
   logger: Logger;
   config: ActivitySamplerConfig;
   /** Injected epoch-ms clock (defaults to Date.now); tests pass a synthetic clock. */
@@ -90,6 +92,7 @@ function sensitiveSkip(rt: SamplerRuntime, sample: ForegroundWindowOutput): bool
     return false;
   }
   rt.deps.state.seal();
+  rt.deps.evidence?.reject();
   if (!rt.sensitiveLogged) {
     rt.log.debug("sensitive foreground app; sample dropped");
     rt.sensitiveLogged = true;
@@ -112,9 +115,11 @@ function stop(rt: SamplerRuntime): void {
     rt.timer = undefined;
   }
   if (wasRunning) notifyPerceptionChange(rt.deps.onChange);
+  if (wasRunning) rt.deps.evidence?.reject();
 }
 
 function handleFailure(rt: SamplerRuntime, code: RouteFailureCode, at: number): void {
+  rt.deps.evidence?.reject();
   if (code === "NO_NODE") {
     // Shell offline: quiet skip, retry next tick; log at most once per offline streak (no backoff escalation).
     if (!rt.offlineLogged) {
@@ -153,24 +158,32 @@ async function tick(rt: SamplerRuntime): Promise<void> {
     handleFailure(rt, "NO_NODE", at);
     return;
   }
+  const epoch = rt.deps.evidence?.generation();
   rt.inflight = true;
   try {
     const routed = await rt.deps.route(CAPABILITY, {});
+    if (rt.stopped || rt.deps.isPaused() || (epoch !== undefined && !rt.deps.evidence?.isCurrent(epoch))) return;
     if (!routed.ok) {
       handleFailure(rt, routed.code, at);
       return;
     }
+    if (routed.provenance && !routed.provenance.isCurrent()) return;
     rt.consecutiveErrors = 0;
     rt.backoffUntil = 0;
     rt.offlineLogged = false;
     const parsed = ForegroundWindowOutputSchema.safeParse(routed.output);
     if (!parsed.success) {
+      rt.deps.evidence?.reject();
       rt.log.warn({ code: "MALFORMED_SAMPLE" }, "foreground sample failed schema; skipping tick");
       return;
     }
     if (sensitiveSkip(rt, parsed.data)) return;
-    rt.deps.state.push(scrubSample(parsed.data), at);
+    if (!parsed.data.available) rt.deps.state.seal();
+    const sample = scrubSample(parsed.data);
+    if (epoch !== undefined && !rt.deps.evidence?.acceptForeground({ epoch, provenance: routed.provenance, sample, observedAt: at })) return;
+    rt.deps.state.push(sample, at);
   } catch (error) {
+    if (epoch !== undefined && rt.deps.evidence?.isCurrent(epoch)) rt.deps.evidence.reject();
     // Defense-in-depth: routeCapability never throws, but the loop must survive any surprise without crashing.
     const message = error instanceof Error ? error.message : String(error);
     rt.log.warn({ err: message }, "activity sampler tick threw; skipping");

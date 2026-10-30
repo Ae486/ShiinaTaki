@@ -10,6 +10,10 @@
 > single-character inline-tag approach is not an architecture to copy, because TakiAgent must survive character and
 > costume switching that the prototype never faces.
 >
+> **Owner clarification (2026-09-19):** the tool-call contract stays for the D80/D69 outcome work, whose result path
+> is contract-neutral. Whether inline tags become the invocation contract is re-decided in a dedicated grill before
+> #31 / segmented beats (§5.6), when mid-sentence markers first matter — see `deferred-decisions.md` D81.
+>
 > Scope: the expression/motion vocabulary, how it reaches the model, and the two avatar tools. TTS, lip-sync, and
 > speech timing remain governed by `TTS-INTERFACE.md`; §6 records what our engine and assets actually support, and §7 lists one item there for re-appraisal.
 >
@@ -673,6 +677,11 @@ Not registered in `deferred-decisions.md` by this document — they need an owne
    repeating the current expression or playing a NORMAL motion over a NORMAL motion returns `false` in the engine
    while the agent is told success. Any presentation feature that relies on tool success needs that outcome surfaced
    first (`deferred-decisions.md` D80).
+   **Status (2026-09-19, task `09-19-avatar-command-outcome`):** both landed. The tools now await the Pet UI's
+   Presentation Outcome (Core `commandId`, `avatar.outcome`, bounded by `TAKI_AVATAR_OUTCOME_DEADLINE_MS`) and return
+   `applied` / `not_rendered` / `rejected`+reason / `superseded` / `unknown`; `presentationTailStop` gives one
+   correction chance per turn for an invalid call. The provider-shape and cross-turn-inertia layers of D69 still
+   await a real trace; see `deferred-decisions.md` T4-D80 / D69 / T4-D82.
 
 5. **D40 (`deferred-decisions.md:109`)** can be collapsed rather than deferred if §4.5 removes `priority`/`loop`
    from the model-facing schema. Worth confirming when that change is scheduled.

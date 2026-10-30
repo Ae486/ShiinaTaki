@@ -1,0 +1,17 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "--filter",
+    "@taki/e2e",
+    "exec",
+    "vitest",
+    "run",
+    "src/initiative-runtime.e2e.test.ts",
+    "-t",
+    "held-Run crash"
+  ],
+  "startedAt": "2026-09-26T11:15:14.129408+00:00",
+  "seconds": 11.047,
+  "exitCode": 0,
+  "log": "e2e-crash-2026-09-26.log"
+}

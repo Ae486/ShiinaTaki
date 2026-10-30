@@ -3,7 +3,7 @@
  * OUTPUT: isolated fan-out with one initiator delivery and connection-scoped cleanup
  * POS:    core/server — the existing Character subscription registry; no new socket or execution authority
  */
-import type { ChatActivity, TimelineCommitted, TimelineEntry, TimelineRemoved } from "@taki/shared";
+import { TIMELINE_METHODS, type ChatActivity, type TimelineCommitted, type TimelineEntry, type TimelineRemoved } from "@taki/shared";
 import type { Connection } from "./connection-registry.ts";
 
 /** One subscriber's two push handlers: an appended entry and a retract (removed) ref — the sibling of onAppend/onRemove. */
@@ -15,6 +15,7 @@ export interface TimelineSink {
 }
 
 export interface TimelineSubscriptions {
+  publishObserved(entry: TimelineEntry): Promise<"sent" | "unknown" | "no_target">;
   subscribe(characterId: string, connection: Connection, sink: TimelineSink): void;
   unsubscribe(characterId: string, connection: Connection): void;
   /** Fans an appended entry out to every connection subscribed to its character. */
@@ -26,11 +27,14 @@ export interface TimelineSubscriptions {
   count(characterId: string): number;
 }
 
+type CharacterSinks = Map<string, Map<Connection, TimelineSink>>;
+
 export function createTimelineSubscriptions(): TimelineSubscriptions {
   // Connection identity keys the inner map, so disconnect cleanup is an O(1) delete.
-  const byCharacter = new Map<string, Map<Connection, TimelineSink>>();
+  const byCharacter: CharacterSinks = new Map();
 
   return {
+    publishObserved: (entry) => publishObserved(byCharacter, entry),
     subscribe(characterId, connection, sink) {
       let sinks = byCharacter.get(characterId);
       if (!sinks) {
@@ -68,6 +72,20 @@ export function createTimelineSubscriptions(): TimelineSubscriptions {
       return byCharacter.get(characterId)?.size ?? 0;
     },
   };
+}
+
+async function publishObserved(byCharacter: CharacterSinks, entry: TimelineEntry): Promise<"sent" | "unknown" | "no_target"> {
+  const targets = [...byCharacter.get(entry.characterId)?.entries() ?? []]
+    .filter(([connection]) => connection.state.status === "authenticated" && connection.state.role === "operator");
+  if (targets.length === 0) return "no_target";
+  const outcomes = await Promise.all(targets.map(async ([connection, sink]) => {
+    try {
+      if (connection.notifyObserved) return await connection.notifyObserved(TIMELINE_METHODS.appended, entry);
+      sink.appended(entry); return "unknown";
+    } catch { return "unknown"; }
+  }));
+  if (outcomes.includes("accepted")) return "sent";
+  return outcomes.every((value) => value === "refused") ? "no_target" : "unknown";
 }
 
 function publish(notify: () => void): void {

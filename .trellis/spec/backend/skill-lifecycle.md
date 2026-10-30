@@ -47,11 +47,16 @@ Migration 018 owns the STRICT `skill_packages` table. Its durable columns are `p
 Agent-facing reads remain separate from operator mutation:
 
 ```typescript
-load_skill({ skill: string })
-read_skill_resource({ skill: string, path: string })
+load_skill({ name: string })
+read_skill_resource({ name: string, path: string })
 ```
 
 Both use the existing `skill.load` / `skill-load` Governance identity. Neither method can mutate lifecycle state.
+
+Trusted product integrations may associate registered tools with a captured Skill through `ChatAgentDeps.skillTools`.
+The Agent uses `load_skill` against that Run's captured Skill binding; a successful full read makes only the associated
+bundle visible on the next SDK step. This adds no executable package/frontmatter semantics. Resources remain separate
+lazy reads. Follow [tool disclosure](./tool-disclosure.md); preserve immutable package publication.
 
 ### 3. Contracts
 

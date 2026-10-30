@@ -7,6 +7,7 @@ import { activityToolLabel, activityToolStatus } from "@/lib/tool-activity-displ
 import type { BubblePresenceRow } from "./bubble-presence.ts";
 import type { BubbleTranscriptItem } from "./bubble-transcript.ts";
 import { useBubbleRowPresence } from "./use-bubble-row-presence.ts";
+import { useCommittedExposure } from "@/features/presence/use-committed-exposure.js";
 
 function ToolBubble({ item, exiting }: { item: Extract<BubbleTranscriptItem, { kind: "tool" }>; exiting: boolean }) {
   const status = activityToolStatus(item.status, item.stale);
@@ -33,6 +34,8 @@ interface BubbleRowProps {
 export function BubbleTranscriptRow({ row, settled }: BubbleRowProps) {
   const presence = useBubbleRowPresence({ row, settled });
   const exiting = row.phase === "exiting";
+  const exposureRef = useCommittedExposure(row.item.kind === "text" ? row.item.committed ?? [] : [],
+    row.item.kind === "text" ? row.item.text : "", row.phase === "present");
   const tone = row.item.kind === "error" ? "bg-danger-soft text-danger-strong ring-danger-border"
     : row.item.kind === "notice" ? "bg-surface/95 text-text-secondary ring-black/5" : "bg-surface/95 text-text-strong ring-black/5";
   return (
@@ -42,7 +45,7 @@ export function BubbleTranscriptRow({ row, settled }: BubbleRowProps) {
       <div className={`pet-bubble-surface rounded-2xl rounded-bl-md px-4 py-2 text-sm shadow-overlay ring-1 ${tone}`}
         data-keep-interactive={row.phase === "present" ? "" : undefined}
         role={row.item.kind === "error" ? "status" : undefined}>
-        <BubbleContent item={row.item} exiting={exiting} />
+        <div ref={exposureRef}><BubbleContent item={row.item} exiting={exiting} /></div>
       </div>
     </div>
   );

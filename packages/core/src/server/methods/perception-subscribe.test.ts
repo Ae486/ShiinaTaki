@@ -139,7 +139,8 @@ describe("Perception over authenticated WS connections", () => {
     // The next frame on an unobserving/denied peer must be its explicit read response, never an unsolicited hint.
     idle.send({ jsonrpc: "2.0", id: "read", method: PERCEPTION_METHODS.card, params: {} });
     const read = JsonRpcSuccessResponseSchema.parse((await idle.take(1))[0]);
-    expect(PerceptionCardSchema.parse(read.result).current?.windowTitle).toBe("accepted sample");
+    // Consent retirement clears the old activity immediately; an explicit read cannot revive it.
+    expect(PerceptionCardSchema.parse(read.result).current).toBeNull();
     node.send(request);
     expect(appCode((await node.take(1))[0])).toBe("FORBIDDEN");
     await h.server.close();

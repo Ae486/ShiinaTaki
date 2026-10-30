@@ -1,0 +1,30 @@
+{
+  "checkedAt": "2026-09-15T16:57:15.949408+00:00",
+  "recordedEvidence": "H:\\TakiAgent\\.trellis\\.runtime\\d77-api-acceptance\\ca744d0f8a27\\api-b6-closeout-1-source-fingerprint.json",
+  "consumerId": "api-b6-closeout-1",
+  "scope": "Only recorded production/test source files under the explicit allowlist; no configs, credentials, runtime/user databases or new test execution.",
+  "allowedPrefixes": [
+    "taki/packages/core/src/",
+    "taki/packages/shared/src/",
+    "taki/apps/desktop/src/",
+    "taki/apps/desktop/src-tauri/src/",
+    "native/hindsight-api-slim/hindsight_api/",
+    "native/hindsight-api-slim/tests/"
+  ],
+  "extensions": [
+    ".cjs",
+    ".js",
+    ".mjs",
+    ".py",
+    ".rs",
+    ".sql",
+    ".ts",
+    ".tsx"
+  ],
+  "selectedFiles": 1835,
+  "matchedFiles": 1835,
+  "differentFiles": [],
+  "missingFiles": [],
+  "recordedFileCount": 2779,
+  "previousCheckedAt": "2026-09-14T15:35:23.627539+00:00"
+}

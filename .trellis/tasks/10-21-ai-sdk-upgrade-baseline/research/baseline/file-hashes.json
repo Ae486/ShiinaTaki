@@ -1,0 +1,8 @@
+{
+  "package.json": "c750fa708ebf4a515eae464529c1538a3b62ec23d484b2af73796f1e5dd3f4da",
+  "packages/core/package.json": "43a88ea5ac7c0f5190d9b50251efcadce409c9351334c6ac6619cdeebcbb6045",
+  "pnpm-lock.yaml": "4b7eecea2c08ac1b264d35381edfa6218f12f9870ebbcf7649a6edb8b0dc9ace",
+  "pnpm-workspace.yaml": "f059a4900b8a2d1cfeb3f780f1425ddc6d60a5a191731e1597a8efb13a3b44b3",
+  "tsconfig.base.json": "63794054710ad226227b68493a3cb5c957dfbd694a48f950b7eaf554b1972098",
+  "eslint.config.js": "168a469f91a7f9dff9311599715d0741eb5646088058c77fa337d92a2ff88d16"
+}

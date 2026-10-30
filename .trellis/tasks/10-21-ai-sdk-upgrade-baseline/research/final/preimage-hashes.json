@@ -1,0 +1,11 @@
+{
+  "packages/core/src/agents/chat-agent.ts": "766c4c99cf47f8f6d9d915ccaa446befda394c2a7d5b46a7a7872d4b06557af8",
+  "packages/core/src/agents/index.md": "a3ea9230c85abcb183f1c352e9cc747a25864f995c8d669d56ad034bab701e8e",
+  "packages/core/src/agents/provider-stream-failure.ts": "e5ba815d94944aaf3637cdca627f8d6e2b18172fc8776effc1ea0e0c93d2cc5a",
+  "packages/core/src/agents/chat-agent-usage.test.ts": "4219e0d20d06d81343c7f759a0f35e9528df6bbc6e9e0a377d44499e8ef228ca",
+  "packages/core/src/agents/run-observability-telemetry.test.ts": "973d6e5b7c5eba94ab9ced865607c441f7a05e9fc2f15d7b19222f5b0788c126",
+  "packages/core/src/server/methods/index.md": "343e839fa62893221f5fa588ebcd695a7887cd6ad636bdfca3255fe947406189",
+  "packages/core/src/testing/mock-language-model.ts": "07dececa8cc76afffe4d6d5e92fee908bdb5ce204cc75c90b68215e9080fe392",
+  ".trellis/spec/backend/agent-runtime.md": "0b3dacf5cc70894faeb7a31b45acff5390b8ae645dd052296fb7d9a91b82dc4e",
+  ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/task.json": "ac8c3597c3b3f94999c8968041d553bee19f1224f9d7ff80c2233e7e235f0664"
+}

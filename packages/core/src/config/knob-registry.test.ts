@@ -6,6 +6,27 @@ import { CONFIG_KNOBS, findKnob } from "./knob-registry.ts";
 // three variables. TAKI_DEV_TRIGGER is deliberately absent (dev-only, not a panel knob), as are the two test
 // fixtures the same grep found.
 const EXPECTED_KEYS = [
+  "TAKI_BROWSER_PLAYBACK_ENABLED",
+  "TAKI_INITIATIVE_VIEWING_EFFECTIVE_MS",
+  "TAKI_INITIATIVE_VIEWING_REMAINING_SECONDS",
+  "TAKI_INITIATIVE_VIEWING_INVITATION_TTL_MS",
+  "TAKI_INITIATIVE_TARGET_CHARACTER",
+  "TAKI_INITIATIVE_PERIODIC_ENABLED",
+  "TAKI_INITIATIVE_EVENTS_ENABLED",
+  "TAKI_INITIATIVE_CHECK_INTERVAL_MS",
+  "TAKI_INITIATIVE_MODEL_CADENCE_MS",
+  "TAKI_INITIATIVE_JITTER_RATIO",
+  "TAKI_INITIATIVE_QUIET_START",
+  "TAKI_INITIATIVE_QUIET_END",
+  "TAKI_INITIATIVE_INTENTION_MAX_WINDOW_MS",
+  "TAKI_INITIATIVE_ENABLED",
+  "TAKI_INITIATIVE_MODEL_HOUR_LIMIT",
+  "TAKI_INITIATIVE_UTTERANCE_HOUR_LIMIT",
+  "TAKI_INITIATIVE_UTTERANCE_DAY_LIMIT",
+  "TAKI_INITIATIVE_UTTERANCE_GAP_MS",
+  "TAKI_INITIATIVE_BUSY_MAX_WAIT_MS",
+  "TAKI_INITIATIVE_OUTPUT_TTL_MS",
+  "TAKI_SCHEDULED_OUTPUT_TTL_MS",
   "TAKI_WS_HOST",
   "TAKI_WS_PORT",
   "TAKI_LOG_LEVEL",
@@ -41,6 +62,7 @@ const EXPECTED_KEYS = [
   "TAKI_COMPACT_KEEP_MESSAGES",
   "TAKI_MAX_STEPS",
   "TAKI_ATTACHMENT_TTL_DAYS",
+  "TAKI_AVATAR_OUTCOME_DEADLINE_MS",
   "TAKI_AMBIENT_SCREENSHOT",
   "TAKI_AMBIENT_SCREENSHOT_RETENTION",
   "TAKI_MEMORY_PINNED_BUDGET",
@@ -66,6 +88,8 @@ const EXPECTED_KEYS = [
   "TAKI_HINDSIGHT_EMBEDDING_MODEL",
   "TAKI_HINDSIGHT_RERANKER_PROVIDER",
   "TAKI_HINDSIGHT_RERANKER_MODEL",
+  "TAKI_HINDSIGHT_POLICY_TIMEOUT_MS",
+  "TAKI_HINDSIGHT_POLICY_PROMPT",
 ];
 
 describe("CONFIG_KNOBS", () => {
@@ -73,7 +97,7 @@ describe("CONFIG_KNOBS", () => {
     const keys = CONFIG_KNOBS.map((knob) => knob.key);
     expect(new Set(keys).size).toBe(keys.length);
     expect([...keys].sort()).toEqual([...EXPECTED_KEYS].sort());
-    expect(CONFIG_KNOBS).toHaveLength(60);
+    expect(CONFIG_KNOBS).toHaveLength(84);
   });
 
   it("flags exactly the three API keys as secrets", () => {
@@ -87,6 +111,23 @@ describe("CONFIG_KNOBS", () => {
   it("keeps apply metadata truthful for timing rows with and without current production consumers", () => {
     expect(CONFIG_KNOBS.filter((knob) => knob.apply === "env-only").map((knob) => knob.key)).toEqual(["TAKI_DATA_DIR"]);
     expect(CONFIG_KNOBS.filter((knob) => knob.apply === "live").map((knob) => knob.key)).toEqual([
+      "TAKI_INITIATIVE_TARGET_CHARACTER",
+  "TAKI_INITIATIVE_PERIODIC_ENABLED",
+  "TAKI_INITIATIVE_EVENTS_ENABLED",
+  "TAKI_INITIATIVE_CHECK_INTERVAL_MS",
+  "TAKI_INITIATIVE_MODEL_CADENCE_MS",
+  "TAKI_INITIATIVE_JITTER_RATIO",
+  "TAKI_INITIATIVE_QUIET_START",
+  "TAKI_INITIATIVE_QUIET_END",
+  "TAKI_INITIATIVE_INTENTION_MAX_WINDOW_MS",
+  "TAKI_INITIATIVE_ENABLED",
+      "TAKI_INITIATIVE_MODEL_HOUR_LIMIT",
+      "TAKI_INITIATIVE_UTTERANCE_HOUR_LIMIT",
+      "TAKI_INITIATIVE_UTTERANCE_DAY_LIMIT",
+      "TAKI_INITIATIVE_UTTERANCE_GAP_MS",
+      "TAKI_INITIATIVE_BUSY_MAX_WAIT_MS",
+      "TAKI_INITIATIVE_OUTPUT_TTL_MS",
+      "TAKI_SCHEDULED_OUTPUT_TTL_MS",
       "TAKI_MONITOR_MODE",
       "TAKI_RECONNECT_BASE_MS",
       "TAKI_RECONNECT_CAP_MS",
@@ -98,6 +139,11 @@ describe("CONFIG_KNOBS", () => {
       "TAKI_PET_COSTUME_TOTAL_TIMEOUT_MS",
       "TAKI_RENDERER_LOAD_TIMEOUT_MS",
       "TAKI_HOME_RESULT_TIMEOUT_MS",
+      "TAKI_AVATAR_OUTCOME_DEADLINE_MS",
+      "TAKI_BROWSER_PLAYBACK_ENABLED",
+      "TAKI_INITIATIVE_VIEWING_EFFECTIVE_MS",
+      "TAKI_INITIATIVE_VIEWING_REMAINING_SECONDS",
+      "TAKI_INITIATIVE_VIEWING_INVITATION_TTL_MS",
       "TAKI_HINDSIGHT_ENABLED",
       "TAKI_HINDSIGHT_DEPLOYMENT_MODE",
       "TAKI_HINDSIGHT_ENDPOINT",
@@ -113,6 +159,8 @@ describe("CONFIG_KNOBS", () => {
       "TAKI_HINDSIGHT_EMBEDDING_MODEL",
       "TAKI_HINDSIGHT_RERANKER_PROVIDER",
       "TAKI_HINDSIGHT_RERANKER_MODEL",
+      "TAKI_HINDSIGHT_POLICY_TIMEOUT_MS",
+      "TAKI_HINDSIGHT_POLICY_PROMPT",
     ]);
   });
 
@@ -139,6 +187,8 @@ describe("CONFIG_KNOBS", () => {
     expect(findKnob("TAKI_MEMORY_BM25_WEIGHTS")?.schema.safeParse("2,1").success).toBe(false);
     expect(findKnob("TAKI_MEMORY_STOPLIST")?.schema.safeParse("maybe").success).toBe(false);
     expect(findKnob("TAKI_RPC_INTERACTIVE_TIMEOUT_MS")?.schema.safeParse(0).success).toBe(false);
+    expect(findKnob("TAKI_AVATAR_OUTCOME_DEADLINE_MS")?.schema.safeParse(99).success).toBe(false);
+    expect(findKnob("TAKI_AVATAR_OUTCOME_DEADLINE_MS")?.schema.safeParse(10_001).success).toBe(false);
   });
 
   it("accepts the shapes the loaders accept", () => {

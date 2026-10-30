@@ -1,0 +1,145 @@
+{
+  "url": "https://registry.npmjs.org/%40workflow%2Fserde/4.1.0",
+  "metadata": {
+    "bugs": {
+      "url": "https://github.com/vercel/workflow/issues"
+    },
+    "dist": {
+      "shasum": "82dbbaf2370f7b8ae46d9a9a4ab0917258f8db62",
+      "tarball": "https://registry.npmjs.org/@workflow/serde/-/serde-4.1.0.tgz",
+      "fileCount": 7,
+      "integrity": "sha512-pav4F2BoirECWR7Nf1TKt+2eETcBj7jj4cBefQ8VXQCA6NPkaKeLfj/zMgi+3zYV5ZIBT4GuUiphsj0/b9hPQQ==",
+      "signatures": [
+        {
+          "sig": "MEQCIDlaXr9d5rkoxcIC/EA4235iH560GtT6WzJ63NTWagJgAiAGBCvjbwKIZ/7ub+aUX5vF3/Cy7pigP3coJ9fQ4GvK/Q==",
+          "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+        }
+      ],
+      "attestations": {
+        "url": "https://registry.npmjs.org/-/npm/v1/attestations/@workflow%2fserde@4.1.0",
+        "provenance": {
+          "predicateType": "https://slsa.dev/provenance/v1"
+        }
+      },
+      "unpackedSize": 3735
+    },
+    "main": "dist/index.js",
+    "name": "@workflow/serde",
+    "type": "module",
+    "_from": "file:workflow-serde-4.1.0.tgz",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "license": "Apache-2.0",
+    "scripts": {
+      "dev": "tsc --watch",
+      "build": "tsc",
+      "clean": "tsc --build --clean && rm -rf dist",
+      "typecheck": "tsc --noEmit"
+    },
+    "_npmUser": {
+      "name": "GitHub Actions",
+      "email": "npm-oidc-no-reply@github.com",
+      "trustedPublisher": {
+        "id": "github",
+        "oidcConfigId": "oidc:5a61ded0-8fc6-4ec0-9055-f9442d0988b0"
+      }
+    },
+    "homepage": "https://github.com/vercel/workflow#readme",
+    "_resolved": "/tmp/574418604553502b86193455d8275569/workflow-serde-4.1.0.tgz",
+    "_integrity": "sha512-pav4F2BoirECWR7Nf1TKt+2eETcBj7jj4cBefQ8VXQCA6NPkaKeLfj/zMgi+3zYV5ZIBT4GuUiphsj0/b9hPQQ==",
+    "repository": {
+      "url": "git+https://github.com/vercel/workflow.git",
+      "type": "git",
+      "directory": "packages/serde"
+    },
+    "_npmVersion": "11.11.0",
+    "description": "Serialization symbols for custom class serialization in Workflow SDK",
+    "directories": {},
+    "maintainers": [
+      {
+        "name": "melkey",
+        "email": "melkeydev@gmail.com"
+      },
+      {
+        "name": "techwraith",
+        "email": "techwraithpdx@gmail.com"
+      },
+      {
+        "name": "vaguelyserious",
+        "email": "mittgfu@gmail.com"
+      },
+      {
+        "name": "qiao",
+        "email": "xueqiaoxu@gmail.com"
+      },
+      {
+        "name": "bobmshannon",
+        "email": "bob.shannon@vercel.com"
+      },
+      {
+        "name": "vercel_it_service_account",
+        "email": "it+npmserviceaccount@vercel.com"
+      },
+      {
+        "name": "ronnie-hanif",
+        "email": "ronnie.hanif@gmail.com"
+      },
+      {
+        "name": "nick.tracey",
+        "email": "nick.tracey@vercel.com"
+      },
+      {
+        "name": "elsigh",
+        "email": "lsimon@commoner.com"
+      },
+      {
+        "name": "adamdong",
+        "email": "adam.dong@vercel.com"
+      },
+      {
+        "name": "matheuss",
+        "email": "matheus.frndes@gmail.com"
+      },
+      {
+        "name": "bvred4244",
+        "email": "becky.vredenburg@vercel.com"
+      },
+      {
+        "name": "matt.straka",
+        "email": "matt.j.straka@gmail.com"
+      },
+      {
+        "name": "pranaygp",
+        "email": "pranay.gp@gmail.com"
+      },
+      {
+        "name": "tootallnate",
+        "email": "nathan@tootallnate.net"
+      },
+      {
+        "name": "vercel-release-bot",
+        "email": "infra+release@vercel.com"
+      }
+    ],
+    "_nodeVersion": "24.14.1",
+    "publishConfig": {
+      "access": "public"
+    },
+    "_hasShrinkwrap": false,
+    "devDependencies": {
+      "@types/node": "22.19.0",
+      "@workflow/tsconfig": "4.0.1"
+    },
+    "_npmOperationalInternal": {
+      "tmp": "tmp/serde_4.1.0_1775606081609_0.44029033988722444",
+      "host": "s3://npm-registry-packages-npm-production"
+    },
+    "_id": "@workflow/serde@4.1.0",
+    "version": "4.1.0"
+  }
+}

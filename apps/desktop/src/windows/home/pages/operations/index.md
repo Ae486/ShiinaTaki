@@ -1,10 +1,16 @@
 # windows/home/pages/operations/
-The operations page: manual memory maintenance, the memory/context status card, and storage usage with the D46
-attachment purge. Every number comes from a WS read — the page computes nothing the Core owns.
-- operations-page.tsx — page root: tidy trigger + defect counts, status card, storage card; loading rides Skeleton and the failed status/usage read carries a retry
-- storage-card.tsx — media.usage display and two-step attachment purge; stable pending label, locked confirmation/Cancel and one retained failure path
-- use-operations.ts — independent memory/storage demand states and retries, with visibility-gated read invalidation after writes
+The Operations page joins durable Memory operations, manual maintenance, context and storage.
+Every displayed fact comes from Core; retained-page reads never replay mutations.
+
+- operations-page.tsx — retained Memory authority, tidy, context and storage cards with independent failure/retry states
+- storage-card.tsx — media usage and two-step attachment purge with stable pending labels and locked confirmation
+- use-operations.ts — independent Memory/storage demand states and retries; visibility-gated invalidation after writes
 - use-memory-tidy.ts — synchronous one-attempt tidy lock and current-client outcomes, independent of read visibility
-- use-media-clear.ts — React adapter for guarded media clearing with once-only floating outcomes and storage invalidation
+- use-media-clear.ts — guarded media clearing, once-only floating outcomes, retained failure and storage invalidation
 - media-clear-controller.ts — explicit confirmation, per-client attempt lock, stale-result suppression and terminal retryable errors; reconnect cannot erase an unconfirmed prior purge
 - operations-state.ts — pure view models + media.clear state machine; Cancel is valid only before destructive execution
+- memory-authority-card.tsx — memory.authority.status card: authority/runtime/setup lines, per-Bank replica + Pending rows with Sync now / Full reconcile / Retry, active operations with Cancel (admitted replica.sync only)
+- memory-authority-state.ts — provider status and semantic Bank/operation labels; unknown stays unknown and internal identities remain non-display state
+- memory-operations-controller.ts — current-client operation actions and outcomes; visibility/acknowledgement-gated status reads, retryable setup and coalesced invalidation without mutation replay
+- use-memory-operations.ts — Memory operations React lifecycle tied to authenticated client and actual retained-page visibility
+- memory-authority-fixtures.ts — test support (not in the production path): MemoryAuthorityStatus / Bank / MemoryOperation fixtures shared by the card, view-model and controller tests

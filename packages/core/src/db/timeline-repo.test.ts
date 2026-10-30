@@ -126,6 +126,46 @@ describe("timeline tool display names", () => {
   });
 });
 
+describe("timeline source preservation", () => {
+  it("keeps absent source context as SQL NULL and refuses malformed source evidence before a batch writes", () => {
+    const legacy = repo.append({ characterId: "taki", role: "user", content: "Original self-report." });
+    expect("sourceContext" in legacy).toBe(false);
+    expect(db.prepare("SELECT source_context_json AS source FROM timeline_messages WHERE seq=:seq").get({ seq: legacy.seq })?.source).toBeNull();
+    const malformed = { characterId: "taki", role: "assistant" as const, content: "Bad context", sourceContext: { materials: [{ label: "" }] } };
+    expect(() => repo.appendBatch([{ characterId: "taki", role: "assistant", content: "Must roll back" }, malformed])).toThrow();
+    expect(repo.latestAscending("taki", 10)).toEqual([legacy]);
+  });
+
+  it("does not silently discard corrupt stored source context", () => {
+    db.prepare(`INSERT INTO timeline_messages(id,character_id,role,content,source_context_json,created_at)
+      VALUES(:id,'taki','assistant','Original text','{"materials":[{"speaker":42}]}','2026-10-22T00:00:00.000Z')`)
+      .run({ id: "550e8400-e29b-41d4-a716-446655440000" });
+    expect(() => repo.latestAscending("taki", 10)).toThrow("corrupt source context JSON");
+  });
+
+  it("retains source context and exact tool material status without raw call inputs", () => {
+    const sourceContext = { generatedBy: { runId: "generation", attemptId: "attempt" },
+      materials: [{ label: "Interview", reference: "document:interview", speaker: "Guest" }] };
+    const sourceMaterials = [{ key: "interview", source: sourceContext.materials[0] }];
+    const output = { type: "json", value: { ok: false, reason: "unavailable" } };
+    const parts: TimelinePart[] = [
+      { type: "tool-call", toolCallId: "read", toolName: "read_file", input: { secret: "DO_NOT_RETAIN" } },
+      { type: "tool-result", toolCallId: "read", toolName: "read_file", output, sourceMaterials },
+    ];
+    const input = { characterId: "taki", role: "assistant" as const, content: "The guest's story.\n", sourceContext, parts };
+    const row = repo.append(input);
+    const expected = { ...input, parts: [{ type: "tool-call", toolCallId: "read", toolName: "read_file" }, parts[1]] };
+    expect(row).toMatchObject(expected);
+    for (const entry of [repo.latestAscending("taki", 10)[0], repo.rangeAscending("taki", 0, row.seq)[0],
+      repo.pageBefore({ characterId: "taki", limit: 10 }).entries[0]]) expect(entry).toMatchObject(expected);
+    expect(JSON.stringify(row)).not.toContain("DO_NOT_RETAIN");
+    sourceContext.materials[0]!.speaker = "Changed outside storage";
+    expect(repo.latestAscending("taki", 10)[0]?.sourceContext?.materials?.[0]?.speaker).toBe("Guest");
+    expect(() => db.prepare("UPDATE timeline_messages SET source_context_json='{}' WHERE seq=:seq").run({ seq: row.seq }))
+      .toThrow("timeline source context is immutable");
+  });
+});
+
 describe("createTimelineRepo.deleteEntry", () => {
   it("removes exactly the addressed row; later reads exclude it and other rows survive", () => {
     repo.append({ characterId: "taki", role: "user", content: "keep-1" });

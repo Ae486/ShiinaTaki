@@ -14,12 +14,16 @@ export interface PerceptionChangesDeps {
   /** Read lazily: the Perception layer installs this owner before constructing and starting its producers. */
   pauseState: (at: number) => PerceptionPauseState;
   now?: () => number;
+  /** Local data-free invalidation; observing never creates a sensor subscription. */
+  onChanged?: () => void;
 }
 
 export interface PerceptionChanges {
   subscriptions: PerceptionSubscriptions;
   changed(): void;
   pauseChanged(): void;
+  /** Coalesce one synchronous compound state change before exposing its final projection. */
+  batch(change: () => void): void;
   dispose(): void;
 }
 
@@ -31,27 +35,45 @@ class PerceptionChangesOwner implements PerceptionChanges {
   readonly subscriptions: PerceptionSubscriptions;
   private readonly pauseState: PerceptionChangesDeps["pauseState"];
   private readonly now: () => number;
+  private readonly onChanged?: () => void;
   private revision = 0;
   private timer: ReturnType<typeof setTimeout> | undefined;
   private deadlineEpoch = 0;
   private disposed = false;
+  private batchDepth = 0;
+  private pendingChange = false;
 
   constructor(deps: PerceptionChangesDeps) {
     this.pauseState = deps.pauseState;
     this.now = deps.now ?? Date.now;
+    this.onChanged = deps.onChanged;
     this.subscriptions = createPerceptionSubscriptions(() => this.refreshDeadline());
   }
 
   changed = (): void => {
     if (this.disposed) return;
+    if (this.batchDepth > 0) { this.pendingChange = true; return; }
     this.revision += 1;
     this.subscriptions.publish({ revision: this.revision });
+    try { this.onChanged?.(); } catch { /* Projection failure cannot undo an accepted source or privacy withdrawal. */ }
   };
 
   pauseChanged = (): void => {
     this.refreshDeadline();
     this.changed();
   };
+
+  batch(change: () => void): void {
+    this.batchDepth += 1;
+    try { change(); }
+    finally {
+      this.batchDepth -= 1;
+      if (this.batchDepth === 0 && this.pendingChange) {
+        this.pendingChange = false;
+        this.changed();
+      }
+    }
+  }
 
   dispose(): void {
     if (this.disposed) return;

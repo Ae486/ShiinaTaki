@@ -1,6 +1,6 @@
 /**
- * INPUT:  trusted canonical identity/cell sidecar, GovernancePolicyService, and an existing AI SDK Tool closure
- * OUTPUT: unchanged guarded execution/results, closed Effect outcomes, and optional wait/dispatch observations
+ * INPUT:  canonical identity/cell, live policy/durable Approval, captured closure and trusted execution options
+ * OUTPUT: guarded interactive/unattended execution, attributed Effect outcomes and wait/dispatch observations
  * POS:    core/governance — explicit Core/MCP/Skill adapter primitive; presentation keys and tool metadata grant nothing
  */
 import type { Tool } from "ai";
@@ -15,6 +15,7 @@ import type { EffectLifecycleService } from "../harness/effect-lifecycle-service
 import { randomUUID } from "node:crypto";
 import type { ToolEffectObserver } from "../observability/tool-effect-observer.ts";
 import { classifyToolOutcome } from "../agents/tool-outcome.ts";
+import { governedExecutionContext } from "./captured-tool-execution.ts";
 
 export interface GovernedToolBinding {
   identity: CanonicalCapabilityIdentity;
@@ -55,6 +56,7 @@ export interface GovernedEffectContext {
   attemptId: string;
   effects: EffectLifecycleService;
   toolObserver?: ToolEffectObserver;
+  signal?: AbortSignal;
 }
 
 export interface GovernedToolContext {
@@ -62,6 +64,7 @@ export interface GovernedToolContext {
   binding: GovernedToolBinding;
   interactive?: InteractiveGovernanceContext;
   effect?: GovernedEffectContext;
+  approval?: Pick<ApprovalInteractionService, "hasDurableAuthority">;
   dispatchLease?: GovernedDispatchLease;
 }
 
@@ -90,10 +93,14 @@ export function attachEffectExecutionContext(options: unknown, effect: EffectExe
 export function wrapGovernedTool(tool: Tool, context: GovernedToolContext): Tool {
   const execute = tool.execute;
   if (typeof execute !== "function") return tool;
-  return {
-    ...tool,
-    execute: (input, options) => executeGoverned({ execute, context, input, options }),
-  } as Tool;
+  const descriptors = Object.getOwnPropertyDescriptors(tool);
+  descriptors.execute = { ...descriptors.execute, value: ((input, options) => {
+      const effect = governedExecutionContext(options);
+      const interactive = effect && context.interactive ? { ...context.interactive, ...effect,
+        signal: options.abortSignal ?? effect.signal } : context.interactive;
+      return executeGoverned({ execute, context: effect ? { ...context, effect, interactive } : context, input, options });
+    }) satisfies NonNullable<Tool["execute"]> };
+  return Object.create(Object.getPrototypeOf(tool), descriptors) as Tool;
 }
 
 interface ExecuteGovernedArgs {
@@ -106,11 +113,29 @@ interface ExecuteGovernedArgs {
 async function executeGoverned(args: ExecuteGovernedArgs) {
   const { execute, context, input, options } = args;
   const { service, binding, interactive } = context;
+  if (options.abortSignal?.aborted || context.effect?.signal?.aborted || interactive?.signal?.aborted) {
+    return { ok: false, code: "CANCELLED", message: "Run execution was cancelled" };
+  }
   const decision = service.authorize(binding);
   recordGovernance(context, decision, options);
   if (decision.allowed) return executeWithEffect({ execute, context, input, options });
-  if (decision.code !== "APPROVAL_REQUIRED" || !interactive) return denied(decision, binding);
+  if (decision.code !== "APPROVAL_REQUIRED") return denied(decision, binding);
   const requestedBinding = approvalBinding(binding, decision.evaluation, service);
+  if (!interactive) {
+    return context.approval?.hasDurableAuthority(requestedBinding)
+      ? executeWithEffect({ execute, context, input, options }) : denied(decision, binding);
+  }
+  return executeInteractiveApproval(args, { interactive, decision, requestedBinding });
+}
+
+async function executeInteractiveApproval(args: ExecuteGovernedArgs, authorization: {
+  interactive: InteractiveGovernanceContext;
+  decision: Exclude<ReturnType<GovernancePolicyService["authorize"]>, { allowed: true }>;
+  requestedBinding: ReturnType<typeof approvalBinding>;
+}) {
+  const { execute, context, input, options } = args;
+  const { service, binding } = context;
+  const { interactive, decision, requestedBinding } = authorization;
   const handle = requestApproval({ interactive, binding, decision, requestedBinding });
   // A durable waiting Effect represents a real operator prompt. Session/always authority is already resolved and has
   // no canonical Approval ID, so it must proceed directly to target intent instead of creating an untraceable wait.
@@ -175,6 +200,11 @@ async function executeWithEffect(args: ExecuteGovernedArgs & { waiting?: ReturnT
   const effects = context.effect?.effects ?? interactive?.effects;
   const runId = context.effect?.runId ?? interactive?.runId;
   const attemptId = context.effect?.attemptId ?? interactive?.attemptId;
+  if (options.abortSignal?.aborted || context.effect?.signal?.aborted || interactive?.signal?.aborted) {
+    if (waiting && effects?.settleWaiting) effects.settleWaiting({ effectId: waiting.effectId, runId: waiting.runId,
+      attemptId: waiting.attemptId, expectedVersion: waiting.version, outcome: "cancelled", errorCode: "cancelled" });
+    return { ok: false, code: "CANCELLED", message: "Run execution was cancelled" };
+  }
   const lease = context.dispatchLease;
   if (lease && !lease.acquire()) {
     if (waiting && effects?.settleWaiting) effects.settleWaiting({
@@ -198,7 +228,8 @@ async function executeWithEffect(args: ExecuteGovernedArgs & { waiting?: ReturnT
     const executionOptions = effect ? withEffectContext(options, effect) : options;
     observePhase(context, options, "executing");
     const raw = await Promise.resolve(execute(input, executionOptions as Parameters<NonNullable<Tool["execute"]>>[1])).catch((error: unknown) => {
-      if (effect && effects) effects.settle({ effectId: effect.effectId, runId: effect.runId, attemptId: effect.attemptId, expectedVersion: effect.version, outcome: "failed", errorCode: "tool_error" });
+      const cancelled = options.abortSignal?.aborted || context.effect?.signal?.aborted;
+      if (effect && effects) effects.settle({ effectId: effect.effectId, runId: effect.runId, attemptId: effect.attemptId, expectedVersion: effect.version, outcome: cancelled ? "cancelled" : "failed", errorCode: cancelled ? "cancelled" : "tool_error" });
       throw error;
     });
     const result = lease?.acceptResult ? lease.acceptResult(raw) : raw;

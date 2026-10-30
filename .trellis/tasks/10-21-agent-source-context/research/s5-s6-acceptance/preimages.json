@@ -1,0 +1,32 @@
+[
+  {
+    "sha256": "3837b5bd3326d34e6e92fa15f9b07dfc7a85c74da61e1387795ca97e3aee87ad",
+    "path": "packages/core/src/agents/source-context-real.test.ts",
+    "preimage": ".trellis\\tasks\\10-21-agent-source-context\\research\\s5-s6-acceptance\\preimages\\packages__core__src__agents__source-context-real.test.ts"
+  },
+  {
+    "sha256": "ada2eebc15b3d991a2ad9adb3111f8b2863081dc37f4a9d46bc067e22ee6cfe2",
+    "path": "packages/core/src/testing/co-watching-fixture.ts",
+    "preimage": ".trellis\\tasks\\10-21-agent-source-context\\research\\s5-s6-acceptance\\preimages\\packages__core__src__testing__co-watching-fixture.ts"
+  },
+  {
+    "sha256": "dfe9156489145e200c9934358b6489366fe9b1d160166b9afb4fcfbf64681692",
+    "path": "packages/core/src/testing/index.md",
+    "preimage": ".trellis\\tasks\\10-21-agent-source-context\\research\\s5-s6-acceptance\\preimages\\packages__core__src__testing__index.md"
+  },
+  {
+    "preimage": ".trellis\\tasks\\10-21-agent-source-context\\research\\s5-s6-acceptance\\preimages\\packages__core__src__agents__compaction-pass.ts",
+    "path": "packages/core/src/agents/compaction-pass.ts",
+    "sha256": "fb2c9ebe7a73f4b10707aa10c174682514715b271d2ab6fbb860222e101a35f8"
+  },
+  {
+    "preimage": ".trellis\\tasks\\10-21-agent-source-context\\research\\s5-s6-acceptance\\preimages\\packages__core__src__agents__source-compaction.test.ts",
+    "path": "packages/core/src/agents/source-compaction.test.ts",
+    "sha256": "17687253c8429a71a12eca2ab708312c1aa4a6949ca54491460113c2bd2345fb"
+  },
+  {
+    "preimage": ".trellis\\tasks\\10-21-agent-source-context\\research\\s5-s6-acceptance\\preimages\\packages__core__src__agents__index.md",
+    "path": "packages/core/src/agents/index.md",
+    "sha256": "55610fe05f322dbd933e14cb828b7513116a6933d738f240473513d424757bef"
+  }
+]

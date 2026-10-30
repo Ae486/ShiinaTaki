@@ -27,7 +27,8 @@
     "08-12-secure-mcp-lifecycle",
     "08-12-standard-skill-lifecycle",
     "08-12-extension-discovery-integration",
-    "08-20-skills-mcp-freeze-main-integration"
+    "08-20-skills-mcp-freeze-main-integration",
+    "09-01-openbiliclaw-integration"
   ],
   "parent": null,
   "relatedFiles": [],

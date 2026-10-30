@@ -1,0 +1,110 @@
+{
+  "metadata": {
+    "bugs": {
+      "url": "https://github.com/vercel/ai/issues"
+    },
+    "dist": {
+      "shasum": "37a74db683a402c73aa94ea197904b794e917d31",
+      "tarball": "https://registry.npmjs.org/@ai-sdk/provider/-/provider-4.0.31.tgz",
+      "fileCount": 265,
+      "integrity": "sha512-3wJnwVTFg8SwOyoZCv+ov7Re2GB+7IQnU5a5MYJACrtiWDDUHgqTBeeesq2MB2ddgojzL8hgWleltwpAgtUqfg==",
+      "signatures": [
+        {
+          "sig": "MEYCIQCvUT6VQM/g1OoOdK2t7uOHkrlxMCygwRmdBOzhI9ZgYQIhAOd7GKY2iSmqE6/xCczjbSQVTAxNJfOd135WH20dmu7+",
+          "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+        },
+        {
+          "sig": "MEQCID0czKK3tv5NQLCY6xBWJT1iPbA1Yr5TCc5zrwp3p0PmAiBBVUoZ+bhvKPfQNI5MmaE3PSy1n4FYcQffDbQefuGqcA==",
+          "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+        }
+      ],
+      "attestations": {
+        "url": "https://registry.npmjs.org/-/npm/v1/attestations/@ai-sdk%2fprovider@4.0.31",
+        "provenance": {
+          "predicateType": "https://slsa.dev/provenance/v1"
+        }
+      },
+      "unpackedSize": 727089
+    },
+    "main": "./dist/index.js",
+    "name": "@ai-sdk/provider",
+    "type": "module",
+    "types": "./dist/index.d.ts",
+    "source": "./src/index.ts",
+    "engines": {
+      "node": ">=22"
+    },
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js",
+        "default": "./dist/index.js"
+      },
+      "./package.json": "./package.json"
+    },
+    "license": "Apache-2.0",
+    "scripts": {
+      "build": "pnpm clean && tsdown",
+      "clean": "del-cli *.tsbuildinfo",
+      "type-check": "tsc --build",
+      "build:watch": "pnpm clean && tsdown --watch"
+    },
+    "_npmUser": {
+      "name": "GitHub Actions",
+      "email": "npm-oidc-no-reply@github.com",
+      "trustedPublisher": {
+        "id": "github",
+        "oidcConfigId": "05a030e3-19ba-42ac-94ad-182641f7b8eb"
+      }
+    },
+    "homepage": "https://ai-sdk.dev/docs",
+    "keywords": [
+      "ai"
+    ],
+    "repository": {
+      "url": "https://github.com/vercel/ai",
+      "type": "git",
+      "directory": "packages/provider"
+    },
+    "directories": {},
+    "maintainers": [
+      {
+        "name": "vercel-release-bot",
+        "email": "infra+release@vercel.com"
+      },
+      {
+        "name": "matheuss",
+        "email": "matheus.frndes@gmail.com"
+      },
+      {
+        "name": "matt.straka",
+        "email": "matt.j.straka@gmail.com"
+      }
+    ],
+    "sideEffects": false,
+    "_nodeVersion": "24.22.0",
+    "dependencies": {
+      "json-schema": "^0.4.0"
+    },
+    "publishConfig": {
+      "access": "public",
+      "provenance": true
+    },
+    "_hasShrinkwrap": false,
+    "devDependencies": {
+      "tsdown": "^0.23.0",
+      "typescript": "6.0.3",
+      "@types/node": "22.19.19",
+      "@types/json-schema": "7.0.15",
+      "@vercel/ai-tsconfig": "0.0.0",
+      "@vercel/ai-tsdown-config": "0.0.0"
+    },
+    "_npmOperationalInternal": {
+      "tmp": "tmp/provider_4.0.31_1792469505945_0.31678349680087314",
+      "host": "s3://npm-registry-packages-npm-production"
+    },
+    "_id": "@ai-sdk/provider@4.0.31",
+    "version": "4.0.31"
+  },
+  "url": "https://registry.npmjs.org/%40ai-sdk%2Fprovider/4.0.31"
+}

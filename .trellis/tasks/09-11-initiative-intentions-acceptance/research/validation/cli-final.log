@@ -1,0 +1,13 @@
+
+> @taki/cli@0.0.0 test H:\TakiAgent-worktrees\t4\apps\cli
+> vitest run
+
+
+ RUN  v4.1.10 H:/TakiAgent-worktrees/t4/apps/cli
+
+
+ Test Files  8 passed (8)
+      Tests  50 passed (50)
+   Start at  22:56:54
+   Duration  4.74s (transform 9.70s, setup 0ms, import 16.25s, tests 831ms, environment 4ms)
+

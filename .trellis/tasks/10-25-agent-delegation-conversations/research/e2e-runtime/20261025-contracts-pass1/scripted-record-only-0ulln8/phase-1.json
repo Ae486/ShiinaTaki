@@ -1,0 +1,46 @@
+{
+  "phase": "ready",
+  "state": {
+    "available": true,
+    "runs": [],
+    "attempts": [],
+    "effects": [],
+    "deliveries": [],
+    "subagent_conversations": [],
+    "subagent_inputs": [],
+    "subagent_executions": [],
+    "run_messages": [],
+    "timeline_messages": [
+      {
+        "seq": 1,
+        "id": "a9017364-88a9-4e27-9970-4a3811395ccc",
+        "character_id": "taki",
+        "role": "user",
+        "content": "EXCLUDED_PARENT_CONTEXT_381",
+        "parts": null,
+        "created_at": "2026-10-25T14:52:19.811Z",
+        "presentation": null,
+        "source_context_json": null
+      },
+      {
+        "seq": 2,
+        "id": "595b9a2f-6a81-42ee-bb7c-72b56ffca603",
+        "character_id": "taki",
+        "role": "assistant",
+        "content": "Previous unrelated conversation.",
+        "parts": null,
+        "created_at": "2026-10-25T14:52:19.819Z",
+        "presentation": null,
+        "source_context_json": null
+      }
+    ],
+    "run_usage": [],
+    "canonical_memory_sources": [],
+    "canonical_memory_units": [],
+    "canonical_memory_policy": [],
+    "canonical_memory_operation_receipts": [],
+    "canonical_memory_primary_commits": []
+  },
+  "requests": [],
+  "turns": []
+}

@@ -1,0 +1,141 @@
+/**
+ * INPUT: trusted completed tool source descriptions and references to actual retained work evidence
+ * OUTPUT: native result sidecars and selected material descriptions with exact scope validation
+ * POS: core/harness — descriptive evidence only; no source strings become execution or publication authority
+ */
+import { MaterialRefSchema, ToolSourceMaterialSchema, type MaterialRef, type MaterialSource, type PrivateMessage,
+  type ToolSourceMaterial, type ContextMaterial } from "@taki/shared";
+import type { SubagentRepo } from "../db/subagent-repo.ts";
+import type { SubagentInputRepo } from "../db/subagent-input-repo.ts";
+import type { SubagentExecutionRepo } from "../db/subagent-execution-repo.ts";
+import type { RunMessageRepo } from "../db/run-message-repo.ts";
+import type { ModelMessage } from "ai";
+import { renderToolResult } from "../agents/source-context.ts";
+import { toolSourceMaterials } from "../agents/tool-source-materials.ts";
+
+export interface ToolMaterialSink {
+  register(invocation: { attemptId: string; toolCallId: string; toolName: string }, materials: readonly ToolSourceMaterial[]): void;
+  attach(attemptId: string, messages: PrivateMessage[]): PrivateMessage[];
+  render(attemptId: string, messages: ModelMessage[]): ModelMessage[];
+  capture(input: { runId: string; attemptId: string; stepNumber: number;
+    results: readonly { toolCallId: string; toolName: string; output: unknown }[] }): void;
+  select(ref: MaterialRef): ContextMaterial | undefined;
+}
+type KnownMaterials = Map<string, { name: string; materials: ToolSourceMaterial[] }>;
+type CompletedMaterials = Map<string, { ref: Extract<MaterialRef, { kind: "tool_result" }>; text: string }[]>;
+
+export function createToolMaterialSink(): ToolMaterialSink {
+  const known: KnownMaterials = new Map();
+  const completed: CompletedMaterials = new Map();
+  return {
+    register(invocation, materials) {
+      if (materials.length > 200) throw new Error("SUBAGENT_MATERIAL_LIMIT");
+      const parsed = materials.map((material) => ToolSourceMaterialSchema.parse(material));
+      if (new Set(parsed.map((material) => material.key)).size !== parsed.length) throw new Error("SUBAGENT_MATERIAL_CONFLICT");
+      const key = `${invocation.attemptId}:${invocation.toolCallId}`;
+      const value = { name: invocation.toolName, materials: parsed };
+      if (known.has(key) && JSON.stringify(known.get(key)) !== JSON.stringify(value)) throw new Error("SUBAGENT_MATERIAL_CONFLICT");
+      known.set(key, value);
+    },
+    attach(attemptId, messages) {
+      return messages.map((message) => ({ ...message, ...(message.parts ? { parts: message.parts.map((part) => {
+        if (part.type !== "tool-result") return part;
+        const value = known.get(`${attemptId}:${part.toolCallId}`);
+        if (!value || value.name !== part.toolName) return part;
+        return { ...part, sourceMaterials: value.materials };
+      }) } : {}) }));
+    },
+    render(attemptId, messages) {
+      return messages.map((message) => message.role !== "tool" ? message : { ...message, content: message.content.map((part) => {
+        if (part.type !== "tool-result") return part;
+        const value = known.get(`${attemptId}:${part.toolCallId}`);
+        if (!value || value.name !== part.toolName) return part;
+        const refs = completed.get(`${attemptId}:${part.toolCallId}`)?.map((item) => item.ref) ?? [];
+        const original = referenceOutputs.get(part.output) ?? part.output;
+        const output = renderToolResult(withReferences(original, refs), value.materials);
+        referenceOutputs.set(output, original);
+        return { ...part, output };
+      }) });
+    },
+    capture(input) {
+      for (const result of input.results) {
+        const key = `${input.attemptId}:${result.toolCallId}`;
+        if (completed.has(key)) continue;
+        const materials = toolSourceMaterials(result.output) ?? known.get(key)?.materials ?? [{ key: "result", source: undefined }];
+        known.set(key, { name: result.toolName, materials: [...materials] });
+        const text = JSON.stringify(result.output) ?? "null";
+        completed.set(key, materials.map((material) => ({ text, ref: { kind: "tool_result", runId: input.runId,
+          attemptId: input.attemptId, stepNumber: input.stepNumber, toolCallId: result.toolCallId, key: material.key } })));
+      }
+    },
+    select: (ref) => selectCompleted(known, completed, ref),
+  };
+}
+
+function selectCompleted(known: KnownMaterials, completed: CompletedMaterials, ref: MaterialRef): ContextMaterial | undefined {
+  if (ref.kind !== "tool_result") return undefined;
+  const key = `${ref.attemptId}:${ref.toolCallId}`;
+  const result = completed.get(key)?.find((item) => item.ref.runId === ref.runId && item.ref.stepNumber === ref.stepNumber && item.ref.key === ref.key);
+  return result ? { key: ref.key, text: result.text, source: known.get(key)?.materials.find((item) => item.key === ref.key)?.source } : undefined;
+}
+
+const referenceOutputs = new WeakMap<object, import("ai").ToolResultPart["output"]>();
+function withReferences(output: import("ai").ToolResultPart["output"], refs: MaterialRef[]): import("ai").ToolResultPart["output"] {
+  if (refs.length === 0) return output;
+  const original = referenceOutputs.get(output) ?? output;
+  const header = `Core material references for this exact completed result: ${JSON.stringify(refs)}`;
+  const result = original.type === "json" || original.type === "error-json" ? { ...original, value: { materialReferences: refs, result: original.value } }
+    : original.type === "text" || original.type === "error-text" ? { ...original, value: `${header}\n${original.value}` }
+      : original.type === "content" ? { ...original, value: [{ type: "text" as const, text: header }, ...original.value] }
+        : { ...original, reason: `${header}\n${original.reason ?? "Tool execution denied."}` };
+  referenceOutputs.set(result, original); return result;
+}
+
+export interface MaterialSelection {
+  resolve(refs: readonly MaterialRef[]): MaterialSource[];
+  select(refs: readonly MaterialRef[]): ContextMaterial[];
+}
+
+export function createMaterialSelection(input: {
+  characterId: string; subagentId?: string; children: SubagentRepo; inputs: SubagentInputRepo;
+  executions: SubagentExecutionRepo; messages: RunMessageRepo;
+}): MaterialSelection {
+  const assertChild = (id: string) => {
+    if (input.children.get(id).characterId !== input.characterId || (input.subagentId && input.subagentId !== id)) {
+      throw new Error("SUBAGENT_MATERIAL_SCOPE_MISMATCH");
+    }
+  };
+  const resolve = (candidate: MaterialRef): ContextMaterial => {
+    const ref = MaterialRefSchema.parse(candidate);
+    if (ref.kind === "input") {
+      const message = input.inputs.get(ref.inputId); assertChild(message.subagentId);
+      const material = message.materials.find((item) => item.key === ref.key);
+      if (!material) throw new Error("SUBAGENT_MATERIAL_NOT_FOUND");
+      return material;
+    }
+    const execution = input.executions.get(ref.kind === "retained_result" ? ref.childRunId : ref.runId);
+    assertChild(execution.subagentId);
+    if (ref.kind === "retained_result") {
+      const result = input.executions.result(ref.childRunId);
+      if (!result || result.childDigest !== ref.resultDigest) throw new Error("SUBAGENT_MATERIAL_STALE");
+      const material = result.child.sourceContext.materials?.[ref.materialIndex];
+      if (!material) throw new Error("SUBAGENT_MATERIAL_NOT_FOUND");
+      return { key: `result:${ref.materialIndex}`, text: JSON.stringify(result.child), source: material };
+    }
+    let afterSeq = 0;
+    for (;;) {
+      const page = input.messages.list({ runId: ref.runId, afterSeq, limit: 2000 });
+      const parts = page.filter((row) => row.attemptId === ref.attemptId && row.stepNumber === ref.stepNumber)
+        .flatMap((row) => row.parts ?? []).filter((part) => part.type === "tool-result").filter((part) => part.toolCallId === ref.toolCallId)
+      const part = parts.find((part) => part.sourceMaterials?.some((item) => item.key === ref.key));
+      if (part) return { key: ref.key, text: JSON.stringify(part.output), source: part.sourceMaterials?.find((item) => item.key === ref.key)?.source };
+      if (page.length < 2000) throw new Error("SUBAGENT_MATERIAL_NOT_FOUND");
+      afterSeq = page.at(-1)!.seq;
+    }
+  };
+  const select = (refs: readonly MaterialRef[]) => {
+    if (refs.length > 200) throw new Error("SUBAGENT_MATERIAL_LIMIT");
+    return refs.map((ref, index) => ({ ...resolve(ref), key: `selected:${index}` }));
+  };
+  return { select, resolve: (refs) => select(refs).flatMap((material) => material.source ? [material.source] : []) };
+}

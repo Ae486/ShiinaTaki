@@ -1,0 +1,23 @@
+
+ RUN  v4.1.10 H:/TakiAgent-worktrees/t4/e2e
+
+ ✓ src/agent-context-r2.e2e.test.ts (2 tests | 1 skipped) 6700ms
+     ✓ verifies actual cancel, durable user latch, explicit continuation and publication with controlled HTTP timing  6698ms
+ ✓ src/agent-context-restart.e2e.test.ts (1 test) 12176ms
+   ✓ preserves private controls and truthful orphan results across two actual production Core restarts  12174ms
+ ✓ src/fixture/real-provider-observer.e2e.test.ts (12 tests) 8100ms
+     ✓ streams an oversized error without retaining its body or truncating downstream evidence  6990ms
+     ✓ honors downstream backpressure instead of draining the whole provider into memory  786ms
+ ✓ src/agent-context-runtime.e2e.test.ts (3 tests) 18082ms
+     ✓ retains selected work and addressed input with record_only completion (requested Memory mutations: false)  6071ms
+     ✓ retains selected work and addressed input with request_parent completion (requested Memory mutations: false)  6149ms
+     ✓ retains selected work and addressed input with record_only completion (requested Memory mutations: true)  5859ms
+ ✓ src/fixture/agent-context-timing-relay.e2e.test.ts (3 tests) 297ms
+ ↓ src/agent-context-real.e2e.test.ts (2 tests | 2 skipped)
+
+ Test Files  5 passed | 1 skipped (6)
+      Tests  20 passed | 3 skipped (23)
+   Start at  11:55:31
+   Duration  51.06s (transform 1.34s, setup 0ms, import 3.72s, tests 45.35s, environment 1ms)
+
+JSON report written to H:/TakiAgent-worktrees/t4/.trellis/tasks/10-21-agent-context-acceptance/research/final-automatic/repaired-final/deterministic-e2e.json

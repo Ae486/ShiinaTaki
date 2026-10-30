@@ -1,0 +1,925 @@
+--- a/packages/core/package.json
++++ b/packages/core/package.json
+@@ -11,10 +11,10 @@
+     "test": "vitest run"
+   },
+   "dependencies": {
+-    "@ai-sdk/mcp": "^2.0.10",
+-    "@ai-sdk/openai-compatible": "^3.0.5",
++    "@ai-sdk/mcp": "2.0.81",
++    "@ai-sdk/openai-compatible": "3.0.75",
+     "@taki/shared": "workspace:*",
+-    "ai": "^7.0.17",
++    "ai": "7.0.148",
+     "croner": "^10.0.1",
+     "cross-spawn": "7.0.6",
+     "fflate": "^0.8.3",
+--- a/packages/core/src/agents/chat-agent-usage.test.ts
++++ b/packages/core/src/agents/chat-agent-usage.test.ts
+@@ -190,7 +190,7 @@
+     expect(reports).toEqual([]);
+   });
+ 
+-  it("fires nothing on a THROW-ending stop (partial text persisted, but the committed tail is never reached)", async () => {
++  it("fires nothing on a cancelled stop when the SDK closes a rejecting provider gracefully", async () => {
+     const f = fresh();
+     const reports: TurnUsageReport[] = [];
+     const controller = new AbortController();
+@@ -213,8 +213,9 @@
+     }
+     await flushDetached();
+ 
+-    expect(String(threw)).toContain("turn cancelled by operator");
++    // Owner-approved policy now uses Core cancellation, not a transport-dependent throw, to gate callbacks.
++    expect(threw).toBeNull();
+     expect(deltas).toEqual(["par"]); // the partial the user saw is kept (D1 #5) ...
+-    expect(reports).toEqual([]); // ... but a thrown ending fires no usage report
++    expect(reports).toEqual([]); // ... but a cancelled turn fires no post-turn usage report
+   });
+ });
+--- a/packages/core/src/agents/chat-agent.test.ts
++++ b/packages/core/src/agents/chat-agent.test.ts
+@@ -176,7 +176,7 @@
+     expect(auto).toEqual([]); // a retracted turn never enters memory
+   });
+ 
+-  it("cancel after partial text keeps the stop path: partial persisted, no retract, autoMemory fires", async () => {
++  it("cancel after partial text keeps the partial source without retraction or post-turn maintenance", async () => {
+     const f = fresh();
+     const auto: string[] = [];
+     const controller = new AbortController();
+@@ -201,11 +201,11 @@
+       { role: "user", content: "hi" },
+       { role: "assistant", content: "par" },
+     ]);
+-    expect(auto).toEqual(["taki"]); // the stop path still fires the auto-write
+-  });
+-
+-  // The THROW ending (the common prefill-cancel timing): the transport rejects the read with our string abort reason,
+-  // which fails the SDK's isAbortError, so the stream errors and the for-await throws instead of ending gracefully.
++    expect(auto).toEqual([]); // Owner-approved policy skips the callback bundle even on a graceful partial abort.
++  });
++
++  // A scripted rejecting body remains covered, but modern SDK cancellation may finish gracefully before that
++  // failure crosses the provider boundary. Retraction must not depend on either public ending.
+   it("throw-ending cancel before any output still retracts (transport rejects with the string reason)", async () => {
+     const f = fresh();
+     const auto: string[] = [];
+@@ -238,7 +238,7 @@
+     expect(auto).toEqual([]); // a retracted turn never enters memory
+   });
+ 
+-  it("throw-ending cancel after partial text rethrows and keeps the partial (stop, matches old runtime)", async () => {
++  it("a rejecting provider cancelled after partial text keeps the source and accepts the SDK graceful ending", async () => {
+     const f = fresh();
+     const auto: string[] = [];
+     const controller = new AbortController();
+@@ -262,12 +262,12 @@
+     }
+ 
+     expect(deltas).toEqual(["par"]);
+-    expect(String(threw)).toContain("turn cancelled by operator"); // the reason propagates → pump maps it to chat.error
++    expect(threw).toBeNull(); // Owner-approved SDK policy does not synthesize the historical transport-dependent throw.
+     expect(retracted).toBe(false); // partial text exists → stop, not retract
+     expect(f.conversation.history("taki")).toEqual([
+       { role: "user", content: "hi" },
+       { role: "assistant", content: "par" },
+     ]);
+-    expect(auto).toEqual([]); // the throw ending skips the detached auto-write (pre-existing runtime behavior)
++    expect(auto).toEqual([]); // Core cancellation skips detached callbacks independently of the stream ending.
+   });
+ });
+--- a/packages/core/src/agents/chat-agent.ts
++++ b/packages/core/src/agents/chat-agent.ts
+@@ -147,7 +147,7 @@
+   /** Extra stop conditions OR-composed into stopWhen after the step cap (e.g. the avatar presentation tail-stop, 1c). */
+   stopConditions?: StopCondition<ToolSet>[];
+   /** Usage-capture seam (batch 6, R1 tier 2): fired DETACHED on committed turns only, alongside the auto-memory
+-   *  fire (same never-adds-latency contract); a retract or a thrown ending fires nothing. Absent = today's behavior. */
++   *  fire (same never-adds-latency contract); a retract, cancellation or thrown ending fires nothing. */
+   onUsage?: (report: TurnUsageReport) => void;
+   /** The configured non-history share of the calibrated context window; actual stable costs consume it first. */
+   requestEnvelopeReserve?: () => number;
+@@ -260,7 +260,8 @@
+     }
+     if (retracted) return;
+     if (failure) throw failure.error;
+-    state.afterCommit?.();
++    // A cancelled turn keeps its committed source witness but starts no post-turn maintenance.
++    if (!turn?.signal?.aborted) state.afterCommit?.();
+     return;
+   }
+ }
+@@ -321,6 +322,9 @@
+     instructions,
+     tools,
+     toolOrder,
++    prepareCall: (settings) => ({ ...settings,
++      // The SDK fallback prints raw provider exceptions. Core handles the unchanged public error part.
++      onError: () => undefined }),
+     prepareStep: ({ steps }) => ({ activeTools: disclosure.activeTools(steps) }),
+     telemetry: { isEnabled: true, recordInputs: false, recordOutputs: false,
+       integrations: observability ? [observability.telemetry, requestTelemetry] : [requestTelemetry] },
+@@ -331,7 +335,9 @@
+     // Capture each completed step before a later request can fail and reject the aggregate response promise.
+     // The same completed-step fact preserves the existing prohibition on retrying completed tool effects.
+     onStepEnd: (event) => {
+-      state.stepEnded = true;
++      // SDK 7.0.148 also emits onStepEnd for an error-only provider response before the public error part.
++      // That failed request must retain the one clean overflow retry; completed tools still fence replay.
++      state.stepEnded ||= event.finishReason !== "error" || event.content.length > 0;
+       state.recording.capture(event.stepNumber, event.response.messages);
+     },
+   });
+--- a/packages/core/src/agents/index.md
++++ b/packages/core/src/agents/index.md
+@@ -1,5 +1,5 @@
+ # core/agents/
+-- chat-agent.ts — AI SDK v7 ToolLoopAgent with ordered activity, exception-safe atomic turn persistence, existing cancellation/retry and non-primary control boundaries; primary-compatible AI SDK v7 ToolLoopAgent with full-turn persistence/cancellation, exact primary commit witnesses, admission-bound memory/tools, and ephemeral automatic recall before request measurement; one live User Timezone capture per attempt keeps stable day and volatile time coherent across awaited recall; non-primary controls remain separate from relationship history and automatic ingestion
++- chat-agent.ts — AI SDK v7 ToolLoopAgent with ordered activity, exception-safe atomic turn persistence, existing cancellation/retry and non-primary control boundaries; primary-compatible AI SDK v7 ToolLoopAgent with full-turn persistence/cancellation, exact primary commit witnesses, admission-bound memory/tools, and ephemeral automatic recall before request measurement; one live User Timezone capture per attempt keeps stable day and volatile time coherent across awaited recall; non-primary controls remain separate from relationship history and automatic ingestion; Core cancellation gates the post-turn callback bundle after exact primary source witnessing
+ - chat-activity.ts — accepted-message ordered producer; callback-before-receipt buffering, immutable invocations and identity-guarded terminalization
+ - chat-activity-projection.ts — runtime-owned latest started Character snapshot, incremental item/text budgets, explicit overflow and disposal
+ - turn-activity-presentation.ts — stable item links and text spans into canonical step rows without changing replay content
+@@ -31,6 +31,7 @@
+ - untrusted-fence.ts — the A1 minimal fence: fenceUntrusted({source,content}) → XML-delimited `<untrusted-observation>` block labeling content DATA-never-INSTRUCTIONS; neutralizes any literal closing tag so hostile content can't escape; reused by every untrusted-content producer (T3a activity, later T3b/screenshot/T5)
+ - window-calibrator.ts — createWindowCalibrator({repo, slot, declared}): R1 tier-2 EMA correction factor over the estimator (clamped) + R2 overflow shrink (floor(observed×0.9), never above declared), persisted via window-state-repo; a lowered declaration is written back so runtime and operator status agree while an earlier overflow shrink survives; effectiveWindow() returns the estimator-unit budget
+ - model-effect-middleware.ts — model Effect lifecycle and exact request/first-output/tool-call observation before provider parts leave the middleware
++- sdk-wire-compatibility.test.ts — real compatible-provider SSE regression: complete streamed arguments, distinct sparse/repeated IDs, unsafe finish suppression, and abort aggregate settlement
+ - model-observability.ts — Effect-keyed per-request telemetry and unique unfinished SDK-end association; ambiguous generations never overwrite a request
+ - run-observability-telemetry.ts — per-attempt SDK composition sharing immutable invocations with optional activity; legacy callers gain no invented Run/Effect
+ - tool-invocation.ts — immutable IDs/name-only snapshots and SDK-object bridge; real optional Run lineage, exact request identity and conservative ambiguity
+--- a/packages/core/src/agents/run-observability-telemetry.test.ts
++++ b/packages/core/src/agents/run-observability-telemetry.test.ts
+@@ -6,7 +6,7 @@
+ import { createEffectRepo } from "../db/effect-repo.ts";
+ import { createEffectLifecycleService, type EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
+ import { createCompanionFixture, type CompanionFixture } from "../testing/companion-fixture.ts";
+-import { failingMockModel, midStreamErrorModel, scriptedModel, streamingMockModel } from "../testing/mock-language-model.ts";
++import { abortRejectingModel, failingMockModel, midStreamErrorModel, scriptedModel, slowStreamingModel, streamingMockModel } from "../testing/mock-language-model.ts";
+ import { createChatAgent } from "./chat-agent.ts";
+ 
+ const fixtures: CompanionFixture[] = [];
+@@ -48,6 +48,28 @@
+ }
+ 
+ describe("Run observability telemetry", () => {
++  it.each([false, true])("settles one unknown model Effect without replay after partial cancel, rejecting=%s", async rejecting => {
++    const { companion, events, lifecycle } = fixture();
++    const controller = new AbortController();
++    const model = rejecting ? abortRejectingModel(["partial", "never"], 20) : slowStreamingModel(["partial", "never"], 20);
++    const agent = createChatAgent({ model, store: companion.conversation, memory: companion.memory, effectLifecycle: lifecycle });
++    let failure: unknown;
++    try {
++      for await (const delta of agent.stream({ characterId: "taki", message: "Fixture" }, {
++        runId: "run", attemptId: "attempt", signal: controller.signal,
++      })) { expect(delta).toBe("partial"); controller.abort("fixture cancel"); }
++    } catch (error) { failure = error; }
++    // Owner-approved SDK policy: immediate cancellation may close either provider gracefully;
++    // Core preserves the partial source and suppresses post-turn callbacks without inventing a throw.
++    expect(failure).toBeUndefined();
++    expect(model.doStreamCalls).toHaveLength(1);
++    expect(companion.db.prepare("SELECT state,outcome FROM run_effects WHERE kind='model'").all())
++      .toEqual([{ state: "terminal", outcome: "outcome_unknown" }]);
++    expect(events.list("run").filter(event => event.payload.kind === "model.response.settled")).toHaveLength(1);
++    expect(companion.conversation.history("taki")).toEqual([
++      { role: "user", content: "Fixture" }, { role: "assistant", content: "partial" },
++    ]);
++  });
+   it("persists one successful model lifecycle with authoritative detailed usage and measured timing", async () => {
+     const { companion, events, lifecycle } = fixture();
+     const agent = createChatAgent({
+--- /dev/null
++++ b/packages/core/src/agents/sdk-wire-compatibility.test.ts
+@@ -0,0 +1,105 @@
++import { afterEach, describe, expect, it, vi } from "vitest";
++import { APICallError, ToolLoopAgent, isStepCount, tool } from "ai";
++import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
++import { z } from "zod";
++import { createChatAgent } from "./chat-agent.ts";
++import { createCompanionFixture, type CompanionFixture } from "../testing/companion-fixture.ts";
++import { midStreamErrorModel } from "../testing/mock-language-model.ts";
++
++const fixtures: CompanionFixture[] = [];
++afterEach(() => { vi.restoreAllMocks(); for (const fixture of fixtures.splice(0)) fixture.cleanup(); });
++
++function chunk(delta: unknown, finishReason: string | null = null): string {
++  return `data: ${JSON.stringify({ id: "wire-fixture", object: "chat.completion.chunk", created: 0, model: "fixture",
++    choices: [{ index: 0, delta, finish_reason: finishReason }] })}\n\n`;
++}
++
++function call(index: number, id: string, input: { arguments: string; name?: string }) {
++  return { index, id, type: "function", function: input };
++}
++
++function wireModel(firstResponse: string) {
++  const requests: Array<{ messages: Array<{ role: string; content: string | null }> }> = [];
++  const provider = createOpenAICompatible({ name: "compatibility-wire", baseURL: "https://fixture.invalid/v1",
++    fetch: async (_url, init) => {
++      requests.push(JSON.parse(String(init?.body)));
++      const body = requests.length === 1 ? firstResponse : chunk({ content: "Done" }, "stop");
++      return new Response(body + "data: [DONE]\n\n", { headers: { "content-type": "text/event-stream" } });
++    } });
++  return { model: provider("fixture"), requests };
++}
++
++async function run(firstResponse: string, schema: z.ZodType = z.number()) {
++  const fixture = createCompanionFixture(); fixtures.push(fixture);
++  const wire = wireModel(firstResponse);
++  const execute = vi.fn(async (input: unknown) => ({ ok: true, input }));
++  const agent = createChatAgent({ model: wire.model, store: fixture.conversation, memory: fixture.memory,
++    extraTools: { probe: tool({ description: "Fixture", inputSchema: schema, execute }) } });
++  for await (const delta of agent.stream({ characterId: "taki", message: "Run the fixture" })) void delta;
++  return { fixture, execute, requests: wire.requests };
++}
++
++describe("existing SDK consumers over actual compatible-provider SSE", () => {
++  it("preserves the exact provider exception without SDK console disclosure", async () => {
++    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
++    const error = new APICallError({ message: "Private fixture failure", url: "https://fixture.invalid/v1",
++      requestBodyValues: { privatePrompt: "must-not-log" }, statusCode: 401, responseBody: "private response" });
++    const fixture = createCompanionFixture(); fixtures.push(fixture);
++    const agent = createChatAgent({ model: midStreamErrorModel([], error), store: fixture.conversation, memory: fixture.memory });
++    const consumed = (async () => { for await (const delta of agent.stream({ characterId: "taki", message: "Fixture" })) void delta; })();
++    await expect(consumed).rejects.toBe(error);
++    expect(consoleError).not.toHaveBeenCalled();
++  });
++  it("executes only the complete final argument when a JSON number prefix is already parseable", async () => {
++    const firstResponse = chunk({ tool_calls: [call(0, "number", { arguments: "1", name: "probe" })] })
++      + chunk({ tool_calls: [call(0, "number", { arguments: "2" })] }, "tool_calls");
++    const { execute, requests } = await run(firstResponse);
++    expect(execute).toHaveBeenCalledOnce();
++    expect(execute.mock.calls[0]?.[0]).toBe(12);
++    expect(requests).toHaveLength(2);
++    const result = requests[1]?.messages.find(message => message.role === "tool");
++    expect(JSON.parse(result?.content ?? "null")).toEqual({ ok: true, input: 12 });
++  });
++
++  it("keeps distinct invocations and ordered replay for repeated wire IDs and noncontiguous indexes", async () => {
++    const firstResponse = chunk({ tool_calls: [call(4, "repeated", { arguments: "1", name: "probe" }), call(9, "repeated", { arguments: "2", name: "probe" })] }, "tool_calls");
++    const { execute, fixture } = await run(firstResponse);
++    expect(execute.mock.calls.map(([input]) => input)).toEqual([1, 2]);
++    const results = fixture.conversation.history("taki").filter(message => message.role === "tool")
++      .flatMap(message => Array.isArray(message.content) ? message.content : []).filter(part => part.type === "tool-result");
++    expect(results).toHaveLength(2);
++    expect(new Set(results.map(part => part.toolCallId)).size).toBe(2);
++    expect(results.map(part => part.output)).toEqual([
++      { type: "json", value: { ok: true, input: 1 } }, { type: "json", value: { ok: true, input: 2 } },
++    ]);
++  });
++
++  it.each(["length", "content_filter", "error", "unexpected"])("does not execute proposed tools on finish_reason=%s", async finishReason => {
++    const { execute, fixture } = await run(chunk({ tool_calls: [call(0, "unsafe", { arguments: "1", name: "probe" })] }, finishReason));
++    expect(execute).not.toHaveBeenCalled();
++    const toolRows = fixture.conversation.history("taki").filter(message => message.role === "tool");
++    expect(toolRows).toEqual([]);
++  });
++
++  it("settles aggregate results and closes iteration after abort even when the provider cancel promise stalls", async () => {
++    const abort = new AbortController();
++    const cancel = vi.fn(() => new Promise<void>(() => undefined));
++    const provider = createOpenAICompatible({ name: "abort-wire", baseURL: "https://fixture.invalid/v1",
++      fetch: async () => new Response(new ReadableStream<Uint8Array>({
++        start(controller) { controller.enqueue(new TextEncoder().encode(chunk({ content: "partial" }))); }, cancel,
++      }), { headers: { "content-type": "text/event-stream" } }) });
++    const agent = new ToolLoopAgent({ model: provider("fixture"), stopWhen: isStepCount(1) });
++    const result = await agent.stream({ prompt: "Fixture", abortSignal: abort.signal });
++    const aggregates = Promise.allSettled([result.text, result.totalUsage, result.steps, result.responseMessages]);
++    const consumed = (async () => {
++      for await (const part of result.fullStream) if (part.type === "text-delta") abort.abort("fixture cancel");
++    })();
++    const settled = await Promise.race([
++      Promise.all([aggregates, consumed]),
++      new Promise<never>((_resolve, reject) => setTimeout(() => reject(new Error("abort results did not settle")), 1000).unref()),
++    ]);
++    expect(settled[0]).toHaveLength(4);
++    expect(settled[0].every(result => result.status === "rejected")).toBe(true);
++    expect(abort.signal.reason).toBe("fixture cancel");
++  });
++});
+--- a/packages/core/src/mcp/index.md
++++ b/packages/core/src/mcp/index.md
+@@ -1,6 +1,7 @@
+ # core/mcp/
+ - mcp-config.ts — strict zod schemas + parseMcpServers body parse for mcp-servers.json (operator-owned; NEVER agent-reachable; env/header values may be `secret-ref:` markers post-migration) — the file is a SEED-ONLY legacy input consumed once by mcp-desired-repo
+ - mcp-connect.ts — sanctioned MCP transport-construction boundary (ADR 0006); builds a stdio/http transport + connects
++- mcp-http.test.ts — real loopback HTTP fixture for legacy initialization, delayed modern discovery and structured-only results
+ - mcp-stdio-launch.ts / mcp-stdio-relay.mjs — portable command/args launch tuple plus Windows cross-spawn relay; no platform adapter leaks into desired config
+ - mcp-schema-compat.ts — deep-clone definitions; narrow verified optional-nullable properties; isolate unsafe tools
+ - legacy-mcp-deny.ts — read-only mcp-approvals.json deny adapter; missing is empty, allows inert, corrupt/ambiguous state fail-closed
+--- a/packages/core/src/mcp/mcp-http.test.ts
++++ b/packages/core/src/mcp/mcp-http.test.ts
+@@ -7,7 +7,8 @@
+ 
+ // A node:http Streamable-HTTP MCP fixture (research §4b): POST -> 200 + JSON-RPC body, notification -> 202,
+ // GET -> 405 (the transport treats 405 as "no inbound SSE" and proceeds).
+-function startHttpFixture(): Promise<{ url: string; server: Server }> {
++function startHttpFixture(options: { structuredOnly?: boolean; modernDelayMs?: number } = {}): Promise<{ url: string; server: Server; methods: string[] }> {
++  const methods: string[] = [];
+   const server = createServer((req, res) => {
+     if (req.method === "GET") {
+       res.writeHead(405).end();
+@@ -17,18 +18,33 @@
+     req.on("data", (chunk) => (body += chunk));
+     req.on("end", () => {
+       const msg = JSON.parse(body);
++      methods.push(msg.method);
+       if (msg.id === undefined) {
+         res.writeHead(202).end();
+         return;
+       }
+-      res.writeHead(200, { "content-type": "application/json" });
+-      res.end(JSON.stringify(reply(msg)));
++      const send = (result: unknown) => {
++        res.writeHead(200, { "content-type": "application/json" });
++        res.end(JSON.stringify(result));
++      };
++      if (options.modernDelayMs !== undefined && msg.method === "server/discover") {
++        setTimeout(() => send({ jsonrpc: "2.0", id: msg.id,
++          result: { resultType: "success", supportedVersions: ["2026-07-28"], capabilities: { tools: {} } } }), options.modernDelayMs);
++      } else if (options.modernDelayMs !== undefined && msg.method === "initialize") {
++        send({ jsonrpc: "2.0", id: msg.id, error: { code: -32601, message: "Modern-only fixture" } });
++      } else if (options.structuredOnly && msg.method === "tools/call") {
++        send({ jsonrpc: "2.0", id: msg.id, result: { structuredContent: { echo: msg.params?.arguments?.text } } });
++      } else {
++        const response = reply(msg) as { result?: Record<string, unknown> };
++        if (options.modernDelayMs !== undefined && response.result) response.result.resultType = "success";
++        send(response);
++      }
+     });
+   });
+   return new Promise((resolve) => {
+     server.listen(0, "127.0.0.1", () => {
+       const port = (server.address() as AddressInfo).port;
+-      resolve({ url: `http://127.0.0.1:${port}/mcp`, server });
++      resolve({ url: `http://127.0.0.1:${port}/mcp`, server, methods });
+     });
+   });
+ }
+@@ -63,7 +79,7 @@
+   return { jsonrpc: "2.0", id: msg.id, error: { code: -32601, message: "Method not found" } };
+ }
+ 
+-let running: { url: string; server: Server } | null = null;
++let running: { url: string; server: Server; methods: string[] } | null = null;
+ let manager: McpManager | null = null;
+ afterEach(async () => {
+   await manager?.close();
+@@ -93,4 +109,27 @@
+     };
+     expect(result.content[0]?.text).toBe("echo: over-http");
+   });
++
++  it("preserves structured-only results through the actual transport and namespaced tool", async () => {
++    running = await startHttpFixture({ structuredOnly: true });
++    const { logger } = createCaptureLogger();
++    manager = createMcpManager({ logger, connect: defaultConnect });
++    await manager.reconcile([{ serverId: "structured", ownerHostId: "11111111-1111-4111-8111-111111111111",
++      configRevision: 1, config: { url: running.url }, selectedTools: [], enabled: true }]);
++    const result = await manager.tools().structured_echo?.execute?.({ text: "complete" }, { toolCallId: "structured", messages: [], context: undefined });
++    expect(result).toMatchObject({ structuredContent: { echo: "complete" },
++      content: [{ type: "text", text: '{"echo":"complete"}' }] });
++    expect(running.methods.filter(method => method === "tools/call")).toHaveLength(1);
++  });
++
++  it("waits for delayed modern-only HTTP discovery inside the Core candidate budget", async () => {
++    running = await startHttpFixture({ modernDelayMs: 1100 });
++    const { logger } = createCaptureLogger();
++    manager = createMcpManager({ logger, connect: defaultConnect, candidateDeadlineMs: 4000 });
++    await manager.reconcile([{ serverId: "modern", ownerHostId: "11111111-1111-4111-8111-111111111111",
++      configRevision: 1, config: { url: running.url }, selectedTools: [], enabled: true }]);
++    expect(manager.tools().modern_echo).toBeDefined();
++    expect(running.methods).toContain("server/discover");
++    expect(running.methods).not.toContain("initialize");
++  });
+ });
+--- /dev/null
++++ b/packages/core/src/server/methods/chat-send-sdk-transport.test.ts
+@@ -0,0 +1,212 @@
++import { createServer } from "node:http";
++import { once } from "node:events";
++import { join } from "node:path";
++import { afterEach, describe, expect, it, vi } from "vitest";
++import { tool, type ToolSet } from "ai";
++import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
++import { z } from "zod";
++import { CHAT_METHODS, ChatDeltaSchema, ChatErrorSchema, ChatSendResultSchema, ConnectResultSchema,
++  JsonRpcSuccessResponseSchema, type TriggerRequest } from "@taki/shared";
++import { createChatAgent } from "../../agents/chat-agent.ts";
++import { createChatActivityProjection } from "../../agents/chat-activity-projection.ts";
++import { createTurnQueue } from "../../agents/turn-queue.ts";
++import { createTurnRegistry } from "../../agents/turn-registry.ts";
++import { createRunRepo } from "../../db/run-repo.ts";
++import { createRunEventRepo } from "../../db/run-event-repo.ts";
++import { createEffectRepo } from "../../db/effect-repo.ts";
++import { createRunService } from "../../harness/run-service.ts";
++import { createEffectLifecycleService } from "../../harness/effect-lifecycle-service.ts";
++import { wrapGovernedTool } from "../../governance/governed-tool.ts";
++import type { GovernancePolicyService } from "../../governance/governance-policy-service.ts";
++import { createDeviceRegistry } from "../../devices/device-registry.ts";
++import { createPairedDeviceStore } from "../../devices/paired-device-store.ts";
++import { createCompanionFixture } from "../../testing/companion-fixture.ts";
++import { createCaptureLogger } from "../../testing/capture-logger.ts";
++import { abortRejectingModel, slowStreamingModel } from "../../testing/mock-language-model.ts";
++import { notification, openClient, sendConnect, type TestClient } from "../../testing/ws-test-client.ts";
++import { createConnectionRegistry } from "../connection-registry.ts";
++import { createMethodRegistry } from "../method-registry.ts";
++import { createTimelineSubscriptions } from "../timeline-subscriptions.ts";
++import { startWsServer } from "../ws-server.ts";
++import { connectMethod } from "./connect.ts";
++import { chatSendMethod } from "./chat-send.ts";
++import { chatCancelMethod } from "./chat-cancel.ts";
++
++type Scenario = "prefill" | "partial" | "success" | "error" | "tool-partial" | "graceful" | "rejecting";
++const cleanup: Array<() => Promise<void>> = [];
++afterEach(async () => { for (const close of cleanup.splice(0).reverse()) await close(); });
++
++function sse(delta: unknown, finishReason: string | null = null): string {
++  return `data: ${JSON.stringify({ id: "transport-fixture", object: "chat.completion.chunk", created: 0,
++    model: "fixture", choices: [{ index: 0, delta, finish_reason: finishReason }],
++    ...(finishReason ? { usage: { prompt_tokens: 3, completion_tokens: 5, total_tokens: 8 } } : {}),
++  })}\n\n`;
++}
++
++async function httpProvider(scenario: Scenario) {
++  let requests = 0;
++  let markReady!: () => void;
++  const ready = new Promise<void>(resolve => { markReady = resolve; });
++  const server = createServer((request, response) => {
++    requests++;
++    request.resume();
++    request.on("end", () => {
++      if (scenario === "error") {
++        response.writeHead(401, { "content-type": "application/json" });
++        response.end(JSON.stringify({ error: { message: "Fixture refusal" } }));
++      } else {
++        response.writeHead(200, { "content-type": "text/event-stream" });
++        response.flushHeaders();
++        if (scenario === "success") response.end(sse({ content: "complete" }, "stop") + "data: [DONE]\n\n");
++        else if (scenario === "tool-partial" && requests === 1) {
++          response.end(sse({ tool_calls: [{ index: 0, id: "one-call", type: "function",
++            function: { name: "probe", arguments: "{}" } }] }, "tool_calls") + "data: [DONE]\n\n");
++        } else if (scenario !== "prefill") response.write(sse({ content: "partial" }));
++      }
++      markReady();
++    });
++  });
++  server.listen(0, "127.0.0.1");
++  await once(server, "listening");
++  cleanup.push(async () => { server.closeAllConnections(); await new Promise<void>(resolve => server.close(() => resolve())); });
++  const address = server.address();
++  if (!address || typeof address === "string") throw new Error("Fixture HTTP listener missing");
++  const provider = createOpenAICompatible({ name: "local-transport", baseURL: `http://127.0.0.1:${address.port}/v1` });
++  return { model: provider("fixture"), ready, requests: () => requests };
++}
++
++function snapshot(request: TriggerRequest) {
++  return { schemaVersion: "transport-test.v1", characterId: request.characterId, initiator: request.initiator,
++    provenance: request.provenance, deliveryClass: request.deliveryClass, contextMode: request.contextMode,
++    modelProvider: "fixture", modelId: "fixture", primaryHostId: "core", hosts: [], extensions: [],
++    extensionSnapshotDigest: "a".repeat(64), governance: { policyGeneration: 1, registryRevision: 1, approvalGeneration: 1 },
++    memory: { providerId: "legacy-markdown", contractVersion: 1 as const, capabilityDigest: "b".repeat(64), capabilities: {
++      providerId: "legacy-markdown", contractVersion: 1 as const, retain: true, recall: true, reflect: false,
++      edit: false, invalidate: true, restore: false, conditionalMutation: false, idempotentWrites: false,
++      sparseRetrieval: true, vectorRetrieval: "unavailable" as const, derivedMemoryRead: false,
++    } }, contextDecision: { sourceCategories: ["character"], tokenAccounting: "unknown" as const },
++    replayDecision: { status: "not_captured" as const }, budget: {},
++    implementation: { runtimeVersion: "test", schemaVersion: "transport-test.v1" }, sourceRefs: [] };
++}
++
++async function boot(scenario: Scenario) {
++  const companion = createCompanionFixture();
++  cleanup.push(async () => { companion.cleanup(); });
++  const http = await httpProvider(scenario);
++  const fake = scenario === "graceful" ? slowStreamingModel(["partial", "unread"], 30)
++    : scenario === "rejecting" ? abortRejectingModel(["partial", "unread"], 30) : undefined;
++  const model = fake ?? http.model;
++  const events = createRunEventRepo(companion.db);
++  const effects = createEffectLifecycleService(createEffectRepo(companion.db, events), undefined, { eventRepo: events });
++  const runs = createRunService({ repo: createRunRepo(companion.db), provider: "fixture", modelId: "fixture",
++    snapshot: { async capture(request) { return { snapshot: snapshot(request) }; } } });
++  const maintenance = vi.fn(async () => undefined);
++  const imageMaintenance = vi.fn();
++  const usage = vi.fn();
++  const witness = vi.fn();
++  const execute = vi.fn(async () => ({ ok: true, value: "effect complete" }));
++  const governed = wrapGovernedTool(tool({ inputSchema: z.object({}), execute }), {
++    service: { authorize: () => ({ allowed: true, evaluation: {} }) } as unknown as GovernancePolicyService,
++    binding: { identity: { capabilityId: "fixture.probe", ownerHostId: "core" }, cellKey: "probe" },
++  });
++  const capturedTools: ToolSet = scenario === "tool-partial" ? { probe: governed } : {};
++  const agent = createChatAgent({ model, visionModel: model, store: companion.conversation, memory: companion.memory,
++    effectLifecycle: effects, autoMemory: { onTurnCompleted: maintenance }, onUsage: usage, onPrimaryCommitted: witness,
++    imageMemory: { onImageTurn: imageMaintenance }, attachments: { save: () => ({ ref: `attachments/${"a".repeat(64)}.png`, bytes: 3 }) },
++    runContext: () => ({ tools: capturedTools }),
++  });
++  const { logger } = createCaptureLogger();
++  const connections = createConnectionRegistry();
++  const registry = createMethodRegistry();
++  registry.register(connectMethod({ deviceRegistry: createDeviceRegistry({ store: createPairedDeviceStore(join(companion.root, "devices.json")) }),
++    connectionRegistry: connections, trustLoopbackOperator: true, onPairingCode: () => undefined, onAutoTrust: () => undefined }));
++  const activity = createChatActivityProjection();
++  const controls = { queue: createTurnQueue(), turns: createTurnRegistry(), live: { activity, subscriptions: createTimelineSubscriptions() } };
++  registry.register(chatSendMethod(agent, logger, controls, runs));
++  registry.register(chatCancelMethod(controls.turns, runs));
++  const server = await startWsServer({ host: "127.0.0.1", port: 0, registry, connectionRegistry: connections, logger });
++  cleanup.push(async () => { await controls.turns.drain(); await server.close(); activity.dispose(); });
++  const client = await openClient(`ws://127.0.0.1:${server.port}`);
++  cleanup.push(async () => { client.close(); await client.waitClosed(); });
++  sendConnect(client, { deviceId: "550e8400-e29b-41d4-a716-446655440000", deviceName: "transport fixture", role: "operator" });
++  const connected = ConnectResultSchema.parse(JsonRpcSuccessResponseSchema.parse((await client.take(1))[0]).result);
++  expect(connected.status).toBe("ok");
++  return { companion, http, client, runs, activity, events, maintenance, imageMaintenance, usage, witness, execute,
++    requests: () => fake?.doStreamCalls.length ?? http.requests() };
++}
++
++async function settle(client: TestClient, input: { runId: string; cancelOnDelta: boolean; cancelSent: boolean }) {
++  let cancelSent = input.cancelSent;
++  let cancelAcknowledged = !cancelSent;
++  let terminal = false;
++  const notes: Array<{ method: string; params: unknown }> = [];
++  while (!terminal || !cancelAcknowledged) {
++    const frame = (await client.take(1))[0];
++    const response = JsonRpcSuccessResponseSchema.safeParse(frame);
++    if (response.success) {
++      expect(response.data.id).toBe("cancel");
++      expect(response.data.result).toEqual({ cancelled: true });
++      cancelAcknowledged = true;
++      continue;
++    }
++    const note = notification(frame); notes.push(note);
++    if (note.method === CHAT_METHODS.delta && input.cancelOnDelta && !cancelSent) {
++      expect(ChatDeltaSchema.parse(note.params).delta).toBe("partial");
++      client.send({ jsonrpc: "2.0", id: "cancel", method: CHAT_METHODS.cancel, params: { characterId: "taki", runId: input.runId } });
++      cancelSent = true; cancelAcknowledged = false;
++    }
++    terminal ||= note.method === CHAT_METHODS.complete || note.method === CHAT_METHODS.error;
++  }
++  return notes;
++}
++
++describe("approved cancellation policy over real HTTP and WebSocket transports", () => {
++  it.each([
++    { scenario: "prefill", image: false }, { scenario: "partial", image: false },
++    { scenario: "partial", image: true }, { scenario: "tool-partial", image: false },
++    { scenario: "graceful", image: false }, { scenario: "rejecting", image: false },
++    { scenario: "success", image: false }, { scenario: "success", image: true }, { scenario: "error", image: false },
++  ] as const)("$scenario, image=$image: terminal notification, primary witness and one Effect settlement", async ({ scenario, image }) => {
++    const f = await boot(scenario);
++    const cancelled = scenario !== "success" && scenario !== "error";
++    f.client.send({ jsonrpc: "2.0", id: "send", method: CHAT_METHODS.send, params: {
++      characterId: "taki", message: "Fixture only", ...(image ? { attachments: [{ mediaType: "image/png", dataBase64: "YWJj" }] } : {}),
++    } });
++    const ack = ChatSendResultSchema.parse(JsonRpcSuccessResponseSchema.parse((await f.client.take(1))[0]).result);
++    if (scenario === "prefill") {
++      await f.http.ready;
++      f.client.send({ jsonrpc: "2.0", id: "cancel", method: CHAT_METHODS.cancel, params: { characterId: "taki", runId: ack.runId } });
++    }
++    const notes = await settle(f.client, { runId: ack.runId, cancelSent: scenario === "prefill", cancelOnDelta: cancelled });
++    const terminal = notes.filter(note => note.method === CHAT_METHODS.complete || note.method === CHAT_METHODS.error);
++    expect(terminal).toHaveLength(1);
++    expect(terminal[0]?.method).toBe(scenario === "prefill" || scenario === "error" ? CHAT_METHODS.error : CHAT_METHODS.complete);
++    if (scenario === "prefill") expect(ChatErrorSchema.parse(terminal[0]?.params).retracted).toBe(true);
++    const outcome = cancelled ? "cancelled" : scenario === "error" ? "failed" : "completed";
++    expect(f.runs.status(ack.runId)).toMatchObject({ run: { state: outcome }, receipt: { outcome }, attempts: [{ state: outcome }] });
++    expect(f.activity.read("taki")).toMatchObject({ status: "terminal", outcome });
++    expect(f.maintenance).toHaveBeenCalledTimes(scenario === "success" ? 1 : 0);
++    expect(f.imageMaintenance).toHaveBeenCalledTimes(scenario === "success" && image ? 1 : 0);
++    if (cancelled || scenario === "error") expect(f.usage).not.toHaveBeenCalled();
++    const history = f.companion.conversation.history("taki");
++    if (scenario === "prefill") {
++      expect(history).toEqual([]); expect(f.witness).not.toHaveBeenCalled();
++    } else {
++      expect(f.witness).toHaveBeenCalledOnce();
++      expect(f.witness.mock.calls[0]?.[0].entries.map((entry: { role: string }) => entry.role)).toEqual(history.map(row => row.role));
++      expect(history[0]?.role).toBe("user");
++      if (scenario === "error") expect(history).toEqual([{ role: "user", content: "Fixture only" }]);
++      else expect(history.at(-1)).toEqual({ role: "assistant", content: scenario === "success" ? "complete" : "partial" });
++    }
++    expect(f.requests()).toBe(scenario === "tool-partial" ? 2 : 1);
++    const modelEffects = f.companion.db.prepare("SELECT state,outcome FROM run_effects WHERE run_id=@runId AND kind='model' ORDER BY rowid").all({ runId: ack.runId });
++    expect(modelEffects).toEqual(scenario === "tool-partial"
++      ? [{ state: "terminal", outcome: "completed" }, { state: "terminal", outcome: "outcome_unknown" }]
++      : [{ state: "terminal", outcome: cancelled ? "outcome_unknown" : scenario === "error" ? "failed" : "completed" }]);
++    expect(f.events.list(ack.runId).filter(event => event.payload.kind === "model.response.settled")).toHaveLength(f.requests());
++    const toolEffects = f.companion.db.prepare("SELECT state,outcome FROM run_effects WHERE run_id=@runId AND kind='tool'").all({ runId: ack.runId });
++    expect(toolEffects).toEqual(scenario === "tool-partial" ? [{ state: "terminal", outcome: "completed" }] : []);
++    expect(f.execute).toHaveBeenCalledTimes(scenario === "tool-partial" ? 1 : 0);
++    if (scenario === "tool-partial") expect(history.filter(row => row.role === "tool")).toHaveLength(1);
++  });
++});
+--- a/packages/core/src/server/methods/index.md
++++ b/packages/core/src/server/methods/index.md
+@@ -5,7 +5,7 @@
+ - host-catalog-publish.ts — host.catalogPublish (node-only): provenance-bound publication and fail-closed retirement; accepted mutations are observed inside the Host catalog owner
+ - extension-status.ts — operator-only extension.status convergence projection over current Host/Skill/MCP owner generations
+ - extension-subscribe.ts — operator-only opt-in extension change membership before acknowledgement; idempotent retries and one close cleanup, with no read/probe/reconcile
+-- chat-send.ts — durable send admission/ack, queue-owner activity replacement plus legacy stream settlement, exact captured observer wiring and unchanged initiator cancellation
++- chat-send.ts — durable send admission/ack, queue-owner activity replacement plus legacy stream settlement, exact captured observer wiring and unchanged initiator cancellation; real HTTP/WebSocket cancellation, primary witnesses and Effect settlement are covered by colocated transport tests
+ - chat-activity-read.ts — operator-only Character recovery snapshot; read-only, complete or explicitly unavailable, with no execution/replay path
+ - chat-cancel.ts — chat.cancel (operator-only): legacy character-only active-turn abort plus optional exact runId durable cancellation for queued work; idempotent ({cancelled:false} when absent/mismatched)
+ - run-status.ts — run.status (operator-only): bounded Run/Attempt/Receipt status by durable runId
+--- a/packages/core/src/testing/index.md
++++ b/packages/core/src/testing/index.md
+@@ -1,6 +1,6 @@
+ # testing/
+ 
+-- mock-language-model.ts — MockLanguageModelV4 factories: streaming / slow-streaming (abort-window) / failing / fail-then-stream + error-part-then-stream (the two R2 overflow transport endings) / mid-stream-error / scripted tool-loop (stream) + generating / failing-generate / scripted (non-streaming generate); test-only
++- mock-language-model.ts — MockLanguageModelV4 factories: streaming / slow-streaming (abort-window) / failing / fail-then-stream + error-part-then-stream (the two R2 overflow transport endings) / mid-stream-error / scripted tool-loop (stream) + generating / failing-generate / scripted (non-streaming generate); test-only; resolving/rejecting bodies are scripted fixtures, with real fetch behavior covered by the server transport regression
+ - memory-store.ts — :memory:-SQLite conversation-store fixture (db + repo + store); test-only
+ - memory-fixture.ts — memory store + repo + tokenizer + reconcile fixture with reopenDb (rebuild-equivalence) and overridable bm25 weights / stoplist; test-only
+ - companion-fixture.ts — conversation store + memory engine over one db (timeline wired as in main.ts), with reopen (restart); test-only
+--- a/packages/core/src/testing/mock-language-model.ts
++++ b/packages/core/src/testing/mock-language-model.ts
+@@ -47,11 +47,11 @@
+ }
+ 
+ /**
+- * Transport-faithful cancel: on abort it ERRORS the model stream with the raw (string) reason — mirroring undici
+- * rejecting the in-flight body read with `signal.reason`. That string fails the SDK's isAbortError name check, so the
+- * SDK errors the stream and the chat loop's for-await THROWS the reason. This is the prefill-cancel ending that
+- * simulateReadableStream cannot reproduce (its reads always resolve, always taking the graceful abort branch). Deltas
+- * arrive on a timer so a cancel can be timed before the first (throw-ending retract) or after it (throw-ending stop).
++ * Scripted rejecting provider: abort errors the model stream with the original reason, unlike the resolving
++ * simulateReadableStream fixture. Historically SDK 7.0.17 surfaced a string throw; SDK 7.0.148 can cancel its reader
++ * first and return gracefully. Core's approved cancellation policy must not infer callback eligibility from either
++ * ending. Real fetch/provider transforms are covered separately by chat-send-sdk-transport.test.ts. Timed deltas
++ * allow cancellation before the first output or after a retained partial response.
+  */
+ export function abortRejectingModel(deltas: string[], chunkDelayInMs: number): MockLanguageModelV4 {
+   return new MockLanguageModelV4({
+@@ -73,7 +73,7 @@
+               controller.close();
+             }
+           }, chunkDelayInMs);
+-          // undici rejects the body read with signal.reason verbatim — reproduce that as a stream error.
++          // Deliberately exercise a rejecting model body; this does not replace the real HTTP/fetch fixture.
+           abortSignal?.addEventListener("abort", () => {
+             clearInterval(timer);
+             controller.error(abortSignal.reason);
+--- a/pnpm-lock.yaml
++++ b/pnpm-lock.yaml
+@@ -131,17 +131,17 @@
+   packages/core:
+     dependencies:
+       '@ai-sdk/mcp':
+-        specifier: ^2.0.10
+-        version: 2.0.10(zod@4.4.3)
++        specifier: 2.0.81
++        version: 2.0.81(zod@4.4.3)
+       '@ai-sdk/openai-compatible':
+-        specifier: ^3.0.5
+-        version: 3.0.5(zod@4.4.3)
++        specifier: 3.0.75
++        version: 3.0.75(zod@4.4.3)
+       '@taki/shared':
+         specifier: workspace:*
+         version: link:../shared
+       ai:
+-        specifier: ^7.0.17
+-        version: 7.0.17(zod@4.4.3)
++        specifier: 7.0.148
++        version: 7.0.148(zod@4.4.3)
+       croner:
+         specifier: ^10.0.1
+         version: 10.0.1
+@@ -201,42 +201,32 @@
+ 
+ packages:
+ 
+-  '@ai-sdk/gateway@4.0.13':
+-    resolution: {integrity: sha512-EIiMZZMEAc3yZ3nywrJfKigrkaNwqrQgGsj0QbQ6x3Y73MlQe68EElR2cm/8I5dvBci3PFyahMRe3NwR8OOb9A==}
++  '@ai-sdk/gateway@4.0.121':
++    resolution: {integrity: sha512-cPNXvQ4B5OkmVAm98Dxe1fHdMthyqqqAG0HJx3D92NUa9FpcvkNxdAqiuZdeAhNAodFb9lBrslzzzEwxuVS53A==}
+     engines: {node: '>=22'}
+     peerDependencies:
+       zod: ^3.25.76 || ^4.1.8
+ 
+-  '@ai-sdk/mcp@2.0.10':
+-    resolution: {integrity: sha512-LP47CEk3e6BwCqXamvv4nKbgOWQ5z5T/qS/J2fola5h98KTy7JT7I1yw5LKtB89MZBLviYmEh98Ep4ovHOz/vA==}
++  '@ai-sdk/mcp@2.0.81':
++    resolution: {integrity: sha512-2ZqfHLu1K93uPse+QWbcNjkznCtM6UHMoNWjUDpmM9kCr+y9bWcf5VWfNAWi4ziQoncZPJo2qUWeDIXgrqLsKg==}
+     engines: {node: '>=22'}
+     peerDependencies:
+       zod: ^3.25.76 || ^4.1.8
+ 
+-  '@ai-sdk/openai-compatible@3.0.5':
+-    resolution: {integrity: sha512-4UtDxT6Ga7U225o5fBEgtCFZHba4/iTDXRqMrU62yEfTrFks4o+F4jt0D3OWmUasR9LPFzLy0KnEITxFDtc89g==}
++  '@ai-sdk/openai-compatible@3.0.75':
++    resolution: {integrity: sha512-Zs+EWsK1XprpCR6+VIva50W2YuD3TNSymd5DKFh8XSrroK0copxm2BlSDRKWVdx3SZEh1XqD+1cgYzGR7huL4A==}
+     engines: {node: '>=22'}
+     peerDependencies:
+       zod: ^3.25.76 || ^4.1.8
+ 
+-  '@ai-sdk/provider-utils@5.0.5':
+-    resolution: {integrity: sha512-oI0t3dvCoqWNV1I8o1Rybi2DXDvHES5r/TrwtJW90tuFLVepgJlftPxrcjh8vaSvjqC2diTuA2vXyjKAyHJm4A==}
++  '@ai-sdk/provider-utils@5.0.65':
++    resolution: {integrity: sha512-LCugcsP8oWmdeI3BASf4Fuo1wiC6Qx0YrefFssl7n12s+LV4DNi5RdwWQrtrB4oek3GGNQRN/h/NSwVZM2eHKw==}
+     engines: {node: '>=22'}
+     peerDependencies:
+       zod: ^3.25.76 || ^4.1.8
+ 
+-  '@ai-sdk/provider-utils@5.0.7':
+-    resolution: {integrity: sha512-OSm5/5kdrHa11WIOo5LYgDKnxYWp5aB/wx5EXRHi0jpUGduMDeB6oht9U6p+UNNWIP3F/EqPpV8d7vdP/iRnqg==}
+-    engines: {node: '>=22'}
+-    peerDependencies:
+-      zod: ^3.25.76 || ^4.1.8
+-
+-  '@ai-sdk/provider@4.0.2':
+-    resolution: {integrity: sha512-pfPoy9J1B1xV7cqJ8MYHOsDYrMv5tR3+EMNfI249OhkD2uRakvav3Fo7XpD2luuN/YNCBY7KfEQc7vEV7KEtyw==}
+-    engines: {node: '>=22'}
+-
+-  '@ai-sdk/provider@4.0.3':
+-    resolution: {integrity: sha512-e0CpNWJUY7OxAFAnCZkw+ri9QOHWwTs1tXP42782KFGCU07qt8NiXCrCVowyCB5dP2r5/Uls+g2oPd8kOJn9dw==}
++  '@ai-sdk/provider@4.0.31':
++    resolution: {integrity: sha512-3wJnwVTFg8SwOyoZCv+ov7Re2GB+7IQnU5a5MYJACrtiWDDUHgqTBeeesq2MB2ddgojzL8hgWleltwpAgtUqfg==}
+     engines: {node: '>=22'}
+ 
+   '@emnapi/core@1.11.1':
+@@ -805,8 +795,8 @@
+     engines: {node: '>=0.4.0'}
+     hasBin: true
+ 
+-  ai@7.0.17:
+-    resolution: {integrity: sha512-kpIjNtN0tyUaxzkAs7b8YF48WZzc71dKu0HqFPSAWg/avu1Ogv50UPE9hpVMr+kb33zsEa6LrAU9DZHMNscvzw==}
++  ai@7.0.148:
++    resolution: {integrity: sha512-FPgfIAhz/FrlzcvqTN7pGGibahR5rD19NXZWX9WQ1tskTic+CN+jxvubpreyq8uN1maIEHPwvZmil/3IYN8FIw==}
+     engines: {node: '>=22'}
+     peerDependencies:
+       zod: ^3.25.76 || ^4.1.8
+@@ -1815,6 +1805,10 @@
+ 
+   undici-types@7.18.2:
+     resolution: {integrity: sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==}
++
++  undici@7.30.1:
++    resolution: {integrity: sha512-03KrMbjIFDWQR5RNPrSw3bd1r12JpyFQl9/yxjUbJtqkjmllqC5lFjZh6ujeuJCKr8EOQvRW872Oy/az+nLYxg==}
++    engines: {node: '>=20.18.1'}
+ 
+   unified@11.0.5:
+     resolution: {integrity: sha512-xKvGhPWw3k84Qjh8bI3ZeJjqnyadK+GEFtazSfZv/rKeTkTjOJho6mFqh2SM96iIcZokxiOpg78GazTSg8+KHA==}
+@@ -2010,47 +2004,37 @@
+ 
+ snapshots:
+ 
+-  '@ai-sdk/gateway@4.0.13(zod@4.4.3)':
+-    dependencies:
+-      '@ai-sdk/provider': 4.0.2
+-      '@ai-sdk/provider-utils': 5.0.5(zod@4.4.3)
++  '@ai-sdk/gateway@4.0.121(zod@4.4.3)':
++    dependencies:
++      '@ai-sdk/provider': 4.0.31
++      '@ai-sdk/provider-utils': 5.0.65(zod@4.4.3)
+       '@vercel/oidc': 3.2.0
+       zod: 4.4.3
+ 
+-  '@ai-sdk/mcp@2.0.10(zod@4.4.3)':
+-    dependencies:
+-      '@ai-sdk/provider': 4.0.3
+-      '@ai-sdk/provider-utils': 5.0.7(zod@4.4.3)
++  '@ai-sdk/mcp@2.0.81(zod@4.4.3)':
++    dependencies:
++      '@ai-sdk/provider': 4.0.31
++      '@ai-sdk/provider-utils': 5.0.65(zod@4.4.3)
++      cross-spawn: 7.0.6
+       pkce-challenge: 5.0.1
+       zod: 4.4.3
+ 
+-  '@ai-sdk/openai-compatible@3.0.5(zod@4.4.3)':
+-    dependencies:
+-      '@ai-sdk/provider': 4.0.2
+-      '@ai-sdk/provider-utils': 5.0.5(zod@4.4.3)
++  '@ai-sdk/openai-compatible@3.0.75(zod@4.4.3)':
++    dependencies:
++      '@ai-sdk/provider': 4.0.31
++      '@ai-sdk/provider-utils': 5.0.65(zod@4.4.3)
+       zod: 4.4.3
+ 
+-  '@ai-sdk/provider-utils@5.0.5(zod@4.4.3)':
+-    dependencies:
+-      '@ai-sdk/provider': 4.0.2
++  '@ai-sdk/provider-utils@5.0.65(zod@4.4.3)':
++    dependencies:
++      '@ai-sdk/provider': 4.0.31
+       '@standard-schema/spec': 1.1.0
+       '@workflow/serde': 4.1.0
+       eventsource-parser: 3.1.0
++      undici: 7.30.1
+       zod: 4.4.3
+ 
+-  '@ai-sdk/provider-utils@5.0.7(zod@4.4.3)':
+-    dependencies:
+-      '@ai-sdk/provider': 4.0.3
+-      '@standard-schema/spec': 1.1.0
+-      '@workflow/serde': 4.1.0
+-      eventsource-parser: 3.1.0
+-      zod: 4.4.3
+-
+-  '@ai-sdk/provider@4.0.2':
+-    dependencies:
+-      json-schema: 0.4.0
+-
+-  '@ai-sdk/provider@4.0.3':
++  '@ai-sdk/provider@4.0.31':
+     dependencies:
+       json-schema: 0.4.0
+ 
+@@ -2555,11 +2539,11 @@
+ 
+   acorn@8.17.0: {}
+ 
+-  ai@7.0.17(zod@4.4.3):
+-    dependencies:
+-      '@ai-sdk/gateway': 4.0.13(zod@4.4.3)
+-      '@ai-sdk/provider': 4.0.2
+-      '@ai-sdk/provider-utils': 5.0.5(zod@4.4.3)
++  ai@7.0.148(zod@4.4.3):
++    dependencies:
++      '@ai-sdk/gateway': 4.0.121(zod@4.4.3)
++      '@ai-sdk/provider': 4.0.31
++      '@ai-sdk/provider-utils': 5.0.65(zod@4.4.3)
+       zod: 4.4.3
+ 
+   ajv@6.15.0:
+@@ -3763,6 +3747,8 @@
+ 
+   undici-types@7.18.2: {}
+ 
++  undici@7.30.1: {}
++
+   unified@11.0.5:
+     dependencies:
+       '@types/unist': 3.0.3
+--- a/.trellis/spec/backend/agent-runtime.md
++++ b/.trellis/spec/backend/agent-runtime.md
+@@ -69,35 +69,42 @@
+   operator-only (no Rust mirror — see [Server-Push & Connection Auth](./server-push-and-connection-auth.md)). Retained
+   bytes are swept on a configurable TTL; the description memory is never swept.
+ 
+-## A cancel has TWO stream endings — cover both, and mock the transport faithfully (#17 cancel-retract)
+-
+-`ai@7.0.17` ends an aborted stream in either of two ways; which fires is decided by the SDK's `isAbortError` name
+-check (provider-utils: an Error/DOMException named AbortError/ResponseAborted/TimeoutError), not by us:
+-
+-- **Graceful**: the model read resolves (or rejects AbortError-shaped) → the SDK enqueues an `abort` part and closes;
+-  the for-await ends cleanly.
+-- **Throw**: the read rejects with anything else. Our abort reason is a PLAIN STRING ("turn cancelled by operator")
+-  and undici rejects the in-flight body read with `signal.reason` verbatim — a string fails `isAbortError`, the SDK
+-  errors the stream, the for-await THROWS the reason. This is the COMMON production ending for a prefill cancel (no
+-  chunk ever arrived); the old "turn cancelled by operator" error toast was this ending's fingerprint.
+-
+-Consequences (all load-bearing):
+-
+-- Post-loop logic that must run on cancel (the retract seam) lives on BOTH endings: an additive catch wrapper around
+-  the frozen try/finally + the clean-path check, sharing ONE predicate (`retractIfCancelledSilent` = aborted AND zero
+-  completed steps AND no partial text). Do NOT "fix" the string reason into an AbortError to force the graceful path —
+-  correctness must not depend on SDK-internal name lists surviving the next major.
+-- **Mock-green ≠ prod-correct.** `simulateReadableStream` reads always RESOLVE, so mock tests structurally see only
+-  the graceful ending — the throw ending stayed invisible under 513 green tests. Abort-path tests use the
+-  transport-faithful `abortRejectingModel` (errors the model stream with `signal.reason` on abort, mirroring undici).
+-  The cancel matrix is 2×2 (graceful/throw × retract/stop) — keep all four pinned.
+-- Before relying on any SDK runtime behavior, read the INSTALLED dist (`node_modules/.pnpm/ai@*/**/dist/index.js`) —
+-  not the mock's behavior, not training memory. An observed packaged-runtime symptom (which error text, which
+-  notification arrived) is evidence about which path actually fires; reconcile a probe against it before believing it.
+-- Retract semantics (user-approved 2026-07-17): cancel with NOTHING produced → delete the just-appended user row
+-  (DB + `timeline.removed` push), pump sends `chat.error{retracted:true}`, the UI restores the draft (never
+-  overwriting newly typed text), autoMemory/imageMemory never fire. Cancel after ANY output → stop, today's behavior
+-  byte-identical. "Produced nothing" is exactly "persistTurn would persist nothing beyond the user row".
++## Cancellation: Core owns post-turn callback eligibility (approved 2026-10-22)
++
++Historical SDK 7.0.17 behavior had two endings: a resolving/AbortError-shaped body ended gracefully, while a real
++Node fetch body rejected a string cancellation reason through the iterator. Core formerly inferred whether to run
++post-turn callbacks from that transport-dependent throw. SDK 7.0.148 immediately cancels its internal reader and
++rejects aggregate promises; it may finish gracefully before a physical fetch failure crosses provider transforms.
++Its raw provider also wraps body failures in APICallError. Do not recreate the old ending with timers, polling,
++synthetic throws or an outer physical-failure observer: those observations do not reliably survive cancellation.
++
++The owner explicitly approved these contracts for the coordinated SDK upgrade:
++
++- Keep the original signal and the SDK's supported immediate cancellation. A public graceful end remains graceful;
++  a genuine surfaced error still propagates. Never change the reason into a synthetic AbortError or delay cancellation
++  to recover a hypothetical physical failure. Tool cancellation and aggregate settlement retain their existing owners.
++- Always finish the existing capture/commit `finally`. Delivered partial text and completed tool evidence survive;
++  completed Effects are never replayed. Cancel with nothing produced retracts the exact user row and emits
++  `chat.error{retracted:true}` so the client can restore the draft. Retraction remains identical for both endings.
++- After persistence, retraction and surfaced failure handling, the outer turn owner calls `state.afterCommit` only if
++  its signal is not aborted. This gates the existing bundle: request-pressure remeasurement, auto-memory/compaction
++  maintenance, optional image-description maintenance and the detached turn-usage callback. An aborted turn starts
++  none of that bundle, including a previously graceful partial cancellation.
++- This is **not a ban on all memory ingestion**. `finishRecordedTurn` still calls `onPrimaryCommitted` with the exact
++  eligible retained primary rows before the callback guard. Source witnessing, later extraction/maintenance policy,
++  authority, eligibility, transcript identity and raw-input minimization remain unchanged.
++- For partial real-fetch cancellation, `chat-send` normally emits `chat.complete` on the SDK's graceful return;
++  Run, Attempt, Receipt and activity outcome remain `cancelled` through the existing signal checks. A genuine provider
++  failure still emits `chat.error` and settles failed. A notification name is not the Run outcome.
++- Ordinary success continues invoking the existing callback bundle. Observer/storage failures never justify replaying
++  an already completed provider/tool action; model/tool Effects retain exactly-once terminal settlement.
++
++`server/methods/chat-send-sdk-transport.test.ts` exercises actual Node fetch + local HTTP SSE, authenticated real
++WebSocket send/cancel, SQLite/ConversationStore, Run/Receipt/activity, and model/tool Effect settlement. Cover prefill,
++partial text/image, completed-tool-then-partial cancellation, resolving/rejecting model fixtures, ordinary success and
++real provider failure. Assert notification, canonical rows, exact primary witness, callback counts and no effect replay.
++`abortRejectingModel` is a scripted rejecting body, not proof of modern fetch transformation behavior. Keep direct
++error/retraction tests as well; mocks and Vitest transformation do not replace the real Node boot/transport evidence.
+ 
+ ## Classify every tool: presentation (fire-and-forget) vs informational (T1 1c)
+ 
