@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 33 (branch-qualified histories)
-- **Last Active**: 2026-09-19
+- **Total Sessions**: 34
+- **Last Active**: 2026-11-01
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~1525 | Active |
+| `journal-1.md` | ~1558 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 34 | 2026-11-01 | Complete cache token diagnosis and live monitoring | `57d14a1`, `3637f27` | `task/t4-skills-mcp-productization` |
 | 32 | 2026-09-19 | Avatar lab panel acceptance, native lip-sync verdict and closeout | `8694355`, `328c5ea`, `7814a5e` | `task/t4-skills-mcp-productization` |
 | T4-31 | 2026-09-08 | Home continuity closeout and Heartbeat planning entry | `d6ddf2e5f932a096ff6162d31b05caeb16e7286e` | `task/t4-skills-mcp-productization` |
 | main-31 | 2026-09-19 | Hindsight closure Stage 1: durable memory operations | `406d7cd`, `eb20c58`, `4b2694f`, `7d80d87`, `18fe4d4` | `main` |

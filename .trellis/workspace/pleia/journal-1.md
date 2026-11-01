@@ -1520,3 +1520,39 @@ Core-owned durable operation owner (setup validate/apply, manual replica sync), 
 
 - Stage 2: Local-only onboarding, existing-instance first activation (PR03 source custody, PR05 Local-only slice), active Bank/configuration lifecycle
 - Scoped grill for PR02 before Stage 3; U1 before Stage 4
+
+
+## Session 34: Complete cache token diagnosis and live monitoring
+
+**Date**: 2026-11-01
+**Task**: Complete cache token diagnosis and live monitoring
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Completed and archived cache-token-cost-diagnosis with owner authorization; preserved later optimization ideas as separate follow-ups.
+
+### Main Changes
+
+- Delivered truthful partial tidy recovery and live summary-window cache statistics; retained existing source recovery, catch-up and auxiliary accounting evidence.
+- Archived the task under .trellis/tasks/archive/2026-11/11-01-cache-token-cost-diagnosis and repaired driver/context references.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `57d14a1` | (see git log) |
+| `3637f27` | (see git log) |
+
+### Testing
+
+- [OK] 6591 tests passed, 6 skipped; typecheck, active-source lint and Clippy passed. Independent review, 11 browser cases and actual Core/WS integration passed.
+- [OK] Archived JavaScript syntax/import checks and context validation passed; read-only live query and historical analyzer reproduced expected results.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Use normal activity to observe cold starts and long sessions. Windows exec guidance and gate-only reasoning experiments remain optional follow-ups; no push performed.
