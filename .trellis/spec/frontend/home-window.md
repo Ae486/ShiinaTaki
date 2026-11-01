@@ -366,6 +366,19 @@ Live delivery follows [Foreground Chat Feedback](foreground-chat-feedback.md) an
   affordance) remains in [`reactive-read-models.md`](reactive-read-models.md) §(f). Pet additionally follows
   the segmented transcript and occupied-space motion rules in the foreground-feedback contract.
 
+## Memory tidy result feedback
+
+Operations uses `MemoryTidyFailureDetailsSchema` from Shared to recognize typed INTERNAL_ERROR data. Keep the canonical
+request result separate from optional read-model refresh errors: a failed refresh cannot replace a successful or partial
+mutation outcome. A new attempt clears its prior result, locks duplicate clicks and ignores retired-client settlement.
+Known partial/failed outcomes refresh the affected read models and show actual saved edits plus Chinese reasons and
+closed tool-error labels. The issue count describes unresolved tool operations, not every possible failure. Unknown
+transport/deadline errors remain unknown; never replay tidy automatically or label a timeout as no changes.
+
+Validate the controller's client replacement, duplicate-click and refresh-failure boundaries, component result/error
+states, and a rendered production WS path carrying clean/ran and typed partial/failed outcomes. Scripted models prove
+wiring; real-model behavior and owner UI acceptance are separate evidence.
+
 ## Rendering server-owned binary refs (images)
 
 A timeline `image` part carries `{ mediaType, ref }` — **never bytes**. ONE render path for both live-attached and scroll-back images: a `use-attachment-image.ts` hook calls `media.get(ref)` lazily, cached in a module-level `Map<ref, Promise<dataURL>>` (one fetch per ref across all rows and re-mounts; evict on failure so it can retry). A `FORBIDDEN`/missing ref (TTL-expired image) degrades to a placeholder — **text stays authoritative** (the image's meaning already lives in memory as the vision description). The `<img src>` is a `data:` URL whose mediaType comes ONLY from the zod-parsed `MediaGetResult` closed enum.

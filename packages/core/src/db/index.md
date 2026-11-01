@@ -1,4 +1,5 @@
 # core/db/
+- cache-usage-repo.ts — global settled-request cache statistics against the exact durable primary-summary baseline
 - subagent-repo.ts — immutable private continuity and exact child stop/control CAS
 - subagent-input-repo.ts — idempotent addressed acceptance, separate work sequence and user-only latch continuation
 - subagent-execution-repo.ts — trusted atomic child/parent Run links, immutable proposals and completion outbox reads
@@ -10,7 +11,7 @@
 - run-work-transition.ts — same-ledger quiescent accepted-purpose wait/resume with exact Attempt/version and atomic v3 evidence
 - initiative-completion-source.ts — read-only bounded actual terminal background Runs and Class A publication exclusions
 - user-timezone-repo.ts — validated reads and CAS replacement of the existing singleton with mode, designated device and last confirmation provenance
-- effect-repo.ts — Core-owned provider-neutral Effect intent/wait/settlement CAS boundary with authoritative detailed usage rows/events
+- effect-repo.ts — Core-owned provider-neutral Effect intent/wait/settlement CAS boundary with authoritative detailed usage rows/events and cache provenance
 - run-repo.ts — durable Run aggregate with atomic admission/context evidence, original snapshot reads, CAS lifecycle/retry transitions and bounded Receipt/status references
 - run-event-repo.ts — immutable contiguous event appends, indexed bounded forward/tail/before pages, exact event lookup, and synchronous summary aggregation; immutable, contiguous, redaction-safe lifecycle evidence ledger queries and appends
 - run-event-live.ts — post-commit best-effort observer bus with bounded durable backfill, bounded live queues, and independent cursor isolation; post-commit best-effort observer bus with cursor isolation
@@ -29,7 +30,7 @@
 - memory-events-repo.ts — memory_events SQL: record / listByCharacter (the memory system's decision log — skips, reinforcements, searches, tidy passes; ids/counts only, never memory content or a query)
 - privacy-pause-repo.ts — privacy_pause_state SQL: load / save (the single global Privacy Pause row; a consent withdrawal must survive a restart)
 - summary-repo.ts — conversation_summary SQL: get / upsert / getMeta (the per-character rolling compaction summary + its through_seq coverage — T5-R3, batch 7; getMeta returns the text LENGTH only, for the operator status read)
-- compaction-operation-repo.ts — fenced per-Character compaction cursor, immutable bounded lifecycle evidence, cancellation/restart reconciliation, and atomic summary CAS commit
+- compaction-operation-repo.ts — fenced compaction lifecycle and atomic summary CAS with optional cache baseline capture and post-commit notice
 - window-state-repo.ts — slot_window_state SQL: get / set / list (per-model-slot effective window + EMA factor — the window calibrator's persistence, batch 6; list feeds memory.status)
 - config-repo.ts — config SQL: get / all / upsert / delete (the sparse operator-set settings store; a row that is not a JSON primitive throws at the boundary)
 - ../governance/governance-policy-repo.ts — governance policy SQL aggregate: durable level/generation + sparse validated overrides
@@ -142,4 +143,4 @@
 - subagent-action-evidence.ts — useful action-result projection without internal receipts
 - primary-conversation-source-repo.ts — provider-independent atomic source lifecycle, exact Timeline membership, authority capture and boot recovery
 - primary-ingestion-progress.ts — shared Local/Hindsight gap-separated source groups and truthful continuous-coverage queries
-- auxiliary-usage-repo.ts — metadata-only auxiliary model-call lifecycle, explicit boot interruption recovery and bounded usage aggregates
+- auxiliary-usage-repo.ts — metadata-only auxiliary model-call lifecycle, interruption recovery, bounded usage aggregates and post-commit settlement notice

@@ -520,3 +520,8 @@ export { SUBAGENT_METHODS, SubagentSummarySchema, SubagentListParamsSchema, Suba
   type SubagentSummary, type SubagentControlResult, type SubagentChanged, type SubagentResultView,
   type SubagentListParams, type SubagentHistoryParams, type SubagentResultParams, type SubagentSendParams,
   type SubagentStopParams, type SubagentContinueParams, type SubagentListResult, type SubagentHistoryResult } from "./subagent-api-schema.ts";
+export { MemoryTidyToolNameSchema, MemoryTidyIssueSchema, MemoryTidyFailureReasonSchema, MemoryTidyFailureDetailsSchema,
+  type MemoryTidyIssue, type MemoryTidyFailureReason, type MemoryTidyFailureDetails } from "./memory-tidy-diagnostics-schema.ts";
+export { CACHE_USAGE_METHODS, CacheUsageWindowSnapshotSchema, CacheUsageUpdateSchema,
+  CacheUsageSubscribeParamsSchema, CacheUsageUnsubscribeParamsSchema, CacheUsageUnsubscribeResultSchema,
+  type CacheUsageWindowSnapshot, type CacheUsageUpdate, type CacheUsageSubscribeParams } from "./cache-usage-schema.ts";

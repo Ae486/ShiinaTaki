@@ -33,7 +33,7 @@
 - memory-flush-port.ts — typed pre-retirement Memory Provider boundary: fenced Legacy watermark and actual Canonical Local ingestion receipts, unavailable Hindsight failure, and switchable activation binding
 - tidy-report.ts — the tidy pass's deterministic health report (rc five-class contract): facts flat (missing trigger, over-budget incl. block used/limit beside full content), hypotheses as questions (stale, near-duplicate) + the new-writes slice carrying the misfiled question; per-class caps with dropped counts stated; observed content fenced; never prescribes an action
 - tidy-tools.ts — the maintenance verbs the foreground agent never gets: memory_reinforce / memory_archive_supersede (the sanctioned promotion route) / memory_set_disclosure / memory_refile / block_rethink (background blocks only) / memory_finish_edits (the structural terminal); never-throw envelopes
-- tidy-pass.ts — the model-led maintenance pass: write-count trigger (maybeRun) + operator runNow over one execute path; clean store = zero model calls; system-reminder input framing; six refinement principles + do-nothing permission + imported R10 voice; stopWhen finish-tool/step-cap; watermark advances only on success; tidy event + counts-only log line
+- tidy-pass.ts — model-led maintenance with zero-cost clean exit; canonical explicit completion and safe partial/failure diagnostics, real committed counts and success-only watermark; Legacy bounded-pass compatibility
 - memory-provider.ts — async provider and optional vector projection interfaces
 - local-memory-provider.ts — structured Local provider with completed-only retain, applied/unchanged CAS mutations, and sparse recall
 - canonical-local-runtime.ts — canonical Local engine with real maintenance, observed writes and admission-bound tools/recall/prompt capture
@@ -45,7 +45,7 @@
 - canonical-local-ingestion.ts — local source import, gap-isolated pending groups, truthful continuous coverage, 20-message cadence and durable receipt retries
 - canonical-local-ingestion-batch.ts — canonical original-source/fact batches and lexical duplicate evidence
 - canonical-layer-policy.ts — registry ownership and automatic policy projection shared by Local provider writes
-- canonical-local-tidy.ts — private CAS-bound canonical maintenance tools over an immutable row/Block review
+- canonical-local-tidy.ts — captured-reference/CAS-bound maintenance; exact revision-conflict correction, replay-safe edit counts, explicit finish and unresolved-issue evidence
 - canonical-local-retention.ts — canonical registry retention with revision-bearing targets and actual persisted-effect counts
 - canonical-observed-write.ts — trusted image-description writes via the Local provider with observed provenance and automatic visibility limits
 - canonical-memory-view.ts — revision-bearing opaque references and canonical row projection for reused T5 policy/report code

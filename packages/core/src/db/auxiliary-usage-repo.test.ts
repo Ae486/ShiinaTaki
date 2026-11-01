@@ -1,7 +1,7 @@
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AuxiliaryUsageCounts } from "@taki/shared";
 import { rmTempDir } from "../testing/rm-temp.ts";
 import { createAuxiliaryUsageRepo, type AuxiliaryUsageRepo } from "./auxiliary-usage-repo.ts";
@@ -30,6 +30,21 @@ function settle(repo: AuxiliaryUsageRepo, input: { callId: string; usage: Auxili
 }
 
 describe("auxiliary usage repo", () => {
+  it("notifies only new committed settlements and reconciliation, with rollback and callback isolation", () => {
+    const { db } = open(); const onSettled = vi.fn(() => { throw new Error("optional observer failed"); });
+    const repo = createAuxiliaryUsageRepo(db, { onSettled }); start(repo, { callId: id(1) });
+    expect(onSettled).not.toHaveBeenCalled();
+    expect(() => db.transaction(() => {
+      settle(repo, { callId: id(1), usage: unknown }); expect(onSettled).not.toHaveBeenCalled();
+      throw new Error("rollback");
+    })).toThrow("rollback");
+    expect(onSettled).not.toHaveBeenCalled();
+    expect(() => settle(repo, { callId: id(1), usage: unknown })).not.toThrow();
+    settle(repo, { callId: id(1), usage: unknown }); expect(onSettled).toHaveBeenCalledOnce();
+    start(repo, { callId: id(2) }); expect(repo.reconcileInterrupted()).toBe(1);
+    expect(repo.reconcileInterrupted()).toBe(0); expect(onSettled).toHaveBeenCalledTimes(2);
+  });
+
   it("persists started calls across reopen and reconciles them only when explicitly requested", () => {
     const root = mkdtempSync(join(tmpdir(), "taki-auxiliary-usage-")); cleanup.push(() => rmTempDir(root));
     const path = join(root, "state.db"); const first = open(path); start(first.repo, { callId: id(1) }); first.db.close();

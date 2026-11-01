@@ -8,6 +8,7 @@ import type { LanguageModelMiddleware } from "ai";
 import type { EffectLifecycle, UsageRecord } from "@taki/shared";
 import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 import { withRunUsageOwner } from "../observability/model-usage-context.ts";
+import { primaryCacheUsage } from "../observability/primary-cache-usage.ts";
 
 interface ModelEffectContext {
   lifecycle: EffectLifecycleService;
@@ -193,6 +194,7 @@ function settleDirect(input: {
 }
 
 interface ProviderUsage {
+  raw?: unknown;
   inputTokens: { total?: number; noCache?: number; cacheRead?: number; cacheWrite?: number };
   outputTokens: { total?: number; text?: number; reasoning?: number };
 }
@@ -202,6 +204,7 @@ function usageRecord(
   usage: ProviderUsage | undefined,
 ): Omit<UsageRecord, "usageId" | "schemaVersion" | "runId" | "attemptId" | "effectId" | "recordedAt"> {
   const normalized = usage ?? { inputTokens: {}, outputTokens: {} };
+  const cache = primaryCacheUsage(normalized, normalized.inputTokens.total);
   const counts = [normalized.inputTokens.total, normalized.inputTokens.noCache, normalized.inputTokens.cacheRead,
     normalized.inputTokens.cacheWrite, normalized.outputTokens.total, normalized.outputTokens.text, normalized.outputTokens.reasoning];
   return {
@@ -209,9 +212,10 @@ function usageRecord(
     modelId: model.modelId,
     quality: counts.some((value) => value !== undefined) ? "reported" : "unknown",
     inputTokens: normalized.inputTokens.total,
+    cacheReadObserved: cache.cacheReadObserved,
     inputTokenDetails: compactDetails({
       noCacheTokens: normalized.inputTokens.noCache,
-      cacheReadTokens: normalized.inputTokens.cacheRead,
+      cacheReadTokens: cache.cacheReadTokens,
       cacheWriteTokens: normalized.inputTokens.cacheWrite,
     }),
     outputTokens: normalized.outputTokens.total,

@@ -92,4 +92,38 @@ Implementation checks and limits are recorded in [research/implementation-report
 
 The later explicit owner authorization enabled the previously separated batch3 apply/paid work.
 It is complete; see [real-catchup-report.md](research/real-catchup-report.md) for outcomes, preservation evidence,
-provider usage, pricing and limits. The dated code-only checks above remain the production baseline.
+provider usage, pricing and limits. The dated code-only checks above describe their original phase.
+
+## Authorized follow-ups and current continuation
+
+- [x] Durable auxiliary invocation accounting and bounded real thinking comparison; see auxiliary-usage-report.md.
+- [x] Tidy recovery, partial-result RPC/UI feedback and compatibility regressions; see research/tidy-repair-design.md.
+- [x] Full workspace checks, independent review, isolated rendered WS integration and one successful live-model tidy;
+  see [tidy-repair-report.md](research/tidy-repair-report.md). Current Core PID26756 uses this checkout.
+- [x] Read-only new/old normal-use cost analysis and independent aggregate SQL checks; see
+  [new-conversation-cost-analysis.md](research/new-conversation-cost-analysis.md).
+- [ ] Observe sustained normal use, cold/restart boundaries and the next naturally eligible summary with quality intact.
+- [ ] Review the bounded exec-guidance, gate-only experiment and existing measurement-persistence candidates before
+  changing their production behavior. Keep low-value avatar/result-projection work subordinate to measured returns.
+
+The owner-authorized backlog checkpoint is commit9326955. Later tidy changes have not been committed, pushed or archived.
+The current report is observational: no global thinking switch, hard token cap or claimed controlled saving is justified.
+
+## Owner-added Monitor cache metric (implemented and verified)
+
+The owner chose to keep this addition in the current task and defined the statistics window as the interval between
+successful primary conversation summaries. Read [the concrete design](research/live-cache-window-design.md),
+[producer review](research/live-cache-metric-review.md), and [window review](research/live-cache-window-advisor.md).
+The owner explicitly approved this addition. Completed evidence is in
+[live-cache-implementation-report.md](research/live-cache-implementation-report.md).
+
+- [x] Record summary-bounded weighted calculation, completion-based membership, automatic refresh and truthful unknowns.
+- [x] Verify existing producers and independently challenge missing-cache normalization and the durable reset boundary.
+- [x] Review the additive design, including its small provenance/baseline migration, before implementation dispatch.
+- [x] Implement normalized input/cache evidence, atomic summary baseline and read-only aggregate/subscription contracts.
+- [x] Add the compact live Monitor strip and verify reset/reconnect/empty/partial/disabled/rendered paths.
+- [x] Complete required checks and isolated real-data/production-WS comparison, then include this addition in task closeout.
+
+Long-term observation and optimization experiments listed above remain follow-up candidates, not unfulfilled claims
+of this implementation. The requested display is complete; task closeout awaits ordinary authorized Git/archive work.
+No new task or task-pointer change was made.

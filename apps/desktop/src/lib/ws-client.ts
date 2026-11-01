@@ -8,6 +8,8 @@ import { JSONRPCClient, JSONRPCServer, JSONRPCServerAndClient } from "json-rpc-2
 import { CHAT_METHODS, ChatSendResultSchema } from "@taki/shared";
 import type { SubagentActivity, SubagentChanged } from "@taki/shared";
 import type { SubagentMethods } from "./ws-client-subagents.ts";
+import type { CacheUsageMethods } from "./ws-client-cache-usage.ts";
+import type { CacheUsageUpdate } from "@taki/shared";
 import { addSubagentChangedHandler, addSubagentActivityHandler } from "./ws-client-routes.ts";
 import type {
   CoWatchingChanged,
@@ -120,7 +122,8 @@ import { sendChatTurn, type ChatHandlers } from "./ws-chat-turn.ts";
 
 export type { ChatHandlers, ConnectOutcome };
 
-export interface WsClient extends MemoryOperationMethods, UserTimezoneMethods, PresenceMethods, InitiativeMethods, CoWatchingMethods, SubagentMethods {
+export interface WsClient extends MemoryOperationMethods, UserTimezoneMethods, PresenceMethods, InitiativeMethods, CoWatchingMethods, SubagentMethods, CacheUsageMethods {
+  onCacheUsageChanged(handler: (update: CacheUsageUpdate) => void): () => void;
   onSubagentChanged(handler: (change: SubagentChanged) => void): () => void;
   onSubagentActivity(handler: (event: SubagentActivity) => void): () => void;
   onCoWatchingChanged(handler: (change: CoWatchingChanged) => void): () => void;
@@ -329,6 +332,10 @@ export function createWsClient(deps: WsClientDeps): WsClient {
 
 function pushRegistrations(state: ReturnType<typeof createRoutes>) {
   return {
+    onCacheUsageChanged: (handler: (update: CacheUsageUpdate) => void) => {
+      state.push.cacheUsage.add(handler);
+      return () => { state.push.cacheUsage.delete(handler); };
+    },
     onSubagentActivity: (handler: (event: SubagentActivity) => void) => addSubagentActivityHandler(state, handler),
     onSubagentChanged: (handler: (change: SubagentChanged) => void) => addSubagentChangedHandler(state, handler),
     onCoWatchingChanged: (handler: (change: CoWatchingChanged) => void) => addCoWatchingChangedHandler(state, handler),

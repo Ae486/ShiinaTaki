@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createEffectRepo } from "./effect-repo.ts";
 import { createRunEventRepo } from "./run-event-repo.ts";
 import { openDatabase } from "./sqlite.ts";
@@ -13,6 +13,39 @@ function fixture() {
 }
 
 describe("EffectRepo", () => {
+  it("publishes usage only after the outermost commit and drops notifications on rollback", () => {
+    const { db } = fixture(); const publish = vi.fn();
+    const repo = createEffectRepo(db, createRunEventRepo(db), { publish,
+      subscribe: () => ({ cursor: 0, overflowed: false, close: () => undefined }) });
+    const effect = repo.prepareIntent({ runId: "r", attemptId: "a", kind: "model",
+      sourceRef: { type: "model", provider: "p", modelId: "m" }, replayPosture: "never" });
+    publish.mockClear();
+    const settle = () => repo.settle({ effectId: effect.effectId, runId: "r", attemptId: "a", expectedVersion: 0,
+      outcome: "completed", usage: { provider: "p", modelId: "m", quality: "reported", inputTokens: 100,
+        inputTokenDetails: { cacheReadTokens: 0 }, cacheReadObserved: true } });
+    expect(() => db.transaction(() => { settle(); expect(publish).not.toHaveBeenCalled();
+      throw new Error("rollback"); })).toThrow("rollback");
+    expect(publish).not.toHaveBeenCalled();
+    expect(db.prepare("SELECT count(*) AS n FROM run_usage").get()?.n).toBe(0);
+    db.transaction(() => { settle(); expect(publish).not.toHaveBeenCalled(); });
+    expect(publish).toHaveBeenCalledOnce();
+    expect(publish.mock.calls[0]?.[0].map((event: { kind: string }) => event.kind)).toEqual(["effect.settled", "usage.settled"]);
+    settle(); expect(publish).toHaveBeenCalledOnce(); db.close();
+  });
+
+  it.each([true, false, undefined])("persists cache provenance %s without rewriting existing usage", (cacheReadObserved) => {
+    const { db, repo } = fixture();
+    const effect = repo.prepareIntent({ runId: "r", attemptId: "a", kind: "model",
+      sourceRef: { type: "model", provider: "p", modelId: "m" }, replayPosture: "never" });
+    const result = repo.settle({ effectId: effect.effectId, runId: "r", attemptId: "a", expectedVersion: 0,
+      outcome: "completed", usage: { provider: "p", modelId: "m", quality: "reported", inputTokens: 100,
+        inputTokenDetails: { cacheReadTokens: 0 }, cacheReadObserved } });
+    expect(result.usage?.cacheReadObserved).toBe(cacheReadObserved);
+    expect(db.prepare("SELECT cache_read_tokens,cache_read_observed FROM run_usage").get())
+      .toEqual({ cache_read_tokens: 0, cache_read_observed: cacheReadObserved === undefined ? null : Number(cacheReadObserved) });
+    db.close();
+  });
+
   it("commits intent before settlement and couples usage", () => {
     const { db, repo } = fixture();
     const effect = repo.prepareIntent({ runId: "r", attemptId: "a", kind: "model", sourceRef: { type: "model", provider: "p", modelId: "m" }, replayPosture: "never" });

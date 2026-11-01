@@ -38,6 +38,20 @@
   conflict refetches Core truth and requires a fresh operator action; an interrupted write surfaces as an
   error, not a queued retry.
 
+### Monitor's global cache statistic
+
+- `useCacheUsage` owns a separate aggregate subscription: it is independent of the selected Run and browser filters.
+  Gate its work with effective Monitor route/document visibility, preserving the existing trajectory lifecycle.
+- Register the typed push handler before requesting the initial snapshot. Accept only the current client/generation
+  and a strictly newer server revision; a late initial reply must not replace a newer push. Reset the local revision
+  floor on physical-client replacement, never the server-owned summary window.
+- Hidden/disabled/replaced bindings unsubscribe; re-entry subscribes and reads the durable current window. Duplicate
+  retry demand joins the existing pending read. Keep last-good values visibly stale during transport/reconciliation;
+  a known unavailable new summary window replaces old numbers with unavailable rather than relabeling them as current.
+- Render the compact `CacheUsageStrip` above the Run workspace and below policy diagnostics. Show weighted rate,
+  `本次摘要以来` / `首次摘要前`, global foreground/background scope, paired/observed coverage and actual calculation time.
+  Never render internal summary revisions, request identities, fabricated 0%, or derive sums/reset events in React.
+
 ## (c) No polling intervals in home windows
 
 - `setInterval` for data is forbidden (quality-guidelines.md). Data arrives via WS push: `chat.delta`,

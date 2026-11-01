@@ -9,7 +9,8 @@ import { LabeledRows, PageCard } from "../../page-card.tsx";
 import { PageAlert, PageBody, PageHeader } from "../../page-chrome.tsx";
 import { Skeleton } from "@/components/ui/skeleton.js";
 import { MemoryAuthorityCard } from "./memory-authority-card.tsx";
-import { statusRows, tidyDefectRows } from "./operations-state.ts";
+import { MemoryTidyCard } from "./memory-tidy-card.tsx";
+import { statusRows } from "./operations-state.ts";
 import { StorageCard } from "./storage-card.tsx";
 import { useMemoryOperations } from "./use-memory-operations.ts";
 import { useOperations } from "./use-operations.ts";
@@ -22,30 +23,8 @@ export function OperationsPage() {
     <>
       <PageHeader title="运维" hint="手动整理记忆、查看压缩与校准状态、管理附件占用。" busy={ops.refreshing || (memoryOps.connectionReady && memoryOps.loading)} />
       <PageBody>
-        {ops.error && (
-          <PageAlert>{ops.error}</PageAlert>
-        )}
-
         <MemoryAuthorityCard ops={memoryOps} />
-
-        <PageCard title="记忆整理">
-          <ActionButton
-            tone="primary"
-            busy={ops.tidying}
-            onClick={() => void ops.runTidy()}
-            disabled={!ops.connectionReady || ops.tidying}
-          >
-            立即整理
-          </ActionButton>
-          {ops.tidy && (
-            <div className="mt-3 flex flex-col gap-1.5">
-              <p className="text-xs text-text-body">
-                {ops.tidy.status === "clean" ? "无需整理（未调用模型）" : `已整理：${ops.tidy.edits} 处改动 / ${ops.tidy.steps} 步`}
-              </p>
-              <LabeledRows rows={tidyDefectRows(ops.tidy)} />
-            </div>
-          )}
-        </PageCard>
+        <MemoryTidyCard {...ops} />
 
         <PageCard title="记忆 / 上下文状态">
           {ops.statusError && <PageAlert action={{ label: "重试", onClick: () => void ops.refreshStatus() }}>读取状态失败：{ops.statusError}</PageAlert>}

@@ -5,12 +5,12 @@
  *         invocation over ONE execute path; deterministic report in, tool edits out; a clean store costs ZERO model
  *         calls; the watermark advances only on success. Runs serially on the utility slot (T5-R11)
  */
-import { ToolLoopAgent, hasToolCall, isStepCount } from "ai";
-import type { MemoryTidyDefects } from "@taki/shared";
+import { ToolLoopAgent, hasToolCall, isStepCount, InvalidToolInputError, NoSuchToolError, type StepResult, type ToolSet } from "ai";
+import { MemoryErrorCodeSchema, MemoryTidyToolNameSchema, type MemoryTidyDefects, type MemoryTidyFailureReason, type MemoryTidyIssue } from "@taki/shared";
 import type { MemoryConfig } from "../config/memory-config.ts";
 import type { MemoryAutoRepo } from "../db/memory-auto-repo.ts";
 import type { MemoryEventsRepo } from "../db/memory-events-repo.ts";
-import type { TidyEngineView } from "./memory-engine.ts";
+import type { TidyEngineView, TidyReviewOutcome } from "./memory-engine.ts";
 import { buildTidyReport } from "./tidy-report.ts";
 import { FINISH_TOOL_NAME } from "./tidy-tools.ts";
 import type { UtilitySlot, UtilityUsage } from "./utility-slot.ts";
@@ -75,12 +75,15 @@ const INPUT_FRAMING =
   `respond only with tool calls, and end by calling ${FINISH_TOOL_NAME}.`;
 
 export interface TidyRunOutcome {
-  /** "failed" never crosses the WS surface — the method throws on it (the protocol result is clean|ran). */
-  status: "clean" | "ran" | "failed";
+  /** Incomplete outcomes cross WS as typed error details; the successful protocol result remains clean|ran. */
+  status: "clean" | "ran" | "partial" | "failed";
   defects: MemoryTidyDefects;
   edits: number;
   steps: number;
   usage: UtilityUsage;
+  reason?: MemoryTidyFailureReason;
+  issues?: MemoryTidyIssue[];
+  issueCount?: number;
 }
 
 export interface TidyPass {
@@ -103,6 +106,14 @@ export interface TidyPassDeps {
   slot: UtilitySlot;
   config: MemoryConfig;
   logger: TidyLogger;
+}
+
+interface Progress {
+  edits: number;
+  steps: number;
+  executionFailed: boolean;
+  issues: MemoryTidyIssue[];
+  issueCount: number;
 }
 
 export function createTidyPass(deps: TidyPassDeps): TidyPass {
@@ -131,38 +142,90 @@ async function execute(deps: TidyPassDeps, characterId: string, lastTidyAt: stri
     return { status: "clean", defects: report.defects, edits: 0, steps: 0, usage: deps.slot.usage() };
   }
 
-  const progress = { edits: 0, steps: 0 };
+  const progress: Progress = { edits: 0, steps: 0, executionFailed: false, issues: [], issueCount: 0 };
   const result = await deps.slot.run("tidy", () => runAgent({ ...deps, view }, { characterId, reportText: report.text, progress }));
-  if (result === undefined || view.reviewHealthy?.() === false) {
-    // The slot already warned with the error; the watermark stays put so the next trigger retries (auto-memory's
-    // failure convention).
-    deps.logger.warn({ characterId }, "tidy pass failed; watermark not advanced");
-    return { status: "failed", defects: report.defects, edits: progress.edits, steps: progress.steps, usage: deps.slot.usage() };
+  const review = view.reviewOutcome?.();
+  const reason = failureReason(result !== undefined, review, progress)
+    ?? (review === undefined && view.reviewHealthy?.() === false ? "review-stale" : undefined);
+  const edits = review?.edits ?? (result === undefined ? progress.edits : countEdits(result.toolResults));
+  const steps = result?.steps.length ?? progress.steps;
+  if (reason !== undefined) {
+    const issues = [...(review?.issues ?? []), ...progress.issues].slice(0, 20);
+    const issueCount = (review?.issueCount ?? 0) + progress.issueCount;
+    safeLog(deps.logger, "warn", { characterId, reason, edits, steps, issues, issueCount });
+    return { status: edits > 0 ? "partial" : "failed", defects: report.defects, edits, steps,
+      usage: deps.slot.usage(), reason, issues, issueCount };
   }
 
-  const edits = countEdits(result.toolResults);
-  const steps = result.steps.length;
   deps.autoState.setTidy(characterId, startedAt);
   deps.events.record({ kind: "tidy", characterId, count: edits });
-  deps.logger.info(
-    { characterId, defects: report.defects, edits, steps, durationMs: Date.now() - startedMs },
-    "tidy pass completed",
-  );
+  safeLog(deps.logger, "info", { characterId, defects: report.defects, edits, steps, durationMs: Date.now() - startedMs });
   return { status: "ran", defects: report.defects, edits, steps, usage: deps.slot.usage() };
 }
 
-function runAgent(deps: TidyPassDeps, input: { characterId: string; reportText: string; progress: { edits: number; steps: number } }) {
-  const agent = new ToolLoopAgent({
-    model: deps.slot.model,
-    instructions: TIDY_SYSTEM_PROMPT,
-    tools: deps.view.createTools(input.characterId),
-    // Count completed steps as they happen: a later failed CAS or model call does not undo earlier durable edits.
-    onStepEnd: (step) => { input.progress.steps += 1; input.progress.edits += countEdits(step.toolResults); },
-    // Structural exit (rc A2): the finish tool ends the loop, the step cap ends a runaway. Names verified against
-    // the installed ai@7.0.17 types (hasToolCall + isStepCount; stopWhen takes an array).
-    stopWhen: [hasToolCall(FINISH_TOOL_NAME), isStepCount(deps.config.tidyMaxSteps)],
-  });
-  return agent.generate({ prompt: `<system-reminder>\n${INPUT_FRAMING}\n</system-reminder>\n\n${input.reportText}` });
+function failureReason(settled: boolean, review: TidyReviewOutcome | undefined, progress: Progress): MemoryTidyFailureReason | undefined {
+  if (!settled) return progress.executionFailed ? "execution-failed" : "unfinished";
+  if (review && progress.issueCount > 0) return "tool-errors";
+  if (review && !review.complete) return review.reason ?? "unfinished";
+  return undefined;
+}
+
+async function runAgent(deps: TidyPassDeps, input: { characterId: string; reportText: string; progress: Progress }) {
+  try {
+    const agent = new ToolLoopAgent({
+      model: deps.slot.model,
+      instructions: TIDY_SYSTEM_PROMPT,
+      tools: deps.view.createTools(input.characterId),
+      // Completed steps remain factual even when a later model request fails.
+      onStepEnd: (step) => {
+        input.progress.steps += 1;
+        input.progress.edits += countEdits(step.toolResults);
+        recordStepIssues(step, input.progress, deps.logger);
+      },
+      stopWhen: [hasToolCall(FINISH_TOOL_NAME), isStepCount(deps.config.tidyMaxSteps)],
+    });
+    return await agent.generate({ prompt: `<system-reminder>\n${INPUT_FRAMING}\n</system-reminder>\n\n${input.reportText}` });
+  } catch {
+    // Keep a closed observed failure locally. Returning undefined retains the
+    // Utility Slot's unknown-usage convention without exposing provider errors.
+    input.progress.executionFailed = true;
+    return undefined;
+  }
+}
+
+function recordStepIssues(step: StepResult<ToolSet>, progress: Progress, logger: TidyLogger): void {
+  for (const part of step.content) {
+    if (part.type === "tool-error") {
+      // SDK validation outputs contain stringified errors; the matching call
+      // retains the structural invalid flag, so never classify by raw text.
+      const invalid = step.toolCalls.some((call) => call.toolCallId === part.toolCallId && "invalid" in call && call.invalid === true);
+      const code = invalid || InvalidToolInputError.isInstance(part.error) || NoSuchToolError.isInstance(part.error)
+        ? "MEMORY_INVALID_REQUEST" : "MEMORY_INTERNAL_ERROR";
+      const issue = safeIssue(part.toolName, code);
+      progress.issueCount += 1;
+      if (progress.issues.length < 20) progress.issues.push(issue);
+      safeToolLog(logger, issue);
+    } else if (part.type === "tool-result" && typeof part.output === "object" && part.output !== null
+      && "ok" in part.output && part.output.ok === false) {
+      safeToolLog(logger, safeIssue(part.toolName, "code" in part.output ? part.output.code : undefined));
+    }
+  }
+}
+
+function safeIssue(toolName: string, code: unknown): MemoryTidyIssue {
+  const tool = MemoryTidyToolNameSchema.safeParse(toolName);
+  const error = MemoryErrorCodeSchema.safeParse(code);
+  return { toolName: tool.success ? tool.data : "unknown", code: error.success ? error.data : "MEMORY_INTERNAL_ERROR" };
+}
+
+function safeToolLog(logger: TidyLogger, issue: MemoryTidyIssue): void {
+  try { logger.warn(issue, "tidy tool was not applied"); }
+  catch { /* Optional diagnostics cannot change an already committed mutation or induce another model call. */ }
+}
+
+function safeLog(logger: TidyLogger, level: "info" | "warn", details: object): void {
+  try { logger[level](details, level === "info" ? "tidy pass completed" : "tidy pass failed; watermark not advanced"); }
+  catch { /* Pass settlement and committed effects do not depend on the log destination. */ }
 }
 
 // Successful MUTATING tool results only: finish is a no-op terminal, and a refused/failed op is not an edit.

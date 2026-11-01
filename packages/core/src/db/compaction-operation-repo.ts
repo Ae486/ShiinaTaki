@@ -1,11 +1,12 @@
 /**
  * INPUT:  captured compaction snapshots, fenced lifecycle transitions, cancellation, and summary replacement CAS
- * OUTPUT: one typed repository over the mutable operation cursor and immutable conversation_compaction_events
+ * OUTPUT: fenced summary commits, immutable lifecycle events and optional cache baselines/post-commit notifications
  * POS:    core/db — sole durable coordination/evidence writer for conversation compaction; never a Run/Timeline authority
  */
 import { CharacterIdSchema } from "@taki/shared";
 import { z } from "zod";
 import type { Database, SqlRow } from "./sqlite.ts";
+import { captureCacheUsageBaseline } from "./cache-usage-repo.ts";
 
 const OperationStateSchema = z.enum(["open", "committed", "failed", "cancelled", "abandoned"]);
 const FailureCodeSchema = z.enum([
@@ -102,7 +103,7 @@ const EventRowSchema = z.object({
   flush_status: z.enum(["success", "not_required"]).nullable(), writes: z.int().nonnegative().nullable(), output_chars: z.int().nonnegative().nullable(),
 });
 
-export function createCompactionOperationRepo(db: Database): CompactionOperationRepo {
+export function createCompactionOperationRepo(db: Database, options: { onSummaryCommitted?: () => void } = {}): CompactionOperationRepo {
   return {
     begin: (input) => begin(db, BeginSchema.parse(input)),
     renewLease: (input) => renewLease(db, input),
@@ -110,7 +111,7 @@ export function createCompactionOperationRepo(db: Database): CompactionOperation
     recordSummaryGenerated: (input) => recordGenerated(db, input),
     fail: (input) => fail(db, input),
     cancelActive: (input) => cancelActive(db, input),
-    commitSummary: (input) => commitSummary(db, input),
+    commitSummary: (input) => commitSummary(db, input, options.onSummaryCommitted),
     reconcileExpired: (now) => reconcileExpired(db, Timestamp.parse(now)),
     get: (operationId) => readOperation(db, operationId),
     active: (characterId) => readActive(db, CharacterIdSchema.parse(characterId)),
@@ -220,7 +221,7 @@ function cancelActive(db: Database, input: { characterId: string; now: string })
   return operationId === null ? null : { operationId };
 }
 
-function commitSummary(db: Database, input: { lease: CompactionLease; text: string; sourceDigest: string; now: string }): "committed" | "duplicate" | "conflict" | "stale" {
+function commitSummary(db: Database, input: { lease: CompactionLease; text: string; sourceDigest: string; now: string }, onCommitted?: () => void): "committed" | "duplicate" | "conflict" | "stale" {
   let result: "committed" | "duplicate" | "conflict" | "stale" = "stale";
   db.transaction(() => {
     const operation = readOperation(db, input.lease.operationId);
@@ -253,6 +254,9 @@ function commitSummary(db: Database, input: { lease: CompactionLease; text: stri
     if (terminal.changes !== 1) throw new Error("COMPACTION_LEASE_LOST");
     appendEvent(db, { operationId: operation.operationId, kind: "committed", now: input.now,
       detail: { summaryRevision: revision } }); result = "committed";
+    try { captureCacheUsageBaseline(db, operation.characterId); }
+    catch { /* Missing exact metadata makes the metric unavailable; a valid summary must remain durable. */ }
+    if (onCommitted) db.afterCommit(onCommitted);
   });
   return result;
 }

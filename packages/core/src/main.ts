@@ -147,6 +147,9 @@ import { createAuxiliaryUsageRepo } from "./db/auxiliary-usage-repo.ts";
 import { createAuxiliaryUsageMeter } from "./observability/auxiliary-usage-meter.ts";
 import { registerAuxiliaryUsageMethod } from "./server/methods/auxiliary-usage-method.ts";
 import { registerObservabilityMethods } from "./server/methods/observability-methods.ts";
+import { registerCacheUsageMethods } from "./server/methods/cache-usage-methods.ts";
+import { createCacheUsageRepo } from "./db/cache-usage-repo.ts";
+import { createCacheUsageService } from "./observability/cache-usage-service.ts";
 import { composeInitiativeRuntime } from "./initiative/initiative-composition.ts";
 import { composePresenceRuntime } from "./initiative/presence-composition.ts";
 import { registerPresenceMethods } from "./server/methods/presence-methods.ts";
@@ -174,13 +177,18 @@ const coWatchingLifecycle: { current?: CoWatchingRuntime } = {};
 const viewingLifecycle: { current?: ViewingInvitationSource } = {};
 const mediaAnalysisLifecycle: { current?: MediaAnalysisRuntime } = {};
 const subagentLifecycle: { current?: ReturnType<typeof composeSubagents> } = {};
+const cacheUsageLifecycle: { current?: ReturnType<typeof createCacheUsageService> } = {};
 const coWatchingSubscriptions = createCoWatchingSubscriptions();
 const boot = bootstrapCore(process.env, { onConfigChanged: (key) => {
   if (key.startsWith("TAKI_INITIATIVE_")) patternLifecycle.current?.policyChanged();
   if (key === BROWSER_PLAYBACK_ENABLED_KEY) browserPlaybackLifecycle.current?.refresh();
+  if (key === MONITOR_MODE_CONFIG_KEY) cacheUsageLifecycle.current?.changed();
 } });
 const { logger, db, serverConfig, contextConfig, model, visionModel } = boot;
-const auxiliaryUsage = createAuxiliaryUsageRepo(db);
+const cacheUsage = createCacheUsageService({ read: createCacheUsageRepo(db).read,
+  mode: () => MonitorModeSchema.parse(boot.config.source.resolve(MONITOR_MODE_CONFIG_KEY)?.value ?? "DISABLED"), logger });
+cacheUsageLifecycle.current = cacheUsage;
+const auxiliaryUsage = createAuxiliaryUsageRepo(db, { onSettled: cacheUsage.changed });
 try { auxiliaryUsage.reconcileInterrupted(); }
 catch { logger.warn({ code: "AUXILIARY_USAGE_RECOVERY_FAILED" }, "auxiliary usage observation unavailable"); }
 const auxiliaryUsageMeter = createAuxiliaryUsageMeter({ repo: auxiliaryUsage, logger });
@@ -196,7 +204,10 @@ const secretCatalog = await createSecretCatalogService({
 const governance = createGovernancePolicyService(createGovernancePolicyRepo(db));
 const runEventRepo = createRunEventRepo(db);
 const runEventLive = createRunEventLiveBus((runId, afterSeq, limit) => runEventRepo.page({ runId, afterSeq, limit }),
-  (events) => { patternLifecycle.current?.committed(events); viewingLifecycle.current?.changed(); });
+  (events) => {
+    if (events.some((event) => event.kind === "usage.settled")) cacheUsage.changed();
+    patternLifecycle.current?.committed(events); viewingLifecycle.current?.changed();
+  });
 const subagentExecutions = createSubagentExecutionRepo(db);
 const runRepo = createRunRepo(db, runEventRepo, { liveBus: runEventLive, linkedState: subagentExecutions.linkedState });
 const observability = createObservabilityQueryService({ db, events: runEventRepo, mode: () => MonitorModeSchema.parse(boot.config.source.resolve(MONITOR_MODE_CONFIG_KEY)?.value ?? "DISABLED") });
@@ -250,6 +261,7 @@ const memoryRuntime = composeMemoryRuntime({ db, dataDir: serverConfig.dataDir, 
   measureRequest: (characterId) => latestRequestMeasurements.get(characterId),
   effectiveWindowTokens: () => windowCalibrator.effectiveWindow(),
   compact: contextConfig.compact, env: boot.env, logger, usageMeter: auxiliaryUsageMeter,
+  onSummaryCommitted: cacheUsage.changed,
   hindsight: { source: boot.config.source, secrets: secretCatalog } });
 const { selected: selectedMemory, memory, autoMemory, tidy, memoryRoot, writeMemory } = memoryRuntime;
 
@@ -623,6 +635,7 @@ registry.register(runQueueMethod(runService));
 // Operator-only, NO Rust mirror; secrets are reported as set/not-set and refused on write (invariant 5).
 registerConfigMethods(registry, { ...boot.config, logger });
 registerObservabilityMethods(registry, { service: observability, live: runEventLive });
+registerCacheUsageMethods(registry, cacheUsage);
 registerAuxiliaryUsageMethod(registry, { repo: auxiliaryUsage, mode: observability.mode });
 registerScheduledTaskMethods(registry, scheduleService);
 
@@ -767,6 +780,7 @@ function shutdown(signal: string): void {
   void turnControls.turns.drain(5_000).then(() => patternStopped).then(() => coWatchingStopped).then(() => mediaAnalysisStopped).then(() => subagentsStopped).then(() => schedulerStopped).then(() => initiativeStopped).then(() => memoryStopped).then(() => memoryOperations.stop()).then(() => server.close()).then(async () => {
     chatActivity.dispose();
     extensionSubscriptions.dispose();
+    cacheUsage.dispose();
     coWatchingSubscriptions.close();
     skillBoot.catalog.close();
     // Stop MCP publication → cancel candidates → drain under one budget → force-close remaining clients

@@ -6,6 +6,7 @@
 import { JSONRPCErrorException, type JSONRPCParams, type JSONRPCServerAndClient } from "json-rpc-2.0";
 import {
   AVATAR_METHODS,
+  CACHE_USAGE_METHODS,
   CHARACTER_METHODS,
   CHAT_METHODS,
   CONFIG_METHODS,
@@ -45,6 +46,8 @@ export const RPC_METHOD_POLICIES: ReadonlyMap<string, RpcMethodPolicy> = new Map
   [CHAT_METHODS.send, { class: "chat-ack", timing: "chatAckMs", timeoutOutcome: "unknown" }],
   [CHAT_METHODS.cancel, INTERACTIVE_MUTATION],
   [CHAT_METHODS.activityRead, INTERACTIVE_READ],
+  [CACHE_USAGE_METHODS.subscribe, INTERACTIVE_READ],
+  [CACHE_USAGE_METHODS.unsubscribe, INTERACTIVE_READ],
   [AVATAR_METHODS.subscribe, INTERACTIVE_MUTATION],
   [AVATAR_METHODS.report, INTERACTIVE_MUTATION],
   [AVATAR_METHODS.outcome, INTERACTIVE_MUTATION],

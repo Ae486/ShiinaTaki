@@ -36,7 +36,7 @@ The owner accepted the following direction after challenging the initial recomme
 - [x] Existing Local/Hindsight source readers and Legacy compatibility are preserved; old unknown rows are not bulk relabeled during migration.
 - [x] Tests cover normal/cancelled/partial/interrupted/restarted flows, source changes, repeated recovery and truthful progress. Real-model quality/cost and owner acceptance remain separately evidenced.
 
-## Completed Diagnosis Acceptance
+## Completed Diagnosis Acceptance (initial read-only phase)
 
 - [x] The actual data source, sample interval, record coverage, available model/provider evidence, and important measurement gaps are documented, including the absence of a currently running Core.
 - [x] Reproducible read-only queries produce aggregate and per-scenario evidence for cache loss and additional token usage.
@@ -103,3 +103,64 @@ until evidence supports a separate decision. Existing Run accounting and unrelat
 - [x] Real fixed-input reasoning comparison records quality limits, actual tokens and cache-independent cost estimates.
 
 Completed follow-up evidence: [auxiliary-usage-report.md](research/auxiliary-usage-report.md). Production thinking defaults remain unchanged after the failed quality comparison; current Core is running and actual auxiliary usage is queryable. Owner semantic acceptance and normal-chat cost improvements are not claimed.
+
+## Approved tidy repair and new-conversation diagnosis
+
+The owner approved repairing partial tidy completion/recovery and diagnostics, verifying it, then resuming the original
+cost investigation using new normal conversations and historical records. Existing real-data/paid-call permission
+persists. The design is research/tidy-repair-design.md; no new commit/push/archive authorization is implied.
+
+- [x] Exact proven correction can complete Local tidy; unrelated success cannot hide errors.
+- [x] Partial committed work and safe failure reasons reach the operator without weakening CAS/authority.
+- [x] Existing Legacy/Hindsight contracts, old-client errors and unknown transport outcomes remain truthful.
+- [x] Isolated integration and actual rendered UI verify the original failure and success paths.
+- [x] New/old normal-conversation token/cache/tool costs are compared with explicit cohort/quality limits.
+
+The [tidy repair report](research/tidy-repair-report.md) records 6,524 passing tests/6 skipped, the rendered WS cases,
+independent review, and one successful real-model pass (11 effects, four provider calls) after updating Core to PID26756.
+The [new conversation analysis](research/new-conversation-cost-analysis.md) records 20 foreground Runs, 39 requests and
+six normal background calls; independent SQL confirmed 96.06% foreground cache and conditional CNY0.2013968 total.
+This is a short observational cohort, not controlled causal savings or owner semantic/UI acceptance. The task stays
+in progress for sustained normal-use validation and review of bounded optimization candidates; defaults are unchanged.
+
+## Added requirement: live cache rate between primary summaries
+
+The owner requested an explicit, automatically updated overall cache-hit metric in Monitor and chose to continue
+under this task rather than create another task. The owner then specified that each successfully committed primary
+conversation summary starts a new statistics window. This supersedes the proposed all-history/day alternatives.
+
+- Show the weighted input cache-read ratio prominently but compactly in Monitor, labeled in Chinese as the period
+  since the current primary conversation summary. The ratio is sum(cache-read input) / sum(input) over the same
+  eligible request observations, never an arithmetic mean of request percentages.
+- Include recorded foreground and background model calls. Update after each terminal provider usage observation is
+  durably recorded and the aggregate is ready; a multi-request conversation therefore updates more than once.
+- A successful primary summary commit resets the displayed window immediately. Summary generation without a committed
+  checkpoint, failed/stale/cancelled compaction, memory tidy and private child summaries do not reset it.
+- A request that settles after a reset belongs to the new completion-based window. The successful summary's own model
+  call settles before the checkpoint commit and therefore belongs to the preceding window.
+- With no primary summary, use the pre-first-summary window. With no eligible input in a window, show no data rather
+  than a synthetic zero. Explicit upstream zero cache hits are valid observations; omitted/conflicting/invalid data
+  are unknown and excluded from both paired sums, with coverage shown.
+- Preserve the same window through Core/page restart and reconnect; opening the page or changing the selected Run
+  must not reset or reweight it. Keep this overall window distinct from the selected Run's browsing filters.
+- Use existing durable usage sources, post-commit notifications and Monitor lifecycle patterns. Optional metric
+  failures must not change a request outcome, replay model work or affect summary durability. Do not poll or retain
+  prompts/conversation bodies for the metric.
+
+Acceptance:
+
+- [x] Weighted aggregation includes valid zero, excludes unknown consistently and counts each physical request once.
+- [x] Successful primary summary commit starts an empty new window; failure/rollback and other maintenance do not.
+- [x] Equal timestamps and calls spanning a reset cannot leak pre-reset settlements or lose post-reset settlements.
+- [x] Completion updates the visible metric without a manual page refresh; restart/reconnect restores the same value.
+- [x] Unknown, partial coverage, disconnected/stale, disabled and empty states are truthful and render correctly.
+- [x] Production WS/UI integration and a read-only comparison against actual recorded usage verify the full path.
+
+The planned normalization prerequisite and historical coverage limits are documented in
+[live-cache-metric-review.md](research/live-cache-metric-review.md). Existing tidy/cost deliveries remain intact.
+The concrete implementation proposal is [live-cache-window-design.md](research/live-cache-window-design.md), with
+independent boundary review in [live-cache-window-advisor.md](research/live-cache-window-advisor.md). This addition
+was explicitly approved and implemented. See [the completed delivery](research/live-cache-implementation-report.md):
+6,591 tests passed/6 skipped, real SQLite/SDK/WS/browser evidence and actual main-entry integration, migration066 and
+live Core PID47796 with92.8% over55/55 eligible observations. Owner acceptance is separate; implementation is ready
+for ordinary Git/documentation wrap-up without folding more optimization candidates into this task.

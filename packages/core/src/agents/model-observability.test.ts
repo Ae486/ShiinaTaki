@@ -27,6 +27,23 @@ function end(content: unknown[] = []) {
 }
 
 describe("exact model request observation", () => {
+  it.each([
+    [{ prompt_tokens: 100 }, undefined, false],
+    [{ prompt_tokens: 100, prompt_tokens_details: { cached_tokens: 0 } }, 0, true],
+    [{ prompt_tokens: 100, prompt_cache_hit_tokens: 80 }, 80, true],
+    [{ prompt_tokens: 100, prompt_cache_hit_tokens: 80, prompt_tokens_details: { cached_tokens: 70 } }, undefined, false],
+    [{ prompt_tokens: 100, prompt_cache_hit_tokens: 120 }, undefined, false],
+  ])("uses transient raw cache evidence in SDK callback usage %j", (raw, cacheReadTokens, cacheReadObserved) => {
+    const f = fixture(); f.bind("cache-observation");
+    f.model.end({ ...(end() as object), usage: { inputTokens: 100, inputTokenDetails: { cacheReadTokens: 0 },
+      outputTokens: 10, outputTokenDetails: {}, totalTokens: 110, raw } } as never);
+    const usage = vi.mocked(f.lifecycle.settle).mock.calls[0]?.[0].usage;
+    expect(usage?.cacheReadObserved).toBe(cacheReadObserved);
+    expect(usage?.inputTokenDetails?.cacheReadTokens).toBe(cacheReadTokens);
+    expect(usage).not.toHaveProperty("raw");
+    expect(usage).toMatchObject({ inputTokens: 100, outputTokens: 10, totalTokens: 110 });
+  });
+
   it("settles successive Effects under one generation without letting duplicate old callbacks settle the new one", () => {
     const f = fixture();
     f.bind("model-a");

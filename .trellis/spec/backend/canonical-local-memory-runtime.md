@@ -146,8 +146,21 @@ captureRun(characterId: string): Promise<CapturedMemoryRun>;
   access and background writes to the user card. Hidden records are excluded from the model's review; row tools accept only
   captured references or new references returned by successful row operations in that pass. Block absence uses expected
   revision 0; read/CAS/write is atomic.
-- Count only committed effects. If a later model step or authority check fails, keep earlier actual effect counts but do not
-  advance the successful tidy watermark. A clean store consumes no model call.
+- Count only new committed effects: cached receipts and unchanged outcomes contribute zero. A clean store consumes no model
+  call. Canonical completion requires an accepted `memory_finish_edits` and no unresolved errors; capped or abandoned passes
+  keep committed work but do not advance `lastTidyAt`. Preserve the separately tested Legacy bounded-pass and Hindsight curator
+  completion contracts.
+- A captured review can resolve only an admitted action's `MEMORY_REVISION_MISMATCH`, through a fresh successful execution
+  with the same verb, stable target and complete semantic payload (excluding only expected revision). Unrelated success or a
+  cached pre-error receipt cannot clear it. Authority, malformed, uncaptured-reference and internal errors remain unresolved;
+  never silently substitute the current revision or weaken CAS.
+- `TidyEngineView.reviewOutcome?(): TidyReviewOutcome` reports completion, actual edits and closed diagnostics. The existing
+  `memory.tidy` clean/ran success shape is unchanged. Partial/failed calls return JSON-RPC INTERNAL_ERROR with
+  `MemoryTidyFailureDetailsSchema` directly in `.data`: kind=memory-tidy, status=partial|failed, defects/edits/steps/usage,
+  reason=tool-errors|execution-failed|review-stale|unfinished, at most 20 closed tool/code pairs and the total issueCount.
+  Partial requires positive edits; failed requires zero. Diagnostics never contain raw arguments or exception text.
+  Regressions must cover exact corrected actions versus cached/unrelated success, sticky authority/unknown failures,
+  no-op counts, explicit finish, later model failure and the actual MethodRegistry error envelope.
 - The durable authority marker is the retirement boundary. Once committed, retire the Legacy fence before constructing or
   publishing a replacement. Constructor, callback or marker-read failures cannot reopen old held tool/write/maintenance/flush
   references. Before-commit rollback may reopen them. Failed replacement binding leaves an unavailable memory facade;

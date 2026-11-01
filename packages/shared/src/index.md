@@ -1,4 +1,5 @@
 # shared/src/
+- cache-usage-schema.ts — summary-window cache counts, coverage and typed whole-snapshot operator subscriptions; no payloads or client-owned counters
 - run-work-schema.ts — bounded accepted-work transition contracts and strict v3 lifecycle events; no publication authority
 - prepared-publication-schema.ts — explicit finite/until-cancelled accepted-source/Class A scope, finite candidate freshness and reference-only publication/edit data; serialized scope is not a grant
 - co-watching-publication-schema.ts — isolated M51 accepted Co-Watching classification data for the business adapter; no public RPC or acceptance authority
@@ -116,3 +117,4 @@
 - subagent-progress-schema.ts — captured work intervals, runtime check-in sidecars and complete/partial child token usage
 - subagent-attention-schema.ts — bounded durable operator attention and explicit pre-intent retry contracts
 - auxiliary-usage-schema.ts — nullable observed auxiliary call counters, state, keyset query and aggregate contracts
+- memory-tidy-diagnostics-schema.ts — safe bounded partial/failed maintenance details on the existing JSON-RPC error path

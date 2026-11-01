@@ -1,6 +1,6 @@
 /**
  * INPUT:  observed auxiliary provider-call starts, terminal outcomes, and bounded history filters
- * OUTPUT: durable idempotent call rows, explicit boot interruption recovery, and whole-filter aggregates
+ * OUTPUT: idempotent call rows, boot interruption recovery, whole-filter aggregates and post-commit settlement notices
  * POS:    core/db — metadata-only auxiliary accounting; independent from canonical Run/Effect usage
  */
 import { z } from "zod";
@@ -59,13 +59,20 @@ const COUNT_COLUMNS = {
   totalTokens: "total_tokens",
 } as const;
 
-export function createAuxiliaryUsageRepo(db: Database): AuxiliaryUsageRepo {
+export function createAuxiliaryUsageRepo(db: Database, options: { onSettled?: () => void } = {}): AuxiliaryUsageRepo {
   return {
     start(input) { startCall(db, input); },
-    settle(input) { settleCall(db, input); },
+    settle(input) {
+      db.transaction(() => { if (settleCall(db, input) && options.onSettled) db.afterCommit(options.onSettled); });
+    },
     reconcileInterrupted() {
-      return db.prepare(`UPDATE auxiliary_model_calls SET status='interrupted',updated_at=:updatedAt
-        WHERE status='started'`).run({ updatedAt: new Date().toISOString() }).changes;
+      let changed = 0;
+      db.transaction(() => {
+        changed = db.prepare(`UPDATE auxiliary_model_calls SET status='interrupted',updated_at=:updatedAt
+          WHERE status='started'`).run({ updatedAt: new Date().toISOString() }).changes;
+        if (changed > 0 && options.onSettled) db.afterCommit(options.onSettled);
+      });
+      return changed;
     },
     query(params) { return queryCalls(db, params); },
   };
@@ -90,13 +97,13 @@ function startCall(db: Database, input: AuxiliaryUsageStart): void {
   });
 }
 
-function settleCall(db: Database, candidate: AuxiliaryUsageSettlement): void {
+function settleCall(db: Database, candidate: AuxiliaryUsageSettlement): boolean {
   const input = SettlementSchema.parse(candidate);
   const row = db.prepare("SELECT * FROM auxiliary_model_calls WHERE call_id=:callId").get({ callId: input.callId });
   if (!row) throw new Error("AUXILIARY_USAGE_CALL_NOT_FOUND");
   const current = readCall(row);
   if (current.status !== "started") {
-    if (sameSettlement(current, input)) return;
+    if (sameSettlement(current, input)) return false;
     throw new Error("AUXILIARY_USAGE_SETTLEMENT_CONFLICT");
   }
   const changed = db.prepare(`UPDATE auxiliary_model_calls SET
@@ -108,6 +115,7 @@ function settleCall(db: Database, candidate: AuxiliaryUsageSettlement): void {
     responseId: input.responseId, ...input.usage,
   });
   if (changed.changes !== 1) throw new Error("AUXILIARY_USAGE_SETTLEMENT_CONFLICT");
+  return true;
 }
 
 function queryCalls(db: Database, candidate: AuxiliaryUsageQuery): AuxiliaryUsageResult {

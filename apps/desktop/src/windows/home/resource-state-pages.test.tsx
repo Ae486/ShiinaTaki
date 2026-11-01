@@ -22,7 +22,7 @@ vi.mock("@/features/character-import/use-character-import.js", () => ({ useChara
 const read = async () => undefined;
 const ops: OperationsView = {
   status: null, usage: null, statusLoading: false, usageLoading: false, statusError: null, usageError: null,
-  refreshStatus: read, refreshUsage: read, connectionReady: true, tidy: null, tidying: false, refreshing: false,
+  refreshStatus: read, refreshUsage: read, connectionReady: true, tidy: null, tidyFailure: null, tidying: false, refreshError: null, refreshing: false,
   clear: { phase: "idle", error: null, onEvent: () => undefined }, error: null, refresh: read, runTidy: read,
 };
 const costume: CostumePageView = {

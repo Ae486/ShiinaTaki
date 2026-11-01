@@ -5,15 +5,16 @@
  */
 
 import { useCallback, useMemo } from "react";
-import { MediaUsageResultSchema, MemoryStatusResultSchema, type MediaUsageResult, type MemoryStatusResult, type MemoryTidyResult } from "@taki/shared";
+import { MediaUsageResultSchema, MemoryStatusResultSchema, type MediaUsageResult, type MemoryStatusResult } from "@taki/shared";
 import { ACTIVE_CHARACTER_ID } from "@/lib/active-character.js";
 import { useCachedFetch } from "@/lib/use-cached-fetch.js";
 import { useHomeClient } from "../../home-client-context.ts";
 import { usePageActive } from "../../page-visibility-store.ts";
 import { useMediaClear, type MediaClearControl } from "./use-media-clear.ts";
 import { useMemoryTidy } from "./use-memory-tidy.ts";
+import type { MemoryTidyState } from "./memory-tidy-controller.ts";
 
-export interface OperationsView {
+export interface OperationsView extends MemoryTidyState {
   status: MemoryStatusResult | null;
   usage: MediaUsageResult | null;
   statusLoading: boolean;
@@ -23,11 +24,8 @@ export interface OperationsView {
   refreshStatus(): Promise<void>;
   refreshUsage(): Promise<void>;
   connectionReady: boolean;
-  tidy: MemoryTidyResult | null;
-  tidying: boolean;
   refreshing: boolean;
   clear: MediaClearControl;
-  error: string | null;
   /** Re-reads both snapshots after a load failure (batch-2 U5: every failed read gets a retry). */
   refresh: () => Promise<void>;
   runTidy: () => Promise<void>;

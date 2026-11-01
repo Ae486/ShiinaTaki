@@ -109,6 +109,34 @@ applied, and defaults to `DISABLED`.
 - Inspector returns populated typed semantic sections and an empty compatibility `technical` array in all modes.
   No producer exists here for raw prompt/full tool input/output/definitions/diff panels; do not invent those tabs.
 
+### Primary-summary-bounded cache rate
+
+- `CACHE_USAGE_METHODS` defines operator-only cacheUsageSubscribe/cacheUsageUnsubscribe and cacheUsageChanged under
+  observability. Subscribe returns `CacheUsageUpdate { revision, snapshot }`; changes deliver complete computed snapshots.
+  The selected Character identifies the primary-summary boundary; the population is all observed Core model calls,
+  including auxiliary calls. Run selection/list filters do not change it. Do not invent per-Character auxiliary ownership.
+- `run_usage.cache_read_observed` preserves new provider field presence. Reuse raw-aware normalization; explicit zero
+  counts, absent/invalid/conflicting cache is unknown. The verified old adapter's positive cache values remain usable;
+  ambiguous legacy zero is unpaired. Ratio is sum(cache-read)/sum(input) over identical valid pairs, with positive input,
+  bounded cache and safe counts. Count failed/cancelled metered calls once; do not sum the usage event again.
+- Migration066 adds `cache_usage_baselines`. A successful `commitSummary` captures cumulative observed/pair counts and
+  paired input/cache sums in its transaction; the current window subtracts that exact revision/operation baseline.
+  The compact call is already settled; calls settling later belong to the new window even if they started earlier.
+  Same-millisecond timestamps cannot change forward membership. Duplicate/failed/private summaries and tidy do not reset.
+- Optional baseline errors use a nested savepoint and cannot invalidate an otherwise valid summary. A missing/mismatched
+  baseline, malformed totals or unsupported ledger rewriting yields unavailable, never plausible zeroes. Historical
+  initialization uses original recorded_at/finished_at, never auxiliary updated_at; unassignable ties/nulls are unavailable.
+  Any future explicit usage import/retention must preserve or rebase this meaning; normal terminal ledgers are immutable.
+- Primary usage, auxiliary settlement and summary-baseline notifications wait for the outermost commit. Rollback and
+  duplicate settlement cannot publish a fresh observation. The service computes SQL aggregates only for subscribers,
+  coalesces synchronous hints by microtask and isolates reader/logger/socket failures. No polling or UI running counters.
+- Empty has zero eligible sums and null ratio; unavailable has null counts and a closed reason. Both differ from a
+  reported zero hit rate. Server snapshots are strictly validated and have monotonically increasing process revisions;
+  reconnect fetches the durable window rather than replaying work. Mode disable withdraws counts and prevents reads.
+- Required regressions: explicit zero/missing/conflicting raw fields; unequal-size request weighting; same-ms/cross-reset
+  completion; outer rollback/duplicate commit; failed baseline save; historical bootstrap/import timestamps; SQLite reopen;
+  actual Core main/WS production wiring and rendered client refresh/reconnect behavior.
+
 ## 4. Validation & Error Matrix
 
 | Condition | Required result |

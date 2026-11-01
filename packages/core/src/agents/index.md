@@ -32,9 +32,9 @@
 - turn-registry.ts — non-replacing Character/private-work scope controllers and exact Run cancellation; a local drain owner aborts all scopes immediately and bounds their cleanup wait without unregistering live work
 - untrusted-fence.ts — the A1 minimal fence: fenceUntrusted({source,content}) → XML-delimited `<untrusted-observation>` block labeling content DATA-never-INSTRUCTIONS; neutralizes any literal closing tag so hostile content can't escape; reused by every untrusted-content producer (T3a activity, later T3b/screenshot/T5)
 - window-calibrator.ts — createWindowCalibrator({repo, slot, declared}): R1 tier-2 EMA correction factor over the estimator (clamped) + R2 overflow shrink (floor(observed×0.9), never above declared), persisted via window-state-repo; a lowered declaration is written back so runtime and operator status agree while an earlier overflow shrink survives; effectiveWindow() returns the estimator-unit budget
-- model-effect-middleware.ts — model Effect lifecycle and exact request/first-output/tool-call observation under Run-owned provider dispatch before parts leave the middleware
+- model-effect-middleware.ts — model Effect lifecycle and exact request/first-output/tool-call observation with raw-aware direct cache usage before parts leave the middleware
 - sdk-wire-compatibility.test.ts — real compatible-provider SSE regression: complete streamed arguments, distinct sparse/repeated IDs, unsafe finish suppression, and abort aggregate settlement
-- model-observability.ts — Effect-keyed per-request telemetry and unique unfinished SDK-end association; ambiguous generations never overwrite a request
+- model-observability.ts — Effect-keyed per-request telemetry, raw-aware cache provenance and unique unfinished SDK-end association; ambiguous generations never overwrite a request
 - run-observability-telemetry.ts — per-attempt SDK composition sharing immutable invocations with optional activity; legacy callers gain no invented Run/Effect
 - tool-invocation.ts — immutable IDs/name-only snapshots and SDK-object bridge; real optional Run lineage, exact request identity and conservative ambiguity
 - tool-observability.ts — isolated durable/activity callbacks with pre-conversion outcomes, preliminary exclusion, measured processing and confirmed governed phases

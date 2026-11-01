@@ -160,7 +160,7 @@ export function createEffectRepo(db: Database, eventRepo: RunEventRepo, liveBus?
         }
       }); } catch (error) { if (!stale) throw error; }
       if (stale) return { effect: read(db.prepare("SELECT * FROM run_effects WHERE effect_id=:effectId").get({ effectId: input.effectId }) as Record<string, unknown>), duplicate: false, stale: true };
-      try { liveBus?.publish(events); } catch { /* observer failure cannot alter committed settlement */ }
+      try { db.afterCommit(() => liveBus?.publish(events)); } catch { /* observer failure cannot alter committed settlement */ }
       return { effect: settled, duplicate: false, stale: false, usage };
     },
     get(effectId) { const row = db.prepare("SELECT * FROM run_effects WHERE effect_id=:effectId").get({ effectId }); return row ? read(row) : undefined; },
@@ -184,17 +184,18 @@ function insertUsage(args: {
   args.db.prepare(`INSERT INTO run_usage (
     usage_id,run_id,attempt_id,effect_id,schema_version,provider,model_id,quality,input_tokens,
     input_no_cache_tokens,cache_read_tokens,cache_write_tokens,output_tokens,output_text_tokens,
-    reasoning_tokens,total_tokens,recorded_at
+    reasoning_tokens,total_tokens,recorded_at,cache_read_observed
   ) VALUES (
     :usageId,:runId,:attemptId,:effectId,:schemaVersion,:provider,:modelId,:quality,:inputTokens,
     :inputNoCacheTokens,:cacheReadTokens,:cacheWriteTokens,:outputTokens,:outputTextTokens,
-    :reasoningTokens,:totalTokens,:recordedAt
+    :reasoningTokens,:totalTokens,:recordedAt,:cacheReadObserved
   )`).run({
     usageId: usage.usageId, runId: usage.runId, attemptId: usage.attemptId, effectId: usage.effectId,
     schemaVersion: usage.schemaVersion, provider: usage.provider, modelId: usage.modelId, quality: usage.quality,
     inputTokens: usage.inputTokens ?? null,
     inputNoCacheTokens: usage.inputTokenDetails?.noCacheTokens ?? null,
     cacheReadTokens: usage.inputTokenDetails?.cacheReadTokens ?? null,
+    cacheReadObserved: usage.cacheReadObserved === undefined ? null : Number(usage.cacheReadObserved),
     cacheWriteTokens: usage.inputTokenDetails?.cacheWriteTokens ?? null,
     outputTokens: usage.outputTokens ?? null,
     outputTextTokens: usage.outputTokenDetails?.textTokens ?? null,

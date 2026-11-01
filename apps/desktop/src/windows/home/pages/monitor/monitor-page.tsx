@@ -1,6 +1,6 @@
 /**
  * INPUT:  Home's current client/visibility generation and disposable Monitor controller state
- * OUTPUT: the full-height Run browser, DSH trajectory workspace, and explicit connection/read states
+ * OUTPUT: overall cache strip, full-height Run browser, DSH trajectory workspace and explicit read states
  * POS:    ui/monitor — Monitor alone owns its page scroll geometry; see third-party-notices.md (DeepSeek MIT)
  */
 import type { MonitorController, MonitorViewState } from "./monitor-controller.ts";
@@ -12,10 +12,14 @@ import { useMonitorController } from "./use-monitor-controller.ts";
 import css from "./monitor-workspace.module.css";
 import type { ReactNode } from "react";
 import { InitiativePolicyDiagnostics } from "@/features/initiative-patterns/initiative-policy-diagnostics.js";
+import { CacheUsageStrip } from "./cache-usage-strip.tsx";
+import { useCacheUsage } from "./use-cache-usage.ts";
 
 export function MonitorPage() {
   const monitor = useMonitorController();
-  return <MonitorWorkspace {...monitor} policy={<InitiativePolicyDiagnostics enabled={monitor.view.mode !== "DISABLED"} />} />;
+  const cache = useCacheUsage(monitor.view.mode);
+  return <MonitorWorkspace {...monitor} policy={<InitiativePolicyDiagnostics enabled={monitor.view.mode !== "DISABLED"} />}
+    cache={<CacheUsageStrip {...cache} />} />;
 }
 
 interface MonitorWorkspaceProps {
@@ -24,11 +28,13 @@ interface MonitorWorkspaceProps {
   connectionKind: string;
   visible: boolean;
   policy?: ReactNode;
+  cache?: ReactNode;
 }
 
-export function MonitorWorkspace({ view, controller, connectionKind, visible, policy }: MonitorWorkspaceProps) {
+export function MonitorWorkspace({ view, controller, connectionKind, visible, policy, cache }: MonitorWorkspaceProps) {
   return <section className={css.root} aria-label="运行监视">
     {policy}
+    {view.mode !== "DISABLED" && cache}
     {view.error && <div className={css.notice} role="alert"><span>{view.error}</span>
       <button type="button" onClick={() => void (view.retryRunKey ? controller.select(view.retryRunKey) : controller.refresh())}>
         {view.retryRunKey ? "重试切换" : "重试"}

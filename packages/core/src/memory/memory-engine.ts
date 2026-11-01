@@ -31,11 +31,21 @@ import { createMemoryStore, type MemoryStore } from "./store.ts";
 import { createTidyTools, type TidyToolOps } from "./tidy-tools.ts";
 import type { ToolSet } from "ai";
 import type { InitiativeMemoryAssembler } from "./initiative-memory-assembly.ts";
+import type { MemoryTidyFailureReason, MemoryTidyIssue } from "@taki/shared";
 
 // How many memories a single memory_search tool call returns to the model.
 const SEARCH_LIMIT = 8;
 
 const ALL_LAYER_IDS = V1_MEMORY_LAYERS.map((layer) => layer.id);
+
+/** Captured canonical review evidence; Legacy keeps its existing bounded-pass semantics. */
+export interface TidyReviewOutcome {
+  complete: boolean;
+  edits: number;
+  reason?: MemoryTidyFailureReason;
+  issues: MemoryTidyIssue[];
+  issueCount: number;
+}
 
 /** The tidy pass's engine surface (batch 4b): deterministic report reads + the maintenance toolset. */
 export interface TidyEngineView {
@@ -43,6 +53,8 @@ export interface TidyEngineView {
   captureReview?(characterId: string): TidyEngineView;
   /** Failed canonical CAS/authority work keeps the report eligible for retry. */
   reviewHealthy?(): boolean;
+  /** Canonical completion requires explicit finish, current authority and no unresolved issue; edits exclude replays. */
+  reviewOutcome?(): TidyReviewOutcome;
   /** Every active in-scope row across all layers — the report's raw material. */
   listActive(characterId: string): MemoryEntryRow[];
   /** Writes-since-mark for the trigger; updated_at counts — a reinforced store is a changed store. */

@@ -8,6 +8,7 @@ import type { EffectLifecycle, RunEvent, UsageRecord } from "@taki/shared";
 import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 import type { ModelEffectBinding, ModelEffectObserver } from "./model-effect-middleware.ts";
 import type { ToolInvocationBridge } from "./tool-invocation.ts";
+import { primaryCacheUsage } from "../observability/primary-cache-usage.ts";
 
 interface ModelObserverInput {
   lifecycle: EffectLifecycleService;
@@ -156,6 +157,9 @@ function normalizedUsage(
   modelId: string,
   usage: LanguageModelUsage,
 ): Omit<UsageRecord, "usageId" | "schemaVersion" | "runId" | "attemptId" | "effectId" | "recordedAt"> {
+  const cache = primaryCacheUsage({ raw: usage.raw, inputTokens: {
+    total: usage.inputTokens, cacheRead: usage.inputTokenDetails.cacheReadTokens,
+  } }, usage.inputTokens);
   const values = [usage.inputTokens, usage.inputTokenDetails.noCacheTokens,
     usage.inputTokenDetails.cacheReadTokens, usage.inputTokenDetails.cacheWriteTokens,
     usage.outputTokens, usage.outputTokenDetails.textTokens, usage.outputTokenDetails.reasoningTokens,
@@ -163,9 +167,10 @@ function normalizedUsage(
   return {
     provider, modelId, quality: values.some((value) => value !== undefined) ? "reported" : "unknown",
     inputTokens: usage.inputTokens,
+    cacheReadObserved: cache.cacheReadObserved,
     inputTokenDetails: compact({
       noCacheTokens: usage.inputTokenDetails.noCacheTokens,
-      cacheReadTokens: usage.inputTokenDetails.cacheReadTokens,
+      cacheReadTokens: cache.cacheReadTokens,
       cacheWriteTokens: usage.inputTokenDetails.cacheWriteTokens,
     }),
     outputTokens: usage.outputTokens,

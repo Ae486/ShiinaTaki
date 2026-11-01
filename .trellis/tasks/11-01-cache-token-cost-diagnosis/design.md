@@ -143,4 +143,11 @@ Acceptance must cover normal conversation, memory-grounded questions with full-d
 
 ## Proposed sequence and authorization boundary
 
-[implement.md](implement.md) defines the approved implementation and verification stages. Batches 1 and 2 are now implemented in the T4 worktree, and batch 3 has a [read-only historical preview](research/historical-source-preview.md). Final review and integrated checks are recorded in the implementation report. Real-data repair, paid application-provider validation/catch-up, Git commit/push and task archive remain outside the current action.
+[implement.md](implement.md) defines the approved implementation and verification stages. Batches 1 and 2 are implemented;
+the initially read-only batch 3 subsequently received real-data and paid-call authorization. The PRD's subsequent sections
+and linked catch-up/auxiliary reports record that work and the separately authorized checkpoint commit9326955.
+The later [tidy repair](research/tidy-repair-report.md) is verified in isolation and on the live model, and the
+[new/old cost analysis](research/new-conversation-cost-analysis.md) supersedes the original absence of normal-use follow-up
+data. Its short warm session supports retaining the repaired history behavior, not a causal savings percentage.
+Future optimization candidates need their stated quality/cost validation; no model/reasoning default switch, new commit,
+push or archive is implied by this repair and investigation.

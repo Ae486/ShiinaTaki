@@ -47,6 +47,7 @@ interface MemoryRuntimeInput {
   effectiveWindowTokens?: () => number;
   primarySources?: PrimaryConversationSourceRepo;
   usageMeter?: AuxiliaryUsageMeter;
+  onSummaryCommitted?: () => void;
   hindsight?: { source: ConfigSource; secrets: SecretCatalogService; client?: HindsightClient };
 }
 type LocalSubsystem = ReturnType<typeof createCanonicalLocalSubsystem>;
@@ -143,7 +144,8 @@ function createCompactionMaintenance(input: MemoryRuntimeInput, utility: Utility
     view: { estimatedTokens: input.estimatedTokens, budget: input.budget,
       measureRequest: input.measureRequest ? (characterId) => input.measureRequest?.(characterId) : undefined,
       effectiveWindowTokens: input.effectiveWindowTokens },
-    timeline: input.timeline, summaries: input.summaries, operations: createCompactionOperationRepo(input.db),
+    timeline: input.timeline, summaries: input.summaries,
+    operations: createCompactionOperationRepo(input.db, { onSummaryCommitted: input.onSummaryCommitted }),
     legacyFlush: () => scope.selected.canonical ? undefined : scope.current().memoryFlush, slot: utility,
     config: { ...input.compact, summaryQuality: true, retryBudget: 3, retryCooldownMs: 30_000 },
     protectedContent: () => [MEMORY_VOICE_RULE],
