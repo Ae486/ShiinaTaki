@@ -73,9 +73,9 @@ pnpm -r --workspace-concurrency=1 typecheck
 pnpm lint --ignore-pattern 'artifacts/**'
 pnpm -r --workspace-concurrency=1 test --maxWorkers=4
 cargo clippy --manifest-path apps/desktop/src-tauri/Cargo.toml -- -D warnings
-node .trellis/tasks/11-01-cache-token-cost-diagnosis/research/verify-cache-ui.mjs
-node .trellis/tasks/11-01-cache-token-cost-diagnosis/research/verify-cache-core.mjs
-node .trellis/tasks/11-01-cache-token-cost-diagnosis/research/query-cache-live.mjs
+node .trellis/tasks/archive/2026-11/11-01-cache-token-cost-diagnosis/research/verify-cache-ui.mjs
+node .trellis/tasks/archive/2026-11/11-01-cache-token-cost-diagnosis/research/verify-cache-core.mjs
+node .trellis/tasks/archive/2026-11/11-01-cache-token-cost-diagnosis/research/query-cache-live.mjs
 ```
 
 Private evidence is under `target/cache-metric-20261101/`: backups/manifests, preservation.json, rehearsal.json,

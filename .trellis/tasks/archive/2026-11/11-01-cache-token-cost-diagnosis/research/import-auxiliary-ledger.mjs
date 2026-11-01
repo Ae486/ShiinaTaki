@@ -2,10 +2,10 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
-import { openDatabase } from '../../../../packages/core/src/db/sqlite.ts';
-import { MIGRATIONS } from '../../../../packages/core/src/db/migrations/index-list.ts';
-import { createAuxiliaryUsageRepo } from '../../../../packages/core/src/db/auxiliary-usage-repo.ts';
-import { normalizeAuxiliaryUsage } from '../../../../packages/core/src/observability/auxiliary-usage-normalization.ts';
+import { openDatabase } from '../../../../../../packages/core/src/db/sqlite.ts';
+import { MIGRATIONS } from '../../../../../../packages/core/src/db/migrations/index-list.ts';
+import { createAuxiliaryUsageRepo } from '../../../../../../packages/core/src/db/auxiliary-usage-repo.ts';
+import { normalizeAuxiliaryUsage } from '../../../../../../packages/core/src/observability/auxiliary-usage-normalization.ts';
 
 const path = process.argv[2];
 const output = process.argv[3];

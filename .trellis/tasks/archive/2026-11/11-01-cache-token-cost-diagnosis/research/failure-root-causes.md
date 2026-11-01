@@ -8,7 +8,7 @@ Planning update: the owner subsequently accepted independent context compaction 
 
 ## Findings
 
-Owner-authorized task: `.trellis/tasks/11-01-cache-token-cost-diagnosis`; the root session resolves this task, while this delegated session has no task pointer and the legacy global pointer is stale. No pointer was modified. Source data is `C:/Users/55473/.takiagent/taki.db`, opened exclusively with SQLite URI `mode=ro`, `query_only=ON`, and `busy_timeout=10000`. Queries below expose metadata, counts, and bounded tool-error classes rather than private dialogue.
+Owner-authorized task: `.trellis/tasks/archive/2026-11/11-01-cache-token-cost-diagnosis`; the root session resolves this task, while this delegated session has no task pointer and the legacy global pointer is stale. No pointer was modified. Source data is `C:/Users/55473/.takiagent/taki.db`, opened exclusively with SQLite URI `mode=ro`, `query_only=ON`, and `busy_timeout=10000`. Queries below expose metadata, counts, and bounded tool-error classes rather than private dialogue.
 
 ### 1. Memory provenance gaps block ingestion, which blocks compaction
 

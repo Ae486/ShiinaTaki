@@ -3,7 +3,7 @@ import { writeFileSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
-const require = createRequire(new URL('../../../../packages/core/package.json', import.meta.url));
+const require = createRequire(new URL('../../../../../../packages/core/package.json', import.meta.url));
 const { default: WebSocket } = await import(pathToFileURL(require.resolve('ws')).href);
 const socket = new WebSocket('ws://127.0.0.1:8974');
 await new Promise((yes, no) => { socket.once('open', yes); socket.once('error', no); });

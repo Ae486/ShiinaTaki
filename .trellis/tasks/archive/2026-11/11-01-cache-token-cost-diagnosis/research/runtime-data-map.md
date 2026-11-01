@@ -65,8 +65,8 @@ Sanitized read-back is [existing-prefix-comparison.json](existing-prefix-compari
 From the T4 worktree:
 
 ```powershell
-python ./.trellis/tasks/11-01-cache-token-cost-diagnosis/research/analyze_runtime.py --db 'C:/Users/55473/.takiagent/taki.db' --output './.trellis/tasks/11-01-cache-token-cost-diagnosis/research/runtime-metrics.json'
-node ./.trellis/tasks/11-01-cache-token-cost-diagnosis/research/probe_replay.mjs 'C:/Users/55473/.takiagent/taki.db' './.trellis/tasks/11-01-cache-token-cost-diagnosis/research/replay-projection.json'
+python ./.trellis/tasks/archive/2026-11/11-01-cache-token-cost-diagnosis/research/analyze_runtime.py --db 'C:/Users/55473/.takiagent/taki.db' --output './.trellis/tasks/archive/2026-11/11-01-cache-token-cost-diagnosis/research/runtime-metrics.json'
+node ./.trellis/tasks/archive/2026-11/11-01-cache-token-cost-diagnosis/research/probe_replay.mjs 'C:/Users/55473/.takiagent/taki.db' './.trellis/tasks/archive/2026-11/11-01-cache-token-cost-diagnosis/research/replay-projection.json'
 ```
 
 The Python output includes all cohort denominators, per-tool counters, stored payload character counts, compaction lifecycle rows and invariant results. Character counts are deliberately not mislabeled as tokens. Reproduction against a later database is a new observation and may differ from this dated snapshot.

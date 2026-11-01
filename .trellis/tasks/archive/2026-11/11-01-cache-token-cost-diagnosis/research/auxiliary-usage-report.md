@@ -102,9 +102,9 @@ Sanitized aggregates: [reasoning-comparison-metrics.json](reasoning-comparison-m
 Drivers under this research directory:
 
 ```powershell
-node --env-file-if-exists=.env.local .trellis/tasks/11-01-cache-token-cost-diagnosis/research/compare-reasoning.mjs prepare
+node --env-file-if-exists=.env.local .trellis/tasks/archive/2026-11/11-01-cache-token-cost-diagnosis/research/compare-reasoning.mjs prepare
 # run and summary-control are explicit paid phases and refuse already-started ledger cardinality.
-node .trellis/tasks/11-01-cache-token-cost-diagnosis/research/query-auxiliary-live.mjs
+node .trellis/tasks/archive/2026-11/11-01-cache-token-cost-diagnosis/research/query-auxiliary-live.mjs
 ```
 
 `import-auxiliary-ledger.mjs <database> <report>` is an explicit migration/import operation, not a read-only query.

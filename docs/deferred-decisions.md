@@ -9,12 +9,12 @@ and changed retention layers; one summary truncated and the completed control dr
 The thinking baseline also has scope/layer and date/causal inaccuracies. Production defaults remain unchanged.
 
 Completion trigger: before any reasoning-mode rollout, evaluate the concrete cases in the
-[quality review](../.trellis/tasks/11-01-cache-token-cost-diagnosis/research/reasoning-quality-review.md), preserve source
+[quality review](../.trellis/tasks/archive/2026-11/11-01-cache-token-cost-diagnosis/research/reasoning-quality-review.md), preserve source
 attribution/uncertainty and still-live anchors, and compare equivalent output limits and cache-normalized cost.
 Narrow candidates are per-message time framing for summary input and the existing semantic layer guidance in extraction;
 implementation is a separate follow-up, not an automatic retry/validator framework. Two keep gates are not sufficient
 skip/coverage evidence. Normal-chat cost improvements still need observation; auxiliary usage is now persisted and queryable.
-See the [delivery and measurement report](../.trellis/tasks/11-01-cache-token-cost-diagnosis/research/auxiliary-usage-report.md).
+See the [delivery and measurement report](../.trellis/tasks/archive/2026-11/11-01-cache-token-cost-diagnosis/research/auxiliary-usage-report.md).
 
 ## Co-Watching situational-reference capability gap (owner direction, 2026-10-04; audit completed 2026-10-05)
 

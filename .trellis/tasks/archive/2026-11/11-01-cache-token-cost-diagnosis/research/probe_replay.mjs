@@ -1,8 +1,8 @@
 /** Offline projection only: current pure production replay code, read-only historical rows, no LLM calls. */
 import { DatabaseSync } from 'node:sqlite';
 import { writeFileSync } from 'node:fs';
-import { createTimelineRepo } from '../../../../packages/core/src/db/timeline-repo.ts';
-import { createConversationStore } from '../../../../packages/core/src/agents/conversation-store.ts';
+import { createTimelineRepo } from '../../../../../../packages/core/src/db/timeline-repo.ts';
+import { createConversationStore } from '../../../../../../packages/core/src/agents/conversation-store.ts';
 
 const [databasePath, outputPath] = process.argv.slice(2);
 if (!databasePath || !outputPath) throw new Error('Usage: node probe_replay.mjs <db> <output.json>');

@@ -33,8 +33,8 @@ await new Promise((yes) => provider.listen(0, '127.0.0.1', yes));
 Object.assign(process.env, { TAKI_DATA_DIR: dataDir, TAKI_WS_PORT: '19266', TAKI_MONITOR_MODE: 'FULL_LOCAL',
   TAKI_PROVIDER_BASE_URL: `http://127.0.0.1:${provider.address().port}/v1`, TAKI_PROVIDER_API_KEY: 'fixture', TAKI_PROVIDER_MODEL: 'isolated',
   TAKI_INITIATIVE_ENABLED: 'false', TAKI_TRUST_LOOPBACK_OPERATOR: 'true', TAKI_PROVIDER_INCLUDE_USAGE: 'true' });
-await import('../../../../packages/core/src/main.ts');
-const require = createRequire(new URL('../../../../packages/core/package.json', import.meta.url));
+await import('../../../../../../packages/core/src/main.ts');
+const require = createRequire(new URL('../../../../../../packages/core/package.json', import.meta.url));
 const { default: WebSocket } = await import(pathToFileURL(require.resolve('ws')).href);
 const socket = new WebSocket('ws://127.0.0.1:19266');
 await new Promise((yes, no) => { socket.once('open', yes); socket.once('error', no); });

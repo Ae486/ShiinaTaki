@@ -163,4 +163,5 @@ independent boundary review in [live-cache-window-advisor.md](research/live-cach
 was explicitly approved and implemented. See [the completed delivery](research/live-cache-implementation-report.md):
 6,591 tests passed/6 skipped, real SQLite/SDK/WS/browser evidence and actual main-entry integration, migration066 and
 live Core PID47796 with92.8% over55/55 eligible observations. Owner acceptance is separate; implementation is ready
-for ordinary Git/documentation wrap-up without folding more optimization candidates into this task.
+for ordinary Git/documentation wrap-up without folding more optimization candidates into this task. The owner has
+now authorized commit/archive; final completion and follow-up boundaries are recorded in [closeout.md](closeout.md).

@@ -4,9 +4,9 @@ import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 import { resolve, join } from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { openDatabase } from '../../../../packages/core/src/db/sqlite.ts';
-import { MIGRATIONS } from '../../../../packages/core/src/db/migrations/index-list.ts';
-import { createAuxiliaryUsageRepo } from '../../../../packages/core/src/db/auxiliary-usage-repo.ts';
+import { openDatabase } from '../../../../../../packages/core/src/db/sqlite.ts';
+import { MIGRATIONS } from '../../../../../../packages/core/src/db/migrations/index-list.ts';
+import { createAuxiliaryUsageRepo } from '../../../../../../packages/core/src/db/auxiliary-usage-repo.ts';
 
 const root = resolve('target/auxiliary-usage-20261101');
 const dataDir = join(root, `smoke-${Date.now()}`);
@@ -20,8 +20,8 @@ db.close();
 Object.assign(process.env, { TAKI_DATA_DIR: dataDir, TAKI_WS_PORT: '19265', TAKI_MONITOR_MODE: 'FULL_LOCAL',
   TAKI_PROVIDER_BASE_URL: 'http://127.0.0.1:1', TAKI_PROVIDER_API_KEY: 'fixture', TAKI_PROVIDER_MODEL: 'fixture',
   TAKI_INITIATIVE_ENABLED: 'false', TAKI_TRUST_LOOPBACK_OPERATOR: 'true' });
-await import('../../../../packages/core/src/main.ts');
-const require = createRequire(new URL('../../../../packages/core/package.json', import.meta.url));
+await import('../../../../../../packages/core/src/main.ts');
+const require = createRequire(new URL('../../../../../../packages/core/package.json', import.meta.url));
 const { default: WebSocket } = await import(pathToFileURL(require.resolve('ws')).href);
 const socket = new WebSocket('ws://127.0.0.1:19265');
 await new Promise((yes, no) => { socket.once('open', yes); socket.once('error', no); });

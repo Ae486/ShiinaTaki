@@ -94,7 +94,7 @@ console.log(JSON.stringify({calibration:state,historyBudget,points:results,
   scope:'Fixed latest calibration and current code; history projection only, not exact historical wire requests.'}));
 """
     completed = subprocess.run(["node", "--input-type=module", "-e", script, str(path.resolve())],
-                               cwd=Path(__file__).resolve().parents[4], capture_output=True, text=True, check=True)
+                               cwd=Path(__file__).resolve().parents[6], capture_output=True, text=True, check=True)
     return json.loads(completed.stdout)
 
 

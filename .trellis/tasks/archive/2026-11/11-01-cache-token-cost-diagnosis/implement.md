@@ -125,5 +125,5 @@ The owner explicitly approved this addition. Completed evidence is in
 - [x] Complete required checks and isolated real-data/production-WS comparison, then include this addition in task closeout.
 
 Long-term observation and optimization experiments listed above remain follow-up candidates, not unfulfilled claims
-of this implementation. The requested display is complete; task closeout awaits ordinary authorized Git/archive work.
-No new task or task-pointer change was made.
+of this implementation. The requested display is complete and the owner authorized final commit/archive.
+See closeout.md for the completed task boundary and archival checks; no new task was created.

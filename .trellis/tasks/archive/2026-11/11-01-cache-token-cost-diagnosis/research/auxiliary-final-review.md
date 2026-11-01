@@ -30,5 +30,5 @@ None.
 
 - This was a code-path and focused-test review only. It did not make paid/provider calls, write a real application database, import historical calls, run the reasoning comparison, or claim invoice completeness.
 - Main boot/RPC real-composition acceptance and the full lint/typecheck/test result remain with the parent reviewer.
-- `.trellis/.current-task` is stale and points to a missing older task; this review used the session-authoritative `.trellis/tasks/11-01-cache-token-cost-diagnosis` task stated in the PRD and assignment.
+- `.trellis/.current-task` is stale and points to a missing older task; this review used the session-authoritative `.trellis/tasks/archive/2026-11/11-01-cache-token-cost-diagnosis` task stated in the PRD and assignment.
 - Extensive unrelated worktree changes were left untouched.

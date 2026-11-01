@@ -241,7 +241,7 @@ uses only the existing pure replay projection and a read-only database handle. T
 tool arguments, command bodies, stdout/stderr bodies, prompts, reasoning text, account balance or secrets.
 
 ```powershell
-python .trellis/tasks/11-01-cache-token-cost-diagnosis/research/analyze_new_conversations.py --db target/tidy-repair-20261101/before-repair.db --old-db target/auxiliary-usage-20261101/before-065.db --output .trellis/tasks/11-01-cache-token-cost-diagnosis/research/new-conversation-cost-metrics.json
+python .trellis/tasks/archive/2026-11/11-01-cache-token-cost-diagnosis/research/analyze_new_conversations.py --db target/tidy-repair-20261101/before-repair.db --old-db target/auxiliary-usage-20261101/before-065.db --output .trellis/tasks/archive/2026-11/11-01-cache-token-cost-diagnosis/research/new-conversation-cost-metrics.json
 ```
 
 The query completed successfully: 288 original usage rows preserved, 39 new rows, zero duplicate usage Effects,

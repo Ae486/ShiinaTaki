@@ -38,4 +38,6 @@ These are recorded candidates, not newly created or silently implemented tasks. 
 
 Private database copies, raw test evidence and logs remain under ignored target directories. The pre-existing
 untracked artifacts directory is preserved and excluded from task commits. Archived research drivers continue to
-run from the T4 repository root; their relative imports and documented task paths are adjusted during archive.
+run from the T4 repository root; their relative imports and documented task paths were adjusted during archive.
+All11 JavaScript drivers passed syntax/import-path checks, both context manifests validated, and the archived live
+query and read-only old/new analyzer ran successfully with unchanged results. The session task pointer is cleared.
