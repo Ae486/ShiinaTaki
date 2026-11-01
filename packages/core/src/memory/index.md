@@ -23,13 +23,13 @@
 - memory-tools.ts — the first agent tools (memory_write/search/archive); thin, characterId-bound, never throw; search hits carry disclosure + origin (observed content fenced) and record a search event; descriptions carry the per-call R18 prefer-correcting and R19 experience-shape hints (prompt surface — the decision flow lives in base-prompt.ts); plus the BACKGROUND set whose memory_write is schema-restricted to the auto layers + importance ceiling (Q11-1 covers every automatic path)
 - memory-engine.ts — the memory subsystem composition root (store+repo+tokenizer+indexer+retriever+assembler+tools; the retriever serves memory_search only, T5-R6; exposes writeEntry, createTools, createBackgroundTools, retention's narrow list/archive/hard-delete seam, and the tidy view — report reads + the maintenance toolset)
 - bootstrap.ts — Legacy Markdown subsystem wiring: engine/reconcile, shared Utility Slot model, provider maintenance, tidy/retention, and one watermark-guarded FlushWriter exposed through MemoryFlushPort; Compaction is Core-owned
-- utility-slot.ts — T5-R11's background model slot: the utility provider when configured else the MAIN model, one GLOBAL serial task chain, sanitized closed failure diagnostics, and cumulative token spend since boot
+- utility-slot.ts — T5-R11's background model slot: the utility provider when configured else the MAIN model, one GLOBAL serial task chain, immutable auxiliary usage task ownership, sanitized diagnostics, and cumulative token spend since boot
 - retention-sweeper.ts — shared registry retention verdict plus the legacy sweeper: rolling machine deletion, recoverable archival elsewhere, and reinforcement-aware age; canonical adapters reuse the verdict with authoritative writes
 - render-transcript.ts — shared helper: a timeline segment -> "role: text" transcript for the auto-write prompts
 - write-convention.ts — the ONE shared write-side prompt wording: WRITE_GATE_RULE (T5-R15 behaviour-change test) + MEMORY_VOICE_RULE (T5-R10 first person, user's words); episodic + flush import it so the voices cannot diverge
 - episodic-writer.ts — auto-write path 2: segment -> 0..3 entries in the layer the model chooses, write-gated (silence is the normal outcome), importance clamped below the pin line
 - flush-writer.ts — auto-write path 3: pre-compaction flush as one SILENT tool-enabled turn on the BACKGROUND toolset (prose discarded, successful-write count returned); optionally runs through the shared Utility Slot and shares the write-convention fragments
-- auto-memory.ts — shared detached per-Character maintenance chain plus Legacy provider pass: episodic → ordinary flush → tidy → provider-neutral Compaction; dynamic provider retirement cannot create a second chain
+- auto-memory.ts — independent detached per-Character maintenance and compaction chains with complete shutdown; Legacy alone preserves extraction/flush/tidy ordering
 - memory-flush-port.ts — typed pre-retirement Memory Provider boundary: fenced Legacy watermark and actual Canonical Local ingestion receipts, unavailable Hindsight failure, and switchable activation binding
 - tidy-report.ts — the tidy pass's deterministic health report (rc five-class contract): facts flat (missing trigger, over-budget incl. block used/limit beside full content), hypotheses as questions (stale, near-duplicate) + the new-writes slice carrying the misfiled question; per-class caps with dropped counts stated; observed content fenced; never prescribes an action
 - tidy-tools.ts — the maintenance verbs the foreground agent never gets: memory_reinforce / memory_archive_supersede (the sanctioned promotion route) / memory_set_disclosure / memory_refile / block_rethink (background blocks only) / memory_finish_edits (the structural terminal); never-throw envelopes
@@ -39,10 +39,10 @@
 - canonical-local-runtime.ts — canonical Local engine with real maintenance, observed writes and admission-bound tools/recall/prompt capture
 - canonical-local-banks.ts — preserves existing Local Bank identities and initializes scopes for a new Character
 - canonical-local-subsystem.ts — Local ingestion, precise source witnesses, tidy, retention and pre-retirement flush on the shared Utility Slot
-- canonical-ingestion-source.ts — exact primary witnesses and optional bound source facts, original conversational spans, unchanged text offsets and reversible metadata
+- canonical-ingestion-source.ts — bounded retained-source import into existing provider witnesses, exact original conversational spans, unchanged text offsets and reversible metadata
 - canonical-ingestion-model.ts — one Write Gate and source-grounded Local extraction through the process Utility Slot
 - canonical-ingestion-plan.ts — durable gate/extraction plan and stable routed write identities
-- canonical-local-ingestion.ts — exact pending source queue, 20-message cadence, durable retries and forced retirement flush
+- canonical-local-ingestion.ts — local source import, gap-isolated pending groups, truthful continuous coverage, 20-message cadence and durable receipt retries
 - canonical-local-ingestion-batch.ts — canonical original-source/fact batches and lexical duplicate evidence
 - canonical-layer-policy.ts — registry ownership and automatic policy projection shared by Local provider writes
 - canonical-local-tidy.ts — private CAS-bound canonical maintenance tools over an immutable row/Block review

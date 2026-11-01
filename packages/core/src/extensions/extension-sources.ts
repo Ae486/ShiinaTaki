@@ -50,6 +50,7 @@ export function snapshotSkillExtensions(input: {
       callMode: "skill-load",
       selectionToolNames: ["load_skill"],
       isCurrent: current,
+      toModelOutput: loadTool?.toModelOutput,
       call: (value, options) => emptyInput(value)
         ? executeTool(loadTool, { name }, options)
         : invalidInput(),
@@ -61,6 +62,7 @@ export function snapshotSkillExtensions(input: {
       callMode: "skill-resource",
       selectionToolNames: ["read_skill_resource"],
       isCurrent: current,
+      toModelOutput: resourceTool?.toModelOutput,
       call: (value, options) => {
         const parsed = ResourceInputSchema.safeParse(value);
         return parsed.success ? executeTool(resourceTool, { name, path: parsed.data.path }, options) : invalidInput();

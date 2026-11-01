@@ -6,5 +6,7 @@
 - extension-run-context.ts — one-shot Host/Skill/MCP Run assembly with captured MCP display names and disclosure metadata reused across model retries
 - extension-sources.ts — captured registry adapters; MCP tools/names share one snapshot and Host calls retain per-execution Run/Attempt/abort identity
 - extension-tools.ts — AI SDK bounded discovery, next-step direct MCP tool description, and sealed call bridge
+- extension-tool-model-output.ts — compact model directory retaining functional selectors, Host disambiguation, availability and incomplete-result truth
+- extension-call-model-output.ts — captured Skill projection reuse; indirect MCP/unknown results preserve complete JSON including error and structured data, retaining the bridge's existing JSON-only media limit
 - tool-disclosure-snapshot.ts — frozen internal links from admitted descriptors to direct MCP tools and Core Skill-load identities; overflow tools remain deferred
 - extension-transfer.ts — fail-closed adapter for advertised, governed, explicit-target cross-Host transfer capabilities

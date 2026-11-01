@@ -9,6 +9,10 @@ import { createCanonicalIngestionSourceRepo } from "./canonical-ingestion-source
 import { createHindsightIngestionSourceRepo } from "./hindsight-ingestion-source-repo.ts";
 import { primarySourceRowDigest } from "./primary-source-row.ts";
 import { readPrimaryMemorySource } from "./primary-memory-source-read.ts";
+import { createPrimaryConversationSourceRepo } from "./primary-conversation-source-repo.ts";
+import { createMemoryRunReference } from "../memory/memory-capability-snapshot.ts";
+import { LOCAL_MEMORY_CAPABILITIES } from "../memory/local-memory-provider.ts";
+import { createPrimaryMemorySourceState } from "../memory/primary-memory-source-state.ts";
 import { primaryEntryDigest, sanitizeCommittedPrimarySpan, retainedIngestionSource, ingestionSourceDigest } from "../memory/canonical-ingestion-source.ts";
 import { createCanonicalIngestionModel } from "../memory/canonical-ingestion-model.ts";
 import { createUtilitySlot } from "../memory/utility-slot.ts";
@@ -41,6 +45,27 @@ function fixture(native = false) {
 }
 
 describe("conditional source evidence at every original-primary reader", () => {
+  it("keeps captured source authority currentness before asynchronous provider binding", () => {
+    const f = fixture(); const sources = createPrimaryConversationSourceRepo({ db: f.db, timeline: f.timeline });
+    f.db.prepare(`UPDATE memory_authority_selection SET mode='canonical-local',active_epoch_id=:epoch,
+      verified_snapshot_id='fixture',activation_transaction_id='fixture'`).run({ epoch: f.scope.epochId });
+    const memory = createMemoryRunReference({ providerId: "local", authorityEpochId: f.scope.epochId,
+      providerLineageId: "captured-lineage", contractVersion: 1, capabilities: LOCAL_MEMORY_CAPABILITIES });
+    const opened = sources.begin({ user: { characterId: "taki", role: "user", content: "Keep this constraint." }, runId: "run", memory });
+    const row = f.db.prepare("SELECT id,seq,character_id,role,content,parts,created_at,source_context_json FROM timeline_messages WHERE id=:id")
+      .get({ id: opened.userEntry.id })!;
+    const witness = { characterId: "taki", userTimelineId: opened.userEntry.id,
+      userTimelineSeq: opened.userEntry.seq, sourceDigest: primarySourceRowDigest(row) };
+    const state = createPrimaryMemorySourceState({ db: f.db, assertAlive: () => undefined, hindsight: () => undefined });
+    expect(readPrimaryMemorySource(f.db, witness)).toEqual({ kind: "unbound", epochId: f.scope.epochId });
+    expect(state(witness)).toBe("current");
+    f.db.exec("UPDATE memory_authority_selection SET active_epoch_id='different-epoch'");
+    expect(state(witness)).toBe("unavailable");
+    sources.retract(opened.sourceId);
+    expect(state(witness)).toBe("withdrawn");
+    expect(f.db.prepare("SELECT * FROM canonical_memory_primary_commits").all()).toEqual([]);
+  });
+
   it("preserves old entry/C3 digest bytes for absent and SQL-null context", () => {
     const f = fixture(); const entry = f.timeline.append({ characterId: "taki", role: "user", content: "I prefer noodles" });
     const old = { id: entry.id, seq: entry.seq, characterId: entry.characterId, role: entry.role,

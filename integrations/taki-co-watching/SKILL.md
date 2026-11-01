@@ -7,6 +7,11 @@ description: Analyze a supplied Bilibili video URL, find and read registered vid
 
 Loading this Skill does not start watching, create consent or grant tool permissions. Choose the matching caller below.
 
+Choose by the user's intent: a video-content question uses existing analysis reads or explicit URL analysis;
+watching together uses Co-Watching controls; selecting recommendations uses `taki-media-recommendations` when installed.
+For a stop request, identify whether it targets accepted Co-Watching (`stop`), independent URL analysis
+(`analysis_cancel`) or selected recommendation preparation (`preparation_cancel`). Do not cancel another kind of work.
+
 On a successful full load in ordinary user chat, the integration's registered `manage_co_watching` tool becomes
 available from the next model step. Load the Skill again in a new conversation turn when its tool is needed; a past
 load in conversation history does not keep it globally active. For detailed query/control usage, read the bundled

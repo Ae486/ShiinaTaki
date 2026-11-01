@@ -27,7 +27,20 @@ export function selectSubagentMaterials(input: SubagentToolBinding, refs: Materi
     return { ...material, key: `selected:${index}` };
   });
 }
-export function subagentToolRefusal(error: unknown) {
+export function subagentToolRefusal(error: unknown, input?: { service: SubagentService; subagentId: string; characterId: string }) {
+  let current;
+  try {
+    const summary = input?.service.summary(input.subagentId);
+    current = summary?.characterId === input?.characterId ? summary : undefined;
+  } catch { current = undefined; }
   return { ok: false, code: error instanceof Error && /^SUBAGENT_[A-Z_]+$/.test(error.message) ? error.message : "SUBAGENT_UNAVAILABLE",
-    message: "The work operation was refused. Inspect the child for its current state; do not assume it executed." };
+    message: "The work operation was refused; no accepted action can be assumed.", current,
+    currentTarget: current ? { subagentId: current.subagentId, workInputId: current.pendingRequest?.workInputId ?? current.activeWorkInputId ?? current.latestWorkInputId,
+      expectedRunId: current.activeRunId, expectedControlVersion: current.controlVersion } : null,
+    nextAction: current?.stopOrigin === "user" || current?.pendingRequest?.checkIn?.requiredActor === "user" ? "Ask the user to Continue this exact work."
+      : current?.pendingRequest?.reason === "question"
+        ? "Answer the pending question with send_subagent_message: copy currentTarget unchanged, use pendingRequest.eventId as replyToEventId, set continue=false and put the answer in direction. Ordinary messages do not resolve this wait."
+        : current?.pendingRequest
+          ? "Approve the check-in with send_subagent_message: copy currentTarget unchanged, use pendingRequest.eventId as replyToEventId and set continue=true."
+        : "Send an ordinary message by child ID, or refresh the exact target before Stop/Continue." };
 }

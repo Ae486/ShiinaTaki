@@ -6,13 +6,12 @@
 import { strict as assert } from "node:assert";
 import { Buffer } from "node:buffer";
 import { spawn } from "node:child_process";
-import { createHash } from "node:crypto";
 import { once } from "node:events";
 import { createRequire } from "node:module";
 import { createServer } from "node:http";
-import { readFile, readdir, mkdtemp, mkdir, writeFile } from "node:fs/promises";
+import { readFile, mkdtemp, mkdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, dirname, resolve, extname, relative, sep } from "node:path";
+import { join, dirname, resolve, extname, sep } from "node:path";
 import process from "node:process";
 import console from "node:console";
 import { fileURLToPath, URL } from "node:url";
@@ -21,13 +20,15 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { withScriptedAgentContextScenario } from "../../../e2e/src/fixture/agent-context-scenario.ts";
 import { startScriptedProvider } from "../../../e2e/src/fixture/scripted-provider.ts";
+import { deliveredInboxEvents, scriptedInboxReply } from "../../../e2e/src/fixture/agent-context-inbox.ts";
+import { CONFIG_METHODS, ConfigSetResultSchema } from "../../../packages/shared/src/index.ts";
 import { connectCdp, waitFor } from "./c2-native-driver.mjs";
+import { subagentNativeManifest } from "./subagent-native-manifest.mjs";
 
 const { fetch } = globalThis;
 const { WebSocket, WebSocketServer } = createRequire(new URL("../../../packages/core/package.json", import.meta.url))("ws");
 const desktop = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const directory = await mkdtemp(join(tmpdir(), "taki-s7-runtime-native-"));
-const artifacts = resolve(desktop, "../../.trellis/tasks/10-25-agent-delegation-conversations/research/native-runtime",
+const artifacts = resolve(process.env.TAKI_E2E_EVIDENCE_DIR ?? join(desktop, "../../target/acceptance-implementation-20261030/native-runtime"),
   new Date().toISOString().replaceAll(/[:.]/g, "-"));
 const correction = "PRIVATE_NATIVE_INPUT_82653";
 const label = "实际运行时界面验收";
@@ -37,7 +38,9 @@ const secondDraft = "PRIVATE_SECOND_DRAFT_64217";
 const longReport = "PRIVATE_LONG_REPORT_START\n" + "这是工作记录中的证据，并非用户自身经历。\n".repeat(700) + "PRIVATE_LONG_REPORT_END";
 const checks = [];
 await mkdir(artifacts, { recursive: true });
-const sourceBefore = await nativeSourceManifest();
+const directory = await mkdtemp(join(tmpdir(), "taki-s7-native-fixture-"));
+await writeFile(join(artifacts, "fixture-location.json"), JSON.stringify({ retainedOwnedFixture: directory }, null, 2));
+const sourceBefore = await subagentNativeManifest();
 await writeFile(join(artifacts, "native-source-before.json"), JSON.stringify(sourceBefore, null, 2));
 const output = join(directory, "assets");
 await build({ configFile: false, root: desktop, plugins: [react(), tailwindcss()], logLevel: "warn",
@@ -53,11 +56,19 @@ let delegated = false;
 let native;
 let relay;
 let passed = false;
-const provider = await startScriptedProvider(async (request) => {
+let summaryRequests = 0;
+const provider = await startScriptedProvider(async (request) => ({ ...await nativeReply(request),
+  usage: { prompt_tokens: 101, completion_tokens: 17, total_tokens: 118 } }));
+
+async function nativeReply(request) {
+  if (request.stream !== true && JSON.stringify(request.messages).includes("Summarize completed private task work")) {
+    summaryRequests++;
+    return { text: "Task SECOND_NATIVE_WORKER: preserve the original external source; the user did not have that experience. Completed private progress rounds remain exact evidence. Continue the same review; final report remains pending." };
+  }
   if (hasTool(request, "complete_subagent")) {
     if (JSON.stringify(request.messages).includes("SECOND_NATIVE_WORKER")) {
       secondRequests += 1;
-      if (secondRequests <= 55) return { text: `第 ${secondRequests} 个完整工作回合。`,
+      if (secondRequests <= 55) return { text: `第 ${secondRequests} 个完整工作回合。` + "外部讲述者的经历不能归属为用户经历。".repeat(45),
         calls: [{ name: "interact_parent", arguments: { kind: "message", text: `PRIVATE_PROGRESS_${secondRequests}` } }] };
       return { calls: [{ name: "complete_subagent", arguments: { text: longReport, materials: [] } }] };
     }
@@ -71,6 +82,15 @@ const provider = await startScriptedProvider(async (request) => {
     assert.ok(JSON.stringify(request.messages).includes(runningInput));
     return { calls: [{ name: "complete_subagent", arguments: { text: correction, materials: [] } }] };
   }
+  const events = deliveredInboxEvents(request);
+  if (JSON.stringify(request.messages).includes("This unattended inbox opportunity cannot create children.")) {
+    assert.equal(hasTool(request, "delegate_subagent"), false);
+    for (const toolName of ["send_subagent_message", "stop_subagent", "read_agent_inbox", "handle_agent_event"])
+      assert.equal(hasTool(request, toolName), true);
+  }
+  const inbox = scriptedInboxReply(request, () => ({ kind: "needs_user_input", note: "The check-in requires a direct user decision; keep the same review paused." }));
+  if (inbox) return inbox;
+  assert.equal(events.length, 0);
   assert.equal(hasTool(request, "finish_parent_continuation"), false);
   assert.equal(hasTool(request, "delegate_subagent"), true);
   if (delegated) return { text: "主会话仍能正常响应。" };
@@ -84,11 +104,18 @@ const provider = await startScriptedProvider(async (request) => {
     context: { kind: "fresh" }, completionPolicy: "record_only",
     toolSelection: { mode: "allow", names: ["complete_subagent"] }, materials: [],
   } }] };
-});
+}
 
 try {
   await withScriptedAgentContextScenario({ name: "native-home-production-runtime", providerBaseUrl: provider.baseUrl,
-    evidenceRoot: artifacts, maxUpstreamRequests: 80 }, async (scenario) => {
+    evidenceRoot: artifacts, maxUpstreamRequests: 110, sessionDeadlineMs: 420_000,
+    contextTokens: 24000, historyRatio: 0.2, compactKeepMessages: 4 }, async (scenario) => {
+    const defaults = await scenario.effectiveSettings();
+    assert.equal(defaults.entries.find((entry) => entry.key === "TAKI_SUBAGENT_CHECKIN_STEPS")?.value, 50);
+    assert.equal(defaults.entries.find((entry) => entry.key === "TAKI_SUBAGENT_CHECKIN_PARENT_APPROVALS")?.value, 3);
+    ConfigSetResultSchema.parse(await scenario.rpc(CONFIG_METHODS.set, { key: "TAKI_SUBAGENT_CHECKIN_PARENT_APPROVALS", value: 0 }));
+    scenario.checkpoint("native-effective-config", { defaults, effective: await scenario.effectiveSettings(),
+      reason: "Keep default N=50; explicit K=0 exercises the bounded direct-user attention path in native UI." });
     await scenario.ask("创建一个隔离的子代理工作，用于检查私有会话界面。");
     const child = await waitFor(async () => (await scenario.list()).entries.find((entry) => entry.label === label && entry.activeRunId), "running child");
     const second = await waitFor(async () => (await scenario.list()).entries.find((entry) => entry.label === secondLabel), "second child");
@@ -160,11 +187,40 @@ try {
     scenario.checkpoint("native-complete", completed);
     record("Native Send and continue performs one addressed continuation, retaining the cancelled Run and both private inputs");
 
+    const checkpoint = await waitFor(async () => {
+      const current = (await scenario.history(second.subagentId)).conversation;
+      return current.activeRunId === null && current.pendingRequest?.reason === "check_in" && current;
+    }, "default N50 native check-in", 120_000);
+    assert.equal(secondRequests, 50);
+    assert.equal(checkpoint.progress.completedSteps, 50);
+    assert.equal(checkpoint.pendingRequest.checkIn.requiredActor, "user");
+    assert.ok(summaryRequests > 1);
+    const beforeContinue = await scenario.history(second.subagentId);
+    const firstLongRun = beforeContinue.executions[0].runId;
+    assert.equal(new Set(beforeContinue.executions.map((execution) => execution.runId)).size, 1);
+    assert.equal(scenario.rows(`SELECT attempt_id FROM run_attempts WHERE run_id='${firstLongRun}'`).length, 1);
+    assert.ok(scenario.rows("SELECT revision FROM subagent_context_summaries").length > 1);
+    await click(home, "聊天");
+    await waitFor(() => hasText(home, "进度检查需要你决定"), "check-in attention while private page hidden");
+    await screenshot(home, "main-chat-user-required-checkin");
+    await click(home, "打开工作并决定");
+    await waitFor(() => hasText(home, "已完成 50 个模型步骤"), "rendered cumulative default check-in count");
+    await waitFor(() => hasText(home, "必须由你明确继续或调整方向"), "rendered user-only check-in");
+    assert.ok(checkpoint.tokenUsage.complete);
+    assert.ok(checkpoint.tokenUsage.totalTokens > 0);
+    await waitFor(() => home.evaluate(`document.body.innerText.includes('累计 ' + (${checkpoint.tokenUsage.totalTokens}).toLocaleString() + ' token')`), "actual complete provider usage");
+    assert.equal(await home.evaluate("document.querySelector('textarea[aria-label=向这项工作补充说明]').value"), secondDraft);
+    await enterDraft(home, "");
+    if (await hasText(home, "使用当前目标")) await click(home, "使用当前目标");
+    await screenshot(home, "default-50-checkin-before-user-continue");
+    await click(home, "继续此工作");
+    record("Default N=50 crosses multiple same-Attempt compaction segments, pauses visibly, and direct UI Continue resumes the same work; explicit K=0 proves user-required attention and actual usage");
+
     await waitFor(async () => (await scenario.history(second.subagentId)).results.some((result) =>
       result.result.child.body === longReport), "long second conversation", 90_000);
     await selectChild(home, secondLabel);
     await waitFor(() => hasText(home, "PRIVATE_LONG_REPORT_START"), "bounded long report preview");
-    assert.equal(await home.evaluate("document.querySelector('textarea[aria-label=向这项工作补充说明]').value"), secondDraft);
+    assert.equal(await home.evaluate("document.querySelector('textarea[aria-label=向这项工作补充说明]').value"), "");
     if (!await hasText(home, "PRIVATE_LONG_REPORT_END")) await click(home, "读取完整正文");
     await waitFor(() => hasText(home, "PRIVATE_LONG_REPORT_END"), "full body pages");
     await screenshot(home, "long-report-body");
@@ -179,9 +235,14 @@ try {
     await screenshot(home, "older-conversation-page");
     const secondHistory = await scenario.history(second.subagentId);
     assert.equal(secondRequests, 56);
-    assert.equal(new Set(secondHistory.executions.map((execution) => execution.runId)).size, 1);
+    assert.equal(new Set(secondHistory.executions.map((execution) => execution.runId)).size, 2);
+    assert.equal(new Set(secondHistory.executions.map((execution) => execution.workInputId)).size, 1);
+    assert.equal(secondHistory.conversation.progress.completedSteps, 56);
+    assert.equal(secondHistory.conversation.progress.intervalStartSteps, 50);
+    assert.equal(secondHistory.conversation.progress.consecutiveParentApprovals, 0);
+    assert.equal(secondHistory.inputs.filter((input) => input.replyToEventId === checkpoint.pendingRequest.eventId).length, 1);
     assert.equal(scenario.rows("SELECT content FROM timeline_messages").some((row) => String(row.content).includes("PRIVATE_PROGRESS_")), false);
-    record("One child Run exceeds old action caps; ordered older history and the complete long report remain reachable in native Chat");
+    record("The original 56-step work finishes after the exact UI check-in answer in a new Run; older history and complete body remain reachable, with private source/publication boundaries intact");
 
     await selectChild(home, label);
     await enterDraft(home, "PRIVATE_RECONNECT_DRAFT");
@@ -220,11 +281,12 @@ async function finishNativeEvidence() {
   const cleanupFailed = cleanup.some((result) => result.status === "rejected");
   let evidenceFailed;
   try {
-    const sourceAfter = await nativeSourceManifest();
+    const sourceAfter = await subagentNativeManifest();
     const sourceUnchanged = JSON.stringify(sourceBefore) === JSON.stringify(sourceAfter);
     evidenceFailed = !sourceUnchanged;
     await writeFile(join(artifacts, "native-evidence.json"), JSON.stringify({ status: passed && !cleanupFailed && sourceUnchanged ? "passed" : "failed",
-      checks, artifacts, directory, childRequests, secondRequests, cleanupFailed, sourceUnchanged, sourceAfter,
+      checks, artifacts, directory, childRequests, secondRequests, summaryRequests, cleanupFailed, sourceUnchanged, sourceAfter,
+      retainedOwnedFixture: directory, checkInSteps: 50, parentApprovals: 0,
       scope: "Actual production Home/WsClient/Core/SubagentService/SQLite and SDK HTTP. Two local scripted workers; one held cancelled request, a long worker conversation and native controls. Isolated native shell; no real model, real user data, playback or human acceptance." }, null, 2));
   } catch { evidenceFailed = true; }
   if (passed && (cleanupFailed || evidenceFailed)) throw new Error("native fixture cleanup or evidence failed");
@@ -254,25 +316,6 @@ async function enterDraft(session, text) {
 async function screenshot(session, name) {
   const shot = await session.call("Page.captureScreenshot", { format: "png" });
   await writeFile(join(artifacts, `${name}.png`), Buffer.from(shot.data, "base64"));
-}
-
-async function nativeSourceManifest() {
-  const paths = [fileURLToPath(import.meta.url), join(desktop, "test/c2-native-driver.mjs"),
-    join(desktop, "test/c3-pattern-fixture.tsx"), join(desktop, "test/c3-pattern-fixture.html"),
-    join(desktop, "package.json"), join(desktop, "src-tauri/Cargo.toml"), join(desktop, "src-tauri/Cargo.lock"),
-    join(desktop, "src-tauri/examples/c2-presence-fixture.rs"),
-    join(process.env.CARGO_TARGET_DIR || join(desktop, "src-tauri/target"), "debug/examples/c2-presence-fixture.exe")];
-  const visit = async (path) => {
-    for (const entry of await readdir(path, { withFileTypes: true })) {
-      const fullPath = join(path, entry.name);
-      if (entry.isDirectory()) await visit(fullPath);
-      else if (/\.(?:ts|tsx|css)$/.test(entry.name)) paths.push(fullPath);
-    }
-  };
-  await visit(join(desktop, "src"));
-  const manifest = {};
-  for (const path of paths.sort()) manifest[relative(desktop, path).replaceAll("\\", "/")] = createHash("sha256").update(await readFile(path)).digest("hex");
-  return manifest;
 }
 
 async function openCoreRelay(wsUrl) {

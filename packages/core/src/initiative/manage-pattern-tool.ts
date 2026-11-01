@@ -55,6 +55,7 @@ export function createManagePatternTool(input: Dependencies): ToolSet {
       + "When the user requests creation and the supported fields are clear, actually call propose. Listing or describing a candidate does not save it. "
       + "Only claim that a review card exists after an applied/duplicate result contains its candidate revision; on refusal, explain it instead. "
       + "Report stored state accurately. Do not invent when a revision was created or modified; omit relative dates unless established by returned timestamps. "
+      + "Continue list with nextAfter and history with nextBefore. A missing pattern or empty page is a read result, not a saved proposal; retain exact IDs, versions and candidate revisions for later actions. "
       + "Use schedule_task for an explicit scheduled reminder instead. Read a conflict or refusal and clarify; never retry an unseen revision or display internal IDs.",
     inputSchema: Input,
     execute(params, options) {

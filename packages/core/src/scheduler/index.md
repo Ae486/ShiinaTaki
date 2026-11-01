@@ -5,3 +5,4 @@
 - schedule-engine.ts — durable catch-up/re-arm lifecycle with single-flight unref timers, refreshed due-row validation and occurrence dispatch
 - scheduled-run-adapter.ts — Scheduled TriggerRequest through RunService/Character queue/ChatAgent; only settled final-step text enters shared Class A delivery
 - schedule-task-tool.ts — primary-turn-only action-discriminated schedule_task Agent tool
+- schedule-task-model-output.ts — compact model-only mutation receipts; full lists, exact revisions and refusal outcomes remain available

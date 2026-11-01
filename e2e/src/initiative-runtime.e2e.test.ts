@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
@@ -395,12 +395,19 @@ async function withScenario(
   run: (scenario: Scenario) => Promise<void>,
   settings: Record<string, string> = {},
 ): Promise<void> {
-  const fixtureParent = resolve(tmpdir());
+  const evidenceRoot = process.env.TAKI_E2E_EVIDENCE_DIR
+    ? resolve(process.env.TAKI_E2E_EVIDENCE_DIR, "initiative-runtime") : undefined;
+  const fixtureParent = evidenceRoot ?? resolve(tmpdir());
+  if (evidenceRoot) mkdirSync(evidenceRoot, { recursive: true });
   const fixtureRoot = mkdtempSync(join(fixtureParent, "taki-initiative-runtime-"));
   const dataDir = join(fixtureRoot, "core");
   let provider: ScriptedProvider | undefined;
   const processes: InitiativeProcess[] = [];
   const sockets: RpcSocket[] = [];
+  const scenarioName = expect.getState().currentTestName;
+  const startedAt = new Date().toISOString();
+  let failure: { error: unknown } | undefined;
+  const cleanupErrors: unknown[] = [];
   let current: InitiativeProcess;
   const start = async () => {
     if (!provider) throw new Error("missing scenario provider");
@@ -440,13 +447,60 @@ async function withScenario(
       },
     });
     expect(provider.errors).toEqual([]);
+  } catch (error) {
+    failure = { error };
   } finally {
-    for (const socket of sockets) socket.close();
-    for (const instance of processes) await instance.close();
-    await provider?.close();
-    expect(dirname(fixtureRoot)).toBe(fixtureParent);
-    rmSync(fixtureRoot, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    if (evidenceRoot) {
+      try {
+        writeFileSync(join(fixtureRoot, "before-teardown.json"), JSON.stringify({ scenarioName, startedAt,
+          observedAt: new Date().toISOString(), outcome: failure ? "failed" : "passed",
+          failure: failure ? diagnosticError(failure.error) : null, providerRequests: provider?.requests.length ?? null,
+          providerErrors: provider?.errors.map(diagnosticError) ?? [], runtime: runtimeEvidence(dataDir) }, null, 2));
+      } catch (error) { cleanupErrors.push(error); }
+    }
+    for (const socket of sockets) {
+      try { socket.close(); } catch (error) { cleanupErrors.push(error); }
+    }
+    for (const instance of processes) {
+      try { await instance.close(); } catch (error) { cleanupErrors.push(error); }
+    }
+    try { await provider?.close(); } catch (error) { cleanupErrors.push(error); }
+    if (evidenceRoot) {
+      try {
+        writeFileSync(join(fixtureRoot, "process-output.json"), JSON.stringify(processes.map((instance) => ({
+          pid: instance.core.child.pid, exitCode: instance.core.child.exitCode, signalCode: instance.core.child.signalCode,
+          stdout: instance.core.stdout.lines().slice(-500).map((line) => line.slice(0, 4000)),
+          stderr: instance.core.stderr.lines().slice(-500).map((line) => line.slice(0, 4000)),
+        })), null, 2));
+        writeFileSync(join(fixtureRoot, "teardown.json"), JSON.stringify({ errors: cleanupErrors.map(diagnosticError),
+          closedAt: new Date().toISOString(), providerRequests: provider?.requests.length ?? null }, null, 2));
+      } catch (error) { cleanupErrors.push(error); }
+    } else {
+      try {
+        expect(dirname(fixtureRoot)).toBe(fixtureParent);
+        rmSync(fixtureRoot, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+      } catch (error) { cleanupErrors.push(error); }
+    }
   }
+  if (cleanupErrors.length) throw new AggregateError([...failure ? [failure.error] : [], ...cleanupErrors], "Initiative scenario or evidence cleanup failed");
+  if (failure) throw failure.error;
+}
+
+function diagnosticError(error: unknown) {
+  return error instanceof Error ? { name: error.name, message: error.message.slice(0, 4000),
+    stack: error.stack?.split("\n").slice(0, 12).join("\n") } : { name: "NonError", message: String(error).slice(0, 4000) };
+}
+
+function runtimeEvidence(dataDir: string): unknown {
+  const path = join(dataDir, "taki.db");
+  if (!existsSync(path)) return { status: "database_not_created" };
+  const db = new DatabaseSync(path, { readOnly: true });
+  try {
+    return { status: "available", tables: Object.fromEntries([
+      "runs", "run_attempts", "run_effects", "run_events", "run_deliveries", "initiative_model_opportunities",
+    ].map((table) => [table, db.prepare(`SELECT * FROM ${table} ORDER BY rowid LIMIT 200`).all()])) };
+  } catch (error) { return { status: "read_failed", error: diagnosticError(error) }; }
+  finally { db.close(); }
 }
 
 function decisionInput(decision: HeartbeatDecision) {

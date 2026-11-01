@@ -5,6 +5,7 @@
  */
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { once } from "node:events";
+import { listenLoopbackHttp } from "./loopback-http.ts";
 
 export interface ProviderObservation {
   status?: number;
@@ -122,12 +123,8 @@ export async function observeRealProvider(input: {
       controller.signal.removeEventListener("abort", onAbort); active.delete(forwarding);
     }
   }
-  server.listen(0, "127.0.0.1");
-  try { await once(server, "listening"); }
-  catch (error) { server.close(); throw error; }
-  const address = server.address();
-  if (!address || typeof address === "string") { server.close(); throw new Error("provider observer failed to bind"); }
-  return { baseUrl: `http://127.0.0.1:${address.port}/v1`, requests,
+  const port = await listenLoopbackHttp(server);
+  return { baseUrl: `http://127.0.0.1:${port}/v1`, requests,
     close(): Promise<void> {
       closing ??= (async () => {
         const closed = new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));

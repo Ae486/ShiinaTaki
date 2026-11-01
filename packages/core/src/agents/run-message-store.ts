@@ -13,7 +13,7 @@ import type { SubagentContextSummaryRepo } from "../db/subagent-context-summary-
 import type { SubagentToolResultRepo } from "../db/subagent-tool-result-repo.ts";
 import type { ReplayProjection } from "./conversation-store.ts";
 import type { PreparedWorkStep, WorkContext, WorkStepInput, WorkSegmentCheckpoint } from "./work-context.ts";
-import { toEntryInput, toModelMessage, type TurnMessage } from "./turn-mapping.ts";
+import { toEntryInput, toModelMessage } from "./turn-mapping.ts";
 import { estimateMessagesTokens } from "../memory/token-estimator.ts";
 import { resolveDelegationTools } from "../harness/delegation-tools.ts";
 import type { ToolMaterialSink } from "../harness/subagent-tool-materials.ts";
@@ -21,6 +21,8 @@ import { renderContextMaterial } from "./source-context.ts";
 import { preparePrivateTaskContext, type PrivateTaskContextInput } from "./private-task-context.ts";
 import type { PrivateTaskSummarizer } from "./private-task-summarizer.ts";
 import { createSubagentSelfHistoryTool } from "./subagent-self-history-tool.ts";
+import type { CompletedWorkStep } from "./work-context.ts";
+import type { EffectLifecycle } from "@taki/shared";
 
 export interface RunMessageStoreInput {
   runId: string; scope: SubagentWorkScope; instructions: string; tools: ToolSet; stop?: StopCondition<ToolSet>;
@@ -34,7 +36,8 @@ export interface RunMessageStoreInput {
   transaction?(action: () => void): void;
   assertSafeFrontier?(): void;
   checkCurrent(token: SubagentWorkToken | undefined, phase: "model_intent" | "result"): void;
-  onCompletedStep?(input: { attemptId: string; stepNumber: number; messages: TurnMessage[] }): void;
+  onCompletedStep?(input: CompletedWorkStep): void;
+  onModelIntent?(input: { step: PreparedWorkStep; effect: EffectLifecycle }): void;
   changed(): void;
 }
 
@@ -72,6 +75,7 @@ export function createRunMessageStore(input: RunMessageStoreInput): WorkContext 
         input.messages.recordModelInputs({ effect, token: step.token, stepNumber: step.stepNumber, inputIds: step.inputIds });
         if (step.summary) input.summaries?.recordIntent({ effect, token: step.token, stepNumber: step.stepNumber, summary: step.summary });
       }
+      input.onModelIntent?.({ step, effect });
     },
     recordCompletedStep: (step) => recordCompleted(input, step),
     checkpointSegment: (checkpoint) => checkpointWorkSegment(input, { context, prepare }, checkpoint),
@@ -105,7 +109,7 @@ async function prepareWorkStep(input: {
   return state.prepared;
 }
 
-function recordCompleted(input: RunMessageStoreInput, step: { attemptId: string; stepNumber: number; messages: TurnMessage[] }): void {
+function recordCompleted(input: RunMessageStoreInput, step: CompletedWorkStep): void {
   const messages = input.materialSink.attach(step.attemptId, step.messages.map(toEntryInput).filter((entry) => entry !== null), step.stepNumber);
   const commit = () => {
     if (messages.length) input.messages.recordStep({ runId: input.runId, attemptId: step.attemptId,

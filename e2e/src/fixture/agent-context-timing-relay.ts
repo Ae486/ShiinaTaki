@@ -8,6 +8,7 @@ import { once } from "node:events";
 import { writeFileSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { join } from "node:path";
+import { listenLoopbackHttp } from "./loopback-http.ts";
 
 export interface TimingRequest {
   requestNumber: number;
@@ -116,13 +117,9 @@ export async function startAgentContextTimingRelay(input: {
   }
   // Fail evidence setup before acquiring a listening socket whose closer has not reached the caller yet.
   save();
-  server.listen(0, "127.0.0.1");
-  try { await once(server, "listening"); }
-  catch (error) { server.close(); throw error; }
-  const address = server.address();
-  if (!address || typeof address === "string") throw new Error("timing relay failed to bind");
+  const port = await listenLoopbackHttp(server);
   return {
-    baseUrl: `http://127.0.0.1:${address.port}/v1`, requests,
+    baseUrl: `http://127.0.0.1:${port}/v1`, requests,
     release(gate: string) {
       released.add(gate);
       for (const resolve of pending.get(gate) ?? []) resolve();

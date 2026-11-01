@@ -10,6 +10,8 @@ import { applicationTestBind } from "../testing/hindsight-application-runtime-fi
 import { curatorTestBank, curatorTestRemotePolicy } from "./hindsight/hindsight-policy-curator-fixtures.ts";
 import { hindsightRuntimeFixture, type HindsightRuntimeFixture } from "../testing/hindsight-runtime-composition-fixtures.ts";
 import type { CapturedMemoryRun } from "./canonical-memory-run.ts";
+import { composeMemoryRuntime } from "./runtime-composition.ts";
+import { createMemoryAutoRepo } from "../db/memory-auto-repo.ts";
 
 const cleanup: Array<() => void | Promise<void>> = [];
 afterEach(async () => { for (const close of cleanup.splice(0).reverse()) await close(); vi.useRealTimers(); vi.restoreAllMocks(); });
@@ -36,6 +38,34 @@ function knownPinBank(text: string, expiresAt?: string) {
 }
 
 describe("production Hindsight runtime composition", () => {
+  it("commits a source-preserving summary when Hindsight maintenance is fenced by connection drift", async () => {
+    const model = scriptedGenerateModel([{ kind: "text", deltas: ["Lin prefers tea and does not accept calls after 21:00."] }]);
+    const f = fixture({ model });
+    const runtime = composeMemoryRuntime({ ...f, estimatedTokens: () => 90, budget: () => 100,
+      hindsight: { source: f.source, secrets: f.secrets.catalog, client: f.remote.client } });
+    cleanup.push(runtime.stop);
+    await runtime.captureRun("taki");
+    const entries = Array.from({ length: 20 }, (_, index) => f.timeline.append({ characterId: "taki", role: "user",
+      content: index === 0 ? "My name is Lin. I prefer tea. Never call me after 21:00." : `earlier conversation ${index}` }));
+    runtime.recordPrimaryCommitted({ characterId: "taki", entries });
+    const raw = f.db.prepare("SELECT * FROM timeline_messages ORDER BY seq").all();
+    const calls = f.remote.calls.length;
+    f.config.upsert("TAKI_HINDSIGHT_ENDPOINT", "http://127.0.0.1:18482");
+    await runtime.autoMemory.onTurnCompleted("taki");
+    expect(f.logs).toContainEqual(expect.objectContaining({
+      obj: expect.objectContaining({ kind: "provider", code: "MEMORY_PROVIDER_MAINTENANCE_FAILED" }),
+    }));
+    expect(f.summaries.get("taki")?.text).toBe("Lin prefers tea and does not accept calls after 21:00.");
+    expect(model.doGenerateCalls).toHaveLength(1);
+    expect(JSON.stringify(model.doGenerateCalls[0])).toContain("Never call me after 21:00.");
+    expect(f.remote.calls).toHaveLength(calls);
+    expect(f.db.prepare("SELECT * FROM timeline_messages ORDER BY seq").all()).toEqual(raw);
+    expect(f.db.prepare("SELECT count(*) AS count FROM hindsight_ingestion_spans").get()?.count).toBe(0);
+    expect(createMemoryAutoRepo(f.db).get("taki").lastFlushSeq).toBe(0);
+    expect(f.db.prepare("SELECT kind,flush_status FROM conversation_compaction_events ORDER BY operation_seq").all())
+      .toEqual(["started", "summary_generated", "committed"].map((kind) => ({ kind, flush_status: null })));
+  });
+
   it("exposes the operations() live accessor only for the selected Hindsight subsystem", async () => {
     expect(fixture({ mode: "local" }).compose().operations()).toBeNull();
     const f = fixture(); const runtime = f.compose();

@@ -46,12 +46,12 @@ export function scriptedInboxReply(request: Record<string, unknown>, actionFor: 
 export function acknowledgedChildren(request: Record<string, unknown>): string[] {
   return [...new Set(modelToolOutputs(request).flatMap((output) => {
     const target = SubagentTargetSchema.safeParse(output.target);
-    return typeof output.worker === "string" && typeof output.acceptedInputId === "string" && target.success
+    return typeof output.worker === "string" && output.accepted === true && target.success
       ? [target.data.subagentId] : [];
   }))];
 }
 
-function modelToolOutputs(request: Record<string, unknown>): Record<string, unknown>[] {
+export function modelToolOutputs(request: Record<string, unknown>): Record<string, unknown>[] {
   if (!Array.isArray(request.messages)) return [];
   return request.messages.flatMap((message) => {
     const item = record(message);

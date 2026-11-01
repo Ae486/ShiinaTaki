@@ -76,6 +76,11 @@
   already retired. Preserve Monitor's route-only semantics and verify this chain in the native renderer.
 - A hidden page must not drive React renders: the monitor suppresses `emit` while hidden and
   reconciles from its page memory on reactivation.
+- The Home-wide child-attention entry is an intentional lightweight status consumer across page navigation. Its
+  bounded reads remain active while Home is visible even if Subagents is hidden; selected private transcript/activity
+  work still follows its existing page gate. Document hiding retains hints without reads or React publication. Real
+  child changes invalidate one flight plus one trailing obligation; a notification while paging returns attention
+  demand to the first page so new escalations cannot remain behind an old cursor. Reconnect never submits recovery.
 - Hiding must never rebind a mutation controller to null or discard its lock/outcome. A pending command
   settles once; after it settles, a visible consumer reads if its result was not covered. Preserve this
   obligation even if hide/show happened during the command's post-write read.

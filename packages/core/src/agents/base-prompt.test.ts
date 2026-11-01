@@ -85,6 +85,16 @@ describe("BASE_SYSTEM_PROMPT — memory floors (T5-R12/R16-R19)", () => {
     expect(FLAT).toContain("never keep two versions");
     expect(FLAT).toContain("write it to memory yourself");
   });
+
+  it("requires lookup for insufficient evidence and preserves unknown after lookup or correction", () => {
+    expect(FLAT).toContain("missing, ambiguous or conflicting");
+    expect(FLAT).toContain("look it up before making a claim");
+    expect(FLAT).toContain("If the fact remains unresolved, state the uncertainty");
+    expect(FLAT).toContain("If lookup fails, report it as unavailable");
+    expect(FLAT).toContain("sufficient current evidence need no search");
+    expect(FLAT).toContain("does not establish that an event did not happen, that no result exists, or that a result is still pending");
+    expect(FLAT).toContain("keep unresolved facts unresolved");
+  });
 });
 
 describe("BASE_SYSTEM_PROMPT — conversation-summary contract (batch 7)", () => {
@@ -110,7 +120,9 @@ describe("BASE_SYSTEM_PROMPT — standing floors", () => {
   });
 
   it("keeps the truthfulness floor (D1 #2 anti-hallucination guard)", () => {
-    expect(FLAT).toContain("Never claim you ran a tool");
+    expect(FLAT).toContain("Never claim you personally ran a tool");
+    expect(FLAT).toContain("matching tool-result supporting that outcome");
+    expect(FLAT).toContain("Accepted worker reports supplied by Core are attributed evidence");
   });
 
   // Prompt budget: this constant ships on EVERY turn. Guidance that must live here stays dense (survey §6); anything

@@ -1,7 +1,7 @@
 /**
  * INPUT: existing Core repositories, execution owners and trusted domain work bindings
  * OUTPUT: closed service/executor ports and disposable queue/controller state
- * POS: core/harness — shared delegation composition; durable truth stays in the four existing record families
+ * POS: core/harness — shared delegation composition; durable truth stays in canonical Run, private evidence and work-progress repositories
  */
 import type { ToolSet } from "ai";
 import type { ContextMaterial, SubagentInitialContext, SubagentInput, SubagentProposal, SubagentToolSelection,
@@ -59,6 +59,7 @@ export interface SubagentDependencies {
   changed(characterId: string, subagentId: string): void;
   reportError(code: string): void;
   utility?: UtilitySlot;
+  checkInPolicy?(): import("@taki/shared").SubagentCheckInPolicy;
   mainTools?(characterId: string, turn: TurnContext): ToolSet;
   reports?: {
     canReply(workInputId: string): boolean;

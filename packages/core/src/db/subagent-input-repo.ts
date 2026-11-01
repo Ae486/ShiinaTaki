@@ -10,10 +10,13 @@ import type { Database } from "./sqlite.ts";
 import { digestRunValue } from "./run-row-mappers.ts";
 import { readRunById } from "./run-readers.ts";
 import { latestWorkSeq, mapSubagentInput, readSubagent, readSubagentInput } from "./subagent-readers.ts";
+import { validateCheckInInput, applyCheckInInput } from "./subagent-checkin-input.ts";
+import { SUBAGENT_CHECKIN_DEFAULTS } from "../config/subagent-config.ts";
+import type { SubagentCheckInPolicy } from "@taki/shared";
 
 export function createSubagentInputRepo(db: Database) {
   return {
-    accept: (candidate: SubagentInputRequest) => acceptInput(db, candidate),
+    accept: (candidate: SubagentInputRequest, options?: { policy?: SubagentCheckInPolicy; relaxOrdinaryControl?: boolean }) => acceptInput(db, candidate, options),
     get: (inputId: string) => readSubagentInput(db, inputId),
     latestWorkSeq: (workInputId: string) => latestWorkSeq(db, workInputId),
     pending(input: { workInputId: string; throughWorkSeq: number; afterWorkSeq?: number; limit?: number }) {
@@ -32,7 +35,8 @@ export function createSubagentInputRepo(db: Database) {
   };
 }
 
-function acceptInput(db: Database, candidate: SubagentInputRequest): { input: SubagentInput; reused: boolean } {
+function acceptInput(db: Database, candidate: SubagentInputRequest,
+  options: { policy?: SubagentCheckInPolicy; relaxOrdinaryControl?: boolean } = {}): { input: SubagentInput; reused: boolean } {
   const request = SubagentInputRequestSchema.parse(candidate);
   const digest = digestRunValue(request);
   let inputId: string = randomUUID();
@@ -45,7 +49,8 @@ function acceptInput(db: Database, candidate: SubagentInputRequest): { input: Su
       inputId = String(previous.input_id); reused = true; return;
     }
     const child = readSubagent(db, request.subagentId);
-    if (request.input.kind !== "work" && (request.input.expectedControlVersion !== child.controlVersion
+    const loose = options.relaxOrdinaryControl && request.input.kind === "message" && !request.input.replyToEventId;
+    if (request.input.kind !== "work" && !loose && (request.input.expectedControlVersion !== child.controlVersion
       || (request.input.expectedRunId !== undefined && request.input.expectedRunId !== child.activeRunId))) {
       throw new Error("SUBAGENT_CONTROL_CONFLICT");
     }
@@ -56,7 +61,8 @@ function acceptInput(db: Database, candidate: SubagentInputRequest): { input: Su
     if (root && (root.subagentId !== child.subagentId || root.kind !== "work")) throw new Error("SUBAGENT_WORK_MISMATCH");
     if (request.input.kind === "continue" && root?.workValidity.kind === "expires_at"
       && Date.now() >= Date.parse(root.workValidity.expiresAt)) throw new Error("SUBAGENT_WORK_EXPIRED");
-    if (request.input.kind === "continue") continueControl(db, request, child);
+    const checkIn = validateCheckInInput(db, request);
+    if (request.input.kind === "continue") continueControl(db, request, { child, checkIn });
     insertInput(db, { request, inputId, digest, inputSeq: child.nextInputSeq, root });
     if (request.input.kind !== "work" && request.input.replyToEventId) {
       const answered = db.prepare(`UPDATE subagent_input_waits SET state='answered',answer_input_id=:input
@@ -64,17 +70,20 @@ function acceptInput(db: Database, candidate: SubagentInputRequest): { input: Su
         event: request.input.replyToEventId, work: request.input.workInputId });
       if (answered.changes !== 1) throw new Error("SUBAGENT_INPUT_REQUEST_CONFLICT");
     }
+    applyCheckInInput(db, { request, inputId, checkIn, policy: options.policy ?? SUBAGENT_CHECKIN_DEFAULTS });
     db.prepare("UPDATE subagent_conversations SET next_input_seq=next_input_seq+1 WHERE subagent_id=:id")
       .run({ id: child.subagentId });
   });
   return { input: readSubagentInput(db, inputId), reused };
 }
 
-function continueControl(db: Database, request: SubagentInputRequest, child: ReturnType<typeof readSubagent>): void {
+function continueControl(db: Database, request: SubagentInputRequest, input: { child: ReturnType<typeof readSubagent>; checkIn: boolean }): void {
+  const { child, checkIn } = input;
   if (request.input.kind !== "continue") return;
   if (child.controlVersion !== request.input.expectedControlVersion) throw new Error("SUBAGENT_CONTROL_CONFLICT");
-  if (child.activeRunId) throw new Error("SUBAGENT_EXECUTION_NOT_QUIESCENT");
+  if (child.activeRunId && (!checkIn || child.stopOrigin)) throw new Error("SUBAGENT_EXECUTION_NOT_QUIESCENT");
   if (child.stopOrigin === "user" && request.sender.kind !== "user") throw new Error("SUBAGENT_USER_CONTINUE_REQUIRED");
+  if (checkIn && !child.stopOrigin) return;
   db.prepare("UPDATE subagent_conversations SET stop_origin=NULL,control_version=control_version+1 WHERE subagent_id=:id")
     .run({ id: child.subagentId });
 }

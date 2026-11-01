@@ -1,5 +1,245 @@
 # Implementation checkpoint
 
+## Current continuation — authorized prompt/runtime diagnosis, 2026-10-30
+
+- Latest live state: source is FROZEN for `real-long-global-deadline` (exec86499), the only paid process. No full suite is running.
+  `real-eight-current` FAILED (closed61052):8validated finals were actually delivered in foreground request12, but
+  the main model returned onlyACK and made0inboxactions. Exact8previews/bodySHA/deliveryEffect/step3 are verified;
+  this is a real disposition omission, not late-claim or SDK data loss. Advisor is preparing a bounded foreground-to-idle
+  same-batch handoff proposal. It is NOT implemented; distinguish this new natural-omission policy from the already
+  implemented known cooperative idle-yield exception. No new mechanical retry/prose-promotion/model-mode change.
+- Owner confirmation is required for that new natural-omission policy. The owner replied "什么意思？请你解释一下";
+  root explained the exact8completed/mainACK-only example and one bounded same-batch background opportunity. This is
+  NOT approval. Do not implement it or treat elapsed time as approval. Authorized independent long validation continues.
+  The final deterministic suite PASSED98/29skipped (`e2e-final-context-yield.log`, closed23437). Core whole suite PASSED4,301/6skipped
+  (`core-final-context-yield.log`, closed65874). Long Xkb5l1 ended FAILED (closed67999) when its180s local
+  checkpoint wait expired during active progress, not a captured pre-teardown Runtime failure. Root workspace typecheck/scoped root lint PASS
+  (`typecheck-final-context-yield.log`, `lint-final-context-yield.log`; closed30701/49855).
+  Previous full deterministic E2E PASSED98/29skipped (`e2e-context-repaired.log`, closed31500).
+- Current root typecheck/lint logs are `typecheck-final-delivery.log` and `lint-final-delivery.log`, both PASS before
+  the last parent-wording refinement; that refinement separately passed Core typecheck/lint,29inbox regressions and
+  the3-test envelope regression. E2E typecheck/lint PASS after the latest fixture correction.
+- Independent `real-independent-yield-final/...1d8hkb` achieved2validated/2handled plus actual read-only yield successor
+  and publicTimeline13. Its command FAILED only on a verdict-regex false negative; current-source retained-evidence
+  recheck PASSED (`independent-answer-recheck.json`) without another provider call. Original status is not rewritten.
+- Eight-case validation sequence: `real-eight-public-final` was7final+1interrupted, but the fixture blocked the main
+  behind8finals so no event was delivered. Gate now releases on8originalchildren's terminal events, still requiring
+  eight original works' current validated finals, parent-origin same-work recovery, every initial/final event handled
+  once and a public summary after all requiredfinals. `real-eight-supervised-final` delivered/handled8 but parent adopted
+  the unstructured verdict as complete and did not resume. Common inbox/message descriptions now distinguish usable
+  evidence from acceptedcompletion and explain interrupted-work continue=true/replyToEventId=null with exacttarget.
+- `real-eight-completion-contract` then observed actual parent continuation and the worker's validated final, but the
+  fixture incorrectly required input.kind=message. It now accepts the existing message OR continue forms while keeping
+  parent origin, actual new-Run consumption and unchangedwork guards. Its teardown prevented complete final-publication
+  acceptance. The full rerun61052 exposed the separate foreground omission described above. No Core auto-retry,
+  prose promotion or model-mode change was added.
+  `real-long-context-repaired/goals-long-audit-checkin-hb5hev` FAILED (closed exec3213), source/cleanup parity intact.
+  Before these newest repairs, Core whole suite PASSED4,279/6skipped
+  with two workers (`core-context-repaired.log`, closed exec91492). Prior exec52724 FAILED;
+  exec67144 PASSED 4,270 tests / 6 skipped. No paid scenarios run in parallel. No task creation, Git delivery or model-mode change.
+- Session pointer was checked live: existing `10-25-agent-delegation-conversations`, source
+  `session:codex_01a18bce-da73-7f02-985a-b6d8f180dd28`; the unrelated legacy global pointer remains unchanged.
+- Rkarum exposed two independent defects: projected summary plus optional old rounds could exceed budget while newest
+  alone fit; and SDK-local argument validation errors with a complete error result were rejected at pressure/check-in.
+  Both narrow repairs are now implemented and independently reviewed. Selection+SDK/GC context regression27/27,
+  frontier/check-in regression33/33, Core typecheck and scoped lint PASS. Full current-source long acceptance is pending.
+- The repaired hb5hev run reached46steps/13summaries/5Corecheckins before another exact projection defect: a mixed
+  `read_self_history` + `read_file` result exempted the whole tool message from reduction. Only the history page needs
+  protection. Historical replay at budget9,246: head5,950+latest3,695=9,645; reducing just the ordinary peer result keeps
+  the history page byte-identical and yields latest1,574/total7,524. The narrow repair is applied; actual SDK/SQLite
+  mixed-result tests and direct historical replay PASS. Full raw file reconstruction remains byte-identical.
+  Correct coverage:18unique read paths included manifest and2generated audits, so only15/24evidence cases were read.
+- Actual summary growth1,273→5,897tokens with9case sources still unread justifies dynamic prompt-only
+  `targetSummaryTokens` and rewrite/consolidation wording. It prices the replacement-free actual projection under the
+  existing80%pressure line, falls back to free space, and changes no hard output/model/thinking limit. Checks cover
+  old-summary exclusion, initial/pending/wrapper/reduced-peer inclusion and the existing growth remeasurement path.
+- Post-freeze small-peer review found that an unchanged ordinary result beside a large history page could receive a
+  false omission notice. Source is now unfrozen and `followup_review` is applying the staged per-part reference
+  correction/tests. Apply and verify affected projection paths before the next paid run. This does
+  not invalidate the already proved large-peer fix; final reporting must mention the source/check chronology accurately.
+- Xkb5l1 completed15tasksteps, including7after its first check-in. Those7taskrequests took58.552s, five summaries
+  took116.379s, and a sixth summary was aborted5.314s into its request by harness teardown. All earlier Effects
+  completed; actualunique source files were manifest+3cases. Root changed long boundary waits to use the remaining
+  original1800s scenario deadline, never resetting it;224request/20continuation limits stay unchanged. New terminal
+  child states fail promptly. This removes an accidental local timing cap, not the observed throughput limitation.
+- `real-independent-final` FAILED its two-handled assertion despite two validated reports and a genuine combined public
+  answer. A foreground request interrupted an already-delivered idle batch after a read, leaving one reconciliation-needed
+  event. Independent review confirmed a normal-yield lifecycle gap under the original requirements. The same-batch
+  continuation repair is applied; its17newtests and related69PASS/1skipped are green, Core/Shared typecheck and final
+  independent review PASS. Mixed-peer/summary-target coverage:10new/unit tests plus28SDK/GC regressions PASS.
+  Unknown/mutation/unclassified failures remain explicit recovery; original intents
+  and event membership are preserved through the existing linked resume, never fresh-event redelivery.
+- Strong interim end-to-end case now PASSES in `real-interim-publication/goals-interim-clarification-YIUWhN`: visible
+  acknowledgement, actual inbox question, exact300ms answer, same-work validatedAmber, and one actual final public
+  Timeline answer via speech_proposed. The idle handler now explicitly puts the public answer in note while Core retains
+  publication authority; retained/no_action stay internal. Common inbox text no longer implies idle text is public.
+- Actual8-event batch PASSED in `real-eight-inbox-reporting/goals-full-eight-inbox-SdXN3o` before that final idle wording
+  refinement. All8eligible finals were delivered together and handled once. Final public synthesis was not its assertion.
+- Current-source native runtime8/8 PASSED, including defaultN50/56-step work and real reconnect. Evidence:
+  `native-final-protocol/2026-10-30T13-04-26-349Z`; screenshots inspected. Prior one-off reconnect timeout remains retained,
+  and the port audit does not attribute it to a blocked port.
+- Full deterministic E2E98PASS/29skipped was green before the final idle wording and opt-in long-fixture-only refinements.
+  Shared684/CLI50, workspace typecheck and source lint pass. The last4worker Core run had4268PASS/6skipped plus2 existing
+  Hindsight tests exceeding their5s limit during other validation; both files passed39/39 in isolation, no timeout changes.
+- Long validation now keeps24full sources/28paragraphs, but names caseFileCount explicitly and aligns original/top-level
+  case IDs. FirstN8 without compaction is allowed; proof requires actual summary-use intent before a later Corecheckin,
+  exact continuation into another Run using that summary, all sources, contiguous unique ordinals and final completion.
+  It answers one naturally requested midpoint confirmation separately from Core checkpoints.224requests/20waits/1800s
+  are finite test ceilings justified by the measured57-step pre-confirmation run, not production work limits.
+- Remaining: finish focused checks/review, freeze source, rerun the full long scenario, independent reviews and eight-event public synthesis,
+  obtain final Core/deterministic gates, update final acceptance truth. Human acceptance stays owner-only.
+
+## Investigation sequence — earlier observations in this continuation
+
+- Owner explicitly approved continued fixes/real-model testing and requested a GPT-5.6 Sol comparison of public
+  Codex/Claude Code prompt design, including the supplied Chinese catalog. No new Trellis task or Git delivery.
+- Public-source findings: `research/prompt-design-public-research-20261030.md`. A complete worker-runtime probe
+  with fixed original eight directions, scripted parent and real children reproduced an upstream prose-only stop:
+  baseline 7/8 validated versus clarified 8/8. This is one small comparison, not a reliability estimate.
+- Generic worker protocol and final/question descriptions now separate requested text format from lifecycle action.
+  The first real interim case passed child wait/answer/final, but parent chose silent reporting, received no inbox
+  event, emitted no foreground text and requested a redundant format correction. Do not count that as full acceptance.
+- The next eight-child real run produced eight validated finals, all suppressed by parent-selected `record_only`.
+  Parent-facing tool wording now clearly describes default automatic reporting versus deliberate silent inspection,
+  and foreground acknowledgements. Legacy silent routing remains; ordinary needs-input routing was not broadened.
+- Long-task diagnosis found aggregate-vs-single-request calibration mismatch. Corrected capture pairs the latest
+  completed SDK request envelope with its actual step usage; full Core 4,268 PASS / 6 skipped, scoped regressions80
+  PASS, workspace typecheck and root source lint PASS. Report: `research/long-task-diagnosis-20261030.md`.
+- Long acceptance now uses a 24-source linked evidence chain and a48k artificial window, preserving strict compaction,
+  N8/K0, exact same-work continuation and all-source read checks. Its real rerun is pending.
+- Initiative fixture diagnosis reproduced Fetch-blocked ephemeral port6000 failures in actual Core. A shared HTTP
+  binder avoids the83 WHATWG blocked ports without probe requests/OS changes. HTTP19 and initiative17 PASS; whole E2E
+  refresh pending. Historical failure ports remain unknown. See `research/initiative-stability-diagnosis-20261030.md`.
+- Current work: stricter real parent/question routing, full8inbox, long work, explicit silent-question inspection gap,
+  then final frozen checks. Model/default thinking unchanged. Human acceptance remains owner-only.
+- Subsequent stricter interim run (`real-interim-parent-protocol`) chose `request_parent`, acknowledged to the user
+  and delivered the actual question, but failed after the parent queued an ordinary message without `replyToEventId`
+  and then guessed incorrect exact-target fields despite receiving `currentTarget`. The question correctly stayed open.
+  Message-tool wording and refusal guidance now explicitly map question/check-in actions and require copying the target.
+- Runtime follow-up agent owns an additive bounded `inspect_subagent(events)` read so silent retained question bodies
+  can actually be inspected. Its local SQLite/SDK reproduction proved no existing model inspection category returned
+  the body, while operator conversation/body did. No change to notification policy or inbox membership guards.
+
+## Previous discussion checkpoint — session 01a18bce, 2026-10-30
+
+- Current handoff: owner asks whether completion omissions are prompt/interaction-design defects and what
+  `tool_choice=required` means. Current work is read-only diagnosis/discussion; no new Trellis task, no required-tool
+  production setting and no production prompt rewrite. Keep thinking mode unchanged. Existing authorization for
+  N/K and real-model tests remains, but do not silently resolve the newly discussed quality/compatibility tradeoff.
+- All exec sessions from the earlier anchors have finished. Latest Core whole suite is 4,268 PASS/6 skipped;
+  Desktop 1,289 PASS, root typecheck and source lint PASS. Native8 passed after one retained re-authentication timeout.
+  Current full E2E is NOT all green: 93 PASS/28 skipped plus an initiative silent-case pre-model failure; isolated
+  retry passed, then its full 17-test file had a different held/restart failure. No unsupported root-cause claim.
+- All six real campaign goals ran: Co-Watching PASS (9 steps under N50/K3), correction PASS after the confirmed
+  synchronous-error/latch repair, needs-input PASS with a fully specified fixture and explicit pending-review goal.
+  Independent reviewers FAIL (one unstructured stop), eight-reviewer gate FAIL (4 final/4 unstructured), long-pressure
+  FAIL after two steps during a six-file read at artificial24k, before any check-in. These remain open acceptance gaps.
+- Full prompt audit refutes Companion persona leakage but finds missing report-format-to-tool-text mapping and
+  stage-completion vs whole-work ambiguity. Both successes and failures share the same system wording, so do not
+  blame the model alone. An eight-call first-response replay pilot gave baseline4/4 and clarified4/4 collector
+  selection; it did not reproduce or prove improvement. Production prompts remain unchanged.
+- A one-request original-route `required` probe failed HTTP400 (thinking/tool-choice incompatibility); a separate
+  isolated thinking-disabled probe passed. Do not turn off thinking or enable required in production without the
+  owner's explicit product choice. No such choice has been made; the owner requested explanation and prompt audit.
+- Current consolidated truth: `research/acceptance-20261030.md`, including all failed/corrected attempts and limits.
+  Validation artifacts: `target/agent-delegation-20261030-validation`. No commit/push/archive or real-user DB changes.
+- Recovery repair is now implemented, reviewed by root and FROZEN: only the two production TS modules above,
+  their tests/specs/indexes changed. 59 distinct focused/regression tests, Core typecheck and scoped lint PASS;
+  actual SDK proves invalid material refusal -> corrected validated final in the same Run/Attempt with source intact.
+  See `followup-review-collector-recovery-20261030.md`. Root has started final full Core (`87558`), final full
+  deterministic E2E (`59446`), and serial paid correction retry (`71288`), with logs `core-tests-recovery-final.log`,
+  `e2e-recovery-final.log`, `real-running-correction-recovery.log`. These are current exec session IDs, not OS PIDs.
+  Afterward: inspect real correction output, rerun missing requirement, then full eight-event and long-audit cases;
+  run current production-Core native8 and finish static/acceptance records. No new agents/source work needed unless
+  those checks expose a genuine remaining defect. The independent natural-completion adherence failure stays recorded.
+- Latest coordinator anchor (18:38 local): all initial final gates completed, then real-model testing exposed a
+  genuine synchronous-tool-error recovery defect. `followup_review` now exclusively owns the narrow repair to
+  `governance/governed-tool.ts`, `agents/subagent-result-tool.ts` and their tests/specs/indexes. Root owns E2E,
+  test fixture and task records. No paid or native process is running while this production repair is prepared.
+- Confirmed defect: `Promise.resolve(execute(...)).catch(...)` misses a synchronous throw, leaving the actual
+  collector Effect at `intent_committed`; next worker intent is correctly fenced. The collector separately
+  reserves its final slot before material validation and leaks that slot on refusal. Reviewer module probes
+  and root code inspection confirm both. Fix both without relaxing provenance, safety fences or completion.
+- Paid campaign so far: corrected simple Co-Watching PASS at actual 9 task steps, N50/K3, no check-in, validated
+  plan, 62,203 reported tokens. Independent reviewers FAIL strict completion because one produced unstructured
+  prose despite correct collector disclosure (reviewed model adherence limitation; no justified source patch).
+  Running correction initially hit stale harness SQL, now fixed via public history plus bilingual semantic checks;
+  its paid retry accepted and consumed the correction but failed on the above material/error recovery defect.
+  Missing-requirement case similarly failed before a question wait with a failed completion collector.
+  Retain all attempts; do not weaken the assertions. Eight-event and long-audit cases have NOT run.
+- After the repair freezes: focused sync/async settlement plus actual SDK invalid-reference recovery proof;
+  required affected full checks and a fresh production-Core native run; rerun live correction/missing cases,
+  then eight-event and long audit serially, inspect real semantic outputs and usage, consolidate acceptance.
+  `acceptance-20261030.md` is the current consolidated report (still in progress). No commit/push/archive.
+- Prior to that newly found Core repair: final E2E 94 PASS/28 skipped (49 files); final Desktop 1,289 PASS;
+  Co-Watching subtree 147 PASS/2 skipped, same8000-token fixture regression 20 task steps + 15 Utility requests
+  PASS; workspace typecheck and Desktop build PASS. Production-Core native8 and supplemental UI6 PASS with
+  source/cleanup parity; root inspected checkpoint/attention and exact input-recovery screenshots.
+- Late production Desktop feedback correction is complete: exact canonical operation confirmation clears only
+  that operation's unknown-outcome warning. Full Desktop suite/build above include it. Core/Shared were unchanged
+  by that correction. Read `followup-review-exact-input-feedback-20261030.md` for evidence.
+- `acceptance_implement` repeatedly hit rate limits and was resumed in place. Its original harness deliverable
+  completed; root finished the narrow Co-Watching fixture correction using its preserved red tests. No outstanding
+  write ownership remains with that agent. Root's fixture uses scenario context policy + real main-model Utility
+  fallback; the originally missing Utility/8000 whole-request clamp was a test fixture defect, now resolved.
+- Final integration in progress: Shared 684, CLI 50, Core 4,249 (6 skipped), Desktop 1,286 tests passed;
+  explicit GC retention 22 passed. Workspace typecheck, Desktop build and Rust checks passed.
+  Root lint finds only the preserved historical `artifacts/runtime-inbox-preimages-20261025` copy's line limit;
+  the same root lint excluding exactly that non-runtime backup directory passes. No backup bytes were changed.
+- The late Desktop check-in presentation review is complete and included in the final Desktop suite; see
+  `followup-review-checkin-presentation-20261030.md`. Core/Shared production remained unchanged.
+- First approved real Co-Watching observation reached nine actual task-model steps under N=50/K=3 and failed
+  before producing a validated plan. It did not reach a check-in. The saved request shows unavailable summary
+  maintenance; the acceptance owner is checking the fixture's history budget/Utility wiring against production.
+  This failed observation is not success evidence. Retained under
+  `target/agent-delegation-20261030-validation/real-simple-cowatching/goals-simple-cowatching-plan-qGsGHB`.
+- Initial native UI attempt failed before WebView startup: new repository-local fixture allocation violates
+  the unchanged Rust fixture's OS-temp-root assertion. The reviewer owns a narrow two-script fixture repair.
+  Root separately reproduced an old Host E2E label expectation (`exec` versus the specified `执行命令`).
+  Full deterministic E2E remains running; native and real-model acceptance are still open.
+- Verified `H:/TakiAgent-worktrees/t4`, branch `task/t4-skills-mcp-productization`, HEAD `6b36d0d`.
+  Preserved inherited edits to PRD/implement, untracked maturity assessment and `artifacts/`.
+- Restored only the existing task's session pointer; `task.py current --source` reports
+  `session:codex_01a18bce-da73-7f02-985a-b6d8f180dd28`. The unrelated legacy global pointer is unchanged.
+- Owner approved configurable provisional defaults N=50/K=3 after discussing the follow-up order and reset semantics.
+  PRD/implement now record that decision. Real-model/E2E calls remain approved; no new task or Git delivery.
+- S7a independent repair recheck completed: 29 Core and 27 Desktop tests passed, plus actual SDK/SQLite
+  retention/paging probes. Both prior repairs passed; the hidden-row cursor premise was refuted for current production
+  scheduling. See `s7a-recheck-20261030.md`; no speculative paging patch is needed.
+- Independent S8-S10 challenge completed in `checkin-advisor-20261030.md`. Use a durable per-work count and typed
+  check-in sidecar, one ordered boundary, factual Core progress report, next-interval config capture and actual
+  usage aggregation. The synchronous report adds no model request and labels unknown remaining work honestly.
+- Runtime owner `runtime_followup` owns Core/Shared/config/main; `desktop_followup` owns Desktop source;
+  `acceptance_implement` owns E2E/native test scripts. Root owns task docs and final integration. No final validation
+  or human acceptance is claimed. `acceptance-plan-20261030.md` records existing harness seams and evidence limits.
+- The Co-Watching plan-generation child also receives N/K protection. Root initially framed caller compatibility as
+  a scope choice; after the owner's clarification, uniform checks plus the existing adapter's pause/resume support
+  are treated as required integration. No source-owned or `record_only` exemption. External video analysis is unaffected.
+  Runtime ownership extends narrowly to the Co-Watching child adapter and its related tests/read contracts.
+- `cargo build --locked --manifest-path apps/desktop/src-tauri/Cargo.toml --example c2-presence-fixture` passed;
+  log: `target/agent-delegation-20261030-validation/native-fixture-build.log`. Native UI execution remains pending.
+- Core/Shared and Desktop source reached their final owner handoffs (`runtime-followup-20261030.md`,
+  `desktop-followup-20261030.md`). Independent `followup_review` now owns evidence-backed production/test/spec repairs;
+  the original implementers do not write unless reassigned. Acceptance harness ownership is unchanged.
+- Root Rust Clippy and tests passed (204 library + 7 helper), and the headless `taki-node` executable was rebuilt.
+  Logs are under `target/agent-delegation-20261030-validation/`. Full TS/workspace, native and real-model gates are pending.
+- Combined review confirmed and repaired a Home attention gap: the actual requested user decision/refusal explanation
+  was missing from the persistent view. `followup_review` owns the repair/tests and final review record; its report is
+  still pending. No final whole-worktree pass is claimed.
+- Acceptance scripts include new `agent-delegation-checkin.e2e.test.ts` and goal-only real-model cases. Root requested
+  that a needs-input answer be supplied through actual primary chat/model behavior (not a synthetic addressed-input RPC),
+  while explicit user check-in continuation keeps its real operator control. A real default-50 Co-Watching preparation
+  observation will reuse the existing actual-SDK fixture and label its synthetic source/authority dependencies.
+- Next coordinator gates after review/harness handoff: frozen-source typecheck/lint/full tests with bounded workers,
+  explicit GC retention checks, deterministic E2E and Desktop build; actual native production-Core/WebView2 run;
+  approved goal-only real-model campaign and measured simple Co-Watching preparation. New production findings require
+  focused correction checks and a final complete rerun. Human acceptance remains owner-only.
+- Registered previously referenced T4-D88/D89 in `docs/deferred-decisions.md` with explicit completion triggers;
+  retained-data deletion and routed background approvals remain separate work.
+- A research-agent redaction command accidentally exposed two provider credentials in tool output. The owner was
+  informed immediately; no credential values are retained in task documents. Subsequent configuration inspection
+  is allow-listed and credentials are not changed by this task.
+
 ## Current recovery anchor — session 01a173ab, 2026-10-25
 
 - Current session: `01a173ab-1a8d-7032-b2df-26fa41ca2230`, resuming requested root

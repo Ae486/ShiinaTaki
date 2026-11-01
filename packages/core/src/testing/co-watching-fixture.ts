@@ -22,6 +22,8 @@ import { createRunMessageRepo } from "../db/run-message-repo.ts";
 import { createSubagentService } from "../harness/subagent-service.ts";
 import { streamingMockModel } from "./mock-language-model.ts";
 import { coWatchingToolFixture } from "./co-watching-tool-fixture.ts";
+import { DEFAULT_CONTEXT_TOKENS, DEFAULT_HISTORY_RATIO } from "../config/context-config.ts";
+import { createUtilitySlot } from "../memory/utility-slot.ts";
 
 export function coWatchingInput() {
   const analysis: CoWatchingAnalysis = { analysisId: randomUUID(), revision: 1, title: "Fixture video",
@@ -37,13 +39,22 @@ export function coWatchingInput() {
 }
 
 export async function coWatchingFixture(options: { fresh?: boolean;
-  preparation?: { model: LanguageModel; modelId: string; provider?: string };
+  preparation?: { model: LanguageModel; modelId: string; provider?: string;
+    contextTokens?: number; historyRatio?: number; requestEnvelopeReserve?: number; useProviderUsage?: boolean };
 } = {}) {
   const hooks: { yieldToPrimary?: (key: string) => void } = {};
   const base = await preparedPublicationFixture({ linkedSubagents: true, onPrimaryReserved: (key) => hooks.yieldToPrimary?.(key),
     ...(options.preparation ? { modelId: options.preparation.modelId, provider: options.preparation.provider,
       expiresAt: new Date(Date.now() + 600_000).toISOString() } : {}) });
   const actualTools = options.preparation ? coWatchingToolFixture(base) : undefined;
+  const contextTokens = options.preparation?.contextTokens ?? DEFAULT_CONTEXT_TOKENS;
+  const historyRatio = options.preparation?.historyRatio ?? DEFAULT_HISTORY_RATIO;
+  const historyTokens = Math.floor(contextTokens * historyRatio);
+  const contextPolicy = { contextTokens, historyRatio, historyTokens,
+    requestEnvelopeReserve: options.preparation?.requestEnvelopeReserve ?? contextTokens - historyTokens,
+    useProviderUsage: options.preparation?.useProviderUsage ?? false, utilityRoute: "main_model_fallback" };
+  const utility = options.preparation
+    ? createUtilitySlot({ mainModel: options.preparation.model, logger: createCaptureLogger().logger }) : undefined;
   const { analysis, raw } = coWatchingInput();
   const flags = { source: true, native: true, skill: true };
   const playback: BrowserPlaybackView = { sourceRef: randomUUID(), hostId: randomUUID(), connectionGeneration: 1, catalogGeneration: 1,
@@ -90,6 +101,8 @@ export async function coWatchingFixture(options: { fresh?: boolean;
   };
   const realAgent = createChatAgent({ model: options.preparation?.model ?? model,
     store: base.store, memory: base.memory, effectLifecycle: base.effects, maxSteps: options.preparation ? 6 : undefined,
+    ...(options.preparation ? { contextWindowTokens: () => contextTokens,
+      requestEnvelopeReserve: () => contextPolicy.requestEnvelopeReserve, useProviderUsage: contextPolicy.useProviderUsage } : {}),
     ...(actualTools ? { coreTools: actualTools.coreTools, extraTools: actualTools.extraTools,
       coreToolGovernance: actualTools.coreToolGovernance, instructionsExtra: actualTools.instructionsExtra } : {}) });
   const agent: typeof realAgent = { async *stream(params, turn) {
@@ -100,7 +113,8 @@ export async function coWatchingFixture(options: { fresh?: boolean;
   const children = createSubagentRepo(base.db); const inputs = createSubagentInputRepo(base.db); const messages = createRunMessageRepo(base.db);
   const errors: string[] = [];
   const subagents = createSubagentService({ ...base, agent, children, inputs, messages, executions: base.executions!,
-    historyBudget: () => 8000, changed: (characterId) => onChanged(characterId), reportError: (code) => { errors.push(code); } });
+    ...(utility ? { utility } : {}), historyBudget: () => options.preparation ? historyTokens : 8000,
+    changed: (characterId) => onChanged(characterId), reportError: (code) => { errors.push(code); } });
   const createRuntime = () => createCoWatchingRuntime({ ...base, catalog, agent, subagents, workspaceRoot: base.workspaceRoot,
     logger: createCaptureLogger().logger, targetReady: () => true, onChanged,
     resultTool: () => ({ toolKey: "native_result", isCurrent: () => flags.native }),
@@ -116,9 +130,9 @@ export async function coWatchingFixture(options: { fresh?: boolean;
   hooks.yieldToPrimary = runtime.yieldToPrimary;
   const input: CoWatchingStart = { characterId: "taki", requestId: randomUUID(), sourceRef: playback.sourceRef, analysisId: analysis.analysisId, lifetimeMinutes: 5 };
   const interactive = { connection: { state: { status: "authenticated" as const, deviceId: "fixture", role: "operator" as const, capabilities: [] } } };
-  return { ...base, subagents, children, inputs, messages, errors, skillRevision: actualTools?.skillRevision,
+  return { ...base, subagents, children, inputs, messages, errors, contextPolicy, skillRevision: actualTools?.skillRevision,
     get runtime() { return runtime; }, catalog, analysis, raw, flags, playback, readNative, submitNative, lookupNative, statusNative, generate, plans, onChanged, input, interactive,
     restart: async () => { await runtime.close(); runtime = createRuntime(); hooks.yieldToPrimary = runtime.yieldToPrimary; },
     start: () => runtime.start(input, interactive), session: () => runtime.read("taki").session!,
-    cleanup: async () => { await runtime.close(); await subagents.close(); base.cleanup(); } };
+    cleanup: async () => { await runtime.close(); await subagents.close(); await utility?.stop(); base.cleanup(); } };
 }

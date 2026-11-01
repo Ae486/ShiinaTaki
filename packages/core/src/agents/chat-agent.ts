@@ -1,6 +1,6 @@
 /**
  * INPUT:  chat/attachment input, SDK models, ConversationStore, Memory hooks, live User Timezone and Run bindings
- * OUTPUT: ordered live activity, text compatibility streaming, and atomic full-turn persistence after either ending
+ * OUTPUT: ordered live activity, text streaming, and atomic primary-source retention/retraction after either ending
  * POS:    core/agents — the existing ToolLoopAgent boundary; owns abort/retract and one context-overflow retry,
  *         preserving day-stable instructions, volatile message-tail context, and detached memory writes
  */
@@ -112,7 +112,7 @@ export interface ChatAgentDeps {
   memoryPrompt?: string | (() => string);
   /** Optional auto-write orchestrator; when present, fired detached after each turn (existing tests omit it). */
   autoMemory?: AutoMemory;
-  /** Exact committed primary rows, never a queried seq range. The composition root persists source witnesses. */
+  /** Compatibility witness callback only when the ConversationStore has no durable primary-source writer. */
   onPrimaryCommitted?: (input: PrimaryConversationCommit) => void;
   /** Vision model slot (TAKI_VLM_*, #17 decision 5); image-bearing turns route here. Absent = image turns rejected. */
   visionModel?: LanguageModel;
@@ -194,6 +194,7 @@ export interface TurnAttempt {
   vision: VisionDeps | null;
   userSeq?: number;
   userEntry?: TimelineEntry;
+  primarySourceId?: string;
   primary: boolean;
   runContext?: AgentRunContext;
   toolDisplayNames?: Readonly<Record<string, string>>;
@@ -225,16 +226,18 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
   const images = primary && vision
     ? attachments.map((a) => ({ mediaType: a.mediaType, ref: vision.store.save(a.dataBase64, a.mediaType).ref }))
     : [];
-  // Capture the committed user row so a cancel-before-reply can retract exactly this seq (the retract seam in the
-  // attempt). Appended ONCE — an R2 retry replays the same committed row, never a second one.
-  const userEntry = primary ? store.appendUser(characterId, message, images) : undefined;
-  if (turn?.runId) turn.materials ??= createToolMaterialSink();
-  if (approval && turn) wireApprovalDenial(approval, turn);
   const runContext = turn?.runContext ?? deps.runContext?.(turn);
   const ownsRunContext = turn?.runContext === undefined;
-  const base = { characterId, message, attachments, images, vision, userSeq: userEntry?.seq, userEntry, primary, runContext, recall: {},
-    toolDisplayNames: captureToolDisplayNames(runContext?.toolDisplayNames) };
   try {
+    // Admission identity is captured before the atomic initial write and remains unchanged across retries.
+    const opened = primary ? store.beginPrimary({ characterId, text: message, images,
+      runId: turn?.runId, memory: runContext?.memorySnapshot }) : undefined;
+    const userEntry = opened?.userEntry;
+    if (turn?.runId) turn.materials ??= createToolMaterialSink();
+    if (approval && turn) wireApprovalDenial(approval, turn);
+    const base = { characterId, message, attachments, images, vision, userSeq: userEntry?.seq, userEntry,
+      primarySourceId: opened?.sourceId, primary, runContext, recall: {},
+      toolDisplayNames: captureToolDisplayNames(runContext?.toolDisplayNames) };
     yield* executeAttempts(deps, base, turn);
   } finally {
     if (ownsRunContext) runContext?.dispose?.();
@@ -290,17 +293,20 @@ function finishRecordedTurn(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tu
   const retract = (turn?.signal?.aborted ?? false) && !recording.hasProduced()
     && !attempt.state.inbox?.hasIntent() && turn?.independentWorkAccepted !== true && attempt.userSeq !== undefined;
   if (retract && attempt.userSeq !== undefined) {
-    store.removeEntry(attempt.characterId, attempt.userSeq);
+    if (attempt.primarySourceId) store.retractPrimary(attempt.primarySourceId);
+    else store.removeEntry(attempt.characterId, attempt.userSeq);
     turn?.onRetract?.();
+    return true;
   }
   const entries = recording.commit({ store, characterId: attempt.characterId, toolDisplayNames: attempt.toolDisplayNames,
+    primarySourceId: attempt.primarySourceId,
     activity: turn?.activity, attempt: activity,
     partialSourceContext: attempt.state.inbox?.hasIntent() ? attempt.state.inbox.sourceContext : undefined });
   attempt.state.inbox?.onPublicCommitted?.(entries);
   // The atomic writer returns the exact committed rows, including presentation metadata. Witness only
   // this primary source, after commit and on exceptional/iterator-close endings as well as normal completion.
   // A clean overflow retry never reaches this guard; a retracted user row must never become ingestion input.
-  if (!retract && attempt.userEntry) deps.onPrimaryCommitted?.({ characterId: attempt.characterId,
+  if (!attempt.primarySourceId && attempt.userEntry) deps.onPrimaryCommitted?.({ characterId: attempt.characterId,
     entries: [attempt.userEntry, ...entries], runId: turn?.runId });
   return retract;
 }

@@ -227,11 +227,15 @@ async function executeWithEffect(args: ExecuteGovernedArgs & { waiting?: ReturnT
     context.binding.effect?.onIntent?.(effect!, input);
     const executionOptions = effect ? withEffectContext(options, effect) : options;
     observePhase(context, options, "executing");
-    const raw = await Promise.resolve(execute(input, executionOptions as Parameters<NonNullable<Tool["execute"]>>[1])).catch((error: unknown) => {
+    let raw: unknown;
+    try {
+      // Invoke inside the bracket: evaluating execute() before Promise.resolve skips settlement on a synchronous throw.
+      raw = await execute(input, executionOptions as Parameters<NonNullable<Tool["execute"]>>[1]);
+    } catch (error) {
       const cancelled = options.abortSignal?.aborted || context.effect?.signal?.aborted;
       if (effect && effects) effects.settle({ effectId: effect.effectId, runId: effect.runId, attemptId: effect.attemptId, expectedVersion: effect.version, outcome: cancelled ? "cancelled" : "failed", errorCode: cancelled ? "cancelled" : "tool_error" });
       throw error;
-    });
+    }
     const result = lease?.acceptResult ? lease.acceptResult(raw) : raw;
     if (effect && effects) settleToolResult(effects, effect, result);
     return result;

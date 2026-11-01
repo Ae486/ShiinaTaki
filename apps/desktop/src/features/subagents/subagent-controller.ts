@@ -3,7 +3,7 @@
  * OUTPUT: coherent retained child/work views, serialized controls and honest recovery diagnostics
  * POS: ui/subagents — disposable read owner; Core alone schedules, stops and resumes work
  */
-import type { SubagentControlResult, SubagentTarget, SubagentConversationResult } from "@taki/shared";
+import type { SubagentControlResult, SubagentTarget, SubagentConversationResult, SubagentInput } from "@taki/shared";
 import { createReadCoordinator } from "@/lib/read-coordinator.js";
 import { createReadObservation } from "@/lib/read-observation.js";
 import { INITIAL_SUBAGENT_STATE, displayedTarget, sameTarget, type SubagentClient, type SubagentState } from "./subagent-state.ts";
@@ -13,6 +13,8 @@ import { SubagentDrafts } from "./subagent-drafts.ts";
 import { PRIVATE_ACTIVITY_HYDRATE_MAX_CHARS, PRIVATE_ACTIVITY_HYDRATE_MAX_ENTRIES } from "./subagent-activity-hydration.ts";
 import type { TimelineReadingPosition } from "@/windows/home/pages/chat/use-timeline-scroll.js";
 import { commandFailure, commandOutcomeUnknown, privateViewUnavailable } from "./subagent-labels.ts";
+
+type PendingMutation = { characterId: string; target: SubagentTarget; action: "send" | "stop" | "continue"; operationKey: string };
 
 export class SubagentController {
   private state: SubagentState = INITIAL_SUBAGENT_STATE;
@@ -24,7 +26,8 @@ export class SubagentController {
   readonly drafts = new SubagentDrafts();
   readonly readingPositions = new Map<string, TimelineReadingPosition>();
   private requestedWork: string | null = null;
-  private mutation: { characterId: string; target: SubagentTarget; action: "send" | "stop" | "continue" } | null = null;
+  private mutation: PendingMutation | null = null;
+  private unknownInputFeedback: { mutation: PendingMutation; feedback: NonNullable<SubagentState["feedback"]> } | null = null;
   private readonly publish: (state: SubagentState) => void;
   private readonly reads = createReadCoordinator({
     started: () => this.patch({ loading: true }),
@@ -52,7 +55,7 @@ export class SubagentController {
     this.client = client;
     if (this.mutation) {
       if (this.mutation.action !== "stop") this.drafts.uncertain(this.mutation.characterId, this.mutation.target);
-      this.patch({ feedback: { tone: "warn", message: "连接中断，刚才操作的结果尚未确认。恢复后请核对当前状态；不会自动重新提交。" } });
+      this.commandFailed(this.mutation, "连接中断，刚才操作的结果尚未确认。恢复后请核对当前状态；不会自动重新提交。", true);
     }
     this.mutation = null;
     this.patch({ pending: null, fresh: false, bodyReads: {} });
@@ -180,15 +183,16 @@ export class SubagentController {
     if (!client || this.mutation || !this.visible || !this.state.fresh || this.state.requestedId !== this.state.selectedId
       || !sameTarget(displayedTarget(this.state), target)) return false;
     if (action === "send" && !direction.trim()) return false;
-    const token = { characterId: this.state.characterId, target, action };
+    const token = { characterId: this.state.characterId, target, action, operationKey: crypto.randomUUID() };
     const generation = this.generation;
     this.mutation = token;
+    this.unknownInputFeedback = null;
     this.patch({ pending: action, feedback: null, fresh: false });
     this.syncReads();
     try {
       const base = { characterId: this.state.characterId, target };
       const request = this.state.detail?.conversation.pendingRequest;
-      const addressed = { ...base, operationKey: crypto.randomUUID(), direction, materials: [],
+      const addressed = { ...base, operationKey: token.operationKey, direction, materials: [],
         ...(request?.state === "open" && request.workInputId === target.workInputId ? { replyToEventId: request.eventId } : {}) };
       if (action !== "stop") this.drafts.submitted(token.characterId, target, addressed.operationKey);
       const result = await (action === "stop" ? client.subagentStop(base)
@@ -198,7 +202,7 @@ export class SubagentController {
       return true;
     } catch (cause) {
       if (action !== "stop" && commandOutcomeUnknown(cause)) this.drafts.uncertain(token.characterId, target);
-      if (this.generation === generation) this.patch({ feedback: { tone: "warn", message: commandFailure(cause) } });
+      if (this.generation === generation) this.commandFailed(token, commandFailure(cause), commandOutcomeUnknown(cause));
       return false;
     } finally {
       if (this.mutation === token) {
@@ -225,7 +229,10 @@ export class SubagentController {
   }
 
   private commitDetail(detail: SubagentConversationResult): void {
-    for (const entry of detail.entries) if (entry.kind === "input") this.drafts.reconcile(this.state.characterId, entry.input);
+    for (const entry of detail.entries) if (entry.kind === "input") {
+      this.drafts.reconcile(this.state.characterId, entry.input);
+      this.reconcileInputFeedback(entry.input);
+    }
     const sameChild = this.state.selectedId === detail.conversation.subagentId;
     const workInputId = this.requestedWork ?? (sameChild ? this.state.workInputId : null)
       ?? detail.conversation.activeWorkInputId ?? detail.conversation.latestWorkInputId;
@@ -233,6 +240,21 @@ export class SubagentController {
     this.patch({ detail, selectedId: detail.conversation.subagentId, workInputId,
       acceptedInputs: this.state.acceptedInputs.filter((input) => !detail.entries.some((row) => row.kind === "input" && row.input.inputId === input.inputId)),
       detailLoading: false, detailError: null, fresh: true });
+  }
+
+  private commandFailed(mutation: PendingMutation, message: string, unknown: boolean): void {
+    const feedback: NonNullable<SubagentState["feedback"]> = { tone: "warn", message };
+    this.unknownInputFeedback = unknown && mutation.action !== "stop" ? { mutation, feedback } : null;
+    this.patch({ feedback });
+  }
+
+  private reconcileInputFeedback(input: SubagentInput): void {
+    const pending = this.unknownInputFeedback;
+    if (!pending || pending.mutation.characterId !== this.state.characterId
+      || pending.mutation.target.subagentId !== input.subagentId || pending.mutation.target.workInputId !== input.workInputId
+      || pending.mutation.operationKey !== input.operationKey) return;
+    if (this.state.feedback === pending.feedback) this.patch({ feedback: null });
+    this.unknownInputFeedback = null;
   }
 
   private failDetail(cause: unknown): void {

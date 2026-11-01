@@ -35,9 +35,18 @@ references the outcome, **fabricates that it already acted**. This surfaces only
 
 ## The base system prompt carries a truthfulness floor
 
-The stable base prompt (before per-turn memory context) must state, explicitly, that the model may **never claim a
-tool ran / a result was obtained unless a matching tool-result is present in the transcript** — earlier text is not
-proof. This is the direct behavioural guard; persistence is the structural one. Ship both.
+Primary task guidance lives in `agents/companion-task-guidance.ts`, composed by `agent-attempt.ts` only for primary
+Companion work. Capability choices use the exact currently exposed tool names after disclosure and execution
+selection; refresh when a successful Skill load or extension description reveals tools. Do not infer availability
+from substrings, installed files or historical calls. Worker, selected initiative and non-primary private requests
+retain their dedicated protocols. Keep the stable base/date ordering and active Memory authority procedure.
+Source: `[A-WTA]` / `[O-FC]` in [Tool Design](tool-design.md); approved project role split in the prompt audit.
+
+The stable base prompt (before per-turn memory context) must require a matching tool result before claiming the
+Companion personally performed an action. Errors/refusals/unknowns do not prove success. Accepted worker reports
+supplied by Core are separately attributed evidence: a complete report needs no duplicate read merely to prove
+receipt, while its claims still require task-appropriate assessment and confer no permission or personal execution.
+Earlier prose alone proves no action. This is the direct behavioural guard; persistence is the structural one.
 
 ## Source meaning across shared execution and replay
 
@@ -50,7 +59,11 @@ proof. This is the direct behavioural guard; persistence is the structural one. 
 - `turn-mapping.ts` rebuilds source-aware model messages from retained sidecars without changing canonical speech or
   sending the replay header to UI/TTS. Unknown historical sources stay absent; corrupt stored source data is an error.
 - Compose `SOURCE_INTERPRETATION_RULE` into response/description prompts and the shared Memory writing conventions.
-  Keep explicit self-reports, quotations, generated material and corrections distinct. Private work eligibility and
+  Keep explicit self-reports, quotations, generated material and corrections distinct. Missing or inconclusive evidence
+  cannot establish a negative fact or pending outcome; a subject correction preserves unresolved facts. In the base Memory
+  procedure, insufficient/ambiguous/conflicting evidence triggers the applicable lookup before a claim. An unsuccessful
+  lookup remains unknown, while a failed lookup remains unavailable; sufficient evidence already read needs no new search.
+  Private work eligibility and
   executable tool authority remain governed by [Shared Agent Delegation](./shared-agent-delegation.md).
 - Verify the actual SDK/provider-bound message, source-aware reduction and durable replay. Scripted source carriage
   does not establish semantic model accuracy; [Compaction](./compaction-harness.md) and
@@ -112,9 +125,10 @@ The owner explicitly approved these contracts for the coordinated SDK upgrade:
   its signal is not aborted. This gates the existing bundle: request-pressure remeasurement, auto-memory/compaction
   maintenance, optional image-description maintenance and the detached turn-usage callback. An aborted turn starts
   none of that bundle, including a previously graceful partial cancellation.
-- This is **not a ban on all memory ingestion**. `finishRecordedTurn` still calls `onPrimaryCommitted` with the exact
-  eligible retained primary rows before the callback guard. Source witnessing, later extraction/maintenance policy,
-  authority, eligibility, transcript identity and raw-input minimization remain unchanged.
+- The source-backed primary writer retains actual input/output membership atomically before this callback guard;
+  later ordinary maintenance imports it into the selected provider's existing witness journal. Only compatibility
+  callers without the durable source writer use `onPrimaryCommitted`. Cancellation cannot lose a retained source just
+  because it suppresses maintenance, nor make a retracted input eligible. See [Canonical Local Memory Runtime](canonical-local-memory-runtime.md).
 - For partial real-fetch cancellation, `chat-send` normally emits `chat.complete` on the SDK's graceful return;
   Run, Attempt, Receipt and activity outcome remain `cancelled` through the existing signal checks. A genuine provider
   failure still emits `chat.error` and settles failed. A notification name is not the Run outcome.
@@ -128,7 +142,7 @@ real provider failure. Assert notification, canonical rows, exact primary witnes
 `abortRejectingModel` is a scripted rejecting body, not proof of modern fetch transformation behavior. Keep direct
 error/retraction tests as well; mocks and Vitest transformation do not replace the real Node boot/transport evidence.
 
-## Classify every tool: presentation (fire-and-forget) vs informational (T1 1c)
+## Classify every tool: presentation vs informational (T1 1c)
 
 Every tool call ends a ToolLoopAgent step, and the SDK **forces another generation** after tool results ("until there
 are no further tool calls or the stopping condition is met"). For a tool whose result carries nothing to read, that
@@ -136,8 +150,9 @@ forced step has nothing substantive to say — the model pads (filler "嗯。") 
 message (owner evidence 2026-07-18, one user message → 5 assistant segments).
 
 - **Informational** tools (screenshot, files_read, memory recall) return data the model reasons over — the loop MUST
-  continue after them. **Presentation / fire-and-forget** tools (`avatar_set_expression`, `avatar_play_motion`) act on
-  what the user sees and return only `{ok:true}` — the model must NOT be forced to generate again just because one ran.
+  continue after them unless another explicit stop applies. **Presentation** tools (`avatar_set_expression`,
+  `avatar_play_motion`) act on what the user sees and return bounded Presentation Outcomes — the model need not
+  generate again solely because one ran. Prompts must not describe these outcomes as empty or guaranteed success.
 - AI SDK v7 `execute` must return a value (no LiveKit-style `None`/`StopResponse` escape), so a presentation tool's
   non-continuation is enforced by a **construction-level `stopWhen` predicate**, never by the tool result shape:
   `presentationTailStop` (`packages/core/src/avatar/presentation-stop.ts`) stops the loop after a step whose tool calls
@@ -160,7 +175,9 @@ message (owner evidence 2026-07-18, one user message → 5 assistant segments).
   empty/unknown vocab degrading to `z.string().min(1)` (`z.enum([])` is invalid). This is the SOURCE clamp; the
   renderer's `onVocabularyDrift` re-report (1b) is the FALLBACK — a double net. An out-of-enum arg does NOT crash the
   turn: `parseToolCall` marks the call `invalid:true` and the stream loop enqueues a `tool-error` the model reads next
-  step (verified in `ai@7.0.17` dist — parseToolCall catch + the `toolCall.invalid` branch), so the model self-corrects.
+  step (rechecked with `ai@7.0.148`). Correction is possible, not guaranteed. The dynamic Zod error supplies a required
+  object example using a current name and retains structured allowed values once. Missing input does not execute;
+  a repeated invalid presentation-only step still exhausts the existing one-correction budget.
   This runtime enum does NOT violate #16's "no baked enum" — that rejected a COMPILE-TIME enum (multi-character /
   multi-costume can't fix names at build time); deriving the enum per turn from the live manifest is the SAME Option-A
   data, moved from the prompt into the schema. Only ever build the enum from the reported (pruned, playable) vocabulary.

@@ -4,6 +4,7 @@ import {
   CONFIG_GROUPS,
   configGroupOf,
   configLabelOf,
+  configHintOf,
   filterConfigEntries,
   groupConfigEntries,
 } from "./config-groups.ts";
@@ -22,6 +23,14 @@ const KEYS = [
 ] as const;
 
 describe("config groups", () => {
+  it("exposes both check-in knobs with Chinese labels and next-interval application semantics", () => {
+    for (const key of ["TAKI_SUBAGENT_CHECKIN_STEPS", "TAKI_SUBAGENT_CHECKIN_PARENT_APPROVALS"]) {
+      expect(configGroupOf(key).id).toBe("model-context"); expect(configLabelOf(key)).toContain("子代理");
+      expect(configHintOf(key)).toContain("下一个进度检查间隔");
+      expect(filterConfigEntries([entry(key)], "子代理")).toHaveLength(1);
+    }
+    expect(configHintOf("TAKI_MAX_STEPS")).toBeNull();
+  });
   it("resolves exact keys to their group and Chinese label", () => {
     expect(configLabelOf("TAKI_PROVIDER_MODEL")).toBe("主模型 ID");
     expect(configGroupOf("TAKI_PROVIDER_MODEL").id).toBe("model-context");

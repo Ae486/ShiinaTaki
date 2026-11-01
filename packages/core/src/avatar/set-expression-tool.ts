@@ -17,7 +17,7 @@ export function createSetExpressionTool(deps: AvatarToolDeps): ToolSet {
   return {
     avatar_set_expression: tool({
       description:
-        "Set your avatar's facial expression to show how you feel (e.g. before replying, or reacting to the user); " +
+        "Set your avatar's facial expression alongside your reply or reaction to the user; " +
         "to play a body motion instead, use avatar_play_motion. " +
         "The name MUST be one of the expression names listed in your avatar vocabulary. " +
         OUTCOME_GUIDANCE,

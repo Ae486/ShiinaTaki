@@ -32,6 +32,7 @@ export interface CanonicalIngestionRepo {
   unprocessedCount(scope: IngestionScope): number;
   hasApplicableSource(input: IngestionScope & { throughSeq: number }): boolean;
   advanceCoverage(input: IngestionScope & { throughSeq: number; now: string }): number;
+  coverageGap: CanonicalIngestionSourceRepo["coverageGap"];
   pending(scope: IngestionScope): CanonicalIngestionState | undefined;
   start(input: IngestionScope & { source: SanitizedCommittedSpan; now: string }): CanonicalIngestionState;
   saveGate(input: StateUpdate & { gate: CanonicalWriteGateDecision }): CanonicalIngestionState;
@@ -51,7 +52,7 @@ export function createCanonicalIngestionRepo(input: RepoInput): CanonicalIngesti
     primaryEntries: sources.primaryEntries, cursor: sources.cursor, eligibilityStartSeq: sources.eligibilityStartSeq,
     initializeBaseline: sources.initializeBaseline, pendingEntries: sources.pendingEntries,
     unprocessedCount: sources.unprocessedCount, hasApplicableSource: sources.hasApplicableSource,
-    advanceCoverage: sources.advanceCoverage,
+    advanceCoverage: sources.advanceCoverage, coverageGap: sources.coverageGap,
     pending: (scope) => pending(ctx.db, scope),
     start: (input) => start(ctx, input),
     saveGate: (input) => saveGate(ctx, input),
@@ -156,17 +157,14 @@ function complete(ctx: RepoContext, input: StateUpdate): CanonicalIngestionState
     if (state.gate === null) throw new Error("MEMORY_INGESTION_INCOMPLETE");
     if (state.gate.decision === "keep") verifyCompletion(ctx, state);
     ctx.sources.assertClaimed(state);
-    const changed = ctx.db.prepare(`UPDATE canonical_memory_ingestion_cursors SET through_seq=MAX(through_seq,:through),updated_at=:at
-      WHERE authority_epoch_id=:epoch AND character_id=:character`)
-      .run({ epoch: state.epochId, character: state.characterId,
-        through: state.source.throughSeq, at: input.now });
-    if (changed.changes !== 1) throw new Error("MEMORY_INGESTION_STALE_CURSOR");
+    const completed = update(ctx.db, { ...state, state: "complete", updatedAt: input.now });
+    const throughSeq = ctx.sources.advanceCoverage({ ...state, throughSeq: state.source.throughSeq, now: input.now });
     ctx.db.prepare(`INSERT INTO memory_auto_state(character_id,last_episodic_seq,last_flush_seq)
       VALUES (:character,:through,:through) ON CONFLICT(character_id) DO UPDATE SET
       last_episodic_seq=MAX(memory_auto_state.last_episodic_seq,excluded.last_episodic_seq),
       last_flush_seq=MAX(memory_auto_state.last_flush_seq,excluded.last_flush_seq)`)
-      .run({ character: state.characterId, through: state.source.throughSeq });
-    return update(ctx.db, { ...state, state: "complete", updatedAt: input.now });
+      .run({ character: state.characterId, through: throughSeq });
+    return completed;
   });
 }
 

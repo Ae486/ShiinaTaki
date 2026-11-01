@@ -2,7 +2,7 @@
 The home window: one instance, left menu / right page content. Pages are registry-driven — adding a page is one row
 in pages.ts. Holds no state of record (invariant 4); Core pages use the window's operator WS, while QQ history uses its own local native QQMM attachment.
 - main.tsx — React root mounting <HomeShell> into home.html #root, on the page named by the `?page=` boot param
-- home-shell.tsx — two-pane shell, retained pages with pre-paint route publication, shared client/Approval owner, and connection feedback; Monitor survives transient client retirement, initial unresolved routes stay pending, and confirmed disable removes its surface
+- home-shell.tsx — two-pane shell, retained pages with pre-paint route publication, shared client/Approval owner, persistent child attention in the scrollable sidebar, and connection feedback; Monitor survives transient client retirement, initial unresolved routes stay pending, and confirmed disable removes its surface
 - pages.ts — THE page registry, including initiative management and private child conversations (id/label/icon/component rows), derived PageId and runtime gate
 - pages/qqmm/ — local QQ history, native-only transport and effective visibility disposal; exempt from the Core connection banner
 - pages/monitor/ — full-height DSH Run browser/Toolbar/Overview/measured-ledger/temporary-Inspector port with semantic filters, independent history/live recovery, and no user-facing internal metadata

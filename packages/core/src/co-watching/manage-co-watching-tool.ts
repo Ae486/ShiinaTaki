@@ -12,6 +12,7 @@ import type { CoWatchingRuntime } from "./runtime.ts";
 import { selectInvitationSource } from "./invitation-source.ts";
 import type { CoWatchingAnalysisReader } from "./read-analysis.ts";
 import type { MediaAnalysisRuntime } from "./media-analysis-runtime.ts";
+import { mediaToolModelOutput } from "./media-tool-model-output.ts";
 
 const CoWatchingControlInputSchema = z.strictObject({
   action: z.enum(["list_analyses", "read_analysis", "analyze_url", "analysis_status", "analysis_cancel", "start", "reanalyze", "revise", "stop"]).describe("analyze_url accepts an explicit URL analysis; analysis_status/cancel control only that analysis. read_analysis reads an existing result. start/reanalyze/revise/stop control Co-Watching."),
@@ -50,6 +51,7 @@ export function createManageCoWatchingTool(input: {
   return { manage_co_watching: tool({
     description: TOOL_DESCRIPTION,
     inputSchema: CoWatchingControlInputSchema,
+    toModelOutput: mediaToolModelOutput,
     async execute({ action, instruction, videoUrl, sourceRef, lifetimeMinutes, analysisId, view, offset }, options) {
       if (input.turn?.signal?.aborted) return { ok: false, reason: "turn_cancelled" };
       if (action === "revise" && !instruction) return { ok: false, reason: "instruction_required" };

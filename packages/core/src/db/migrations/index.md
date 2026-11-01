@@ -65,3 +65,7 @@
 - 060-agent-conversation-order.ts — private source commit ordering, control history and immutable event frontiers
 - 061-subagent-presentation.ts — immutable native private message presentation references
 - 062-subagent-inbox-resume.ts — explicit operation-keyed successor consumer identity without automatic replay
+
+- 063-subagent-progress.ts — additive tracked work intervals, actual model-step witnesses, check-in sidecars and attention
+- 064-primary-conversation-sources.ts — additive primary source lifecycle and exact Timeline membership; historical proofs remain unchanged
+- 065-auxiliary-model-usage.ts — observed auxiliary provider-call lifecycle and nullable token counters, separate from Run usage

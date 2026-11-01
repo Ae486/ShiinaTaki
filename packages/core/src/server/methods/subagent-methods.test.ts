@@ -16,7 +16,8 @@ describe("authenticated child conversation protocol", () => {
     const connection = connections.create(); const notify = vi.fn(); const closes: (() => void)[] = [];
     const ctx: MethodContext = { connection, notify, close() {}, onClose: (callback) => closes.push(callback) };
     const request = { jsonrpc: "2.0" as const, id: 1, method: SUBAGENT_METHODS.list, params: { characterId: "taki" } };
-    const terminal = Promise.withResolvers<void>();
+    let resolveTerminal!: () => void;
+    const terminal = { promise: new Promise<void>((resolve) => { resolveTerminal = resolve; }), resolve: () => resolveTerminal() };
     const unsubscribe = f.runRepo.onTerminalCommit((fact) => {
       if (fact.run.initiator === "subagent") terminal.resolve();
     });

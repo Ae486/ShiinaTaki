@@ -1,8 +1,15 @@
 # Desktop isolated native checks
 
-- s7-subagent-runtime-smoke.mjs — production Home/WsClient connected to production Core, shared SubagentService and isolated SQLite with local scripted HTTP inference. Verifies actual UI stop, queued addressed input, explicit continuation into a new Run, retained input receipt/result and no relationship speech. Writes source hashes, screenshots and process evidence to acceptance `research/native-runtime/`; no real model, playback or owner acceptance.
+- subagent-native-manifest.mjs — shared before/after source and executable hashes for both private-conversation smokes, including frontend assets, native sources/examples/permissions/configuration, fixture drivers and build inputs; no environment or credentials
 
-- s7-subagent-native-smoke.mjs / s7-subagent-native-server.mjs / s7-subagent-data.ts — production Home/WS/controller with Shared-validated scripted child state in the existing isolated WebView2 fixture; exact child/work controls, receipt distinctions, paused Co-Watching navigation, retained nodes/drafts and no reconnect replay. Evidence goes to Runtime `research/s7-recovery/native/`; no model, production Runtime execution or owner acceptance.
+- s7-subagent-runtime-smoke.mjs — actual Home/WsClient/Core/SQLite/SDK with scripted HTTP: two children/main/drafts, user Stop/Continue, default N50 pause across compaction, exact UI continuation of the original 56-step work, operator K0 user-required attention while private page is hidden, complete actual usage, paging/reconnect/source/privacy. Evidence uses TAKI_E2E_EVIDENCE_DIR or target/acceptance-implementation-20261030/native-runtime; retained profiles/assets live under the actual OS temp root and are recorded in fixture-location.json before building. No real model or human acceptance.
+
+- s7-subagent-native-smoke.mjs / s7-subagent-native-server.mjs / s7-subagent-data.ts — supplemental UI-only WebView2/Home/WS with Shared-validated scripted continuous conversation/activity/attention state; exact combined Stop/Continue, receipts, paused Co-Watching navigation, draft/selection retention and no unknown-send replay. All independent cleanup/evidence failures fail a passing run. Evidence uses TAKI_E2E_EVIDENCE_DIR or target/acceptance-implementation-20261030/native-ui-only; fixture-location.json records the retained OS-temp fixture before building. Cleanup closes owned processes/connections without deleting retained profiles/assets. No model/Core lifecycle/human acceptance.
+
+  Continue checks wait for the actual client's refreshed controls and cleared submitted draft, not merely the server's
+  receipt count. Lost-ACK checks hold canonical history to observe the retained unknown draft, then release it and verify
+  that the same accepted operation clears uncertainty and renders once without replay. Failure evidence includes DOM,
+  visible buttons, draft value and fixture control receipts alongside native screenshots.
 
 - c4-backoff-native-smoke.mjs / c4-backoff-native-server.mjs — the existing frozen Home fixture and C2 WebView2 shell with scripted Shared-validated Monitor/backoff/Timeline data; checks dynamic stages, refresh/reset/reconnect behavior and actual Chat result selection/accessibility. Writes screenshots and source-hash JSON to C4 `research/validation/backoff-native-*`; no real Core/model/C2 opportunity or owner acceptance.
 

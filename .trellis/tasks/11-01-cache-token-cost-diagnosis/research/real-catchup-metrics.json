@@ -1,0 +1,97 @@
+{
+  "at": "2026-11-01T11:10:38.939786+00:00",
+  "calls": [
+    {
+      "mode": "ingest",
+      "label": "canonical-write-gate",
+      "response_id": "fcdd4c7f-b1cf-44ca-a542-c41d4bafe257",
+      "input": 8586,
+      "cache_read": 128,
+      "cache_miss": 8458,
+      "output": 4876,
+      "reasoning": 4854,
+      "elapsed_ms": 33534,
+      "estimated_cny": 0.027964559999999996
+    },
+    {
+      "mode": "ingest",
+      "label": "canonical-local-extraction",
+      "response_id": "050b1eb6-f690-402e-b003-0a96b5e7d05f",
+      "input": 825,
+      "cache_read": 128,
+      "cache_miss": 697,
+      "output": 592,
+      "reasoning": 461,
+      "elapsed_ms": 3734,
+      "estimated_cny": 0.00306756
+    },
+    {
+      "mode": "ingest",
+      "label": "canonical-write-gate",
+      "response_id": "7523fd09-1ebc-452d-8e7a-f204696d6aff",
+      "input": 7733,
+      "cache_read": 384,
+      "cache_miss": 7349,
+      "output": 1565,
+      "reasoning": 1543,
+      "elapsed_ms": 11227,
+      "estimated_cny": 0.01361668
+    },
+    {
+      "mode": "ingest",
+      "label": "canonical-local-extraction",
+      "response_id": "47d25a8c-0464-437a-8b03-c2fcdd500a29",
+      "input": 7239,
+      "cache_read": 256,
+      "cache_miss": 6983,
+      "output": 2115,
+      "reasoning": 1772,
+      "elapsed_ms": 13048,
+      "estimated_cny": 0.01544812
+    },
+    {
+      "mode": "compact",
+      "label": "compact",
+      "response_id": "c5d10606-6e0b-4a41-84de-7866513e3d38",
+      "input": 83604,
+      "cache_read": 0,
+      "cache_miss": 83604,
+      "output": 19681,
+      "reasoning": 11571,
+      "elapsed_ms": 110885,
+      "estimated_cny": 0.162328
+    }
+  ],
+  "totals": {
+    "input": 107987,
+    "cache_read": 896,
+    "cache_miss": 107091,
+    "output": 28829,
+    "reasoning": 20201,
+    "elapsed_ms": 172428,
+    "estimated_cny": 0.22242492,
+    "weighted_cache_fraction": 0.008297295044773908,
+    "reasoning_fraction_of_output": 0.7007180269867148
+  },
+  "pricing": {
+    "currency": "CNY",
+    "currency_verified_by": "Authenticated /user/balance returned CNY; balances not exported.",
+    "source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing.md",
+    "checked_on": "2026-11-01",
+    "model_alias": "deepseek-v4-flash is billed as deepseek-flash / DeepSeek-V4.1-Flash-1017",
+    "time_band": "off-peak; Sunday and UTC11:03-11:06",
+    "rates_per_million": {
+      "input_cache_hit": 0.02,
+      "input_cache_miss": 1,
+      "output": 4
+    },
+    "estimate_only": "Calculated from actual returned tokens and public tariff; not an invoice or before/after balance measurement."
+  },
+  "replay_comparison": {
+    "before_estimator_units": 61941,
+    "after_estimator_units": 22103,
+    "reduction_fraction": 0.6431604268578164,
+    "scope": "Same current code/config/calibration, history-only replay; not full request or billed-cost reduction."
+  },
+  "coverage": "Five complete raw provider usage records; SDK usage is not added again; reasoning is part of output."
+}

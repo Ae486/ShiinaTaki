@@ -18,6 +18,7 @@ export interface TurnRecording {
   partial(): { stepNumber: number; text: string } | undefined;
   commit(input: {
     characterId: string; store: ConversationStore; toolDisplayNames?: Readonly<Record<string, string>>;
+    primarySourceId?: string;
     activity?: ChatTurnActivity; attempt?: ChatActivityAttempt;
     partialSourceContext?: SourceContext;
   }): TimelineEntry[];
@@ -65,7 +66,8 @@ export function createTurnRecording(): TurnRecording {
         rows.push({ message: { role: "assistant", content: partial }, stepNumber: partialStep });
       }
       const entries = input.store.commitTurn({
-        characterId: input.characterId, messages: rows.map((row) => row.message), toolDisplayNames: input.toolDisplayNames,
+        characterId: input.characterId, primarySourceId: input.primarySourceId,
+        messages: rows.map((row) => row.message), toolDisplayNames: input.toolDisplayNames,
         sourceContext: (index) => sources.get(rows[index]?.stepNumber ?? -1)
           ?? (rows[index]?.stepNumber === partialStep && !completed.has(partialStep) ? input.partialSourceContext : undefined),
         ...(input.activity ? { presentation: {

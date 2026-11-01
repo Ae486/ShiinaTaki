@@ -1,8 +1,7 @@
 /**
  * INPUT:  onTurnCompleted(characterId, origin) after each turn; injected timeline/auto-state/events repos, writers,
  *         the conversation store's window boundary and the optional tidy/compact hooks
- * OUTPUT: createAutoMemory(deps) -> { onTurnCompleted } — detached episodic + flush passes (watermark-guarded),
- *         then tidy, then compaction, all in one per-character chain
+ * OUTPUT: detached per-Character maintenance and compaction chains with settle/stop; explicit Legacy ordering
  * POS:    core/memory — the auto-write orchestrator (MEMORY-DESIGN §Write paths 2-3); never blocks the chat turn
  */
 import type { MemoryAutoRepo } from "../db/memory-auto-repo.ts";
@@ -32,7 +31,7 @@ export interface AutoMemoryTidy {
   maybeRun(characterId: string): Promise<void>;
 }
 
-/** The compaction pass's trigger seam (batch 7b fills it): same self-deciding shape as tidy, runs LAST. */
+/** Core-owned compaction decides whether captured conversation pressure merits a summary. */
 export interface AutoMemoryCompact {
   maybeRun(characterId: string): Promise<void>;
 }
@@ -40,12 +39,12 @@ export interface AutoMemoryCompact {
 export interface AutoMemory {
   /**
    * Fire-and-forget after a completed turn. Returns a promise (never rejects) that resolves when this trigger's
-   * pass finishes — production ignores it (detached); tests await it. Passes serialize per character (mutex).
+   * maintenance and compaction finish — production ignores it (detached); tests await it. Each branch serializes per Character.
    */
   onTurnCompleted(characterId: string, origin?: TurnOrigin): Promise<void>;
 }
 
-/** Provider-specific memory work that runs before provider-neutral Compaction in the shared Character chain. */
+/** Provider-specific memory work, independently admitted from canonical Compaction. */
 export interface AutoMemoryMaintenance {
   run(characterId: string, origin: TurnOrigin): Promise<void>;
 }
@@ -71,16 +70,18 @@ export interface AutoMemoryDeps {
    */
   tidy?: AutoMemoryTidy;
   /**
-   * OPTIONAL compaction hook, run LAST in the same chain (episodic → flush → tidy → compact): the compactor
-   * re-runs the flush over its retiring span, so it must see watermarks this pass has finished advancing.
-   * Absent = today's behavior byte-identical.
+   * OPTIONAL compaction hook. This Legacy writer composition preserves maintenance-before-compaction;
+   * canonical runtimes use createMaintenanceAutoMemory's independent admission instead.
    */
   compact?: AutoMemoryCompact;
 }
 
 export function createAutoMemory(deps: AutoMemoryDeps): AutoMemory {
   const maintenance = createAutoMemoryMaintenance(deps);
-  return createMaintenanceAutoMemory({ maintenance: () => maintenance, compact: deps.compact, logger: deps.logger });
+  return createMaintenanceAutoMemory({
+    maintenance: () => maintenance, compact: deps.compact,
+    legacyMaintenanceBeforeCompact: () => true, logger: deps.logger,
+  });
 }
 
 export function createAutoMemoryMaintenance(deps: Omit<AutoMemoryDeps, "compact">): AutoMemoryMaintenance {
@@ -90,20 +91,22 @@ export function createAutoMemoryMaintenance(deps: Omit<AutoMemoryDeps, "compact"
 export function createMaintenanceAutoMemory(input: {
   maintenance: () => AutoMemoryMaintenance | undefined;
   compact?: AutoMemoryCompact;
+  /** Legacy alone requires this trigger's maintenance to finish before compaction is admitted. */
+  legacyMaintenanceBeforeCompact?: () => boolean;
   logger: AutoMemoryLogger;
 }): AutoMemory & { stop(): Promise<void>; settle(): Promise<void> } {
-  // Per-character promise chain: a second trigger waits for the first, so it reads the advanced watermark (no double-fire).
-  const chains = new Map<string, Promise<void>>();
+  // Independent branches preserve each Character's serialization without provider/tidy completion blocking summaries.
+  const maintenanceChains = new Map<string, Promise<void>>();
+  const compactChains = new Map<string, Promise<void>>();
   let stopped = false;
 
-  function onTurnCompleted(characterId: string, origin: TurnOrigin = "primary"): Promise<void> {
-    if (stopped) return Promise.resolve();
+  function enqueue(chains: Map<string, Promise<void>>, characterId: string, task: () => Promise<void>): Promise<void> {
     const prev = chains.get(characterId) ?? Promise.resolve();
     // Defer to a macrotask so the just-finished chat turn returns to the caller before any auto-write work begins.
     const next = prev.then(() => new Promise<void>((resolve) => {
       setImmediate(() => {
         if (stopped) { resolve(); return; }
-        void runMaintenanceChain({ ...input, stopped: () => stopped }, characterId, origin).then(resolve, resolve);
+        void task().then(resolve, resolve);
       });
     }));
     chains.set(characterId, next);
@@ -113,12 +116,27 @@ export function createMaintenanceAutoMemory(input: {
     return next;
   }
 
-  const settle = async () => { while (chains.size > 0) await Promise.allSettled([...chains.values()]); };
+  function onTurnCompleted(characterId: string, origin: TurnOrigin = "primary"): Promise<void> {
+    if (stopped) return Promise.resolve();
+    const ordered = input.legacyMaintenanceBeforeCompact?.() ?? false;
+    const maintenance = enqueue(maintenanceChains, characterId, () => runMaintenanceChain(input, characterId, origin));
+    const compact = enqueue(compactChains, characterId, async () => {
+      if (ordered) await maintenance;
+      if (!stopped) await maybeCompact(input, characterId);
+    });
+    return Promise.all([maintenance, compact]).then(() => undefined);
+  }
+
+  const settle = async () => {
+    while (maintenanceChains.size > 0 || compactChains.size > 0) {
+      await Promise.allSettled([...maintenanceChains.values(), ...compactChains.values()]);
+    }
+  };
   return { onTurnCompleted, settle, stop: () => { stopped = true; return settle(); } };
 }
 
 async function runMaintenanceChain(
-  input: { maintenance: () => AutoMemoryMaintenance | undefined; compact?: AutoMemoryCompact; logger: AutoMemoryLogger; stopped?: () => boolean },
+  input: { maintenance: () => AutoMemoryMaintenance | undefined; logger: AutoMemoryLogger },
   characterId: string,
   origin: TurnOrigin,
 ): Promise<void> {
@@ -129,7 +147,6 @@ async function runMaintenanceChain(
     // exception outside its own sub-path.
     input.logger.warn({ kind: "provider", characterId, code: maintenanceFailureCode(error) }, "memory provider maintenance failed; will retry");
   }
-  if (!input.stopped?.()) await maybeCompact({ compact: input.compact, logger: input.logger }, characterId);
 }
 
 // A provider pass never throws (each sub-path is guarded) so the outer coordinator remains detached and reusable.
@@ -151,8 +168,7 @@ async function maybeTidy(deps: AutoMemoryDeps, characterId: string): Promise<voi
   }
 }
 
-// Compaction runs after even tidy (batch 7): it retires conversation the flush above has finished judging, and its
-// own flush-before-retire step must read the watermark this pass just advanced. Failure = warn + retry next trigger.
+// Canonical summaries retain relevant facts while extraction is delayed; Legacy preserves its explicit flush path.
 async function maybeCompact(
   deps: { compact?: AutoMemoryCompact; logger: AutoMemoryLogger },
   characterId: string,

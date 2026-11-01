@@ -22,7 +22,9 @@ import { createSubagentRepo } from "./db/subagent-repo.ts";
 import { createSubagentInputRepo } from "./db/subagent-input-repo.ts";
 import { createSubagentExecutionRepo } from "./db/subagent-execution-repo.ts";
 import { createRunMessageRepo } from "./db/run-message-repo.ts";
+import { createPrimaryConversationSourceRepo } from "./db/primary-conversation-source-repo.ts";
 import { composeSubagents } from "./harness/subagent-composition.ts";
+import { readSubagentCheckInPolicy } from "./config/subagent-config.ts";
 import { isSubagentLane } from "./agents/work-scope.ts";
 import { createWindowCalibrator } from "./agents/window-calibrator.ts";
 import type { RequestMeasurement } from "./agents/request-measurement.ts";
@@ -141,6 +143,9 @@ import { createScheduledRunAdapter } from "./scheduler/scheduled-run-adapter.ts"
 import { createScheduleEngine } from "./scheduler/schedule-engine.ts";
 import { registerScheduledTaskMethods } from "./server/methods/scheduled-task-methods.ts";
 import { createObservabilityQueryService } from "./observability/observability-query-service.ts";
+import { createAuxiliaryUsageRepo } from "./db/auxiliary-usage-repo.ts";
+import { createAuxiliaryUsageMeter } from "./observability/auxiliary-usage-meter.ts";
+import { registerAuxiliaryUsageMethod } from "./server/methods/auxiliary-usage-method.ts";
 import { registerObservabilityMethods } from "./server/methods/observability-methods.ts";
 import { composeInitiativeRuntime } from "./initiative/initiative-composition.ts";
 import { composePresenceRuntime } from "./initiative/presence-composition.ts";
@@ -175,6 +180,10 @@ const boot = bootstrapCore(process.env, { onConfigChanged: (key) => {
   if (key === BROWSER_PLAYBACK_ENABLED_KEY) browserPlaybackLifecycle.current?.refresh();
 } });
 const { logger, db, serverConfig, contextConfig, model, visionModel } = boot;
+const auxiliaryUsage = createAuxiliaryUsageRepo(db);
+try { auxiliaryUsage.reconcileInterrupted(); }
+catch { logger.warn({ code: "AUXILIARY_USAGE_RECOVERY_FAILED" }, "auxiliary usage observation unavailable"); }
+const auxiliaryUsageMeter = createAuxiliaryUsageMeter({ repo: auxiliaryUsage, logger });
 const coreHostId = loadOrCreateHostIdentity(join(serverConfig.dataDir, "host-identity.json"));
 logger.info("Core Host identity loaded");
 // The selected memory runtime and inactive B3 setup share the same just-in-time
@@ -197,6 +206,7 @@ const effectLifecycle = createEffectLifecycleService(
   { eventRepo: runEventRepo, liveBus: runEventLive },
 );
 const timelineRepo = createTimelineRepo(db);
+const primarySources = createPrimaryConversationSourceRepo({ db, timeline: timelineRepo });
 // R1 tier 2: the MAIN slot's window calibrator (vision/utility declare windows but stay uncalibrated in v1 —
 // their traffic is rare and their windows generous; batch-6 design §2.5 records the gap).
 const windowStateRepo = createWindowStateRepo(db);
@@ -212,6 +222,7 @@ const latestRequestMeasurements = new Map<string, RequestMeasurement>();
 const presenceLifecycle: { current?: ReturnType<typeof composePresenceRuntime> } = {};
 const conversationStore = createConversationStore({
   repo: timelineRepo,
+  primarySources: { repo: primarySources, afterCommit: (callback) => db.afterCommit(callback) },
   onAppend: (entry) => {
     timelineSubscriptions.publish(entry); presenceLifecycle.current?.observeEntry(entry);
     if (entry.role === "user") patternLifecycle.current?.primaryObserved(entry.characterId);
@@ -234,11 +245,11 @@ const avatarOutcomes = createAvatarOutcomes({ deadlineMs: avatarOutcomeDeadlineM
 
 // Marker-first composition owns every legacy/canonical reader, writer, prompt, scheduler, and migration cutover seam.
 const memoryRuntime = composeMemoryRuntime({ db, dataDir: serverConfig.dataDir, promptDir: serverConfig.promptDir, model,
-  timeline: timelineRepo, windowStart: conversationStore.windowStart, summaries: summaryRepo,
+  timeline: timelineRepo, primarySources, windowStart: conversationStore.windowStart, summaries: summaryRepo,
   estimatedTokens: conversationStore.estimatedTokens, budget: historyBudget,
   measureRequest: (characterId) => latestRequestMeasurements.get(characterId),
   effectiveWindowTokens: () => windowCalibrator.effectiveWindow(),
-  compact: contextConfig.compact, env: boot.env, logger,
+  compact: contextConfig.compact, env: boot.env, logger, usageMeter: auxiliaryUsageMeter,
   hindsight: { source: boot.config.source, secrets: secretCatalog } });
 const { selected: selectedMemory, memory, autoMemory, tidy, memoryRoot, writeMemory } = memoryRuntime;
 
@@ -256,7 +267,7 @@ const characterImporter = createCharacterImporter({ store: characterStore });
 // A thin, deletable writer riding its own detached hook; the memory engine itself is untouched.
 const imageDescriptionWriter = visionModel && writeMemory
   ? createImageDescriptionWriter({
-      model: visionModel,
+      model: auxiliaryUsageMeter.wrapModel(visionModel, { source: "image-description", label: "image-memory" }),
       attachments: attachmentStore,
       writeEpisode: writeMemory,
       logger: logger.child({ mod: "image-memory" }),
@@ -324,7 +335,9 @@ bindHostGenerationRetirement({ connections: connectionRegistry, catalogs: hostCa
 registry.register(capabilityChallengeMethod(capabilityBroker, connectionRegistry));
 // Screenshot→VLM bridge: reuses the OPTIONAL vision slot; without it a result stays path+dims (no pixels to the text
 // model) and ambient sampling never starts. ONE bridge, shared by the on-demand tool and the ambient sampler.
-const describeScreenshot = visionModel ? createScreenshotDescriber({ model: visionModel, logger }).describe : undefined;
+const describeScreenshot = visionModel ? createScreenshotDescriber({
+  model: auxiliaryUsageMeter.wrapModel(visionModel, { source: "screenshot-description", label: "screenshot-description" }), logger,
+}).describe : undefined;
 // The six Shell-routed capability tools as one factory (invariant 7): per-call construction binds the initiating
 // operator socket (the challenge prompt targets exactly that connection); the no-argument bag stays for unattended
 // turns. The chat agent's turnTools, the unattended fallback, and the dev trigger all reuse this exact factory.
@@ -427,6 +440,10 @@ const runService = createRunService({
 // Recovery is a boot barrier: classify durable orphan work before registering/accepting trigger dispatch.
 const recovery = createRecoveryCoordinator({ db, runs: runRepo, effects: effectLifecycle });
 await recovery.scan();
+const sourceRecovery = primarySources.recoverOpen();
+if (sourceRecovery.unresolvedSourceIds.length > 0) {
+  logger.warn({ code: "PRIMARY_SOURCE_UNPROVEN", count: sourceRecovery.unresolvedSourceIds.length }, "Interrupted primary sources need review");
+}
 
 // Turn lifecycle (D1 #3/#4): per-character serialization + the cancellable-turn registry shared by send/cancel.
 const turnControls = { queue: createTurnQueue({ onPrimaryReserved: (characterId) => {
@@ -479,12 +496,11 @@ const chatAgent = createChatAgent({
       memory,
        memoryPrompt: () => selectedMemory.canonical ? CANONICAL_MEMORY_SYSTEM_PROMPT : BASE_SYSTEM_PROMPT,
       autoMemory,
-      onPrimaryCommitted: memoryRuntime.recordPrimaryCommitted,
       foregroundInbox: (input) => subagentLifecycle.current?.service.prepareInbox(input),
       contextWindowTokens: () => windowCalibrator.effectiveWindow(),
       maxSteps: boot.agentConfig.maxSteps,
-      // Presentation tools (avatar expression/motion) return nothing to read; stop the loop after a spoken,
-      // presentation-only step so the SDK does not force a padded filler generation (1c). See presentation-stop.ts.
+      // Presentation tools return bounded outcomes; a spoken presentation-only step needs no filler generation.
+      // Invalid inputs retain one correction chance. See presentation-stop.ts.
       stopConditions: [presentationTailStop],
       // Vision slot + attachment store (#17): an image turn routes to visionModel and its bytes ride in-flight only; with
       // no vision slot an image turn is rejected upstream (the text model never receives an image).
@@ -607,6 +623,7 @@ registry.register(runQueueMethod(runService));
 // Operator-only, NO Rust mirror; secrets are reported as set/not-set and refused on write (invariant 5).
 registerConfigMethods(registry, { ...boot.config, logger });
 registerObservabilityMethods(registry, { service: observability, live: runEventLive });
+registerAuxiliaryUsageMethod(registry, { repo: auxiliaryUsage, mode: observability.mode });
 registerScheduledTaskMethods(registry, scheduleService);
 
 const { runtime: initiativeRuntime, finishScheduled, delivery: sharedDelivery, deliveries: sharedDeliveries } = composeInitiativeRuntime({ db, events: runEventRepo, live: runEventLive,
@@ -618,6 +635,7 @@ const subagents = composeSubagents({ db, runRepo, runs: runService, effects: eff
   children: createSubagentRepo(db), inputs: createSubagentInputRepo(db), executions: subagentExecutions, messages: createRunMessageRepo(db),
   queue: turnControls.queue, turns: turnControls.turns, store: conversationStore, historyBudget, timeline: timelineRepo,
   utility: memoryRuntime.utility,
+  checkInPolicy: () => readSubagentCheckInPolicy(boot.config.source),
   deliveries: sharedDeliveries, delivery: sharedDelivery, registry, connections: connectionRegistry,
   reportError: (code) => logger.error({ code }, "Delegation operation failed") });
 subagentLifecycle.current = subagents;

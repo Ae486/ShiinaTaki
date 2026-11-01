@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createServer, request as httpRequest, type IncomingMessage, type ServerResponse } from "node:http";
 import { once } from "node:events";
+import { listenLoopbackHttp } from "./loopback-http.ts";
 import { observeRealProvider, type SyntheticProviderRequest } from "./real-provider-observer.ts";
 
 const cleanup: Array<() => Promise<void>> = [];
@@ -11,14 +12,12 @@ const BODY = Buffer.from(JSON.stringify({ model: "local-fixture", messages: [{ r
 
 async function upstream(handler: (request: IncomingMessage, response: ServerResponse) => void | Promise<void>) {
   const server = createServer((request, response) => { void Promise.resolve(handler(request, response)).catch(() => response.destroy()); });
-  server.listen(0, "127.0.0.1"); await once(server, "listening");
-  const address = server.address();
-  if (!address || typeof address === "string") throw new Error("local fixture did not bind");
+  const port = await listenLoopbackHttp(server);
   cleanup.push(async () => {
     const closed = new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
     server.closeAllConnections(); await closed;
   });
-  return `http://127.0.0.1:${address.port}/v1`;
+  return `http://127.0.0.1:${port}/v1`;
 }
 async function observer(baseUrl: string) {
   const relay = await observeRealProvider({ baseUrl, apiKey: API_KEY,

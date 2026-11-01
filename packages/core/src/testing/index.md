@@ -21,7 +21,7 @@
 - prepared-publication-fixture.ts — explicit-report fixture with synthetic authorization, real SQLite/Character queue, optional linked-child participant and business adapter; test-only
 - direct-request-report-fixture.ts — real primary witness/report acceptance and canonical model-free child/parent proposals for validity/publication tests
 - real-playback-client.ts — explicit loopback Core/CDP connection for owner-authorized real-player controls and Shared-validated current playback; test-only, no credentials
-- co-watching-fixture.ts — synthetic native/browser producers over real ChatAgent/SubagentService/Run/SQLite/Delivery owners; optional actual model/Skill/file composition, default scripted artifact producer
+- co-watching-fixture.ts — synthetic native/browser producers over real ChatAgent/SubagentService/Run/SQLite/Delivery owners; optional actual model/Skill/file composition with explicit context policy and main-model Utility fallback, default scripted artifact producer
 - co-watching-tool-fixture.ts — actual shipped Co-Watching Skill loader and governed Workspace tools for isolated acceptance fixtures
 - source-live-evidence.ts — physically capped real-provider observation, synthetic request capture and immutable per-trial Source evidence directories
 - subagent-fixture.ts — synthetic real SQLite/Effect/ToolLoopAgent/child-service fixture without external calls or user Memory

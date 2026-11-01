@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createAvatarOutcomes, type AvatarOutcomes } from "../avatar/avatar-outcomes.ts";
 import { createAvatarSubscriptions, type AvatarSubscriptions } from "../avatar/avatar-subscriptions.ts";
 import { createAvatarTools } from "../avatar/avatar-tools.ts";
@@ -67,6 +67,43 @@ describe("chat-agent presentation tail-stop (1c)", () => {
 });
 
 describe("chat-agent one-correction rule for invalid presentation calls (D69)", () => {
+  it("missing name receives a current object example, does not execute, and can correct exactly once", async () => {
+    const makeTools = avatarTools();
+    const executions = vi.fn();
+    const wrapped = (characterId: string) => Object.fromEntries(Object.entries(makeTools(characterId)).map(([name, value]) =>
+      [name, { ...value, execute: (input: unknown, options: Parameters<NonNullable<typeof value.execute>>[1]) => {
+        executions(name, input);
+        return value.execute!(input, options);
+      } }]));
+    const { model } = await run([
+      { kind: "textTool", deltas: ["你好！"], toolCallId: "empty", toolName: "avatar_set_expression", input: {} },
+      { kind: "tool", ...expression("correct", "smile") },
+      { kind: "text", deltas: ["(never)"] },
+    ], wrapped);
+    expect(model.doStreamCalls).toHaveLength(2);
+    expect(executions).toHaveBeenCalledExactlyOnceWith("avatar_set_expression", { name: "smile" });
+    const prompt = JSON.stringify(model.doStreamCalls[1]?.prompt);
+    expect(prompt).toContain("Provide the required name in an object");
+    expect(prompt).toContain("do not repeat empty {} arguments");
+    expect(prompt).toContain("default");
+    const requestTools = model.doStreamCalls[0]?.tools?.filter((item) => item.type === "function");
+    expect(requestTools?.find((item) => item.name === "avatar_set_expression")?.inputSchema).toMatchObject({
+      properties: { name: { enum: ["default", "smile"] } }, required: ["name"],
+    });
+    expect(requestTools?.find((item) => item.name === "avatar_play_motion")?.inputSchema).toMatchObject({
+      properties: { name: { enum: ["wave"] } },
+    });
+  });
+
+  it("repeating the observed empty arguments still stops after the bounded correction", async () => {
+    const { model } = await run([
+      { kind: "textTool", deltas: ["你好！"], toolCallId: "empty1", toolName: "avatar_set_expression", input: {} },
+      { kind: "tool", toolCallId: "empty2", toolName: "avatar_set_expression", input: {} },
+      { kind: "text", deltas: ["(never)"] },
+    ]);
+    expect(model.doStreamCalls).toHaveLength(2);
+  });
+
   it("text + invalid avatar call → the SDK re-calls the model once so it reads the validation error", async () => {
     const { model, streamed } = await run([
       { kind: "textTool", deltas: ["你好呀！"], ...expression("c1", "not_in_vocab") },

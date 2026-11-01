@@ -20,4 +20,14 @@ describe("vocabNameSchema", () => {
     expect(schema.parse("anything")).toBe("anything");
     expect(() => schema.parse("")).toThrow();
   });
+
+  it("uses the current costume in correction examples while keeping structured allowed values", () => {
+    const result = z.object({ name: vocabNameSchema(["new_smile", "new_wave"]) }).safeParse({});
+    expect(result.success).toBe(false);
+    const issue = result.error!.issues[0];
+    expect(issue).toMatchObject({ code: "invalid_value", values: ["new_smile", "new_wave"], path: ["name"] });
+    expect(issue?.message).toContain('{"name":"new_smile"}');
+    expect(issue?.message).not.toContain("new_wave");
+    expect(issue?.message).not.toContain("default");
+  });
 });

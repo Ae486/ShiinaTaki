@@ -1,4 +1,4 @@
-import { tool } from "ai";
+import { tool, type Tool } from "ai";
 import { z } from "zod";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { APPROVAL_METHODS, APPROVAL_PRESENTATION_REVISION, type CanonicalApprovalRequest, type RunEvent } from "@taki/shared";
@@ -72,6 +72,44 @@ function requestOf(notifications: Array<{ method: string; params: unknown }>): C
 }
 
 describe("wrapGovernedTool interactive authority", () => {
+  it.each([
+    { asynchronous: false, cancelled: false }, { asynchronous: true, cancelled: false },
+    { asynchronous: false, cancelled: true }, { asynchronous: true, cancelled: true },
+  ])("settles a thrown execute exactly once (async=$asynchronous, cancelled=$cancelled)", async ({ asynchronous, cancelled }) => {
+    const f = failureFixture();
+    const controller = new AbortController();
+    const failure = new Error("private_payload_marker");
+    const fail = () => { if (cancelled) controller.abort(); throw failure; };
+    const execute = vi.fn(asynchronous ? async () => fail() : fail);
+    const wrapped = f.wrap(execute, { signal: controller.signal });
+    await expect(wrapped.execute!({}, { toolCallId: "failed", messages: [], context: {} })).rejects.toBe(failure);
+    expect(execute).toHaveBeenCalledOnce();
+    expect(f.effects.unfinished("r")).toEqual([]);
+    expect(f.db.prepare("SELECT state,outcome,error_code FROM run_effects").get()).toMatchObject({
+      state: "terminal", outcome: cancelled ? "cancelled" : "failed", error_code: cancelled ? "cancelled" : "tool_error",
+    });
+    const settlements = f.eventRepo.list("r").filter((event) => event.kind === "effect.settled");
+    expect(settlements).toHaveLength(1);
+    expect(JSON.stringify(settlements)).not.toContain("private_payload_marker");
+  });
+
+  it.each(["intent", "observer", "settlement"] as const)("does not disguise a %s authority failure as an execute failure", async (stage) => {
+    const f = failureFixture();
+    const failure = new Error(`authority_${stage}`);
+    const fail = () => { throw failure; };
+    const execute = vi.fn(() => ({ ok: true }));
+    const settle = vi.spyOn(f.effects, "settle");
+    if (stage === "settlement") settle.mockImplementation(fail);
+    const wrapped = f.wrap(execute, {
+      onIntent: stage === "intent" ? fail : undefined,
+      bindEffect: stage === "observer" ? fail : undefined,
+    });
+    await expect(wrapped.execute!({}, { toolCallId: "authority", messages: [], context: {} })).rejects.toBe(failure);
+    expect(execute).toHaveBeenCalledTimes(stage === "settlement" ? 1 : 0);
+    expect(settle).toHaveBeenCalledTimes(stage === "settlement" ? 1 : 0);
+    expect(f.effects.unfinished("r")).toHaveLength(1);
+  });
+
   it.each([
     { output: { ok: true }, outcome: "completed", errorCode: undefined },
     { output: { isError: true, content: [{ type: "text", text: "private_payload_marker" }] }, outcome: "failed", errorCode: "mcp_tool_error" },
@@ -209,3 +247,28 @@ describe("wrapGovernedTool interactive authority", () => {
     expect(f.notifications).toEqual([]);
   });
 });
+
+function failureFixture() {
+  const f = fixture();
+  const eventRepo = createRunEventRepo(f.db);
+  const effects = createEffectLifecycleService(createEffectRepo(f.db, eventRepo), undefined, { eventRepo });
+  f.db.exec(`
+    INSERT INTO run_snapshots (snapshot_id,run_id,schema_version,manifest_json,manifest_digest,captured_at,created_at)
+    VALUES ('s','r','harness.v1','{}','${"a".repeat(64)}','2026-10-30T00:00:00.000Z','2026-10-30T00:00:00.000Z');
+    INSERT INTO runs (run_id,character_id,trigger_request_id,idempotency_key,request_hash,initiator,provenance_json,
+      delivery_class,state,state_version,snapshot_id,active_attempt_id,queued_at,operation_phase,created_at,updated_at)
+    VALUES ('r','c','t','i','h','primary','{}','class_a','running',0,'s','a','2026-10-30T00:00:00.000Z',
+      'executing','2026-10-30T00:00:00.000Z','2026-10-30T00:00:00.000Z');
+    INSERT INTO run_attempts (attempt_id,run_id,ordinal,state,state_version,provider,model_id,snapshot_id)
+    VALUES ('a','r',1,'effect_running',0,'p','m','s');
+  `);
+  return { ...f, eventRepo, effects, wrap(execute: NonNullable<Tool["execute"]>, options: {
+    signal?: AbortSignal; onIntent?(): void; bindEffect?(): void;
+  }) {
+    return wrapGovernedTool(tool({ inputSchema: z.object({}), execute }), { service: f.governance,
+      binding: { identity: { capabilityId: "core.subagent.result", ownerHostId: OWNER_HOST_ID }, cellKey: "subagent-result",
+        effect: { sourceRef: { type: "tool", toolName: "core.subagent.result" }, onIntent: options.onIntent } },
+      effect: { runId: "r", attemptId: "a", effects, signal: options.signal,
+        toolObserver: options.bindEffect ? { bindEffect: options.bindEffect } : undefined } });
+  } };
+}

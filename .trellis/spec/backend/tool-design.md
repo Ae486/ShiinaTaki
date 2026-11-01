@@ -174,9 +174,18 @@ than opaque error codes or tracebacks"; e.g. "The `user_id` parameter must be a 
 enum list is in the tool spec and an out-of-enum arg becomes a readable `tool-error` the model self-corrects on
 (`./agent-runtime.md` 1e).
 
-**R3. Return only high-signal context; prefer semantic fields over low-level identifiers (`name`/`file_type`/`image_url`,
-not `uuid`/`mime_type`/`256px_url`).** `[A-WTA]`. — Our precedent: `screenshot` returns `{path, width, height, bytes,
-description?}`; `process_list` returns `{processes, count}`.
+**R3. Return high-signal context selected by its next decision, retrieval or action consumer.** `[A-WTA]`.
+Preserve requested content, source meaning, meaningful outcome/partial/paging facts and exact functional selectors.
+An ID, hash or version needed for a subsequent call, evidence selection or CAS remains useful even when opaque.
+Omit only proven duplicate or internal bookkeeping fields; do not strip recursively by field spelling.
+Use family-owned SDK `toModelOutput` when execution collectors, canonical records or UI callers need the full result.
+Validate the actual next SDK request and raw collector separately; SDK validation errors bypass normal result projection.
+Unknown third-party fields remain intact without an adapter-specific contract. `[A-WTA]` `[O-FC]` `[MCP-SPEC]`
+Implementation seam: [AI SDK tools and tool calling](https://ai-sdk.dev/docs/ai-sdk-core/tools-and-tool-calling),
+verified locally with `ai@7.0.148`. The [approved audit](../../../docs/PROMPT-AND-TOOL-OPTIMIZATION-2026-11-01.md)
+records per-family field decisions. Memory views preserve semantic policy, attribution, nonempty source/entity/scope
+evidence and temporal facts. Scheduler mutation receipts may be compact, but `list` stays complete because it is the
+existing diagnostic retrieval path. No result gets arbitrary truncation merely to meet a smaller size target.
 
 **R4. Result budget: cap/truncate large outputs with a machine-readable `truncated` flag and a sensible default; tell the
 model how to narrow.** `[A-WTA]` ("we restrict tool responses to 25,000 tokens by default … make many small, targeted

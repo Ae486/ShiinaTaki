@@ -9,18 +9,20 @@ import { RunMessageSchema } from "./run-message-schema.ts";
 import { SubagentInputSchema, SubagentTargetSchema } from "./subagent-schema.ts";
 import { SubagentResultGroupSchema } from "./subagent-result-schema.ts";
 import { SubagentInputWaitSchema } from "./subagent-inbox-schema.ts";
+import { SubagentWorkProgressSchema, SubagentTokenUsageSchema } from "./subagent-progress-schema.ts";
 
 const Id = z.string().min(1).max(200);
 export const SUBAGENT_METHODS = { list: "subagent.list", history: "subagent.history", result: "subagent.result",
   send: "subagent.send", stop: "subagent.stop", continue: "subagent.continue", subscribe: "subagent.subscribe", changed: "subagent.changed",
   conversation: "subagent.conversation", conversationBody: "subagent.conversation.body", activityRead: "subagent.activity.read",
-  inboxRecovery: "subagent.inbox.recovery", inboxResume: "subagent.inbox.resume",
+  inboxRecovery: "subagent.inbox.recovery", inboxResume: "subagent.inbox.resume", inboxRetry: "subagent.inbox.retry", attention: "subagent.attention",
   activitySubscribe: "subagent.activity.subscribe", activityUnsubscribe: "subagent.activity.unsubscribe", activity: "subagent.activity" } as const;
 export const SubagentSummarySchema = z.strictObject({
   subagentId: z.uuid(), characterId: Id, label: z.string().min(1).max(200), createdAt: z.iso.datetime({ offset: true }),
   activeRunId: Id.nullable(), activeWorkInputId: z.uuid().nullable(), controlVersion: z.int().nonnegative(), stopOrigin: z.enum(["user", "parent"]).nullable(),
   state: z.enum(["idle", "queued", "running", "blocked_user", "blocked_parent", "deferred", "needs_input"]),
   pendingRequest: SubagentInputWaitSchema.nullable().default(null),
+  progress: SubagentWorkProgressSchema.nullable().default(null), tokenUsage: SubagentTokenUsageSchema.nullable().default(null),
   latestWorkInputId: z.uuid().nullable(), latestCompletionId: Id.nullable(),
 });
 export type SubagentSummary = z.infer<typeof SubagentSummarySchema>;

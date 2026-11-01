@@ -1,10 +1,10 @@
 /**
- * INPUT:  the replay view's size/budget, timeline + summary repos, the MemoryFlushPort, the UtilitySlot,
+ * INPUT:  the replay view's size/budget, timeline + summary repos, optional Legacy flush, the UtilitySlot,
  *         the compaction knobs (context-config), a Logger; maybeRun(characterId) per completed turn
  * OUTPUT: createCompactionPass(deps) -> durable coordinator plus the reviewed prompt contract
  * POS:    core/agents — T5-R5's background compactor: an EXTERNAL summarizer on the utility slot (never the chat
- *         agent), riding auto-memory's per-character chain LAST; flush-before-retire, through_seq advances only on
- *         full success; the chat turn never waits
+ *         agent), independently admitted from canonical extraction; Legacy alone flushes first; through_seq advances
+ *         only on validated, fenced summary success; the chat turn never waits
  */
 import { MEMORY_VOICE_RULE } from "../memory/write-convention.ts";
 import { renderDayDate } from "../time/time-context.ts";
@@ -19,8 +19,8 @@ import {
  * three ruled amendments, plus the source-preservation clarification below:
  *   (a) the closing "Aim for about {TAKI_COMPACT_SUMMARY_TOKENS} tokens." line is DELETED (owner 2026-08-02: no
  *       length limit, no truncation, no knob) and REPLACED with Letta's quality closer;
- *   (b) the WHAT TO LET GO block gains the permanent-facts drop line (design §3.2b — the summarizer never reads
- *       the memory store; this line removes the identity-fact duplication class instead);
+ *   (b) the 2026-11-01 owner-approved decoupling preserves salient facts in the summary while canonical extraction
+ *       is delayed; the summarizer cannot assume long-term memory has already stored them;
  *   (c) {MEMORY_VOICE_RULE} stays a whole-constant import (the tidy-pass precedent — one voice, R10).
  * The source clarification preserves relevant reported events/negations across different subjects and avoids
  * inventing correction history from native roles. It does not change Memory eligibility or summary quality gates.
@@ -62,11 +62,14 @@ WHAT MUST SURVIVE (in this order of priority):
    how you speak to each other.
 6. Their words, where the exact words matter — quote them.
 
+Keep salient names, preferences, hard boundaries and constraints needed for future
+continuity, whether they appear in the earlier record or the new material.
+Do not assume these facts have already been stored in long-term memory.
+
 WHAT TO LET GO: logistics that are finished and settled; back-and-forth that reached a
 conclusion already recorded above; pleasantries; anything still visible in the recent
-messages that follow this record.  Permanent facts about them (their name, fixed
-preferences, hard boundaries) belong to your long-term memory, not this record — this
-record keeps what HAPPENED and what is ONGOING.
+messages that follow this record. Keep the salient facts alongside what HAPPENED and
+what is ONGOING; drop a relevant fact only when the material clearly supersedes it.
 
 DATES: write absolute dates ("on 2026-07-14"), never "today", "yesterday" or "recently" —
 this record is kept indefinitely and relative words in it become lies.  Phrase things that
@@ -89,7 +92,8 @@ transcript says so. An assistant-role message with a supplied material source is
 evidence of a previous attribution mistake. Do not invent a correction narrative from
 that role alone.
 
-This record is the only thing that survives of that stretch of conversation. Every word
+This record may be the only available context for that stretch of conversation while
+long-term memory extraction is pending. Every word
 should enable future continuity.`;
 
 /** Input = date anchor + old summary (if any) + the rendered retiring span — the Letta sliding_window shape (re Part A/E). */

@@ -21,6 +21,7 @@ export const OBSERVABILITY_METHODS = {
   state: "observability.state", list: "observability.list", trajectory: "observability.trajectory",
   inspect: "observability.inspect", subscribe: "observability.subscribe",
   unsubscribe: "observability.unsubscribe", event: "observability.event",
+  auxiliaryUsage: "observability.auxiliaryUsage",
 } as const;
 export const MonitorModeSchema = z.enum(["DISABLED", "FEEDBACK_ONLY", "FULL_LOCAL"]);
 export type MonitorMode = z.infer<typeof MonitorModeSchema>;

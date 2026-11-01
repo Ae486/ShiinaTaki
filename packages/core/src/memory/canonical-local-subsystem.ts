@@ -4,6 +4,7 @@
  * POS:    core/memory — provider-specific background composition; Compaction remains Core-owned
  */
 import type { MemoryConfig } from "../config/memory-config.ts";
+import type { PrimaryConversationSourceRepo } from "../db/primary-conversation-source-repo.ts";
 import { createCanonicalIngestionRepo } from "../db/canonical-ingestion-repo.ts";
 import { createMemoryAutoRepo } from "../db/memory-auto-repo.ts";
 import { createMemoryEventsRepo } from "../db/memory-events-repo.ts";
@@ -22,13 +23,15 @@ import type { UtilitySlot } from "./utility-slot.ts";
 export function createCanonicalLocalSubsystem(input: {
   db: Database; epochId: string; promptDir: string; timeline: TimelineRepo;
   utility: UtilitySlot; config: MemoryConfig; logger: Logger;
+  primarySources?: PrimaryConversationSourceRepo;
 }) {
   const engine = createCanonicalLocalRuntime(input);
   const autoState = createMemoryAutoRepo(input.db);
   const events = createMemoryEventsRepo(input.db);
   const journal = createCanonicalIngestionRepo({ db: input.db, maintenance: engine.maintenanceStore });
   const ingestion = createCanonicalLocalIngestion({ provider: engine.provider, authority: engine.authority,
-    maintenance: engine.maintenanceStore, journal, timeline: input.timeline, autoState, slot: input.utility, events, config: input.config });
+    maintenance: engine.maintenanceStore, journal, timeline: input.timeline, autoState, slot: input.utility, events, config: input.config,
+    primarySources: input.primarySources });
   const tidy = createTidyPass({ view: engine.tidy, autoState, events, slot: input.utility,
     config: input.config, logger: input.logger.child({ mod: "memory-tidy" }) });
   for (const bank of engine.authority.listBanks(input.epochId)) {
@@ -46,6 +49,7 @@ export function createCanonicalLocalSubsystem(input: {
   } };
   const writeMemory: MemoryWriteOp = ({ layer, ...request }) => engine.writeEntry({ ...request, type: layer });
   return { engine, maintenance, memoryFlush: ingestion.flushPort, tidy, writeMemory, stop: retention.stop,
+    importPrimarySources: ingestion.importPrimarySources,
     captureRun: (characterId: string) => {
       engine.banks(characterId);
       ingestion.initializeBaseline(characterId);

@@ -13,6 +13,7 @@
 - media-analysis-work.ts — shared native progression; explicit answers use the ordinary Agent while recommendation results settle silently
 - media-recommendation-preparation.ts — primary-source-authorized 1–3 item batches, exact status/cancel and native-result-only lifecycle
 - manage-media-recommendations-tool.ts — recommendation Skill control for bounded selected preparation and exact batch/item inspection/cancellation
+- media-tool-model-output.ts — SDK model views retaining verified content/paging and exact job/batch controls while omitting native verification and Run/Character bookkeeping
 - mcp-analysis-tools.ts — complete selected native tool discovery on existing MCP connections
 - runtime-types.ts — process-local session/dependency bindings; canonical execution remains in existing Run/Effect/delivery repositories
 - runtime.ts — explicit start/read/revise/stop, Character queue scheduling and deterministic playback publication
@@ -23,7 +24,7 @@
 - viewing-invitation-source.ts — finite Wake media opportunities, admitted evidence preparation, committed-delivery invitation projection and exact accept/defer suppression
 - viewing-invitation-evidence.ts — captured exact-service probe and screened Host frame description inside the admitted Run, with privacy/source authority rechecks
 - runtime-model.ts — original accepted-root/native stage and durable shared-child acceptance before releasing its Character lane
-- child-adapter.ts — shared private preparation, fresh per-Run artifacts, existing plan validation, committed result/edit handoff, exact controls and media/moment/generation sidecars
+- child-adapter.ts — shared private preparation, preserved checkpoint artifacts, natural-final validation including failure on N, committed result/edit handoff, exact controls and media/moment/generation sidecars
 - task-workspace.ts — protected original inputs, explicit bounded anchor selection and revision-specific model proposals
 - manage-co-watching-tool.ts — Skill-disclosed primary tool for registered analysis reads, independent URL analysis/status/cancel, invitation/reconciliation, confirmed-failure reanalysis, accepted duration, revision and Stop; Core owns native request IDs
 

@@ -37,13 +37,13 @@ const EXPRESSION_HEADER = "Avatar expressions you can set with avatar_set_expres
 const MOTION_HEADER = "Avatar motions you can play with avatar_play_motion:";
 
 // The same-step discipline that ships WITH the vocabulary (1c): keeps the model from padding a filler turn after a
-// fire-and-forget avatar call, and from reusing names a costume swap has since replaced. These prompt rules are the
+// settled avatar call, and from reusing names a costume swap has since replaced. These prompt rules are the
 // bias; the structural guarantee is presentationTailStop (presentation-stop.ts).
 const USAGE_RULES = [
   "How to use these avatar tools:",
   "- Express in the SAME reply: call avatar_set_expression / avatar_play_motion together with the words you are already saying, not as a separate message.",
-  "- These tools are fire-and-forget — they change what is on screen and return nothing to read. After calling one, do NOT send another message just because the tool ran.",
-  "- Once you have both spoken and expressed, you are done: stop. Never reply to your own previous message.",
+  "- These tools return presentation outcomes. Applied/already-active, busy, unavailable, superseded and unknown are distinct; none requires repeated presentation calls or a filler reply.",
+  "- Correct a missing or invalid argument only from the current schema, within the one-correction limit. Presentation does not decide whether the user's substantive task is complete.",
   "- Do your real work (reading the screen, files, memory) first; express your reaction alongside your final reply.",
   "- Use ONLY the names listed above. Never reuse an expression/motion name remembered from earlier in the conversation — the set changes when the costume changes.",
 ].join("\n");

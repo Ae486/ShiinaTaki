@@ -2,6 +2,20 @@
 
 Source provenance after the 2026-09-19 integration: `main-D77` through `main-D81` and `T4-D77` through `T4-D81` preserve distinct historical decisions with colliding numbers. Unqualified references inside each historical entry retain that entry's branch context; matching numbers never combine scope or acceptance.
 
+## Memory quality before reasoning-cost reduction (2026-11-01)
+
+A bounded real comparison does not support disabling thinking globally. Nonthinking extraction lost durable preferences
+and changed retention layers; one summary truncated and the completed control dropped live commitments/constraints.
+The thinking baseline also has scope/layer and date/causal inaccuracies. Production defaults remain unchanged.
+
+Completion trigger: before any reasoning-mode rollout, evaluate the concrete cases in the
+[quality review](../.trellis/tasks/11-01-cache-token-cost-diagnosis/research/reasoning-quality-review.md), preserve source
+attribution/uncertainty and still-live anchors, and compare equivalent output limits and cache-normalized cost.
+Narrow candidates are per-message time framing for summary input and the existing semantic layer guidance in extraction;
+implementation is a separate follow-up, not an automatic retry/validator framework. Two keep gates are not sufficient
+skip/coverage evidence. Normal-chat cost improvements still need observation; auxiliary usage is now persisted and queryable.
+See the [delivery and measurement report](../.trellis/tasks/11-01-cache-token-cost-diagnosis/research/auxiliary-usage-report.md).
+
 ## Co-Watching situational-reference capability gap (owner direction, 2026-10-04; audit completed 2026-10-05)
 
 | ID | Deferred contract | Reason | Completion trigger | Evidence | Status |
@@ -278,3 +292,31 @@ M1 设计对话存储时还没有工具,`conversation-store.ts` 做成 text-only
   `packages/core/src/approval/approval-labels.ts`;
   `packages/core/src/mcp/mcp-candidate.ts`; `approval.list` and `mcp.list` live readback on 2026-10-18.
 - **Status:** OPEN; owner-deferred, recorded only. No permission, runtime or frontend behavior was changed.
+
+### T4-D88 — Retained delegation data lifecycle (owner follow-up, 2026-10-30)
+
+- **Content:** Define bounded startup/scheduling reads and an operator-owned retention/archive policy for private
+  child conversations, work bindings, Run messages, results and tool materials. Preserve exact retrieval and the
+  history needed for pending inputs, check-ins, unknown effects and inbox reconciliation.
+- **Reason:** The current conversation task improves execution and recovery; deleting historical evidence or
+  choosing a retention lifetime is a separate data-lifecycle decision. No cleanup is implemented or authorized here.
+- **Completion trigger:** Before promoting delegation from internal trials to sustained always-on use, or upon the
+  first measured startup/scheduling regression attributable to retained work, whichever occurs first. Record retained
+  row/body sizes and startup/scheduling timings before selecting a numeric volume threshold; no unmeasured threshold
+  is claimed to be safe. The follow-up must define the operational threshold before general availability.
+- **Anchors:** `packages/core/src/harness/subagent-service.ts::restoreGenericRoutes` and `schedule`;
+  [delegation maturity assessment](../.trellis/tasks/10-25-agent-delegation-conversations/research/maturity-assessment-20261030.md).
+- **Status:** OPEN; registered only. No deletion, archival migration or real-user data change.
+
+### T4-D89 — User approvals for background child tools (owner follow-up, 2026-10-30)
+
+- **Content:** Route approval-gated child operations through the existing durable permission/approval owner with
+  exact child/work/Run/action identity and user-visible recovery. A missing approval must continue to fail closed.
+- **Reason:** A general background approval route is outside the continuing-conversation/check-in task. Check-in
+  continuation is permission to resume reasoning, not approval for an otherwise unauthorized tool operation.
+- **Completion trigger:** Before advertising or enabling background child workflows that require an interactive
+  approval-gated capability. Prove approval identity, cancellation, expiry, reconnect and unknown-effect behavior
+  against the actual Core/Host boundary before relying on those workflows.
+- **Anchors:** `packages/core/src/governance/governed-tool.ts`;
+  [delegation task scope](../.trellis/tasks/10-25-agent-delegation-conversations/prd.md#out-of-scope).
+- **Status:** OPEN; existing fail-closed behavior remains authoritative.

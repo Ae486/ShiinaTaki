@@ -23,3 +23,5 @@
 - viewing-invitation-config.ts — live registered effective-viewing, remaining-time and invitation-lifetime settings
 - initiative-intention-config.ts — live maximum active duration for new finite follow-up plans; existing deadlines never slide
 - Browser playback opt-in is registered in knob-registry.ts and read live by the Perception source receiver; default false and subordinate to Privacy Pause.
+
+- subagent-config.ts — registered live next-interval check-in N/K policy with defaults 50/3

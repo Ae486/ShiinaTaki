@@ -31,8 +31,8 @@ export function createSubagentInteractCollector(input: {
   let committedWait = false;
   const tools: ToolSet = { interact_parent: tool({
     description: "Send an asynchronous private message to the main Companion using message; independent work can continue. "
-      + "Use needs_input only when dependent work must wait for an addressed answer in this same conversation. "
-      + "This returns a proposal; Core accepts it with the completed step. Use complete_subagent for a final report.",
+      + "Use needs_input when dependent work must wait for an addressed answer in this same conversation; put the precise question in text and keep the job unfinished. "
+      + "This returns a proposal; Core accepts it with the completed step. Use complete_subagent only when the entire assigned job is complete, not for an awaiting-clarification report.",
     inputSchema: SubagentInteractionSchema,
     execute(candidate, options) {
       if (!input.current()) return { ok: false, code: "SUBAGENT_INTERACTION_STALE" };

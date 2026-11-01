@@ -6,6 +6,7 @@
 import { z } from "zod";
 import { SourceContextSchema } from "./context-source-schema.ts";
 import { SubagentTargetSchema } from "./subagent-schema.ts";
+import { SubagentCheckInSchema } from "./subagent-progress-schema.ts";
 
 const Id = z.string().min(1).max(200);
 const Digest = z.string().regex(/^[a-f0-9]{64}$/);
@@ -25,9 +26,12 @@ export const SubagentEventSchema = z.strictObject({
 export type SubagentEvent = z.infer<typeof SubagentEventSchema>;
 export const SubagentInputWaitSchema = z.strictObject({
   eventId: Id, workInputId: z.uuid(), state: z.enum(["open", "answered"]), answerInputId: z.uuid().nullable(),
-});
+  reason: z.enum(["question", "check_in"]).default("question"), checkIn: SubagentCheckInSchema.nullable().default(null),
+}).refine((wait) => (wait.reason === "check_in") === (wait.checkIn !== null), "Check-in waits require their runtime sidecar");
 export type SubagentInputWait = z.infer<typeof SubagentInputWaitSchema>;
 export const SubagentInboxActionSchema = z.discriminatedUnion("kind", [
+  z.strictObject({ kind: z.literal("continue_child"), target: SubagentTargetSchema,
+    replyToEventId: Id, direction: z.string().max(1_000_000) }),
   z.strictObject({ kind: z.literal("answered_child"), target: SubagentTargetSchema,
     replyToEventId: Id.nullable(), direction: z.string().min(1).max(1_000_000) }),
   z.strictObject({ kind: z.enum(["retained", "no_action", "needs_user_input", "speech_proposed"]),

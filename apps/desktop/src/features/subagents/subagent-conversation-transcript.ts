@@ -9,6 +9,7 @@ import { addPrivateMessage } from "./subagent-message-projection.ts";
 import { activityItemKey } from "@/lib/chat-activity-state.js";
 import type { SubagentLiveView } from "./subagent-activity-retention.ts";
 import { completePrivateItem, privateItemPreview } from "./subagent-live-coverage.ts";
+import { subagentCheckInPresentation } from "./subagent-checkin-presentation.ts";
 
 
 const SENDER = { user: "你", parent: "主助手", core: "系统" };
@@ -30,11 +31,12 @@ export function projectSubagentConversation(input: {
       if (!previewsLive) addPrivateMessage(items, entry, { ...base, sender: input.label });
     }
     else if (entry.kind === "event") {
+      const checkIn = subagentCheckInPresentation(entry);
       const ref = entry.presentation?.references[0];
       const key = ref && entry.presentation ? activityItemKey(entry.presentation.messageId, ref.itemId) : `private-event:${entry.event.eventId}`;
       items.set(key, {
-      ...base, key, kind: "text", role: "assistant", sender: entry.event.kind === "interrupted" ? "系统" : input.label,
-      text: entry.event.body ?? "正文暂不可用。", detail: `${EVENT[entry.event.kind]} · ${DISPOSITION[entry.event.state]}`,
+      ...base, key, kind: "text", role: "assistant", sender: checkIn?.sender ?? (entry.event.kind === "interrupted" ? "系统" : input.label),
+      text: checkIn?.text ?? entry.event.body ?? "正文暂不可用。", detail: `${checkIn?.detail ?? EVENT[entry.event.kind]} · ${DISPOSITION[entry.event.state]}`,
       });
     }
     else items.set(`private-control:${entry.seq}`, { ...base, key: `private-control:${entry.seq}`, kind: "notice",

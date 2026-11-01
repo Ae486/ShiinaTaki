@@ -2,6 +2,10 @@
 
 Start here. Every design decision has exactly one canonical home; nothing is duplicated.
 
+- [Project-wide prompt and tool optimization](PROMPT-AND-TOOL-OPTIMIZATION-2026-11-01.md) — owner-approved requirements, field decisions and role coverage.
+- [Implementation evidence](PROMPT-AND-TOOL-IMPLEMENTATION-2026-11-01.md) — current changes, checks, measured request sizes and validation limits.
+- [Real-model validation](PROMPT-AND-TOOL-REAL-VALIDATION-2026-11-01.md) — bounded paid observations, verified delayed-batch final delivery, unresolved wait-only commands and acceptance limits.
+
 > **New session picking up implementation?** Read **`HANDOFF.md`** first - it is the durable Leader bootstrap (what
 > is done, what to read, and how to drive the Trellis leader/agent flow). For the active ZCODE takeover, start with
 > **`ZCODE-HANDOFF.md`** because its dirty-tree warning is time-sensitive, then read `HANDOFF.md` for the durable

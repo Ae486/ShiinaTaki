@@ -226,3 +226,30 @@ const errorCode = output.code.toLowerCase().slice(0, 100);
 // Correct: the same closed pre-conversion classifier supplies observed and governed settlement facts.
 const outcome = classifyToolOutcome({ type: "tool-result", output });
 ```
+
+
+## Observed auxiliary model usage (2026-11-01)
+
+`auxiliary_model_calls` (migration 065) records actual Utility/VLM provider-model invocations outside existing Run
+ownership. It is independent of authoritative `run_usage`: no synthetic Run, inferred historic cost, or merged task/request
+total. Core wraps the resolved Utility model and detached image/shared screenshot describers. Foreground Run observers
+retain ownership. AsyncLocalStorage captures the immutable Utility task at invocation and suppresses auxiliary recording
+inside `createModelEffectMiddleware` dispatch; stream consumption never consults a later task context.
+
+One invocation, including an SDK retry, is one row. `started` becomes completed/failed/cancelled/interrupted from observed
+provider/consumer behavior. Explicit boot reconciliation marks old started rows interrupted without an invented finish
+time. Optional observer failure reports a fixed diagnostic and preserves provider return/exception identity; it must never
+induce model replay or change authoritative Run settlement. Streams retain backpressure, do not drain for accounting, and
+preserve failed status plus any usage returned after an error. Missing/malformed counts are null; reported zero remains zero.
+Reasoning is part of output, not an additional output charge. Recognized raw field presence overrides adapter default zeros.
+No prompts, text, reasoning, tool output, image bytes, exceptions or whole raw objects enter this ledger.
+
+`observability.auxiliaryUsage` is operator-only and refuses `DISABLED` with `OBSERVABILITY_DISABLED`; recording continues.
+Its strict Shared schema requires a `[from,to)` time interval, optional source/label/provider/model filters and a 1..100 row
+page. `(startedAt,callId)` descending keysets paginate rows. Whole-filter totals remain independent of pagination, exposing
+knownCount per nullable sum; cache ratio uses only rows where both input and cache-read counts are known. This scope is
+`observed-auxiliary`, not a provider invoice. No new UI, subscription, pricing engine or replay/recovery queue is implied.
+
+Required regression evidence covers actual multiple/zero-call tasks, retries, Run deduplication, raw unknown/zero counts,
+metadata/storage/logger failures, consumed-stream terminal orders, restart persistence, timezones, page-independent
+aggregates and operator/mode authorization. Real model quality and invoice savings remain separate acceptance evidence.

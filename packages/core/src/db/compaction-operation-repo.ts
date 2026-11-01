@@ -61,6 +61,8 @@ export type BeginCompactionResult =
 
 export interface CompactionOperationRepo {
   begin(input: BeginCompactionInput): BeginCompactionResult;
+  /** Renew a still-current dispatch lease without claiming that memory extraction happened. */
+  renewLease(input: { lease: CompactionLease; now: string; expiresAt: string }): CompactionLease | null;
   recordFlush(input: { lease: CompactionLease; status: "success" | "not_required"; writes: number; now: string; expiresAt: string }): CompactionLease | null;
   recordSummaryGenerated(input: { lease: CompactionLease; outputChars: number; now: string }): boolean;
   fail(input: { lease: CompactionLease; code: CompactionFailureCode; now: string }): boolean;
@@ -103,6 +105,7 @@ const EventRowSchema = z.object({
 export function createCompactionOperationRepo(db: Database): CompactionOperationRepo {
   return {
     begin: (input) => begin(db, BeginSchema.parse(input)),
+    renewLease: (input) => renewLease(db, input),
     recordFlush: (input) => recordFlush(db, input),
     recordSummaryGenerated: (input) => recordGenerated(db, input),
     fail: (input) => fail(db, input),
@@ -177,12 +180,20 @@ function recordFlush(db: Database, input: { lease: CompactionLease; status: "suc
     if (!leaseIsCurrent(db, input.lease, input.now)) return;
     appendEvent(db, { operationId: input.lease.operationId, kind: "flush_completed", now: input.now,
       detail: { flushStatus: input.status, writes: input.writes } });
-    const changed = db.prepare(`UPDATE conversation_compaction_operations SET lease_expires_at=:expires,updated_at=:now
-      WHERE operation_id=:id AND state='open' AND lease_owner=:owner AND lease_fence=:fence AND lease_expires_at>:now`)
-      .run({ id: input.lease.operationId, owner: input.lease.owner, fence: input.lease.fence, now: input.now, expires: input.expiresAt });
-    if (changed.changes === 1) renewed = { ...input.lease, expiresAt: input.expiresAt };
+    renewed = renewLease(db, input);
   });
   return renewed;
+}
+
+function renewLease(db: Database, input: { lease: CompactionLease; now: string; expiresAt: string }): CompactionLease | null {
+  const now = Timestamp.parse(input.now);
+  const expiresAt = Timestamp.parse(input.expiresAt);
+  const changed = db.prepare(`UPDATE conversation_compaction_operations SET lease_expires_at=:expires,updated_at=:now
+    WHERE operation_id=:id AND character_id=:characterId AND state='open' AND lease_owner=:owner
+    AND lease_fence=:fence AND lease_expires_at>:now`)
+    .run({ id: input.lease.operationId, characterId: input.lease.characterId, owner: input.lease.owner,
+      fence: input.lease.fence, now, expires: expiresAt });
+  return changed.changes === 1 ? { ...input.lease, expiresAt } : null;
 }
 
 function recordGenerated(db: Database, input: { lease: CompactionLease; outputChars: number; now: string }): boolean {

@@ -71,7 +71,7 @@ describe("source context migration 057", () => {
     const receipts = old.prepare("SELECT * FROM migrations ORDER BY version").all();
     old.close();
     const upgraded = open(path);
-    expect(upgraded.prepare("SELECT * FROM timeline_messages").get()).toEqual({ ...timeline, source_context_json: null });
+    expect(upgraded.prepare("SELECT * FROM timeline_messages").get()).toEqual({ ...timeline, source_context_json: null, primary_source_id: null });
     expect(upgraded.prepare("SELECT * FROM run_deliveries").get()).toEqual({ ...delivery, source_context_json: null });
     expect(upgraded.prepare("SELECT * FROM migrations WHERE version<=56 ORDER BY version").all()).toEqual(receipts);
     const repo = createTimelineRepo(upgraded);

@@ -51,6 +51,12 @@ function acceptEvent(db: Database, input: AcceptedSubagentEvent): string {
 export function createSubagentEventRepo(db: Database) {
   return {
     get: (eventId: string) => readSubagentEvent(db, eventId),
+    checkInForRun(runId: string) {
+      const row = db.prepare(`SELECT w.*,c.checkin_json FROM subagent_checkins c JOIN subagent_input_waits w USING(event_id)
+        JOIN subagent_events e USING(event_id) WHERE e.producer_run_id=:run ORDER BY e.seq DESC LIMIT 1`).get({ run: runId });
+      return row ? SubagentInputWaitSchema.parse({ eventId: row.event_id, workInputId: row.work_input_id, state: row.state,
+        answerInputId: row.answer_input_id, reason: "check_in", checkIn: JSON.parse(String(row.checkin_json)) }) : null;
+    },
     list(input: { characterId: string; afterSeq?: number; limit?: number }) {
       return db.prepare(`SELECT event_id FROM subagent_events WHERE character_id=:character AND seq>:after
         ORDER BY seq LIMIT :limit`).all({ character: input.characterId, after: input.afterSeq ?? 0,
@@ -58,8 +64,10 @@ export function createSubagentEventRepo(db: Database) {
     },
     wait(workInputId: string) {
       const row = db.prepare("SELECT * FROM subagent_input_waits WHERE work_input_id=:work ORDER BY rowid DESC LIMIT 1").get({ work: workInputId });
+      const checkIn = row ? db.prepare("SELECT checkin_json FROM subagent_checkins WHERE event_id=:id").get({ id: String(row.event_id) }) : null;
       return row ? SubagentInputWaitSchema.parse({ eventId: row.event_id, workInputId: row.work_input_id,
-        state: row.state, answerInputId: row.answer_input_id }) : null;
+        state: row.state, answerInputId: row.answer_input_id, reason: checkIn ? "check_in" : "question",
+        checkIn: checkIn ? JSON.parse(String(checkIn.checkin_json)) : null }) : null;
     },
     acceptInteraction(input: { runId: string; attemptId: string; token: SubagentWorkToken; stepNumber: number;
       toolCallId: string; kind: "message" | "needs_input"; text: string }): string | undefined {

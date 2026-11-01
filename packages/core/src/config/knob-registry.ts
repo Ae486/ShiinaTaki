@@ -25,6 +25,7 @@ import { INITIATIVE_POLICY_FIELDS } from "./initiative-policy-config.ts";
 import { INITIATIVE_WAKE_KNOBS } from "./initiative-wake-knobs.ts";
 import { VIEWING_INVITATION_KNOBS } from "./viewing-invitation-config.ts";
 import { INTENTION_WINDOW_KNOB } from "./initiative-intention-config.ts";
+import { SUBAGENT_CHECKIN_KNOBS } from "./subagent-config.ts";
 import { DEFAULT_HINDSIGHT_POLICY_PROMPT, DEFAULT_HINDSIGHT_POLICY_TIMEOUT_MS } from "./hindsight-policy-config.ts";
 import { DEFAULT_TTL_DAYS } from "./attachment-config.ts";
 import { AVATAR_OUTCOME_DEADLINE_KEY, DEFAULT_AVATAR_OUTCOME_DEADLINE_MS } from "./avatar-config.ts";
@@ -106,6 +107,7 @@ function pattern(spec: { regex: RegExp; message: string }): Pick<Knob, "schema" 
 export const CONFIG_KNOBS: Knob[] = [
   ...INITIATIVE_WAKE_KNOBS,
   INTENTION_WINDOW_KNOB,
+  ...SUBAGENT_CHECKIN_KNOBS,
   { key: "TAKI_INITIATIVE_ENABLED", ...bool(), default: false, apply: "live", description: "Enable Class B initiative admission and delivery; requires a valid Core opportunity source." },
   ...Object.entries(INITIATIVE_POLICY_FIELDS).map(([field, entry]): Knob => ({ ...entry,
     ...int({ min: 1, max: 2_147_483_647 }), apply: "live",

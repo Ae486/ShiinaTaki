@@ -82,6 +82,16 @@ captureRun(characterId: string): Promise<CapturedMemoryRun>;
   canonical observation began, not completed processing of older messages. Startup initializes existing Character Banks.
 - Accept only positive exact commit evidence: Character, row ID, sequence, content digest and complete commit boundary.
   An autonomous assistant row or a numeric Timeline range is not proof of primary conversational origin.
+- Migration 064 adds provider-independent `primary_conversation_sources` and exact Timeline membership. The primary
+  writer commits user/open source together, response rows/retained state together, or no-output cancellation/retraction
+  together. Publication uses `Database.afterCommit`. A provider callback is not the sole durable source producer.
+- Capture admission authority identity locally; available Run metadata may accompany it. Capability availability or a
+  changed capability digest cannot govern chat durability or reassign a source to another epoch/provider/lineage.
+  Before accepting new work, boot seals old open inputs from actual durable members; it never invents output or settles
+  uncertain Runs/Effects. Unknown historical rows are not relabeled by schema migration.
+- Ordinary maintenance imports retained local sources idempotently into existing immutable provider witness tables,
+  including below-cadence passes. Failed binding retains the source for later retry; another provider's witness is not
+  duplicated. Reuse the existing span plans and receipts rather than introducing another extraction queue.
 - Select unprocessed witnesses by epoch and absent span assignment. A late positive commit remains eligible even when its
   sequence is below the retirement cursor or original baseline. Cursor advancement cannot mark an unwitnessed source done.
 - Reuse T5's `EPISODIC_EVERY_N = 20` actual unprocessed primary-message cadence for ordinary maintenance. A failed pending
@@ -93,11 +103,14 @@ captureRun(characterId: string): Promise<CapturedMemoryRun>;
   at supported source/message boundaries; do not truncate a supported 100,000-character source to make framing fit.
 - Lexical duplicates reinforce the existing fact without another classification call, and retain the new source-to-fact
   evidence. Extraction obeys automatic importance/visibility limits. Trusted observed writes keep machine-observed provenance.
-- An unresolved post-baseline primary witness gap, incomplete receipt, authority change or failed flush prevents retirement.
+- Select valid pending source groups independently of earlier unknown holes; never join context across a hole.
+  Report processing progress separately from contiguous coverage, which stops before the first unresolved source.
+- An unresolved post-baseline primary witness gap, incomplete receipt, authority change or failed flush prevents a
+  successful explicit ingestion-coverage claim. It does not block canonical context compaction.
   A genuinely pre-baseline range with no applicable positive source is `not_required/before_canonical_ingestion_eligibility`.
   An uninstalled ingestion adapter is a failure, never a synthetic successful flush.
-- Per-Character detached work serializes in the existing maintenance chain; all model work shares one process Utility Slot.
-  Do not wrap a chain that calls `slot.run` in another `slot.run`. Compaction remains Core-owned.
+- Per-Character maintenance and compaction have independent serialized chains; all model work shares one process
+  Utility Slot. Do not wrap a chain that calls `slot.run` in another `slot.run`. Legacy alone retains synchronous flush.
 
 ### Source descriptions in exact-primary ingestion
 
@@ -137,8 +150,8 @@ captureRun(characterId: string): Promise<CapturedMemoryRun>;
   advance the successful tidy watermark. A clean store consumes no model call.
 - The durable authority marker is the retirement boundary. Once committed, retire the Legacy fence before constructing or
   publishing a replacement. Constructor, callback or marker-read failures cannot reopen old held tool/write/maintenance/flush
-  references. Before-commit rollback may reopen them. Failed replacement binding leaves an unavailable facade and failing
-  Compaction flush; it must not keep using the retired writer.
+  references. Before-commit rollback may reopen them. Failed replacement binding leaves an unavailable memory facade;
+  independent context compaction must not keep using the retired writer.
 
 ## 4. Validation & Error Matrix
 
@@ -146,7 +159,7 @@ captureRun(characterId: string): Promise<CapturedMemoryRun>;
 | --- | --- |
 | Wrong epoch, Bank, Character or stale revision | Refuse without partial mutation; preserve the matching structured conflict/authority error |
 | Forged/replayed commit with changed row or commit boundary | `MEMORY_INGESTION_SOURCE_UNPROVEN`; the entire witness batch rolls back |
-| Unknown post-baseline user source | Flush refuses; no summary retirement or invented primary witness |
+| Unknown post-baseline user source | Explicit coverage remains incomplete; later valid groups and context compaction may proceed |
 | Late exact source below baseline/cursor | Assign and process that source once; do not replay completed historical spans |
 | Below cadence with no failed span | No Write Gate/extraction model call |
 | Partial routed write or restart | Reuse saved gate/plan and committed Bank receipt; apply only missing work |
@@ -154,7 +167,7 @@ captureRun(characterId: string): Promise<CapturedMemoryRun>;
 | Cross-Bank correction has private supporting facts | Preserve copied support edges as hidden evidence; exclude them from other Characters' prompts, sparse recall and tidy model input |
 | Imported record receives an unchanged lifecycle operation | Persist the referenced snapshot with its receipt; return the same result on retry |
 | Post-marker constructor/callback/read failure | Legacy stays retired; replacement is unavailable or correctly bound, never fallback |
-| No real provider flush installed | Failure that prevents Compaction retirement |
+| No real provider flush installed | Explicit coverage fails; canonical Compaction remains independent |
 
 ## 5. Good / Base / Bad Cases
 
@@ -187,10 +200,10 @@ const entries = timeline.rangeAscending(characterId, cursor, tail);
 await extract(entries.filter((entry) => entry.role === "assistant"));
 ```
 
-Correct: witness the persistence owner's exact committed rows, preserve cadence, and let flush force the same journal.
+Correct: persist exact source membership locally, then let ordinary maintenance bind and process the same journal.
 
 ```ts
-ingestion.recordPrimaryCommitted(primaryCommit);
+const opened = primarySources.begin({ user, runId, memory: capturedMemory });
+primarySources.retain({ sourceId: opened.sourceId, rows: actualResponseRows });
 await ingestion.maybeRun({ characterId });
-await ingestion.flushPort.prepareRetirement(retirement);
 ```

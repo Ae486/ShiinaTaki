@@ -8,19 +8,23 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFil
 import { join, relative, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { parseEnv } from "node:util";
-import { ConnectResultSchema, JsonRpcSuccessResponseSchema, SUBAGENT_METHODS,
+import { CONFIG_METHODS, ConfigListResultSchema, ConnectResultSchema, JsonRpcSuccessResponseSchema, SUBAGENT_METHODS,
   SubagentListResultSchema, SubagentHistoryResultSchema, TIMELINE_METHODS } from "@taki/shared";
 import { CORE_DIR, realProviderEnv } from "./paths.ts";
 import { startInitiativeProcess, type InitiativeProcess } from "./initiative-process.ts";
 import { openRpcSocket, type RpcSocket } from "./rpc-socket.ts";
 import { fetchTimelineEntries, sayToAgent, type AgentTurn } from "./operator-drivers.ts";
-import { observeRealProvider, type SyntheticProviderRequest } from "./real-provider-observer.ts";
+import { observeRealProvider, type ProviderObservation, type SyntheticProviderRequest } from "./real-provider-observer.ts";
 import { seedCanonicalLocal } from "./seed-canonical-memory.ts";
 
 const ROOT = resolve(CORE_DIR, "../..");
 const EFFECTS_SQL = `SELECT effect_id,run_id,attempt_id,kind,state,input_digest,source_ref_json,
   started_at,settled_at,outcome,error_code FROM run_effects ORDER BY created_at,effect_id`;
 const TABLES = ["subagent_conversations", "subagent_inputs", "subagent_executions", "run_messages",
+  "subagent_events", "subagent_input_waits", "subagent_inbox_consumers", "subagent_inbox_members",
+  "subagent_inbox_deliveries", "subagent_event_actions", "subagent_speech_publications",
+  "subagent_context_summaries", "subagent_context_summary_intents", "subagent_context_summary_failures",
+  "subagent_work_progress", "subagent_task_steps", "subagent_checkins", "subagent_user_attention",
   "timeline_messages", "run_usage", "canonical_memory_sources", "canonical_memory_units",
   "canonical_memory_policy", "canonical_memory_operation_receipts", "canonical_memory_primary_commits"] as const;
 
@@ -30,21 +34,37 @@ export interface AgentContextScenario {
   readonly dataDir: string;
   readonly evidenceDir: string;
   readonly wsUrl: string;
+  readonly requestedModel: string;
+  /** Loopback observation endpoint, never the upstream credential or Authorization header. */
+  readonly providerBaseUrl: string;
   readonly requests: readonly SyntheticProviderRequest[];
+  readonly observations: readonly ProviderObservation[];
   readonly socket: RpcSocket;
+  /** Remaining time on the existing scenario deadline; reading it never extends the deadline. */
+  remainingMs(): number;
   ask(prompt: string): Promise<AgentTurn>;
   rpc(method: string, params: unknown): Promise<unknown>;
   list(): Promise<ReturnType<typeof SubagentListResultSchema.parse>>;
   history(subagentId: string): Promise<ReturnType<typeof SubagentHistoryResultSchema.parse>>;
   rows(sql: string): Record<string, unknown>[];
   checkpoint(phase: string, detail?: unknown): void;
+  effectiveSettings(): Promise<ReturnType<typeof ConfigListResultSchema.parse>>;
 }
 
-interface ScenarioInput {
+export interface ScenarioInput {
   name: string;
   maxUpstreamRequests: number;
   blocks?: { globalUserCard?: string; characterIndex?: string };
   seed?(dataDir: string): void;
+  sessionDeadlineMs?: number;
+  turnDeadlineMs?: number;
+  checkInSteps?: number;
+  checkInParentApprovals?: number;
+  contextTokens?: number;
+  historyRatio?: number;
+  compactKeepMessages?: number;
+  /** null uses the production default; the older directed fixtures retain their explicit six-step main policy. */
+  mainMaxSteps?: number | null;
   /** Optional test-owned transport timing; production Core still sends its ordinary HTTP requests. */
   transport?(baseUrl: string, evidenceDir: string): Promise<{ baseUrl: string; close(): Promise<void> }>;
 }
@@ -68,6 +88,9 @@ export async function withScriptedAgentContextScenario(input: ScenarioInput & {
 async function runScenario(input: ScenarioInput & { provider: Record<string, string>; evidenceKind: string; evidenceRoot?: string },
   exercise: (scenario: AgentContextScenario) => Promise<void>): Promise<void> {
   const provider = input.provider;
+  const sessionDeadlineMs = positiveInteger(input.sessionDeadlineMs ?? 240_000, "session deadline");
+  const turnDeadlineMs = positiveInteger(input.turnDeadlineMs ?? 180_000, "turn deadline");
+  positiveInteger(input.maxUpstreamRequests, "upstream request budget");
   if (!/^[a-z0-9-]+$/.test(input.name)) throw new Error("invalid agent context scenario name");
   const artifactRoot = input.evidenceRoot ?? process.env.TAKI_E2E_EVIDENCE_DIR;
   if (!artifactRoot) throw new Error("agent context acceptance requires TAKI_E2E_EVIDENCE_DIR");
@@ -88,8 +111,11 @@ async function runScenario(input: ScenarioInput & { provider: Record<string, str
   let timer: ReturnType<typeof setTimeout> | undefined;
   const startedAt = new Date().toISOString();
   const baseline = sourceManifest();
-  const settings: Record<string, string> = { ...provider, ...modelTuning(), TAKI_MAX_STEPS: "6", TAKI_PROVIDER_INCLUDE_USAGE: "true",
+  const settings: Record<string, string> = { ...provider, ...modelTuning(), TAKI_PROVIDER_INCLUDE_USAGE: "true",
     TAKI_MONITOR_MODE: "FULL_LOCAL", TAKI_INITIATIVE_ENABLED: "false" };
+  if (input.mainMaxSteps !== null) settings.TAKI_MAX_STEPS = String(positiveInteger(input.mainMaxSteps ?? 6, "main step limit"));
+  const scenarioSettings = explicitSettings(input);
+  Object.assign(settings, scenarioSettings);
   const write = (name: string, value: unknown) => writeFileSync(join(evidenceDir, name), `${JSON.stringify(value, null, 2)}\n`, "utf8");
   const checkpoint = (phase: string, detail?: unknown) => {
     phases.push({ phase, at: new Date().toISOString() });
@@ -98,7 +124,10 @@ async function runScenario(input: ScenarioInput & { provider: Record<string, str
   try {
     write("baseline.json", { name: input.name, startedAt, source: baseline, node: process.version,
       requestedModel: provider.TAKI_PROVIDER_MODEL, maxUpstreamRequests: input.maxUpstreamRequests,
-      maxSteps: 6, sessionDeadlineMs: 240_000, contextTokens: settings.TAKI_PROVIDER_CONTEXT_TOKENS ?? null,
+      requestedMainMaxSteps: input.mainMaxSteps === null ? "production-default" : input.mainMaxSteps ?? 6,
+      sessionDeadlineMs, turnDeadlineMs, scenarioSettings,
+      endpointHost: new URL(provider.TAKI_PROVIDER_BASE_URL!).hostname,
+      contextTokens: settings.TAKI_PROVIDER_CONTEXT_TOKENS ?? null,
       evidenceKind: input.evidenceKind });
     seedCanonicalLocal(dataDir, input.blocks);
     input.seed?.(dataDir);
@@ -107,16 +136,17 @@ async function runScenario(input: ScenarioInput & { provider: Record<string, str
       syntheticCapture: { maxUpstreamRequests: input.maxUpstreamRequests, onRequest(request) {
         requests.push(request);
         // These candidates are a concurrent observation, not an invented exact Effect/request correlation.
-        write(`request-${request.requestNumber}.json`, { ...request,
+        write(`request-${request.requestNumber}.json`, { ...request, bodySha256: createHash("sha256").update(request.body).digest("hex"),
           effectsAtRequest: readRows(dataDir, EFFECTS_SQL),
           executionsAtRequest: readRows(dataDir, "SELECT run_id,subagent_id,work_input_id,parent_run_id FROM subagent_executions") });
       } } });
     core = await startInitiativeProcess({ dataDir, providerBaseUrl: relay.baseUrl, productionEntry: true, settings });
+    const deadlineAt = performance.now() + sessionDeadlineMs;
     timer = setTimeout(() => {
       deadlineExpired = true;
       void Promise.allSettled([Promise.resolve().then(() => relay?.close()), Promise.resolve().then(() => transport?.close()),
         Promise.resolve().then(() => core?.close())]);
-    }, 240_000);
+    }, sessionDeadlineMs);
     socket = await openRpcSocket(core.wsUrl);
     const connection = socket;
     const rpc = async (method: string, params: unknown) => {
@@ -126,14 +156,25 @@ async function runScenario(input: ScenarioInput & { provider: Record<string, str
     ConnectResultSchema.parse(await rpc("connect", { deviceId: randomUUID(), deviceName: "Agent context acceptance", role: "operator" }));
     await rpc(TIMELINE_METHODS.subscribe, { characterId: "taki" });
     await rpc(SUBAGENT_METHODS.subscribe, {});
+    const effectiveSettings = async () => {
+      const config = ConfigListResultSchema.parse(await rpc(CONFIG_METHODS.list, {}));
+      return { entries: config.entries.filter((entry) => !entry.secret && (
+        entry.key.startsWith("TAKI_SUBAGENT_CHECKIN_") || entry.key === "TAKI_MAX_STEPS"
+        || entry.key === "TAKI_PROVIDER_CONTEXT_TOKENS" || entry.key === "TAKI_CONTEXT_HISTORY_RATIO"
+        || entry.key === "TAKI_COMPACT_KEEP_MESSAGES" || entry.key === "TAKI_PROVIDER_INCLUDE_USAGE")) };
+    };
+    write("effective-settings.json", await effectiveSettings());
     checkpoint("ready");
-    await exercise({ dataDir, evidenceDir, wsUrl: core.wsUrl, requests, socket: connection, rpc, checkpoint,
+    await exercise({ dataDir, evidenceDir, wsUrl: core.wsUrl, requestedModel: provider.TAKI_PROVIDER_MODEL!, providerBaseUrl: relay.baseUrl,
+      requests, socket: connection, rpc, checkpoint, effectiveSettings,
+      remainingMs: () => Math.max(0, Math.ceil(deadlineAt - performance.now())),
+      get observations() { return relay?.requests ?? []; },
       rows: (sql) => readRows(dataDir, sql),
       list: async () => SubagentListResultSchema.parse(await rpc(SUBAGENT_METHODS.list, { characterId: "taki", limit: 100 })),
       history: async (subagentId) => SubagentHistoryResultSchema.parse(await rpc(SUBAGENT_METHODS.history,
         { characterId: "taki", subagentId, limit: 100 })),
       ask: async (prompt) => {
-        const result = await sayToAgent(connection, prompt, 180_000);
+        const result = await sayToAgent(connection, prompt, turnDeadlineMs);
         turns.push({ prompt, status: result.status, text: result.text });
         checkpoint("chat-ended", { status: result.status, timeline: await fetchTimelineEntries(connection, "taki") });
         if (result.status !== "complete") throw new Error("agent context chat failed; consult retained phase evidence");
@@ -203,7 +244,9 @@ function modelTuning(): Record<string, string> {
 }
 
 function sourceManifest(): Record<string, string> {
-  const files = ["package.json", "pnpm-lock.yaml", "packages/core/package.json", "packages/shared/package.json", "e2e/package.json"];
+  const files = ["package.json", "pnpm-lock.yaml", "tsconfig.base.json", "packages/core/package.json",
+    "packages/core/tsconfig.json", "packages/shared/package.json", "packages/shared/tsconfig.json", "e2e/package.json",
+    "e2e/tsconfig.json", "e2e/vitest.config.ts"];
   const visit = (path: string) => {
     for (const entry of readdirSync(path, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
       const fullPath = join(path, entry.name);
@@ -213,4 +256,26 @@ function sourceManifest(): Record<string, string> {
   };
   for (const directory of ["packages/core/src", "packages/shared/src", "e2e/src"]) visit(join(ROOT, directory));
   return Object.fromEntries(files.sort().map((path) => [path, createHash("sha256").update(readFileSync(join(ROOT, path))).digest("hex")]));
+}
+
+function positiveInteger(value: number, label: string): number {
+  if (!Number.isSafeInteger(value) || value <= 0) throw new Error(`invalid ${label}`);
+  return value;
+}
+
+function explicitSettings(input: ScenarioInput): Record<string, string> {
+  const settings: Record<string, string> = {};
+  for (const [key, value] of [["TAKI_SUBAGENT_CHECKIN_STEPS", input.checkInSteps],
+    ["TAKI_PROVIDER_CONTEXT_TOKENS", input.contextTokens], ["TAKI_COMPACT_KEEP_MESSAGES", input.compactKeepMessages]] as const) {
+    if (value !== undefined) settings[key] = String(positiveInteger(value, key));
+  }
+  if (input.checkInParentApprovals !== undefined) {
+    if (!Number.isSafeInteger(input.checkInParentApprovals) || input.checkInParentApprovals < 0) throw new Error("invalid parent approval limit");
+    settings.TAKI_SUBAGENT_CHECKIN_PARENT_APPROVALS = String(input.checkInParentApprovals);
+  }
+  if (input.historyRatio !== undefined) {
+    if (!Number.isFinite(input.historyRatio) || input.historyRatio <= 0 || input.historyRatio > 1) throw new Error("invalid history ratio");
+    settings.TAKI_CONTEXT_HISTORY_RATIO = String(input.historyRatio);
+  }
+  return settings;
 }

@@ -1,6 +1,6 @@
 # prompt/ — System & Character Prompt Library
 
-Single home for all injectable prompt content. Kept at the repo root (not buried in a package) so it's easy to find and edit. These are **data files, not code** — the Agent Core READS them at assembly time and injects them; nothing here is hardcoded into `.ts`.
+Home for editable Companion and persona cards. The Agent Core reads these data files at assembly time. Runtime mechanics, role protocols and capability-dependent guidance have source-owned prompts listed below; this directory is not the only model entrypoint.
 
 ## Layout
 
@@ -23,6 +23,19 @@ prompt/
 ```
 
 The assistant layer is global (one file, every character shares it). The persona is per-character; the active character selects which `characters/<id>/persona.md` loads.
+
+The diagram describes the editable memory/persona portion. The full primary request starts with the authority-selected base/Memory procedure, stable date/timezone, this portion and captured run instructions. `companion-task-guidance.ts` adds primary task guidance and capability choices only for tools exposed in the current step; private inbox instructions follow when present. Deferred Skill/MCP tools gain their associated guidance only after successful disclosure.
+
+## Source-owned prompt map
+
+| Audience | Owner | Contract |
+| --- | --- | --- |
+| Primary Companion | `packages/core/src/agents/base-prompt.ts`, `companion-task-guidance.ts`, `agent-attempt.ts` | Truthful results, source rules, active Memory procedure, task completion and actual capability membership. |
+| Worker / private inbox / initiative | `packages/core/src/harness/` and `agents/initiative-context.ts` | Separate role input, result and publication contracts; no primary task module injection. |
+| Tool and feature consumer | Tool descriptions, `integrations/taki-co-watching/`, `integrations/taki-media-recommendations/`, avatar vocabulary | Parameters, states and feature-specific choices appear beside the capability. |
+| Utility / media / external summary producers | Their owning `memory/`, `agents/`, `co-watching/` modules and QQ summary producer | Independent model calls with bounded extraction, summary or preparation duties; editing the Companion card does not change them. |
+
+See the [coverage and independent-entrypoint audit](../docs/PROMPT-AND-TOOL-OPTIMIZATION-2026-11-01.md#6-prompt-organization-and-coverage) for reviewed surfaces and intentionally unchanged contracts.
 
 ## These are the shipped defaults
 

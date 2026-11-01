@@ -83,7 +83,7 @@ function close(db: Database): void {
 }
 
 function expectFinalSchema(db: Database): void {
-  expect(db.prepare("SELECT max(version) AS version FROM migrations").get()?.version).toBe(62);
+  expect(db.prepare("SELECT max(version) AS version FROM migrations").get()?.version).toBe(65);
   expect(db.prepare("PRAGMA table_info(timeline_messages)").all().map((row) => row.name)).toContain("presentation");
   const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map((row) => row.name);
   expect(tables).toEqual(expect.arrayContaining([
@@ -136,7 +136,7 @@ function expectFinalSchema(db: Database): void {
     "run_receipts",
     "run_events",
     "run_effects",
-    "run_usage",
+    "run_usage", "auxiliary_model_calls",
     "core_process_generations",
     "scheduled_tasks",
     "schedule_occurrences",
@@ -212,10 +212,10 @@ describe("migration lineage reopen matrix", () => {
     const firstApplied: number[][] = [];
     const first = open(path, MIGRATIONS, (applied) => firstApplied.push(applied));
     expectFinalSchema(first);
-    expect(firstApplied).toEqual([[...Array.from({ length: 58 }, (_, index) => index + 1), 60, 61, 62]]);
+    expect(firstApplied).toEqual([[...Array.from({ length: 58 }, (_, index) => index + 1), 60, 61, 62, 63, 64, 65]]);
     close(first);
     const reopened = expectReopenNoOp(path);
-    expect(reopened.prepare("SELECT count(*) AS count FROM migrations").get()?.count).toBe(61);
+    expect(reopened.prepare("SELECT count(*) AS count FROM migrations").get()?.count).toBe(64);
   });
 
   it("converges the historical T4 17/18 MCP-Skill lineage through the current tail", () => {
@@ -269,10 +269,10 @@ describe("migration lineage reopen matrix", () => {
       sourceContextMigration057,
       ...MIGRATIONS.filter((migration) => migration.version > 57),
     ], (applied) => tailApplied.push(applied));
-    expect(tailApplied).toEqual([[19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 60, 61, 62]]);
+    expect(tailApplied).toEqual([[19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 60, 61, 62, 63, 64, 65]]);
     expectFinalSchema(reopened);
     expect(reopened.prepare("SELECT version FROM migrations ORDER BY version").all().map((row) => row.version)).toEqual(
-      [...Array.from({ length: 58 }, (_, index) => index + 1), 60, 61, 62],
+      [...Array.from({ length: 58 }, (_, index) => index + 1), 60, 61, 62, 63, 64, 65],
     );
     close(reopened);
     expectReopenNoOp(path);
@@ -285,7 +285,7 @@ describe("migration lineage reopen matrix", () => {
     close(first);
     const tailApplied: number[][] = [];
     const reopened = open(path, MIGRATIONS, (applied) => tailApplied.push(applied));
-    expect(tailApplied).toEqual([[21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 60, 61, 62]]);
+    expect(tailApplied).toEqual([[21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 60, 61, 62, 63, 64, 65]]);
     expectFinalSchema(reopened);
     expect(reopened.prepare("SELECT mode FROM memory_authority_selection WHERE singleton=1").get()?.mode)
       .toBe("legacy-markdown");
@@ -302,7 +302,7 @@ describe("migration lineage reopen matrix", () => {
 
     const applied: number[][] = [];
     const upgraded = open(path, MIGRATIONS, (versions) => applied.push(versions));
-    expect(applied).toEqual([[32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 60, 61, 62]]);
+    expect(applied).toEqual([[32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 60, 61, 62, 63, 64, 65]]);
     expect(upgraded.prepare(`SELECT through_seq,text,revision,last_operation_id,source_from_seq,source_through_seq,
       source_digest,captured_tail_seq FROM conversation_summary WHERE character_id='taki'`).get()).toEqual({
       through_seq: 12,
@@ -366,7 +366,7 @@ describe("migration lineage reopen matrix", () => {
     const leases = first.prepare("SELECT * FROM hindsight_replica_sync_leases").all();
     close(first); const applied: number[][] = [];
     const upgraded = open(path, MIGRATIONS, (versions) => applied.push(versions));
-    expect(applied).toEqual([[34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 60, 61, 62]]);
+    expect(applied).toEqual([[34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 60, 61, 62, 63, 64, 65]]);
     expectFinalSchema(upgraded);
     expect(upgraded.prepare("SELECT * FROM hindsight_replica_sync_records").all()).toEqual(records);
     expect(createReplicaRecordStore(upgraded, createIntlSegmenterTokenizer({ stoplist: true })).get({
@@ -397,12 +397,13 @@ describe("migration lineage reopen matrix", () => {
 
     const applied: number[][] = [];
     const upgraded = open(path, MIGRATIONS, (versions) => applied.push(versions));
-    expect(applied).toEqual([history === "034" ? [35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 60, 61, 62] : [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 60, 61, 62]]);
+    expect(applied).toEqual([history === "034" ? [35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 60, 61, 62, 63, 64, 65] : [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 60, 61, 62, 63, 64, 65]]);
     expectFinalSchema(upgraded);
     expect(upgraded.prepare("SELECT version,applied_at FROM migrations WHERE version<=:version ORDER BY version")
       .all({ version: history === "034" ? 34 : 35 })).toEqual(receipts);
     const after = memoryTimelineData(upgraded);
-    expect(after.timeline).toEqual(before.timeline.map((row) => ({ ...row, presentation: row.presentation ?? null, source_context_json: null })));
+    expect(after.timeline).toEqual(before.timeline.map((row) => ({ ...row, presentation: row.presentation ?? null,
+      source_context_json: null, primary_source_id: null })));
     if (before.presentationBytes) expect(after.presentationBytes).toEqual(before.presentationBytes);
     expect(after.pending).toEqual(before.pending);
     expect(after.watermarks).toEqual(before.watermarks);

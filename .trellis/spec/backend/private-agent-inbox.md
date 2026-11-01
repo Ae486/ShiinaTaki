@@ -30,14 +30,48 @@ Private task context compaction is covered by `private-worker-context.md`; publi
   terminal transaction. Interaction events join completed private message persistence in its transaction.
 - `accepted` means persisted. `delivered` means the exact batch was included at an actual model Effect intent, not
   confirmed remote receipt. `handled` requires a durable disposition/action; ordinary model termination acknowledges none.
+- A useful unstructured worker response is provisional evidence, not accepted delegated completion. Idle state and no
+  pending question do not change this. Parent instructions distinguish normal unstructured output from failure/cancellation;
+  when the original report is still required, reuse existing analysis and continue the same work for its normal final
+  submission. Explicit interrupted-work continuation with no pending request uses the exact current target,
+  `continue=true` and `replyToEventId=null`. This is a model-selected existing action, not a new Runtime retry loop.
+  User Stop, unknown Effects, permission/source refusals and explicit abandonment remain separate facts and barriers.
 - Claims without any actual intent may be released. No timeout or restart returns delivered events to the automatic pool.
   FIFO claims contain at most eight events and a 16 KiB rendered envelope with bounded previews and explicit detail tools.
-- An idle failure before any actual inbox intent defers that Character until a meaningful fresh opportunity: a newly
-  accepted work/addressed input, eligible interaction/final event, successful primary terminal commit, or an explicit
-  owner authority-change signal. Ordinary queue-release hints never clear that deferral. A fresh opportunity arriving
-  during the failing capture is retained for the next capture. No timer or task-age policy is introduced.
+- Foreground/idle guidance separates a completed reply/handler from completion of the original task. Handle available
+  events and end when only other notified results remain pending; later events resume work without a new user message.
+  Retained earlier evidence can be inspected when needed for integration. Deliver the integrated answer when the
+  requested results are sufficient, using foreground text or the existing idle `speech_proposed` publication path.
+  Dynamic guidance does not rewrite an existing claim's frozen instructions, membership or projection digest.
+- An idle batch contains newly delivered events, not earlier handlers' reports/dispositions. When integration requires
+  a worker report absent from current context, inspect that worker's retained results once before concluding it is
+  pending. A report missing from this batch is not evidence it has not arrived. No extra persistent coordinator or
+  automatic history copy is needed; the existing scoped inspection supplies the missing evidence.
+- A proven pre-intent idle failure retries on one bounded timer (1s, 5s, 15s), as well as fresh accepted work/input,
+  eligible events and successful primary completion. Ordinary queue-release hints do not clear deferral. Fresh
+  opportunities during capture are retained. Exhaustion is persisted and shown in `subagent.attention`; an explicit
+  `subagent.inbox.retry` offers fresh authority capture without releasing/replaying any delivered batch. Close clears timers.
+- Idle handlers structurally exclude `delegate_subagent` from executable and disclosed tools. Existing child
+  inspection/answer/Stop and exact check-in continuation remain available. Actual model instructions disclose this boundary.
+- `needs_user_input` attention persists beyond a handled disposition until trusted user guidance to the exact work/request.
+  Reconciliation and exhausted pre-intent retries have separate actionable attention entries, visible through Home reads
+  and existing child invalidations. Runtime status does not publish Companion speech.
 - After actual inbox intent, the durable delivered membership fences that batch from automatic replay; a handler
-  failure must not latch unrelated later eligible events. Only missing dispositions require explicit reconciliation.
+  failure must not latch unrelated later eligible events. Failed or naturally omitted dispositions require explicit
+  reconciliation. The narrow successful foreground-yield continuation below preserves the existing delivered batch.
+- A live idle handler may automatically continue the same batch after a proven cooperative foreground yield: the actual
+  recorded safe tool boundary caused the stop, the stream drained and Run settled successfully, every Effect completed,
+  and actual non-model operations were only `core.subagent.read`, with no accepted event actions. Finite step caps win
+  before yield certification. A flag observed only at final settlement, unknown outcome, mutation, natural stop, recording
+  failure or cancellation cannot authorize this path.
+- The process-local certificate schedules existing linked resume only when the lane is free, with a stable operation key
+  and fresh normal authority. Preserve old deliveries/actions and successor CAS; never release events to the fresh pool.
+  Capture failures consume the opportunity. Only a proven new foreground reservation with atomic zero-admission rollback
+  defers the same certificate until a fresh lane opportunity. No timer retry or restart reconstruction is introduced.
+  Shutdown discards certificates; unresolved durable consumers remain explicitly recoverable.
+- A successor sees the latest public conversation. If the foreground already supplied the requested result it can retain
+  the event; unrelated foreground chat does not suppress an outstanding answer. Existing publication authority remains
+  mandatory. This establishes exactly-once accepted dispositions, not deterministic semantic deduplication of public prose.
 - One main Attempt owns at most one immutable batch. Before the first nonempty claim, foreground preparation may try
   again at subsequent SDK request boundaries. After claiming, its members and projection identity do not change.
 - `answered_child` commits addressed acceptance and its action/result receipt together. Repeated identical operation and
@@ -47,6 +81,11 @@ Private task context compaction is covered by `private-worker-context.md`; publi
 
 - A question is a work dependency, not a successful task result or an open Run. Accept the exact answer transactionally;
   an answer arriving before terminal pointer release remains answered and is scheduled only after release.
+- Check-in input waits and per-work progress follow [Private worker check-ins](private-worker-checkin.md).
+- Ordinary model messages resolve active/latest work only when work is omitted; an explicit work never silently changes.
+  Run/control drift alone does not reject ordinary messages. Stop, Continue and exact-question answers stay versioned.
+  Model inspection/result pages retain useful evidence while omitting canonical digests/internal receipts. Refusals carry
+  current scoped state, exact current target and next valid action; wrong-Character refusals expose no child details.
 - A user Stop latch blocks parent resumption and suppresses Stop-derived terminal notifications. Already accepted earlier
   events remain evidence. Explicit user continuation restores future reporting and never rewrites historical eligibility.
 - Generic work defaults to `until_cancelled`; finite source-owned validity, individual request deadlines and unknown-effect
@@ -59,6 +98,14 @@ Private task context compaction is covered by `private-worker-context.md`; publi
   as evidence, with exact paged detail available, and only missing dispositions need execution.
 
 ### Private read/activity boundary
+
+- Compact model views do not alter raw action results, canonical events or body pages. Future teasers may omit the
+  work ID duplicated by detailed exact targets; never rewrite stored claim instructions/digests. Foreground guidance
+  is a current role prefix around frozen claim text. Foreground replies require committed primary text; idle handling
+  keeps the private `speech_proposed` publication contract. Event handling alone does not deliver an answer.
+- New claim guidance permits direct use of complete accepted report previews. Interrupted-work recovery guidance
+  is included only when the batch contains an interrupted event and is explicitly scoped to that event kind.
+  Original stored claims/digests are never rewritten to update these instructions.
 
 - Conversation order stores source references, never another transcript. Inputs render once; their model inclusion receipts
   remain canonical evidence. Accepted report events replace their matched report tool pair in the read projection.

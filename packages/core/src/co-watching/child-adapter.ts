@@ -64,7 +64,12 @@ export async function submitCoWatchingChild(state: CoWatchingRuntimeState, sessi
 
 async function prepareExecution(state: CoWatchingRuntimeState, session: CoWatchingBinding, execution: OwnedSubagentExecution): Promise<string> {
   if (!session.child || !session.edit || !coWatchingCurrent(state, session) || execution.signal.aborted) throw new Error("CO_WATCHING_SOURCE_LOST");
-  const paths = coWatchingPaths(session); const revision = randomUUID();
+  const paths = coWatchingPaths(session);
+  const previous = session.child.artifact;
+  const checkpoint = previous && state.deps.subagents?.events.checkInForRun(previous.runId);
+  const reuse = checkpoint && session.pending === undefined && previous.edit === session.edit
+    && previous.committedDigest === digestRunValue([...session.committed]);
+  const revision = reuse ? previous.revision : randomUUID();
   session.child.subagentId = execution.token().subagentId; session.child.workInputId = execution.token().workInputId;
   session.child.artifact = { runId: execution.runId, revision, reference: `${paths.output}/${revision}.json`, edit: session.edit,
     committedDigest: digestRunValue([...session.committed]) };
@@ -104,6 +109,11 @@ async function acceptCommittedResult(state: CoWatchingRuntimeState, session: CoW
   const child = session.child; const service = state.deps.subagents;
   if (!child || !service || session.closed || child.acceptedCompletionId === completionId) return;
   const result = service.result({ characterId: session.request.characterId, completionId }).result.child;
+  const checkpoint = service.events.checkInForRun(completionId);
+  if (checkpoint && result.workInputId === child.workInputId && result.outcome === "completed") {
+    child.ownerYield = false;
+    controlChanged(state, session); return;
+  }
   if (result.workInputId !== child.workInputId || result.runId !== child.artifact?.runId) return;
   if (service.summary(result.subagentId).stopOrigin) { controlChanged(state, session); return; }
   if (result.outcome === "cancelled" || session.pending !== undefined || child.ownerYield) return;
@@ -146,7 +156,9 @@ function controlChanged(state: CoWatchingRuntimeState, session: CoWatchingBindin
   if (!target || session.closed) return;
   const current = state.deps.subagents!.summary(target.subagentId);
   session.edit ??= session.owner?.beginEdit(session.revision);
-  session.status = current.stopOrigin ? "paused_child" : session.plan ? "revising" : "preparing";
+  session.status = current.stopOrigin || (current.pendingRequest?.workInputId === target.workInputId
+    && current.pendingRequest.state === "open" && current.pendingRequest.reason === "check_in")
+    ? "paused_child" : session.plan ? "revising" : "preparing";
   state.deps.onChanged(session.request.characterId);
 }
 
@@ -169,7 +181,8 @@ export function yieldCoWatchingChild(state: CoWatchingRuntimeState, session: CoW
 export function resumeCoWatchingChild(state: CoWatchingRuntimeState, session: CoWatchingBinding): void {
   const target = childTarget(state, session); const child = session.child;
   if (!target || !child?.ownerYield || target.expectedRunId || session.closed || !coWatchingCurrent(state, session)) return;
-  if (state.deps.subagents!.summary(target.subagentId).stopOrigin) return;
+  const current = state.deps.subagents!.summary(target.subagentId);
+  if (current.stopOrigin || current.pendingRequest?.state === "open") return;
   child.ownerYield = false;
   state.deps.subagents!.resumeOwnedWork(child.binding, { characterId: session.request.characterId, target,
     operationKey: randomUUID(), direction: "Resume the accepted preparation after foreground work released its lane.", materials: [] });

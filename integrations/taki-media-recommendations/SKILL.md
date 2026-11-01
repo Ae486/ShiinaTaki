@@ -8,6 +8,10 @@ description: Select and prepare 1-3 existing OpenBili video recommendations, exp
 Use ordinary Agent tools and the configured OpenBili MCP server. This portable Skill is procedural knowledge;
 loading it grants no permission, opens no page, accepts no Co-Watching session and changes no preferences.
 
+Use this Skill for selecting, preparing or discussing native recommendations. A request to analyze one supplied
+URL or watch together belongs to `taki-co-watching` when installed. Match explicit cancellation to the retained
+recommendation batch/item; stopping Co-Watching or URL-analysis follow-up is a separate control.
+
 Discover the current OpenBili extension tools and describe the exact operation before calling it. The MCP tools
 are disclosed individually through the existing extension directory; loading this Skill does not automatically
 expose every MCP schema. Use the returned current tool key, since server prefixes vary by installation. Do not

@@ -8,6 +8,7 @@ import { openDatabase, type Database } from "../db/sqlite.ts";
 import { createSummaryRepo } from "../db/summary-repo.ts";
 import { createTimelineRepo } from "../db/timeline-repo.ts";
 import { estimateMessageTokens } from "../memory/token-estimator.ts";
+import { createMaintenanceAutoMemory } from "../memory/auto-memory.ts";
 import type { FlushWriter } from "../memory/flush-writer.ts";
 import { createLegacyMemoryFlushPort, type MemoryFlushPort } from "../memory/memory-flush-port.ts";
 import type { UtilitySlot } from "../memory/utility-slot.ts";
@@ -24,12 +25,19 @@ afterEach(() => {
   for (const db of dbs.splice(0)) db.close();
 });
 
+function deferred() {
+  let resolve!: () => void;
+  const promise = new Promise<void>((done) => { resolve = done; });
+  return { promise, resolve };
+}
+
 /** A generate mock that records every prompt it receives (row 9: rolling input inspection). */
-function recordingModel(text: string): { model: LanguageModel; prompts: string[] } {
+function recordingModel(text: string, beforeGenerate?: () => void): { model: LanguageModel; prompts: string[] } {
   const prompts: string[] = [];
   const model = new MockLanguageModelV4({
     doGenerate: async (options) => {
       prompts.push(JSON.stringify(options.prompt));
+      beforeGenerate?.();
       return {
         content: [{ type: "text", text }],
         finishReason: { unified: "stop" as const, raw: undefined },
@@ -120,7 +128,7 @@ function spyFlush(): { calls: SegmentCall[]; failNext: { value: boolean }; write
 
 function fixture(opts: {
   estimated?: number; wall?: number; keep?: number; model?: LanguageModel; flushPort?: MemoryFlushPort;
-  now?: () => Date; leaseMs?: number;
+  now?: () => Date; leaseMs?: number; canonical?: boolean; slot?: UtilitySlot;
 } = {}) {
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
   dbs.push(db);
@@ -137,8 +145,8 @@ function fixture(opts: {
     timeline,
     summaries,
     operations,
-    flush: opts.flushPort ?? createLegacyMemoryFlushPort({ timeline, autoState, writer: flush.writer }),
-    slot,
+    legacyFlush: opts.canonical ? undefined : () => opts.flushPort ?? createLegacyMemoryFlushPort({ timeline, autoState, writer: flush.writer }),
+    slot: opts.slot ?? slot,
     config: { triggerRatio: 0.8, keepMessages: opts.keep ?? 3 },
     logger: logger.child({ mod: "compaction" }),
     ...(opts.now ? { now: opts.now } : {}),
@@ -165,6 +173,90 @@ function seedToolSource(f: ReturnType<typeof fixture>) {
   update.run({ seq: 3, role: "tool", content: "[tool-result: opaque_route -> json]", parts: JSON.stringify(result) });
   return { call, result };
 }
+
+describe("canonical compaction independent of memory extraction", () => {
+  it.each(["failed", "blocked"])("summarizes salient facts with %s maintenance and keeps raw Timeline", async (mode) => {
+    const recorder = recordingModel("I remember Lin's preference for tea and promise to avoid late calls.");
+    const f = fixture({ canonical: true, model: recorder.model });
+    seed(f.timeline, 10);
+    f.db.prepare("UPDATE timeline_messages SET content=:text WHERE seq=1")
+      .run({ text: "My name is Lin. I prefer tea. Never call me after 21:00." });
+    const raw = f.db.prepare("SELECT * FROM timeline_messages ORDER BY seq").all();
+    const release = deferred();
+    const compacted = deferred();
+    let maintenanceEntered = false;
+    const { logger } = createCaptureLogger();
+    const auto = createMaintenanceAutoMemory({
+      maintenance: () => ({ run: async () => {
+        maintenanceEntered = true;
+        if (mode === "failed") throw new Error("provider unavailable");
+        await release.promise;
+      } }),
+      compact: { maybeRun: async (characterId) => {
+        await f.pass.maybeRun(characterId);
+        compacted.resolve();
+      } },
+      logger,
+    });
+    const active = auto.onTurnCompleted("taki");
+    try {
+      await compacted.promise;
+      expect(maintenanceEntered).toBe(true);
+      expect(recorder.prompts).toHaveLength(1);
+      expect(recorder.prompts[0]).toContain("My name is Lin. I prefer tea. Never call me after 21:00.");
+      expect(recorder.prompts[0]).toContain("Do not assume these facts have already been stored in long-term memory");
+      expect(f.summaries.get("taki")?.throughSeq).toBe(6);
+      expect(f.autoState.get("taki").lastFlushSeq).toBe(0);
+      expect(f.db.prepare("SELECT * FROM timeline_messages ORDER BY seq").all()).toEqual(raw);
+      expect(f.db.prepare("SELECT kind,flush_status,writes FROM conversation_compaction_events ORDER BY operation_seq").all())
+        .toEqual(["started", "summary_generated", "committed"].map((kind) => ({ kind, flush_status: null, writes: null })));
+    } finally {
+      release.resolve();
+      await active;
+      await auto.stop();
+    }
+  });
+});
+
+describe("compaction Utility Slot dispatch lease", () => {
+  it.each(["expired", "cancelled", "valid"])("checks a %s lease after queue wait before calling the model", async (state) => {
+    const { logger } = createCaptureLogger();
+    let clock = new Date("2026-11-01T00:00:00.000Z");
+    const recorder = recordingModel("A compact memory.", () => {
+      // Generation completes beyond the original lease, inside the renewed dispatch lease.
+      clock = new Date("2026-11-01T00:00:01.250Z");
+    });
+    const slot = createUtilitySlot({ mainModel: recorder.model, logger });
+    const release = deferred();
+    const entered = deferred();
+    const blocker = slot.run("maintenance", async () => { entered.resolve(); await release.promise; });
+    await entered.promise;
+    const f = fixture({ canonical: true, slot, now: () => clock, leaseMs: 1_000 });
+    seed(f.timeline, 10);
+    const active = f.pass.maybeRun("taki");
+    const operation = f.operations.active("taki")!;
+    try {
+      expect(recorder.prompts).toHaveLength(0);
+      clock = new Date(state === "expired" ? "2026-11-01T00:00:01.000Z" : "2026-11-01T00:00:00.500Z");
+      if (state === "cancelled") expect(f.pass.cancel("taki")).toBe(true);
+      release.resolve();
+      await blocker;
+      await active;
+      expect(recorder.prompts).toHaveLength(state === "valid" ? 1 : 0);
+      expect(f.operations.get(operation.operationId)?.state).toBe(state === "valid" ? "committed" : state === "expired" ? "abandoned" : "cancelled");
+      expect(f.operations.events(operation.operationId).map((event) => event.kind)).toEqual(state === "valid"
+        ? ["started", "summary_generated", "committed"] : ["started", state === "expired" ? "abandoned" : "cancelled"]);
+      if (state !== "valid") {
+        expect(f.summaries.get("taki")).toBeNull();
+        expect(f.records.some((record) => record.msg === "summary generation failed; will retry")).toBe(false);
+      }
+    } finally {
+      release.resolve();
+      await active;
+      await slot.stop();
+    }
+  });
+});
 
 describe("compaction trigger math (row 7 — fires above the ratio, never at or below)", () => {
   it("does nothing at or below triggerRatio × wall", async () => {
@@ -701,7 +793,8 @@ describe("compaction rolling input (row 9 — old summary + retiring span, tail 
     expect(prompt).toContain("You are NOT the primary agent");
     expect(prompt).toContain("FIRST PERSON"); // MEMORY_VOICE_RULE imported whole (R10, tidy precedent)
     expect(prompt).toContain("WHAT MUST SURVIVE");
-    expect(prompt).toContain("Permanent facts about them"); // amendment (b): the §3.2b drop line
+    expect(prompt).toContain("Keep salient names, preferences, hard boundaries and constraints");
+    expect(prompt).not.toContain("belong to your long-term memory, not this record");
     expect(prompt).toContain("Every word\nshould enable future continuity"); // amendment (a): Letta closer, no token target
     expect(prompt).not.toContain("Aim for about");
     // Post-probe owner ruling: the input carries the base-prompt day line — the probe showed the model inventing a
@@ -729,7 +822,7 @@ describe("compaction on the real utility slot (row 11 — slot model used; main-
       timeline,
       summaries,
       operations: createCompactionOperationRepo(db),
-      flush: createLegacyMemoryFlushPort({ timeline, autoState, writer: spyFlush().writer }),
+      legacyFlush: () => createLegacyMemoryFlushPort({ timeline, autoState, writer: spyFlush().writer }),
       slot,
       config: { triggerRatio: 0.8, keepMessages: 3 },
       logger: createCaptureLogger().logger.child({ mod: "compaction" }),

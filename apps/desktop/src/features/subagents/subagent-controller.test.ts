@@ -34,8 +34,27 @@ function setup() {
 async function ready(h: ReturnType<typeof setup>) {
   h.controller.bind(h.client); await flush(); h.controller.select(CHILD_A); await flush();
 }
+function confirmedInput(operationKey: string, seq = 900) {
+  const data = conversation();
+  data.entries.push({ kind: "input", seq, subagentId: CHILD_A, workInputId: WORK_A, historicalOrder: false,
+    createdAt: data.conversation.createdAt, input: work({ inputId: `00000000-0000-4000-8000-${String(seq).padStart(12, "0")}`,
+      operationKey, kind: "message", inputSeq: seq, workSeq: seq, sender: { kind: "user" }, direction: "once", consumed: null }) });
+  return data;
+}
 
 describe("private child controller", () => {
+  it("empty check-in Continue addresses the exact wait once and retains user-stop authority in the target", async () => {
+    const h = setup(); const data = conversation();
+    data.conversation.pendingRequest = { eventId: "checkin-a", workInputId: WORK_A, state: "open", answerInputId: null,
+      reason: "check_in", checkIn: { completedSteps: 50, intervalStartSteps: 0, intervalSteps: 50,
+        parentApprovalLimit: 3, consecutiveParentApprovals: 3, requiredActor: "user", reportKind: "core_snapshot" } };
+    data.conversation.stopOrigin = "user"; data.conversation.activeRunId = null;
+    vi.mocked(h.client.subagentConversation).mockResolvedValue(data); await ready(h);
+    const target = h.target();
+    expect(await h.controller.submitDraft(target, "continue")).toBe(true);
+    expect(h.client.subagentContinue).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ target, direction: "", replyToEventId: "checkin-a" }));
+    expect(h.client.subagentSend).not.toHaveBeenCalled();
+  });
   it("unrelated child progress refreshes the list without disabling the selected child's Send", async () => {
     const h = setup(); await ready(h);
     const list = deferred<Awaited<ReturnType<SubagentClient["subagentList"]>>>();
@@ -74,7 +93,7 @@ describe("private child controller", () => {
   it("Send and continue performs exactly one continuation and addresses the current input wait", async () => {
     const h = setup(); const data = conversation();
     data.conversation.stopOrigin = "user"; data.conversation.activeRunId = null; data.conversation.state = "blocked_user";
-    data.conversation.pendingRequest = { eventId: "question-a", workInputId: WORK_A, state: "open", answerInputId: null };
+    data.conversation.pendingRequest = { eventId: "question-a", workInputId: WORK_A, state: "open", answerInputId: null, reason: "question", checkIn: null };
     vi.mocked(h.client.subagentConversation).mockResolvedValue(data); await ready(h);
     h.controller.editDraft(h.target(), "addressed answer");
     expect(await h.controller.submitDraft(h.target(), "continue")).toBe(true);
@@ -89,6 +108,47 @@ describe("private child controller", () => {
     expect(h.controller.draft(target)).toMatchObject({ text: "once", uncertain: true });
     expect(await h.controller.submitDraft(h.target(), "send")).toBe(false);
     expect(h.client.subagentSend).toHaveBeenCalledOnce();
+  });
+  it("clears only the matching unknown-input warning when canonical history confirms the accepted operation", async () => {
+    const h = setup(); await ready(h); const target = h.target(); h.controller.editDraft(target, "once");
+    vi.mocked(h.client.subagentSend).mockRejectedValueOnce(new Error("ACK lost"));
+    await h.controller.submitDraft(target, "send"); await flush();
+    const warning = h.state().feedback; expect(warning?.message).toContain("未能确认操作结果");
+    const request = vi.mocked(h.client.subagentSend).mock.calls[0]![0];
+    vi.mocked(h.client.subagentConversation).mockResolvedValue(confirmedInput("unrelated-operation", 899)); h.emit(); await flush();
+    expect(h.state().feedback).toBe(warning); expect(h.controller.draft(target).uncertain).toBe(true);
+    vi.mocked(h.client.subagentConversation).mockResolvedValue(confirmedInput(request.operationKey)); await h.controller.refresh(); await flush();
+    expect(h.controller.draft(target)).toMatchObject({ text: "", uncertain: false });
+    expect(h.state().feedback).toBeNull(); expect(h.client.subagentSend).toHaveBeenCalledOnce();
+  });
+
+  it("resolves a connection-loss warning from exact canonical input while preserving a newer local draft", async () => {
+    const h = setup(); await ready(h); const target = h.target(); h.controller.editDraft(target, "once");
+    const pending = deferred<SubagentControlResult>(); vi.mocked(h.client.subagentSend).mockReturnValueOnce(pending.promise);
+    const action = h.controller.submitDraft(target, "send");
+    const request = vi.mocked(h.client.subagentSend).mock.calls[0]![0];
+    h.controller.bind(null); expect(h.state().feedback?.message).toContain("尚未确认");
+    h.controller.editDraft(target, "newer unsent draft");
+    const replacement = setup(); vi.mocked(replacement.client.subagentConversation).mockResolvedValue(confirmedInput(request.operationKey));
+    h.controller.bind(replacement.client); await flush();
+    expect(h.controller.draft(target)).toMatchObject({ text: "newer unsent draft", uncertain: false });
+    expect(h.state().feedback).toBeNull();
+    pending.resolve({ conversation: summary(), input: work(), cancellationRequested: false }); await action;
+    expect(h.state().feedback).toBeNull(); expect(replacement.client.subagentSend).not.toHaveBeenCalled();
+  });
+
+  it("does not erase a newer control conflict or independent list-read error when an older input is confirmed", async () => {
+    const h = setup(); await ready(h); const target = h.target(); h.controller.editDraft(target, "once");
+    vi.mocked(h.client.subagentSend).mockRejectedValueOnce(new Error("ACK lost"));
+    await h.controller.submitDraft(target, "send"); await flush();
+    const request = vi.mocked(h.client.subagentSend).mock.calls[0]![0];
+    vi.mocked(h.client.subagentStop).mockRejectedValueOnce(new JSONRPCErrorException("stale", -32000, { reason: "SUBAGENT_CONTROL_CONFLICT" }));
+    await h.controller.act(target, "stop"); await flush(); const warning = h.state().feedback;
+    expect(warning?.message).toContain("控制状态已变化");
+    vi.mocked(h.client.subagentList).mockRejectedValue(new Error("list unavailable"));
+    vi.mocked(h.client.subagentConversation).mockResolvedValue(confirmedInput(request.operationKey)); h.emit(); await flush();
+    expect(h.controller.draft(target).uncertain).toBe(false); expect(h.state().feedback).toBe(warning);
+    expect(h.state().readError).toContain("读取子代理列表失败");
   });
   it("installs the handler and waits for subscription acknowledgement before reading", async () => {
     const h = setup(); const subscribed = deferred<"supported">();

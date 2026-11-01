@@ -1,0 +1,8 @@
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Check optional diagnostic isolation, sensitive-data handling and known/unknown counters."}
+{"file":".trellis/spec/backend/canonical-local-memory-runtime.md","reason":"Check exact proof, rollback/retraction and no fabricated historical source coverage."}
+{"file":".trellis/spec/backend/compaction-harness.md","reason":"Check actual progress/shrinkage and truth-preserving retirement guards."}
+{"file":".trellis/spec/backend/observability-projection.md","reason":"Check once-only usage, truthful unknowns and optional versus authoritative failure handling."}
+{"file":".trellis/tasks/11-01-cache-token-cost-diagnosis/research/usage-coverage.md","reason":"Check currently tracked and untracked model paths; avoid double accounting private summaries."}
+{"file":".trellis/tasks/11-01-cache-token-cost-diagnosis/research/failure-root-causes.md","reason":"Check original measured cases, existing corrective policy and non-regression boundaries."}
+{"file":".trellis/tasks/11-01-cache-token-cost-diagnosis/research/simplification-scope-review.md","reason":"Check accepted simplification, independent compaction, local-source atomicity and bounded recovery instead of preserving obsolete global blocking."}
+{"file": ".trellis/tasks/11-01-cache-token-cost-diagnosis/research/auxiliary-usage-design.md", "reason": "Check the bounded auxiliary accounting follow-up against actual producers and no-replay constraints."}

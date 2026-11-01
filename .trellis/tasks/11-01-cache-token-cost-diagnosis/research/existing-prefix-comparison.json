@@ -1,0 +1,52 @@
+{
+  "source": "target\\agent-delegation-20261030-validation\\eight-foreground-prompt-comparison-20261030",
+  "scope": "Existing separately retained diagnostic; no new model calls",
+  "differing_paths": [
+    ".messages.0.content"
+  ],
+  "message_count": 15,
+  "tool_count": 30,
+  "observations": [
+    {
+      "order": 1,
+      "arm": "baseline",
+      "input_tokens": 26380,
+      "cache_read_tokens": 26240,
+      "miss_tokens": 140,
+      "output_tokens": 167,
+      "cache_ratio": 0.9946929492039424,
+      "requests": 1
+    },
+    {
+      "order": 2,
+      "arm": "clarified",
+      "input_tokens": 26471,
+      "cache_read_tokens": 6016,
+      "miss_tokens": 20455,
+      "output_tokens": 102,
+      "cache_ratio": 0.22726757583770918,
+      "requests": 1
+    },
+    {
+      "order": 3,
+      "arm": "baseline",
+      "input_tokens": 26380,
+      "cache_read_tokens": 26240,
+      "miss_tokens": 140,
+      "output_tokens": 152,
+      "cache_ratio": 0.9946929492039424,
+      "requests": 1
+    },
+    {
+      "order": 4,
+      "arm": "clarified",
+      "input_tokens": 26471,
+      "cache_read_tokens": 26240,
+      "miss_tokens": 231,
+      "output_tokens": 214,
+      "cache_ratio": 0.9912734690793699,
+      "requests": 1
+    }
+  ],
+  "total_tokens": 106337
+}

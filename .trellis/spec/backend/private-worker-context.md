@@ -64,6 +64,13 @@ type WorkSegmentCheckpoint = { kind: "continue" } | {
   a summary witness instead of a fresh raw receipt. Later arrivals remain outside the earlier capture.
 - Preserve complete SDK action rounds. Never project an orphan tool result. Giant current tool outputs may use a bounded
   source-aware projection with an exact retrieval cursor; unfit fixed instructions/current input fail explicitly.
+  Preserve each `read_self_history` page and cursor verbatim. If the same tool message contains ordinary results, those
+  peers remain independently reducible with their original order, source metadata and exact-history references intact.
+- Price retained rounds through the same projection as the request, including summary wrapper, initial snapshot and
+  pending inputs. The 40% recent-history target is soft: always protect the newest round, but do not add an optional
+  older round if that complete suffix would exceed the budget. Retire eligible older prefixes and remeasure after each
+  replacement summary. A shrinking summary is not a guarantee of fit; if no further prefix can retire, an actually
+  unfit protected envelope still fails explicitly without truncating evidence or dispatching an oversized request.
 - A terminal prior Run's partial or input-only tail may be summarized as immutable historical evidence together with its
   actual `outcome`/`outputKind`; it must not permanently block later conversation compaction. Raw replay labels historical
   partial output as incomplete. The summary source digest includes the canonical execution outcome. A current Run's
@@ -72,6 +79,11 @@ type WorkSegmentCheckpoint = { kind: "continue" } | {
   sender/source and negation. This is a generated projection, not user-authored evidence or authority. Utility requests use
   separately governed model Effects and never consume pending task inputs. Read SDK result accessors explicitly: spreading
   `GenerateTextResult` omits prototype-backed `text`/`finishReason`.
+- Summary requests carry a prompt-only `targetSummaryTokens`: space within the existing 80% pressure line after pricing
+  initial/pending input, retained projected tail and replacement wrapper without the old summary text; if that space is
+  nonpositive, use the actual remaining message budget (minimum one). Ask the model to rewrite/consolidate repeated rules
+  and tool chronology while retaining distinct facts and sources. This is neither a new product cap nor `maxOutputTokens`.
+  Exceeding the prompt target alone does not reject a summary or bypass quality/CAS/full-request remeasurement.
 - Commit text, coverage and revision atomically only after raw source persistence, current Run/Attempt/control/source checks,
   quality validation and actual shrinking of the retired model projection. Stop, stale owner/source/revision or SQL failure
   preserves the prior checkpoint. Failed ranges are not retried immediately; raw replay may continue only while it fits,
@@ -79,6 +91,8 @@ type WorkSegmentCheckpoint = { kind: "continue" } | {
 - A safe local frontier contains complete successful or explicit error pairs. Provider-executed, deferred, preliminary,
   unresolved or approval-pending frontiers cannot authorize rollover. Runtime separately refuses unfinished or unknown
   non-model Effects before another task model dispatch. A settled local exception is not automatically an unknown Effect.
+  An SDK-invalid local call is safe only with its matching local error, never a successful result. This includes schema
+  validation errors that never execute the tool, both at retained-reference rollover and at the N-step check-in boundary.
 - Drain the SDK stream before releasing completed recording/activity/material/invocation references. Persist before release;
   no durable material repository means no discard. Empty producer source metadata gets a `result` reference with unknown
   source, so the completed cache entry remains addressable and releasable. Successful disclosure retains only activated names
@@ -131,6 +145,12 @@ type WorkSegmentCheckpoint = { kind: "continue" } | {
   cross 35 later tool rounds, and prove cancellation facts/raw evidence remain unchanged while summaries advance.
   Repository-history fixtures are not claims of thousands of simultaneous admissions.
 - `worker-sdk-segment.test.ts`: complete success/error pairs and provider/approval/preliminary/mismatch refusal matrix.
+- `private-task-context.test.ts`: projected summary/tail fit, oversized optional old rounds, replacement remeasurement,
+  initial-snapshot pricing and live-partial/protected-round refusal; repository boundaries are stubbed in this unit suite.
+- `chat-agent-worker-invalid-frontier.test.ts`: real SDK invalid-argument round, zero invalid executions, durable error,
+  pressure rollover and corrected same-Run completion; invalid arguments exactly at N enter a normal check-in.
+- `chat-agent-worker-mixed-history.test.ts`: actual SDK mixed history-page/file results retain exact page and cursor bytes,
+  reduce ordinary peer output, continue within the same Run/Attempt and reconstruct the untouched file from raw pages.
 - `subagent-tool-materials-retention.test.ts`: unknown-source reference/release and refusal to discard unsaved evidence.
 - `chat-agent-step-recording-failure.test.ts`: actual SQLite output/material INSERT failures stop the real SDK before another
   model/tool call; a natural last-step failure suppresses settled text; foreground private-recording failure preserves public

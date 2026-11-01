@@ -7,6 +7,7 @@ import { TimelineEntrySchema, type TimelineEntry } from "@taki/shared";
 import { z } from "zod";
 import type { Database, SqlRow } from "./sqlite.ts";
 import { readTimelineSourceContext } from "./primary-source-row.ts";
+import { firstPrimaryIngestionGroup, primaryIngestionCoverageGap } from "./primary-ingestion-progress.ts";
 import { assertHindsightIngestionScope as assertScope, hindsightIngestionAtomic as atomic } from "./hindsight-ingestion-guard.ts";
 import type { HindsightIngestionScope } from "../memory/hindsight/hindsight-ingestion-contract.ts";
 import { ingestionSourceDigest, primaryEntryDigest, sanitizeCommittedPrimarySpan,
@@ -38,6 +39,7 @@ export function createHindsightIngestionSourceRepo(db: Database) {
     claim: (input: Claim) => claim(db, input),
     assertCovered: (input: Range) => assertCovered(db, input),
     advanceCoverage: (input: Range & { now: string }) => advanceCoverage(db, input),
+    coverageGap: (input: Range) => coverageGap(db, input),
   };
 }
 export type HindsightIngestionSourceRepo = ReturnType<typeof createHindsightIngestionSourceRepo>;
@@ -104,10 +106,11 @@ function count(db: Database, scope: HindsightIngestionScope, input: { expression
 }
 
 function pendingEntries(db: Database, scope: Range): ProvenPrimaryEntry[] {
-  assertScope(db, scope); assertNoMissing(db, scope);
-  return db.prepare(`${WITNESS_SELECT} WHERE p.authority_epoch_id=:epoch AND p.character_id=:character
+  assertScope(db, scope);
+  const entries = db.prepare(`${WITNESS_SELECT} WHERE p.authority_epoch_id=:epoch AND p.character_id=:character
     AND p.ingestion_span_id IS NULL AND p.timeline_seq<=:through ORDER BY p.timeline_seq LIMIT 257`)
     .all({ epoch: scope.epochId, character: scope.characterId, through: scope.throughSeq }).map((row) => proof(row, scope.characterId));
+  return firstPrimaryIngestionGroup(db, entries);
 }
 
 function baseline(db: Database, scope: HindsightIngestionScope): SqlRow | undefined {
@@ -136,18 +139,14 @@ function initializeBaseline(db: Database, input: Range & { now: string }): numbe
   });
 }
 
-function assertNoMissing(db: Database, input: Range): void {
+function coverageGap(db: Database, input: Range) {
   const start = eligibilityStart(db, input);
   if (start === undefined) throw new Error("MEMORY_INGESTION_BASELINE_MISSING");
-  const missing = db.prepare(`SELECT 1 AS missing FROM timeline_messages t LEFT JOIN hindsight_ingestion_primary_commits p ON p.timeline_seq=t.seq
-    WHERE t.character_id=:character AND t.seq>=:start AND t.seq<=:through AND t.role='user'
-    AND (p.timeline_seq IS NULL OR p.authority_epoch_id<>:epoch) LIMIT 1`)
-    .get({ character: input.characterId, epoch: input.epochId, start, through: input.throughSeq });
-  if (missing) throw new Error("MEMORY_INGESTION_SOURCE_UNPROVEN");
+  return primaryIngestionCoverageGap(db, { ...input, provider: "hindsight", eligibilityStartSeq: start });
 }
 
 function verifySource(db: Database, input: Source, spanId: string | null): void {
-  assertScope(db, input); assertNoMissing(db, { ...input, throughSeq: input.source.throughSeq });
+  assertScope(db, input);
   if (input.source.characterId !== input.characterId || !input.source.proofs.length) throw new Error("MEMORY_INGESTION_SOURCE_UNPROVEN");
   const entries = input.source.proofs.map((ref) => {
     const row = db.prepare(`${WITNESS_SELECT} WHERE p.timeline_seq=:seq AND p.authority_epoch_id=:epoch AND p.character_id=:character`)
@@ -172,24 +171,23 @@ function claim(db: Database, input: Claim): void {
 }
 
 function assertCovered(db: Database, input: Range): void {
-  assertScope(db, input); assertNoMissing(db, input);
-  const pending = db.prepare(`SELECT 1 AS pending FROM hindsight_ingestion_primary_commits p LEFT JOIN hindsight_ingestion_spans s
-    ON s.authority_epoch_id=p.authority_epoch_id AND s.character_id=p.character_id AND s.span_id=p.ingestion_span_id
-    WHERE p.authority_epoch_id=:epoch AND p.character_id=:character AND p.timeline_seq<=:through
-    AND (p.ingestion_span_id IS NULL OR s.state IS NULL OR s.state<>'complete') LIMIT 1`)
-    .get({ epoch: input.epochId, character: input.characterId, through: input.throughSeq });
-  if (pending) throw new Error("MEMORY_INGESTION_INCOMPLETE");
+  assertScope(db, input);
+  const gap = coverageGap(db, input);
+  if (gap) throw new Error(gap.code);
 }
 
 function advanceCoverage(db: Database, input: Range & { now: string }): number {
   return atomic(db, input, () => {
-    assertCovered(db, input);
+    const gap = coverageGap(db, input);
+    const throughSeq = Math.min(input.throughSeq, gap ? gap.seq - 1 : input.throughSeq);
     const start = eligibilityStart(db, input);
     if (start === undefined) throw new Error("MEMORY_INGESTION_BASELINE_MISSING");
-    if (input.throughSeq < start) return cursor(db, input);
+    if (throughSeq < start && !db.prepare(`SELECT 1 AS present FROM hindsight_ingestion_primary_commits
+      WHERE authority_epoch_id=:epoch AND character_id=:character AND timeline_seq<=:through LIMIT 1`)
+      .get({ epoch: input.epochId, character: input.characterId, through: throughSeq })) return cursor(db, input);
     db.prepare(`UPDATE hindsight_ingestion_cursors SET through_seq=MAX(through_seq,:through),updated_at=:at
       WHERE authority_epoch_id=:epoch AND character_id=:character`)
-      .run({ epoch: input.epochId, character: input.characterId, through: input.throughSeq, at: input.now });
+      .run({ epoch: input.epochId, character: input.characterId, through: throughSeq, at: input.now });
     return cursor(db, input);
   });
 }

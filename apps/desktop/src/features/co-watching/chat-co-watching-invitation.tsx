@@ -10,7 +10,7 @@ import { useCoWatchingInvitation } from "./use-co-watching-invitation.ts";
 const STATUS: Record<CoWatchingSession["status"], string> = {
   starting: "正在开始共看", analyzing: "正在分析视频，可以继续聊天", reading: "正在读取分析", preparing: "正在准备回应",
   ready: "共看中，回应会随播放出现", revising: "正在调整后续回应", stopped: "共看已停止", failed: "本次共看未能继续",
-  paused_child: "子代理已停止，等待你明确继续",
+  paused_child: "子代理已暂停，请查看工作中的待决定事项",
 };
 export function ChatCoWatchingInvitation() {
   const { state, controller, openChild, available, connected } = useCoWatchingInvitation();

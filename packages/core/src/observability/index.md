@@ -1,4 +1,7 @@
 # core/observability/
+- auxiliary-usage-meter.ts — non-interfering AI SDK v4 middleware recording one durable auxiliary row per provider invocation while skipping Run-owned calls
+- auxiliary-usage-normalization.ts — nullable safe-integer usage normalization with OpenAI-compatible raw-field presence recovery
+- model-usage-context.ts — immutable AsyncLocalStorage ownership for Utility tasks and Run provider dispatch
 - observability-query-service.ts — authorized bounded Run/event query composition, independent history cursors, exact Inspector lookup, and mode gating
 - observability-event-projection.ts — Chinese semantic trajectory rows with captured identities; v2 initiative and v3 work transitions preserve sequence without fabricating model/tool activity
 - presence-event-bridge.ts — transaction-bound presentation and response-opportunity facts published after commit into the existing Run stream

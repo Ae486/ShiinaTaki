@@ -38,7 +38,7 @@ describe("subagent migration 056", () => {
     const receipts = old.prepare("SELECT * FROM migrations ORDER BY version").all();
     old.close();
     const upgraded = open(path, MIGRATIONS);
-    expect(upgraded.prepare("SELECT * FROM timeline_messages WHERE id='old'").get()).toEqual({ ...text, source_context_json: null });
+    expect(upgraded.prepare("SELECT * FROM timeline_messages WHERE id='old'").get()).toEqual({ ...text, source_context_json: null, primary_source_id: null });
     expect(upgraded.prepare("SELECT * FROM migrations WHERE version<=:version ORDER BY version").all({ version: lineage === "current" ? 55 : 35 })).toEqual(receipts);
     expect(upgraded.prepare("PRAGMA foreign_key_check").all()).toEqual([]);
     upgraded.close();

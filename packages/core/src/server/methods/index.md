@@ -53,4 +53,5 @@
 - initiative-backoff-methods.ts — authenticated same-Monitor backoff read and explicit operator reset without Run creation
 - browser-playback-methods.ts — strict Node-only selected playback reports and operator-only snapshots using actual connection identity
 - co-watching-methods.ts — live operator-only acceptance/configuration/control, contextual invitation read/respond and versioned Character invalidation subscriptions
-- subagent-methods.ts — live operator-only private conversation reads/subscriptions and exact CAS send/stop/continue controls
+- subagent-methods.ts — live operator-only private conversation reads/subscriptions and exact CAS send/stop/continue controls, durable attention and explicit pre-intent inbox retry
+- auxiliary-usage-method.ts — operator-only, monitor-mode-gated auxiliary usage query without Run mutations

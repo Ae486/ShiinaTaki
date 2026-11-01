@@ -25,16 +25,25 @@ export function createSubagentResultCollector(input: {
   let committed = false;
   return {
     tools: { complete_subagent: tool({
-      description: "Finish this delegated work with a useful result and references to material actually supplied or acquired. "
+      description: "Finish the entire assigned job with a useful result and references to material actually supplied or acquired. "
+        + "Put the parent-requested report format and content in text. If missing information still blocks the job, use interact_parent with kind needs_input instead; a clarification-stage report is not final completion. "
         + "Use an empty materials array when none applies. This records private work; it does not speak or write Memory.",
       inputSchema: SubagentResultToolSchema,
       execute(candidate, options) {
         if (!input.current()) return { ok: false, code: "SUBAGENT_RESULT_STALE" };
+        let proposal: SubagentProposal;
+        try {
+          proposal = SubagentProposalSchema.parse({ text: candidate.text,
+            sourceContext: { materials: input.materials.resolve(candidate.materials) } });
+        } catch (error) {
+          const refusal = materialRefusal(error);
+          if (!refusal) throw error;
+          return refusal;
+        }
+        // Invalid material must not claim the shared final/question slot and prevent a corrected call.
         if (input.terminal && !input.terminal.reserve(input.attemptId(), options.toolCallId, "final")) {
           return { ok: false, code: "SUBAGENT_TERMINAL_CHOICE_CONFLICT" };
         }
-        const proposal = SubagentProposalSchema.parse({ text: candidate.text,
-          sourceContext: { materials: input.materials.resolve(candidate.materials) } });
         if (pending && pending.attemptId === input.attemptId() && digestRunValue(pending.proposal) !== digestRunValue(proposal)) {
           return { ok: false, code: "SUBAGENT_RESULT_CONFLICT" };
         }
@@ -51,6 +60,16 @@ export function createSubagentResultCollector(input: {
       committed = true;
     },
   };
+}
+
+function materialRefusal(error: unknown) {
+  if (!(error instanceof Error) || !["SUBAGENT_MATERIAL_NOT_FOUND", "SUBAGENT_MATERIAL_SCOPE_MISMATCH",
+    "SUBAGENT_MATERIAL_STALE", "SUBAGENT_MATERIAL_LIMIT", "SUBAGENT_INPUT_NOT_FOUND",
+    "SUBAGENT_EXECUTION_NOT_FOUND", "SUBAGENT_NOT_FOUND"].includes(error.message)) return;
+  return { ok: false, code: error.message, state: "not_proposed",
+    message: "A material reference is unavailable, stale, or outside this child's scope. This call recorded no result proposal.",
+    nextAction: "Use the exact Core materialReferences supplied with completed results, or read_self_history to recover this child's "
+      + "actual inputs/results, then retry complete_subagent with valid references. Do not invent reference fields or remove supporting sources to bypass this refusal." };
 }
 
 export function hasCollectorResult(messages: TurnMessage[], callId: string, name: string): boolean {

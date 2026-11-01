@@ -1,6 +1,6 @@
 /**
  * INPUT:  page registry, requested route, shared Home connection, and last-confirmed Monitor availability
- * OUTPUT: navigation, retained pages with pre-paint route publication, client context, Approval modal, and ToastHost
+ * OUTPUT: navigation, retained pages, window-wide child attention, client context, Approval modal, and ToastHost
  * POS:    ui/home — window root; transient disconnects retain Monitor's mounted controller and selection,
  *         while confirmed DISABLED removes the optional surface and applies the existing Chat fallback
  */
@@ -19,6 +19,7 @@ import { appendVisitedPage } from "./visited-page-ids.ts";
 import { usePageVisibilityStore } from "./page-visibility-store.ts";
 import { useMonitorAvailability } from "./use-monitor-availability.ts";
 import { observeHomeDocumentVisibility } from "./home-document-visibility.ts";
+import { SubagentAttention } from "@/features/subagents/subagent-attention.js";
 
 const BRAND_MARK = "flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-xs font-semibold text-white";
 
@@ -78,11 +79,12 @@ export function HomeShell() {
   return (
     <HomeClientContext.Provider value={connection}>
       <div className="flex h-full bg-surface-sunken text-text-strong">
-        <nav className="flex w-56 shrink-0 flex-col gap-1 border-r border-border bg-surface-sunken px-3 py-4">
+        <nav className="flex w-56 shrink-0 flex-col gap-1 overflow-y-auto border-r border-border bg-surface-sunken px-3 py-4">
           <Brand />
           {visiblePages.map((entry) => (
             <MenuItem key={entry.id} page={entry} active={entry.id === currentPage} />
           ))}
+          <SubagentAttention />
         </nav>
         {/* relative anchors the ConnectionStatusBanner overlay (U6): it floats over the page instead of shifting it. */}
         <main className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-surface">

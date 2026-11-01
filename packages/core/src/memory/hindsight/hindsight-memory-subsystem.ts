@@ -13,6 +13,7 @@ import { createMemoryAutoRepo } from "../../db/memory-auto-repo.ts";
 import { createMemoryEventsRepo } from "../../db/memory-events-repo.ts";
 import type { Database } from "../../db/sqlite.ts";
 import type { TimelineRepo } from "../../db/timeline-repo.ts";
+import type { PrimaryConversationSourceRepo } from "../../db/primary-conversation-source-repo.ts";
 import type { Logger } from "../../logging/logger.ts";
 import type { SecretCatalogService } from "../../secrets/secret-catalog-service.ts";
 import type { AutoMemoryMaintenance } from "../auto-memory.ts";
@@ -33,6 +34,7 @@ import { captureHindsightIngestionBinding } from "./hindsight-recall-evidence.ts
 interface Input {
   db: Database; epochId: string; config: MemoryConfig; source: ConfigSource; secrets: SecretCatalogService;
   timeline: TimelineRepo; utility: UtilitySlot; logger: Logger; promptDir?: string; now?: () => string; client?: HindsightClient;
+  primarySources?: PrimaryConversationSourceRepo;
 }
 
 export function createHindsightMemorySubsystem(input: Input) {
@@ -43,7 +45,8 @@ export function createHindsightMemorySubsystem(input: Input) {
     captureBinding: captureHindsightIngestionBinding(state.replica, input.db),
     readVerifiedBank: (bankId) => state.replica.bankBinding(bankId)?.bank });
   const ingestion = createHindsightIngestion({ authority: runtime.authority, journal, timeline: input.timeline,
-    slot: input.utility, provider: state.provider, resolveBanks: runtime.resolveBanks, config: input.config, now: input.now });
+    slot: input.utility, provider: state.provider, resolveBanks: runtime.resolveBanks, config: input.config, now: input.now,
+    primarySources: input.primarySources });
   const work = createHindsightPolicyWorkRepo({ db: input.db, now: input.now, assertActive: (scope) => state.assertActive({
     key: { authorityEpochId: scope.authorityEpochId, bankId: scope.bankId, requestId: "policy-work" }, namespace: scope.namespace }) });
   const curator = createHindsightPolicyCurator({ authority: runtime.authority, replica: state.replica, work, writer: state.writer,
@@ -63,6 +66,7 @@ export function createHindsightMemorySubsystem(input: Input) {
     runtime.assertConnection(); await tidy.maybeRun(characterId);
   } };
   return { engine: foreground.engine, maintenance, memoryFlush: ingestion.flushPort, tidy,
+    importPrimarySources: ingestion.importPrimarySources,
     writeMemory: createHindsightObservedWriter(state), snapshot: foreground.snapshot,
     state, ingestion, curator, scheduler,
     start: () => { runtime.assertConnection(); scheduler.start(); },

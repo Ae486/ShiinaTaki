@@ -28,12 +28,13 @@ export async function workerEnvelope(input: {
 export function completedWorkerFrontier(step: Pick<StepResult<ToolSet>, "finishReason" | "toolCalls" | "content">): boolean {
   if (step.finishReason !== "tool-calls" || step.toolCalls.length === 0) return false;
   if (step.content.some((part) => part.type === "tool-approval-request")) return false;
-  // A thrown local tool is a settled native error result, not an unresolved effect. Runtime separately
-  // refuses unknown effects; counting only successful results would terminate ordinary recoverable failures.
+  // Local execution and argument-validation errors are settled native outcomes. Runtime separately fences
+  // unknown Effects; an invalid call can authorize continuation only through its matching completed error.
   const outcomes = step.content.filter((part) => part.type === "tool-result" || part.type === "tool-error");
-  return step.toolCalls.every((call) => !call.providerExecuted && !call.invalid
+  return step.toolCalls.every((call) => !call.providerExecuted
     && outcomes.some((result) => result.toolCallId === call.toolCallId && result.toolName === call.toolName
-      && !result.providerExecuted && (result.type === "tool-error" || !result.preliminary)))
+      && !result.providerExecuted && !("preliminary" in result && result.preliminary)
+      && (!call.invalid || result.type === "tool-error")))
     && outcomes.length === step.toolCalls.length;
 }
 

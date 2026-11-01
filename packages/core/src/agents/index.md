@@ -1,18 +1,19 @@
 # core/agents/
-- chat-agent.ts — AI SDK v7 ToolLoopAgent with ordered activity, exception-safe atomic turn persistence, existing cancellation/retry and non-primary control boundaries; primary-compatible AI SDK v7 ToolLoopAgent with full-turn persistence/cancellation, exact primary commit witnesses, admission-bound memory/tools, and ephemeral automatic recall before request measurement; one live User Timezone capture per attempt keeps stable day and volatile time coherent across awaited recall; non-primary controls remain separate from relationship history and automatic ingestion; Core cancellation gates the post-turn callback bundle after exact primary source witnessing
+- chat-agent.ts — AI SDK v7 ToolLoopAgent with ordered activity, provider-independent atomic primary source capture/retain/retract, existing cancellation/retry and non-primary control boundaries; primary-compatible AI SDK v7 ToolLoopAgent with full-turn persistence/cancellation, exact primary commit witnesses, admission-bound memory/tools, and ephemeral automatic recall before request measurement; one live User Timezone capture per attempt keeps stable day and volatile time coherent across awaited recall; non-primary controls remain separate from relationship history and automatic ingestion; Core cancellation gates the post-turn callback bundle after exact primary source witnessing
 - chat-activity.ts — accepted-message ordered producer; callback-before-receipt buffering, immutable invocations and identity-guarded terminalization
 - chat-activity-projection.ts — runtime-owned latest started Character snapshot, incremental item/text budgets, explicit overflow and disposal
 - turn-activity-presentation.ts — stable item links and text spans into canonical step rows without changing replay content
-- turn-recording.ts — exact committed rows for primary Memory witnessing, completed-step capture and uncovered partial text; durable private-frontier release retains output/retry evidence and prevents duplicate partials
+- turn-recording.ts — exact committed rows and retained source identity for primary Memory,  completed-step capture and uncovered partial text; durable private-frontier release retains output/retry evidence and prevents duplicate partials
 - foreground-inbox.ts — trusted private tool partition and activity filtering for mixed primary SDK steps; Runtime owns consumer admission and actions
-- conversation-turn-writer.ts — whole-turn preparation and transaction, followed by isolated legacy append and complete batch publication
+- companion-task-guidance.ts — primary task/completion guidance, pending asynchronous reply boundaries and capability choices derived from the current exposed tool subset, refreshed after disclosure
+- conversation-turn-writer.ts — atomic primary begin/retain/retract and whole-turn preparation, followed by isolated after-commit publication
 - tool-set-assembly.ts — collision-safe merge of independently governed ToolSet groups; duplicate model-facing keys fail closed instead of choosing authority by spread order
 - tool-disclosure.ts — captured Skill loading and current-generation SDK activeTools selection; hides dedicated Skill/MCP schemas until successful loading/description without changing execution or history
 - chat-agent.ts execution subsets — trusted callers may narrow the final governed tool bag before disclosure; admitted initiative evidence appends only to ephemeral control input
 - chat-agent.ts captured execution — each Attempt binds original extension closures to its Run/Effect/abort context before SDK invocation and captured Skill loading
 - base-prompt.ts — BASE_SYSTEM_PROMPT: the stable identity + tool-use + "never claim a tool ran without a tool-result" truthfulness floor (anti-hallucination) + the memory floors (T5-R12/R16-R19: never answer the user's past from impression, OpenClaw-shaped search triggers, one-search + say-you-checked fallback, pin-on-repeat, fix-on-read, supersede-don't-append, deliberate experience writes, card-wins last) + the injected-context contracts a user must not be able to edit away (what an `<untrusted-observation>` block is / trust only these exact tags, what the `<turn-context>` tail is and where the two time lines arrive, what a `<conversation-summary>` head is — her own earlier record, never recited, memory store wins on disagreement — batch 7, anti-recitation); prepended before memory context — behavior norms for the same surfaces live in prompt/system/assistant-layer.md
 - compaction-pass.ts — reviewed companion-summary prompt preserving relevant reported events and their subjects, plus compatibility factory for the durable Compaction Coordinator
-- compaction-coordinator.ts — per-Character fenced lifecycle, stable operation idempotency, cancellation/restart reconciliation, flush/generate orchestration, source-digest validation excluding tool display labels, and atomic summary CAS commit
+- compaction-coordinator.ts — per-Character fenced lifecycle, stable operation idempotency, cancellation/restart reconciliation, independent canonical generation with Legacy-only flush,  source-digest validation excluding tool display labels, and atomic summary CAS commit
 - context-reduction.ts — deterministic typed projection reductions with protected classes, source headers beside retained bodies, bounded external facts and measured savings
 - compaction-policy.ts — pure summary quality, operation retry, and Character cooldown policy helpers
 - summary-quality.ts — blank/truncation/non-shrink/protected-content guards for projection-only rolling summaries
@@ -21,8 +22,8 @@
 - context-window.ts — selectWindow(entries, budgetTokens): pure token cut over balanced tool-call/result units (newest unit kept even when oversized); no silent row cap; returns the shared window boundary and estimate
 - replay-source-loader.ts — pages durable Timeline rows beyond the legacy 200-row view until token candidates are sufficient, a nearby summary bridge is reached, or history ends; a documented 10,000-row emergency ceiling emits an explicit degraded-source fact
 - request-measurement.ts — provider-neutral complete request-envelope decomposition (assembled instructions/messages, Replay/history/summary/fold savings, prepared tool schemas, cache-read pressure, response reserve); no fabricated usage/cache values
-- turn-usage-report.ts — detached committed-turn usage reporting; combines authoritative provider usage with request measurement for calibration without adding chat latency
-- conversation-store.ts — atomic conversational writer with sourced delivery appends; one `project()` computation for history/windowStart/pressure, canonical paging/summary/folds and balanced selection; legacy no-budget mode retains the 200-row window
+- turn-usage-report.ts — bounded last-completed-request capture and detached committed-turn calibration; pairs step usage with the same prepared instructions/messages/tools, independently of cumulative Run usage
+- conversation-store.ts — atomic primary-source writer with sourced delivery appends; one `project()` computation for history/windowStart/pressure, canonical paging/summary/folds and balanced selection; legacy no-budget mode retains the 200-row window
 - overflow-error.ts — R2's pure overflow classifier: isContextOverflowError (APICallError + 4xx/absent status + sourced context-length phrase family; unrecognized fails open — no retry) + observedTokensOf (the failing request's provider-reported token count, never the advertised maximum)
 - replay-folds.ts — foldUnderPressure(entries, budget) -> { entries, estimatedTokens }: T5-R4's pure under-pressure folds inside the replay view (ADR 0008 idempotent projection; copies only, stored rows untouched) — stage a snapshot-class results (Q5 capturedAt marker) beyond the newest 3 per toolName, stage b fact-class results oldest-first, stage c tool-call args over the ~200-char floor; Hermes-style one-line traces; under budget = zero folds
 - turn-mapping.ts — privacy boundary between live AI SDK messages and TimelineEntry: tool calls persist/replay by name and call id only with empty replay inputs; raw arguments never enter timeline rows or reconstructed history; image parts replay as text projection
@@ -31,7 +32,7 @@
 - turn-registry.ts — non-replacing Character/private-work scope controllers and exact Run cancellation; a local drain owner aborts all scopes immediately and bounds their cleanup wait without unregistering live work
 - untrusted-fence.ts — the A1 minimal fence: fenceUntrusted({source,content}) → XML-delimited `<untrusted-observation>` block labeling content DATA-never-INSTRUCTIONS; neutralizes any literal closing tag so hostile content can't escape; reused by every untrusted-content producer (T3a activity, later T3b/screenshot/T5)
 - window-calibrator.ts — createWindowCalibrator({repo, slot, declared}): R1 tier-2 EMA correction factor over the estimator (clamped) + R2 overflow shrink (floor(observed×0.9), never above declared), persisted via window-state-repo; a lowered declaration is written back so runtime and operator status agree while an earlier overflow shrink survives; effectiveWindow() returns the estimator-unit budget
-- model-effect-middleware.ts — model Effect lifecycle and exact request/first-output/tool-call observation before provider parts leave the middleware
+- model-effect-middleware.ts — model Effect lifecycle and exact request/first-output/tool-call observation under Run-owned provider dispatch before parts leave the middleware
 - sdk-wire-compatibility.test.ts — real compatible-provider SSE regression: complete streamed arguments, distinct sparse/repeated IDs, unsafe finish suppression, and abort aggregate settlement
 - model-observability.ts — Effect-keyed per-request telemetry and unique unfinished SDK-end association; ambiguous generations never overwrite a request
 - run-observability-telemetry.ts — per-attempt SDK composition sharing immutable invocations with optional activity; legacy callers gain no invented Run/Effect
@@ -45,22 +46,26 @@
 - work-scope.ts — disjoint child lane keys and Character-hook discriminator
 - run-message-store.ts — bounded private replay and same-work addressed inputs bound to actual Effect intents; no Timeline or Memory writes
 - subagent-tools.ts — trusted main delegation tool composition and selected actual material resolution
-- subagent-delegate-tool.ts — independent create/reuse acceptance, explicit snapshot/material/tool selection and primary no-retract marker
-- subagent-message-tool.ts — exact addressed messages and explicit parent-interruption continuation
+- subagent-delegate-tool.ts — independent create/reuse acceptance, event-driven follow-up across replies versus silent inspection, independent check-ins, snapshot/material/tool selection and primary no-retract marker
+- subagent-message-tool.ts — ordinary guidance, exact question answers and check-in/unfinished-work continuation with copied current targets and distinct reply-event rules
 - subagent-stop-tool.ts — exact parent-directed child interruption without sibling or main cancellation
-- subagent-inspect-tool.ts — readable retained private history and complete child/parent result inspection
-- subagent-result-tool.ts — current-Attempt explicit child result collector with selected actual materials
+- subagent-inspect-tool.ts — purposeful private evidence/target inspection, default compact listings and explicit diagnostics without completion polling
+- subagent-result-tool.ts — current-Attempt explicit child result collector with validated actual materials, recoverable reference refusals and reservation after validation
 - parent-continuation-result-tool.ts — main-role internal/no-action/reply proposals committed only with matching successful SDK tool results
 - tool-source-materials.ts — non-serialized producer-known source facts attached to unchanged completed tool result objects
 - source-context.ts — shared material/row/tool rendering, completed-SDK source retention and associated body reduction without changing native outcome kinds
-- source-interpretation.ts — shared role-versus-source, subject, quotation, uncertainty and self-report prompt contract
+- source-interpretation.ts — shared source/subject/quotation contract; missing evidence preserves unknown rather than proving absence or pending status, including after corrections
 
 - agent-attempt.ts — shared SDK request owner with child-only pressure rollover, foreground private routing and explicit completed-step failure fences outside SDK notification callbacks
-- worker-sdk-segment.ts — complete local success/error frontier safety, provider/deferred/approval refusal and full instruction/schema envelope pricing for private SDK segments
-- private-task-context.ts — task summary pressure, complete pending-input watermark, exact recent replay and bounded retrieval projections
-- private-task-summarizer.ts — governed Utility summary requests isolated from task-input consumption and relationship Memory
+- worker-sdk-segment.ts — complete local success/error frontier safety including matched SDK validation errors, provider/deferred/approval refusal and full instruction/schema envelope pricing for private SDK segments
+- private-task-context.ts — projected summary/tail fit, complete pending-input watermark and per-result reduction preserving exact history pages beside ordinary tool peers
+- private-task-summarizer.ts — governed Utility replacement summaries with dynamic prompt-only space guidance, isolated from task-input consumption and relationship Memory
 - subagent-self-history-tool.ts — mandatory self-scoped category/body pagination with captured history watermarks
 
-- subagent-interact-tool.ts — completed-result witnessed asynchronous messages and exclusive input-wait proposals
-- subagent-inbox-tools.ts — intrinsic private delivered-event/action paging and idempotent handling tools
-- subagent-control-output.ts — compact readable control acknowledgements with exact actionable targets
+- subagent-interact-tool.ts — completed-result witnessed asynchronous messages and exclusive input-wait proposals, distinct from whole-job completion
+- subagent-inbox-tools.ts — intrinsic delivered-event/action paging and idempotent handling, with explicit internal disposition versus final-answer proposal semantics
+- subagent-control-output.ts — compact control acknowledgements with exact targets and accepted automatic/silent work reporting guidance
+- subagent-model-state.ts — compact current/scoped worker state, exact control targets, pending request and completion selectors; raw diagnostics remain available explicitly
+
+- subagent-evidence-output.ts — bounded model result/history projections without internal receipts; distinct retrieval/body/result status with unchanged serialized evidence and cursors
+- subagent-event-inspection.ts — scoped accepted-event body pagination with current exact action targets, independent of inbox delivery and suppression

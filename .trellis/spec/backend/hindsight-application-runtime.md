@@ -164,8 +164,13 @@ B5 native projection hashes and JSON1 limits must not be silently reinterpreted.
 
 - Hindsight ingestion consumes exact committed Primary source witnesses, one eligibility/ownership gate and the existing
   20-message cadence. It does not perform Local fact extraction. Persist stable per-Bank requests before asynchronous work.
-- Pre-retirement flush requires complete confirmed or actual durable Pending source coverage in every selected Bank.
+- Primary Timeline capture uses the shared provider-independent source lifecycle described in
+  [Canonical Local Memory Runtime](canonical-local-memory-runtime.md). Import retained sources from local authority
+  identity without provider/capability I/O, reuse existing Hindsight witnesses, and isolate unresolved gaps from later groups.
+- Explicit ingestion coverage requires complete confirmed or actual durable Pending source coverage in every selected Bank.
   A queued promise, guessed timeline interval or one successful Bank is insufficient. Late witnesses remain recoverable.
+- Context compaction runs independently of ingestion/curation and preserves raw Timeline and pending source state.
+  Its summary retains salient facts even while extraction is delayed; continuous ingestion coverage never skips a hole.
 - The curator is limited to Taki policy and authorized Block work, with separate Global/Character model inputs. Keep
   user-card ownership, filter hidden/expired/ineligible-mood input before each submission, and persist claims, prompts,
   results, command identities and retries. Restart resumes saved proposals without rerunning a completed model call.

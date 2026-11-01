@@ -6,3 +6,4 @@
 - skill-lifecycle-service.ts — serialized operator lifecycle/reconcile; observes durable list commits separately from coherent catalog publication, including rejected and surviving partial commits
 - skill-boot.ts — observed lifecycle composition and read-only one-time legacy seed before initial catalog publication
 - load-skill-tool.ts / read-skill-resource-tool.ts — governed instruction and confined UTF-8 support-resource tools
+- skill-tool-model-output.ts — model-only revision omission while raw Skill loads retain exact next-step disclosure/currentness authority

@@ -106,6 +106,34 @@ generation, and gates while hidden is codified in [`reactive-read-models.md`](./
 
 ### Private Subagent Conversation
 
+- Home's sidebar mounts lightweight `subagent.attention` observation independently of the selected page. Install the
+  existing child-change listener before subscription acknowledgement, then read at most 20 entries per explicit page.
+  Actual producer hints and reconnect invalidate; document hide retires disposable reads and preserves the gap.
+  `needs_user_input`, `reconciliation_needed`, user-required check-ins and exhausted pre-intent retry retain an explanation and exact
+  child/work navigation. Generic once-per-recent-attention Toasts contain no private report body and never replace the
+  persistent entry. Existing recovery controls retain the exact consumer and stable operation key; no automatic replay.
+  Render the actual `needs_user_input.reason` decision note as escaped persistent text; a generic request to decide is
+  insufficient. Map reconciliation reason codes through the shared recovery vocabulary without displaying internal codes.
+  A child send/Continue warning remains unknown until a canonical input with its exact Character/child/work/operation
+  identity is read. Clear only that warning when acceptance is confirmed; preserve newer action feedback and independent
+  read errors. Receipt reconciliation may clear the submitted draft, but never a newer local edit or another operation.
+  `inbox_retry_exhausted` offers explicit `subagent.inbox.retry` without inventing a consumer: it schedules only a fresh
+  pre-intent opportunity. Unknown outcomes require a fresh status read and deliberate action, never reconnect replay.
+- Child headers/list show Core cumulative token evidence, including no calls yet, reported zero, unknown totals,
+  incomplete known subtotal, in-flight calls and missing usage. Do not derive total usage from step count, last Run or
+  local counters. Progress displays the captured current interval and actual unattended approval count; legacy
+  `post_upgrade` tracking explicitly leaves earlier step counts unknown.
+- An open `check_in` wait uses one exact `Continue` RPC with `replyToEventId`, including an empty direction. A draft
+  provides explicit redirect-and-continue. User-required checks say the main Agent cannot release them. User Stop
+  remains independent and user-only; ordinary main chat does not reset the unattended work count.
+- Conversation check-ins render as System factual snapshots, selected only by the trusted `needs_input` event's Core-minted
+  `producerKey=checkin:<interval>`, never by body text. Show recorded steps, pending-input count, captured required actor and
+  clearly attributed recent worker text/older summary; remaining work stays unconfirmed. Do not expose internal reference
+  fields as ordinary prose. Decode at most 64,000 body characters; incomplete/unsupported bodies retain a labelled original
+  fallback and the existing exact read-more control. Formatting never mutates the canonical body or changes row identity.
+- Both N/K knobs use existing Settings registry editors and Chinese labels. Explain that newly stored values are
+  captured at new work or the next check-in interval; they do not move an active threshold or downgrade an existing
+  user-required check-in. UI owns no second configurable state.
 - Home registers `subagents` once in `pages.ts`. `features/subagents/` owns a disposable query/controller view;
   retained private content never enters the Character Timeline, presence exposure reports, or persisted UI caches.
   Reuse Chat text/tool presentation without manufacturing canonical Timeline identities.

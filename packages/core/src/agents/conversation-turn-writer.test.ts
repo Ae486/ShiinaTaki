@@ -3,6 +3,7 @@ import { TimelineCommittedSchema, type TimelineCommitted } from "@taki/shared";
 import { openDatabase, type Database } from "../db/sqlite.ts";
 import { MIGRATIONS } from "../db/migrations/index-list.ts";
 import { createTimelineRepo } from "../db/timeline-repo.ts";
+import { createPrimaryConversationSourceRepo } from "../db/primary-conversation-source-repo.ts";
 import { createConversationStore } from "./conversation-store.ts";
 import type { TurnCommitInput } from "./conversation-turn-writer.ts";
 
@@ -24,6 +25,33 @@ function fixture() {
 }
 
 describe("atomic conversation turn writer", () => {
+  it("publishes source begin/retention/retraction only after the outer commit and suppresses duplicates", () => {
+    const f = fixture(); const sources = createPrimaryConversationSourceRepo({ db: f.db, timeline: f.repo });
+    const onAppend = vi.fn(); const onCommit = vi.fn(); const onRemove = vi.fn();
+    const store = createConversationStore({ repo: f.repo,
+      primarySources: { repo: sources, afterCommit: (notify) => f.db.afterCommit(notify) }, onAppend, onCommit, onRemove });
+    expect(() => f.db.transaction(() => {
+      store.beginPrimary({ characterId: "taki", text: "rolled back" });
+      expect(onAppend).not.toHaveBeenCalled(); throw new Error("outer rollback");
+    })).toThrow("outer rollback");
+    expect(onAppend).not.toHaveBeenCalled(); expect(f.repo.latestSeq("taki")).toBe(0);
+    const opened = store.beginPrimary({ characterId: "taki", text: "actual input" });
+    onAppend.mockClear();
+    expect(() => f.db.transaction(() => {
+      store.commitTurn({ ...f.input, primarySourceId: opened.sourceId });
+      expect(onAppend).not.toHaveBeenCalled(); expect(onCommit).not.toHaveBeenCalled(); throw new Error("outer rollback");
+    })).toThrow("outer rollback");
+    expect(onAppend).not.toHaveBeenCalled(); expect(onCommit).not.toHaveBeenCalled();
+    const result = store.commitTurn({ ...f.input, primarySourceId: opened.sourceId });
+    expect(result).toHaveLength(2); expect(onAppend).toHaveBeenCalledTimes(2); expect(onCommit).toHaveBeenCalledTimes(1);
+    expect(store.commitTurn({ ...f.input, primarySourceId: opened.sourceId })).toEqual(result);
+    expect(onAppend).toHaveBeenCalledTimes(2); expect(onCommit).toHaveBeenCalledTimes(1);
+    const cancelled = store.beginPrimary({ characterId: "taki", text: "cancel" });
+    f.db.transaction(() => { store.retractPrimary(cancelled.sourceId!); expect(onRemove).not.toHaveBeenCalled(); });
+    expect(onRemove).toHaveBeenCalledExactlyOnceWith({ characterId: "taki", seq: cancelled.userEntry.seq });
+    store.retractPrimary(cancelled.sourceId!); expect(onRemove).toHaveBeenCalledTimes(1);
+  });
+
   it("commits the whole validated batch before any legacy append or commit observer", () => {
     const f = fixture();
     f.store.commitTurn(f.input);

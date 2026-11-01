@@ -19,6 +19,11 @@ import { createSubagentInboxExecution } from "./subagent-inbox-execution.ts";
 import { createSubagentActivity } from "./subagent-activity.ts";
 import { readSubagentConversation, readSubagentConversationBody } from "../db/subagent-conversation-repo.ts";
 import { readSubagentInboxRecovery } from "../db/subagent-inbox-recovery-repo.ts";
+import { createSubagentProgressRepo } from "../db/subagent-progress-repo.ts";
+import { acceptDueSubagentCheckIn } from "../db/subagent-checkin-repo.ts";
+import { SUBAGENT_CHECKIN_DEFAULTS } from "../config/subagent-config.ts";
+import { readSubagentAttention } from "../db/subagent-attention-repo.ts";
+import { resolveOrdinarySubagentTarget } from "./subagent-addressing.ts";
 
 export interface SubagentAddressedInput {
   characterId: string; target: SubagentTarget; operationKey: string; direction: string; materials: ContextMaterial[]; replyToEventId?: string;
@@ -33,7 +38,7 @@ export function createSubagentService(deps: SubagentDependencies) {
     schedule: () => schedule(state), completionHint: () => undefined, inboxOpportunity: () => undefined };
   restoreGenericRoutes(state);
   const prepareInbox = (input: ForegroundInboxInput & { mode?: "foreground" | "idle" }) => prepareSubagentInbox(state, input,
-    (value, sender) => acceptAddressed(state, value, { sender, continuation: false }));
+    (value, sender, continuation) => acceptAddressed(state, value, { sender, continuation }));
   const completion = createSubagentCompletion(state);
   const inboxExecution = createSubagentInboxExecution(state, prepareInbox);
   state.inboxOpportunity = (characterId) => inboxExecution.retry(characterId);
@@ -46,11 +51,15 @@ export function createSubagentService(deps: SubagentDependencies) {
     ...readPorts(state),
     yieldInbox: (characterId: string) => inboxExecution.yield(characterId),
     resumeInbox: inboxExecution.resume,
+    retryInbox: (input: { characterId: string }) => inboxExecution.retryNow(input.characterId),
     inboxRecovery: (input: Parameters<typeof readSubagentInboxRecovery>[1]) => readSubagentInboxRecovery(deps.db, input),
+    attention: (input: Parameters<typeof readSubagentAttention>[1]) => readSubagentAttention(deps.db, input),
     events: createSubagentEventRepo(deps.db), inbox: createSubagentInboxRepo(deps.db),
     delegate: (binding: SubagentWorkBinding, input: DelegateWork, acceptance: SubagentAcceptance = {}) => acceptWork(state, binding, { input, acceptance }),
     submitOwnedWork: (binding: SubagentWorkBinding, input: DelegateWork) => acceptWork(state, binding, { input, acceptance: {} }),
     send: (input: SubagentAddressedInput, sender: SubagentSender) => acceptAddressed(state, input, { sender, continuation: false }),
+    sendCurrent: (input: Omit<SubagentAddressedInput, "target"> & { subagentId: string; workInputId?: string | null }, sender: SubagentSender) =>
+      acceptCurrentMessage(state, input, sender),
     continue: (input: SubagentAddressedInput, sender: SubagentSender) => acceptAddressed(state, input, { sender, continuation: true }),
     stop: (input: { characterId: string; target: SubagentTarget }, origin: "user" | "parent") => stopChild(state, input, origin),
     yieldOwnedWork: (target: SubagentTarget) => yieldOwned(state, target),
@@ -58,10 +67,6 @@ export function createSubagentService(deps: SubagentDependencies) {
       const root = deps.inputs.get(input.target.workInputId);
       state.bindings.set(root.inputId, { root, binding, resume: false });
       return acceptAddressed(state, input, { sender: { kind: "core", ownerRef: binding.source?.ownerRef ?? "core.subagent-owner" }, continuation: false });
-    },
-    authorityChanged() {
-      for (const bound of state.bindings.values()) if (bound.deferred === "source_unavailable") bound.deferred = undefined;
-      state.schedule(); completion.retry(); inboxExecution.retry();
     },
     released() { state.schedule(); state.completionHint(); },
     async close() {
@@ -77,6 +82,16 @@ export function createSubagentService(deps: SubagentDependencies) {
   };
 }
 export type SubagentService = ReturnType<typeof createSubagentService>;
+
+function acceptCurrentMessage(state: SubagentState,
+  input: Omit<SubagentAddressedInput, "target"> & { subagentId: string; workInputId?: string | null }, sender: SubagentSender) {
+  let result!: SubagentControlResult;
+  state.deps.db.transaction(() => {
+    const target = resolveOrdinarySubagentTarget(state, input);
+    result = acceptAddressed(state, { ...input, target }, { sender, continuation: false, relaxOrdinaryControl: true });
+  });
+  return result;
+}
 
 function readPorts(state: SubagentState) {
   const { deps } = state;
@@ -112,6 +127,10 @@ function observeTerminal(state: SubagentState): () => void {
   const { deps } = state;
   return deps.runRepo.onTerminalCommit((fact) => {
     const scope = deps.executions.scope(fact.run.runId);
+    const members = deps.db.prepare(`SELECT DISTINCT e.subagent_id FROM subagent_inbox_consumers c
+      JOIN subagent_inbox_members m USING(consumer_id) JOIN subagent_events e USING(event_id) WHERE c.run_id=:run`)
+      .all({ run: fact.run.runId });
+    for (const member of members) deps.changed(fact.run.characterId, String(member.subagent_id));
     if (fact.run.initiator === "primary" && fact.finalOutcome === "completed") state.inboxOpportunity(fact.run.characterId);
     if (scope?.kind === "subagent" && deps.db.prepare("SELECT 1 FROM subagent_events WHERE producer_run_id=:run AND producer_key='terminal' AND eligible=1 LIMIT 1")
       .get({ run: fact.run.runId })) state.inboxOpportunity(fact.run.characterId);
@@ -163,6 +182,7 @@ async function acceptWork(state: SubagentState, binding: SubagentWorkBinding, op
       input: { kind: "work", completionPolicy: input.completionPolicy, lifetimeMinutes: input.lifetimeMinutes,
         validity: input.validity, toolSelection: input.toolSelection } });
     accepted = acceptance.input; fresh = !acceptance.reused;
+    createSubagentProgressRepo(deps.db).ensure(accepted.inputId, deps.checkInPolicy?.() ?? SUBAGENT_CHECKIN_DEFAULTS, "work_start");
     deps.db.prepare(`INSERT OR IGNORE INTO subagent_work_routes(work_input_id,parent_run_id,route_kind,parent_tools_json)
       VALUES (:work,:parent,:kind,:tools)`).run({ work: accepted.inputId, parent: binding.parentRunId,
       kind: binding.source ? "source_owned" : "generic", tools: binding.parentToolNames ? JSON.stringify(binding.parentToolNames) : null });
@@ -177,7 +197,8 @@ async function acceptWork(state: SubagentState, binding: SubagentWorkBinding, op
   return { conversation: subagentSummary(state, root.subagentId), input: root, cancellationRequested: false };
 }
 
-function acceptAddressed(state: SubagentState, input: SubagentAddressedInput, options: { sender: SubagentSender; continuation: boolean }): SubagentControlResult {
+function acceptAddressed(state: SubagentState, input: SubagentAddressedInput,
+  options: { sender: SubagentSender; continuation: boolean; relaxOrdinaryControl?: boolean }): SubagentControlResult {
   const { sender, continuation } = options;
   if (state.closing) throw new Error("SUBAGENT_CLOSED");
   const { deps } = state;
@@ -194,11 +215,17 @@ function acceptAddressed(state: SubagentState, input: SubagentAddressedInput, op
   if (continuation && (!bound || workHasUncertainEffects(state, bound))) throw new Error("SUBAGENT_CONTINUE_REQUIRES_RECONCILIATION");
   if (continuation && bound) assertContinuationCurrent(state, bound);
   assertPendingCapacity(state, root.subagentId);
-  const acceptance = deps.inputs.accept({ subagentId: input.target.subagentId, operationKey: input.operationKey,
+  const policy = deps.checkInPolicy?.() ?? SUBAGENT_CHECKIN_DEFAULTS;
+  let acceptance!: ReturnType<typeof deps.inputs.accept>;
+  deps.db.transaction(() => {
+    createSubagentProgressRepo(deps.db).ensure(root.inputId, policy, "post_upgrade");
+    acceptance = deps.inputs.accept({ subagentId: input.target.subagentId, operationKey: input.operationKey,
     sender, direction: input.direction, materials: input.materials, input: continuation
       ? { kind: "continue", workInputId: root.inputId, expectedControlVersion: input.target.expectedControlVersion, expectedRunId: input.target.expectedRunId, replyToEventId: input.replyToEventId }
       : { kind: "message", workInputId: root.inputId, expectedControlVersion: input.target.expectedControlVersion,
-        expectedRunId: input.target.expectedRunId, replyToEventId: input.replyToEventId } });
+        expectedRunId: input.target.expectedRunId, replyToEventId: input.replyToEventId } }, { policy, relaxOrdinaryControl: options.relaxOrdinaryControl });
+    acceptDueSubagentCheckIn(deps.db, root.inputId);
+  });
   const accepted = acceptance.input;
   if (bound) bound.deferred = undefined;
   notifyOwner(state, root.inputId, { kind: "control", id: root.subagentId });

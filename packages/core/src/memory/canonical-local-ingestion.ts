@@ -4,6 +4,7 @@
  * POS:    core/memory — canonical Local background ingestion; never blocks the foreground or calls native services
  */
 import { CanonicalMemorySourceSchema } from "@taki/shared";
+import type { PrimaryConversationSourceRepo } from "../db/primary-conversation-source-repo.ts";
 import type { MemoryConfig } from "../config/memory-config.ts";
 import type { CanonicalIngestionRepo } from "../db/canonical-ingestion-repo.ts";
 import type { CanonicalMemoryAuthorityRepo } from "../db/canonical-memory-authority-repo.ts";
@@ -12,8 +13,8 @@ import type { MemoryAutoRepo } from "../db/memory-auto-repo.ts";
 import type { MemoryEventsRepo } from "../db/memory-events-repo.ts";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
 import { createCanonicalIngestionModel, type CanonicalIngestionModel } from "./canonical-ingestion-model.ts";
-import { sanitizeCommittedPrimarySpan, retainedIngestionSource, type PrimaryConversationCommit,
-  type SanitizedCommittedSpan } from "./canonical-ingestion-source.ts";
+import { sanitizeCommittedPrimarySpan, retainedIngestionSource, importRetainedPrimarySources, type PrimaryConversationCommit,
+  type SanitizedCommittedSpan, type IngestionCoverageGap, type PrimarySourceImportResult } from "./canonical-ingestion-source.ts";
 import type { CanonicalIngestionState, PreparedLocalIngestion } from "./canonical-ingestion-plan.ts";
 import type { LocalMemoryProvider } from "./local-memory-provider.ts";
 import { canonicalLocalMemoryFlushPort, type MemoryFlushPort } from "./memory-flush-port.ts";
@@ -24,11 +25,14 @@ import type { ProvenPrimaryEntry } from "./canonical-ingestion-source.ts";
 export interface CanonicalIngestionRunResult {
   throughSeq: number; eligibilityStartSeq: number; hasApplicableSource: boolean;
   writes: number; reinforced: number; sources: number; skippedSpans: number;
+  coverageGap?: IngestionCoverageGap;
+  sourceImport: PrimarySourceImportResult;
 }
 export interface CanonicalLocalIngestion {
   /** Call before this Character's first primary append; persisted once, never a synthetic completion watermark. */
   initializeBaseline(characterId: string): void;
   recordPrimaryCommitted(input: PrimaryConversationCommit): void;
+  importPrimarySources(characterId: string): PrimarySourceImportResult;
   run(input: { characterId: string; throughSeq?: number }): Promise<CanonicalIngestionRunResult>;
   maybeRun(input: { characterId: string }): Promise<CanonicalIngestionRunResult | null>;
   readonly flushPort: MemoryFlushPort;
@@ -37,6 +41,7 @@ export interface CanonicalLocalIngestionDeps {
   provider: LocalMemoryProvider; authority: CanonicalMemoryAuthorityRepo; maintenance: CanonicalMemoryMaintenanceRepo;
   journal: CanonicalIngestionRepo; timeline: TimelineRepo; autoState: MemoryAutoRepo; slot: UtilitySlot;
   events?: MemoryEventsRepo; config?: MemoryConfig; now?: () => string;
+  primarySources?: PrimaryConversationSourceRepo;
 }
 interface IngestionContext extends CanonicalLocalIngestionDeps { epochId: string; model: CanonicalIngestionModel }
 
@@ -54,10 +59,12 @@ export function createCanonicalLocalIngestion(deps: CanonicalLocalIngestionDeps)
   };
   const run: CanonicalLocalIngestion["run"] = (input) => enqueue(input.characterId, () => runRange(ctx, input));
   return { run, flushPort: canonicalLocalMemoryFlushPort({ run }),
+    importPrimarySources: (characterId) => importPrimarySources(ctx, characterId),
     maybeRun: (input) => enqueue(input.characterId, async () => {
+      const sourceImport = importPrimarySources(ctx, input.characterId);
       const scope = { epochId: ctx.epochId, characterId: input.characterId };
       return deps.journal.pending(scope) || deps.journal.unprocessedCount(scope) >= EPISODIC_EVERY_N
-        ? runRange(ctx, input) : null;
+        ? runRange(ctx, input, sourceImport) : null;
     }),
     initializeBaseline: (characterId) => {
       deps.journal.initializeBaseline({ epochId: ctx.epochId, characterId,
@@ -69,9 +76,10 @@ export function createCanonicalLocalIngestion(deps: CanonicalLocalIngestionDeps)
     } };
 }
 
-async function runRange(ctx: IngestionContext, input: { characterId: string; throughSeq?: number }): Promise<CanonicalIngestionRunResult> {
+async function runRange(ctx: IngestionContext, input: { characterId: string; throughSeq?: number }, imported?: PrimarySourceImportResult): Promise<CanonicalIngestionRunResult> {
   try {
     ctx.authority.activeEpoch(ctx.epochId);
+    const sourceImport = imported ?? importPrimarySources(ctx, input.characterId);
     const scope = { epochId: ctx.epochId, characterId: input.characterId };
     const eligibilityStartSeq = ctx.journal.eligibilityStartSeq(scope);
     if (eligibilityStartSeq === undefined) throw new Error("MEMORY_INGESTION_BASELINE_MISSING");
@@ -80,14 +88,23 @@ async function runRange(ctx: IngestionContext, input: { characterId: string; thr
     if (!Number.isSafeInteger(requested) || requested < 0) throw new Error("MEMORY_INVALID_REQUEST");
     const target = Math.min(requested, ctx.timeline.latestSeq(input.characterId));
     const totals = await drainSources(ctx, { characterId: input.characterId, target, forcePending: input.throughSeq === undefined });
-    return { ...totals, eligibilityStartSeq, hasApplicableSource: ctx.journal.hasApplicableSource({ ...scope, throughSeq: target }),
-      throughSeq: ctx.journal.advanceCoverage({ ...scope, throughSeq: target, now: now(ctx) }) };
+    return { ...totals, sourceImport, eligibilityStartSeq, hasApplicableSource: ctx.journal.hasApplicableSource({ ...scope, throughSeq: target }),
+      throughSeq: ctx.journal.advanceCoverage({ ...scope, throughSeq: target, now: now(ctx) }),
+      coverageGap: ctx.journal.coverageGap({ ...scope, throughSeq: target }) };
   } catch (error) {
     // Provider/schema causes can include the private transcript; only the closed
     // code may cross this detached maintenance/flush boundary.
     // eslint-disable-next-line preserve-caught-error
     throw new Error(ingestionFailureCode(error));
   }
+}
+
+function importPrimarySources(ctx: IngestionContext, characterId: string): PrimarySourceImportResult {
+  const epoch = ctx.authority.activeEpoch(ctx.epochId);
+  if (!ctx.primarySources) return { imported: 0, unresolvedSourceIds: [] };
+  return importRetainedPrimarySources({ sources: ctx.primarySources, characterId,
+    memory: { providerId: "local", authorityEpochId: ctx.epochId, providerLineageId: epoch.providerLineageId },
+    record: (commit) => ctx.journal.recordPrimaryCommitted({ ...commit, epochId: ctx.epochId }) });
 }
 
 async function drainSources(ctx: IngestionContext, input: { characterId: string; target: number; forcePending: boolean }) {

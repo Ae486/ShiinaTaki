@@ -69,6 +69,12 @@ export { MONITOR_MODE_CONFIG_KEY, OBSERVABILITY_METHODS, MonitorModeSchema, Moni
   RunMonitorListResult, type TrajectoryRow, type TrajectoryParams, type TrajectoryResult, type TrajectoryInspectParams, type
   TrajectoryInspector, type RunMonitorSubscribeParams, type RunMonitorEvent } from "./observability-schema.ts";
 export { observabilityLabel, observabilityLabels, observabilityUsageDetails } from "./observability-presentation.ts";
+export { AuxiliaryCallSourceSchema, AuxiliaryUsageCountsSchema, AuxiliaryModelCallStatusSchema, AuxiliaryModelCallSchema,
+  AuxiliaryUsageCursorSchema, AuxiliaryUsageQuerySchema, AuxiliaryUsageCounterAggregateSchema, AuxiliaryUsageStateCountsSchema,
+  AuxiliaryUsageCacheAggregateSchema, AuxiliaryUsageResultSchema, type AuxiliaryCallSource, type AuxiliaryUsageCounts,
+  type AuxiliaryModelCallStatus, type AuxiliaryModelCall, type AuxiliaryUsageCursor, type AuxiliaryUsageQuery,
+  type AuxiliaryUsageCounterAggregate, type AuxiliaryUsageStateCounts, type AuxiliaryUsageCacheAggregate,
+  type AuxiliaryUsageResult } from "./auxiliary-usage-schema.ts";
 export { EFFECT_SCHEMA_VERSION, EffectKindSchema, EffectStateSchema, EffectReplayPostureSchema, EffectOutcomeSchema, EffectSourceRefSchema,
   EffectExecutorRefSchema, ApprovalEffectRefSchema, EffectLifecycleSchema, UsageQualitySchema, InputTokenDetailsSchema,
   OutputTokenDetailsSchema, UsageRecordSchema, type EffectLifecycle, type ApprovalEffectRef, type UsageRecord } from "./effect-lifecycle-schema.ts";
@@ -490,6 +496,9 @@ export { SubagentProposalSchema, ParentContinuationProposalSchema, SubagentCompl
 export { SubagentDelegateToolSchema, SubagentMessageToolSchema, SubagentResultToolSchema, ParentContinuationToolSchema,
   SubagentInspectToolSchema, type SubagentDelegateTool, type SubagentMessageTool } from "./subagent-tool-schema.ts";
 export { SubagentValiditySchema, type SubagentValidity } from "./subagent-validity-schema.ts";
+export { SubagentCheckInPolicySchema, SubagentWorkProgressSchema, SubagentCheckInSchema, SubagentTokenUsageSchema, type SubagentCheckInPolicy, type SubagentWorkProgress, type SubagentCheckIn, type SubagentTokenUsage } from "./subagent-progress-schema.ts";
+export { SubagentAttentionParamsSchema, SubagentAttentionResultSchema, type SubagentAttentionParams, type SubagentAttentionResult } from "./subagent-attention-schema.ts";
+export { SubagentInboxRetryParamsSchema, SubagentInboxRetryResultSchema, type SubagentInboxRetryParams, type SubagentInboxRetryResult } from "./subagent-attention-schema.ts";
 export { SubagentInboxRecoveryParamsSchema, SubagentInboxRecoveryResultSchema,
   SubagentInboxResumeParamsSchema, SubagentInboxResumeResultSchema, type SubagentInboxResumeParams,
   type SubagentInboxRecoveryParams, type SubagentInboxRecoveryResult, type SubagentInboxResumeResult } from "./subagent-inbox-schema.ts";

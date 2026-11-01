@@ -7,6 +7,8 @@ import { SubagentSummarySchema, SubagentHistoryResultSchema, SubagentListResultS
   type SubagentSummary, type SubagentResultView } from "@taki/shared";
 import type { SubagentState } from "./subagent-state.ts";
 import { createSubagentEventRepo } from "../db/subagent-event-repo.ts";
+import { readSubagentProgress } from "../db/subagent-progress-repo.ts";
+import { readSubagentTokenUsage } from "../db/subagent-usage-repo.ts";
 
 export function subagentSummary(state: SubagentState, subagentId: string): SubagentSummary {
   const { deps } = state; const child = deps.children.get(subagentId);
@@ -27,12 +29,27 @@ export function subagentSummary(state: SubagentState, subagentId: string): Subag
       : pendingRequest ? "needs_input" : pending ? queueable ? "queued" : "deferred" : "idle";
   return SubagentSummarySchema.parse({ subagentId, characterId: child.characterId, label: child.label, createdAt: child.createdAt,
     activeRunId: child.activeRunId, controlVersion: child.controlVersion, stopOrigin: child.stopOrigin, state: phase, pendingRequest,
+    progress: child.activeRunId ? readSubagentProgress(deps.db, deps.executions.get(child.activeRunId).workInputId)
+      : latest ? readSubagentProgress(deps.db, String(latest.work_input_id)) : null,
+    tokenUsage: readSubagentTokenUsage(deps.db, subagentId),
     activeWorkInputId: child.activeRunId ? deps.executions.get(child.activeRunId).workInputId : null,
     latestWorkInputId: latest?.work_input_id ?? null, latestCompletionId: result?.run_id ?? null });
 }
 
 export function assertSubagentCharacter(state: SubagentState, characterId: string, subagentId: string): void {
   if (state.deps.children.get(subagentId).characterId !== characterId) throw new Error("SUBAGENT_CHARACTER_MISMATCH");
+}
+
+export function subagentEventHistory(state: SubagentState, input: {
+  characterId: string; subagentId: string; afterSeq: number; throughSeq?: number;
+}) {
+  assertSubagentCharacter(state, input.characterId, input.subagentId);
+  const db = state.deps.db;
+  const throughSeq = input.throughSeq ?? Number(db.prepare("SELECT max(seq) AS seq FROM subagent_events WHERE subagent_id=:child")
+    .get({ child: input.subagentId })?.seq ?? 0);
+  const row = db.prepare(`SELECT event_id FROM subagent_events WHERE subagent_id=:child AND seq>:after AND seq<=:through
+    ORDER BY seq LIMIT 1`).get({ child: input.subagentId, after: input.afterSeq, through: throughSeq });
+  return { throughSeq, event: row ? createSubagentEventRepo(db).get(String(row.event_id)) : undefined };
 }
 
 export function subagentResult(state: SubagentState, input: { characterId: string; completionId: string }): SubagentResultView {

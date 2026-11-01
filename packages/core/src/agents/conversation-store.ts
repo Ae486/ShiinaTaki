@@ -3,6 +3,7 @@
  * OUTPUT: atomic turn/append/remove APIs and one project() source for all Replay View consumers
  * POS:    core/agents — one conversational writer and Character-scoped canonical Replay View boundary (ADR 0008)
  */
+/* eslint max-lines-per-function: ["error", { "max": 55, "skipBlankLines": true, "skipComments": true }] -- The factory keeps per-store replay diagnostic closures and thin source writer adapters together. */
 import type { ModelMessage } from "ai";
 import type { SourceContext, TimelineCommitted, TimelineEntry } from "@taki/shared";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
@@ -11,7 +12,8 @@ import { selectWindow } from "./context-window.ts";
 import { foldUnderPressure } from "./replay-folds.ts";
 import { loadReplaySource, REPLAY_SOURCE_BACKSTOP, type ReplaySource } from "./replay-source-loader.ts";
 import { toModelMessage, toUserEntryInput, type TurnEntryInput, type TurnMessage, type UserImageInput } from "./turn-mapping.ts";
-import { commitConversationTurn, type TurnCommitInput } from "./conversation-turn-writer.ts";
+import { beginPrimaryConversation, commitConversationTurn, publishTurnCommit, retractPrimaryConversation,
+  type PrimaryBeginInput, type TurnCommitInput, type TurnWriterDeps } from "./conversation-turn-writer.ts";
 
 // Legacy no-budget compatibility only. Measured production replay uses the separately observable source backstop.
 export const REPLAY_WINDOW = 200;
@@ -60,6 +62,10 @@ export interface SourceBackstopHit {
 }
 
 export interface ConversationStore {
+  beginPrimary(input: PrimaryBeginInput): {
+    userEntry: TimelineEntry; sourceId?: string;
+  };
+  retractPrimary(sourceId: string): void;
   /** Called only within the owning delivery transaction; the caller publishes after the outer commit. */
   appendDelivery(characterId: string, text: string, sourceContext?: SourceContext): TimelineEntry;
   /**
@@ -79,9 +85,8 @@ export interface ConversationStore {
   /** The replay window as AI SDK messages, oldest-first (summary head first when one is substituted — R3). */
   history(characterId: string): ModelMessage[];
   /**
-   * Seq of the oldest entry history() still replays — every row below it has LEFT the model's window (rows the
-   * summary retired included). The flush computes "leaving the window" from THIS boundary (same select call:
-   * same slice, no drift — batch 6); safe because the compactor flushes BEFORE advancing through_seq (batch 7).
+   * Seq of the oldest entry history() still replays; earlier rows have left the Replay View. Legacy flush uses
+   * this same projection boundary; canonical ingestion tracks its independent durable source coverage.
    */
   windowStart(characterId: string): number;
   /** Estimator-unit size of the current replay view (summary head + kept rows) — the compaction trigger's input. */
@@ -92,6 +97,7 @@ export interface ConversationStore {
 
 export interface ConversationStoreDeps {
   repo: TimelineRepo;
+  primarySources?: TurnWriterDeps["primarySources"];
   /** Fired after each committed append; the server fans it out as timeline.appended (write→event colocation). */
   onAppend?: (entry: TimelineEntry) => void;
   /** One complete foreground batch, emitted only after every canonical row commits. */
@@ -120,7 +126,7 @@ export function createConversationStore(deps: ConversationStoreDeps): Conversati
   const { repo, onAppend, onRemove, window, summaries, onWallHit, onSourceBackstopHit, source } = deps;
   const commit = (characterId: string, input: TurnEntryInput): TimelineEntry => {
     const entry = repo.append({ characterId, ...input });
-    onAppend?.(entry);
+    publishTurnCommit(deps, () => onAppend?.(entry));
     return entry;
   };
   const wallWarnedAt = new Map<string, number>();
@@ -142,6 +148,8 @@ export function createConversationStore(deps: ConversationStoreDeps): Conversati
     return { messages: view.head === null ? messages : [view.head, ...messages], windowStartSeq: view.windowStartSeq, measurement: view.measurement };
   };
   return {
+    beginPrimary: (input) => beginPrimaryConversation(deps, input),
+    retractPrimary: (sourceId) => retractPrimaryConversation(deps, sourceId),
     appendDelivery: (characterId, text, sourceContext) => repo.append({ characterId, role: "assistant", content: text,
       ...(sourceContext === undefined ? {} : { sourceContext }) }),
     // No images = toUserEntryInput returns the legacy `{role:"user", content}` row (byte-identical to before #17).
@@ -158,7 +166,7 @@ export function createConversationStore(deps: ConversationStoreDeps): Conversati
       commitTurn: (input) => commitConversationTurn(deps, input),
     removeEntry: (characterId, seq) => {
       repo.deleteEntry(characterId, seq);
-      onRemove?.({ characterId, seq });
+      publishTurnCommit(deps, () => onRemove?.({ characterId, seq }));
     },
     // Legacy text-only rows reconstruct via content; tool calls replay with empty input placeholders, never raw args.
     history: (characterId) => {

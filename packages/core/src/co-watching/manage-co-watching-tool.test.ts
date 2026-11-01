@@ -82,6 +82,12 @@ describe("governed primary Co-Watching control surface", () => {
     expect(f.runtime.read("taki").session).toBeNull();
     expect(f.submitNative).not.toHaveBeenCalled(); expect(f.lookupNative).not.toHaveBeenCalled();
     expect(f.statusNative).not.toHaveBeenCalled(); expect(f.generate).not.toHaveBeenCalled();
+    const nextRequest = JSON.stringify(model.doStreamCalls[1]?.prompt);
+    expect(nextRequest).toContain("Grounded test analysis");
+    expect(nextRequest).toContain(f.analysis.analysisId);
+    expect(nextRequest).toContain(f.analysis.media.cid);
+    expect(nextRequest).not.toContain(f.analysis.native.sha256);
+    expect(nextRequest).not.toContain(f.analysis.native.serviceInstanceId);
     expect(JSON.stringify(f.store.history("taki"))).toContain("analysis_read");
   });
   it.each([false, true])("lists registered references with no source or native availability, without accepting or submitting work (empty=%s)", async (empty) => {

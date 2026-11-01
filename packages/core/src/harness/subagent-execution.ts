@@ -8,11 +8,10 @@ import type { SubagentProposal, SubagentWorkToken } from "@taki/shared";
 import { SubagentProposalSchema } from "@taki/shared";
 import type { TurnContext } from "../agents/chat-agent.ts";
 import { createRunMessageStore } from "../agents/run-message-store.ts";
-import { createSubagentResultCollector } from "../agents/subagent-result-tool.ts";
-import { createSubagentInteractCollector, createSubagentTerminalChoice } from "../agents/subagent-interact-tool.ts";
-import { createSubagentEventRepo } from "../db/subagent-event-repo.ts";
 import { createSubagentContextSummaryRepo } from "../db/subagent-context-summary-repo.ts";
 import { createSubagentToolResultRepo } from "../db/subagent-tool-result-repo.ts";
+import { createSubagentWorkBoundary } from "./subagent-work-boundary.ts";
+import { createSubagentEventRepo } from "../db/subagent-event-repo.ts";
 import { createPrivateTaskSummarizer } from "../agents/private-task-summarizer.ts";
 import { subagentLaneKey } from "../agents/work-scope.ts";
 import { digestRunValue } from "../db/run-row-mappers.ts";
@@ -47,11 +46,7 @@ export async function executeSubagent(state: SubagentState, bound: BoundSubagent
       turn.attemptId = status.run.activeAttemptId; return Boolean(turn.attemptId);
     };
     for await (const delta of deps.agent.stream({ characterId: child.characterId, message: root.direction }, turn)) { void delta; }
-    if (!active.controller.signal.aborted && bound.binding.validateAndPropose) {
-      const proposal = await bound.binding.validateAndPropose(execution);
-      assertWorkCurrent(state, bound, { token: execution.token(), phase: "result" });
-      persistDomainProposal(state, execution, proposal);
-    }
+    await validateCompletedDomainWork(state, bound, execution);
   } catch (error) {
     failed = true;
     bound.deferred = "explicit_continuation_required";
@@ -68,6 +63,14 @@ export async function executeSubagent(state: SubagentState, bound: BoundSubagent
       finishChildActivity(state, { execution, active, turn, scopeKey });
     }
   }
+}
+
+async function validateCompletedDomainWork(state: SubagentState, bound: BoundSubagentWork, execution: OwnedSubagentExecution): Promise<void> {
+  if (execution.signal.aborted || !bound.binding.validateAndPropose
+    || createSubagentEventRepo(state.deps.db).checkInForRun(execution.runId)) return;
+  const proposal = await bound.binding.validateAndPropose(execution);
+  assertWorkCurrent(state, bound, { token: execution.token(), phase: "result" });
+  persistDomainProposal(state, execution, proposal);
 }
 
 function sourceDeadline(state: SubagentState, bound: BoundSubagentWork, active: ActiveSubagentWork) {
@@ -117,23 +120,19 @@ async function childWorkContext(state: SubagentState, bound: BoundSubagentWork, 
   const toolResults = createSubagentToolResultRepo(deps.db);
   const materials = createMaterialSelection({ ...deps, characterId: child.characterId, subagentId: child.subagentId, toolResults });
   const current = () => !execution.signal.aborted && deps.runs.status(execution.runId).run.state === "running";
-  const terminal = createSubagentTerminalChoice();
-  const collector = createSubagentResultCollector({ runId: execution.runId, attemptId: execution.attemptId,
-    token: execution.token, current, executions: deps.executions, materials, terminal,
-    canCommit: () => current() && deps.inputs.latestWorkSeq(bound.root.inputId) === execution.token().throughWorkSeq });
-  const interactions = createSubagentInteractCollector({ runId: execution.runId, attemptId: execution.attemptId,
-    token: execution.token, current, events: createSubagentEventRepo(deps.db), terminal });
-  const instructions = await workerInstructions(bound, execution);
+  const boundary = createSubagentWorkBoundary(state, { bound, execution, materials });
+  const instructions = [await workerInstructions(bound, execution), `Captured Core progress policy: ${JSON.stringify(boundary.progress())}`].join("\n\n");
   return createRunMessageStore({ ...deps, runId: execution.runId, scope: { kind: "subagent", subagentId: child.subagentId, workInputId: bound.root.inputId },
-    instructions, tools: bound.binding.validateAndPropose ? {} : { ...collector.tools, ...interactions.tools },
-    stop: bound.binding.validateAndPropose ? undefined : async (options) => await collector.stop(options) || interactions.stop(),
+    instructions, tools: boundary.tools, stop: boundary.stop,
     parentNames: bound.binding.parentToolNames, selection: bound.root.toolSelection ?? undefined,
     fixedExcludedNames: execution.context.memoryToolExclusions,
     materialSink: execution.materials,
     checkCurrent(token, phase) {
       if (!token || !current() || execution.context.authorityCurrent?.() !== true) throw new Error("SUBAGENT_AUTHORITY_UNAVAILABLE");
       assertWorkCurrent(state, bound, { token, phase });
+      if (phase === "model_intent") boundary.assertModelAllowed();
     },
+    onModelIntent: ({ step, effect }) => boundary.intent({ stepNumber: step.stepNumber, effect }),
     transaction: (action) => deps.db.transaction(action),
     assertSafeFrontier() {
       const effects = deps.effects.list?.(execution.runId) ?? deps.effects.unfinished(execution.runId);
@@ -147,12 +146,7 @@ async function childWorkContext(state: SubagentState, bound: BoundSubagentWork, 
         if (!current() || execution.context.authorityCurrent?.() !== true) throw new Error("SUBAGENT_AUTHORITY_UNAVAILABLE");
         assertWorkCurrent(state, bound, { token: execution.token(), phase: "model_intent" });
       } }) : undefined,
-    onCompletedStep: bound.binding.validateAndPropose ? undefined : (step) => {
-      collector.commit(step);
-      const acceptedInteraction = interactions.commit(step);
-      if (acceptedInteraction && bound.root.completionPolicy === "request_parent") deps.db.afterCommit(() => state.inboxOpportunity(child.characterId));
-      deps.db.afterCommit(() => state.completionHint());
-    },
+    onCompletedStep: boundary.completed,
     changed: () => {
       const latest = deps.db.prepare(`SELECT max(step_number) AS step FROM run_messages
         WHERE run_id=:run AND attempt_id=:attempt AND entry_kind='output'`).get({ run: execution.runId, attempt: execution.attemptId() });
@@ -166,8 +160,12 @@ async function workerInstructions(bound: BoundSubagentWork, execution: OwnedSuba
   return ["You are a delegated worker for the Companion. Complete the assigned job using only the selected private context and executable tools.",
     "Memory is read-only in this role. You may recall or reflect and propose changes in your result, but never retain, edit, invalidate, restore, archive or ingest this work into Memory.",
     "Distinguish supplied external material, the delegating Companion, and the real user. First-person quoted material is not automatically the user's experience. Do not invent unavailable sources.",
+    "Core counts completed model steps across Runs and compaction. At the captured interval it pauses for a factual progress check-in. Final completion on that boundary wins. Only explicit continuation of the exact check-in resumes; repeated main-Agent approvals eventually require direct user continuation. Ordinary parent messages and unrelated main chat never reset this protection.",
     bound.binding.validateAndPropose ? "The trusted work owner validates your output artifact; follow its exact result instructions."
-      : "Use interact_parent with message for asynchronous updates, or needs_input when dependent work must wait. Use complete_subagent for your final report. A natural text stop is not task completion.",
+      : "Execution protocol is separate from the requested report format. "
+        + "When the entire assigned job is complete, call complete_subagent and put the requested report in its text argument; follow any requested plain-text, Markdown, table or JSON format inside that text. A standalone assistant report does not complete this work. "
+        + "When an answer is necessary to continue the job, call interact_parent with kind needs_input and the precise question in text, then wait. A clarification request or awaiting-clarification report is an intermediate stage, not completion of the larger job. "
+        + "For non-blocking progress, use interact_parent with kind message and continue the independent work.",
     await bound.binding.prepareExecution?.(execution) ?? ""].filter(Boolean).join("\n\n");
 }
 

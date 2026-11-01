@@ -40,13 +40,13 @@ export async function preparePrivateTaskContext(input: PrivateTaskContextInput, 
     const cost = estimateMessagesTokens(selected.messages);
     const pressure = snapshot.more || cost >= budget * 0.8;
     if (!pressure) return prepared(step, { selected, token, summary });
-    const retiring = retiringRounds(input, { rounds: snapshot.rounds,
-      keepTokens: Math.max(1, (budget - estimateMessagesTokens(fixed)) * 0.4) });
+    const retiring = retiringRounds(input, { rounds: snapshot.rounds, pending, summary, budget });
     if (retiring.length === 0) {
       if (snapshot.more || cost >= budget) throw new Error("SUBAGENT_CONTEXT_ROUND_UNFIT");
       return prepared(step, { selected, token, summary });
     }
-    const next = await compact(input, { rows: retiring, summary, token, step });
+    const next = await compact(input, { rows: retiring, retained: snapshot.rows.slice(retiring.length), pending,
+      budget, summary, token, step });
     if (next) { summary = next; continue; }
     const fallback = { ...selected, messages: [...selected.messages, { role: "user" as const, content:
       "Core context status: the current summary checkpoint is unavailable. All supplied raw rounds remain evidence; "
@@ -93,7 +93,8 @@ function loadSnapshot(input: PrivateTaskContextInput, afterSeq: number): Context
   return { rows: rounds.flat(), rounds, more };
 }
 
-function project(input: PrivateTaskContextInput, state: { rows: RunMessage[]; pending: SubagentInput[]; summary: SubagentContextSummary | null }) {
+function project(input: PrivateTaskContextInput, state: { rows: RunMessage[]; pending: SubagentInput[];
+  summary: Pick<SubagentContextSummary, "revision" | "throughSeq" | "text"> | null }) {
   const { rows, pending, summary } = state;
   const inputIds = new Set<string>();
   const messages = rows.map((row) => {
@@ -110,13 +111,21 @@ function project(input: PrivateTaskContextInput, state: { rows: RunMessage[]; pe
   return { messages: [...input.initial, ...head, ...messages, ...pending.map(input.renderInput)], inputIds: ordered.map((record) => record.inputId) };
 }
 
-function retiringRounds(input: PrivateTaskContextInput, selection: { rounds: RunMessage[][]; keepTokens: number }): RunMessage[] {
-  const { rounds, keepTokens } = selection;
+function retiringRounds(input: PrivateTaskContextInput, selection: {
+  rounds: RunMessage[][]; pending: SubagentInput[]; summary: SubagentContextSummary | null; budget: number;
+}): RunMessage[] {
+  const { rounds, pending, summary, budget } = selection;
+  const head = estimateMessagesTokens(project(input, { rows: [], pending, summary }).messages);
+  const keepTokens = Math.max(1, (budget - head) * 0.4);
   let start = rounds.length;
   let retained = 0;
   while (start > 0 && (retained < keepTokens || start === rounds.length)) {
+    const candidate = estimateMessagesTokens(project(input, { rows: rounds[start - 1] ?? [], pending, summary }).messages) - head;
+    // The newest round is protected. Older rounds are optional: a retention target must never
+    // force an otherwise fitting summary/tail over budget. Price the same projection we dispatch.
+    if (start < rounds.length && head + retained + candidate >= budget) break;
     start -= 1;
-    retained += estimateMessagesTokens((rounds[start] ?? []).map(toModelMessage).filter((message): message is ModelMessage => message !== null));
+    retained += candidate;
   }
   const retiring = rounds.slice(0, start);
   // A live partial remains protected. A terminal prior Run is immutable historical evidence, including
@@ -129,15 +138,22 @@ function retiringRounds(input: PrivateTaskContextInput, selection: { rounds: Run
 }
 
 async function compact(input: PrivateTaskContextInput, state: {
-  rows: RunMessage[]; summary: SubagentContextSummary | null; token: SubagentWorkToken; step: WorkStepInput;
+  rows: RunMessage[]; retained: RunMessage[]; pending: SubagentInput[]; budget: number;
+  summary: SubagentContextSummary | null; token: SubagentWorkToken; step: WorkStepInput;
 }): Promise<SubagentContextSummary | undefined> {
   const throughSeq = state.rows.at(-1)?.seq;
   if (!throughSeq || !input.summaries) return;
   const range = input.summaries.capture({ subagentId: input.subagentId, workInputId: input.workInputId, throughSeq });
   if (input.summaries.failed(range)) return;
   const transcript = state.rows.map((row) => privateTranscriptRow(input, row)).join("\n");
+  const nonSummaryCost = estimateMessagesTokens(project(input, { rows: state.retained, pending: state.pending,
+    summary: { text: "", revision: range.expectedRevision + 1, throughSeq: range.throughSeq } }).messages);
+  // This is guidance for the replacement, not a hard output limit; the next loop still remeasures the full request.
+  const pressureTarget = Math.floor(state.budget * 0.8 - nonSummaryCost);
+  const targetSummaryTokens = Math.max(1, pressureTarget > 0 ? pressureTarget : Math.floor(state.budget - nonSummaryCost));
   try {
-    const generated = await input.summarize?.({ previous: state.summary?.text ?? null, transcript, signal: state.step.envelope?.signal });
+    const generated = await input.summarize?.({ previous: state.summary?.text ?? null, transcript,
+      targetSummaryTokens, signal: state.step.envelope?.signal });
     if (!generated) throw new Error("SUBAGENT_SUMMARY_UNAVAILABLE");
     const quality = validateSummary({ text: generated.text, finishReason: generated.finishReason,
       sourceText: [state.summary?.text, transcript].filter(Boolean).join("\n") });
@@ -189,15 +205,22 @@ function privateHistoryMessage(input: PrivateTaskContextInput, row: RunMessage):
     return { ...part, output: withToolMaterialReferences(part.output, refs) };
   }) };
   if (!message || message.role !== "tool" || estimateMessagesTokens([message]) <= 2000) return message;
-  if (message.content.some((part) => part.type === "tool-result" && part.toolName === "read_self_history")) return message;
-  const reduced = reduceMessages({ messages: [message] }).messages[0];
+  // Exact-history pages, including their cursors, are already bounded. Protect those parts without
+  // exempting unrelated large results returned alongside them in the same complete action round.
+  const ordinary = message.content.filter((part) => part.type !== "tool-result" || part.toolName !== "read_self_history");
+  if (ordinary.length === 0) return message;
+  const reduced = reduceMessages({ messages: [{ ...message, content: ordinary }] }).messages[0];
   if (!reduced || reduced.role !== "tool") return message;
   const cursor = JSON.stringify({ child: subagentId, category: "messages", after: row.seq - 1, through: row.seq, offset: 0, recordId: null });
-  const reference = `\nCore projection: large body omitted; exact retained row is pageable with read_self_history(category="messages", cursor=${JSON.stringify(cursor)}, limit=1).`;
-  return { ...reduced, content: reduced.content.map((part) => {
-    if (part.type !== "tool-result") return part;
-    if (part.output.type === "text" || part.output.type === "error-text") return { ...part, output: { ...part.output, value: part.output.value + reference } };
-    return part;
+  const reference = `\nCore projection: exact retained row is pageable with read_self_history(category="messages", cursor=${JSON.stringify(cursor)}, limit=1).`;
+  let ordinaryIndex = 0;
+  return { ...message, content: message.content.map((part) => {
+    if (part.type === "tool-result" && part.toolName === "read_self_history") return part;
+    const projected = reduced.content[ordinaryIndex++] ?? part;
+    if (projected.type !== "tool-result") return projected;
+    if (part.type === "tool-result" && JSON.stringify(projected.output) === JSON.stringify(part.output)) return part;
+    if (projected.output.type === "text" || projected.output.type === "error-text") return { ...projected, output: { ...projected.output, value: projected.output.value + reference } };
+    return projected;
   }) };
 }
 

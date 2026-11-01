@@ -30,6 +30,8 @@ describe("invitation-first Chat controls", () => {
     const html = show({ session: { sessionId: "session", sourceRef: "source", analysisId: "analysis", title: "Current video",
       status: "paused_child", subagentId: "00000000-0000-4000-8000-000000000001", workInputId: "00000000-0000-4000-8000-000000000011",
       reason: null, expiresAt: "2026-10-17T14:00:00.000Z", preparedCount: null, sentCount: 0, pendingRevision: false } });
-    expect(html).toContain("等待你明确继续"); expect(html).toContain("查看子代理工作"); expect(html).not.toContain("继续此工作");
+    expect(html).toContain("子代理已暂停"); expect(html).toContain("待决定事项");
+    expect(html).toContain("查看子代理工作"); expect(html).not.toContain("继续此工作");
+    expect(html).not.toContain("子代理已停止"); expect(html).not.toContain("等待你明确继续");
   });
 });

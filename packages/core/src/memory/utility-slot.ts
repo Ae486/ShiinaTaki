@@ -8,6 +8,8 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import type { LanguageModel } from "ai";
 import type { UtilityConfig } from "../config/utility-config.ts";
 import type { Logger } from "../logging/logger.ts";
+import type { AuxiliaryUsageMeter } from "../observability/auxiliary-usage-meter.ts";
+import { withAuxiliaryUsageTask } from "../observability/model-usage-context.ts";
 
 /** Cumulative background spend since boot; `usageUnknown` counts tasks whose token usage could not be read in full. */
 export interface UtilityUsage {
@@ -31,6 +33,7 @@ export interface UtilitySlotDeps {
   /** Absent/null = no separate slot configured. */
   config?: UtilityConfig | null;
   logger: Logger;
+  usageMeter?: AuxiliaryUsageMeter;
 }
 
 export function createUtilitySlot(deps: UtilitySlotDeps): UtilitySlot & { stop(): Promise<void>; settle(): Promise<void> } {
@@ -38,7 +41,8 @@ export function createUtilitySlot(deps: UtilitySlotDeps): UtilitySlot & { stop()
   // Falling back to the MAIN model is the shipped default, not a degraded mode: Letta's sleep-time agent inherits the
   // primary's llm_config and "use a stronger model" is documentation guidance (rc §A2). A cheaper/stronger background
   // provider is the operator's choice to make, never a requirement for the feature to work.
-  const model = deps.config ? utilityModel(deps.config) : deps.mainModel;
+  const resolvedModel = deps.config ? utilityModel(deps.config) : deps.mainModel;
+  const model = deps.usageMeter?.wrapModel(resolvedModel, { source: "utility", label: "utility" }) ?? resolvedModel;
   const totals: UtilityUsage = { calls: 0, inputTokens: 0, outputTokens: 0, usageUnknown: 0 };
   // ONE global chain (R11: background tasks run serially): a tidy pass and a flush write must not bid for the same
   // provider at once, whichever characters they belong to.
@@ -51,7 +55,7 @@ export function createUtilitySlot(deps: UtilitySlotDeps): UtilitySlot & { stop()
       if (stopped) return undefined;
       totals.calls += 1;
       try {
-        const value = await task();
+        const value = await withAuxiliaryUsageTask(label, task);
         account(totals, value);
         return value;
       } catch {

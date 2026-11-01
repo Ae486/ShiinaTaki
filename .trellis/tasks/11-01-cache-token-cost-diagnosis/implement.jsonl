@@ -1,0 +1,8 @@
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Bound optional diagnostics, preserve unknown usage and avoid sensitive prompt/argument logging."}
+{"file":".trellis/spec/backend/canonical-local-memory-runtime.md","reason":"Durable source proof, ingestion coverage and authority boundaries before any persistence change."}
+{"file":".trellis/spec/backend/compaction-harness.md","reason":"Flush before retirement, summary quality, complete request pressure and recovery."}
+{"file":".trellis/spec/backend/observability-projection.md","reason":"Preserve authoritative settlement and existing Run/Event projections."}
+{"file":".trellis/tasks/11-01-cache-token-cost-diagnosis/research/failure-root-causes.md","reason":"Measured blockers and existing defenses; avoid speculative or duplicate fixes."}
+{"file":".trellis/tasks/11-01-cache-token-cost-diagnosis/research/runtime-data-map.md","reason":"Reproducible data scope, denominator and actual replay evidence."}
+{"file":".trellis/tasks/11-01-cache-token-cost-diagnosis/research/simplification-scope-review.md","reason":"Owner-accepted decoupling and atomic local source direction supersedes the older synchronous-flush repair recommendation; bounded batches and compatibility limits."}
+{"file": ".trellis/tasks/11-01-cache-token-cost-diagnosis/research/auxiliary-usage-design.md", "reason": "Owner-approved auxiliary ledger and fixed-input reasoning comparison; preserves Run accounting."}

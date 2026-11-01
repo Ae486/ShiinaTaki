@@ -23,7 +23,7 @@
   `SummaryRepo.getCheckpoint(characterId) -> { throughSeq, text, revision, lastOperationId, sourceFromSeq,
   sourceThroughSeq, sourceDigest, capturedTailSeq } | null`.
 - Durable coordination:
-  `CompactionOperationRepo.begin`, `recordFlush`, `recordSummaryGenerated`, `fail`, `cancelActive`, `commitSummary`,
+  `CompactionOperationRepo.begin`, `renewLease`, `recordFlush`, `recordSummaryGenerated`, `fail`, `cancelActive`, `commitSummary`,
   `reconcileExpired`, `get`, `active`, and `events`.
 - Runtime coordinator:
   `maybeRun(characterId, correlation?)`, `cancel(characterId)`, and `reconcile()`.
@@ -40,6 +40,14 @@
 
 ### 3. Contracts
 
+- Canonical Local/Hindsight extraction and context compaction are independently admitted per Character. Both retain
+  their existing serialization and share the Utility Slot; an occupied slot is not extra model concurrency.
+  A failed or pending ingestion/tidy pass cannot withhold the compaction trigger. Shutdown settles both branches.
+- Only Legacy Markdown retains maintenance-before-compaction and the optional `legacyFlush` precondition. Resolve
+  current authority at trigger/dispatch boundaries; retired Legacy writers must never be reused. Canonical runs do not
+  emit synthetic `flush` success events. Existing flush history and explicit provider coverage APIs stay intact.
+- At actual Utility Slot dispatch, reject cancelled/expired ownership before calling the model, then renew a valid
+  lease for generation. Queue time cannot consume generation's lease, and an expired lease is never revived.
 - `characterId` is the durable isolation boundary. `operationId` is only an idempotency/evidence identity; optional
   `runId`/`attemptId` are correlations and never become Compaction authorities.
 - A retiring range is contiguous: `selectedFromSeq = expectedSummaryThrough + 1`, and
@@ -67,6 +75,12 @@
 - Provider usage is post-hoc calibration for the completed request. A positive authoritative `inputTokens` sample may
   anchor that report, and cache-read tokens still consume capacity; zero/absent usage falls back to the complete local
   estimate. A later usage callback never overwrites the already measured next-Replay pressure snapshot.
+- Primary turn calibration uses the last completed SDK step's `event.usage` paired with that same model-call start's
+  actual instructions, messages and prepared tool definitions. SDK `result.usage` aggregates all steps and must never
+  be divided by a single request estimate. Retain one bounded sample and emit it only through the existing successful,
+  non-cancelled after-commit callback. This preserves one EMA update per turn; cumulative Run/Effect accounting remains
+  separate. The actual-SDK `chat-agent-usage.test.ts` changes messages, inbox instructions and disclosed tools between
+  requests and verifies the paired sample and persisted calibration factor.
 - Context Reduction is projection-only. It preserves message order, tool call/result identity, the current user message,
   recent dialogue, system/Character/Memory instructions, and Timeline bytes. Production reducers currently cover typed
   tool results and a provenance-marked rolling-summary head; generic dialogue truncation is not enabled.
@@ -89,8 +103,9 @@
   outcome. `reduceSourcedToolResult` uses the projection's retained original-output association; do not parse arbitrary
   tool text as metadata or drop the only source header while retaining its body. Replay folds preserve sidecars and
   failure/denial status even when replacing a payload with an omission trace.
-- Source-aware summary instructions share the Memory voice/source convention. Original Timeline text is unchanged,
-  existing pre-retirement Memory flush remains required, and a summary is never a new original-primary Memory source.
+- Source-aware summary instructions share the Memory voice/source convention. Original Timeline text and pending
+  source records are unchanged; a summary is never a new original-primary Memory source. Preserve salient facts,
+  names, preferences and currently relevant constraints without assuming canonical extraction has already succeeded.
   Actual request/CAS regressions and live semantic observations are separate evidence levels.
 - For relevant retained threads, preserve the source/person of each reported event and explicit negation. Similar
   events affecting two people remain separate; a user's clarification does not retract the external person's event.
@@ -112,7 +127,8 @@
 | Stable operation ID is reused with different source identity | Reject with an operation identity conflict; never reopen it for different evidence. |
 | Canonical source fields in the selected Timeline range change during generation | Record `SOURCE_STALE`; keep the previous summary. |
 | Summary revision or coverage changes during generation | Record `SUMMARY_CONFLICT`; preserve the newer checkpoint. |
-| Memory flush is incomplete, fenced, failed, or unavailable | Record the closed failure class; do not summarize/retire the range. |
+| Canonical memory ingestion is incomplete, failed, or unavailable | Eligible compaction may proceed; preserve raw sources and truthful ingestion gaps. |
+| Legacy flush is incomplete, fenced, failed, or unavailable | Record the closed failure class; do not summarize/retire the range. |
 | Auxiliary generation fails or returns empty text | Record `SUMMARY_GENERATION_FAILED` or `SUMMARY_EMPTY`; do not advance. |
 | Terminal event insertion or summary CAS transaction fails | Roll back summary, operation terminalization, and event together. |
 | Process restarts with expired open work | Reconcile once to `abandoned/LEASE_EXPIRED`; repeated reconciliation is a no-op. |
@@ -127,12 +143,11 @@
 
 ### 5. Good/Base/Bad Cases
 
-- Good: capture range `1..6` at summary revision `0`; flush succeeds; row `11` is appended during generation; the digest
+- Good: capture range `1..6` at summary revision `0`; canonical extraction is pending; row `11` is appended during generation; the digest
   for `1..6` remains equal; one transaction writes summary revision `1`, commits the operation, and appends one
   `committed` event while rows `7..11` remain verbatim.
-- Base: the process dies after a flush but before summary commit. The open lease expires, reconciliation records
-  `abandoned`, and a later retry reuses the stable operation identity/fenced attempt. The idempotent flush may safely
-  report that the range is already covered.
+- Base: the process dies before summary commit. The open lease expires, reconciliation records `abandoned`, and a
+  later retry reuses the stable operation identity/fenced attempt. Original Timeline and ingestion journals remain.
 - Bad: update `conversation_summary` first and append success evidence later; accept a stale lease because the operation
   ID matches; hash the newest tail instead of the selected range; or log the raw provider exception on failure.
 
@@ -144,6 +159,8 @@
 - Equal source/operation identity for otherwise-identical Timeline rows with absent or changed tool display names;
   canonical content/output changes still change identity or cause `SOURCE_STALE`.
 - Flush, generated, failed, cancelled, abandoned, and committed event ordering with append-only trigger enforcement.
+- Failed and blocked maintenance still permits canonical summary progress; Legacy alone keeps flush ordering.
+  Queue cancellation/expiry makes no model call; valid dispatch renews the lease without fake flush evidence.
 - Atomic rollback when committed evidence cannot be inserted; exact duplicate commit idempotency.
 - Concurrent tail append acceptance, selected-range mutation rejection, summary revision/coverage conflict, and
   discontinuous range/operation-ID conflict rejection.

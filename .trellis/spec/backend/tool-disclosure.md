@@ -43,7 +43,14 @@ binding with an actual direct tool returns it. It is neither a display label nor
 - Initial extension context must explain this loading contract before any Skill body is read. Instructions hidden
   inside the Skill cannot teach the model how to discover its absent tools; prior historical instructions do not activate them.
 - Preserve canonical history, completed results and Effect identities. `prepareStep` changes only `activeTools`,
-  never messages. D70's same-loop message reduction remains deferred.
+  never messages for disclosure. Primary capability guidance follows the same active subset without expanding it.
+  D70's same-loop message reduction remains deferred.
+- Model projection is independent of activation: raw Skill revisions and extension identity/toolName remain in
+  completed SDK results. Skill text may omit its revision in the model view; directory views omit generation
+  bookkeeping but preserve selectors, availability and overflow. The sealed extension bridge reuses the exact
+  captured Skill's projector. Unknown MCP payloads retain their complete existing JSON view: blindly applying the
+  direct SDK content projector would lose unique structuredContent or isError. The direct MCP adapter is unchanged;
+  the indirect bridge's existing JSON-only image/resource presentation is not a new multimodal rendering path.
 - SDK validation uses the active subset: a hidden call in the same response as its loader fails even if loading
   finishes first. Disclosure cannot bypass Governance, retired generations, cancellation or initiative restrictions.
 - Product composition chooses non-primary eligibility; the generic hook needs no fake user message. Co-Watching

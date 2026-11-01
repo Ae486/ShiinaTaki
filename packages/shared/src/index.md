@@ -107,8 +107,12 @@
 - subagent-schema.ts — immutable child context, work-scoped inputs, tool selection, trusted scope and control data
 - subagent-result-schema.ts — separate proposals, canonical child/parent terminal reports and completion/publication projections
 - subagent-api-schema.ts — paged child history/result/control projections, exact target CAS, optional subscription invalidations and exported parameter/result types
-- subagent-tool-schema.ts — model delegation/context/material/tool selection and explicit child/parent result decisions without publication authority
+- subagent-tool-schema.ts — model delegation/context/material/tool selection, compact worker versus explicit diagnostic inspection, optional legacy pagination field, and child/parent results without publication authority
 
 - subagent-inbox-schema.ts — private event/wait/handling and explicit reconciliation contracts
 - subagent-conversation-schema.ts — continuous private history, full-batch presentation and bounded body/activity APIs
 - subagent-validity-schema.ts — explicit generic until-cancelled versus finite source validity
+
+- subagent-progress-schema.ts — captured work intervals, runtime check-in sidecars and complete/partial child token usage
+- subagent-attention-schema.ts — bounded durable operator attention and explicit pre-intent retry contracts
+- auxiliary-usage-schema.ts — nullable observed auxiliary call counters, state, keyset query and aggregate contracts

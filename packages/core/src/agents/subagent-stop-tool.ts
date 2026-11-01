@@ -16,6 +16,6 @@ export function createSubagentStopTool(input: SubagentToolBinding): ToolSet {
   toModelOutput: subagentControlModelOutput,
   execute(target) {
     try { return input.service.stop({ characterId: input.characterId, target }, "parent"); }
-    catch (error) { return subagentToolRefusal(error); }
+    catch (error) { return subagentToolRefusal(error, { service: input.service, subagentId: target.subagentId, characterId: input.characterId }); }
   } }) };
 }

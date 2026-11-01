@@ -4,7 +4,7 @@ import { subagentFixture } from "../testing/subagent-fixture.ts";
 import { scriptedModel } from "../testing/mock-language-model.ts";
 
 const fixtures: Awaited<ReturnType<typeof subagentFixture>>[] = [];
-afterEach(async () => { vi.restoreAllMocks(); for (const f of fixtures.splice(0)) await f.close(); });
+afterEach(async () => { vi.restoreAllMocks(); vi.useRealTimers(); for (const f of fixtures.splice(0)) await f.close(); });
 
 async function fixture() {
   const model = new MockLanguageModelV4({ doStream: async (options) => {
@@ -75,6 +75,28 @@ describe("meaningful pre-intent inbox retry opportunities", () => {
     f.runs.settle(f.parent.run.runId, f.parent.attempt.attemptId, "completed");
     await vi.waitFor(() => expect(f.service.events.list({ characterId: "taki" })[0]?.state).toBe("handled"));
     expect(f.attempts()).toBe(2);
+    expect(f.db.prepare("SELECT count(*) AS n FROM subagent_inbox_deliveries").get()?.n).toBe(1);
+  });
+
+  it("automatically retries proven pre-intent failure on its timer without fresh input", async () => {
+    const f = await fixture();
+    await vi.waitFor(() => expect(f.service.events.list({ characterId: "taki" })[0]?.state).toBe("handled"), { timeout: 2500 });
+    expect(f.attempts()).toBe(2);
+    expect(f.db.prepare("SELECT count(*) AS n FROM subagent_inbox_deliveries").get()?.n).toBe(1);
+  });
+
+  it("exposes exhausted pre-intent retries durably and explicit retry cannot replay a delivered batch", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    const f = await fixture(); const goodAdmit = vi.mocked(f.runs.admit).getMockImplementation()!;
+    vi.spyOn(f.runs, "admit").mockImplementation(async () => { throw new Error("capture unavailable"); });
+    for (const delay of [1000, 5000, 15_000]) await vi.advanceTimersByTimeAsync(delay);
+    expect(f.service.attention({ characterId: "taki", limit: 20 }).entries).toContainEqual(expect.objectContaining({ kind: "inbox_retry_exhausted", canResume: true }));
+    expect(f.db.prepare("SELECT * FROM subagent_inbox_consumers").all()).toEqual([]);
+    vi.spyOn(f.runs, "admit").mockImplementation(goodAdmit);
+    expect(f.service.retryInbox({ characterId: "taki" })).toEqual({ status: "scheduled" });
+    await vi.waitFor(() => expect(f.service.events.list({ characterId: "taki" })[0]?.state).toBe("handled"));
+    expect(f.service.retryInbox({ characterId: "taki" })).toEqual({ status: "not_needed" });
+    expect(f.service.attention({ characterId: "taki", limit: 20 }).entries).toEqual([]);
     expect(f.db.prepare("SELECT count(*) AS n FROM subagent_inbox_deliveries").get()?.n).toBe(1);
   });
 });

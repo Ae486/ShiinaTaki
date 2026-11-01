@@ -2,12 +2,14 @@
 
 - line-buffer.ts — line-buffered capture of a child stream + async waitFor matcher + jsonLine parser
 - paths.ts — repo layout paths (core dir, taki-node binary) + dummy/explicit-file/.env.local real provider env builders
-- scripted-provider.ts — loopback SSE model responses with captured real requests and explicit scenario-owned teardown
+- loopback-http.ts — bounded loopback HTTP allocation excluding Fetch bad ports, with no probe requests and closed failed allocations
+- scripted-provider.ts — loopback streaming and non-streaming compatible responses with optional exact usage, captured actual requests and explicit scenario-owned teardown
+- co-watching-real-plan.mjs — real-model Co-Watching shared-child/Skill/files/SQLite counts with scenario context policy and main-model Utility fallback; synthetic native/playback/acceptance ports and explicit failure evidence
 - real-provider-observer.ts — loopback forwarding to an explicitly approved real provider; unchanged streams, content-free diagnostics, explicit synthetic-request capture with a finite upstream budget and abortable teardown
-- agent-context-scenario.ts — explicitly opted-in synthetic real-model acceptance through production Core; bounded requests, exact body evidence, source hashes and per-phase runtime/Memory observations
+- agent-context-scenario.ts — opted-in synthetic real-model or scripted production Core; bounded requests/session/turn deadlines with remaining-budget reads, exact body hashes/evidence, explicit policy/context/main-limit tuning, effective config and complete private runtime/Memory evidence
 - agent-context-timing-relay.ts — explicit request hold/release timing with unchanged bodies/streams and separate physical-forward/cancellation evidence
 - agent-context-r2.ts — Shared-validated original-parent cancellation, independent exact child controls, durable user latch and canonical event handling/separate publication acceptance
-- agent-context-inbox.ts — actual model-request inbox/compact acknowledgement parsing, intrinsic tool decisions and canonical Effect/action receipt assertions
+- agent-context-inbox.ts — actual model-request inbox/accepted-target acknowledgement parsing, intrinsic tool decisions and canonical Effect/action receipt assertions
 - initiative-process.ts — isolated real Core process with correlated IPC arrangement and bounded lifecycle cleanup
 - pattern-process-entry.ts — imports unmodified production Core; only readiness/shutdown IPC, with no source or dispatch bypass
 - initiative-test-entry.ts — exact-main test-only loader access to the composed initiative service and source/delivery fences

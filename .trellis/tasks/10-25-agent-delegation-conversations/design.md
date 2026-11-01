@@ -80,6 +80,15 @@ with its reason while eligible later events advance. Report real backlog count/a
 `needs_user_input`, or `speech_proposed`). A bounded internal handling action validates membership in the delivered set.
 Speech is a separate publication outcome. Natural end does not silently acknowledge every delivered event.
 
+The real 2026-10-30 campaign exposed a distinct normal foreground-yield boundary: a successful read-only idle step
+was mistaken for unexplained missing disposition. A trusted process-local certificate may schedule existing linked
+same-batch resume after the foreground releases its lane. Require the actual yield stop, successful recording/drain/
+settlement, completed Effects limited to model and `core.subagent.read`, and no accepted actions. Preserve the original
+delivery and fresh-authority/successor guards; do not requeue delivered events as fresh. Cap, natural stop, mutation,
+unknown outcome and failures still require explicit recovery. A foreground reservation racing fresh capture may defer
+only after proving atomic zero-admission rollback. The certificate is not reconstructed after restart. Latest public
+context supports retaining an already-answered result; it is not a semantic exactly-once publication guarantee.
+
 Retry automatically only when evidence proves failure before model/tool intent, using meaningful retry triggers and
 fresh authority. Missing handling disposition, unknown execution or a handler failure after effects remains inspectable
 as reconciliation-needed. Explicit continuation carries the same event and previous action receipts. Event/action
@@ -224,6 +233,54 @@ truth and never replays a mutation. Historical work focus must not silently reta
 input capabilities; sharing the composer does not introduce an unimplemented image-upload path.
 
 ## Review and implementation boundary
+
+### October 30 follow-up contract
+
+The latest PRD requirements 11-14 supersede older no-check-in, exact-version ordinary-message and opportunity-only
+retry descriptions above. Owner-confirmed provisional defaults are N=50 completed task-model steps and K=3 unattended
+main-Agent check-in continuations; both use the existing operator configuration system. Direct authenticated user
+guidance or Continue for that work resets its unattended count. Ordinary primary chat, parent messages, SDK rollover,
+new Attempts and process restart do not confer user approval or reset that count. User Stop remains user-only.
+Capture effective N/K at work start and each accepted check-in continuation. Operator changes apply to the next
+interval; they neither move an active threshold nor downgrade an already user-required wait.
+
+Persist work-level completed-step/check-in state together with existing complete-step evidence. SDK-local step offsets
+alone do not survive new Runs. Evaluate accepted final report, explicit input wait, cancellation/failure and the check-in
+boundary in a single ordered owner; completion in step N wins. SDK stop predicates execute concurrently and cannot be
+used as independent ordered final/check-in decision owners. A check-in is an unfinished work wait, never a final result.
+An explicit eligible continuation resumes the same work, with a new execution under the existing Run authority.
+
+The check-in report is a bounded Core snapshot of actual worker evidence: completed step count, latest worker text
+or explicitly older task-summary coverage, recent complete tool outcomes/references, pending input and required actor.
+Unknown remaining work is labelled unknown; no new synthesis call or invented collector invocation is required. This
+avoids another execution phase and report-generation failure/retry mechanism. The tradeoff is that the progress prose
+may be less polished; the handler/user can inspect exact retained history for a deeper assessment. Token usage is a
+projection of actual persisted model usage for the child's executions, including attributed Utility work; missing usage
+remains unknown or incomplete, never fabricated as zero.
+
+Unattended inbox execution must exclude child creation from both executable and disclosed tool sets, retaining existing
+child interaction/inspection/stop and private event actions. Retry only proven pre-intent failures on a bounded timer
+as well as genuine fresh opportunities; delivered membership and action receipts continue to forbid automatic replay.
+Surface needs-user and reconciliation states through the existing operator presentation infrastructure, including while
+the Subagents page is hidden, without writing private content into primary Timeline/Memory.
+
+Ordinary model messages may ask Core to resolve the current work of an identified child. Explicit work identity is
+preserved; never silently retarget a historical work selection. Ordinary Run/control version drift alone does not refuse
+an otherwise valid message. Continue, Stop and exact pending-question answers retain strict authority/currentness checks.
+Slim inbox/inspection model projections while preserving original internal evidence and bounded exact-body retrieval.
+
+Apply check-ins uniformly to generic and feature-owned child work. Final `record_only` routing does not disable a
+safety check-in: its report goes to the inbox while final artifacts remain with their existing feature owner.
+Co-Watching's child generates a companion reaction plan from already produced external video analysis; that external
+analysis process is unaffected. The existing adapter must recognize a durable per-execution check-in fact before final
+artifact validation/invalid-result retirement, preserve its session/edit/artifact, and resume the same work explicitly.
+Use the producer Run's fact even when the check-in was answered before terminal settlement. Ordinary owner yield or
+queue release cannot authorize check-in continuation. Genuine finite source validity and user Stop still apply.
+
+For feature-owned artifact work, completion remains natural SDK end plus successful owner validation. Natural completion
+on step N is validated before a check-in is proposed. A continuing tool step, including writing a candidate artifact,
+does not independently prove final completion; it can pause at N without installing or rejecting that artifact. Do not
+introduce early file-based completion heuristics or a second feature execution framework.
 
 The [execution plan](implement.md) maps all PRD criteria to slices and tests. Final architecture review must challenge
 inbox/primary Memory exclusion, publication validity, historical migration, SDK rollover and live/durable UI handoff.

@@ -5,6 +5,7 @@
  */
 import { createHash } from "node:crypto";
 import { CanonicalMemorySourceSchema, SourceContextSchema, type TimelineEntry } from "@taki/shared";
+import type { PrimaryConversationSourceRepo, PrimarySourceMemoryIdentity } from "../db/primary-conversation-source-repo.ts";
 import { z } from "zod";
 import { sanitizeLegacyRetainText } from "./legacy-migration/legacy-retain-sanitizer.ts";
 import { renderSourceContext } from "../agents/source-context.ts";
@@ -14,6 +15,27 @@ export interface PrimaryConversationCommit {
   characterId: string;
   entries: readonly TimelineEntry[];
   runId?: string;
+}
+
+export interface IngestionCoverageGap {
+  seq: number; code: "MEMORY_INGESTION_SOURCE_UNPROVEN" | "MEMORY_INGESTION_INCOMPLETE";
+}
+export interface PrimarySourceImportResult { imported: number; unresolvedSourceIds: string[] }
+
+/** DB-only bounded import. A corrupt retained source must not suppress independent valid sources. */
+export function importRetainedPrimarySources(input: {
+  sources: PrimaryConversationSourceRepo; characterId: string; memory: PrimarySourceMemoryIdentity;
+  record(commit: PrimaryConversationCommit): void;
+}): PrimarySourceImportResult {
+  const result: PrimarySourceImportResult = { imported: 0, unresolvedSourceIds: [] };
+  for (const sourceId of input.sources.listUnbound({ characterId: input.characterId, memory: input.memory })) {
+    try {
+      const source = input.sources.readRetained(sourceId);
+      input.record({ characterId: source.characterId, entries: source.entries, runId: source.runId });
+      result.imported += 1;
+    } catch { result.unresolvedSourceIds.push(sourceId); }
+  }
+  return result;
 }
 
 /** The repository verifies this witness against the current durable row before returning it. */

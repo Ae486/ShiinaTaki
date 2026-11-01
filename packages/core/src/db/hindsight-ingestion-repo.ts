@@ -113,17 +113,13 @@ function complete(ctx: RepoContext, input: Update): HindsightIngestionState {
     if (state.gate === null || state.receipts.length !== state.batches.length
       || state.gate.decision === "keep" && state.batches.length !== (state.gate.route === "both" ? 2 : 1)) throw new Error("MEMORY_INGESTION_INCOMPLETE");
     const completed = update(ctx.db, { ...state, state: "complete", updatedAt: input.now });
-    const changed = ctx.db.prepare(`UPDATE hindsight_ingestion_cursors SET through_seq=MAX(through_seq,:through),updated_at=:at
-      WHERE authority_epoch_id=:epoch AND character_id=:character`)
-      .run({ epoch: state.epochId, character: state.characterId, through: state.source.throughSeq, at: input.now });
-    if (changed.changes !== 1) throw new Error("MEMORY_INGESTION_BASELINE_MISSING");
+    ctx.sources.advanceCoverage({ ...state, throughSeq: state.source.throughSeq, now: input.now });
     return completed;
   });
 }
 
 function advanceCoverage(ctx: RepoContext, input: HindsightIngestionScope & { throughSeq: number; now: string }): number {
   return atomic(ctx.db, input, () => {
-    ctx.sources.assertCovered(input);
     const rows = ctx.db.prepare(`SELECT * FROM hindsight_ingestion_spans WHERE authority_epoch_id=:epoch
       AND character_id=:character AND from_seq<:through AND state='complete'`)
       .all({ epoch: input.epochId, character: input.characterId, through: input.throughSeq });

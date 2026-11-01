@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { createPatternFixture } from "./c3-pattern-native-server.mjs";
 import { CHILD_A, CHILD_B, WORK_A, history, work } from "./s7-subagent-data.ts";
-import { SubagentHistoryResultSchema, SubagentControlResultSchema, CO_WATCHING_METHODS, CO_WATCHING_INVITATION_METHODS } from "../../../packages/shared/src/index.ts";
+import { SubagentHistoryResultSchema, SubagentControlResultSchema, SubagentConversationResultSchema,
+  CO_WATCHING_METHODS, CO_WATCHING_INVITATION_METHODS } from "../../../packages/shared/src/index.ts";
 
 export async function createSubagentFixture(path) {
   const fixture = await createPatternFixture(path);
@@ -17,7 +18,7 @@ export async function createSubagentFixture(path) {
   fixture.change = () => fixture.notify("subagent.changed", { characterId: "taki", subagentId: CHILD_A, revision: ++fixture.revision });
   fixture.revision = 0;
   fixture.receive = (connection, request) => {
-    if (fixture.holdHistory && request.method === "subagent.history") fixture.heldHistory.push(() => receive(connection, request));
+    if (fixture.holdHistory && ["subagent.history", "subagent.conversation"].includes(request.method)) fixture.heldHistory.push(() => receive(connection, request));
     else receive(connection, request);
   };
   fixture.releaseHistory = () => { fixture.holdHistory = false; fixture.heldHistory.splice(0).forEach((release) => release()); };
@@ -31,10 +32,23 @@ export async function createSubagentFixture(path) {
         expiresAt: "2026-10-24T12:00:00.000Z", preparedCount: null, sentCount: 0, pendingRevision: false } : null };
     if (!method.startsWith("subagent.")) return original(connection, request);
     if (method === "subagent.subscribe") return { status: "ok" };
+    if (["subagent.attention", "subagent.inbox.recovery"].includes(method)) return { entries: [], nextCursor: null };
+    if (["subagent.activity.subscribe", "subagent.activity.unsubscribe"].includes(method)) return { status: "ok" };
+    if (method === "subagent.activity.read") return { subagentId: params.subagentId, workInputId: WORK_A,
+      activity: { status: "idle" }, coveredThroughStep: -1, itemSteps: [] };
     if (method === "subagent.list") return { entries: fixture.empty ? [] : fixture.children.map((row) => row.conversation), nextCursor: null };
-    if (method === "subagent.history") {
+    if (["subagent.history", "subagent.conversation"].includes(method)) {
       if (fixture.failHistory) { fixture.failHistory = false; throw new Error("Isolated read failure"); }
-      return SubagentHistoryResultSchema.parse(fixture.children.find((row) => row.conversation.subagentId === params.subagentId));
+      const child = fixture.children.find((row) => row.conversation.subagentId === params.subagentId);
+      if (method === "subagent.history") return SubagentHistoryResultSchema.parse(child);
+      const entries = [...child.inputs.map((input, index) => ({ kind: "input", input, createdAt: input.createdAt,
+        historicalOrder: false, subagentId: params.subagentId, workInputId: input.workInputId, seq: index + 1 })),
+      ...child.messages.map((message, index) => ({ kind: "message", message, createdAt: message.createdAt,
+        historicalOrder: false, subagentId: params.subagentId, workInputId: WORK_A, seq: child.inputs.length + index + 1 }))];
+      if (child.conversation.stopOrigin) entries.push({ kind: "control", seq: entries.length + 1,
+        subagentId: params.subagentId, workInputId: WORK_A, createdAt: child.conversation.createdAt, historicalOrder: false,
+        control: { origin: child.conversation.stopOrigin, action: "stop", controlVersion: child.conversation.controlVersion } });
+      return SubagentConversationResultSchema.parse({ conversation: child.conversation, entries, nextCursor: null, hasMore: false });
     }
     const child = fixture.children.find((row) => row.conversation.subagentId === params.target.subagentId);
     if (!child) throw new Error("Unknown isolated child");

@@ -11,9 +11,12 @@ import type { SubagentAddressedInput } from "./subagent-service.ts";
 import { toEntryInput } from "../agents/turn-mapping.ts";
 import type { SubagentControlResult, SubagentSender } from "@taki/shared";
 import { recordSubagentPrimarySpeech } from "../db/subagent-speech-repo.ts";
+import { createSubagentEventRepo } from "../db/subagent-event-repo.ts";
+import { subagentSummary } from "./subagent-queries.ts";
+import { subagentActionEvidence } from "../db/subagent-action-evidence.ts";
 
 export function prepareSubagentInbox(state: SubagentState, input: ForegroundInboxInput & { mode?: "foreground" | "idle" },
-  send: (input: SubagentAddressedInput, sender: SubagentSender) => SubagentControlResult): (ForegroundInboxContext & { consumerId: string; prepareStep(): void }) | undefined {
+  send: (input: SubagentAddressedInput, sender: SubagentSender, continuation: boolean) => SubagentControlResult): (ForegroundInboxContext & { consumerId: string; prepareStep(): void }) | undefined {
   const { deps } = state;
   const inbox = createSubagentInboxRepo(deps.db);
   let claim = inbox.claim({ ...input, mode: input.mode ?? "foreground" });
@@ -25,7 +28,7 @@ export function prepareSubagentInbox(state: SubagentState, input: ForegroundInbo
   const tools = inboxBindings(state, input, { inbox, requireClaim, send });
   return {
     get consumerId() { return requireClaim().consumerId; }, tools,
-    get instructions() { return claim?.instructions ?? ""; },
+    get instructions() { return inboxInstructions(claim, input.mode); },
     prepareStep() { claim ??= inbox.claim({ ...input, mode: input.mode ?? "foreground" }); },
     get sourceContext() { return { materials: (claim?.events ?? []).map((event) => ({ label: `Worker ${event.kind}`,
       reference: `agent-event:${event.eventId}#${event.bodyDigest}`, speaker: `worker:${event.subagentId}` })) }; },
@@ -44,9 +47,18 @@ export function prepareSubagentInbox(state: SubagentState, input: ForegroundInbo
   };
 }
 
+function inboxInstructions(claim: InboxClaim | undefined, mode?: "foreground" | "idle"): string {
+  if (!claim) return "";
+  if (mode === "idle") return claim.instructions;
+  return "Foreground inbox: review the relevant delivered report or question now; read exact detail when its preview is incomplete. "
+    + "Use its exact event and target for supported actions. If the requested results are ready, give the integrated answer in this conversation. "
+    + "If other notified workers are still needed, handle the available events, finish useful foreground work, then end the current reply with the task still pending. Later inbox events let you finish without another user message; do not poll to gather all results in this reply. "
+    + "An event disposition does not publish your answer.\n" + claim.instructions;
+}
+
 function inboxBindings(state: SubagentState, input: ForegroundInboxInput & { mode?: "foreground" | "idle" },
   ports: { inbox: ReturnType<typeof createSubagentInboxRepo>; requireClaim(): InboxClaim;
-    send(input: SubagentAddressedInput, sender: SubagentSender): SubagentControlResult }) {
+    send(input: SubagentAddressedInput, sender: SubagentSender, continuation: boolean): SubagentControlResult }) {
   const { deps } = state; const { inbox, requireClaim, send } = ports;
   return createSubagentInboxTools({ actualInvocation: input.actualInvocation,
     read(eventId) {
@@ -55,22 +67,25 @@ function inboxBindings(state: SubagentState, input: ForegroundInboxInput & { mod
       if (!event) throw new Error("SUBAGENT_EVENT_NOT_DELIVERED");
       const child = deps.children.get(event.subagentId);
       const action = deps.db.prepare("SELECT action_json,result_json FROM subagent_event_actions WHERE event_id=:id").get({ id: eventId });
-      return { event, target: { subagentId: child.subagentId, workInputId: event.workInputId,
+      return { event, current: subagentSummary(state, child.subagentId), pendingRequest: createSubagentEventRepo(deps.db).wait(event.workInputId),
+        target: { subagentId: child.subagentId, workInputId: event.workInputId,
         expectedRunId: child.activeRunId, expectedControlVersion: child.controlVersion },
-        action: action ? JSON.stringify({ action: JSON.parse(String(action.action_json)), result: JSON.parse(String(action.result_json)) }) : undefined };
+        action: action ? JSON.stringify({ action: JSON.parse(String(action.action_json)), result: subagentActionEvidence(JSON.parse(String(action.result_json))) }) : undefined };
     },
     handle(value) {
       const result = inbox.action({ ...value, consumerId: requireClaim().consumerId, apply(event) {
-        if (value.action.kind !== "answered_child") return { ok: true, eventId: event.eventId,
+        if (value.action.kind !== "answered_child" && value.action.kind !== "continue_child") return { ok: true, eventId: event.eventId,
           disposition: value.action.kind, ...(value.action.kind === "speech_proposed" ? { publication: "not_published" } : {}) };
         if (value.action.target.subagentId !== event.subagentId || value.action.target.workInputId !== event.workInputId
           || (event.kind === "needs_input" && value.action.replyToEventId !== event.eventId)) throw new Error("SUBAGENT_INPUT_REQUEST_CONFLICT");
         const accepted = send({ characterId: input.characterId, target: value.action.target,
           operationKey: `inbox:${event.eventId}:${value.operationKey}`, direction: value.action.direction, materials: [],
-          replyToEventId: value.action.replyToEventId ?? undefined }, { kind: "parent", runId: input.runId });
-        return { ok: true, eventId: event.eventId, disposition: "answered_child", inputId: accepted.input?.inputId };
+          replyToEventId: value.action.replyToEventId ?? undefined }, { kind: "parent", runId: input.runId }, value.action.kind === "continue_child");
+        return { ok: true, eventId: event.eventId, disposition: value.action.kind, inputId: accepted.input?.inputId };
       } });
       stageSpeech(state, input, value);
+      const event = inbox.get(requireClaim().consumerId).events.find((entry) => entry.eventId === value.eventId);
+      if (event) deps.db.afterCommit(() => deps.changed(input.characterId, event.subagentId));
       return result;
     },
   });

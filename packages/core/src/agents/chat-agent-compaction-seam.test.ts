@@ -119,7 +119,6 @@ describe("admitted request Context Reduction seam", () => {
       view: { estimatedTokens: fixture.conversation.estimatedTokens, budget: () => 100,
         effectiveWindowTokens: () => effectiveWindow, measureRequest: () => latest },
       timeline: createTimelineRepo(fixture.db), summaries, operations: createCompactionOperationRepo(fixture.db),
-      flush: { prepareRetirement: async () => ({ status: "not_required", reason: "canonical_local_records_are_authoritative" }) },
       slot: { model: generatingModel("compacted history"), run: async (label, task) => { calls.push(label); return task(); },
         usage: () => ({ calls: calls.length, inputTokens: 0, outputTokens: 0, usageUnknown: 0 }) },
       config: { triggerRatio: 0.8, keepMessages: 1 }, logger,

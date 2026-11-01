@@ -1,7 +1,7 @@
 /**
  * INPUT:  Core boot dependencies for Legacy, Local and explicitly selected Hindsight memory runtimes
  * OUTPUT: authority-selected engine, immutable Run capture, background maintenance, durability and the operations() live accessor
- * POS:    core/memory — process composition seam; one Utility Slot and one selected provider-specific chain
+ * POS:    core/memory — process composition seam; one Utility Slot with independent canonical maintenance and compaction
  */
 import type { LanguageModel } from "ai";
 import { join } from "node:path";
@@ -15,10 +15,12 @@ import { createCompactionOperationRepo } from "../db/compaction-operation-repo.t
 import type { Database } from "../db/sqlite.ts";
 import type { SummaryRepo } from "../db/summary-repo.ts";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
+import type { PrimaryConversationSourceRepo } from "../db/primary-conversation-source-repo.ts";
 import type { Logger } from "../logging/logger.ts";
+import type { AuxiliaryUsageMeter } from "../observability/auxiliary-usage-meter.ts";
 import type { SecretCatalogService } from "../secrets/secret-catalog-service.ts";
 import type { MemoryProviderCapabilities } from "@taki/shared";
-import { createMaintenanceAutoMemory, type AutoMemoryMaintenance } from "./auto-memory.ts";
+import { createMaintenanceAutoMemory } from "./auto-memory.ts";
 import { createMemorySubsystem, type MemorySubsystem } from "./bootstrap.ts";
 import type { PrimaryConversationCommit } from "./canonical-ingestion-source.ts";
 import { createCanonicalLocalSubsystem } from "./canonical-local-subsystem.ts";
@@ -28,7 +30,6 @@ import type { CapturedMemoryRun } from "./canonical-memory-run.ts";
 import type { MemoryWriteOp } from "./episodic-writer.ts";
 import { LOCAL_MEMORY_CAPABILITIES } from "./local-memory-provider.ts";
 import { createMemoryRunReference } from "./memory-capability-snapshot.ts";
-import { createMemoryFlushBinding, type MemoryFlushPort } from "./memory-flush-port.ts";
 import { createMemoryAuthorityFence } from "./legacy-migration/memory-authority-fence.ts";
 import { readMemoryAuthoritySelection } from "./legacy-migration/legacy-activation-repo.ts";
 import type { MemoryOperationsRuntime } from "./operations/memory-operation-contract.ts";
@@ -44,18 +45,19 @@ interface MemoryRuntimeInput {
   budget: () => number; compact: { triggerRatio: number; keepMessages: number }; env: Record<string, string | undefined>; logger: Logger;
   measureRequest?: (characterId: string) => RequestMeasurement | undefined;
   effectiveWindowTokens?: () => number;
+  primarySources?: PrimaryConversationSourceRepo;
+  usageMeter?: AuxiliaryUsageMeter;
   hindsight?: { source: ConfigSource; secrets: SecretCatalogService; client?: HindsightClient };
 }
 type LocalSubsystem = ReturnType<typeof createCanonicalLocalSubsystem>;
 type HindsightSubsystem = ReturnType<typeof createHindsightMemorySubsystem>;
 type SelectedSubsystem = MemorySubsystem | LocalSubsystem | HindsightSubsystem;
-interface ProviderMaintenance { maintenance: AutoMemoryMaintenance; memoryFlush: MemoryFlushPort }
 
 export function composeMemoryRuntime(input: MemoryRuntimeInput) {
-  const utility = createUtilitySlot({ mainModel: input.model, config: loadUtilityConfig(input.env), logger: input.logger });
+  const utility = createUtilitySlot({ mainModel: input.model, config: loadUtilityConfig(input.env), logger: input.logger,
+    usageMeter: input.usageMeter });
   const scope = createSelectedSubsystem(input, utility); const { selected, current, fence } = scope;
-  const compaction = createCompactionMaintenance(input, utility, current);
-  scope.bindFlush(compaction.bind);
+  const compaction = createCompactionMaintenance(input, utility, scope);
   const lifecycle = createRuntimeLifetime({ scope, utility, autoMemory: compaction.autoMemory });
   const alive = lifecycle.alive;
   return {
@@ -99,8 +101,6 @@ function createSelectedSubsystem(input: MemoryRuntimeInput, utility: UtilitySlot
   const fence = createMemoryAuthorityFence(); let activated = false;
   let canonical: LocalSubsystem | undefined;
   let hindsight: HindsightSubsystem | undefined;
-  let onRetired = (): void => undefined;
-  let onBound = (): void => undefined;
   const selected = selectMemoryRuntime({ db: input.db,
     createLegacy: () => createMemorySubsystem({ ...input, utility, authorityFence: fence, isCanonical: () => activated }),
     createCanonical: (epochId) => {
@@ -112,8 +112,7 @@ function createSelectedSubsystem(input: MemoryRuntimeInput, utility: UtilitySlot
         config: loadMemoryConfig(input.env) });
       return hindsight.engine;
     } : undefined,
-    onLegacyRetired: () => { activated = true; fence.retire(); onRetired(); },
-    onCanonicalBound: () => onBound(),
+    onLegacyRetired: () => { activated = true; fence.retire(); },
   });
   activated = selected.canonical;
   const current = (): SelectedSubsystem => {
@@ -121,11 +120,7 @@ function createSelectedSubsystem(input: MemoryRuntimeInput, utility: UtilitySlot
     if (!value) throw new Error("MEMORY_INTEGRITY_ERROR: selected runtime is unavailable");
     return value;
   };
-  return { selected, current, fence, get canonical() { return canonical; }, get hindsight() { return hindsight; },
-    bindFlush: (bind: (port: MemoryFlushPort) => void) => {
-      onRetired = () => bind({ prepareRetirement: async () => ({ status: "retryable_failure", code: "MEMORY_FLUSH_FAILED" }) });
-      onBound = () => bind(current().memoryFlush);
-    } };
+  return { selected, current, fence, get canonical() { return canonical; }, get hindsight() { return hindsight; } };
 }
 
 function createRuntimeLifetime(input: {
@@ -143,21 +138,21 @@ function createRuntimeLifetime(input: {
     } };
 }
 
-function createCompactionMaintenance(input: MemoryRuntimeInput, utility: UtilitySlot, current: () => ProviderMaintenance) {
-  const flush = createMemoryFlushBinding(current().memoryFlush);
+function createCompactionMaintenance(input: MemoryRuntimeInput, utility: UtilitySlot, scope: ReturnType<typeof createSelectedSubsystem>) {
   const compact = createCompactionPass({
     view: { estimatedTokens: input.estimatedTokens, budget: input.budget,
       measureRequest: input.measureRequest ? (characterId) => input.measureRequest?.(characterId) : undefined,
       effectiveWindowTokens: input.effectiveWindowTokens },
     timeline: input.timeline, summaries: input.summaries, operations: createCompactionOperationRepo(input.db),
-    flush: flush.port, slot: utility,
+    legacyFlush: () => scope.selected.canonical ? undefined : scope.current().memoryFlush, slot: utility,
     config: { ...input.compact, summaryQuality: true, retryBudget: 3, retryCooldownMs: 30_000 },
     protectedContent: () => [MEMORY_VOICE_RULE],
     logger: input.logger.child({ mod: "compaction" }),
   });
-  const autoMemory = createMaintenanceAutoMemory({ maintenance: () => current().maintenance, compact,
+  const autoMemory = createMaintenanceAutoMemory({ maintenance: () => scope.current().maintenance, compact,
+    legacyMaintenanceBeforeCompact: () => !scope.selected.canonical,
     logger: input.logger.child({ mod: "memory-auto" }) });
-  return { autoMemory, compact, bind: flush.bind };
+  return { autoMemory, compact };
 }
 
 function captureLegacyRun(db: Database, subsystem: SelectedSubsystem, characterId: string): CapturedMemoryRun {

@@ -390,6 +390,12 @@ existing usable durable-decision matcher. `bindCapturedToolExecution(tools, exec
 - Bind execution metadata to the original captured closures, preserving descriptor sidecars and the admitted
   context. The binder creates no Effect, registry, connection, permission or native retry. The existing governed
   wrapper/broker owns exactly one Effect at dispatch and its terminal outcome.
+- The execution failure bracket surrounds the actual closure invocation as well as its awaited result. A synchronous
+  throw and an asynchronous rejection both settle that Effect once with the existing failure/cancellation semantics,
+  then propagate the original error. `Promise.resolve(execute(...)).catch(...)` is insufficient because argument
+  evaluation can throw before the handler exists. Keep intent hooks, observer binding and settlement outside that
+  catch: their authority/persistence failures must not be disguised as ordinary tool failures or retried settlement.
+  `governed-tool.test.ts` covers both execution forms, cancellation and those separate failure boundaries.
 - ChatAgent binds the captured bag for each actual Attempt before merging/disclosure/captured Skill loading.
   InitiativeRuntime binds a derived bag for `prepareInput`, which runs before ChatAgent. Source/authority checks
   retain the original context; admission snapshots are not recaptured.

@@ -2,7 +2,7 @@
 - avatar-subscriptions.ts — the avatar.command fan-out registry (characterId→connection→sink) + isSubscribed membership query; mirrors timeline-subscriptions
 - avatar-vocabulary.ts — per-character {motions, expressions} store fed by avatar.report; get() → per-turn dynamic-enum source (1e), render() → the turn-prompt vocabulary section (Option A), consumeCostumeChanged() → one-shot true after a costume swap (1f, baseline-snapshot diff of the worn costume id)
 - costume-notice.ts — COSTUME_CHANGE_NOTICE: the one-shot system note chat-agent prefixes onto a turn's user message after a costume swap (1f), when the vocabulary's consumeCostumeChanged fires
-- vocab-name-schema.ts — vocabNameSchema(names): a dynamic z.enum of the live vocabulary (or z.string().min(1) fallback) for the avatar tools' `name` param (1e)
+- vocab-name-schema.ts — live dynamic name enum (nonempty-string fallback), required-object correction example and structured allowed values without a repeated enum message
 - avatar-tools.ts — AvatarToolDeps + createAvatarTools: the avatar tool family combiner (bound per-turn with the characterId)
 - avatar-outcomes.ts — createAvatarOutcomes: the pending Presentation Outcome registry the tools await (not_rendered instantly with zero subscribers; first applied wins; strongest of rejected>superseded; deadline/abort → unknown; bounded, unref'd timer) (D80)
 - avatar-tool-result.ts — avatarToolResult: maps a Presentation Outcome to the model-visible tool result (applied/not_rendered ok; rejected AVATAR_REJECTED+reason; superseded cancelled; unknown outcome_unknown) + the shared description guidance (R6)

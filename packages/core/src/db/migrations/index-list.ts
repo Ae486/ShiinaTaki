@@ -4,6 +4,9 @@
  * POS:    core/db/migrations — the single registry of migrations; append each new NNN module here in version order
  */
 import type { Migration } from "../migration-runner.ts";
+import { auxiliaryModelUsageMigration065 } from "./065-auxiliary-model-usage.ts";
+import { primaryConversationSourcesMigration064 } from "./064-primary-conversation-sources.ts";
+import { subagentProgressMigration063 } from "./063-subagent-progress.ts";
 import { agentConversationOrderMigration060 } from "./060-agent-conversation-order.ts";
 import { timelineMigration001 } from "./001-timeline.ts";
 import { memoryMigration002 } from "./002-memory.ts";
@@ -130,4 +133,7 @@ export const MIGRATIONS: Migration[] = [
   agentConversationOrderMigration060,
   subagentPresentationMigration061,
   subagentInboxResumeMigration062,
+  subagentProgressMigration063,
+  primaryConversationSourcesMigration064,
+  auxiliaryModelUsageMigration065,
 ];

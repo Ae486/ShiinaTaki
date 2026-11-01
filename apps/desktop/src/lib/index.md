@@ -1,6 +1,6 @@
 # lib/
 - ws-client-subagents.ts — Shared-validated child read/control RPCs and retryable physical-client subscription; no mutation replay
-- ws-client-subagent-inbox.ts — Shared-validated explicit parent-event recovery inspection and idempotent continuation RPCs
+- ws-client-subagent-inbox.ts — Shared-validated bounded attention, explicit parent-event recovery/idempotent continuation and deliberate pre-intent retry RPCs
 - ws-client-initiative.ts — Shared-validated Pattern review/lifecycle, explicit setup, same-Monitor policy and separate backoff read/reset facade
 - ws-client-co-watching.ts — Shared-validated Co-Watching read/start/stop, contextual invitation read/respond and Character-specific retryable subscription setup
 - ws-client-presence.ts — Shared-validated presence and ordinary committed Timeline presentation-report RPC facade
@@ -16,7 +16,7 @@ icons/ (the shared glyph set) and the two window-shared React hooks below.
 - chat-activity-recovery.ts — subscribe/read/live reconciliation, bounded races, explicit unavailable state, read-only gap recovery and disposal
 - tool-activity-display.ts — shared captured-name and truthful phase/outcome vocabulary for Chat and Pet
 - ws-client-memory-operations.ts — outbound sibling: memory.authority.status + memory.operations.submit/status/list/cancel wrappers and shared, explicitly retryable memory.operations.subscribe
-- rpc-deadline.ts — method-class timing table + typed deadline error + json-rpc-2.0 native timeout requester seam
+- rpc-deadline.ts — method-class timing table including read-only child attention, typed deadline error and json-rpc-2.0 native timeout requester seam
 - timing-policy.ts — window-owned bootstrap/last-good timing policy store; validates full Core config refreshes without persistence
 - timing-policy-sync.ts — serialized last-good full-policy refresh after changes and recovered config membership
 - ws-config-methods.ts — retryable physical-client config subscription and config.list sharing only until a verified change, successful write or recovered observation gap

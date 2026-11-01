@@ -8,8 +8,61 @@ import { createReadFileTool } from "../workspace/read-file-tool.ts";
 import { createWorkspacePaths } from "../workspace/workspace-paths.ts";
 import { createLogger } from "../logging/logger.ts";
 import { createMaterialSelection } from "./subagent-tool-materials.ts";
+import type { MaterialRef } from "@taki/shared";
 
 describe("selected actual tool-acquired material", () => {
+  it("recovers from an invalid source reference within the same governed SDK Run and Attempt", async () => {
+    let requests = 0;
+    let reference: MaterialRef | undefined;
+    const model = new MockLanguageModelV4({ doStream: async (options) => {
+      requests++;
+      if (requests === 1) return scriptedModel([{ kind: "tool", toolCallId: "read-evidence", toolName: "read_file",
+        input: { path: "evidence.txt" } }]).doStream(options);
+      const execution = f.executions.list({ subagentId: f.children.list({ characterId: "taki" })[0]!.subagentId })[0]!;
+      reference = { kind: "tool_result", runId: execution.runId, attemptId: f.runs.status(execution.runId).run.activeAttemptId!,
+        stepNumber: 0, toolCallId: "read-evidence", key: "result" };
+      const prompt = JSON.stringify(options.prompt);
+      expect(prompt).toContain("materialReferences");
+      expect(prompt).toContain("read-evidence");
+      if (requests === 2) return scriptedModel([{ kind: "tool", toolCallId: "invalid-final", toolName: "complete_subagent",
+        input: { text: "Premature result", materials: [{ ...reference, key: "nonexistent-source" }] } }]).doStream(options);
+      expect(requests).toBe(3);
+      expect(prompt).toContain("SUBAGENT_MATERIAL_NOT_FOUND");
+      expect(prompt).toContain("nextAction");
+      expect(f.effects.unfinished(execution.runId).filter((effect) => effect.kind !== "model")).toEqual([]);
+      expect(execution.proposal).toBeNull();
+      return scriptedModel([{ kind: "tool", toolCallId: "corrected-final", toolName: "complete_subagent",
+        input: { text: "Report with the actual source", materials: [reference] } }]).doStream(options);
+    } });
+    const f: Awaited<ReturnType<typeof subagentFixture>> = await subagentFixture(model, { agent: {
+      coreTools: () => createReadFileTool({ paths: createWorkspacePaths({ root: f.root }), logger: createLogger("fatal") }),
+    } });
+    try {
+      await writeFile(join(f.root, "evidence.txt"), "Offline reading and existing records are required.", "utf8");
+      const work = await f.service.delegate({ parentRunId: f.parent.run.runId, parentToolNames: ["read_file"] }, {
+        characterId: "taki", operationKey: "recover-material", label: "Review evidence", initialContext: { kind: "fresh" },
+        direction: "Read the evidence and report with its source", materials: [], completionPolicy: "record_only",
+      });
+      await vi.waitFor(() => expect(f.executions.list({ subagentId: work.conversation.subagentId })[0]?.result).toBeTruthy());
+      const executions = f.executions.list({ subagentId: work.conversation.subagentId });
+      expect(executions).toHaveLength(1);
+      const execution = executions[0]!;
+      expect(execution.result).toMatchObject({ outcome: "completed", outputKind: "validated",
+        body: "Report with the actual source", sourceContext: { materials: [{ label: "Workspace file", reference: "evidence.txt" }] } });
+      expect(execution.workInputId).toBe(work.input!.inputId);
+      expect(f.runs.status(execution.runId).attempts).toHaveLength(1);
+      expect(execution.result!.attemptId).toBe(reference!.kind === "tool_result" ? reference!.attemptId : undefined);
+      expect(requests).toBe(3);
+      expect(f.effects.unfinished(execution.runId)).toEqual([]);
+      const effects = f.effects.list!(execution.runId).filter((effect) => effect.kind === "tool");
+      expect(effects.map((effect) => effect.outcome).sort()).toEqual(["completed", "completed", "failed"]);
+      expect(f.service.events.list({ characterId: "taki" }).map((event) => event.kind)).toEqual(["final"]);
+      expect(f.service.summary(work.conversation.subagentId).progress?.completedSteps).toBe(3);
+      expect(f.conversation.history("taki")).toEqual([]);
+      expect(f.errors).toEqual([]);
+    } finally { await f.close(); }
+  });
+
   it("runs two governed file reads, retains original results and passes only explicitly selected source to the parent", async () => {
     let count = 0;
     const model = new MockLanguageModelV4({ doStream: async (options) => {

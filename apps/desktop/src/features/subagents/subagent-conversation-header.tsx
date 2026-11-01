@@ -6,6 +6,7 @@
 import type { SubagentConversationResult } from "@taki/shared";
 import { PendingIndicator } from "@/components/ui/pending-indicator.js";
 import { CHILD_STATE } from "./subagent-labels.ts";
+import { SubagentProgress } from "./subagent-progress.tsx";
 
 interface HeaderProps {
   detail: SubagentConversationResult; workId: string; loading: boolean; pending: boolean;
@@ -19,6 +20,7 @@ export function SubagentConversationHeader({ detail, workId, loading, pending, s
     <div className="flex items-center gap-2"><h2 className="break-words text-base font-semibold text-text-strong">{detail.conversation.label}</h2>
       <span className="text-xs text-text-secondary">{CHILD_STATE[detail.conversation.state]}</span>
       <PendingIndicator active={loading} label="正在读取会话" /></div>
+    <SubagentProgress child={detail.conversation} workId={workId} />
     <label className="flex items-center gap-2 text-xs text-text-secondary" htmlFor="subagent-work">输入发送至
       <select id="subagent-work" disabled={pending} value={workId} onChange={(event) => selectWork(event.target.value)}
         className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-2 py-1 text-xs text-text-body">

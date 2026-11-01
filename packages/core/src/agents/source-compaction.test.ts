@@ -33,7 +33,6 @@ function fixture(drift: boolean) {
   const operations = createCompactionOperationRepo(db); const logger = createCaptureLogger().logger;
   const pass = createCompactionPass({ timeline: observed, summaries, operations,
     view: { estimatedTokens: () => 900, budget: () => 100 },
-    flush: { prepareRetirement: async () => ({ status: "not_required", reason: "canonical_local_records_are_authoritative" }) },
     slot: createUtilitySlot({ mainModel: model, logger }), config: { triggerRatio: 0.8, keepMessages: 3 }, logger });
   return { db, timeline, summaries, model, pass };
 }

@@ -7,6 +7,7 @@ import { JSON_RPC_ERROR_CODES, SUBAGENT_METHODS, SubagentListParamsSchema, Subag
   SubagentSendParamsSchema, SubagentStopParamsSchema, SubagentContinueParamsSchema, SubagentSubscribeParamsSchema } from "@taki/shared";
 import { SubagentConversationParamsSchema, SubagentConversationBodyParamsSchema, SubagentActivityReadParamsSchema, SubagentActivitySubscribeParamsSchema } from "@taki/shared";
 import { SubagentInboxRecoveryParamsSchema, SubagentInboxResumeParamsSchema } from "@taki/shared";
+import { SubagentAttentionParamsSchema, SubagentInboxRetryParamsSchema } from "@taki/shared";
 import type { SubagentService } from "../../harness/subagent-service.ts";
 import type { SubagentSubscriptions } from "../../harness/subagent-subscriptions.ts";
 import type { MethodRegistry } from "../method-registry.ts";
@@ -31,6 +32,8 @@ export function registerSubagentMethods(registry: MethodRegistry, input: {
   add(SUBAGENT_METHODS.conversation, SubagentConversationParamsSchema, (params) => input.service.conversation(params));
   add(SUBAGENT_METHODS.conversationBody, SubagentConversationBodyParamsSchema, (params) => input.service.conversationBody(params));
   add(SUBAGENT_METHODS.inboxRecovery, SubagentInboxRecoveryParamsSchema, (params) => input.service.inboxRecovery(params));
+  add(SUBAGENT_METHODS.attention, SubagentAttentionParamsSchema, (params) => input.service.attention(params));
+  add(SUBAGENT_METHODS.inboxRetry, SubagentInboxRetryParamsSchema, (params) => input.service.retryInbox(params));
   add(SUBAGENT_METHODS.inboxResume, SubagentInboxResumeParamsSchema, (params) => input.service.resumeInbox(params));
   add(SUBAGENT_METHODS.activityRead, SubagentActivityReadParamsSchema, (params) => input.service.activityRead(params));
   const activitySubscriptions = new Map<MethodContext["connection"], () => void>();

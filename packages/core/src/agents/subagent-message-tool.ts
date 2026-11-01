@@ -4,15 +4,17 @@
  * POS: core/agents — informational governed message tool; parent cannot clear a user-stop latch
  */
 import { tool, type ToolSet } from "ai";
-import { SubagentMessageToolSchema } from "@taki/shared";
+import { SubagentMessageToolSchema, SubagentTargetSchema } from "@taki/shared";
 import type { SubagentToolBinding } from "./subagent-tools.ts";
 import { subagentToolRefusal, selectSubagentMaterials } from "./subagent-tools.ts";
 import { digestRunValue } from "../db/run-row-mappers.ts";
 import { subagentControlModelOutput } from "./subagent-control-output.ts";
 
 export function createSubagentMessageTool(input: SubagentToolBinding): ToolSet {
-  return { send_subagent_message: tool({ description: "Send selected direction to the exact child work at its next step. "
-    + "Set continue=true only to resume a parent-interrupted child; a user-stopped child requires the user's Continue action. Read current controlVersion first.",
+  return { send_subagent_message: tool({ description: "Send direction to a child; omit/null workInputId for its current work, or supply an explicit work that must never be retargeted. Ordinary guidance uses continue=false and no replyToEventId; it does not answer a pending question or resume paused work. "
+    + "To answer a pending question, put the answer in direction, use its eventId as replyToEventId, set continue=false and copy the full current target. To approve a progress check-in, use its eventId and full current target with continue=true. "
+    + "To explicitly continue interrupted unfinished work with no pending request, keep its workInputId and full current target, use continue=true and replyToEventId=null. Ask it to finish the still-required report using its retained analysis; idle status or apparently complete prose alone is not accepted completion. "
+    + "Copy the returned target/currentTarget unchanged, including null expectedRunId and the current expectedControlVersion; do not guess or increment a version. User-required check-ins and user Stop require direct user continuation.",
   inputSchema: SubagentMessageToolSchema,
   toModelOutput: subagentControlModelOutput,
   execute(candidate, options) {
@@ -23,7 +25,12 @@ export function createSubagentMessageTool(input: SubagentToolBinding): ToolSet {
         operationKey: `message:${digestRunValue({ runId, toolCallId: options.toolCallId })}`, direction: candidate.direction,
         replyToEventId: candidate.replyToEventId ?? undefined,
         materials: selectSubagentMaterials(input, candidate.materials) };
-      return candidate.continue ? input.service.continue(request, { kind: "parent", runId }) : input.service.send(request, { kind: "parent", runId });
-    } catch (error) { return subagentToolRefusal(error); }
+      if (!candidate.continue && !candidate.replyToEventId) return input.service.sendCurrent({ ...request,
+        subagentId: candidate.target.subagentId, workInputId: candidate.target.workInputId }, { kind: "parent", runId });
+      const parsed = SubagentTargetSchema.safeParse(candidate.target);
+      if (!parsed.success) throw new Error("SUBAGENT_EXACT_TARGET_REQUIRED");
+      const exact = { ...request, target: parsed.data };
+      return candidate.continue ? input.service.continue(exact, { kind: "parent", runId }) : input.service.send(exact, { kind: "parent", runId });
+    } catch (error) { return subagentToolRefusal(error, { service: input.service, subagentId: candidate.target.subagentId, characterId: input.characterId }); }
   } }) };
 }

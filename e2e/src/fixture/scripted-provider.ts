@@ -4,12 +4,13 @@
  * POS: e2e/fixture — test-only model transport; no remote credentials, model stub inside Core, or content logging.
  */
 import { randomUUID } from "node:crypto";
-import { once } from "node:events";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import { listenLoopbackHttp } from "./loopback-http.ts";
 
 export interface ScriptedReply {
   text?: string;
   calls?: ReadonlyArray<{ name: string; arguments: unknown }>;
+  usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
 }
 
 export interface ScriptedProvider {
@@ -31,12 +32,9 @@ export async function startScriptedProvider(
       response.end(JSON.stringify({ error: { message: "scripted provider failed" } }));
     });
   });
-  server.listen(0, "127.0.0.1");
-  await once(server, "listening");
-  const address = server.address();
-  if (!address || typeof address === "string") throw new Error("missing scripted provider port");
+  const port = await listenLoopbackHttp(server);
   return {
-    baseUrl: `http://127.0.0.1:${address.port}/v1`, requests, errors,
+    baseUrl: `http://127.0.0.1:${port}/v1`, requests, errors,
     close: async () => {
       server.closeAllConnections();
       await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
@@ -59,6 +57,13 @@ async function answer(
   const captured = body as Record<string, unknown>;
   const index = scenario.requests.push(captured) - 1;
   const scripted = await scenario.reply(captured, index);
+  if (captured.stream !== true) {
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(JSON.stringify({ id: randomUUID(), object: "chat.completion", created: 1,
+      model: captured.model, choices: [{ index: 0, message: { role: "assistant", content: scripted.text ?? "" }, finish_reason: "stop" }],
+      ...(scripted.usage ? { usage: scripted.usage } : {}) }));
+    return;
+  }
   response.writeHead(200, { "content-type": "text/event-stream" });
   const id = randomUUID();
   const emit = (delta: unknown, finish: string | null = null) => response.write(`data: ${JSON.stringify({
@@ -71,5 +76,6 @@ async function answer(
     function: { name: call.name, arguments: JSON.stringify(call.arguments) },
   }] });
   emit({}, calls.length ? "tool_calls" : "stop");
+  if (scripted.usage) response.write(`data: ${JSON.stringify({ id, object: "chat.completion.chunk", choices: [], usage: scripted.usage })}\n\n`);
   response.end("data: [DONE]\n\n");
 }

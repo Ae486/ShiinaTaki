@@ -119,7 +119,7 @@ export function createTimelineRepo(db: Database): TimelineRepo {
 
 function batchAppender(db: Database, insert: SqlStatement): TimelineRepo["appendBatch"] {
   return (inputs) => {
-    const prepared = inputs.map(prepareEntry);
+    const prepared = inputs.map(prepareTimelineEntry);
     const entries: TimelineEntry[] = [];
     db.transaction(() => {
       for (const row of prepared) {
@@ -136,13 +136,13 @@ function batchAppender(db: Database, insert: SqlStatement): TimelineRepo["append
   };
 }
 
-function prepareEntry(input: AppendInput): TimelineEntry {
+export function prepareTimelineEntry(input: AppendInput): TimelineEntry {
   return TimelineEntrySchema.parse({
     ...input, parts: sanitizeParts(input.parts), seq: 1, id: randomUUID(), createdAt: new Date().toISOString(),
   });
 }
 
-function toEntry(row: SqlRow): TimelineEntry {
+export function toEntry(row: SqlRow): TimelineEntry {
   return TimelineEntrySchema.parse({
     seq: row.seq,
     id: row.id,

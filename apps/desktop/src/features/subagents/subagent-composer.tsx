@@ -18,10 +18,13 @@ export function SubagentComposer({ target, child, controller, available, pending
   const draft = controller.draft(target);
   const currentDraft = controller.draftReady(target);
   const stopped = child.stopOrigin !== null;
-  const action = stopped ? "continue" : "send";
+  const request = child.pendingRequest;
+  const checkIn = request?.state === "open" && request.workInputId === target.workInputId && request.reason === "check_in" ? request.checkIn : null;
+  const continues = stopped || checkIn !== null;
+  const action = continues ? "continue" : "send";
   const ownsWork = !child.activeWorkInputId || child.activeWorkInputId === target.workInputId;
-  const enabled = available && currentDraft && (stopped ? !child.activeRunId : !!draft.text.trim());
-  const label = stopped ? draft.text.trim() ? "发送并继续" : "继续此工作" : "发送输入";
+  const enabled = available && currentDraft && (stopped ? !child.activeRunId : checkIn !== null || !!draft.text.trim());
+  const label = continues ? draft.text.trim() ? checkIn ? "调整并继续" : "发送并继续" : "继续此工作" : "发送输入";
   const submit = () => void controller.submitDraft(target, action);
   return <section aria-label="所选子代理工作控制" className="shrink-0">
     {!currentDraft && <div role="status" className="px-4 py-2 text-xs text-text-secondary">
@@ -38,6 +41,8 @@ export function SubagentComposer({ target, child, controller, available, pending
           busy={pending === "stop"} onClick={() => void controller.act(target, "stop")}>停止此子代理</ActionButton>
       </>} footer={stopped
         ? child.activeRunId ? "正在停止，执行结束后可明确继续。草稿已保留。" : "需要点击继续才能恢复；有草稿时，发送并继续会一次提交。"
-        : child.state === "needs_input" ? "补充内容将回复当前待回答的问题。" : "运行中也可发送补充输入；接收不代表当前模型步骤已读到。"} />
+        : checkIn ? checkIn.requiredActor === "user" ? "只有你能放行此检查点。点击继续，或补充调整后一次提交并继续。"
+          : "点击继续恢复同一工作；补充调整后可一次提交并继续。主对话中的普通聊天不会重置无人值守次数。"
+          : child.state === "needs_input" ? "补充内容将回复当前待回答的问题。" : "运行中也可发送补充输入；接收不代表当前模型步骤已读到。"} />
   </section>;
 }

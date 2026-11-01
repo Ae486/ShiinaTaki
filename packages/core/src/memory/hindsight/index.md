@@ -76,7 +76,7 @@
 - hindsight-application-writer.ts — durable original command identity plus independently verified remote receipt/application status
 - hindsight-ingestion-contract.ts — durable source-only plans, original retain payloads, stable operation identities and coverage codecs
 - hindsight-ingestion-lifetime.ts — owner cancellation, serial ingestion chains and a drain that waits for every underlying operation
-- hindsight-ingestion.ts — source-only ingestion with restart-safe gate/Bank coverage, pre-retirement flush and owned stop/drain
+- hindsight-ingestion.ts — provider-independent source import, gap-isolated source-only ingestion, restart-safe gate/Bank coverage and owned stop/drain
 - hindsight-memory-pending-read.ts — separate unconfirmed overlays, gated by exact scope and current known target policy
 - hindsight-memory-provider-context.ts — guarded foreground request allowances, bounded capability admission or explicit shrinking operation deadlines, and closed provider failures
 - hindsight-memory-provider.ts — native reads/reflection with foreground cold-admission cancellation, truthful Pending outcomes and stable authority

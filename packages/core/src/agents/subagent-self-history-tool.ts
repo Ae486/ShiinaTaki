@@ -22,6 +22,7 @@ export interface SelfHistoryInput {
   characterId: string; subagentId: string; children: SubagentRepo; inputs: SubagentInputRepo;
   executions: SubagentExecutionRepo; messages: RunMessageRepo;
   toolResults?: SubagentToolResultRepo;
+  projectRecord?(category: string, value: unknown): unknown;
 }
 
 export function createSubagentSelfHistoryTool(input: SelfHistoryInput): ToolSet {
@@ -65,7 +66,7 @@ function page(input: SelfHistoryInput, state: { request: SubagentSelfHistoryRequ
     const row = nextRecord(input, cursor);
     if (!row) { if (cursor.recordId) return invalidPage(input, request); break; }
     if (cursor.recordId && row.id !== cursor.recordId) return invalidPage(input, request);
-    const text = JSON.stringify(row.value);
+    const text = JSON.stringify(input.projectRecord ? input.projectRecord(request.category, row.value) : row.value);
     if (cursor.offset > text.length) return invalidPage(input, request);
     let end = Math.min(text.length, cursor.offset + remaining);
     if (end < text.length && /[\uD800-\uDBFF]/u.test(text.charAt(end - 1))) end -= 1;

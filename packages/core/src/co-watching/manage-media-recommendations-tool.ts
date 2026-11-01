@@ -8,6 +8,7 @@ import { z } from "zod";
 import type { TimelineEntry } from "@taki/shared";
 import type { TurnContext } from "../agents/chat-agent.ts";
 import type { MediaAnalysisRuntime } from "./media-analysis-runtime.ts";
+import { mediaToolModelOutput } from "./media-tool-model-output.ts";
 
 export const MEDIA_RECOMMENDATIONS_SKILL = "taki-media-recommendations";
 
@@ -37,8 +38,11 @@ export function createManageMediaRecommendationsTool(input: {
       "Accepted means queued, not completed. Inspect preparation_status for actual per-video outcomes; use existing analysis reads when the user later asks. " +
       "Declining or choosing direct viewing does not cancel preparation. Exact completed results/original requests are reused; unknown outcomes never justify a fresh request. " +
       "preparation_cancel stops only selected pending Taki follow-up, retains completed results and does not claim the upstream job stopped. " +
+      "Read each job's status and reason: failed, cancelled and analysis_unknown are distinct; a missing batch means no retained batch was found, not successful preparation. " +
+      "Preserve batchId and jobs[].requestId for exact status/cancel; completed jobs' analysisId selects an existing analysis read. " +
       "Native MCP capabilities retain their existing permissions/Approval and captured service generation.",
     inputSchema: Input,
+    toModelOutput: mediaToolModelOutput,
     async execute({ action, videoUrls, lifetimeMinutes, batchId, jobRequestId }) {
       if (turn.signal?.aborted) return { ok: false, reason: "turn_cancelled" };
       if (connection.state.status !== "authenticated" || connection.state.role !== "operator") return { ok: false, reason: "source_unavailable" };

@@ -1,10 +1,10 @@
-import { once } from "node:events";
 import { mkdirSync, mkdtempSync, unlinkSync, writeFileSync } from "node:fs";
 import { createServer, Server } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { startAgentContextTimingRelay } from "./agent-context-timing-relay.ts";
+import { listenLoopbackHttp } from "./loopback-http.ts";
 
 function evidenceDir() {
   const root = process.env.TAKI_E2E_EVIDENCE_DIR ?? tmpdir();
@@ -22,10 +22,8 @@ describe("agent context timing relay evidence and transparent transport", () => 
       bodies.push(Buffer.concat(chunks).toString("utf8"));
       response.writeHead(200, { "content-type": "text/event-stream" }); response.end(payload);
     });
-    upstream.listen(0, "127.0.0.1"); await once(upstream, "listening");
-    const address = upstream.address();
-    if (!address || typeof address === "string") throw new Error("test upstream did not bind");
-    const relay = await startAgentContextTimingRelay({ baseUrl: `http://127.0.0.1:${address.port}/v1`, evidenceDir: evidenceDir(),
+    const port = await listenLoopbackHttp(upstream);
+    const relay = await startAgentContextTimingRelay({ baseUrl: `http://127.0.0.1:${port}/v1`, evidenceDir: evidenceDir(),
       gate: (body) => String(body.gate) });
     const body = '{ "gate" : "release", "messages": [] }';
     try {

@@ -22,6 +22,14 @@ async function fixture(count = 1) {
 }
 
 describe("durable actual-intent inbox ownership", () => {
+  it("does not give accepted final events interrupted-work recovery instructions", async () => {
+    const f = await fixture(); const context = f.claim();
+    expect(f.inbox.get(context.consumerId).events.every((event) => event.kind === "final")).toBe(true);
+    expect(context.instructions).toContain("preview contains the complete report; use it directly");
+    expect(context.instructions).not.toContain("Inspect the result to distinguish");
+    expect(context.instructions).not.toContain("send_subagent_message");
+  });
+
   it("keeps prepared events accepted, rolls failed model intent back and never recycles an actual delivered event", async () => {
     const f = await fixture(); const context = f.claim(); const event = f.service.events.list({ characterId: "taki" })[0]!;
     expect(event.state).toBe("accepted"); expect(f.inbox.backlog("taki").count).toBe(1);

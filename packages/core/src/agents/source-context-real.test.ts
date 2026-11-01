@@ -111,9 +111,7 @@ async function runScenario(scenario: Scenario, model: LanguageModel, options: {
     const witnesses = Number(f.db.prepare("SELECT count(*) AS n FROM canonical_memory_primary_commits").get()?.n ?? 0);
     expect(witnesses).toBe(0);
     const pass = createCompactionPass({ timeline: f.timeline, summaries, operations: createCompactionOperationRepo(f.db), slot, logger,
-      view: { estimatedTokens: () => 1000, budget: () => 100 }, config: { triggerRatio: 0.8, keepMessages: 2, summaryQuality: true, retryBudget: 1 },
-      // This fixture never installs canonical primary eligibility. It tests projection, not Memory flush.
-      flush: { prepareRetirement: async () => ({ status: "not_required", reason: "before_canonical_ingestion_eligibility" }) } });
+      view: { estimatedTokens: () => 1000, budget: () => 100 }, config: { triggerRatio: 0.8, keepMessages: 2, summaryQuality: true, retryBudget: 1 } });
     checkpoint("compaction-started");
     await pass.maybeRun("taki");
     checkpoint("compaction-settled");

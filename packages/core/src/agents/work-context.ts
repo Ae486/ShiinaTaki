@@ -33,6 +33,12 @@ export interface WorkStepInput {
 export type WorkSegmentCheckpoint = { kind: "continue" } | {
   kind: "context_rollover"; messages: ModelMessage[]; summary?: SubagentContextSummaryWitness;
 };
+export interface CompletedWorkStep {
+  attemptId: string; stepNumber: number; messages: TurnMessage[];
+  completed?: boolean; safeFrontier?: boolean;
+  modelEffectId?: string;
+  naturalFinish?: boolean;
+}
 
 export interface WorkContext {
   readonly scope: SubagentWorkScope;
@@ -46,6 +52,6 @@ export interface WorkContext {
   checkpointSegment?(input: { attemptId: string; stepNumber: number; retainedBytes: number;
     safeToRollover: boolean; envelope?: WorkContextEnvelope }): Promise<WorkSegmentCheckpoint>;
   commitModelInput(step: PreparedWorkStep, effect: EffectLifecycle): void;
-  recordCompletedStep(input: { attemptId: string; stepNumber: number; messages: TurnMessage[] }): void;
+  recordCompletedStep(input: CompletedWorkStep): void;
   recordPartial(input: { attemptId: string; stepNumber: number; text: string }): void;
 }

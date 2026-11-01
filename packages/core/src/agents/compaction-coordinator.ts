@@ -1,5 +1,5 @@
 /**
- * INPUT:  replay pressure, captured Timeline/Summary state, MemoryFlushPort, Utility Slot, and durable operation repo
+ * INPUT:  replay pressure, captured Timeline/Summary state, optional Legacy flush, Utility Slot, and durable operation repo
  * OUTPUT: fenced, CAS-protected summary replacement with presentation-independent canonical source identity
  * POS:    core/agents — detached Slice 3 compaction lifecycle; one operation per Character, never a Run/Timeline authority
  */
@@ -45,7 +45,8 @@ export interface CompactionCoordinatorDeps {
   timeline: TimelineRepo;
   summaries: SummaryRepo;
   operations: CompactionOperationRepo;
-  flush: MemoryFlushPort;
+  /** Only Legacy requires extraction before summary replacement; the selected port is captured per operation. */
+  legacyFlush?: () => MemoryFlushPort | undefined;
   slot: UtilitySlot;
   config: {
     triggerRatio: number;
@@ -113,6 +114,7 @@ export function createCompactionCoordinator(deps: CompactionCoordinatorDeps): Co
       deps.operations.reconcileExpired(now().toISOString());
       const attemptAt = now();
       if (!attemptAllowed({ deps, characterId, operationId, at: attemptAt })) return;
+      const legacyFlush = deps.legacyFlush?.();
       const startedAt = now();
       const route = modelRoute(deps.slot.model);
       const begun = deps.operations.begin({
@@ -127,7 +129,7 @@ export function createCompactionCoordinator(deps: CompactionCoordinatorDeps): Co
       lease = begun.lease;
       const controller = new AbortController();
       controllers.set(characterId, { operationId, fence: lease.fence, controller });
-      await execute({ deps, captured, lease, controller, now, leaseMs });
+      await execute({ deps, captured, lease, controller, now, leaseMs, legacyFlush });
     } catch {
       if (lease) deps.operations.fail({ lease, code: "COMPACTION_INTERNAL_ERROR", now: now().toISOString() });
       deps.logger.warn({ characterId, code: "COMPACTION_INTERNAL_ERROR" }, "compaction pass failed; will retry");
@@ -150,21 +152,37 @@ export function createCompactionCoordinator(deps: CompactionCoordinatorDeps): Co
 
 async function execute(input: {
   deps: CompactionCoordinatorDeps; captured: CapturedCompaction; lease: CompactionLease;
-  controller: AbortController; now: () => Date; leaseMs: number;
+  controller: AbortController; now: () => Date; leaseMs: number; legacyFlush?: MemoryFlushPort;
 }): Promise<void> {
   const { deps, captured, controller, now, leaseMs } = input;
-  const flushed = await flushRetiringSpan(deps, { captured, lease: input.lease, now });
-  if (!flushed) return;
+  let lease = input.lease;
+  if (input.legacyFlush) {
+    const flushed = await flushRetiringSpan(deps, { captured, lease, now, port: input.legacyFlush });
+    if (!flushed || controller.signal.aborted) return;
+    const renewedAt = now();
+    const renewed = deps.operations.recordFlush({ lease, status: flushed.status, writes: flushed.writes,
+      now: renewedAt.toISOString(), expiresAt: future(renewedAt, leaseMs) });
+    if (!renewed) return;
+    lease = renewed;
+  }
   if (controller.signal.aborted) return;
-  const renewedAt = now();
-  const lease = deps.operations.recordFlush({ lease: input.lease, status: flushed.status, writes: flushed.writes,
-    now: renewedAt.toISOString(), expiresAt: future(renewedAt, leaseMs) });
-  if (!lease || controller.signal.aborted) return;
 
   const previousSummary = captured.previousSummary === null ? null : sanitizeCompactionText(captured.previousSummary);
   const prompt = deps.buildPrompt(previousSummary, renderSafeTranscript(captured.span), now());
-  const result = await deps.slot.run("compact", () => generateText({ model: deps.slot.model, prompt, abortSignal: controller.signal }));
-  if (controller.signal.aborted) return;
+  let dispatchSkipped = false;
+  const result = await deps.slot.run("compact", () => {
+    if (controller.signal.aborted) return Promise.resolve(undefined);
+    const dispatchAt = now();
+    const renewed = deps.operations.renewLease({ lease, now: dispatchAt.toISOString(), expiresAt: future(dispatchAt, leaseMs) });
+    if (!renewed) {
+      dispatchSkipped = true;
+      deps.operations.reconcileExpired(dispatchAt.toISOString());
+      return Promise.resolve(undefined);
+    }
+    lease = renewed;
+    return generateText({ model: deps.slot.model, prompt, abortSignal: controller.signal });
+  });
+  if (controller.signal.aborted || dispatchSkipped) return;
   if (result === undefined) {
     failSummary(deps, { lease, code: "SUMMARY_GENERATION_FAILED", captured, now });
     return;
@@ -276,12 +294,12 @@ function attemptAllowed(input: {
 
 async function flushRetiringSpan(
   deps: CompactionCoordinatorDeps,
-  input: { captured: CapturedCompaction; lease: CompactionLease; now: () => Date },
+  input: { captured: CapturedCompaction; lease: CompactionLease; now: () => Date; port: MemoryFlushPort },
 ): Promise<{ status: "success" | "not_required"; writes: number } | null> {
   const { captured, lease, now } = input;
   let outcome: MemoryFlushOutcome;
   try {
-    outcome = await deps.flush.prepareRetirement({ characterId: captured.characterId,
+    outcome = await input.port.prepareRetirement({ characterId: captured.characterId,
       fromSeq: captured.oldThrough + 1, throughSeq: captured.newThrough, operationId: lease.operationId });
   } catch {
     outcome = { status: "retryable_failure", code: "MEMORY_FLUSH_FAILED" };

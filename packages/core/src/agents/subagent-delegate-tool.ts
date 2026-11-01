@@ -16,9 +16,11 @@ export function createSubagentDelegateTool(input: SubagentToolBinding): ToolSet 
   return { delegate_subagent: tool({
     description: "Delegate a focused job to an independently running worker, or reuse its exact subagentId. "
       + "Choose fresh context or an explicit selected summary snapshot; later main chat is not copied. "
-      + "Choose record_only to retain the result without a new parent inference, or request_parent to request later synthesis. "
+      + "Use request_parent (the default) when the worker should report back: its reports, progress messages and blocking questions reach your inbox for follow-up. An inbox notification does not itself publish a reply to the user. "
+      + "Use record_only only for silent work whose results and questions will be inspected explicitly; it sends no ordinary inbox notifications. Core progress check-ins still reach your inbox under either policy. "
+      + "A worker's requested report format applies to the text in its result or question event; it need not send a separate plain assistant message. "
       + "Use null toolSelection to inherit permitted tools; allow lists and inherited exclusions narrow executable tools. Child Memory is always read-only. "
-      + "Use null subagentId for a new worker. This returns an acknowledgement, not a completed result; inspect_subagent reads results.",
+      + "Use null subagentId for a new worker. This returns an acknowledgement, not a completed result. Acknowledge pending work and continue useful foreground work. For request_parent, end the current reply when only worker results remain pending; workers continue independently and later inbox events let you finish the original request without another user message. Do not poll inspect_subagent just to wait for completion.",
     inputSchema: SubagentDelegateToolSchema,
     toModelOutput: subagentControlModelOutput,
     async execute(candidate, options) {

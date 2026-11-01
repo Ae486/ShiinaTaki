@@ -14,6 +14,7 @@ import { KnobInput } from "./knob-input.tsx";
 import { ActionButton } from "../../action-button.tsx";
 import { useKnobDraft } from "./use-knob-draft.ts";
 import type { ConfigSaveOutcome } from "./config-save-controller.ts";
+import { configHintOf } from "./config-groups.ts";
 
 export interface KnobFieldProps {
   entry: ConfigEntry;
@@ -61,6 +62,7 @@ export function KnobField({ entry, chineseLabel, connectionReady, onSave }: Knob
         </span>
       </div>
       <p className="text-xs leading-snug text-text-secondary">{entry.description}</p>
+      {configHintOf(entry.key) && <p className="text-xs leading-snug text-text-secondary">{configHintOf(entry.key)}</p>}
       <KnobInput entry={entry} editor={availableEditor} draft={draft.state.draft} events={draft.events} />
       {editor.disabledReason && <p className="text-xs text-text-secondary">{editor.disabledReason}</p>}
       <DraftFeedback draft={draft} disabled={availableEditor.disabled} />

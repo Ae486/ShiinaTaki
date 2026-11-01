@@ -5,7 +5,7 @@
  */
 import { z } from "zod";
 import { MaterialRefSchema } from "./context-source-schema.ts";
-import { SubagentCompletionPolicySchema, SubagentTargetSchema, SubagentToolSelectionSchema } from "./subagent-schema.ts";
+import { SubagentCompletionPolicySchema, SubagentToolSelectionSchema } from "./subagent-schema.ts";
 
 export const SubagentDelegateToolSchema = z.strictObject({
   label: z.string().min(1).max(200), subagentId: z.uuid().nullable(),
@@ -17,8 +17,12 @@ export const SubagentDelegateToolSchema = z.strictObject({
   materials: z.array(MaterialRefSchema).max(200).default([]),
 });
 export type SubagentDelegateTool = z.infer<typeof SubagentDelegateToolSchema>;
+export const SubagentMessageTargetSchema = z.strictObject({
+  subagentId: z.uuid(), workInputId: z.uuid().nullable().optional(),
+  expectedRunId: z.string().min(1).max(200).nullable().optional(), expectedControlVersion: z.int().nonnegative().nullable().optional(),
+});
 export const SubagentMessageToolSchema = z.strictObject({
-  target: SubagentTargetSchema, direction: z.string().max(1_000_000), continue: z.boolean(),
+  target: SubagentMessageTargetSchema, direction: z.string().max(1_000_000), continue: z.boolean(),
   replyToEventId: z.string().min(1).max(200).nullable().optional(),
   materials: z.array(MaterialRefSchema).max(200).default([]),
 });
@@ -31,8 +35,10 @@ export const ParentContinuationToolSchema = z.strictObject({
   text: z.string().max(1_000_000), reason: z.string().max(1000), materials: z.array(MaterialRefSchema).max(200),
 });
 export const SubagentInspectToolSchema = z.strictObject({
-  category: z.enum(["workers", "messages", "inputs", "results", "materials"]).nullable().optional(),
+  category: z.enum(["workers", "messages", "inputs", "results", "materials", "events", "diagnostics"]).nullable().optional()
+    .describe("workers lists compact state/targets; diagnostics adds full progress/usage. Other categories read one worker's retained evidence."),
   cursor: z.string().min(1).max(2000).nullable().optional(),
   subagentId: z.uuid().nullable(), completionId: z.string().min(1).max(200).nullable(),
-  afterSeq: z.int().nonnegative(), limit: z.int().min(1).max(100),
+  afterSeq: z.int().nonnegative().optional().describe("Legacy ignored field; use cursor for pagination."),
+  limit: z.int().min(1).max(100).default(20),
 });

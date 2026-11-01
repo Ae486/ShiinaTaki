@@ -9,7 +9,7 @@ import { openDatabase, type Database } from "../db/sqlite.ts";
 import { createSummaryRepo } from "../db/summary-repo.ts";
 import { createTimelineRepo } from "../db/timeline-repo.ts";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
-import { scriptedGenerateModel } from "../testing/mock-language-model.ts";
+import { scriptedGenerateModel, type ScriptStep } from "../testing/mock-language-model.ts";
 import { rmTempDir } from "../testing/rm-temp.ts";
 import * as canonicalSubsystem from "./canonical-local-subsystem.ts";
 import { readMemoryAuthoritySelection } from "./legacy-migration/legacy-activation-repo.ts";
@@ -25,13 +25,13 @@ afterEach(() => {
   }
 });
 
-function setup() {
+function setup(steps: ScriptStep[] = []) {
   const dataDir = mkdtempSync(join(tmpdir(), "taki-activation-failure-"));
   const dbPath = join(dataDir, "state.db");
   const db = openDatabase({ path: dbPath, migrations: MIGRATIONS });
   opened.push({ db, dataDir });
   const timeline = createTimelineRepo(db);
-  const model = scriptedGenerateModel([]);
+  const model = scriptedGenerateModel(steps);
   const { logger } = createCaptureLogger();
   const runtime = composeMemoryRuntime({ db, dataDir, promptDir: join(dataDir, "prompt"), model, timeline,
     windowStart: () => 1, summaries: createSummaryRepo(db), estimatedTokens: () => 90, budget: () => 100,
@@ -90,7 +90,7 @@ async function assertRetired(fixture: Fixture) {
 
 describe("durable activation cannot restore legacy on runtime failure", () => {
   it("retires old references and exposes unavailable canonical runtime when construction fails after commit", async () => {
-    const fixture = setup();
+    const fixture = setup([{ kind: "text", deltas: ["I kept the earlier synthetic conversation."] }]);
     const runner = await fixture.runtime.migrationRunner();
     const staged = runner.stage({ workspaceRoot: join(fixture.dataDir, "workspace"), owner: "test" });
     expect(runner.verify(staged.runId).verified).toBe(true);
@@ -117,10 +117,10 @@ describe("durable activation cannot restore legacy on runtime failure", () => {
     }
     await fixture.runtime.compaction.maybeRun("taki");
     expect(oldFlush).not.toHaveBeenCalled();
-    expect(fixture.db.prepare("SELECT failure_code FROM conversation_compaction_operations").get()?.failure_code)
-      .toBe("MEMORY_FLUSH_FAILED");
-    expect(createSummaryRepo(fixture.db).get("taki")).toBeNull();
-    expect(fixture.model.doGenerateCalls).toHaveLength(0);
+    expect(fixture.db.prepare("SELECT state,failure_code FROM conversation_compaction_operations").get())
+      .toMatchObject({ state: "committed", failure_code: null });
+    expect(createSummaryRepo(fixture.db).get("taki")?.text).toBe("I kept the earlier synthetic conversation.");
+    expect(fixture.model.doGenerateCalls).toHaveLength(1);
 
     const reopened = openDatabase({ path: fixture.dbPath, migrations: MIGRATIONS });
     try {

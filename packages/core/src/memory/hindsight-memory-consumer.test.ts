@@ -250,10 +250,24 @@ describe("D77 results through the actual coordinator and memory consumers", () =
         expect(full.ok && full.data.record?.unit.metadata).toBe(f.records.g.unit.metadata);
         expect(model.value).toContain('"memoryId":"memory-g","revision":3,"state":"valid"');
         expect(model.value).not.toContain('"metadata"'); expect(model.value).not.toContain('"record"');
+      } else if (name === "recall") {
+        expect(model.value).toContain('"scope":"global","memoryId":"memory-g"');
+        expect(model.value).toContain('"scope":"character","memoryId":"memory-c"');
+        expect(model.value).toContain('"constructor":{"prototype":"inert"}');
+        expect(model.value).toContain('"origin":"provider-derived"');
+      } else if (name === "reflect") {
+        expect(model.value).toContain("Actual native reflection");
+        expect(model.value).toContain('"structuredContent"');
+        expect(model.value).toContain('"constructor":{"prototype":"inert"}');
+        expect(model.value).toContain('"evidence":{"memoryIds":["memory-g"]');
+        expect(model.value).not.toContain('"usage"'); expect(model.value).not.toContain('"trace"');
       } else {
-        const escaped = hindsightApplicationWireJson(result).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-        expect(model.value.includes(escaped)).toBe(true);
+        expect(model.value).toContain('"status":"completed"');
+        expect(model.value).toContain('"memoryId":"fact-512","revision":513');
+        expect(model.value).not.toContain('"sourceRevision"');
       }
+      expect(model.value).not.toContain('"capabilities"');
+      expect(model.value).not.toContain('"authorityEpochId"');
       await assertModelDelivery({ name, model });
     },
   );
@@ -282,7 +296,7 @@ describe("D77 results through the actual coordinator and memory consumers", () =
       const model = await tool.toModelOutput!({ toolCallId: "call", input, output: result });
       expect(model.type).toBe("text"); if (model.type !== "text") continue;
       expect(model.value).toContain(`"outcome":"${outcome}"`);
-      expect(model.value).toContain('"bankId":"g","memoryId":"memory-g","revision":3');
+      expect(model.value).toContain('"scope":"global","memoryId":"memory-g","revision":3');
       expect(model.value).not.toMatch(/"(?:record|policy|provenance|metadata|text|context|reason)":/);
       await assertModelDelivery({ name, model, forbidden: sentinel });
     }
@@ -306,7 +320,8 @@ describe("D77 results through the actual coordinator and memory consumers", () =
       const model = await tool.toModelOutput!({ toolCallId: "call", input, output: result });
       expect(model.type).toBe("text"); if (model.type !== "text") continue;
       expect(model.value).toContain('"outcome":"pending"');
-      expect(model.value).toContain(`"operationId":"${result.requestId}"`);
+      expect(model.value).not.toContain('"operationId"');
+      expect(model.value).toContain('"scope":"global"');
       expect(model.value).toContain('"phase":"queued"'); expect(model.value).toContain('"expectedRevision":3');
       expect(model.value).not.toMatch(/"(?:revision|targetRecord|record|patch|reason|metadata)":/);
       await assertModelDelivery({ name, model, forbidden: sentinel });
@@ -321,11 +336,11 @@ describe("D77 results through the actual coordinator and memory consumers", () =
     expect(result).toMatchObject({ ok: true, data: { outcome, record: null } });
     const model = await tool.toModelOutput!({ toolCallId: "call", input, output: result });
     expect(model.type).toBe("text"); if (model.type !== "text") return;
-    expect(model.value).toContain(`"data":{"outcome":"${outcome}"}`);
+    expect(model.value).toContain(`"ok":true,"outcome":"${outcome}"`);
     expect(model.value).not.toMatch(/"(?:revision|memoryId|bankId)":/);
   });
 
-  it("retains a governance denial's real code without serializing unvalidated fields, and leaves Local model defaults intact", async () => {
+  it("retains a governance denial's real code without serializing unvalidated fields, and projects Local mutations too", async () => {
     const f = fixture(); const captured = await f.runtime.captureRun();
     const tools = createCanonicalMemoryToolsWithCapabilities({ coordinator: captured.coordinator, authority: captured.authority, router }, captured.snapshot.capabilities);
     const model = await tools.restore_memory!.toModelOutput!({ toolCallId: "call", input: {},
@@ -335,7 +350,7 @@ describe("D77 results through the actual coordinator and memory consumers", () =
     }
     const local = fixture("local");
     const localTools = createCanonicalMemoryToolsWithCapabilities({ coordinator: local.runtime, router, authority: local.epoch }, local.caps);
-    for (const name of ["update_memory", "invalidate_memory", "restore_memory"] as const) expect(localTools[name]?.toModelOutput).toBeUndefined();
+    for (const name of ["update_memory", "invalidate_memory", "restore_memory"] as const) expect(localTools[name]?.toModelOutput).toBeTypeOf("function");
   });
 });
 

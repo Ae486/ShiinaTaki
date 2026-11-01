@@ -82,8 +82,8 @@
 - canonical-memory-maintenance-evidence.ts — versioned inert source-to-fact evidence within logical source metadata
 - canonical-memory-maintenance-ingestion.ts — atomic original-source/new-fact/duplicate-proof batches and receipt reads
 - canonical-ingestion-repo.ts — durable fixed-span Write Gate/extraction state, per-Bank receipts and atomic completion
-- primary-memory-source-read.ts — exact Timeline witness to original provider ingestion span lookup using owning validated codecs
-- canonical-ingestion-source-repo.ts — exact primary commit and optional source evidence, epoch/span assignment, persistent eligibility baseline and guarded retirement coverage
+- primary-memory-source-read.ts — exact Timeline witness to original provider ingestion span, preserving captured authority before asynchronous binding
+- canonical-ingestion-source-repo.ts — exact primary witnesses, gap-isolated epoch/span selection, immutable occurrence ownership and truthful continuous coverage
 - primary-source-row.ts — validated optional Timeline source facts and conditional C3 digest preserving legacy-null bytes
 - canonical-memory-maintenance-copy.ts — same-Bank copies and complete cross-Bank support/source remapping with retirement
 - canonical-memory-maintenance-retention.ts — activity-only rolling deletion with source cleanup and historical identity retention
@@ -109,7 +109,7 @@
 - hindsight-ingestion-durability.ts — verified source coverage or a refusal; queue promises alone never establish durability
 - hindsight-ingestion-guard.ts — synchronous authority/namespace fences for ingestion plans and durable coverage
 - hindsight-ingestion-repo.ts — restart-safe Hindsight source ingestion journal and receipt-verified retirement coverage
-- hindsight-ingestion-source-repo.ts — durable source witnesses, immutable eligibility baseline and claim/coverage checks
+- hindsight-ingestion-source-repo.ts — immutable source witnesses and baseline, gap-isolated claiming and truthful continuous coverage
 - hindsight-memory-write-contract.ts — lossless internal parent-intent state and an immutable operation identity
 - hindsight-memory-write-repo.ts — original target capture, independent child evidence, stable full-operation receipts and the count-only pending parent-write read
 - memory-operation-repo.ts — durable memory_operations ledger: admitted insert (partial-unique-index single flight), state-CAS transition, active/recent reads, restart reconciliation by owner boot id
@@ -127,8 +127,19 @@
 - subagent-tool-result-repo.ts — immutable full raw tool results keyed by Run/Attempt/step/call, with durable material reads
 
 - subagent-event-repo.ts — immutable accepted child events and exact durable input dependencies
-- subagent-inbox-repo.ts — bounded first claims, actual model-intent deliveries and idempotent handling receipts
+- subagent-inbox-repo.ts — bounded immutable claims, actual deliveries and idempotent handling; complete-preview guidance and event-specific interrupted-work recovery
 - subagent-inbox-terminal.ts — canonical consumer terminal staging, safe release and reconciliation classification
 - subagent-inbox-recovery-repo.ts — atomic explicit successor admission links and discoverable historical action evidence
 - subagent-conversation-repo.ts — continuous canonical-source ordering, complete-step presentation and digest-fenced body pages
 - subagent-speech-repo.ts — canonical event publication source proof and real primary speech witnesses
+
+- subagent-progress-repo.ts — durable actual task-model intents and unique completed-step ordinals across Runs
+- subagent-checkin-repo.ts — atomic factual Core snapshot, exact input wait and immutable check-in sidecar
+- subagent-checkin-input.ts — exact continuation, parent approval counting and trusted work-scoped user reset
+- subagent-usage-repo.ts — cumulative child model usage with missing/in-flight completeness
+- subagent-attention-repo.ts — unresolved user/check-in/reconciliation/exhausted-retry attention pages
+- subagent-inbox-retry-repo.ts — durable pre-intent retry exhaustion without delivered-batch replay
+- subagent-action-evidence.ts — useful action-result projection without internal receipts
+- primary-conversation-source-repo.ts — provider-independent atomic source lifecycle, exact Timeline membership, authority capture and boot recovery
+- primary-ingestion-progress.ts — shared Local/Hindsight gap-separated source groups and truthful continuous-coverage queries
+- auxiliary-usage-repo.ts — metadata-only auxiliary model-call lifecycle, explicit boot interruption recovery and bounded usage aggregates

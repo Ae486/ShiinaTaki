@@ -7,6 +7,7 @@ import { createHash } from "node:crypto";
 import type { LanguageModelMiddleware } from "ai";
 import type { EffectLifecycle, UsageRecord } from "@taki/shared";
 import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
+import { withRunUsageOwner } from "../observability/model-usage-context.ts";
 
 interface ModelEffectContext {
   lifecycle: EffectLifecycleService;
@@ -39,7 +40,7 @@ export function createModelEffectMiddleware(context: ModelEffectContext): Langua
     async wrapGenerate({ doGenerate, params, model }) {
       const binding = prepareBinding(context, model, params);
       try {
-        const result = await doGenerate();
+        const result = await withRunUsageOwner(doGenerate);
         if (!context.observer) settleDirect({ context, effect: binding.effect, model, usage: result.usage });
         return result;
       } catch (error) {
@@ -51,7 +52,7 @@ export function createModelEffectMiddleware(context: ModelEffectContext): Langua
       const binding = prepareBinding(context, model, params);
       let result;
       try {
-        result = await doStream();
+        result = await withRunUsageOwner(doStream);
       } catch (error) {
         fail(context, binding, params.abortSignal?.aborted ? "provider_abort" : "provider_error");
         throw error;

@@ -23,6 +23,16 @@ export const COMPLETION_REASON = { foreground_busy: "主对话忙碌", source_un
   authority_unavailable: "执行条件暂不可用", superseded: "后续修正已替代此结果", source_retired: "来源已结束", expired: "工作已过期" };
 export const PARENT_DECISION = { internal_result: "内部结论", no_action: "无需后续动作", reply: "建议回复",
   unstructured: "未确认结构的输出", none: "没有结论" };
+const INBOX_RECOVERY_REASONS: Record<string, string> = {
+  missing_disposition: "处理已中断，可明确继续核对已有记录。",
+  SUBAGENT_INBOX_NOT_QUIESCENT: "此前执行尚未结束，请等待当前运行状态更新。",
+  SUBAGENT_INBOX_UNCERTAIN_EFFECT: "此前工具操作结果未知，需先核对该操作。",
+  SUBAGENT_INBOX_ALREADY_RESUMING: "已存在后续处理，请查看当前执行状态。",
+  SUBAGENT_INBOX_RECONCILIATION_REQUIRED: "处理状态已变化，请刷新核对。",
+};
+export function inboxRecoveryReason(reason: string): string {
+  return INBOX_RECOVERY_REASONS[reason] ?? "运行时尚未允许继续，需要先核对执行结果。";
+}
 const DELIVERY = { staged: "等待投递", held: "投递暂缓", dispatch_committed: "已开始投递，尚未确认送达",
   sent: "已送达", unknown: "送达结果未知", no_target: "没有可用接收端", expired: "投递已过期", suppressed: "未投递" };
 const PUBLICATION = { internal_only: "仅供内部处理", no_action: "无需发布", pending: "等待发布决定", deferred: "发布暂缓",

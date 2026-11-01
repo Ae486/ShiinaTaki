@@ -8,6 +8,7 @@ import type { RunLinkedAdmission, RunLinkedState } from "./run-linked-state.ts";
 import { readRunById } from "./run-readers.ts";
 import { createSubagentInboxRepo } from "./subagent-inbox-repo.ts";
 import { digestRunValue } from "./run-row-mappers.ts";
+import { subagentActionEvidence } from "./subagent-action-evidence.ts";
 
 export function assertSubagentInboxResumable(db: Database, input: { characterId: string; consumerId: string }): void {
   const consumer = db.prepare("SELECT * FROM subagent_inbox_consumers WHERE consumer_id=:id AND character_id=:character")
@@ -41,7 +42,8 @@ export function linkSubagentInboxResume(db: Database, input: Parameters<RunLinke
     + "Use read_agent_inbox detail=action for complete prior action/result pages, detail=event for the report.\n"
     + JSON.stringify({ events: prior.events.map((event) => ({ eventId: event.eventId, subagentId: event.subagentId,
       workInputId: event.workInputId, kind: event.kind, state: event.state })),
-    actions: receipts.map((receipt) => ({ ...receipt, result: receipt.result.slice(0, 200), resultComplete: receipt.resultComplete && receipt.result.length <= 200 })) });
+    actions: receipts.map((receipt) => ({ eventId: receipt.eventId, kind: receipt.kind, accepted: true,
+      result: receipt.result, resultComplete: receipt.resultComplete })) });
   db.prepare(`INSERT INTO subagent_inbox_consumers(consumer_id,character_id,run_id,attempt_id,mode,state,projection_json,projection_digest,created_at)
     VALUES(:id,:character,:run,:attempt,'idle','claimed',:projection,:digest,:at)`).run({ id: link.consumerId,
     character: input.run.characterId, run: input.run.runId, attempt: input.attempt.attemptId,
@@ -71,7 +73,10 @@ export function readSubagentInboxRecovery(db: Database, input: { characterId: st
 function readActionReceipts(db: Database, consumerId: string) {
   return db.prepare(`SELECT a.event_id,a.operation_key,a.action_json,a.result_json FROM subagent_event_actions a
     JOIN subagent_inbox_members m USING(event_id) WHERE m.consumer_id=:id ORDER BY a.created_at`)
-    .all({ id: consumerId }).map((row) => ({ eventId: String(row.event_id), operationKey: String(row.operation_key),
-      kind: String((JSON.parse(String(row.action_json)) as { kind: string }).kind),
-      result: String(row.result_json).slice(0, 2000), resultComplete: String(row.result_json).length <= 2000 }));
+    .all({ id: consumerId }).map((row) => {
+      const result = JSON.stringify(subagentActionEvidence(JSON.parse(String(row.result_json))));
+      return { eventId: String(row.event_id), operationKey: String(row.operation_key),
+        kind: String((JSON.parse(String(row.action_json)) as { kind: string }).kind),
+        result: result.slice(0, 2000), resultComplete: result.length <= 2000 };
+    });
 }

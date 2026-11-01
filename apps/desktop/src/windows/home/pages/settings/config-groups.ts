@@ -48,6 +48,8 @@ const EXACT_LABELS: Record<string, { group: ConfigGroupId; label: string }> = {
   TAKI_COMPACT_TRIGGER_RATIO: { group: "model-context", label: "压缩触发阈值" },
   TAKI_COMPACT_KEEP_MESSAGES: { group: "model-context", label: "压缩保留条数" },
   TAKI_MAX_STEPS: { group: "model-context", label: "工具循环步数上限" },
+  TAKI_SUBAGENT_CHECKIN_STEPS: { group: "model-context", label: "子代理进度检查间隔（模型步骤）" },
+  TAKI_SUBAGENT_CHECKIN_PARENT_APPROVALS: { group: "model-context", label: "子代理主助手连续放行次数" },
   TAKI_PROMPT_DIR: { group: "model-context", label: "提示卡目录" },
   TAKI_AMBIENT_SCREENSHOT: { group: "perception-privacy", label: "环境截屏采样" },
   TAKI_AMBIENT_SCREENSHOT_RETENTION: { group: "perception-privacy", label: "环境截屏保留" },
@@ -88,6 +90,13 @@ export function configGroupOf(key: string): ConfigGroupMeta {
 /** The Chinese primary label for a knob; null = unknown key (the row keeps the raw key as its primary text). */
 export function configLabelOf(key: string): string | null {
   return EXACT_LABELS[key]?.label ?? null;
+}
+
+export function configHintOf(key: string): string | null {
+  if (key === "TAKI_SUBAGENT_CHECKIN_STEPS" || key === "TAKI_SUBAGENT_CHECKIN_PARENT_APPROVALS") {
+    return "保存后在新工作或下一个进度检查间隔采用；不会改变当前间隔，也不会降低已经要求由你决定的检查点权限。";
+  }
+  return null;
 }
 
 function groupMeta(id: ConfigGroupId): ConfigGroupMeta {

@@ -74,9 +74,50 @@ Detailed current contracts: [Private Agent Inbox](private-agent-inbox.md),
 
 ## Results, inference and publication
 
+- Delegation model projections preserve raw execute results and exact control/collector/evidence contracts. Default
+  or null worker-list selection and `category: workers` are compact; `category: diagnostics` retains full nullable diagnostics. Keep the
+  reusable child identity, exact target, differing active/latest work, pending request and completion selector.
+  An accepted input ID remains when selected materials address an input distinct from the work target. Identical
+  waits may deduplicate only after equal canonical wait comparison; check-in facts remain complete.
+- Work acknowledgements describe the accepted `request_parent` or `record_only` reporting policy and the next
+  interaction. Message/stop results do not imply a new background job. Inspection model views label retrieval as
+  `readStatus` and paging as `bodyComplete`; neither is a work-completion claim. Whole result records expose the
+  recorded terminal outcome or `resultStatus: not_recorded`. The latter does not infer running, failure or success.
+  Serialized evidence bodies and offsets remain unchanged. Legacy unused `afterSeq` is accepted but optional;
+  `cursor` is the pagination control and omitted `limit` defaults to 20.
+
+- Generic worker instructions and tool descriptions distinguish non-blocking progress (`interact_parent/message`),
+  a required answer while the same job remains unfinished (`interact_parent/needs_input`), and whole-job completion
+  (`complete_subagent`). Parent-requested report formatting belongs inside the final tool's `text`; a clarification
+  report does not complete a job that still depends on its answer. Source-owned artifact validation keeps its own path.
+- Parent-facing delegation describes `request_parent` as ordinary automatic reports/questions and `record_only` as
+  deliberately silent retained work requiring explicit inspection. Neither an acknowledgement nor an inbox event is
+  a user-facing answer. Keep legacy silent interaction routing; universal safety check-ins are the explicit exception.
+- The user's task can span main replies: once useful foreground work is done, end the current reply with notified
+  worker results still pending. Later inbox events resume handling and integrated delivery without another user message.
+  Do not keep a reply/handler alive by polling for completion. Concrete task needs, user requests, reported problems and
+  silent-work inspection still justify deliberate reads/guidance. Use delivered inbox detail when available; default
+  compact listings cover ordinary target/state needs, while `diagnostics` requires a diagnostic need.
+- Ordinary guidance never resolves a pending question. Parent-facing instructions distinguish question answers
+  (`replyToEventId`, copied current target, `continue=false`) from check-in approval (`continue=true`). Refusals name
+  the actual pending reason and expose the current target; callers must not guess a Run ID or increment a version.
+- Explicit `inspect_subagent(events)` reads accepted event text even for silent work, with Character/child guards,
+  a captured sequence frontier and bounded body pages. Immutable evidence stays separate from current delivery state
+  and exact action targets. Reading never claims, delivers, handles or wakes an inbox event.
+- An idle main handler must request `speech_proposed` with the complete user-facing answer in `note` when a final
+  result fulfills an outstanding user request. Plain idle text and internal dispositions are not delivery. Core still
+  validates original-request authority/currentness and arranges publication; proposal acceptance is not a delivery receipt.
+- Final collection validates material references and the proposal before reserving the shared final/question choice.
+  Missing, stale, out-of-scope or excessive references return a closed, actionable `not_proposed` refusal; a corrected
+  call can use the same Run/Attempt. Never remove actual supporting sources to bypass validation. Unknown storage/schema
+  failures still throw. Refusal does not replace an earlier accepted proposal or claim a completed task. Governed
+  synchronous and asynchronous throws both settle their actual tool Effect before the SDK can continue; unresolved
+  authority/storage failures retain the existing dispatch fence. `subagent-result-tool.test.ts` and the actual governed
+  SDK/SQLite recovery in `subagent-materials.test.ts` pin this boundary.
 - Every canonical child terminal outcome retains an inspectable result, including failed/cancelled/deadline/unknown/no-output.
   A typed `SubagentValidationError(proposal)` may retain a domain failure explanation; it never changes terminal failure to success.
-- `record_only` creates no automatic parent inference. Interactive `request_parent` work accepts immutable message,
+- `record_only` final results create no automatic parent inference; Runtime progress check-ins are independent and
+  follow [Private worker check-ins](private-worker-checkin.md). Interactive `request_parent` work accepts immutable message,
   input-request, final and interruption events. A natural model stop without a validated final report remains partial.
   User Stop suppresses Stop-derived automatic events; explicit reads still show it and explicit user continuation restores
   subsequent normal reporting. Parent input alone never clears the user latch.

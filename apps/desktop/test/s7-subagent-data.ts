@@ -11,7 +11,8 @@ const digest = "a".repeat(64);
 export function summary(subagentId = CHILD_A): SubagentSummary {
   return { subagentId, characterId: "taki", label: subagentId === CHILD_A ? "视频中的城市记忆" : "整理参考资料",
     createdAt: time, activeRunId: "run-child-a", activeWorkInputId: WORK_A, latestWorkInputId: WORK_A,
-    latestCompletionId: "run-child-finished", controlVersion: 2, stopOrigin: null, pendingRequest: null, state: "running" };
+    latestCompletionId: "run-child-finished", controlVersion: 2, stopOrigin: null, pendingRequest: null,
+    progress: null, tokenUsage: null, state: "running" };
 }
 export function work(overrides: Partial<SubagentInput> = {}): SubagentInput {
   return { inputId: WORK_A, subagentId: CHILD_A, inputSeq: 1, workInputId: WORK_A, workSeq: 1,

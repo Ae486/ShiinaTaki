@@ -3,7 +3,7 @@
  * OUTPUT: streamed text with complete durable step capture and actual-intent input witnesses
  * POS: core/agents — shared SDK request boundary; outer ChatAgent owns retry, final commit and lifetime
  */
-import { ToolLoopAgent, isStepCount, isLoopFinished, type ModelMessage, type Telemetry } from "ai";
+import { ToolLoopAgent, isStepCount, isLoopFinished, type ModelMessage } from "ai";
 import type { ImageAttachment } from "@taki/shared";
 import { fireDetachedTurnWrites, type ChatAgentDeps, type TurnAttempt, type TurnContext } from "./chat-agent.ts";
 import { initiativeInstructions, initiativeReplay } from "./initiative-context.ts";
@@ -11,7 +11,7 @@ import { COSTUME_CHANGE_NOTICE } from "../avatar/costume-notice.ts";
 import { renderCurrentTime, renderDayDate } from "../time/time-context.ts";
 import { BASE_SYSTEM_PROMPT } from "./base-prompt.ts";
 import { assembleTurnTools } from "./agent-tool-assembly.ts";
-import { fireUsageReport } from "./turn-usage-report.ts";
+import { createTurnUsageCapture, fireUsageReport } from "./turn-usage-report.ts";
 import { measurePostTurnRequest, prepareOutgoingRequest } from "./request-preparation.ts";
 import { createRunObservabilityModel } from "./run-observability-telemetry.ts";
 import type { AutomaticMemoryRecall } from "../memory/automatic-memory-recall.ts";
@@ -20,6 +20,7 @@ import type { PreparedWorkStep, WorkContextEnvelope, WorkSegmentCheckpoint } fro
 import { completedWorkerFrontier, retainedWorkerBytes, workerEnvelope } from "./worker-sdk-segment.ts";
 import { retainStepToolSources } from "./source-context.ts";
 import { createForegroundInboxProjection } from "./foreground-inbox.ts";
+import { companionTaskGuidance } from "./companion-task-guidance.ts";
 
 type PromptClock = { now: number; timezone?: string };
 const DEFAULT_MAX_STEPS = 10;
@@ -39,9 +40,11 @@ export async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, tur
   let stepNumber = 0;
   const selected = attempt.runContext?.selectedContext;
   const work = turn?.workContext;
+  const workStop = work?.stop;
   if (work && (!turn?.runId || !turn.attemptId || selected)) throw new Error("SUBAGENT_EXECUTION_CONTEXT_REQUIRED");
   const child = work?.scope.kind === "subagent";
   let preparedWork: PreparedWorkStep | undefined;
+  let stepModelEffectId: string | undefined;
   let envelope: WorkContextEnvelope | undefined;
   let segmentOffset = 0;
   let segmentSteps = 0;
@@ -61,12 +64,13 @@ export async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, tur
   const baseInstructions = child ? [work.instructions, attempt.runContext?.instructions, renderDayDate(clock.now, clock.timezone)].filter(Boolean).join("\n\n")
     : selected ? initiativeInstructions(selected) : composeInstructions(deps, { characterId, memoryContext, memoryPrompt: attempt.runContext?.memoryPrompt,
     runInstructions: [attempt.runContext?.instructions, work?.instructions].filter(Boolean).join("\n\n") }, clock);
-  let instructions = [baseInstructions, state.inbox?.instructions].filter(Boolean).join("\n\n");
+  const companion = primary && !child && !selected;
   const selectedModel = vision ? vision.model : deps.model;
   const { model, observability } = createRunObservabilityModel({
     model: selectedModel, lifecycle: deps.effectLifecycle, runId: turn?.runId, attemptId: turn?.attemptId,
     onCommitModelIntent: (effect) => {
       assertStepRecorded();
+      stepModelEffectId = effect.effectId;
       turn?.onCommitModelIntent?.(effect);
       state.inbox?.commitModelIntent(effect, stepNumber);
       if (work) {
@@ -82,9 +86,10 @@ export async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, tur
   if (turn) turn.executableTools = tools;
   const disclosure = createToolDisclosure({ tools, bundles, snapshot: attempt.runContext?.toolDisclosure });
   const visibleTools = disclosure.initialTools;
+  let instructions = [baseInstructions, companion ? companionTaskGuidance(Object.keys(visibleTools)) : "",
+    state.inbox?.instructions].filter(Boolean).join("\n\n");
   const toolOrder = Object.keys(tools).sort((left, right) => left < right ? -1 : left > right ? 1 : 0);
-  let preparedTools: ReadonlyArray<Record<string, unknown>> | undefined;
-  const requestTelemetry: Telemetry = { onLanguageModelCallStart: (event) => { preparedTools = event.tools ?? []; } };
+  const usageCapture = primary && deps.onUsage ? createTurnUsageCapture() : undefined;
   const agent = new ToolLoopAgent({
     model,
     instructions,
@@ -97,30 +102,37 @@ export async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, tur
       assertStepRecorded();
       stepNumber = segmentOffset + currentStep;
       state.inbox?.prepareStep?.();
-      if (state.inbox) {
-        instructions = [baseInstructions, state.inbox.instructions].filter(Boolean).join("\n\n");
-        state.instructions = instructions;
-      }
       const activeTools = disclosure.activeTools(steps).filter((toolName) =>
         !inboxProjection.isPrivate({ toolName }) || Boolean(state.inbox?.instructions));
+      if (companion || state.inbox) {
+        instructions = [baseInstructions, companion ? companionTaskGuidance(activeTools) : "",
+          state.inbox?.instructions].filter(Boolean).join("\n\n");
+        state.instructions = instructions;
+      }
       if (child) envelope = await workerEnvelope({ deps, work, instructions, tools, activeTools, signal: turn?.signal });
       if (work) preparedWork = await work.prepareStep({ messages, stepNumber, attemptId: turn!.attemptId!, envelope });
       const selectedMessages = preparedWork?.messages ?? (turn?.attemptId ? turn.materials?.render(turn.attemptId, messages) : undefined);
       if (selectedMessages) state.outgoing = selectedMessages;
-      return { activeTools, ...(state.inbox ? { instructions } : {}), ...(selectedMessages ? { messages: selectedMessages } : {}) };
+      return { activeTools, ...(companion || state.inbox ? { instructions } : {}), ...(selectedMessages ? { messages: selectedMessages } : {}) };
     },
     telemetry: { isEnabled: true, recordInputs: false, recordOutputs: false,
-      integrations: observability ? [observability.telemetry, requestTelemetry] : [requestTelemetry] },
-    stopWhen: child ? [isLoopFinished(), async (options) => {
+      integrations: [...(observability ? [observability.telemetry] : []), ...(usageCapture ? [usageCapture.telemetry] : [])] },
+    stopWhen: child ? [async (options) => {
       assertStepRecorded();
       if (await work.stop?.(options)) return true;
+      if (await isLoopFinished()(options)) return true;
       const last = options.steps.at(-1);
       if (!last || !work.checkpointSegment || turn?.signal?.aborted) return false;
       segment.rollover = await work.checkpointSegment({ attemptId: turn!.attemptId!, stepNumber,
         retainedBytes, safeToRollover: completedWorkerFrontier(last), envelope });
       return segment.rollover.kind === "context_rollover";
+    }] : workStop ? [async (options) => {
+      assertStepRecorded();
+      // SDK stop arrays run concurrently. A finite cap must win before a work owner can certify its own yield.
+      if (await isStepCount(deps.maxSteps ?? DEFAULT_MAX_STEPS)(options)) return true;
+      return workStop(options);
     }] : [() => { assertStepRecorded(); return false; }, isStepCount(deps.maxSteps ?? DEFAULT_MAX_STEPS),
-      ...(work?.stop ? [work.stop] : turn?.decisionCollector ? [turn.decisionCollector.stop] : deps.stopConditions ?? [])],
+      ...(turn?.decisionCollector ? [turn.decisionCollector.stop] : deps.stopConditions ?? [])],
     // Compatibility seam for focused tests and pre-Slice-3 callers. Production Batch 1 leaves this absent because
     // MCP execution is already guarded by its canonical adapter and `ask` fails closed before the raw closure.
     toolApproval: approval ? ({ toolCall }) => approval.decide(toolCall, turn?.notify) : undefined,
@@ -145,7 +157,11 @@ export async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, tur
         });
         if (turn?.runId && turn.attemptId) turn.materials?.capture({ runId: turn.runId, attemptId: turn.attemptId,
           stepNumber: globalStep, results: event.toolResults });
-        if (work) work.recordCompletedStep({ attemptId: turn!.attemptId!, stepNumber: globalStep, messages: recorded });
+        if (work) work.recordCompletedStep({ attemptId: turn!.attemptId!, stepNumber: globalStep, messages: recorded,
+          modelEffectId: stepModelEffectId,
+          naturalFinish: event.finishReason === "stop" && event.toolCalls.length === 0,
+          completed: event.finishReason !== "error" && !turn?.signal?.aborted,
+          safeFrontier: (event.finishReason === "stop" && event.toolCalls.length === 0) || completedWorkerFrontier(event) });
         // A loader may be the final step of this SDK call. Preserve only its successful activation names.
         if (child) disclosure.activeTools([event]);
       } catch (error) {
@@ -212,7 +228,8 @@ export async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, tur
     if (primary) state.afterCommit = () => {
       measurePostTurnRequest(deps, { characterId, instructions, tools: visibleTools, toolOrder, toolSchemaTokens: prepared.toolSchemaTokens, store });
       fireDetachedTurnWrites(deps, { characterId, imageRefs: images.map((img) => img.ref), message });
-      fireUsageReport(deps, { characterId, usage: result.usage, instructions, outgoing, tools: visibleTools, toolOrder, preparedTools, replay: replay.measurement });
+      const usage = usageCapture?.latest();
+      if (usage) fireUsageReport(deps, { characterId, ...usage, tools: visibleTools, toolOrder, replay: replay.measurement });
     };
     return;
   }

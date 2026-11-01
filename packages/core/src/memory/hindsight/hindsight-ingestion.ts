@@ -9,10 +9,11 @@ import type { MemoryConfig } from "../../config/memory-config.ts";
 import type { CanonicalMemoryAuthorityRepo } from "../../db/canonical-memory-authority-repo.ts";
 import type { HindsightIngestionRepo } from "../../db/hindsight-ingestion-repo.ts";
 import type { TimelineRepo } from "../../db/timeline-repo.ts";
+import type { PrimaryConversationSourceRepo } from "../../db/primary-conversation-source-repo.ts";
 import { EPISODIC_EVERY_N } from "../auto-memory.ts";
 import { createCanonicalIngestionModel, type CanonicalIngestionModel } from "../canonical-ingestion-model.ts";
-import { sanitizeCommittedPrimarySpan, retainedIngestionSource, type PrimaryConversationCommit,
-  type ProvenPrimaryEntry } from "../canonical-ingestion-source.ts";
+import { sanitizeCommittedPrimarySpan, retainedIngestionSource, importRetainedPrimarySources, type PrimaryConversationCommit,
+  type ProvenPrimaryEntry, type IngestionCoverageGap, type PrimarySourceImportResult } from "../canonical-ingestion-source.ts";
 import type { MemoryFlushPort, MemoryFlushRequest } from "../memory-flush-port.ts";
 import type { MemoryProvider } from "../memory-provider.ts";
 import type { UtilitySlot } from "../utility-slot.ts";
@@ -24,10 +25,13 @@ export interface HindsightIngestionRunResult {
   /** Newly recorded durable source-Bank coverages in this run, never a native extracted-fact count. */
   writes: number;
   sources: number; confirmedSources: number; pendingSources: number; skippedSpans: number;
+  coverageGap?: IngestionCoverageGap;
+  sourceImport: PrimarySourceImportResult;
 }
 export interface HindsightIngestion {
   initializeBaseline(characterId: string): void;
   recordPrimaryCommitted(input: PrimaryConversationCommit): void;
+  importPrimarySources(characterId: string): PrimarySourceImportResult;
   maybeRun(input: { characterId: string }): Promise<HindsightIngestionRunResult | null>;
   run(input: { characterId: string; throughSeq?: number }): Promise<HindsightIngestionRunResult>;
   stop(): Promise<void>;
@@ -39,6 +43,7 @@ export interface HindsightIngestionDeps {
   timeline: Pick<TimelineRepo, "latestSeq">; slot: UtilitySlot; provider: Pick<MemoryProvider, "retain">;
   resolveBanks(characterId: string): readonly MemoryReplicaBank[];
   config?: MemoryConfig; now?: () => string;
+  primarySources?: PrimaryConversationSourceRepo;
 }
 interface Context extends HindsightIngestionDeps {
   epochId: string; providerLineageId: string; model: Pick<CanonicalIngestionModel, "gate">; signal: AbortSignal;
@@ -55,12 +60,14 @@ export function createHindsightIngestion(deps: HindsightIngestionDeps): Hindsigh
     const captured = { ...input }; return lifetime.enqueue(captured.characterId, () => runRange(ctx, captured));
   };
   return { run, stop: lifetime.stop, settle: lifetime.settle,
+    importPrimarySources: (characterId) => importPrimarySources(ctx, characterId),
     flushPort: { prepareRetirement: (request) => flush(ctx, run, request) },
     maybeRun: ({ characterId }) => lifetime.enqueue(characterId, () => {
       assertAuthority(ctx);
+      const sourceImport = importPrimarySources(ctx, characterId);
       const scope = { epochId: ctx.epochId, characterId };
       return ctx.journal.pending(scope) || ctx.journal.unprocessedCount(scope) >= EPISODIC_EVERY_N
-        ? runRange(ctx, { characterId }) : Promise.resolve(null);
+        ? runRange(ctx, { characterId }, sourceImport) : Promise.resolve(null);
     }),
     initializeBaseline: (characterId) => {
       assertAuthority(ctx);
@@ -71,9 +78,10 @@ export function createHindsightIngestion(deps: HindsightIngestionDeps): Hindsigh
     } };
 }
 
-async function runRange(ctx: Context, input: { characterId: string; throughSeq?: number }): Promise<HindsightIngestionRunResult> {
+async function runRange(ctx: Context, input: { characterId: string; throughSeq?: number }, imported?: PrimarySourceImportResult): Promise<HindsightIngestionRunResult> {
   try {
     assertAuthority(ctx);
+    const sourceImport = imported ?? importPrimarySources(ctx, input.characterId);
     const scope = { epochId: ctx.epochId, characterId: input.characterId };
     const eligibilityStartSeq = ctx.journal.eligibilityStartSeq(scope);
     if (eligibilityStartSeq === undefined) throw new Error("MEMORY_INGESTION_BASELINE_MISSING");
@@ -84,13 +92,22 @@ async function runRange(ctx: Context, input: { characterId: string; throughSeq?:
     assertAuthority(ctx);
     const hasApplicableSource = ctx.journal.hasApplicableSource({ ...scope, throughSeq: target });
     const throughSeq = ctx.journal.advanceCoverage({ ...scope, throughSeq: target, now: now(ctx) });
-    return { ...totals, throughSeq, eligibilityStartSeq, hasApplicableSource };
+    return { ...totals, sourceImport, throughSeq, eligibilityStartSeq, hasApplicableSource,
+      coverageGap: ctx.journal.coverageGap({ ...scope, throughSeq: target }) };
   } catch (error) {
     assertHindsightIngestionAlive(ctx.signal);
     // Model, schema and transport messages may contain private source text. Only closed codes leave this boundary.
     // eslint-disable-next-line preserve-caught-error
     throw new Error(failureCode(error));
   }
+}
+
+function importPrimarySources(ctx: Context, characterId: string): PrimarySourceImportResult {
+  assertAuthority(ctx);
+  if (!ctx.primarySources) return { imported: 0, unresolvedSourceIds: [] };
+  return importRetainedPrimarySources({ sources: ctx.primarySources, characterId,
+    memory: { providerId: "hindsight", authorityEpochId: ctx.epochId, providerLineageId: ctx.providerLineageId },
+    record: (commit) => ctx.journal.recordPrimaryCommitted({ ...commit, epochId: ctx.epochId, now: now(ctx) }) });
 }
 
 async function drain(ctx: Context, input: { characterId: string; target: number; forcePending: boolean }) {

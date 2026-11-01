@@ -86,6 +86,7 @@ describe("actual shared ChatAgent worker context", () => {
       failures: f.db.prepare("SELECT * FROM subagent_context_summary_failures").all() })).toEqual([]);
     expect(execution.result).toMatchObject({ outcome: "completed", outputKind: "validated", body: "Completed research" });
     expect(model.doStreamCalls).toHaveLength(rounds + 1);
+    expect(model.doStreamCalls.every((call) => !JSON.stringify(call.prompt).includes("Helping with a task:"))).toBe(true);
     expect(count).toBe(rounds);
     expect(f.executions.list({ subagentId: accepted.conversation.subagentId })).toHaveLength(1);
     const attempts = f.db.prepare("SELECT attempt_id FROM run_attempts WHERE run_id=:run").all({ run: execution.runId });
@@ -363,7 +364,9 @@ describe("actual shared ChatAgent worker context", () => {
     const f = await fresh(model, { agent: { contextWindowTokens: () => 6000 },
       tools: { read: tool({ inputSchema: z.strictObject({}), execute: async () => ({ body }) }) } });
     const accepted = await delegate(f); await finished(f, accepted);
-    expect(JSON.stringify(model.doStreamCalls[1]?.prompt)).toContain("large body omitted");
+    const projected = JSON.stringify(model.doStreamCalls[1]?.prompt);
+    expect(projected).toContain("exact retained row is pageable");
+    expect(projected).toContain("[... reduced ...]");
     const bound = { characterId: "taki", subagentId: accepted.conversation.subagentId, children: f.children,
       inputs: f.inputs, executions: f.executions, messages: f.messages, toolResults: createSubagentToolResultRepo(f.db) };
     let cursor: string | null = null; let accumulated = ""; let pages = 0;

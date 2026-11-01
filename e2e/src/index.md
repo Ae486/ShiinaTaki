@@ -4,6 +4,10 @@ Headless end-to-end scenarios (PRD 07-11-e2e-test-harness layer B). Run with `pn
 (requires a debug `taki-node` build: `cargo build --bin taki-node --manifest-path apps/desktop/src-tauri/Cargo.toml`).
 
 - fixture/ — the reusable withStack harness (see fixture/index.md)
+- prompt-tool-optimization-real.e2e.test.ts — explicit paid opt-in on isolated production Core; bounded Memory/delegation/scheduler and scripted Avatar outcomes, plus separately opted-in delayed-worker foreground/idle delivery
+- agent-delegation-checkin.e2e.test.ts — deterministic production-Core/SDK N50/K3 defaults: below-threshold and N-th-step final completion, same-Attempt compaction, exact user check-in continuation to a new Run, complete usage and preserved private/public boundaries
+- agent-delegation-goals-real.e2e.test.ts — separately opted-in real route: natural delegation/follow-up, main-model clarification including non-final interim reports, actual eight-event batch, long compaction/check-in audit and a scoped real Co-Watching plan-child observation
+- co-watching-context-fixture.e2e.test.ts — actual SDK/SQLite Co-Watching preparation through repeated 8000-token pressure boundaries with the production main-model Utility fallback, preserved task steps and private output
 - initiative-runtime.e2e.test.ts — scripted local provider and real Core composition exercise thin requests, structural decisions, same-Attempt held delivery, persisted model budgets, output/busy expiry, operator timezone invalidation, primary priority and Monitor replay
 - initiative-pattern.e2e.test.ts — unmodified Core startup, real primary proposal/confirmation, automatic finite wake conditions, explicit Skill setup, no-replay and zero-call policy refusals
 - initiative-pattern-real.e2e.test.ts — explicit paid opt-in over isolated production Core: real natural-language authoring/lifecycle, unsupported-source clarification, exact UTC reminder routing, and heartbeat Memory/history boundary probes with semantic-review artifacts
