@@ -52,7 +52,7 @@ async function integratedFixture(provider: "local" | "hindsight", partial: boole
       { type: "text-delta" as const, id: "preface", delta: "Public preface" },
       { type: "text-end" as const, id: "preface" },
       { type: "tool-call" as const, toolCallId: "private-action", toolName: "handle_agent_event",
-        input: JSON.stringify({ eventId: event.eventId, operationKey: "retain-event", action: { kind: "retained", note: "PRIVATE_HANDLING_NOTE" } }) },
+        input: JSON.stringify({ eventId: event.eventId, intent: "record", text: "PRIVATE_HANDLING_NOTE", target: null }) },
       { type: "tool-call" as const, toolCallId: "public-action", toolName: "echo", input: '{"private":true}' },
       { type: "finish" as const, finishReason: { unified: "tool-calls" as const, raw: undefined },
         usage: { inputTokens: { total: 3, noCache: 3, cacheRead: undefined, cacheWrite: undefined },

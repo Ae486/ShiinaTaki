@@ -66,7 +66,7 @@ describe("actual SDK completed-step failure fence", () => {
       mainCalls += 1;
       return scriptedModel(mainCalls === 1 ? [{ kind: "textTool", deltas: ["Public text before the storage failure"],
         toolCallId: "private-action", toolName: "handle_agent_event", input: { eventId: event.eventId,
-          operationKey: "retain-once", action: { kind: "retained", note: "PRIVATE_ACTION_NOTE" } } }]
+          intent: "record", text: "PRIVATE_ACTION_NOTE", target: null } }]
         : [{ kind: "text", deltas: ["Must not continue after missing private evidence"] }]).doStream(options);
     } });
     const f: Fixture = await subagentFixture(model, { agent: { foregroundInbox: (input) => f.service.prepareInbox(input) } });

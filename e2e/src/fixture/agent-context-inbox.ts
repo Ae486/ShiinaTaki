@@ -4,11 +4,12 @@
  * POS: e2e/fixture — no fabricated event IDs, model calls or internal action execution
  */
 import { expect } from "vitest";
-import { SubagentEventSchema, SubagentInboxActionSchema, SubagentTargetSchema, type SubagentInboxAction } from "@taki/shared";
+import { SubagentEventSchema, SubagentHandleEventToolSchema, SubagentInboxActionSchema, SubagentTargetSchema,
+  type SubagentInboxAction } from "@taki/shared";
 import type { AgentContextScenario } from "./agent-context-scenario.ts";
 import type { ScriptedReply } from "./scripted-provider.ts";
 
-const EventIdentitySchema = SubagentEventSchema.pick({ eventId: true, workInputId: true, kind: true }).strip();
+const EventIdentitySchema = SubagentEventSchema.pick({ eventId: true, kind: true }).strip();
 
 export function deliveredInboxEvents(request: Record<string, unknown>) {
   if (!Array.isArray(request.messages)) return [];
@@ -38,8 +39,14 @@ export function scriptedInboxReply(request: Record<string, unknown>, actionFor: 
       && typeof output.text === "string" && SubagentTargetSchema.safeParse(output.target).success);
     if (!detail) return { name: "read_agent_inbox", arguments: { eventId: event.eventId, offset: 0, limit: 16000 } };
     if (detail.nextOffset !== null) throw new Error("fixture event unexpectedly needs another body page");
-    return { name: "handle_agent_event", arguments: { eventId: event.eventId, operationKey: `fixture:${event.eventId}`,
-      action: SubagentInboxActionSchema.parse(actionFor(String(detail.text))) } };
+    const action = SubagentInboxActionSchema.parse(actionFor(String(detail.text)));
+    if (action.kind === "no_action") throw new Error("historical no_action is not a current model intent");
+    const input = action.kind === "answered_child" || action.kind === "continue_child"
+      ? { eventId: event.eventId, intent: action.kind === "answered_child" ? "answer_child" : "continue_child",
+        text: action.direction, target: action.target }
+      : { eventId: event.eventId, intent: { retained: "record", needs_user_input: "ask_user", speech_proposed: "reply" }[action.kind],
+        text: action.note, target: null };
+    return { name: "handle_agent_event", arguments: SubagentHandleEventToolSchema.parse(input) };
   }) };
 }
 

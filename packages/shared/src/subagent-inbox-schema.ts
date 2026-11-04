@@ -1,6 +1,6 @@
 /**
  * INPUT: durable worker events and addressed main-consumer actions
- * OUTPUT: private inbox evidence, explicit input waits and bounded tool contracts
+ * OUTPUT: private inbox evidence, explicit input waits and flat model handling intents
  * POS: shared/protocol — descriptive lifecycle facts; never executable authority or public speech
  */
 import { z } from "zod";
@@ -39,8 +39,17 @@ export const SubagentInboxActionSchema = z.discriminatedUnion("kind", [
 ]);
 export type SubagentInboxAction = z.infer<typeof SubagentInboxActionSchema>;
 export const SubagentHandleEventToolSchema = z.strictObject({
-  eventId: Id, operationKey: Id, action: SubagentInboxActionSchema,
-});
+  eventId: Id.describe("The exact delivered inbox event to handle."),
+  intent: z.enum(["record", "ask_user", "reply", "answer_child", "continue_child"])
+    .describe("Record evidence, ask the user, propose a public reply, reply privately to the child, or approve its check-in."),
+  text: z.string().max(1_000_000).describe("Complete answer/question, private record note, or optional check-in direction."),
+  target: SubagentTargetSchema.required({ expectedRunId: true }).nullable()
+    .describe("Copy the complete current target for answer_child/continue_child; otherwise use null."),
+}).refine((value) => (value.intent === "answer_child" || value.intent === "continue_child") === (value.target !== null),
+  { path: ["target"], message: "Child actions require the exact target; record, ask_user and reply require null." })
+  .refine((value) => value.intent === "record" || value.intent === "continue_child" || value.text.trim().length > 0,
+    { path: ["text"], message: "Questions and answers require meaningful text." });
+export type SubagentHandleEventToolInput = z.infer<typeof SubagentHandleEventToolSchema>;
 export const SubagentReadInboxToolSchema = z.strictObject({
   eventId: Id, offset: z.int().nonnegative(), limit: z.int().min(1).max(16_000), detail: z.enum(["event", "action"]).optional(),
 });

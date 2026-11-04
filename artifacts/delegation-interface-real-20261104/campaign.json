@@ -1,0 +1,145 @@
+{
+  "date": "2026-11-04",
+  "authorizationSession": "01a1a607-29a8-7c12-8a34-c6d90f0eb1aa",
+  "authorization": "Owner authorized delegation-interface optimization and actual-model verification.",
+  "status": "scoped-complete",
+  "initialUpstreamRequestCeiling": 64,
+  "physicalUpstreamRequests": null,
+  "sourceFreeze": "Each paid run freezes captured Core/Shared/E2E source. E2E-only repairs between runs retain preimages and original evidence; production files remain unchanged.",
+  "scenarios": [
+    {
+      "name": "connected-delayed-reports-and-foreground-work",
+      "cap": 18,
+      "status": "passed",
+      "evidenceRoot": "artifacts/delegation-interface-real-20261104/delayed",
+      "evidence": "artifacts/delegation-interface-real-20261104/delayed/interface-delayed-native-tuonGs",
+      "requests": 10,
+      "sourceUnchanged": true,
+      "cleanupFailed": false,
+      "waitOnlyExec": 0,
+      "repeatedIdenticalInspections": 0,
+      "durations": {
+        "initialReplyMs": 5294.733799999999,
+        "foregroundTaskMs": 2447.771499999999
+      }
+    },
+    {
+      "name": "guidance-and-private-question-answer",
+      "cap": 20,
+      "status": "passed",
+      "evidenceRoot": "artifacts/delegation-interface-real-20261104/question",
+      "evidence": "artifacts/delegation-interface-real-20261104/question/interface-exact-question-MTzA7h",
+      "requests": 12,
+      "sourceUnchanged": true,
+      "cleanupFailed": false,
+      "waitOnlyExec": 0,
+      "repeatedIdenticalInspections": 0
+    },
+    {
+      "name": "checkin-and-user-stop",
+      "cap": 24,
+      "status": "failed-test-assertion-timing",
+      "evidenceRoot": "artifacts/delegation-interface-real-20261104/checkin",
+      "requests": 24,
+      "requestCountBasis": "24 admitted observer reservations all received successful upstream HTTP responses; transport relay counters remain null.",
+      "observerAttempts": 25,
+      "cleanupFailed": false,
+      "budgetRefusals": 1,
+      "evidence": "artifacts/delegation-interface-real-20261104/checkin/interface-checkin-stop-Afbe7F",
+      "requestEvidenceFailed": true,
+      "failure": "Final approval count expected zero, but user Continue reset was followed by another legitimate parent approval. Child completed 11 steps and validated total 308; remaining acceptance assertions were not reached.",
+      "sourceUnchanged": true
+    },
+    {
+      "name": "checkin-and-user-stop-corrected",
+      "cap": 32,
+      "status": "failed-awaiting-additional-user-checkin",
+      "evidenceRoot": "artifacts/delegation-interface-real-20261104/checkin-corrected",
+      "trigger": "Corrected receipt-time reset assertion, scripted 11-step regression passed, independent review found no blocker.",
+      "realTestSha256": "c8b12c9a1cd2584f83b70a7c9d72b8d40bf3e6a031c8c8958472dfe78bc934fe",
+      "requestEvidenceFailed": false,
+      "cleanupFailed": false,
+      "budgetRefusals": 0,
+      "requestCountBasis": "23 admitted reservations all received successful upstream HTTP responses; transport relay counters remain null.",
+      "failure": "After explicit user Continue reset at6, a step9 check-in was validly handled as ask_user rather than parent continuation. Test timed out waiting for a final without providing that additional user decision. Independent diagnosis pending; no production defect inferred.",
+      "evidence": "artifacts/delegation-interface-real-20261104/checkin-corrected/interface-checkin-stop-6UwlHc",
+      "requests": 23,
+      "sourceUnchanged": true,
+      "observerAttempts": 23
+    },
+    {
+      "name": "checkin-and-user-stop-bounded-user-decision",
+      "cap": 32,
+      "status": "passed",
+      "evidenceRoot": "artifacts/delegation-interface-real-20261104/checkin-user-decision",
+      "extraUserDecisionsMaximum": 1,
+      "typecheck": "passed",
+      "scopedLint": "passed",
+      "scriptedBranchesPassed": 2,
+      "diffCheck": "passed",
+      "realTestSha256": "6c2a1fb564ec67d944ec1ddff9f16f19c3543e7911dc24d356fe765ec5107921",
+      "independentReview": "Passed before paid execution: both legal parent choices retained, at most one exact authenticated extra user decision, all initial/final gates preserved.",
+      "evidence": "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an",
+      "observerAttempts": 30,
+      "waitOnlyExec": 0,
+      "confirmedUpstreamRequests": 29,
+      "cleanupFailed": false,
+      "requestEvidenceFailed": false,
+      "requests": 30,
+      "physicalUpstreamRequests": null,
+      "repeatedIdenticalInspections": 0,
+      "originalPublication": "source_unavailable",
+      "completedChildTaskSteps": 10,
+      "requestCountBasis": "29 successful upstream HTTP responses, plus one non-streaming utility fetch cancelled as observer-closed before a response. Charge30 against cap; exact physical send count29..30.",
+      "extraUserDecisionsObserved": 0,
+      "budgetRefusals": 0,
+      "finalTotal": 308,
+      "sourceUnchanged": true,
+      "freshForegroundAnswer": "passed"
+    }
+  ],
+  "diagnosticReserve": 2,
+  "preExecutionReallocation": "Four diagnostic requests moved to the Stop scenario because a fresh foreground request is needed after the original speech authority was revoked. Aggregate ceiling remains 64; no paid calls preceded this change.",
+  "automaticScenarioRetries": 0,
+  "limits": [
+    "Use synthetic isolated data and existing credential loader; retain no credentials.",
+    "Physical requests, conservative observer reservations and model Effects are distinct counts.",
+    "A successful sample is not general reliability or owner visual acceptance.",
+    "Retain failed evidence; do not overwrite the November 1 campaign."
+  ],
+  "model": "deepseek-v4-flash",
+  "providerHost": "api.deepseek.com",
+  "evidenceHelperRevision": "Missing canonical arguments are unknown; derived intent uses original action receipt; strict gates reject unassessed execution/inspection inputs. First two artifacts retained for separate audit.",
+  "revisedUpstreamRequestCeiling": 103,
+  "ceilingRevisionReason": "Announced before further calls: 69 actual requests used, one final check-in scenario capped32, reserve2. Independent review approved one bounded authenticated user response to a genuine ask_user event while preserving all initial/final acceptance gates.",
+  "requestCountBasis": "98 confirmed upstream requests, one additional fetch attempt cancelled when observer closed with no response; exact aggregate physical sends are unknown (98..99). Charge all99 to the operational103 ceiling.",
+  "ceilingHistory": [
+    {
+      "beforeRequests": 0,
+      "ceiling": 64,
+      "reason": "Initial bounded campaign"
+    },
+    {
+      "beforeRequests": 46,
+      "ceiling": 80,
+      "reason": "Correct final-counter assertion timing; first failed run preserved"
+    },
+    {
+      "beforeRequests": 69,
+      "ceiling": 103,
+      "reason": "Support one legitimate additional user decision instead of requiring parent auto-approval; second failed run preserved"
+    }
+  ],
+  "confirmedUpstreamRequests": 98,
+  "remainingAttemptAllowance": 4,
+  "countedUpstreamAttempts": 99,
+  "upperBoundUpstreamRequests": 99,
+  "finalDisposition": "Three scoped real scenarios have passing evidence; two earlier failed attempts remain failed. Parent-task and manual gates remain open. No further paid calls planned.",
+  "completedAt": "2026-11-04T12:15:31.4493489+00:00",
+  "independentAudit": {
+    "sha256": "699528cc3f7f247772b302e1a8008970598188022e6a22967c1d2ae5fa1d7496",
+    "checksPassed": 18,
+    "blockingFindings": 0,
+    "path": "artifacts/delegation-interface-real-20261104/final-checkin-audit.json"
+  }
+}

@@ -5,6 +5,62 @@ Status: implementation authorized, 2026-10-25; S0-S6 delivered; S7 continues thr
 is the implementation contract; [PRD](prd.md) owns requirements and current authorization. Activate with `task.py start`.
 Existing October 23 tests are historical evidence, not this follow-up's acceptance.
 
+## Current slice — parent interface simplification, 2026-11-04
+
+See the current section in [design](design.md#parent-interface-simplification--2026-11-04) and PRD
+requirements 15-18. Preserve the extensive unrelated changes on the T4 worktree.
+
+- [x] Bind the existing task to the current session; verify worktree/branch and preserve 52 relevant
+  current-source preimages under `artifacts/delegation-interface-20261104/baseline/`.
+- [x] Complete an independent architecture challenge. Retain private event replies and ordinary messages
+  as differently scoped routes; avoid new per-invocation privacy machinery or a yield tool.
+- [x] Implement the flat five-intent model schema, normalized existing actions and Core-owned stable
+  operation identity, including historical receipt reuse and transactional conflict checks.
+- [x] Update current tool/inbox guidance and truthful model projections while preserving frozen claims.
+- [x] Verify SDK/SQLite, private recording, exact controls, rollback and normal/silent-work regressions.
+- [x] Run the bounded real-model plan in `research/interface-validation-plan-20261104.md`, retaining
+  fresh request/response, usage, source and cleanup evidence; fix demonstrated scoped defects.
+- [x] Complete independent review, applicable workspace quality gates and current spec/evidence updates.
+
+Production ownership is one implementer across the Shared model schema and its Core tool/repository/
+inbox consumers and colocated tests. Root owns task/spec records and overall acceptance. E2E fixture
+ownership is assigned separately after the schema is stable. The owner subsequently authorized a local
+commit of this completed slice on November 4; push, archive and release remain outside this step.
+
+The initial newly authorized campaign uses a 64-upstream-request operational ceiling: 18 for connected
+delayed reports with useful foreground work, 20 for guidance/question handling, 24 for short check-ins
+and user Stop, plus two reserved for one evidence-justified diagnostic. Before any paid execution,
+four reserve requests were assigned to the Stop case: its valid final answer needs a fresh foreground
+request because Stop revokes the original delayed-publication right. The aggregate remains 64. Run exact selected scenarios
+serially with no automatic full-scenario retry. Root records actual physical request counts after each
+scenario, freezes captured source during paid execution, and preserves failed evidence. This is a new
+campaign under the November 4 authorization, not reuse of the exhausted November 1 allowance.
+
+After 46 actual upstream requests (10 delayed, 12 question, 24 first check-in), the coordinator announced
+an operational ceiling revision to 80 before further calls: one corrected check-in rerun capped at 32,
+plus two reserve requests. The original check-in failed an assertion that incorrectly expected the
+approval counter to remain zero after a later legitimate parent continuation; its captured step-9
+snapshot proves the user reset. Keep its failed evidence and budget refusal. Verify reset at the user
+Continue receipt and account for later approvals independently. `artifacts/delegation-interface-real-20261104/campaign.json`
+owns the executed counts; timing-relay forward counts and successful upstream HTTP response counts
+remain explicitly distinguished.
+
+The corrected run used 23 successful requests but paused at a legitimate post-reset `ask_user` under
+the original one-approval conversational allowance. Before another paid call, the coordinator announced
+a ceiling of 103 (69 used + one 32-request run + two reserve). Keep the seven-file chain and original
+prompt. The fixture may provide at most one additional authenticated user Continue, only after an exact
+open check-in has a committed `needs_user_input` disposition and the child remains quiescent. Preserve
+both user-reset receipts and count final unattended approvals after the latest user input. A second
+additional decision or missing final/publication evidence still fails. Independent review approved this
+bounded user branch; no production change or reconstructed pass of the original failures is included.
+
+Final scenario passed: `checkin-user-decision/interface-checkin-stop-OKB1an` (87.86s). It took the
+parent-continuation branch after the original user reset; both legal branches passed scripted regression.
+Campaign accounting: 98 confirmed upstream requests plus one uncertain ancillary Memory fetch, charged
+as 99 against the 103 ceiling. All three scoped scenarios have passed evidence; the two failed attempts
+remain failed. See [interface acceptance](research/interface-acceptance-20261104.md) and the campaign
+JSON for actual source/cleanup, final publication, usage and remaining parent-task limits.
+
 ## Ordered slices and ownership
 
 This task stays one integration unit during planning. Its tightly shared schema, admission, context and UI boundaries

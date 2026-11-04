@@ -52,7 +52,7 @@ export async function exerciseR2(scenario: AgentContextScenario, timing: ReturnT
     + `第一个 label="${A_LABEL}"，context=snapshot 且 summary 只包含 ${R2_A}，completionPolicy=record_only。`
     + `它的 direction：用 complete_subagent 原样返回选定的英文标记。`
     + `第二个 label="${B_LABEL}"，context=snapshot 且 summary 只包含 ${R2_B}，completionPolicy=request_parent。`
-    + `它的 direction：用 complete_subagent 原样返回 ${R2_B}，并说明主代理应读取真实收件事件，再以 handle_agent_event 的 speech_proposed 动作将此标记作为最终回答报告给用户。`
+    + `它的 direction：用 complete_subagent 原样返回 ${R2_B}，并说明主代理应读取真实收件事件，再以 handle_agent_event 的 reply 意图、text 包含此标记、target=null 将最终回答报告给用户。`
     + `两者 subagentId=null，toolSelection={"mode":"allow","names":["complete_subagent"]}，materials=[]。`
     + `我明确请求第二项工作完成后报告结果，即使当前父请求已停止。创建后只确认委派，不要等待、查看或停止子代理。`;
   const original = ChatSendResultSchema.parse(await scenario.rpc(CHAT_METHODS.send, { characterId: "taki", message: prompt }));
@@ -151,7 +151,7 @@ export async function exerciseR2(scenario: AgentContextScenario, timing: ReturnT
     + `这是新的独立工作，context=fresh，completionPolicy=request_parent，`
     + `toolSelection={"mode":"allow","names":["complete_subagent"]}，materials=[]。`
     + `direction：用 complete_subagent 返回 ${R2_INTERNAL}，说明这项新工作只作内部评估，主代理必须读取真实收件事件并调用 handle_agent_event，`
-    + `action.kind=retained，note 包含 ${R2_INTERNAL}，不要回复用户或发布内容。创建后只说已委派，不要说英文标记，不要等待或查看结果。`);
+    + `intent=record，text 包含 ${R2_INTERNAL}，target=null，不要回复用户或发布内容。创建后只说已委派，不要说英文标记，不要等待或查看结果。`);
   await expect.poll(() => handledEvents(scenario).length, OPTIONS).toBe(2);
   const internal = await scenario.history(b.subagentId);
   const internalWork = internal.inputs.find((input) => input.kind === "work" && input.direction.includes(R2_INTERNAL));

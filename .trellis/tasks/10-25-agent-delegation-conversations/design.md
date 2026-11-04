@@ -4,6 +4,55 @@ Status: implementation authorized, 2026-10-25. The [PRD](prd.md) owns requiremen
 [context recovery](research/context-recovery.md) owns the recovered authorization and baseline boundaries.
 Current production specs continue describing the delivered baseline until this follow-up is implemented.
 
+## Parent interface simplification — 2026-11-04
+
+Owner-authorized continuation in session `01a1a607-29a8-7c12-8a34-c6d90f0eb1aa`, following the
+November 1 real-model evidence and current parent/child action inventory. The independent architecture
+challenge selected a narrow model-interface change rather than a new scheduling or privacy subsystem.
+
+Keep `handle_agent_event` private and use a flat model input:
+
+```ts
+{ eventId: string, intent: "record" | "ask_user" | "reply" | "answer_child" | "continue_child",
+  text: string, target: SubagentTarget | null }
+```
+
+`record`, `ask_user`, and `reply` map to the existing `retained`, `needs_user_input`, and
+`speech_proposed` actions, respectively, and require a null target. Answer/continue require the
+exact supplied target. Runtime derives the addressed question/check-in event from the selected delivered
+event. Keep the internal six-form union and historical `no_action` receipts intact. `record` explicitly
+handles this event; it neither defers a fresh retry nor authorizes speech. A reply proposal is still not
+an actual public answer, and asking the user creates operator attention under the existing contract.
+
+Normalize before execution. Core derives operation identity from the event and normalized action;
+equivalent retries with different SDK call IDs must reuse their receipt. Inside the existing action
+transaction, an identical historical action reuses its original key/result, while a different action
+refuses. Preserve delivered membership, actual invocation, exact target, unknown-effect and user Stop
+checks, and the atomic child-input/action transaction. Do not migrate or rewrite old actions, claim
+instructions, digests, body pages or operator recovery contracts.
+
+`send_subagent_message` remains available for ordinary guidance, interrupted-work continuation, and
+deliberately inspected or silent work. Current instructions direct replies to delivered inbox events
+through `handle_agent_event`; no blanket tool hiding is justified by the presence of a child or inbox.
+
+Alternatives and tradeoffs:
+
+- A single reply/continue tool would cross the existing tool-name-based private projection and require
+  per-invocation privacy state, changed activity/error handling, and material-sensitive reconciliation.
+  Keep the two differently scoped routes and make their selection explicit. This reduces argument and
+  decision burden without claiming that all business verbs have one implementation surface.
+- Merging all handling into three nominal intents would hide recipient/continuation choices in extra
+  parameters. Five explicit intents are the simpler complete contract.
+- A batch-finalization or explicit yield action adds settlement, partial-failure and publication choices.
+  It does not itself prevent a model from selecting sleep, including in the same parallel SDK step.
+  Do not include that production change in this slice. Validate the simpler existing surface first.
+
+Required evidence: actual SDK flat-schema/model-result behavior; legacy/equivalent/conflicting retry;
+atomic rollback; check-in counter exactly-once and user Stop; private/public mixed-step persistence;
+attention and publication; normal/silent message compatibility; then bounded real-model question,
+cross-batch delivery, mixed foreground and waiting-behavior scenarios. No broad reliability or native
+Host claim follows from a scripted Host or a single successful scenario.
+
 ## Decision and alternatives
 
 Extend the existing Core Runtime, SQLite repositories, `ChatAgent`/AI SDK and Chat presentation. Add only the missing

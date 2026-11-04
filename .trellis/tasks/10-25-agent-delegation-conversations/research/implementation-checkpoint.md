@@ -1,5 +1,58 @@
 # Implementation checkpoint
 
+## Current continuation — parent interface simplification, 2026-11-04
+
+- Session `01a1a607-29a8-7c12-8a34-c6d90f0eb1aa` resumed the existing task after the owner authorized
+  implementation and real-model verification. Workspace is `H:/TakiAgent-worktrees/t4`, branch
+  `task/t4-skills-mcp-productization`, baseline HEAD `a2269ad` with extensive unrelated changes.
+- The November 4 sections in `../prd.md`, `../design.md` and `../implement.md` own the current scope.
+  An independent advisor selected a flat five-intent private handler with Core-owned operation identity;
+  ordinary messaging and private event replies keep their existing storage/authority boundary.
+- Production implementation, all three scoped real-model scenarios and final independent retained
+  evidence review are complete. No yield tool, scheduler, migration, public/private
+  classifier, archive or release is included. The owner subsequently authorized a local commit of this
+  completed slice and a read-only inventory of remaining requirements. Historical checklists below are
+  not live process status.
+- Baseline source hashes and 52 `.before` preimages are retained under
+  `artifacts/delegation-interface-20261104/baseline/`. New evidence uses separate paths and does not
+  overwrite the November 1 failures or its exhausted 68-request campaign.
+- Full workspace tests passed: 6,719 tests / six skipped; workspace typecheck passed. Root lint is
+  blocked only by the pre-existing archived `artifacts/runtime-inbox-preimages-20261025/packages/shared/src/index.ts`
+  max-lines violation; full-source lint excluding only that backup passed. Rust clippy and 211 tests
+  passed; the current native Host binary was rebuilt. Logs are under
+  `target/delegation-interface-20261104-validation/`; owned diffs/checks under `artifacts/delegation-interface-20261104/`.
+- Real delayed-report and question/answer scenarios passed with 10 and 12 actual requests. Independent
+  retained-artifact audit confirms accepted actions, private recording and actual final publication.
+- First check-in scenario used 24 real requests and one pre-upstream budget refusal. It failed a test
+  assertion expecting a permanently zero approval count after user Continue; captured subsequent
+  check-in proves reset, followed by a legitimate parent approval. The E2E owner corrected assertion
+  timing and added a scripted regression. Original failed artifacts are retained.
+- The corrected third run `checkin-corrected/interface-checkin-stop-6UwlHc` used 23 successful calls
+  and failed waiting for a final: after correct user reset, the parent voluntarily chose `ask_user` at
+  step 9 under the original prompt's one-approval permission. Runtime correctly paused; the fixture
+  supplied no subsequent decision. No production defect was inferred. Review selected a bounded
+  additional authenticated user decision while preserving all original acceptance gates.
+- Reviewer approved at most one extra authenticated user Continue only after a real committed
+  `ask_user` for an exact open check-in, with quiescent child and no premature resume. The original
+  prompt/seven-file chain and all Stop/final/publication gates stay unchanged. Both scripted branches
+  passed (2/2), as did final E2E lint/typecheck/diff checks and independent review. Production remains
+  frozen. Final counter follows the latest actual user input.
+- Final run `checkin-user-decision/interface-checkin-stop-OKB1an` passed (exec 80186 exit 0, 87.86s).
+  It selected normal parent continuation after the user reset, completed ten child steps and a validated
+  total of 308, handled the exact final event, refused the revoked old publication, and delivered 308
+  through a fresh foreground request. Source and cleanup checks passed. Extra user branch was not used.
+- Final announced ceiling remains 103: 98 confirmed upstream requests plus one uncertain primary
+  Memory fetch cancelled before a response, conservatively charged as 99. Exact physical sends/billing
+  for that last fetch are unknown. No paid process remains and no further calls are planned.
+- Final source lint excluding only the historical backup passed (exec 35443 exit 0). All 27 production/
+  test/index and 12 E2E owned hashes match their manifests. Final acceptance lives in
+  `research/interface-acceptance-20261104.md`; campaign/usage JSON preserves both failed attempts.
+- Independent final audit is saved as `artifacts/delegation-interface-real-20261104/final-checkin-audit.json`:
+  all 18 fact checks passed, covering exact private actions, real sources, same-work/Stop/reset,
+  revoked old publication, actual fresh foreground answer and source/cleanup. No scoped blocker remains.
+  The campaign JSON owns current counts and paths. No automatic retries. Full long-audit,
+  eight-agent, owner/manual, native Hindsight and T4/main convergence acceptance remain separate.
+
 ## Current continuation — authorized prompt/runtime diagnosis, 2026-10-30
 
 - Latest live state: source is FROZEN for `real-long-global-deadline` (exec86499), the only paid process. No full suite is running.

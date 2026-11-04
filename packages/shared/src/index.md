@@ -111,7 +111,7 @@
 - subagent-api-schema.ts — paged child history/result/control projections, exact target CAS, optional subscription invalidations and exported parameter/result types
 - subagent-tool-schema.ts — model delegation/context/material/tool selection, compact worker versus explicit diagnostic inspection, optional legacy pagination field, and child/parent results without publication authority
 
-- subagent-inbox-schema.ts — private event/wait/handling and explicit reconciliation contracts
+- subagent-inbox-schema.ts — private event/wait contracts, flat model handling intents and unchanged durable actions/operator reconciliation
 - subagent-conversation-schema.ts — continuous private history, full-batch presentation and bounded body/activity APIs
 - subagent-validity-schema.ts — explicit generic until-cancelled versus finite source validity
 

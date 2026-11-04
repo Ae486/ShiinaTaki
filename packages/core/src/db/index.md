@@ -128,7 +128,7 @@
 - subagent-tool-result-repo.ts — immutable full raw tool results keyed by Run/Attempt/step/call, with durable material reads
 
 - subagent-event-repo.ts — immutable accepted child events and exact durable input dependencies
-- subagent-inbox-repo.ts — bounded immutable claims, actual deliveries and idempotent handling; complete-preview guidance and event-specific interrupted-work recovery
+- subagent-inbox-repo.ts — bounded immutable claims, actual deliveries and transactional Core-derived action identity with original legacy receipt reuse
 - subagent-inbox-terminal.ts — canonical consumer terminal staging, safe release and reconciliation classification
 - subagent-inbox-recovery-repo.ts — atomic explicit successor admission links and discoverable historical action evidence
 - subagent-conversation-repo.ts — continuous canonical-source ordering, complete-step presentation and digest-fenced body pages

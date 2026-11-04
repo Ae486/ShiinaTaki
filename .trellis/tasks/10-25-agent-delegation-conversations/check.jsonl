@@ -9,3 +9,4 @@
 {"file":".trellis/tasks/10-25-agent-delegation-conversations/research/checkin-advisor-20261030.md","reason":"Independent challenge and S8-S10 failure scenarios including configured interval capture and user-only escalation"}
 {"file":".trellis/tasks/10-25-agent-delegation-conversations/research/s7a-recheck-20261030.md","reason":"Fresh closed checkpoint/live-retention gates and refuted cursor premise; avoid duplicating unchanged scoped checks"}
 {"file":".trellis/spec/backend/private-worker-checkin.md","reason":"Check uniform generic/source-owned check-ins, captured configuration, counting and exact continuation evidence"}
+{"file": ".trellis/tasks/10-25-agent-delegation-conversations/design.md", "reason": "Review November 4 simplification against explicit atomicity privacy and historical receipt boundaries"}

@@ -1,0 +1,344 @@
+{
+  "owner": "validation_implement",
+  "workspace": "H:/TakiAgent-worktrees/t4",
+  "branch": "task/t4-skills-mcp-productization",
+  "frozenForRootRealRerun": true,
+  "realScenarioCaps": [
+    18,
+    20,
+    32
+  ],
+  "files": [
+    {
+      "path": "e2e/src/fixture/agent-context-inbox.ts",
+      "sha256": "a24fd230ada3b0aeced117d54249c7694b4397bd05dcdbdea190643976d9243e"
+    },
+    {
+      "path": "e2e/src/fixture/agent-context-scenario.ts",
+      "sha256": "794fda046cc09cd938ee21f56cd2382110313b56a8251d6ad156234bafd896f7"
+    },
+    {
+      "path": "e2e/src/fixture/agent-context-r2.ts",
+      "sha256": "4717df59bc048f3c2ce2a83382e410df11e6598d0dd565e84600eff66b22905d"
+    },
+    {
+      "path": "e2e/src/fixture/agent-context-native-host.ts",
+      "sha256": "fe10590ba83e7310d8e2c938ef4e6284b7974909a0ed98eb068a296b162f4f0b"
+    },
+    {
+      "path": "e2e/src/fixture/agent-interface-evidence.ts",
+      "sha256": "7b6c7c313e303993d6bd9cebe1d2f9e45722d8791c90b305b2c889ad2b482e88"
+    },
+    {
+      "path": "e2e/src/fixture/agent-interface-evidence.e2e.test.ts",
+      "sha256": "875cd8166f30c903cadef398638be60955df95f6bd3d93c7c682ccb48cfb5c1a"
+    },
+    {
+      "path": "e2e/src/fixture/index.md",
+      "sha256": "db8f045b4206e60c1c8e4e4a5ffac471102948188cd40b4ff00d324ed0e8fe31"
+    },
+    {
+      "path": "e2e/src/agent-interface-native.e2e.test.ts",
+      "sha256": "0a9a1c3271f9b2bac10d6fb383730a635effc1da42833bc56ddf7dc9b91fa436"
+    },
+    {
+      "path": "e2e/src/agent-interface-inbox.e2e.test.ts",
+      "sha256": "894ab03c49cf5d0aaab674cdccdea17cba467daff8092dfcafbf5b62579d3d2c"
+    },
+    {
+      "path": "e2e/src/agent-interface-checkin.e2e.test.ts",
+      "sha256": "dc3478d5fa1f073505bc00f8a0cf805d9655a8e6a746a6036da32b17e55d380f"
+    },
+    {
+      "path": "e2e/src/agent-interface-real.e2e.test.ts",
+      "sha256": "6c2a1fb564ec67d944ec1ddff9f16f19c3543e7911dc24d356fe765ec5107921"
+    },
+    {
+      "path": "e2e/src/index.md",
+      "sha256": "0c35df0eaac8683b106ae3afeca678174e0338953969f377fb1cd7f27877001b"
+    }
+  ],
+  "preimages": [
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/git-status.txt",
+      "sha256": "c2b9be950b50140b913af523acba385e43a212d0fee3ef215ab78a5b7f7cd270"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/head.txt",
+      "sha256": "ea8b61aa24eb10016c42a58a1bda806f7e9cb030a2dea6c3ef569bc10ce6a3c1"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/README.txt",
+      "sha256": "71410345dea589c631d680ec59d5b815b804f06804e2c31472c7edb6dba97906"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/source-manifest.json",
+      "sha256": "a9d46c7c2fe3cca09c3c3fa85dc269438ae95a5762bf46ce7fda638d2362bb6b"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/e2e/src/index.md.before",
+      "sha256": "3cf509bff92dd751c6206aa33b9e80a14de9beec51f119fbf619aacd87a24809"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/e2e/src/fixture/agent-context-inbox.ts.before",
+      "sha256": "3188fb28900a64456905bdc429941d6c91c8bd9cbddb7733047d1c405bb037ef"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/e2e/src/fixture/agent-context-r2.ts.before",
+      "sha256": "0ca00b6e3c966f1f168bdb1f7a36b80bf12060f34be587953379cbd23b0a505b"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/e2e/src/fixture/agent-context-scenario.ts.before",
+      "sha256": "005389ebfadec1d54556fe0ee8ef1028d009a6453bf64763e8a7d82c435d8d4a"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/e2e/src/fixture/index.md.before",
+      "sha256": "172746bdf5ca96d2ec23965c1663abadd9ee2a94a0d6cab74dd22f926f095725"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/.trellis/spec/backend/private-agent-inbox.md.before",
+      "sha256": "80574a18eaa7a16d4239d81af4a66fadb64dbfb32be4042de89d7eb6ab574e9d"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/.trellis/spec/backend/shared-agent-delegation.md.before",
+      "sha256": "7779cb2e52255df2d188063ee36db4b1ba3256c7b192e3f4efda43e0ccc64a0f"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/agents/agent-attempt.ts.before",
+      "sha256": "cce2d862fd535362466e1f2f41c056b5875446b1e865d46be582071cae054bfa"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/agents/companion-task-guidance.ts.before",
+      "sha256": "6407efdccd56fdcc2ee6c1aa1e4ff7417491ea3570f2c8c9a8591ebc6094d82f"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/agents/foreground-inbox.ts.before",
+      "sha256": "9b8ec4a8d7f5b6830644a129cd6333e3caf29f54d973d3eb52f5fc1d9de6c4ed"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/agents/index.md.before",
+      "sha256": "75fa0a9c1213734ceecbe3a2d7f5e60d43842ba0787b748f1be685591c1966d7"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/agents/subagent-control-output.ts.before",
+      "sha256": "8aca6a5ba65d40a4b6f0d04172a32d20aaa753e879be691bbfaa2fdd9ef4f4c9"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/agents/subagent-delegate-tool.ts.before",
+      "sha256": "4746340dbec9744d4be924ee63b3b00f9761e48b4af21f5317deb503479f40b1"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/agents/subagent-event-inspection.ts.before",
+      "sha256": "7154dac995c2a7155038c2659f6f7eb8b6f0ca9f001b0293562a15cb74f9774e"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/agents/subagent-evidence-output.ts.before",
+      "sha256": "3650161ac4268001a9524f73f15163298c3fb4fc60c40a96dbe8fe4240da1850"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/agents/subagent-inbox-tools.ts.before",
+      "sha256": "77209370ce513e57502000f505243dcedf306c28be9affa1b10e44d96ddd694d"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/agents/subagent-inspect-tool.ts.before",
+      "sha256": "3cf29c3f61c938cc42d37ac838d024ceddf157dd24e255c22900790e295c659c"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/agents/subagent-interact-tool.ts.before",
+      "sha256": "9e5932b21a0d352a99e3beeb2b97b3ff05529c2ec2a49793a01dcdc84954f0e3"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/agents/subagent-message-tool.ts.before",
+      "sha256": "04787b5dc8f0d20875992d926d86eeaea34ab1fc6bf2c7f2081a94e692fa50dc"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/agents/subagent-model-output.test.ts.before",
+      "sha256": "3f14348afb19b428a7682fb12e38a9c58d103de3ac5b5abcf1fdd40c839553c5"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/agents/subagent-model-state.ts.before",
+      "sha256": "4ddcf4d78c71fe59ac88291dde0c22b2642e12eae45ed9b96299d015f3863e23"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/agents/subagent-result-tool.test.ts.before",
+      "sha256": "6141a7c60520fa8280b62ce8fbed3e20fb01e7339e09ba732ea8f202a2f5a9de"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/agents/subagent-result-tool.ts.before",
+      "sha256": "da86f6bfba7641b60ec5016c8787c993ddf39318bb0e3458cfbbe809893a9d9d"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/agents/subagent-self-history-tool.ts.before",
+      "sha256": "5b9f424a2a5fe14e0e3f9a73b0b21e4c04b33096b0e69ffc2db8e2e298157e7b"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/agents/subagent-stop-tool.ts.before",
+      "sha256": "2413082dd9ff8851ecbb24294bb76ae85dc20b5de026cbbe3d1af3a9c70e3fee"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/agents/subagent-tools.ts.before",
+      "sha256": "5a376679d795933f34bade02182e78db0a36f73d06ff72ec3aa591b8d5982a19"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/db/index.md.before",
+      "sha256": "ba79ab7373c6445f3bebbd2ffd78c2a5d4747f4e7aa14fff1bf53c6b9523bd33"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/db/subagent-inbox-recovery-repo.ts.before",
+      "sha256": "a07807c22e2273a39fff5547457bc74bd9a4f644398420637a05ef5445e0a91c"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/db/subagent-inbox-repo.ts.before",
+      "sha256": "47875e0643536e9d7bb049653a83070f9d69cf60c3fb01bf5e18be1cb7df1821"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/db/subagent-inbox-retry-repo.ts.before",
+      "sha256": "4421e2d09fe062041999a2f4836adb7b258e3aa6681d51a01dd92524ccdd23dc"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/db/subagent-inbox-terminal.ts.before",
+      "sha256": "3d851d6f3839a53772e7c342f779431631952175e48ecee5d62698bc0cba50ec"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/db/subagent-inbox.test.ts.before",
+      "sha256": "35d9290e97247104c2e19c70ccc9fe84ea6aeee7b0976cf89750edc30d0a7b91"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/harness/index.md.before",
+      "sha256": "c096b871c5936ccf8e75f9ff3de665b78580326647ca4aefced2b24fd248b344"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/harness/subagent-composition.ts.before",
+      "sha256": "419441770466893bc452ba94209952dacff0b36c57ba35b86c2be7d3f9cdcb59"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/harness/subagent-inbox-context.ts.before",
+      "sha256": "3f85907776d0de34cb925a0e3d7b94923e2b3b83a8a5970c39b96f207303de55"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/harness/subagent-inbox-execution.ts.before",
+      "sha256": "743dfa2dad1a4296a4e7eb54223e664b17a1bbe159d24a493acdc776a9bd7cb3"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/harness/subagent-inbox-recovery.test.ts.before",
+      "sha256": "bea08dae72d3449af7a4c149b84eaaa6a0db068b592362c929d8b9986360280d"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/harness/subagent-inbox-retry-timer.test.ts.before",
+      "sha256": "46a6539a995dc6adf312cc550e5e5822f9b41dee47647c9becaed21f2195bdbd"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/harness/subagent-inbox-retry.test.ts.before",
+      "sha256": "e7513ea365d50a6fe9405600cf1084cf56b206912bc6b401795d017e645270bf"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/harness/subagent-inbox-retry.ts.before",
+      "sha256": "40a4025f996db559322ddaa426840d67703d8e9f9670cd3bcf1861ec060bc24a"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/harness/subagent-inbox-yield.test.ts.before",
+      "sha256": "62d29aa342acf5c06873fc65bb6f0684caffd31b4a9b3033ed96e75f7710d1a9"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/harness/subagent-inbox-yield.ts.before",
+      "sha256": "b2846bd4c934efecdbf3686de23ace0ca7f8164eeb748c0ece1a0f0dcd26e12e"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/core/src/harness/subagent-state.ts.before",
+      "sha256": "f508ffbf9aefc57d292b5640962f0e8840ea9497293563ef5442de321f10aa27"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/shared/src/index.md.before",
+      "sha256": "3424b9b768003eda53ab6c766b5a60d6091d1c328646de10e7d582d3205f091c"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/shared/src/index.ts.before",
+      "sha256": "631b45de96c77dae62ef01c425f6e473e6a610a36a11821709c8ea2c39349871"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/shared/src/subagent-api-schema.ts.before",
+      "sha256": "8541a9ae8f77bea60a30a48a5e6f60178be1b02d478aa26405a82ae8d0d7cf6d"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/shared/src/subagent-attention-schema.ts.before",
+      "sha256": "fcfc193737a001cefc871dee03558ed804829dc8e8ac5b1a2edc14caabd7732e"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/shared/src/subagent-context-schema.ts.before",
+      "sha256": "45b01719fa9dd31df5329684e21046609d899c3b81c10948f3336b951e6020ce"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/shared/src/subagent-conversation-schema.ts.before",
+      "sha256": "cad3d52d468f1c4039328d466c5c7a1c46b462f5abcee3ac0f307d6b9a9b8b18"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/shared/src/subagent-inbox-schema.ts.before",
+      "sha256": "731a8ef78b069e8f45caf2e5948fbef40a86357a37c58048bca125220b75a936"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/shared/src/subagent-progress-schema.test.ts.before",
+      "sha256": "3c4cb0c42bafbe6fc9f3612932e068ac4245bd8b74a653ead47f206be3f5dbd2"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/shared/src/subagent-progress-schema.ts.before",
+      "sha256": "312842c3b570462cf3c126abf6bbbedf2255d8ead391a338282e31bc23179a3a"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/shared/src/subagent-result-schema.ts.before",
+      "sha256": "0dec1a03f8b47b53c6f6ddd71ed93c35295879b8309db60e6c929996670a2d0c"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/shared/src/subagent-schema.test.ts.before",
+      "sha256": "02de95ed08aadc3d1e3c5163b3e30383428e7456f57d55e5b1592eef77fc28ce"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/shared/src/subagent-schema.ts.before",
+      "sha256": "31b55fc4d3df34d940164441c49f88151e8eb36cc489c5e226a69cc6ca37a946"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/shared/src/subagent-tool-schema.ts.before",
+      "sha256": "5f98bcae67d9a3d8f5919fc0696540dd1566ca32ebddc6a6322197b555d4a9bf"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/baseline/preimages/packages/shared/src/subagent-validity-schema.ts.before",
+      "sha256": "f6f79211df307c784ba9b2edd2a1f99b910d12a84045041118e96ea8eb830666"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/evidence-repair-baseline/e2e/src/fixture/agent-interface-evidence.ts.before",
+      "sha256": "546c002610166b94f10972c75d0e6cbce5b01940e72724a71af88c792a44d1e2"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/evidence-repair-baseline/e2e/src/fixture/index.md.before",
+      "sha256": "df0d8faa02547f6e2c2e309bf0dad011ffc740af810533fc5355bfeb8dbadc25"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/checkin-reset-baseline/e2e/src/agent-interface-checkin.e2e.test.ts.before",
+      "sha256": "5a638eb91b64e004354a1f7ee8c96c104f0c4fe1176d236cb8e8fe7f510b4c65"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/checkin-reset-baseline/e2e/src/agent-interface-real.e2e.test.ts.before",
+      "sha256": "a591d579a203094ef22f26b12194e0e4a9120a644666b80cd2aa2a2333d475be"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/checkin-reset-baseline/e2e/src/index.md.before",
+      "sha256": "b84126e4b43369594571684faaf7b89f1d8b07a161b30998cbb21a2c7b3b0121"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/checkin-user-decision-baseline/e2e/src/agent-interface-checkin.e2e.test.ts.before",
+      "sha256": "dcec9e0ae331837b16bcf02e50e426d131e364c5446abbde06526ec1d167aa67"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/checkin-user-decision-baseline/e2e/src/agent-interface-real.e2e.test.ts.before",
+      "sha256": "c8b12c9a1cd2584f83b70a7c9d72b8d40bf3e6a031c8c8958472dfe78bc934fe"
+    },
+    {
+      "path": "artifacts/delegation-interface-20261104/checkin-user-decision-baseline/e2e/src/index.md.before",
+      "sha256": "5207d021b179072aa0f2f521e1027af1757a25459abdc564c16daf9907d7655f"
+    }
+  ],
+  "nativeBinary": {
+    "path": "apps/desktop/src-tauri/target/debug/taki-node.exe",
+    "sha256": "c700f0c07a0e0c05ca368b910d4c9930b5580f104ca18d23fc3ed92b2a096fc0"
+  },
+  "additionalUserDecisions": 1
+}

@@ -12,9 +12,8 @@ afterEach(async () => { for (const fixture of fixtures.splice(0)) await fixture.
 const job = { characterId: "taki", operationKey: "a", label: "Research", initialContext: { kind: "fresh" as const },
   direction: "Check this", materials: [], completionPolicy: "request_parent" as const, lifetimeMinutes: 30 };
 const child = { kind: "tool" as const, toolCallId: "child-result", toolName: "complete_subagent", input: { text: "Child answer", materials: [] } };
-const decision = (value: "internal_result" | "no_action" = "internal_result") => ({ kind: "tool" as const,
-  toolCallId: "parent-result", toolName: "handle_agent_event", input: { eventId: "delivered-event", operationKey: "retain-result",
-    action: { kind: value === "internal_result" ? "retained" : "no_action", note: "Parent synthesis" } } });
+const decision = () => ({ kind: "tool" as const,
+  toolCallId: "parent-result", toolName: "handle_agent_event", input: { eventId: "delivered-event", intent: "record", text: "Parent synthesis", target: null } });
 function eventModel(steps: Parameters<typeof scriptedModel>[0]) {
   let index = 0;
   return new MockLanguageModelV4({ doStream: async (options) => {
@@ -55,8 +54,8 @@ describe("committed child completion through shared Runtime", () => {
       expect(model.doStreamCalls).toHaveLength(1);
     } finally { vi.useRealTimers(); }
   });
-  it.each(["internal_result", "no_action"] as const)("retains %s after original parent stops, admits once and never speaks", async (kind) => {
-    const model = eventModel([child, decision(kind)]); const f = await subagentFixture(model); fixtures.push(f);
+  it("records the result after original parent stops, admits once and never speaks", async () => {
+    const model = eventModel([child, decision()]); const f = await subagentFixture(model); fixtures.push(f);
     const release = f.queue.tryAcquireBackground("taki")!;
     await f.service.delegate({ parentRunId: f.parent.run.runId, parentToolNames: [] }, job);
     await vi.waitFor(() => expect(f.service.events.list({ characterId: "taki" }).filter((event) => event.eligible)).toHaveLength(1));
@@ -65,7 +64,7 @@ describe("committed child completion through shared Runtime", () => {
     release(); f.service.released();
     await vi.waitFor(() => expect(f.service.events.list({ characterId: "taki" })[0]?.state).toBe("handled"));
     const action = f.db.prepare("SELECT * FROM subagent_event_actions").get()!;
-    expect(JSON.parse(String(action.action_json)).kind).toBe(kind === "internal_result" ? "retained" : "no_action");
+    expect(JSON.parse(String(action.action_json)).kind).toBe("retained");
     const consumer = f.db.prepare("SELECT run_id FROM subagent_inbox_consumers WHERE consumer_id=:id").get({ id: String(action.consumer_id) })!;
     const parentRunId = String(consumer.run_id);
     f.service.released(); f.service.released(); await Promise.resolve();

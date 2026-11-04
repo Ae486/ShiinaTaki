@@ -15,7 +15,7 @@ const cleanups: (() => Promise<void>)[] = [];
 afterEach(async () => { for (const cleanup of cleanups.splice(0)) await cleanup(); });
 
 describe("direct-request delayed report", () => {
-  it.each(["reply", "no_action"] as const)("retains accepted primary evidence through immediate cancel and handles %s through actual owners", async (decision) => {
+  it.each(["reply", "record"] as const)("retains accepted primary evidence through immediate cancel and handles %s through actual owners", async (decision) => {
     const primaryAndChild = scriptedModel([
       { kind: "tool", toolCallId: "delegate", toolName: "delegate_subagent", input: { label: "Research", subagentId: null,
         direction: "Research my original question", context: { kind: "fresh" }, completionPolicy: "request_parent",
@@ -27,8 +27,8 @@ describe("direct-request delayed report", () => {
       if (request++ < 2) return primaryAndChild.doStream(options);
       const event = f.service.events.list({ characterId: "taki" })[0]!;
       return scriptedModel([{ kind: "tool", toolCallId: "parent-result", toolName: "handle_agent_event", input: {
-        eventId: event.eventId, operationKey: "final-answer", action: { kind: decision === "reply" ? "speech_proposed" : "no_action",
-          note: decision === "reply" ? "Delayed requested answer" : "The result needs no further action" },
+        eventId: event.eventId, intent: decision, target: null,
+        text: decision === "reply" ? "Delayed requested answer" : "The result needs no further action",
       } }]).doStream(options);
     } });
     const controller = new AbortController();
@@ -80,11 +80,12 @@ describe("direct-request delayed report", () => {
     expect(spoken).toHaveLength(decision === "reply" ? 1 : 0);
     expect(send).toHaveBeenCalledTimes(decision === "reply" ? 1 : 0);
     if (decision === "reply") {
-      await vi.waitFor(() => expect(readSubagentSpeechPublication(f.db, { eventId: event.eventId, actionId: "final-answer" }))
+      const actionId = String(f.db.prepare("SELECT operation_key FROM subagent_event_actions WHERE event_id=:event").get({ event: event.eventId })!.operation_key);
+      await vi.waitFor(() => expect(readSubagentSpeechPublication(f.db, { eventId: event.eventId, actionId }))
         .toMatchObject({ status: "recorded", state: "sent" }));
       expect(f.runs.status(accepted.acceptedRootRunId).run.state).toBe("completed");
       const consumer = f.db.prepare("SELECT run_id FROM subagent_inbox_consumers").get()!;
-      await reports.stageEventReply({ eventId: event.eventId, consumerRunId: String(consumer.run_id), actionId: "final-answer" });
+      await reports.stageEventReply({ eventId: event.eventId, consumerRunId: String(consumer.run_id), actionId });
       expect(send).toHaveBeenCalledOnce();
     } else {
       expect(reports.canReply(execution.workInputId)).toBe(true);

@@ -14,6 +14,12 @@ Make delegated workers usable as continuing task conversations while the main Ag
 - [October 23 acceptance](../10-21-agent-context-acceptance/research/acceptance-before-human-20261023.md) is the delivered baseline. Its automatic checks passed within their recorded scope; human acceptance, native Hindsight and T4/main SQLite convergence remain separate and unpassed.
 - 2026-10-30 (Claude Code session `0d1f3e80-677e-4e02-8be0-8781cef96719`): after the [maturity assessment](research/maturity-assessment-20261030.md), the owner approved its follow-up order, folded requirements 11-14 into this task and authorized real-model/E2E calls, encouraging them because real models expose real problems. Requirement 5 and the step-cap acceptance item are revised accordingly.
 - 2026-10-30 (Codex session `01a18bce-da73-7f02-985a-b6d8f180dd28`): after discussing the follow-up order and check-in semantics, the owner confirmed provisional defaults N=50 and K=3, both configurable, completing the pending product decision and authorizing continuation of this existing task. No new Trellis task or Git delivery is requested.
+- 2026-11-04 (Codex session `01a1a607-29a8-7c12-8a34-c6d90f0eb1aa`): after recovering session `01a195a9-001a-7ae1-bb3a-a0b1ed50e4ec`, comparing mature delegation interfaces, and reviewing the current parent/child action inventory, the owner authorized implementation and real-model verification: "如果已经根据成熟做法有了方向，可以开始实施优化，允许使用实际模型进行验证". Continue this existing task. Reduce parent coordination burden while preserving the requirements below; do not add a framework, routine polling, or an independent waiting subsystem. The November 1 request ceiling is historical; record a new bounded campaign before any new paid calls. No Git delivery, real-user data mutation or deployment is authorized.
+
+Delivery authorization update (2026-11-04, same session): after reviewing the implementation and
+results, the owner requested a local commit followed by an inventory of remaining requirements.
+This authorizes committing the completed interface slice and its tests/docs. Push, archive, release
+and implementation of additional requirements remain outside this delivery step.
 
 ## Requirements
 
@@ -31,6 +37,10 @@ Make delegated workers usable as continuing task conversations while the main Ag
 12. Unattended inbox handling may answer, record or stop existing children but cannot create new children.
 13. Stuck states are visible and recoverable: `needs_user_input` dispositions and reconciliation-needed batches notify the user, and a pre-intent idle failure retries on a bounded timer as well as on fresh opportunities, without duplicate handling.
 14. Tightening requirement 7: ordinary messages do not fail merely because the child started or finished a Run since the model last read it; exact-version checks remain where acting on stale state is unsafe, such as Continue after Stop or answering a specific request. Model-facing inbox and inspection output omits digests and internal receipts, full results are truncated and paged, and refusals state the current status and the next valid action.
+15. Parent coordination should expose clear business choices with fewer overlapping action routes and fewer model-maintained bookkeeping parameters. Replying to a child, explicitly continuing a permitted wait, retaining evidence, involving the user, and delivering an answer must remain available and distinguishable.
+16. Interface simplification must preserve durable atomic acceptance, meaningful retry/conflict handling, exact pending-request and user Stop checks, private evidence boundaries, and separate publication authority. Historical actions and their receipts remain truthful; ordinary model termination or a read alone does not acknowledge an event.
+17. Preserve useful foreground work and user interaction during delegation. Do not infer that all foreground work is blocked merely because a child exists. Any proposed explicit end-of-turn action must justify its benefit without expanding the coordination surface unnecessarily.
+18. Validate the simplified interface through actual SDK/SQLite integration and a bounded real-model campaign. Cover child questions/answers, check-in continuation, separately delivered reports, final public delivery, unrelated foreground work, and attempts to wait through execution tools. Distinguish real models, scripted Hosts, native Hosts, and owner acceptance.
 
 ## Acceptance criteria for later implementation
 
@@ -52,6 +62,8 @@ Make delegated workers usable as continuing task conversations while the main Ag
 
 ## Research and planning artifacts
 
+- [November 4 interface acceptance](research/interface-acceptance-20261104.md) — delivered five-intent
+  contract, current source checks, bounded real-model evidence and remaining parent-task gates.
 - [Context recovery](research/context-recovery.md) — original user instructions, superseding authorization and current session binding.
 - [Runtime lifecycle](research/runtime-lifecycle.md) — existing owners, queue experiment, event/handling/recovery and expiry/publication compatibility.
 - [Worker context and SDK](research/worker-context-sdk.md) — installed SDK source, offline probes, compaction/retrieval and safe call-segmentation gates.

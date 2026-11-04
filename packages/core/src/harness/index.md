@@ -21,7 +21,7 @@
 - subagent-tool-materials.ts — exact completed tool bodies/sources and scoped durable selection; native capture sidecars survive rendering without serializing pixels; post-checkpoint cache release preserves recovery
 - subagent-composition.ts — single root wiring for child service, report adapter, authenticated methods and lifecycle cleanup
 
-- subagent-inbox-context.ts — lazy first foreground claim, eager idle binding, exact private handling ports and pending-result reply guidance without rewriting frozen claims
+- subagent-inbox-context.ts — lazy foreground/eager idle claims, exact private handling and original-receipt publication identity, with current intent guidance around frozen claims
 - subagent-inbox-execution.ts — background-lane inbox execution, retained-report lookup before inferring pending work across batches, integrated delayed answers, bounded pre-intent retries and certified foreground-yield continuation
 - subagent-activity.ts — isolated real child SDK activity and durable native item references
 

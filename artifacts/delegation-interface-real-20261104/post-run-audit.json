@@ -1,0 +1,89 @@
+{
+  "kind": "Independent retained-artifact audit; no provider calls or original artifact rewrites",
+  "cases": [
+    {
+      "scenario": "delayed",
+      "directory": "artifacts/delegation-interface-real-20261104/delayed/interface-delayed-native-tuonGs",
+      "originalStatus": "passed",
+      "sourceUnchanged": true,
+      "cleanupFailed": false,
+      "physicalUpstreamRequests": 10,
+      "artifactSha256": {
+        "result.json": "4aa74f31dedc73eb3bd791e87992c97339174dc791e1c16070b79dc4f0d2980a",
+        "interface-evidence.json": "03142e420c0fbe349e02d65c75c600d6b6e168daba88327d19db51eeacf5d5da",
+        "transport.json": "58a60c1504839abfe28ab0dac74c41ddd5b559f40bde47cef732c2c90c026ca6"
+      },
+      "handlerArguments": "Raw model input was not retained; the canonical action below is accepted semantics, not reconstructed input.",
+      "derivedHandlers": [
+        {
+          "toolCallId": "call_00_ux4QbzFp69NPFV78kta80050",
+          "rawArguments": null,
+          "canonicalAction": "retained",
+          "derivedIntent": "record",
+          "source": "canonical action receipt"
+        },
+        {
+          "toolCallId": "call_00_tvUVYxsd9fgyhiN6xwIz9225",
+          "rawArguments": null,
+          "canonicalAction": "speech_proposed",
+          "derivedIntent": "reply",
+          "source": "canonical action receipt"
+        }
+      ],
+      "unknownExecutionInputs": 0,
+      "observedWaitCommands": 0,
+      "independentReview": "Four action/consumer/member/model Effect/input-digest joins and two actual sent publication/Timeline witnesses were verified across these two scenarios.",
+      "callReview": [
+        "hostname executed on real native Host and answered unrelated foreground request.",
+        "One B-result check observed not_recorded without polling.",
+        "One A-result read supplied missing evidence across batches.",
+        "One all-workers status read was redundant."
+      ]
+    },
+    {
+      "scenario": "question",
+      "directory": "artifacts/delegation-interface-real-20261104/question/interface-exact-question-MTzA7h",
+      "originalStatus": "passed",
+      "sourceUnchanged": true,
+      "cleanupFailed": false,
+      "physicalUpstreamRequests": 12,
+      "artifactSha256": {
+        "result.json": "422d637b16562d71a6c9de72716a62bdc777ae351851d47b13a22143a9dee70b",
+        "interface-evidence.json": "4f672b648d182b8fdac75df92e27555121e26dba5ee21b011e5f6fb20eb428c6",
+        "transport.json": "ff63a808cb4da34f3b6a9625937524711a5750c540d8378be5cabf22d9ae44c9"
+      },
+      "handlerArguments": "Raw model input was not retained; the canonical action below is accepted semantics, not reconstructed input.",
+      "derivedHandlers": [
+        {
+          "toolCallId": "call_00_AhGhBTJu76wBLEJYzK9h4601",
+          "rawArguments": null,
+          "canonicalAction": "answered_child",
+          "derivedIntent": "answer_child",
+          "source": "canonical action receipt"
+        },
+        {
+          "toolCallId": "call_00_RM72Sq5xax9shz2QGbwO2849",
+          "rawArguments": null,
+          "canonicalAction": "speech_proposed",
+          "derivedIntent": "reply",
+          "source": "canonical action receipt"
+        }
+      ],
+      "unknownExecutionInputs": 0,
+      "observedWaitCommands": 0,
+      "independentReview": "Four action/consumer/member/model Effect/input-digest joins and two actual sent publication/Timeline witnesses were verified across these two scenarios.",
+      "callReview": [
+        "Ordinary guidance did not answer the outstanding question.",
+        "Private answered_child resolved and resumed the same work with 300ms.",
+        "read_agent_inbox(detail=action) found no earlier action but supplied required exact target.",
+        "dir /b failed NO_NODE and supplied no useful evidence.",
+        "One child completion was refused MATERIAL_NOT_FOUND before a corrected successful final."
+      ]
+    }
+  ],
+  "limits": [
+    "Single scenarios do not establish general reliability or causal token savings.",
+    "Four last-step handler raw inputs remain unavailable; accepted canonical action semantics are separately witnessed.",
+    "No unknown execution input was present in either original case, so the corrected unknown-input policy does not invalidate their no-wait observations."
+  ]
+}

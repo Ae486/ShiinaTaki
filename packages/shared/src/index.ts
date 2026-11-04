@@ -513,7 +513,7 @@ export { SubagentContextSummarySchema, SubagentContextSummaryWitnessSchema, Suba
   SubagentSelfHistoryResultSchema, type SubagentContextSummary, type SubagentContextSummaryWitness,
   type SubagentSelfHistoryRequest, type SubagentSelfHistoryResult } from "./subagent-context-schema.ts";
 export { SubagentInteractionSchema, SubagentEventSchema, SubagentInputWaitSchema, SubagentInboxActionSchema,
-  SubagentHandleEventToolSchema, SubagentReadInboxToolSchema, type SubagentInteraction, type SubagentEvent,
+  SubagentHandleEventToolSchema, type SubagentHandleEventToolInput, SubagentReadInboxToolSchema, type SubagentInteraction, type SubagentEvent,
   type SubagentInputWait, type SubagentInboxAction } from "./subagent-inbox-schema.ts";
 export { SUBAGENT_METHODS, SubagentSummarySchema, SubagentListParamsSchema, SubagentListResultSchema,
   SubagentHistoryParamsSchema, SubagentHistoryResultSchema, SubagentResultParamsSchema, SubagentResultViewSchema,

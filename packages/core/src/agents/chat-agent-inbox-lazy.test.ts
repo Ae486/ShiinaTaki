@@ -31,7 +31,7 @@ describe("late first foreground inbox claim", () => {
       if (mainCalls === 1) return first.doStream(options);
       if (mainCalls === 2) return scriptedModel([{ kind: "tools", calls: [
         { toolCallId: "private-handling", toolName: "handle_agent_event", input: { eventId: events[0]!.eventId,
-          operationKey: "handle-late-event", action: { kind: "retained", note: "PRIVATE_HANDLING_NOTE" } } },
+          intent: "record", text: "PRIVATE_HANDLING_NOTE", target: null } },
         { toolCallId: "ordinary-second", toolName: "echo", input: {} },
       ] }]).doStream(options);
       return last.doStream(options);

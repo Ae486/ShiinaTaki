@@ -8,3 +8,4 @@
 {"file":".trellis/tasks/10-25-agent-delegation-conversations/research/checkin-advisor-20261030.md","reason":"Reviewed S8-S10 implementation contract, durable check-in, configured intervals, trusted user reset and truthful usage"}
 {"file":".trellis/spec/backend/config-store.md","reason":"N/K use existing operator registry, precedence and truthful next-interval application"}
 {"file":".trellis/spec/backend/private-worker-checkin.md","reason":"Delivered uniform N/K, per-execution source-owner pause, exact user authority and usage contracts"}
+{"file": ".trellis/tasks/10-25-agent-delegation-conversations/design.md", "reason": "November 4 owner-authorized flat private event interface and compatibility contract"}

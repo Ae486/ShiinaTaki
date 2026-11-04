@@ -16,6 +16,7 @@ import { openRpcSocket, type RpcSocket } from "./rpc-socket.ts";
 import { fetchTimelineEntries, sayToAgent, type AgentTurn } from "./operator-drivers.ts";
 import { observeRealProvider, type ProviderObservation, type SyntheticProviderRequest } from "./real-provider-observer.ts";
 import { seedCanonicalLocal } from "./seed-canonical-memory.ts";
+import { startAgentContextNativeHost, type NativeAgentHost } from "./agent-context-native-host.ts";
 
 const ROOT = resolve(CORE_DIR, "../..");
 const EFFECTS_SQL = `SELECT effect_id,run_id,attempt_id,kind,state,input_digest,source_ref_json,
@@ -31,6 +32,7 @@ const TABLES = ["subagent_conversations", "subagent_inputs", "subagent_execution
 export const realAgentContextEnabled = process.env.TAKI_E2E_REAL_AGENT_CONTEXT === "1" && realProviderEnv() !== null;
 
 export interface AgentContextScenario {
+  readonly nativeHost?: NativeAgentHost;
   readonly dataDir: string;
   readonly evidenceDir: string;
   readonly wsUrl: string;
@@ -52,6 +54,8 @@ export interface AgentContextScenario {
 }
 
 export interface ScenarioInput {
+  /** Test-only exec Host with a hostname allowlist and a no-model native preflight. */
+  nativeHost?: "exec";
   name: string;
   maxUpstreamRequests: number;
   blocks?: { globalUserCard?: string; characterIndex?: string };
@@ -106,18 +110,21 @@ async function runScenario(input: ScenarioInput & { provider: Record<string, str
   let socket: RpcSocket | undefined;
   let relay: Awaited<ReturnType<typeof observeRealProvider>> | undefined;
   let transport: Awaited<ReturnType<NonNullable<ScenarioInput["transport"]>>> | undefined;
+  let nativeHost: NativeAgentHost | undefined;
   let failed = true;
   let deadlineExpired = false;
   let timer: ReturnType<typeof setTimeout> | undefined;
   const startedAt = new Date().toISOString();
-  const baseline = sourceManifest();
+  const baseline = sourceManifest(input.nativeHost !== undefined);
   const settings: Record<string, string> = { ...provider, ...modelTuning(), TAKI_PROVIDER_INCLUDE_USAGE: "true",
     TAKI_MONITOR_MODE: "FULL_LOCAL", TAKI_INITIATIVE_ENABLED: "false" };
+  if (input.nativeHost) settings.TAKI_DEV_TRIGGER = "1";
   if (input.mainMaxSteps !== null) settings.TAKI_MAX_STEPS = String(positiveInteger(input.mainMaxSteps ?? 6, "main step limit"));
   const scenarioSettings = explicitSettings(input);
   Object.assign(settings, scenarioSettings);
   const write = (name: string, value: unknown) => writeFileSync(join(evidenceDir, name), `${JSON.stringify(value, null, 2)}\n`, "utf8");
   const checkpoint = (phase: string, detail?: unknown) => {
+    nativeHost?.save();
     phases.push({ phase, at: new Date().toISOString() });
     write(`phase-${phases.length}.json`, { phase, detail, state: databaseEvidence(dataDir), requests: relay?.requests ?? [], turns });
   };
@@ -145,7 +152,7 @@ async function runScenario(input: ScenarioInput & { provider: Record<string, str
     timer = setTimeout(() => {
       deadlineExpired = true;
       void Promise.allSettled([Promise.resolve().then(() => relay?.close()), Promise.resolve().then(() => transport?.close()),
-        Promise.resolve().then(() => core?.close())]);
+        Promise.resolve().then(() => core?.close()), Promise.resolve().then(() => nativeHost?.close())]);
     }, sessionDeadlineMs);
     socket = await openRpcSocket(core.wsUrl);
     const connection = socket;
@@ -156,6 +163,7 @@ async function runScenario(input: ScenarioInput & { provider: Record<string, str
     ConnectResultSchema.parse(await rpc("connect", { deviceId: randomUUID(), deviceName: "Agent context acceptance", role: "operator" }));
     await rpc(TIMELINE_METHODS.subscribe, { characterId: "taki" });
     await rpc(SUBAGENT_METHODS.subscribe, {});
+    if (input.nativeHost) nativeHost = await startAgentContextNativeHost({ core, socket: connection, evidenceDir });
     const effectiveSettings = async () => {
       const config = ConfigListResultSchema.parse(await rpc(CONFIG_METHODS.list, {}));
       return { entries: config.entries.filter((entry) => !entry.secret && (
@@ -167,6 +175,7 @@ async function runScenario(input: ScenarioInput & { provider: Record<string, str
     checkpoint("ready");
     await exercise({ dataDir, evidenceDir, wsUrl: core.wsUrl, requestedModel: provider.TAKI_PROVIDER_MODEL!, providerBaseUrl: relay.baseUrl,
       requests, socket: connection, rpc, checkpoint, effectiveSettings,
+      ...(nativeHost ? { nativeHost } : {}),
       remainingMs: () => Math.max(0, Math.ceil(deadlineAt - performance.now())),
       get observations() { return relay?.requests ?? []; },
       rows: (sql) => readRows(dataDir, sql),
@@ -186,9 +195,9 @@ async function runScenario(input: ScenarioInput & { provider: Record<string, str
   } finally {
     clearTimeout(timer);
     // Preserve failed scenarios and their already-spent requests; each close runs even when another fails.
-    await finishScenario({ failed, close: [() => socket?.close(), () => core?.close(), () => relay?.close(), () => transport?.close()],
+    await finishScenario({ failed, close: [() => socket?.close(), () => nativeHost?.close(), () => core?.close(), () => relay?.close(), () => transport?.close()],
       save(cleanupFailed) {
-        const finalSource = sourceManifest();
+        const finalSource = sourceManifest(input.nativeHost !== undefined);
         const sourceUnchanged = JSON.stringify(baseline) === JSON.stringify(finalSource);
         const requestEvidenceFailed = relay?.requests.some((request) =>
           request.error === "request-budget-exhausted" || request.error === "capture-failed") ?? false;
@@ -243,7 +252,7 @@ function modelTuning(): Record<string, string> {
   return contextTokens ? { TAKI_PROVIDER_CONTEXT_TOKENS: contextTokens } : {};
 }
 
-function sourceManifest(): Record<string, string> {
+function sourceManifest(nativeHost = false): Record<string, string> {
   const files = ["package.json", "pnpm-lock.yaml", "tsconfig.base.json", "packages/core/package.json",
     "packages/core/tsconfig.json", "packages/shared/package.json", "packages/shared/tsconfig.json", "e2e/package.json",
     "e2e/tsconfig.json", "e2e/vitest.config.ts"];
@@ -251,10 +260,15 @@ function sourceManifest(): Record<string, string> {
     for (const entry of readdirSync(path, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
       const fullPath = join(path, entry.name);
       if (entry.isDirectory()) visit(fullPath);
-      else if (/\.[cm]?[jt]sx?$/.test(entry.name)) files.push(relative(ROOT, fullPath).replaceAll("\\", "/"));
+      else if (/\.[cm]?[jt]sx?$/.test(entry.name) || (nativeHost && entry.name.endsWith(".rs"))) files.push(relative(ROOT, fullPath).replaceAll("\\", "/"));
     }
   };
   for (const directory of ["packages/core/src", "packages/shared/src", "e2e/src"]) visit(join(ROOT, directory));
+  if (nativeHost) {
+    visit(join(ROOT, "apps/desktop/src-tauri/src"));
+    files.push("apps/desktop/src-tauri/Cargo.toml", "apps/desktop/src-tauri/Cargo.lock", "apps/desktop/src-tauri/build.rs", "apps/desktop/src-tauri/tauri.conf.json",
+      `apps/desktop/src-tauri/target/debug/${process.platform === "win32" ? "taki-node.exe" : "taki-node"}`);
+  }
   return Object.fromEntries(files.sort().map((path) => [path, createHash("sha256").update(readFileSync(join(ROOT, path))).digest("hex")]));
 }
 

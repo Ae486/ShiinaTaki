@@ -72,8 +72,7 @@ describe("selected actual tool-acquired material", () => {
       const run = f.executions.list({ subagentId: f.children.list({ characterId: "taki" })[0]!.subagentId })[0]!;
       const input = count === 3 ? { text: "Result about the selected first file", materials: [{ kind: "tool_result", runId: run.runId,
         attemptId: f.runs.status(run.runId).run.activeAttemptId, stepNumber: 0, toolCallId: "read-1", key: "result" }] }
-        : { eventId: f.service.events.list({ characterId: "taki" })[0]!.eventId, operationKey: "retain-source",
-          action: { kind: "retained", note: "Parent synthesis" } };
+        : { eventId: f.service.events.list({ characterId: "taki" })[0]!.eventId, intent: "record", text: "Parent synthesis", target: null };
       return scriptedModel([{ kind: "tool", toolCallId: `result-${count}`, toolName: count === 3 ? "complete_subagent" : "handle_agent_event", input }]).doStream(options);
     } });
     const f: Awaited<ReturnType<typeof subagentFixture>> = await subagentFixture(model, { agent: {

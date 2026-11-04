@@ -39,8 +39,8 @@ export function subagentToolRefusal(error: unknown, input?: { service: SubagentS
       expectedRunId: current.activeRunId, expectedControlVersion: current.controlVersion } : null,
     nextAction: current?.stopOrigin === "user" || current?.pendingRequest?.checkIn?.requiredActor === "user" ? "Ask the user to Continue this exact work."
       : current?.pendingRequest?.reason === "question"
-        ? "Answer the pending question with send_subagent_message: copy currentTarget unchanged, use pendingRequest.eventId as replyToEventId, set continue=false and put the answer in direction. Ordinary messages do not resolve this wait."
+        ? "If this question is delivered in the current inbox, use handle_agent_event with intent=answer_child, its eventId, the answer in text and currentTarget copied unchanged. For inspected or silent work, use send_subagent_message with pendingRequest.eventId as replyToEventId, continue=false and the answer in direction. Ordinary messages do not resolve this wait."
         : current?.pendingRequest
-          ? "Approve the check-in with send_subagent_message: copy currentTarget unchanged, use pendingRequest.eventId as replyToEventId and set continue=true."
+          ? "For a check-in delivered in the current inbox, use handle_agent_event with intent=continue_child and its exact event and currentTarget. For inspected work, use send_subagent_message with pendingRequest.eventId as replyToEventId and continue=true."
         : "Send an ordinary message by child ID, or refresh the exact target before Stop/Continue." };
 }

@@ -1,0 +1,438 @@
+{
+  "exactPhysicalRequests": null,
+  "confirmedRequests": 98,
+  "countedAttempts": 99,
+  "announcedCeiling": 103,
+  "cases": [
+    {
+      "name": "connected-delayed-reports-and-foreground-work",
+      "evidence": "artifacts/delegation-interface-real-20261104/delayed/interface-delayed-native-tuonGs",
+      "originalStatus": "passed",
+      "exactPhysicalRequests": 10,
+      "confirmedRequests": 10,
+      "countedAttempts": 10,
+      "countBasis": "timing-relay forward records",
+      "unconfirmedAttempts": [],
+      "producerCounts": {
+        "observerAttempts": 10,
+        "observerAdmittedReservations": 10,
+        "physicalUpstreamForwards": 10,
+        "successfulHttpStatuses": 10,
+        "completedTransportResponses": 10,
+        "admittedModelEffects": 10,
+        "settledModelEffects": 10,
+        "completedModelGenerations": 10,
+        "completedChildTaskSteps": 2,
+        "taskModelSummaryWitnesses": 0,
+        "observedNonStreamingUtilityRequests": 0,
+        "usageRows": 10,
+        "usageCompleteness": "Retain actual run_usage rows; absent/nullable values are unknown, never zero."
+      },
+      "usageQualities": {
+        "reported": 10
+      },
+      "reportedUsage": {
+        "input_tokens": {
+          "reportedSubtotal": 143443,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 143443
+        },
+        "output_tokens": {
+          "reportedSubtotal": 2746,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 2746
+        },
+        "total_tokens": {
+          "reportedSubtotal": 146189,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 146189
+        },
+        "input_no_cache_tokens": {
+          "reportedSubtotal": 48083,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 48083
+        },
+        "cache_read_tokens": {
+          "reportedSubtotal": 95360,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 95360
+        },
+        "cache_write_tokens": {
+          "reportedSubtotal": 0,
+          "unknownRows": 10,
+          "completeRecordedRowsTotal": null
+        },
+        "output_text_tokens": {
+          "reportedSubtotal": 1691,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 1691
+        },
+        "reasoning_tokens": {
+          "reportedSubtotal": 1055,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 1055
+        }
+      },
+      "sourceUnchanged": true,
+      "cleanupFailed": false,
+      "artifactSha256": {
+        "result.json": "4aa74f31dedc73eb3bd791e87992c97339174dc791e1c16070b79dc4f0d2980a",
+        "interface-evidence.json": "03142e420c0fbe349e02d65c75c600d6b6e168daba88327d19db51eeacf5d5da"
+      }
+    },
+    {
+      "name": "guidance-and-private-question-answer",
+      "evidence": "artifacts/delegation-interface-real-20261104/question/interface-exact-question-MTzA7h",
+      "originalStatus": "passed",
+      "exactPhysicalRequests": 12,
+      "confirmedRequests": 12,
+      "countedAttempts": 12,
+      "countBasis": "timing-relay forward records",
+      "unconfirmedAttempts": [],
+      "producerCounts": {
+        "observerAttempts": 12,
+        "observerAdmittedReservations": 12,
+        "physicalUpstreamForwards": 12,
+        "successfulHttpStatuses": 12,
+        "completedTransportResponses": 12,
+        "admittedModelEffects": 12,
+        "settledModelEffects": 12,
+        "completedModelGenerations": 12,
+        "completedChildTaskSteps": 4,
+        "taskModelSummaryWitnesses": 0,
+        "observedNonStreamingUtilityRequests": 0,
+        "usageRows": 12,
+        "usageCompleteness": "Retain actual run_usage rows; absent/nullable values are unknown, never zero."
+      },
+      "usageQualities": {
+        "reported": 12
+      },
+      "reportedUsage": {
+        "input_tokens": {
+          "reportedSubtotal": 165001,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 165001
+        },
+        "output_tokens": {
+          "reportedSubtotal": 5780,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 5780
+        },
+        "total_tokens": {
+          "reportedSubtotal": 170781,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 170781
+        },
+        "input_no_cache_tokens": {
+          "reportedSubtotal": 49417,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 49417
+        },
+        "cache_read_tokens": {
+          "reportedSubtotal": 115584,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 115584
+        },
+        "cache_write_tokens": {
+          "reportedSubtotal": 0,
+          "unknownRows": 12,
+          "completeRecordedRowsTotal": null
+        },
+        "output_text_tokens": {
+          "reportedSubtotal": 3398,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 3398
+        },
+        "reasoning_tokens": {
+          "reportedSubtotal": 2382,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 2382
+        }
+      },
+      "sourceUnchanged": true,
+      "cleanupFailed": false,
+      "artifactSha256": {
+        "result.json": "422d637b16562d71a6c9de72716a62bdc777ae351851d47b13a22143a9dee70b",
+        "interface-evidence.json": "4f672b648d182b8fdac75df92e27555121e26dba5ee21b011e5f6fb20eb428c6"
+      }
+    },
+    {
+      "name": "checkin-and-user-stop",
+      "evidence": "artifacts/delegation-interface-real-20261104/checkin/interface-checkin-stop-Afbe7F",
+      "originalStatus": "failed",
+      "exactPhysicalRequests": 24,
+      "confirmedRequests": 24,
+      "countedAttempts": 24,
+      "countBasis": "successful upstream responses confirm sends; charge every admitted fetch attempt to the bound",
+      "unconfirmedAttempts": [],
+      "producerCounts": {
+        "observerAttempts": 25,
+        "observerAdmittedReservations": 24,
+        "physicalUpstreamForwards": null,
+        "successfulHttpStatuses": 24,
+        "completedTransportResponses": null,
+        "admittedModelEffects": 25,
+        "settledModelEffects": 25,
+        "completedModelGenerations": 24,
+        "completedChildTaskSteps": 11,
+        "taskModelSummaryWitnesses": 0,
+        "observedNonStreamingUtilityRequests": 0,
+        "usageRows": 25,
+        "usageCompleteness": "Retain actual run_usage rows; absent/nullable values are unknown, never zero."
+      },
+      "usageQualities": {
+        "reported": 24,
+        "unknown": 1
+      },
+      "reportedUsage": {
+        "input_tokens": {
+          "reportedSubtotal": 296995,
+          "unknownRows": 1,
+          "completeRecordedRowsTotal": null
+        },
+        "output_tokens": {
+          "reportedSubtotal": 12135,
+          "unknownRows": 1,
+          "completeRecordedRowsTotal": null
+        },
+        "total_tokens": {
+          "reportedSubtotal": 309130,
+          "unknownRows": 1,
+          "completeRecordedRowsTotal": null
+        },
+        "input_no_cache_tokens": {
+          "reportedSubtotal": 77347,
+          "unknownRows": 1,
+          "completeRecordedRowsTotal": null
+        },
+        "cache_read_tokens": {
+          "reportedSubtotal": 219648,
+          "unknownRows": 1,
+          "completeRecordedRowsTotal": null
+        },
+        "cache_write_tokens": {
+          "reportedSubtotal": 0,
+          "unknownRows": 25,
+          "completeRecordedRowsTotal": null
+        },
+        "output_text_tokens": {
+          "reportedSubtotal": 6529,
+          "unknownRows": 1,
+          "completeRecordedRowsTotal": null
+        },
+        "reasoning_tokens": {
+          "reportedSubtotal": 5606,
+          "unknownRows": 1,
+          "completeRecordedRowsTotal": null
+        }
+      },
+      "sourceUnchanged": true,
+      "cleanupFailed": false,
+      "artifactSha256": {
+        "result.json": "13d413168ee87e38d21b6ef8e790fb93189ef0dc8463eba6cca18bd94094668c",
+        "interface-evidence.json": "4980ab881fad9d6019a3ab8ab21ad2975923c53f18311abddc99d38c3bcfa5e3"
+      }
+    },
+    {
+      "name": "checkin-and-user-stop-corrected",
+      "evidence": "artifacts/delegation-interface-real-20261104/checkin-corrected/interface-checkin-stop-6UwlHc",
+      "originalStatus": "failed",
+      "exactPhysicalRequests": 23,
+      "confirmedRequests": 23,
+      "countedAttempts": 23,
+      "countBasis": "successful upstream responses confirm sends; charge every admitted fetch attempt to the bound",
+      "unconfirmedAttempts": [],
+      "producerCounts": {
+        "observerAttempts": 23,
+        "observerAdmittedReservations": 23,
+        "physicalUpstreamForwards": null,
+        "successfulHttpStatuses": 23,
+        "completedTransportResponses": null,
+        "admittedModelEffects": 23,
+        "settledModelEffects": 23,
+        "completedModelGenerations": 23,
+        "completedChildTaskSteps": 9,
+        "taskModelSummaryWitnesses": 0,
+        "observedNonStreamingUtilityRequests": 0,
+        "usageRows": 23,
+        "usageCompleteness": "Retain actual run_usage rows; absent/nullable values are unknown, never zero."
+      },
+      "usageQualities": {
+        "reported": 23
+      },
+      "reportedUsage": {
+        "input_tokens": {
+          "reportedSubtotal": 290232,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 290232
+        },
+        "output_tokens": {
+          "reportedSubtotal": 8269,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 8269
+        },
+        "total_tokens": {
+          "reportedSubtotal": 298501,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 298501
+        },
+        "input_no_cache_tokens": {
+          "reportedSubtotal": 68792,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 68792
+        },
+        "cache_read_tokens": {
+          "reportedSubtotal": 221440,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 221440
+        },
+        "cache_write_tokens": {
+          "reportedSubtotal": 0,
+          "unknownRows": 23,
+          "completeRecordedRowsTotal": null
+        },
+        "output_text_tokens": {
+          "reportedSubtotal": 3282,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 3282
+        },
+        "reasoning_tokens": {
+          "reportedSubtotal": 4987,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 4987
+        }
+      },
+      "sourceUnchanged": true,
+      "cleanupFailed": false,
+      "artifactSha256": {
+        "result.json": "a158c4bc944f82a6ec1c1c30038ea987d8739e2887bc7c1ab4ae20bf77ec495f",
+        "interface-evidence.json": "6d4fe94905fe6c8b99c4f7a43bbf34c499501cd45fbcd4c29254f47b58bd0b9c"
+      }
+    },
+    {
+      "name": "checkin-and-user-stop-bounded-user-decision",
+      "evidence": "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an",
+      "originalStatus": "passed",
+      "exactPhysicalRequests": null,
+      "confirmedRequests": 29,
+      "countedAttempts": 30,
+      "countBasis": "successful upstream responses confirm sends; charge every admitted fetch attempt to the bound",
+      "unconfirmedAttempts": [
+        30
+      ],
+      "producerCounts": {
+        "observerAttempts": 30,
+        "observerAdmittedReservations": 30,
+        "physicalUpstreamForwards": null,
+        "successfulHttpStatuses": 29,
+        "completedTransportResponses": null,
+        "admittedModelEffects": 29,
+        "settledModelEffects": 29,
+        "completedModelGenerations": 29,
+        "completedChildTaskSteps": 10,
+        "taskModelSummaryWitnesses": 0,
+        "observedNonStreamingUtilityRequests": 1,
+        "usageRows": 29,
+        "usageCompleteness": "Retain actual run_usage rows; absent/nullable values are unknown, never zero."
+      },
+      "usageQualities": {
+        "reported": 29
+      },
+      "reportedUsage": {
+        "input_tokens": {
+          "reportedSubtotal": 411156,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 411156
+        },
+        "output_tokens": {
+          "reportedSubtotal": 8603,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 8603
+        },
+        "total_tokens": {
+          "reportedSubtotal": 419759,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 419759
+        },
+        "input_no_cache_tokens": {
+          "reportedSubtotal": 91924,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 91924
+        },
+        "cache_read_tokens": {
+          "reportedSubtotal": 319232,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 319232
+        },
+        "cache_write_tokens": {
+          "reportedSubtotal": 0,
+          "unknownRows": 29,
+          "completeRecordedRowsTotal": null
+        },
+        "output_text_tokens": {
+          "reportedSubtotal": 4646,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 4646
+        },
+        "reasoning_tokens": {
+          "reportedSubtotal": 3957,
+          "unknownRows": 0,
+          "completeRecordedRowsTotal": 3957
+        }
+      },
+      "sourceUnchanged": true,
+      "cleanupFailed": false,
+      "artifactSha256": {
+        "result.json": "93d8a341645c44d97c0538e565214354413bc2a0db3e30657c9a89c2644f9344",
+        "interface-evidence.json": "cba0e0eba4076f321046d838cef4b525b5903975a9d060f53f686520d0ce4a87"
+      }
+    }
+  ],
+  "reportedUsage": {
+    "input_tokens": {
+      "reportedSubtotal": 1306827,
+      "unknownRows": 1,
+      "completeRecordedRowsTotal": null
+    },
+    "output_tokens": {
+      "reportedSubtotal": 37533,
+      "unknownRows": 1,
+      "completeRecordedRowsTotal": null
+    },
+    "total_tokens": {
+      "reportedSubtotal": 1344360,
+      "unknownRows": 1,
+      "completeRecordedRowsTotal": null
+    },
+    "input_no_cache_tokens": {
+      "reportedSubtotal": 335563,
+      "unknownRows": 1,
+      "completeRecordedRowsTotal": null
+    },
+    "cache_read_tokens": {
+      "reportedSubtotal": 971264,
+      "unknownRows": 1,
+      "completeRecordedRowsTotal": null
+    },
+    "cache_write_tokens": {
+      "reportedSubtotal": 0,
+      "unknownRows": 99,
+      "completeRecordedRowsTotal": null
+    },
+    "output_text_tokens": {
+      "reportedSubtotal": 19546,
+      "unknownRows": 1,
+      "completeRecordedRowsTotal": null
+    },
+    "reasoning_tokens": {
+      "reportedSubtotal": 17987,
+      "unknownRows": 1,
+      "completeRecordedRowsTotal": null
+    }
+  },
+  "limits": [
+    "Reported usage is not provider billing; missing values remain unknown.",
+    "Token subtotals cover recorded usage rows only; the cancelled utility fetch has no completed usage row.",
+    "Failed scenarios remain failed; this calculation does not grant acceptance."
+  ]
+}

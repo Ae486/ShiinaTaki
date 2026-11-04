@@ -17,8 +17,7 @@ async function fixture(config: { unknownEffect?: boolean; priorAction?: boolean 
     const first = call === (config.priorAction ? 1 : 0);
     const event = f.service.events.list({ characterId: "taki" }).find((entry) => entry.state === "delivered");
     return scriptedModel([{ kind: "tool", toolCallId: first ? "final" : "handling", toolName: first ? "complete_subagent" : "handle_agent_event",
-      input: first ? { text: "Result", materials: [] } : { eventId: event!.eventId, operationKey: "recovered-action",
-        action: { kind: "retained", note: "Reconciled result" } } }]).doStream(options);
+      input: first ? { text: "Result", materials: [] } : { eventId: event!.eventId, intent: "record", text: "Reconciled result", target: null } }]).doStream(options);
   } });
   const f = await subagentFixture(model); fixtures.push(f);
   const release = f.queue.tryAcquireBackground("taki")!;

@@ -224,7 +224,13 @@ describe("delegation model projections", () => {
     } while (offset >= 0);
     expect(rebuilt).toBe(text);
     const handled = await requestCapture(f, tools, [{ kind: "tool", toolCallId: "handle", toolName: "handle_agent_event", input: {
-      eventId: question.eventId, operationKey: "stable", action: { kind: "answered_child", target, replyToEventId: question.eventId, direction: "答案😀" } } }]);
+      eventId: question.eventId, intent: "answer_child", text: "答案😀", target } }]);
+    const definition = handled.model.doStreamCalls[0]!.tools!.find((entry) => entry.name === "handle_agent_event")!;
+    expect(definition).toMatchObject({ inputSchema: { type: "object", additionalProperties: false,
+      required: ["eventId", "intent", "text", "target"], properties: { intent: { type: "string",
+        enum: ["record", "ask_user", "reply", "answer_child", "continue_child"] } } } });
+    expect(JSON.stringify(definition)).not.toContain("operationKey");
+    expect(JSON.stringify(definition)).not.toContain("replyToEventId");
     expect(handled.raw[0]).toBe(accepted); expect(JSON.stringify(toolOutput(handled.model, 1))).not.toContain("inputId");
     expect(JSON.stringify(toolOutput(handled.model, 1))).toContain("answered_child");
     const page = await tools.read_agent_inbox!.execute!({ eventId: question.eventId, offset: 0, limit: 3001, detail: "action" }, { toolCallId: "page", messages: [], context: {} });

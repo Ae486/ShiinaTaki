@@ -12,7 +12,7 @@ import { subagentControlModelOutput } from "./subagent-control-output.ts";
 
 export function createSubagentMessageTool(input: SubagentToolBinding): ToolSet {
   return { send_subagent_message: tool({ description: "Send direction to a child; omit/null workInputId for its current work, or supply an explicit work that must never be retargeted. Ordinary guidance uses continue=false and no replyToEventId; it does not answer a pending question or resume paused work. "
-    + "To answer a pending question, put the answer in direction, use its eventId as replyToEventId, set continue=false and copy the full current target. To approve a progress check-in, use its eventId and full current target with continue=true. "
+    + "For a question or check-in delivered in the current inbox, use handle_agent_event when available: answer_child answers the question and continue_child approves the check-in. For deliberately inspected or silent work, answer with direction, its eventId as replyToEventId, continue=false and the full current target; approve a check-in with continue=true. "
     + "To explicitly continue interrupted unfinished work with no pending request, keep its workInputId and full current target, use continue=true and replyToEventId=null. Ask it to finish the still-required report using its retained analysis; idle status or apparently complete prose alone is not accepted completion. "
     + "Copy the returned target/currentTarget unchanged, including null expectedRunId and the current expectedControlVersion; do not guess or increment a version. User-required check-ins and user Stop require direct user continuation.",
   inputSchema: SubagentMessageToolSchema,

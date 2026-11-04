@@ -53,7 +53,7 @@ async function yielded(mode: Mode = "read", capture?: (runId: string) => Promise
       expect(instructions).toContain("retain the available evidence and end this handler");
       expect(instructions).toContain("only newly delivered events");
       expect(instructions).toContain("inspect its retained results once before treating it as pending");
-      expect(instructions).toContain("complete integrated user-facing final answer in note");
+      expect(instructions).toContain("complete integrated user-facing final answer in text");
       expect(instructions).toContain("An accepted proposal is not proof of publication");
       entered.resolve(); await releaseModel.promise;
       if (mode === "natural") return streamingMockModel(["Private natural stop without a disposition"]).doStream(options);
@@ -66,7 +66,7 @@ async function yielded(mode: Mode = "read", capture?: (runId: string) => Promise
       }
       const read = { toolCallId: "read", toolName: "read_agent_inbox", input: { eventId: event.eventId, offset: 0, limit: 16000 } };
       return mode === "action" ? scriptedModel([{ kind: "tools", calls: [{ toolCallId: "handled-first", toolName: "handle_agent_event",
-        input: { eventId: events[0]!.eventId, operationKey: "prior-action", action: { kind: "retained", note: "Earlier progress retained" } } }, read] }]).doStream(options)
+        input: { eventId: events[0]!.eventId, intent: "record", text: "Earlier progress retained", target: null } }, read] }]).doStream(options)
         : scriptedModel([{ kind: "tool", ...read }]).doStream(options);
     }
     expect(idleCalls).toBe(2);
@@ -74,9 +74,9 @@ async function yielded(mode: Mode = "read", capture?: (runId: string) => Promise
     expect(prompt).toContain("same event batch");
     if (foreground) expect(prompt).toContain(foreground);
     return scriptedModel([{ kind: "tool", toolCallId: "handle", toolName: "handle_agent_event", input: {
-      eventId: event.eventId, operationKey: "one-successor-action",
-      action: foreground === CHAT ? { kind: "speech_proposed", note: "The pending synthetic review is ready." }
-        : { kind: "retained", note: "The foreground already answered, or this review requires no public reply." },
+      eventId: event.eventId, target: null, intent: foreground === CHAT ? "reply" : "record",
+      text: foreground === CHAT ? "The pending synthetic review is ready."
+        : "The foreground already answered, or this review requires no public reply.",
     } }]).doStream(options);
   } });
   const f = await subagentFixture(model, { agent: { maxSteps: mode === "cap" ? 1 : 10 },

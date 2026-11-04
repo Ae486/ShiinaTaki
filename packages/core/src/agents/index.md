@@ -75,7 +75,7 @@
 - subagent-self-history-tool.ts — mandatory self-scoped category/body pagination with captured history watermarks
 
 - subagent-interact-tool.ts — completed-result witnessed asynchronous messages and exclusive input-wait proposals, distinct from whole-job completion
-- subagent-inbox-tools.ts — intrinsic delivered-event/action paging and idempotent handling, with explicit internal disposition versus final-answer proposal semantics
+- subagent-inbox-tools.ts — intrinsic delivered-event/action paging and flat five-intent handling mapped to canonical private actions and separate reply proposals
 - subagent-control-output.ts — compact control acknowledgements with exact targets and accepted automatic/silent work reporting guidance
 - subagent-model-state.ts — compact current/scoped worker state, exact control targets, pending request and completion selectors; raw diagnostics remain available explicitly
 

@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { commitInboxSpeech, directRequestReportFixture } from "../testing/direct-request-report-fixture.ts";
+import { commitDirectChild, commitInboxSpeech, directRequestReportFixture } from "../testing/direct-request-report-fixture.ts";
 import { readSubagentSpeechPublication } from "../db/subagent-speech-repo.ts";
 import { createDirectRequestReports } from "./direct-request-report.ts";
+import { randomUUID } from "node:crypto";
+import type { ToolInvocationSnapshot } from "../agents/tool-invocation.ts";
 
 const fixtures: Awaited<ReturnType<typeof directRequestReportFixture>>[] = [];
 beforeEach(() => { vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime("2026-10-25T12:00:00.000Z"); });
@@ -9,6 +11,49 @@ afterEach(async () => { for (const f of fixtures.splice(0)) await f.cleanup(); v
 async function fixture() { const f = await directRequestReportFixture(); fixtures.push(f); return f; }
 
 describe("original-request publication from canonical private inbox actions", () => {
+  it("reuses an arbitrary legacy action key and original consumer when a successor retries the same reply", async () => {
+    const f = await fixture();
+    await commitDirectChild(f);
+    const { input, event, consumer } = await commitInboxSpeech(f);
+    const original = f.db.prepare("SELECT * FROM subagent_event_actions WHERE event_id=:event").get({ event: event.eventId })!;
+    const oldClaim = f.service.inbox.get(String(original.consumer_id));
+    f.runs.settle(consumer.run.runId, consumer.attempt.attemptId, "failed");
+    const consumerId = randomUUID();
+    const successor = await f.runs.admitLinked({ triggerRequestId: randomUUID(), idempotencyKey: randomUUID(), characterId: "taki",
+      initiator: "subagent", deliveryClass: "internal", contextMode: "autonomous", provenance: { provider: "core.subagent-inbox" } },
+    { linked: { kind: "agent-inbox", consumerId, resumesConsumerId: oldClaim.consumerId, operationKey: "resume", validateTx() {} } });
+    f.runs.start(successor.run.runId, successor.attempt.attemptId);
+    let invocation: ToolInvocationSnapshot | undefined;
+    const context = f.service.prepareInbox({ characterId: "taki", runId: successor.run.runId,
+      attemptId: successor.attempt.attemptId, mode: "idle", actualInvocation: () => invocation })!;
+    const effect = f.effects.prepare({ runId: successor.run.runId, attemptId: successor.attempt.attemptId, kind: "model",
+      sourceRef: { type: "model", provider: "test", modelId: "test" }, inputDigest: "e".repeat(64), replayPosture: "never",
+      onCommitIntent: (effect) => context.commitModelIntent(effect, 0) });
+    f.effects.settle({ effectId: effect.effectId, runId: effect.runId, attemptId: effect.attemptId, expectedVersion: effect.version, outcome: "completed" });
+    f.service.state.deps.reports = f.reports;
+    const execute = (text: string, override: Partial<ToolInvocationSnapshot> = {}) => {
+      const toolCallId = randomUUID();
+      invocation = { invocationId: randomUUID(), runId: effect.runId, attemptId: effect.attemptId, modelEffectId: effect.effectId,
+        toolName: "handle_agent_event", toolCallId, validationState: "accepted", ...override };
+      return context.tools.handle_agent_event!.execute!({ eventId: event.eventId, intent: "reply", text, target: null },
+        { toolCallId, messages: [], context: {} });
+    };
+    expect(await execute("The final inbox answer.", { modelEffectId: "not-delivered" })).toMatchObject({ ok: false, code: "SUBAGENT_EVENT_NOT_DELIVERED" });
+    expect(await execute("Changed answer")).toMatchObject({ ok: false, code: "SUBAGENT_EVENT_ALREADY_HANDLED" });
+    expect(await execute("The final inbox answer.")).toEqual({ accepted: true });
+    await vi.waitFor(() => expect(f.send).toHaveBeenCalledOnce());
+    expect(await execute("The final inbox answer.")).toEqual({ accepted: true });
+    await vi.waitFor(() => expect(f.service.state.work.size).toBe(0));
+    expect(readSubagentSpeechPublication(f.db, input)).toMatchObject({ status: "recorded", state: "sent" });
+    expect(f.timeline.latestAscending("taki", 10).filter((row) => row.role === "assistant")).toMatchObject([
+      { content: "The final inbox answer.", sourceContext: { generatedBy: { runId: consumer.run.runId } } },
+    ]);
+    expect(f.db.prepare("SELECT * FROM subagent_event_actions WHERE event_id=:event").get({ event: event.eventId })).toEqual(original);
+    expect(f.service.inbox.get(oldClaim.consumerId)).toMatchObject({ instructions: oldClaim.instructions, projectionDigest: oldClaim.projectionDigest });
+    expect(f.send).toHaveBeenCalledOnce();
+    expect(f.errors).toEqual([]);
+  });
+
   it("publishes exactly once from delivered speech and records a distinct publication outcome", async () => {
     const f = await fixture(); const { input, event, consumer } = await commitInboxSpeech(f);
     expect(f.service.events.get(event.eventId).state).toBe("handled");

@@ -14,6 +14,10 @@ Private task context compaction is covered by `private-worker-context.md`; publi
   event membership to a real main Run/Attempt/model Effect; actions establish explicit per-event handling.
 - `interact_parent({kind:'message'|'needs_input',text})` and `complete_subagent` require matching completed SDK results.
   Addressed input uses the existing exact target plus `replyToEventId` to resolve a specific question.
+- The model-facing handler is `handle_agent_event({eventId,intent,text,target})`, where intent is
+  `record | ask_user | reply | answer_child | continue_child`. The first three require `target=null`;
+  child actions require the complete exact target. Core derives operation identity and the addressed
+  question/check-in event; models do not supply an operation key or a nested internal action.
 - `subagent.conversation` has newest/older/newer child-scoped cursors. Message/event presentation references retain real
   item IDs, while `batch.entrySeqs` names every visible conversation entry required for the completed-step handoff.
 - `subagent.conversation.body` returns exact JSON in bounded character pages with a digest fence. A preview's
@@ -77,6 +81,31 @@ Private task context compaction is covered by `private-worker-context.md`; publi
 - `answered_child` commits addressed acceptance and its action/result receipt together. Repeated identical operation and
   action digest reads that receipt; conflicting repeats refuse. Speech disposition is separate from actual publication.
 
+### Model interface and historical compatibility
+
+- Normalize `record`, `ask_user`, and `reply` into `retained`, `needs_user_input`, and `speech_proposed`.
+  `answer_child` and `continue_child` retain the existing private atomic action owners and exact controls.
+  Derive an answer's `replyToEventId` from the selected immutable event: its ID for `needs_input`, null
+  for a nonblocking message/report. Private responses to ordinary progress messages remain supported;
+  do not reinterpret every answer as resolving a question. Check-in continuation still addresses its exact event.
+  Keep all six internal action variants and operator recovery schemas; the five-intent model interface
+  does not rewrite historical `no_action` records or make `record` an alias for them.
+- `record` is an explicit handled disposition, not a timer, a retry or an instruction to re-deliver the
+  event later. `ask_user` requests operator attention; it does not by itself publish Companion speech.
+  `reply` carries the complete intended answer; foreground still requires actual primary text and idle
+  publication still uses the existing trusted report adapter.
+- Inside the existing action transaction, validate the real invocation and delivered membership before
+  reading an earlier receipt. Equivalent normalized actions reuse the original operation key, result and
+  consumer Run, including historical arbitrary keys and explicit successor consumers. Changed actions
+  refuse. The original consumer/key pair must also address any repeated publication staging.
+- Keep ordinary `send_subagent_message` available for guidance, interrupted work and inspected/silent
+  work. Delivered-event responses use the private handler. The two scopes intentionally retain separate
+  registered tool names because foreground activity and persistence classify private tools by trusted
+  registration; do not replace this with model-authored privacy flags or hide all ordinary sends.
+- Current descriptions and prefixes explain the model vocabulary. Stored claim text, action JSON,
+  digests, raw body pages and receipts remain byte-identical. No migration, additional coordinator,
+  automatic acknowledgement on model exit, or end-of-turn tool is part of this interface change.
+
 ### Input dependency, Stop and recovery
 
 - A question is a work dependency, not a successful task result or an open Run. Accept the exact answer transactionally;
@@ -137,11 +166,16 @@ Private task context compaction is covered by `private-worker-context.md`; publi
 | History page splits a native tool step | Full-batch references keep remaining pages reachable |
 | Body changes or cursor belongs to another child | Explicit changed-body/scope refusal; no mismatched concatenation |
 | Connection is copied, retired, unauthenticated or a Node | Refuse private reads/controls and stop private pushes |
+| Equivalent normalized action uses another tool call or historical operation key | Return the original receipt without another input, counter increment or publication |
+| A handled event receives a different action, including old no_action versus new record | Explicit conflict; retain original action bytes |
+| A successor retries a historical speech action | Preserve original consumer/key publication join; do not stage under the successor identity |
 
 ## 5. Good / Base / Bad Cases
 
 - Good: child asks, Runtime persists the question, the main handles it silently, an exact answer resumes the same work,
   and both the old request and action receipts remain readable across a later explicit continuation.
+- Good: a model repeats the same flat event intent after an uncertain response and receives the original
+  action receipt, while a different intent is refused instead of silently replacing history.
 - Base: an unstructured child stop retains real output and an interruption event; it is not called task success.
 - Bad: clear an inbox on model termination, resume unknown tool work automatically, treat a speech proposal as sent,
   use task age to expire generic work, or clear all live activity on receipt of a single history row.
@@ -152,6 +186,10 @@ Private task context compaction is covered by `private-worker-context.md`; publi
   `subagent-inbox-recovery.test.ts`, `subagent-inbox-retry.test.ts`, `subagent-conversation.test.ts`, and the foreground mixed/lazy inbox tests.
 - Atomicity/receipt/legacy/recovery: `subagent-inbox.test.ts`, `subagent-repo.test.ts`, `subagent-recovery.test.ts`,
   migrations `056-subagent-conversations.test.ts` and `058-agent-inbox.test.ts`.
+- Flat model schema and actual governed SDK action flow: `subagent-inbox-schema.test.ts`,
+  `subagent-inbox-interface.test.ts`; legacy-key successor publication: `direct-request-inbox.test.ts`.
+  Assert complete rollback, changed-call-ID retries, old no_action conflict, user Stop and exactly-once
+  check-in accounting. Keep mixed public/private/Memory tests when adjusting model input shapes.
 - Authenticated method registration, exact conflicts, body/activity reads and unsubscribe cleanup:
   `server/methods/subagent-methods.test.ts`; Shared schema/typecheck and scoped/root lint remain required.
 - These deterministic tests establish their exercised Runtime/SDK/SQLite/WS contracts. They do not establish native
@@ -163,3 +201,9 @@ Wrong: after a delivery timeout, delete the claim and call the model again with 
 
 Correct: retain the actual intent and missing disposition, expose the exact recovery target, and require an explicit
 operation-keyed successor admission that carries historical receipts without recreating source/publication authority.
+
+Wrong: expose internal action JSON and a new model-generated operation key on every retry, or rename a
+private event answer to an ordinary public tool without preserving the storage/activity boundary.
+
+Correct: expose the flat event intent, derive/reuse identity transactionally, and leave private responses
+under their existing registered private tool. A model input shape is not the persistent action schema.

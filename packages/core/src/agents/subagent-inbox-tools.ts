@@ -4,14 +4,14 @@
  * POS: core/agents — informational tool bindings; the inbox repository owns action acceptance
  */
 import { tool, type ToolSet } from "ai";
-import { SubagentHandleEventToolSchema, SubagentReadInboxToolSchema, type SubagentEvent, type SubagentInboxAction } from "@taki/shared";
+import { SubagentHandleEventToolSchema, SubagentReadInboxToolSchema, type SubagentEvent, type SubagentInboxAction, type SubagentHandleEventToolInput } from "@taki/shared";
 import type { ToolInvocationSnapshot } from "./tool-invocation.ts";
 import { subagentScopedModelState } from "./subagent-model-state.ts";
 import { subagentActionEvidence } from "../db/subagent-action-evidence.ts";
 
 export function createSubagentInboxTools(input: {
   read(eventId: string): { event: SubagentEvent; target: unknown; action?: string; current?: unknown; pendingRequest?: unknown };
-  handle(value: { eventId: string; operationKey: string; action: SubagentInboxAction; invocation: ToolInvocationSnapshot }): unknown;
+  handle(value: { eventId: string; action: SubagentInboxAction; invocation: ToolInvocationSnapshot }): unknown;
   actualInvocation(): ToolInvocationSnapshot | undefined;
 }): ToolSet {
   return {
@@ -39,16 +39,18 @@ export function createSubagentInboxTools(input: {
       },
     }),
     handle_agent_event: tool({
-      description: "Handle one delivered worker event. retained and no_action record internal dispositions; they do not send an answer to the user. You may request user input, answer the exact child target, or explicitly continue_child for a permitted exact check-in. "
-        + "Use speech_proposed for an intended final delayed answer and put the complete user-facing answer in note. In an idle handler this requests Core's separate publication checks and delivery; in foreground, also provide the actual reply. Proposal acceptance is not proof of publication. "
-        + "Keep the same operationKey when reconciling an unknown result; conflicting repeats are refused.",
+      description: "Handle one delivered worker event: record retains evidence privately, ask_user requests user attention, and reply proposes a user-facing answer. These intents use target=null; put the complete question or answer in text. "
+        + "To reply privately to a delivered child message or answer its question use answer_child; for a permitted check-in use continue_child. Copy its complete current target unchanged; Core addresses a question only when the selected event requests input. "
+        + "In an idle handler reply requests Core's separate publication checks and delivery; in foreground, also provide the actual reply. Proposal acceptance is not proof of publication, and record handles this event without deferring it for fresh automatic handling. "
+        + "Identical retries return the accepted receipt; changed actions are refused. Ordinary guidance, interrupted-work continuation and inspected or silent work use send_subagent_message when available.",
       inputSchema: SubagentHandleEventToolSchema,
       toModelOutput: ({ output }) => ({ type: "json", value: JSON.parse(JSON.stringify(subagentScopedModelState(subagentActionEvidence(output)))) }),
       execute(candidate) {
         try {
           const invocation = input.actualInvocation();
           if (!invocation) throw new Error("SUBAGENT_INBOX_INVOCATION_REQUIRED");
-          return input.handle({ ...candidate, invocation });
+          const parsed = SubagentHandleEventToolSchema.parse(candidate);
+          return input.handle({ eventId: parsed.eventId, action: normalizeAction(parsed, (id) => input.read(id).event), invocation });
         } catch (error) {
           let current;
           try { current = input.read(candidate.eventId); } catch { current = undefined; }
@@ -57,6 +59,21 @@ export function createSubagentInboxTools(input: {
       },
     }),
   };
+}
+
+function normalizeAction(input: SubagentHandleEventToolInput, read: (eventId: string) => SubagentEvent): SubagentInboxAction {
+  if (input.intent === "answer_child" || input.intent === "continue_child") {
+    if (!input.target) throw new Error("SUBAGENT_EXACT_TARGET_REQUIRED");
+    const event = read(input.eventId);
+    if (input.intent === "continue_child") {
+      if (event.kind !== "needs_input") throw new Error("SUBAGENT_INPUT_REQUEST_CONFLICT");
+      return { kind: "continue_child", target: input.target, replyToEventId: event.eventId, direction: input.text };
+    }
+    return { kind: "answered_child", target: input.target,
+      replyToEventId: event.kind === "needs_input" ? event.eventId : null, direction: input.text };
+  }
+  const kind = { record: "retained", ask_user: "needs_user_input", reply: "speech_proposed" } as const;
+  return { kind: kind[input.intent], note: input.text };
 }
 
 function refusal(error: unknown) {

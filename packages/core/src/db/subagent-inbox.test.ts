@@ -27,7 +27,7 @@ describe("durable actual-intent inbox ownership", () => {
     expect(f.inbox.get(context.consumerId).events.every((event) => event.kind === "final")).toBe(true);
     expect(context.instructions).toContain("preview contains the complete report; use it directly");
     expect(context.instructions).not.toContain("Inspect the result to distinguish");
-    expect(context.instructions).not.toContain("send_subagent_message");
+    expect(f.inbox.get(context.consumerId).instructions).not.toContain("send_subagent_message");
   });
 
   it("keeps prepared events accepted, rolls failed model intent back and never recycles an actual delivered event", async () => {
@@ -70,6 +70,8 @@ describe("durable actual-intent inbox ownership", () => {
     expect(() => f.inbox.action(operation)).toThrow("action refused"); expect(f.inputs.list({ subagentId: child.subagentId })).toHaveLength(1);
     f.db.exec("DROP TRIGGER fail_action");
     const receipt = f.inbox.action(operation); expect(f.inbox.action(operation)).toEqual(receipt);
+    expect(f.inbox.action({ ...operation, operationKey: "different-sdk-key",
+      invocation: { ...operation.invocation, invocationId: randomUUID(), toolCallId: "retry" } })).toEqual(receipt);
     expect(applied).toBe(2); expect(f.inputs.list({ subagentId: child.subagentId })).toHaveLength(2);
     expect(f.service.events.get(event.eventId).state).toBe("handled");
     expect(() => f.inbox.action({ ...operation, action: { ...action, direction: "Different" } })).toThrow("ALREADY_HANDLED");

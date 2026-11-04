@@ -1,5 +1,10 @@
 # e2e/src/
 
+- agent-interface-native.e2e.test.ts — no-model accepted native exec Host, real allowlisted hostname despite exec=deny, zero model requests and retained native cleanup/source evidence
+- agent-interface-inbox.e2e.test.ts — local scripted SDK/Core/SQLite atomic flat inbox answers and legitimate later direct answers after ask_user; historical dispositions remain immutable
+- agent-interface-real.e2e.test.ts — separately opted-in natural real-model campaign with fixed 18/20/32 caps: native foreground work during delayed reports, ordinary guidance/exact question, small factual check-in/user Stop with fresh foreground publication authority; strict behavior failures retain evidence
+- agent-interface-checkin.e2e.test.ts — scripted SDK/Core/SQLite N3/K1 regressions: user Continue resets at step6; step9 supports either parent approval or one additional actually asked user decision, with final accounting after the latest user input
+
 Headless end-to-end scenarios (PRD 07-11-e2e-test-harness layer B). Run with `pnpm --filter @taki/e2e test:e2e`
 (requires a debug `taki-node` build: `cargo build --bin taki-node --manifest-path apps/desktop/src-tauri/Cargo.toml`).
 

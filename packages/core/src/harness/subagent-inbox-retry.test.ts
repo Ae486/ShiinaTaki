@@ -11,8 +11,7 @@ async function fixture() {
     const child = options.tools?.some((entry) => entry.name === "complete_subagent");
     const event = f.service.events.list({ characterId: "taki" }).find((entry) => entry.state === "delivered");
     return scriptedModel([{ kind: "tool", toolCallId: child ? "final" : "handle", toolName: child ? "complete_subagent" : "handle_agent_event",
-      input: child ? { text: "Result", materials: [] } : { eventId: event!.eventId, operationKey: `handle-${event!.eventId}`,
-        action: { kind: "retained", note: "Handled" } } }]).doStream(options);
+      input: child ? { text: "Result", materials: [] } : { eventId: event!.eventId, intent: "record", text: "Handled", target: null } }]).doStream(options);
   } });
   const f = await subagentFixture(model); fixtures.push(f);
   const delegate = (operationKey: string) => f.service.delegate({ parentRunId: f.parent.run.runId, parentToolNames: [] }, {
@@ -43,8 +42,7 @@ describe("meaningful pre-intent inbox retry opportunities", () => {
       }
       const event = f.service.events.list({ characterId: "taki" }).find((entry) => entry.state === "delivered" && !entry.reconciliationNeeded);
       return scriptedModel([{ kind: "tool", toolCallId: child ? "report" : "handle", toolName: child ? "complete_subagent" : "handle_agent_event",
-        input: child ? { text: "Result", materials: [] } : { eventId: event!.eventId, operationKey: "handle-later",
-          action: { kind: "retained", note: "The later event" } } }]).doStream(options);
+        input: child ? { text: "Result", materials: [] } : { eventId: event!.eventId, intent: "record", text: "The later event", target: null } }]).doStream(options);
     } });
     const f = await subagentFixture(model); fixtures.push(f);
     const delegate = (operationKey: string) => f.service.delegate({ parentRunId: f.parent.run.runId, parentToolNames: [] }, {

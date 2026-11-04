@@ -49,11 +49,14 @@ export function prepareSubagentInbox(state: SubagentState, input: ForegroundInbo
 
 function inboxInstructions(claim: InboxClaim | undefined, mode?: "foreground" | "idle"): string {
   if (!claim) return "";
-  if (mode === "idle") return claim.instructions;
+  const protocol = "Current inbox actions use handle_agent_event({eventId,intent,text,target}). "
+    + "Choose record, ask_user or reply with target=null; use answer_child for private replies to delivered child messages/questions and continue_child for a permitted check-in with its exact current target. "
+    + "Core supplies reply addressing and retry identity. Handle delivered-event answers here; send_subagent_message remains for ordinary guidance, interrupted work and inspected or silent work.\n";
+  if (mode === "idle") return protocol + claim.instructions;
   return "Foreground inbox: review the relevant delivered report or question now; read exact detail when its preview is incomplete. "
     + "Use its exact event and target for supported actions. If the requested results are ready, give the integrated answer in this conversation. "
     + "If other notified workers are still needed, handle the available events, finish useful foreground work, then end the current reply with the task still pending. Later inbox events let you finish without another user message; do not poll to gather all results in this reply. "
-    + "An event disposition does not publish your answer.\n" + claim.instructions;
+    + "An event disposition does not publish your answer.\n" + protocol + claim.instructions;
 }
 
 function inboxBindings(state: SubagentState, input: ForegroundInboxInput & { mode?: "foreground" | "idle" },
@@ -73,30 +76,30 @@ function inboxBindings(state: SubagentState, input: ForegroundInboxInput & { mod
         action: action ? JSON.stringify({ action: JSON.parse(String(action.action_json)), result: subagentActionEvidence(JSON.parse(String(action.result_json))) }) : undefined };
     },
     handle(value) {
-      const result = inbox.action({ ...value, consumerId: requireClaim().consumerId, apply(event) {
+      const receipt = inbox.action({ ...value, consumerId: requireClaim().consumerId, apply(event, operationKey) {
         if (value.action.kind !== "answered_child" && value.action.kind !== "continue_child") return { ok: true, eventId: event.eventId,
           disposition: value.action.kind, ...(value.action.kind === "speech_proposed" ? { publication: "not_published" } : {}) };
         if (value.action.target.subagentId !== event.subagentId || value.action.target.workInputId !== event.workInputId
           || (event.kind === "needs_input" && value.action.replyToEventId !== event.eventId)) throw new Error("SUBAGENT_INPUT_REQUEST_CONFLICT");
         const accepted = send({ characterId: input.characterId, target: value.action.target,
-          operationKey: `inbox:${event.eventId}:${value.operationKey}`, direction: value.action.direction, materials: [],
+          operationKey: `inbox:${event.eventId}:${operationKey}`, direction: value.action.direction, materials: [],
           replyToEventId: value.action.replyToEventId ?? undefined }, { kind: "parent", runId: input.runId }, value.action.kind === "continue_child");
         return { ok: true, eventId: event.eventId, disposition: value.action.kind, inputId: accepted.input?.inputId };
       } });
-      stageSpeech(state, input, value);
+      stageSpeech(state, input, { ...value, ...receipt });
       const event = inbox.get(requireClaim().consumerId).events.find((entry) => entry.eventId === value.eventId);
       if (event) deps.db.afterCommit(() => deps.changed(input.characterId, event.subagentId));
-      return result;
+      return receipt.result;
     },
   });
 }
 
 function stageSpeech(state: SubagentState, input: ForegroundInboxInput & { mode?: "foreground" | "idle" },
-  value: { eventId: string; operationKey: string; action: import("@taki/shared").SubagentInboxAction }): void {
+  value: { eventId: string; operationKey: string; consumerRunId: string; action: import("@taki/shared").SubagentInboxAction }): void {
   const { deps } = state;
   if (input.mode === "idle" && value.action.kind === "speech_proposed" && deps.reports?.stageEventReply) deps.db.afterCommit(() => {
     const work = Promise.resolve().then(() => deps.reports?.stageEventReply?.({ eventId: value.eventId,
-      consumerRunId: input.runId, actionId: value.operationKey })).then(() => undefined)
+      consumerRunId: value.consumerRunId, actionId: value.operationKey })).then(() => undefined)
       .catch(() => deps.reportError("SUBAGENT_SPEECH_PUBLICATION_UNAVAILABLE")).finally(() => state.work.delete(work));
     state.work.add(work);
   });
