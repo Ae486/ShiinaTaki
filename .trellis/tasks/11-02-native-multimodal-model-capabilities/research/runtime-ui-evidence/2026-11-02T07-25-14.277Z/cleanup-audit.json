@@ -1,0 +1,5 @@
+{
+  "ownedEdgeProcessesRemaining": 0,
+  "coreCommandExited": 0,
+  "note": "The helper edgeClosed field checked exitCode only; signal termination leaves exitCode null. Independent Win32 process query confirms no matching owned Edge process."
+}

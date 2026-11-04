@@ -1,4 +1,5 @@
 # core/memory/legacy-migration/
+- Request attribution — fenced assembly forwards the exact single-render construction sidecar while preserving admission refusal and irreversible retirement
 - legacy-diagnostics.ts — closed durable diagnostic codes and privacy-safe bounded details
 - legacy-identities.ts — length-delimited domain-separated SHA-256 identities and canonical JSON hashes
 - legacy-migration-ledger-repo.ts — durable resumable source/results/exclusion state guarded by fenced leases

@@ -1,4 +1,5 @@
 # core/memory/
+- Request attribution — canonical/legacy/selected Persona, Block, pinned/intention and mood joins describe their exact rendered spans; facade/fence/direct engine wrappers forward one synchronous render
 - layer-registry.ts — the layer taxonomy as DATA (MemoryLayerDefinitionSchema + V1_MEMORY_LAYERS + writable-layer selectors); `retention` covers permanent / rolling-window / expiring / importance-decay, and is the retention sweeper's only policy source
 - block-registry.ts — the Memory Block taxonomy as DATA (BlockDefinitionSchema + V1_BLOCKS; array order = injection order; ownership/writer/header/budget are all rows)
 - block-store.ts — Memory Block IO: pure-markdown files outside the entry tree (never FTS-indexed), read fresh per turn, written only by the registry's declared writer
@@ -66,5 +67,4 @@
 - hindsight/ — Hindsight setup/cutover clients and offline-testable replica sync/reconciliation/recovery; runtime authority composition remains separate
 - operations/ — the durable memory operation owner (Stage 1): kind registry over the B3 setup service and B5 scheduler, restart reconciliation, and the composite memory.authority.status read
 - canonical-tools/ — admission-bound capability-filtered canonical tool adapters and non-advertised compatibility aliases
-- image-description-writer.ts — thin, DELETABLE image→text bridge (#17 decision 6, D28): VLM describes a turn's images, PII-scrubs the text, writes ONE episode via the existing store path with origin "observed" (the marker the render sites fence on — D47); detached, warn+drop
 - memory-recall-selection.ts — policy-filtered Canonical hits and separate unconfirmed source/mutation intents

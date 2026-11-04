@@ -7,7 +7,7 @@ import { createRunMessageRepo } from "../db/run-message-repo.ts";
 import { createSubagentInputRepo } from "../db/subagent-input-repo.ts";
 import { createSubagentExecutionRepo } from "../db/subagent-execution-repo.ts";
 import { createSubagentContextSummaryRepo } from "../db/subagent-context-summary-repo.ts";
-import { estimateMessagesTokens } from "../memory/token-estimator.ts";
+import { estimateMessagesTokens, IMAGE_TOKENS } from "../memory/token-estimator.ts";
 import { toModelMessage } from "./turn-mapping.ts";
 import { renderSubagentInput } from "./run-message-store.ts";
 import type { PrivateTaskSummarizer } from "./private-task-summarizer.ts";
@@ -54,6 +54,61 @@ function round(seq: number, content: string): RunMessage {
 }
 
 describe("private task projected tail selection", () => {
+  it("projects historical explicit SDK image content natively while keeping byte-free complete private tool feedback", async () => {
+    const output = { type: "content" as const, value: [
+      { type: "text", text: "Historical capture metadata" },
+      { type: "file", mediaType: "image/png", data: { type: "data", data: "HISTORICAL_PIXEL_BYTES" } },
+    ] };
+    const rows: RunMessage[] = [
+      { ...round(1, "capture"), parts: [{ type: "tool-call", toolCallId: "old-capture", toolName: "mcp_capture" }] },
+      { ...round(2, "captured"), stepNumber: 1, role: "tool", parts: [{ type: "tool-result", toolCallId: "old-capture", toolName: "mcp_capture", output }] },
+    ];
+    const f = fixture({ rows, budget: 3000 });
+    const prepared = await f.prepare();
+    expect(estimateMessagesTokens(prepared.messages)).toBeGreaterThan(IMAGE_TOKENS);
+    const feedback = prepared.messages.find((message) => message.role === "tool");
+    expect(JSON.stringify(feedback)).toContain("Historical capture metadata");
+    expect(JSON.stringify(feedback)).not.toContain("HISTORICAL_PIXEL_BYTES");
+    const native = prepared.messages.filter((message) => message.role === "user" && Array.isArray(message.content));
+    expect(JSON.stringify(native)).toContain("HISTORICAL_PIXEL_BYTES");
+    expect(native).toHaveLength(1);
+    expect(rows[1]!.parts?.[0]).toMatchObject({ output });
+  });
+
+  it("prices retained images before accepting a protected private round", async () => {
+    const ref = `attachments/${"a".repeat(64)}.png`;
+    const rows: RunMessage[] = [
+      { ...round(1, "capture"), parts: [{ type: "tool-call", toolCallId: "capture", toolName: "screenshot" }] },
+      { ...round(2, "captured"), stepNumber: 1, role: "tool", parts: [{ type: "tool-result", toolCallId: "capture", toolName: "screenshot",
+        output: { type: "json", value: { ok: true } }, imageRefs: [{ mediaType: "image/png", ref }] }] },
+    ];
+    const reader = { read: vi.fn(() => ({ ok: true as const, mediaType: "image/png" as const, dataBase64: "AAAA" })) };
+    const fitting = fixture({ rows, budget: 3000 }); fitting.input.attachments = reader;
+    const prepared = await fitting.prepare();
+    expect(estimateMessagesTokens(prepared.messages)).toBeGreaterThan(IMAGE_TOKENS);
+    expect(reader.read).toHaveBeenCalledTimes(1);
+    const unfit = fixture({ rows, budget: 1500 }); unfit.input.attachments = reader;
+    await expect(unfit.prepare()).rejects.toThrow("SUBAGENT_CONTEXT_ROUND_UNFIT");
+    expect(unfit.summarize).not.toHaveBeenCalled();
+  });
+
+  it("summarizes older image evidence without sending image bytes to the text-summary producer", async () => {
+    const ref = `attachments/${"b".repeat(64)}.png`;
+    const rows: RunMessage[] = [
+      { ...round(1, "capture"), parts: [{ type: "tool-call", toolCallId: "capture", toolName: "screenshot" }] },
+      { ...round(2, "captured"), stepNumber: 1, role: "tool", parts: [{ type: "tool-result", toolCallId: "capture", toolName: "screenshot",
+        output: { type: "json", value: { ok: true, capturedAt: "2026-11-02T00:00:00Z" } }, imageRefs: [{ mediaType: "image/png", ref }] }] },
+      round(3, "Newer relevant evidence. ".repeat(150)),
+    ];
+    const f = fixture({ rows, budget: 2500 });
+    f.input.attachments = { read: () => ({ ok: true, mediaType: "image/png", dataBase64: "PRIVATE_PIXEL_BYTES" }) };
+    const prepared = await f.prepare();
+    expect(f.summarize).toHaveBeenCalledOnce();
+    expect(f.summarize.mock.calls[0]?.[0].transcript).not.toContain("PRIVATE_PIXEL_BYTES");
+    expect(JSON.stringify(prepared.messages)).not.toContain("PRIVATE_PIXEL_BYTES");
+    expect(estimateMessagesTokens(prepared.messages)).toBeLessThan(2500);
+  });
+
   it.each([false, true])("preserves unchanged small outputs beside a token-heavy exact page (large peer=%s)", async (largePeer) => {
     const history = { type: "tool-result" as const, toolCallId: "page", toolName: "read_self_history",
       output: { type: "json" as const, value: { records: [{ body: "中".repeat(3000), offset: 0, complete: false }],

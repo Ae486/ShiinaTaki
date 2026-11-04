@@ -220,8 +220,15 @@ evidence, with UTC epoch-millisecond `checked_at`. It neither creates a native j
   current explicit acceptance. Exact source, remaining time and evidence authority are still checked at acceptance.
 - Defer and explicit acceptance suppress further automatic invitations during that viewing. Root composition must
   supply `acceptedSource()` as well as `activeSession()`, including the retained source after Stop.
-- An installed bridge must select the probe tool. Ambient capture needs the configured vision slot, enabled privacy
-  setting and actual Host capabilities. Unattended `ask` remains `APPROVAL_REQUIRED`; eligibility is not an approval
+- An installed bridge must select the probe tool. Ambient capture needs the enabled privacy
+  setting and actual Host capabilities. The screened frame enters the same main decision as native image input; no
+  image-description request runs. Captured `extension_call` ambient results expose byte-free status and a trusted
+  process-local native sidecar. Preparation reads `nativeToolImages(rawResult)` before schema parsing, validates
+  the single native frame with the capture metadata, and retains the original sidecar currentness/release through
+  its same-Attempt frame lifetime. Refusal, parsing failure, withdrawal and consumption release it without recapture
+  or durable image references. Preparation retains only source text/currentness for later invitation acceptance,
+  and releases its native carrier after this Attempt. Private-screen abstention occurs in that normal decision,
+  replacing the removed translator's pre-main semantic sentinel. Unattended `ask` remains `APPROVAL_REQUIRED`; eligibility is not an approval
   and never changes policy. Required background grants come from the existing operator permission surface.
 
 ### 4. Validation & Error Matrix

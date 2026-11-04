@@ -1,4 +1,5 @@
 # shared/src/
+- model-capability-schema.ts — operator-only configured identity, optional maintained names/canonical links/provider logos/limits, nullable capability declarations and independent adapter support
 - cache-usage-schema.ts — summary-window cache counts, coverage and typed whole-snapshot operator subscriptions; no payloads or client-owned counters
 - run-work-schema.ts — bounded accepted-work transition contracts and strict v3 lifecycle events; no publication authority
 - prepared-publication-schema.ts — explicit finite/until-cancelled accepted-source/Class A scope, finite candidate freshness and reference-only publication/edit data; serialized scope is not a grant
@@ -23,7 +24,7 @@
 - chat-schema.ts — chat methods including ordered activity/read, accepted send identity, legacy cancellation/events, and in-flight image input
 - chat-activity-schema.ts — strict ordered language/tool events, real phase/outcome vocabulary, bounded recovery snapshots and incremental UTF-8 accounting
 - timeline-presentation-schema.ts — independently validated batch coverage and consistent canonical item references; corrupt references fall back without hiding history or losing handoff identity
-- timeline-schema.ts — canonical Timeline history, optional source/presentation metadata, complete batch commits and compatible append/remove notifications
+- timeline-schema.ts — canonical Timeline history, optional source/presentation metadata, trusted byte-free tool-result image refs, complete batch commits and compatible append/remove notifications
 - config-schema.ts — CONFIG_METHODS + knob entry/list/set/subscribe/changed schemas + ConfigRefusalReason (settings store); operator-only, NO Rust mirror
 - timing-policy-schema.ts — single D59/D61 timing-key vocabulary + cross-field policy schema + owner-approved development defaults; shared by Core registry and Desktop consumers
 - media-schema.ts — MEDIA_METHODS + media.get/clear/usage param & result schemas (attachment byte serving + lifecycle); operator-only, NO Rust mirror
@@ -117,4 +118,5 @@
 - subagent-progress-schema.ts — captured work intervals, runtime check-in sidecars and complete/partial child token usage
 - subagent-attention-schema.ts — bounded durable operator attention and explicit pre-intent retry contracts
 - auxiliary-usage-schema.ts — nullable observed auxiliary call counters, state, keyset query and aggregate contracts
+- request-attribution-schema.ts — bounded category/origin conservation, per-Effect dispatch measurements, real-window snapshots and latest-primary observation with distinct optional response model identity
 - memory-tidy-diagnostics-schema.ts — safe bounded partial/failed maintenance details on the existing JSON-RPC error path

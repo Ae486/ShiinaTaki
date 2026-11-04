@@ -23,11 +23,13 @@ import {
 } from "./extension-sources.ts";
 import { createExtensionTools } from "./extension-tools.ts";
 import { createToolDisclosureSnapshot, type ToolDisclosureSnapshot } from "./tool-disclosure-snapshot.ts";
+import { contextText, joinContextText, type AttributedText } from "../agents/context-attribution.ts";
 
 export interface ExtensionRunContext {
   readonly tools: ToolSet;
   readonly toolDisplayNames?: Readonly<Record<string, string>>;
   readonly instructions: string;
+  readonly instructionsAttribution?: AttributedText;
   readonly snapshot: ExtensionRunSnapshot;
   readonly toolDisclosure: ToolDisclosureSnapshot;
 }
@@ -40,13 +42,18 @@ export function createExtensionRunContext(input: {
   mcp: McpManager;
   interactive?: TurnInteractive;
   route: (request: CapabilityRouteRequest & { targetHostId: string }) => Promise<unknown>;
+  /** Native screenshot projection for this exact captured Host binding, never for arbitrary extension JSON. */
+  projectScreenshot?: (output: unknown) => unknown;
+  projectAmbientScreenshot?: (output: unknown) => unknown;
 }): ExtensionRunContext {
   const catalogs = input.catalogs.list();
   const mcp = snapshotMcpExtensions(input.mcp, input.interactive);
   const candidates = [
     ...snapshotSkillExtensions({ ownerHostId: input.coreHostId, ...input.skills }),
     ...mcp.candidates,
-    ...snapshotHostCapabilityExtensions(input.catalogs, input.route),
+    ...snapshotHostCapabilityExtensions(input.catalogs, input.route, {
+      projectScreenshot: input.projectScreenshot, projectAmbientScreenshot: input.projectAmbientScreenshot,
+    }),
   ];
   const registry = createExtensionRegistry({
     runId: input.runId,
@@ -55,10 +62,13 @@ export function createExtensionRunContext(input: {
     candidates,
   });
   const hostContext = renderHostContext(createHostContext(input.coreHostId, catalogs));
+  const instructionsAttribution = joinContextText([contextText(hostContext, "runtime_context"),
+    contextText(registry.renderContext(), "instructions")], "\n\n", true);
   return Object.freeze({
     tools: Object.freeze(mergeToolSets(mcp.directTools, createExtensionTools(registry))),
     toolDisplayNames: mcp.toolDisplayNames,
-    instructions: `${hostContext}\n\n${registry.renderContext()}`,
+    instructions: instructionsAttribution.text,
+    instructionsAttribution,
     snapshot: registry.snapshot,
     toolDisclosure: createToolDisclosureSnapshot(registry, mcp.directTools, input.coreHostId),
   });

@@ -4,10 +4,12 @@
  * POS: core/observability — no counters of its own; ledgers and summary baselines own the facts.
  */
 import { CacheUsageWindowSnapshotSchema, type CacheUsageUpdate, type CacheUsageWindowSnapshot, type MonitorMode } from "@taki/shared";
+import { LatestPrimaryRequestSnapshotSchema, type LatestPrimaryRequestSnapshot } from "@taki/shared";
 import type { Connection } from "../server/connection-registry.ts";
 
 interface Dependencies {
   read(characterId: string): CacheUsageWindowSnapshot;
+  readLatestPrimaryRequest?(characterId: string): LatestPrimaryRequestSnapshot;
   mode(): MonitorMode;
   logger: { warn(data: Record<string, unknown>, message: string): void };
 }
@@ -58,7 +60,27 @@ export class CacheUsageService {
       try { this.deps.logger.warn({ code: "CACHE_USAGE_READ_FAILED" }, "cache usage projection unavailable"); }
       catch { /* Optional diagnostics cannot affect usage settlement. */ }
     }
-    return { revision: ++this.revision, snapshot };
+    const latestPrimaryRequest = this.latestPrimaryRequest(characterId);
+    return { revision: ++this.revision, snapshot,
+      ...(latestPrimaryRequest === undefined ? {} : { latestPrimaryRequest }) };
+  }
+
+  private latestPrimaryRequest(characterId: string): LatestPrimaryRequestSnapshot | undefined {
+    if (!this.deps.readLatestPrimaryRequest) return undefined;
+    const unavailable = (reason: "read-failed" | "monitor-disabled"): LatestPrimaryRequestSnapshot => ({
+      scope: "latest-primary-request", characterId, status: "unavailable", reason, request: null,
+      computedAt: new Date().toISOString(),
+    });
+    try {
+      if (this.deps.mode() === "DISABLED") return unavailable("monitor-disabled");
+      const result = LatestPrimaryRequestSnapshotSchema.parse(this.deps.readLatestPrimaryRequest(characterId));
+      if (result.characterId !== characterId) throw new Error("REQUEST_ATTRIBUTION_SCOPE_MISMATCH");
+      return result;
+    } catch {
+      try { this.deps.logger.warn({ code: "REQUEST_ATTRIBUTION_READ_FAILED" }, "request attribution projection unavailable"); }
+      catch { /* Optional diagnostics cannot affect model settlement or cache facts. */ }
+      return unavailable("read-failed");
+    }
   }
 
   private flush(): void {
@@ -69,7 +91,8 @@ export class CacheUsageService {
       if (!operator(connection) || this.members.get(connection) !== member) continue;
       let update = snapshots.get(member.characterId);
       if (!update) { update = this.snapshot(member.characterId); snapshots.set(member.characterId, update); }
-      try { member.sink({ revision: update.revision, snapshot: { ...update.snapshot } }); }
+      try { member.sink({ revision: update.revision, snapshot: { ...update.snapshot },
+        ...(update.latestPrimaryRequest === undefined ? {} : { latestPrimaryRequest: structuredClone(update.latestPrimaryRequest) }) }); }
       catch { /* A closed socket cannot interrupt other observers or committed model work. */ }
     }
   }

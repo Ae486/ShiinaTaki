@@ -16,11 +16,10 @@ function sample(processName = "Code.exe", windowTitle = "main.ts"): RouteResult 
 function harness(seed?: PerceptionPauseState) {
   let result = sample();
   const route = vi.fn(async () => result);
-  const describe = vi.fn(async () => "unused synthetic description");
   const save = vi.fn();
   const { logger, records } = createCaptureLogger();
   const perception = createPerceptionLayer({
-    route, describe, hasNode: () => true,
+    route, hasNode: () => true,
     ambient: { enabled: false, retention: { mode: "keep" } },
     ambientShotsDir: join(process.cwd(), "target", "unused-perception-refresh"),
     pauseStore: { load: () => seed, save }, logger,
@@ -29,7 +28,7 @@ function harness(seed?: PerceptionPauseState) {
   const sink = vi.fn();
   const connection: Connection = { state: { status: "authenticated", role: "operator", deviceId: "operator", capabilities: [] } };
   return {
-    perception, route, describe, save, records, sink,
+    perception, route, save, records, sink,
     show: (next: RouteResult) => { result = next; },
     subscribe: () => perception.changes.subscriptions.subscribe(connection, sink),
   };
@@ -69,7 +68,6 @@ describe("Perception source-to-card invalidation wiring", () => {
     for (const privateText of ["alice@example.com", "private vault title", "1Password", "Thunderbird", "notes.md"]) {
       expect(publicTrace).not.toContain(privateText);
     }
-    expect(h.describe).not.toHaveBeenCalled();
   });
 
   it("ignores malformed samples and repeated unavailable seals; actual denial changes scheduled state", async () => {
@@ -106,7 +104,7 @@ describe("Perception source-to-card invalidation wiring", () => {
     expect(h.perception.card(Date.now())).toMatchObject({
       pauseState: { paused: false, until: null }, samplingStatus: { foreground: false, ambientScreen: false },
     });
-    for (const sideEffect of [h.route, h.describe, h.save]) expect(sideEffect).not.toHaveBeenCalled();
+    for (const sideEffect of [h.route, h.save]) expect(sideEffect).not.toHaveBeenCalled();
     expect(vi.getTimerCount()).toBe(0);
   });
 
@@ -117,7 +115,7 @@ describe("Perception source-to-card invalidation wiring", () => {
     expect(h.sink).not.toHaveBeenCalled();
     expect(h.perception.card(Date.now()).current?.windowTitle).toBe("before subscribe");
     expect(vi.getTimerCount()).toBe(0);
-    for (const sideEffect of [h.route, h.describe, h.save]) expect(sideEffect).not.toHaveBeenCalled();
+    for (const sideEffect of [h.route, h.save]) expect(sideEffect).not.toHaveBeenCalled();
     h.perception.dispose();
     h.perception.activity.state.seal();
     expect(h.sink).not.toHaveBeenCalled();

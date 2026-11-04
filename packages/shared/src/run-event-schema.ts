@@ -6,6 +6,7 @@
 import { z } from "zod";
 import { RunEventV2Schema } from "./initiative-event-schema.ts";
 import { RunWorkEventSchema } from "./run-work-schema.ts";
+import { ContextRequestMeasuredEventSchema } from "./request-attribution-schema.ts";
 import {
   EffectSourceRefSchema,
   InputTokenDetailsSchema,
@@ -235,7 +236,7 @@ function expectedCategoryAndSource(kind: z.infer<typeof RunEventKindSchema>): {
   return { category: "lifecycle", source: "core.run-repo" };
 }
 
-export const RunEventSchema = z.union([RunEventV1Schema, RunEventV2Schema, RunWorkEventSchema]);
+export const RunEventSchema = z.union([RunEventV1Schema, RunEventV2Schema, RunWorkEventSchema, ContextRequestMeasuredEventSchema]);
 export type RunEventV1 = z.infer<typeof RunEventV1Schema>;
 export type RunEvent = z.infer<typeof RunEventSchema>;
 export type RunEventPayload = z.infer<typeof RunEventPayloadSchema>;

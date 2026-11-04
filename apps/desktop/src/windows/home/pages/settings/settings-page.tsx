@@ -4,7 +4,7 @@
  * POS:    Home Settings composition — Core order and existing group/key identities preserve active editing.
  */
 
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState, type ReactNode } from "react";
 import { PageAlert, PageBody, PageHeader } from "../../page-chrome.tsx";
 import { Field, FIELD_CONTROL } from "@/components/ui/field.js";
 import { EmptyState } from "@/components/ui/empty-state.js";
@@ -16,6 +16,7 @@ import { PermissionSection } from "./permission-section.tsx";
 import { ApprovalDecisionsSection } from "./approval-decisions-section.tsx";
 import { configLabelOf, filterConfigEntries, groupConfigEntries } from "./config-groups.ts";
 import { UserTimezoneSection } from "./user-timezone-section.tsx";
+import { ModelCapabilitiesSection } from "./model-capabilities-section.tsx";
 
 export function SettingsPage() {
   const { entries, hasSnapshot, connectionReady, loading, error, refreshing, observationGap, save, refresh } = useConfig();
@@ -52,7 +53,9 @@ export function SettingsPage() {
                 groupEntries={groupEntries}
                 connectionReady={connectionReady}
                 onSave={save}
-              />
+              >
+                {group.id === "model-context" && <ModelCapabilitiesSection entries={entries} />}
+              </KnobGroup>
             ))}
             {groups.length === 0 && <EmptyState title="没有匹配的配置项" hint="换一个关键词，或清空搜索框查看全部配置。" />}
           </>
@@ -63,6 +66,7 @@ export function SettingsPage() {
 }
 
 interface KnobGroupProps {
+  children?: ReactNode;
   label: string;
   hint: string;
   groupEntries: ReturnType<typeof groupConfigEntries>[number]["entries"];
@@ -71,7 +75,7 @@ interface KnobGroupProps {
 }
 
 /** One group header (Chinese + one-line explanation) and its card of knob rows in server order. */
-function KnobGroup({ label, hint, groupEntries, connectionReady, onSave }: KnobGroupProps) {
+function KnobGroup({ label, hint, groupEntries, connectionReady, onSave, children }: KnobGroupProps) {
   return (
     <section className="flex flex-col gap-2">
       <div>
@@ -80,13 +84,15 @@ function KnobGroup({ label, hint, groupEntries, connectionReady, onSave }: KnobG
       </div>
       <div className="divide-y divide-border-subtle overflow-hidden rounded-xl border border-border bg-surface shadow-card">
         {groupEntries.map((entry) => (
-          <KnobField
-            key={entry.key}
-            entry={entry}
-            chineseLabel={configLabelOf(entry.key) ?? undefined}
-            connectionReady={connectionReady}
-            onSave={onSave}
-          />
+          <Fragment key={entry.key}>
+            <KnobField
+              entry={entry}
+              chineseLabel={configLabelOf(entry.key) ?? undefined}
+              connectionReady={connectionReady}
+              onSave={onSave}
+            />
+            {entry.key === "TAKI_PROVIDER_MODEL" && children}
+          </Fragment>
         ))}
       </div>
     </section>

@@ -60,10 +60,9 @@ describe("ChatAgent non-primary input seam", () => {
   it("keeps non-primary image bytes in-flight without saving attachment media", async () => {
     const fixture = createCompanionFixture(); fixtures.push(fixture);
     const save = vi.fn(() => ({ ref: `attachments/${"a".repeat(64)}.png`, bytes: 3 }));
-    const vision = streamingMockModel(["described"]);
+    const primaryModel = streamingMockModel(["seen"]);
     const agent = createChatAgent({
-      model: streamingMockModel(["unused"]),
-      visionModel: vision,
+      model: primaryModel,
       attachments: { save },
       store: fixture.conversation,
       memory: fixture.memory,
@@ -72,7 +71,7 @@ describe("ChatAgent non-primary input seam", () => {
       turnKind: "non-primary", controlInput: "inspect image",
     })) { void delta; }
     expect(save).not.toHaveBeenCalled();
-    expect(JSON.stringify(vision.doStreamCalls[0]?.prompt)).toContain("AAAA");
+    expect(JSON.stringify(primaryModel.doStreamCalls[0]?.prompt)).toContain('"type":"file"');
     expect(fixture.conversation.history("taki")).toEqual([]);
   });
 

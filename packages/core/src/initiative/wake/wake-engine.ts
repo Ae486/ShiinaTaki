@@ -152,7 +152,7 @@ async function dispatchSelection(state: EngineState, selection: WakeSelection): 
     }
     const result = await state.deps.runtime.dispatch({ opportunityId: selection.opportunityId, characterId: selection.characterId,
       selectedContext: context,
-      ...(selection.candidates.some((candidate) => candidate.kind === "media") && state.deps.prepareInput
+      ...(state.deps.prepareInput
         ? { prepareInput: (turn) => state.deps.prepareInput!(selection, turn) } : {}),
       isCurrent: () => !state.closed && selectionCurrent(state.deps, selection, state.now()),
       deliveryGate: () => wakeDeliveryGate(state.deps, selection, state.now()),

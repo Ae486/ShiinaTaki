@@ -58,6 +58,15 @@ describe("createTimelineRepo.append", () => {
     expect(page.entries[0]).toMatchObject({ role: "tool", parts });
   });
 
+  it("preserves trusted image refs on their exact tool result while legacy results remain unchanged", () => {
+    const ref = `attachments/${"a".repeat(64)}.png`;
+    const parts: TimelinePart[] = [{ type: "tool-result", toolCallId: "capture", toolName: "extension_call",
+      output: { type: "json", value: { ok: true, width: 64 } }, imageRefs: [{ mediaType: "image/png", ref }] }];
+    repo.append({ characterId: "taki", role: "tool", content: "capture status", parts });
+    expect(repo.latestAscending("taki", 10)[0]?.parts).toEqual(parts);
+    expect(db.prepare("SELECT parts FROM timeline_messages").get()?.parts).toContain(ref);
+  });
+
   it("strips raw input from legacy timeline JSON before returning it", () => {
     const sentinel = "SENTINEL_LEGACY_DB_SECRET_83de";
     db.prepare(

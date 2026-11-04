@@ -95,6 +95,8 @@ export { MEMORY_METHODS, MemoryAutoStatusSchema, MemoryStatusParamsSchema, Memor
   MemoryStatusParams, type MemoryStatusResult, type MemorySummaryStatus, type MemoryTidyDefects, type MemoryTidyParams, type
   MemoryTidyResult, type MemoryWindowSlot } from "./memory-schema.ts";
 
+export { MODEL_CAPABILITIES_METHOD, ModelCapabilitiesParamsSchema, ModelCapabilitiesResultSchema,
+  type ModelCapabilitiesParams, type ModelCapabilitiesResult } from "./model-capability-schema.ts";
 export { CONFIG_METHODS, ConfigApplySchema, ConfigChangedSchema, ConfigEntrySchema, ConfigInputSchema, ConfigListParamsSchema,
   ConfigListResultSchema, ConfigRefusalReasonSchema, ConfigSetParamsSchema, ConfigSetResultSchema, ConfigSubscribeParamsSchema,
   ConfigSubscribeResultSchema, ConfigValueSchema, type ConfigApply, type ConfigChanged, type ConfigEntry, type ConfigInput, type
@@ -525,3 +527,9 @@ export { MemoryTidyToolNameSchema, MemoryTidyIssueSchema, MemoryTidyFailureReaso
 export { CACHE_USAGE_METHODS, CacheUsageWindowSnapshotSchema, CacheUsageUpdateSchema,
   CacheUsageSubscribeParamsSchema, CacheUsageUnsubscribeParamsSchema, CacheUsageUnsubscribeResultSchema,
   type CacheUsageWindowSnapshot, type CacheUsageUpdate, type CacheUsageSubscribeParams } from "./cache-usage-schema.ts";
+export { CONTEXT_CATEGORIES, CONTEXT_CONTENT_ORIGINS, CONTEXT_REQUEST_SCHEMA_VERSION,
+  ContextCategorySchema, ContextContentOriginSchema, ContextWindowSnapshotSchema, RequestCompositionSchema,
+  ContextRequestMeasuredPayloadSchema, ContextRequestMeasuredEventSchema, LatestPrimaryRequestSnapshotSchema,
+  type ContextCategory, type ContextContentOrigin, type ContextWindowSnapshot, type RequestComposition,
+  type ContextRequestMeasuredPayload, type ContextRequestMeasuredEvent, type LatestPrimaryRequestSnapshot,
+} from "./request-attribution-schema.ts";

@@ -7,11 +7,13 @@
 import type { ModelMessage } from "ai";
 import type { SourceContext, TimelineCommitted, TimelineEntry } from "@taki/shared";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
-import { estimateMessageTokens } from "../memory/token-estimator.ts";
+import { estimateMessageTokens, estimateMessagesTokens } from "../memory/token-estimator.ts";
 import { selectWindow } from "./context-window.ts";
 import { foldUnderPressure } from "./replay-folds.ts";
 import { loadReplaySource, REPLAY_SOURCE_BACKSTOP, type ReplaySource } from "./replay-source-loader.ts";
-import { toModelMessage, toUserEntryInput, type TurnEntryInput, type TurnMessage, type UserImageInput } from "./turn-mapping.ts";
+import { toUserEntryInput, type TurnEntryInput, type TurnMessage, type UserImageInput } from "./turn-mapping.ts";
+import { nativeReplayMessages, replayImageSnapshot, type ImageReplayReader } from "./native-image-replay.ts";
+import { contextText, retainContextText } from "./context-attribution.ts";
 import { beginPrimaryConversation, commitConversationTurn, publishTurnCommit, retractPrimaryConversation,
   type PrimaryBeginInput, type TurnCommitInput, type TurnWriterDeps } from "./conversation-turn-writer.ts";
 
@@ -97,6 +99,8 @@ export interface ConversationStore {
 
 export interface ConversationStoreDeps {
   repo: TimelineRepo;
+  /** Native image hydration uses the same read snapshot for source loading, folds, selection and projection. */
+  attachments?: ImageReplayReader;
   primarySources?: TurnWriterDeps["primarySources"];
   /** Fired after each committed append; the server fans it out as timeline.appended (write→event colocation). */
   onAppend?: (entry: TimelineEntry) => void;
@@ -143,8 +147,9 @@ export function createConversationStore(deps: ConversationStoreDeps): Conversati
   };
   // history(), windowStart(), pressure measurement and request construction all derive from this one projection.
   const project = (characterId: string): ReplayProjection => {
-    const view = selectView({ repo, window, summaries, reportWallHit, reportSourceBackstopHit, source }, characterId);
-    const messages = view.entries.map(toModelMessage).filter((message): message is ModelMessage => message !== null);
+    const attachments = replayImageSnapshot(deps.attachments);
+    const view = selectView({ repo, window, summaries, reportWallHit, reportSourceBackstopHit, source, attachments }, characterId);
+    const messages = view.entries.flatMap((entry) => nativeReplayMessages(entry, attachments));
     return { messages: view.head === null ? messages : [view.head, ...messages], windowStartSeq: view.windowStartSeq, measurement: view.measurement };
   };
   return {
@@ -185,6 +190,7 @@ interface ViewContext {
   reportWallHit: (hit: WallHit) => void;
   reportSourceBackstopHit?: (hit: SourceBackstopHit) => void;
   source?: { maxRows?: number; pageSize?: number };
+  attachments?: ImageReplayReader;
 }
 
 // The Replay View pipeline (ADR 0008): summary substitution → R4 folds under pressure → the emergency token cut.
@@ -194,8 +200,9 @@ function selectView(ctx: ViewContext, characterId: string) {
   const through = summary?.throughSeq ?? 0;
   const measured = ctx.window !== undefined;
   const budget = ctx.window?.budget() ?? Number.POSITIVE_INFINITY;
+  const entryCost = (entry: TimelineEntry) => estimateMessagesTokens(nativeReplayMessages(entry, ctx.attachments));
   const source = measured
-    ? loadReplaySource({ repo: ctx.repo, characterId, throughSeq: through, candidateBudget: budget, ...ctx.source })
+    ? loadReplaySource({ repo: ctx.repo, characterId, throughSeq: through, candidateBudget: budget, entryCost, ...ctx.source })
     : legacySource(ctx.repo, characterId, through);
   if (source.backstopHit) ctx.reportSourceBackstopHit?.({ characterId, loadedRows: source.loadedRows,
     limit: ctx.source?.maxRows ?? REPLAY_SOURCE_BACKSTOP, throughSeq: through,
@@ -207,9 +214,9 @@ function selectView(ctx: ViewContext, characterId: string) {
   // The head occupies the same budget the rows compete for; unmeasured mode keeps the 0-cost convention.
   const headCost = head !== null && Number.isFinite(budget) ? estimateMessageTokens(head) : 0;
   const entryBudget = budget - headCost;
-  const liveTokensBeforeFolds = measured ? estimateEntries(live) : 0;
-  const folded = foldUnderPressure(live, entryBudget);
-  const selection = selectWindow(folded.entries, entryBudget);
+  const liveTokensBeforeFolds = measured ? live.reduce((sum, entry) => sum + entryCost(entry), 0) : 0;
+  const folded = foldUnderPressure(live, entryBudget, entryCost);
+  const selection = selectWindow(folded.entries, entryBudget, entryCost);
   const cutDropped = folded.entries.length - selection.entries.length;
   const tokenBoundaryHit = cutDropped > 0 && folded.estimatedTokens > entryBudget;
   // The wall (R5): every fold applied and the live rows STILL exceed the budget — the cut is now dropping
@@ -242,16 +249,10 @@ function legacySource(repo: TimelineRepo, characterId: string, throughSeq: numbe
     loadedRows: rows.length, oldestLoadedSeq: rows[0]?.seq, newestLoadedSeq: rows.at(-1)?.seq };
 }
 
-function estimateEntries(entries: TimelineEntry[]): number {
-  return entries.reduce((sum, entry) => {
-    const message = toModelMessage(entry);
-    return sum + (message === null ? 0 : estimateMessageTokens(message));
-  }, 0);
-}
-
 // The head message is PROJECTION ONLY — never persisted, never a timeline row (R3; the user must never see a
 // machine summary in scroll-back). role:"user" per the surveyed precedents (Claude Code / Codex / Letta legacy
 // all re-enter the summary as a user-side message); the base prompt teaches the tag (batch 7b).
 function summaryHead(text: string): ModelMessage {
-  return { role: "user", content: `<conversation-summary>\n${text}\n</conversation-summary>` };
+  const content = `<conversation-summary>\n${text}\n</conversation-summary>`;
+  return retainContextText({ role: "user" as const, content }, contextText(content, "summary"));
 }

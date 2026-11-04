@@ -4,6 +4,7 @@
  * POS: core/initiative — inert adapter until a caller and opt-in setting authorize an opportunity
  */
 import { createHash } from "node:crypto";
+import { attributedContextText, retainContextText } from "../agents/context-attribution.ts";
 import { InitiativeSelectedContextSchema, type InitiativeSelectedContext, type InitiativePresentation } from "@taki/shared";
 import type { ChatAgent, TurnContext } from "../agents/chat-agent.ts";
 import { createHeartbeatDecisionCollector } from "../agents/heartbeat-respond-tool.ts";
@@ -16,6 +17,7 @@ import type { DeliveryCoordinator } from "../delivery/delivery-coordinator.ts";
 import type { InitiativePolicy } from "../config/initiative-policy-config.ts";
 import type { InitiativeOpportunityRepo } from "../db/initiative-opportunity-repo.ts";
 import { bindCapturedToolExecution } from "../governance/captured-tool-execution.ts";
+import type { InitiativePreparedInput } from "./initiative-prepared-input.ts";
 
 export interface InitiativeOpportunity {
   opportunityId: string;
@@ -24,7 +26,7 @@ export interface InitiativeOpportunity {
   isCurrent(): boolean;
   deliveryGate(): "ready" | "hold" | "suppress";
   /** Bounded evidence reads/capture execute under this admitted Run's original tools and Effect authority. */
-  prepareInput?(turn: TurnContext): Promise<string | undefined>;
+  prepareInput?(turn: TurnContext): Promise<InitiativePreparedInput | undefined>;
   /** Additional stricter-only admission policy; never reapply it after this Run consumes its own allowance. */
   beforeAdmit?(): "budget" | "gap" | undefined;
   /** Critical source/accounting linkage for a newly committed Run, before any model/Effect starts. */
@@ -58,6 +60,8 @@ export function createInitiativeRuntime(deps: InitiativeDeps): InitiativeRuntime
   let closed = false; const active = new Set<Promise<InitiativeDispatchResult>>();
   const dispatch = async (opportunity: InitiativeOpportunity): Promise<InitiativeDispatchResult> => {
     const selection = InitiativeSelectedContextSchema.parse(opportunity.selectedContext);
+    const descriptor = attributedContextText(opportunity.selectedContext);
+    if (descriptor) retainContextText(selection, descriptor);
     const reason = refusal(deps, { opportunity, selection }, closed);
     if (reason) { deps.deliveries.notePolicy(opportunity.characterId, reason); return { status: "refused", reason }; }
     const release = deps.queue.tryAcquireBackground(opportunity.characterId);
@@ -154,21 +158,13 @@ async function reasonAndDeliver(deps: InitiativeDeps, execution: Execution): Pro
       deps.opportunities.charge(opportunityKey(opportunity), deps.policy().modelHourLimit);
     },
     runContext: context, decisionCollector: collector(), onRetry(reason) {
+      if (turn.nativeImageContext) return false; // Captured pixels belong to this Attempt, never a replacement one.
       const next = deps.runs.retry(identity.runId, identity.attemptId, reason).run.activeAttemptId;
       if (!next || next === identity.attemptId) return false;
       identity.attemptId = next; turn.attemptId = next; turn.decisionCollector?.close(); turn.decisionCollector = collector(); return true;
     } };
   try {
-    if (opportunity.prepareInput) {
-      // Evidence preparation runs before the Agent's normal tool binding. Retain the captured
-      // authority and closures, adding only this execution's lifecycle and cancellation metadata.
-      const prepared = await opportunity.prepareInput({ ...turn, runContext: { ...context,
-        tools: bindCapturedToolExecution(context.tools ?? {}, { ...identity, effects: deps.effects, signal: controller.signal }) } });
-      if (!current() || opportunity.deliveryGate() === "suppress" || !prepared?.trim() || prepared.length > 8_000) {
-        throw new Error("INITIATIVE_PREPARATION_REFUSED");
-      }
-      turn.controlInput = prepared;
-    }
+    await prepareTurnInput(deps, { ...execution, current }, turn);
     for await (const delta of deps.agent.stream({ characterId: opportunity.characterId, message: "Initiative judgment" }, turn)) { void delta; }
     if (!current() || deps.effects.unfinished(identity.runId).length > 0) throw new Error("INITIATIVE_SETTLEMENT_REFUSED");
     const decision = turn.decisionCollector?.decision();
@@ -184,7 +180,19 @@ async function reasonAndDeliver(deps: InitiativeDeps, execution: Execution): Pro
     deps.runs.settle(identity.runId, identity.attemptId, controller.signal.aborted ? "cancelled" : "failed",
       { retryable: false, errorCode: "initiative_decision_failed", summary: "Initiative decision did not settle" });
     return { status: "settled", ...identity };
-  } finally { turn.decisionCollector?.close(); }
+  } finally { turn.nativeImageContext?.release(); turn.decisionCollector?.close(); }
+}
+
+async function prepareTurnInput(deps: InitiativeDeps, binding: Execution & { current(): boolean }, turn: TurnContext): Promise<void> {
+  const { opportunity, context, identity, controller, current } = binding;
+  if (!opportunity.prepareInput) return;
+  // Preparation retains captured authority/closures and adds only this execution's lifecycle metadata.
+  const prepared = await opportunity.prepareInput({ ...turn, runContext: { ...context,
+    tools: bindCapturedToolExecution(context.tools ?? {}, { ...identity, effects: deps.effects, signal: controller.signal }) } });
+  turn.nativeImageContext = prepared?.nativeImageContext;
+  if (!current() || opportunity.deliveryGate() === "suppress" || !prepared?.text.trim() || prepared.text.length > 8_000
+    || (turn.nativeImageContext && !turn.nativeImageContext.isCurrent())) throw new Error("INITIATIVE_PREPARATION_REFUSED");
+  turn.controlInput = prepared.text;
 }
 
 function opportunityKey(opportunity: InitiativeOpportunity): string {

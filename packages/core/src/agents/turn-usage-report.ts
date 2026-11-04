@@ -59,7 +59,8 @@ export function createTurnUsageCapture() {
       pending = undefined;
     },
   };
-  return { telemetry, latest: () => sample };
+  return { telemetry, latest: () => sample,
+    dispatched: (request: Omit<RequestUsageSample, "usage">) => { pending = request; } };
 }
 
 export function fireUsageReport(deps: TurnUsageDeps, ctx: TurnUsageContext): void {

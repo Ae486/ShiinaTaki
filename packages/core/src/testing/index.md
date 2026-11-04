@@ -24,4 +24,4 @@
 - co-watching-fixture.ts — synthetic native/browser producers over real ChatAgent/SubagentService/Run/SQLite/Delivery owners; optional actual model/Skill/file composition with explicit context policy and main-model Utility fallback, default scripted artifact producer
 - co-watching-tool-fixture.ts — actual shipped Co-Watching Skill loader and governed Workspace tools for isolated acceptance fixtures
 - source-live-evidence.ts — physically capped real-provider observation, synthetic request capture and immutable per-trial Source evidence directories
-- subagent-fixture.ts — synthetic real SQLite/Effect/ToolLoopAgent/child-service fixture without external calls or user Memory
+- subagent-fixture.ts — synthetic real SQLite/Effect/ToolLoopAgent/child-service fixture with optional retained-image reader, without external calls or user Memory

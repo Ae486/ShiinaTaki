@@ -1,4 +1,8 @@
 # core/agents/
+- context-attribution.ts — construction-owned text spans and supplier sidecars; nonserialized single-render metadata
+- request-composition.ts — exclusive nine-category/four-origin estimates of actual native dispatch, with deliberate framing and heuristic/unknown coverage
+- request-attribution-observer.ts — isolated existing-ledger measurements bound to the exact dispatch-scoped model Effect and real-window snapshot
+- tool-content-attribution.ts — bounded Attempt-local supplier recovery after SDK conversion; per-occurrence retained sources and unknown conflicting pairs
 - chat-agent.ts — AI SDK v7 ToolLoopAgent with ordered activity, provider-independent atomic primary source capture/retain/retract, existing cancellation/retry and non-primary control boundaries; primary-compatible AI SDK v7 ToolLoopAgent with full-turn persistence/cancellation, exact primary commit witnesses, admission-bound memory/tools, and ephemeral automatic recall before request measurement; one live User Timezone capture per attempt keeps stable day and volatile time coherent across awaited recall; non-primary controls remain separate from relationship history and automatic ingestion; Core cancellation gates the post-turn callback bundle after exact primary source witnessing
 - chat-activity.ts — accepted-message ordered producer; callback-before-receipt buffering, immutable invocations and identity-guarded terminalization
 - chat-activity-projection.ts — runtime-owned latest started Character snapshot, incremental item/text budgets, explicit overflow and disposal
@@ -44,7 +48,7 @@
 - agent-tool-assembly.ts — shared turn tool assembly with immutable executable selection and captured Skill/extension alias enforcement
 - work-context.ts — trusted private replay, actual model-input receipts and completed/partial output ports for shared Agent execution
 - work-scope.ts — disjoint child lane keys and Character-hook discriminator
-- run-message-store.ts — bounded private replay and same-work addressed inputs bound to actual Effect intents; no Timeline or Memory writes
+- run-message-store.ts — bounded private native replay and same-work addressed inputs bound to actual Effect intents; no Timeline or Memory writes
 - subagent-tools.ts — trusted main delegation tool composition and selected actual material resolution
 - subagent-delegate-tool.ts — independent create/reuse acceptance, event-driven follow-up across replies versus silent inspection, independent check-ins, snapshot/material/tool selection and primary no-retract marker
 - subagent-message-tool.ts — ordinary guidance, exact question answers and check-in/unfinished-work continuation with copied current targets and distinct reply-event rules
@@ -57,8 +61,16 @@
 - source-interpretation.ts — shared source/subject/quotation contract; missing evidence preserves unknown rather than proving absence or pending status, including after corrections
 
 - agent-attempt.ts — shared SDK request owner with child-only pressure rollover, foreground private routing and explicit completed-step failure fences outside SDK notification callbacks
+- native-image-context.ts — transient producer-owned image lease shared by primary foreground and admitted initiative Attempts
+- native-image-projection.ts — native FilePart construction and actual tool/current-context source sidecars independent of SDK role
+- native-image-replay.ts — retained-ref hydration and truthful missing/expired facts from the same snapshot used by source/fold/window accounting
+- native-image-attempt.ts — per-dispatch observation/retained-image validity checks and actual outgoing-envelope capture without another model call
+- native-tool-images.ts — trusted non-serialized capture/MCP pixels, exact image/ref ordering and originating model Effect/step identity with optional transient validity/release
+- native-tool-projection.ts — idempotent next-step image siblings paired with their completed tool call/result and Attempt cleanup
+- native-tool-image-output.ts — read-only native normalization of historical declared SDK image/file content; byte-free tool feedback preserves non-image content and original durable rows
 - worker-sdk-segment.ts — complete local success/error frontier safety including matched SDK validation errors, provider/deferred/approval refusal and full instruction/schema envelope pricing for private SDK segments
-- private-task-context.ts — projected summary/tail fit, complete pending-input watermark and per-result reduction preserving exact history pages beside ordinary tool peers
+- private-task-context.ts — native-image-priced summary/tail fit, complete pending-input watermark and per-result reduction preserving exact history pages beside ordinary tool peers
+- private-tool-images.ts — exact Attempt/step/pair bridge for temporary native evidence across private DB reconstruction; summary retirement drops its sidecars
 - private-task-summarizer.ts — governed Utility replacement summaries with dynamic prompt-only space guidance, isolated from task-input consumption and relationship Memory
 - subagent-self-history-tool.ts — mandatory self-scoped category/body pagination with captured history watermarks
 

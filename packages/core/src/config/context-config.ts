@@ -1,8 +1,8 @@
 /**
- * INPUT:  process env (TAKI_PROVIDER_CONTEXT_TOKENS / TAKI_VLM_CONTEXT_TOKENS / TAKI_UTILITY_CONTEXT_TOKENS /
+ * INPUT:  process env (TAKI_PROVIDER_CONTEXT_TOKENS / TAKI_UTILITY_CONTEXT_TOKENS /
  *         TAKI_CONTEXT_HISTORY_RATIO / TAKI_PROVIDER_INCLUDE_USAGE / TAKI_COMPACT_TRIGGER_RATIO /
  *         TAKI_COMPACT_KEEP_MESSAGES) — the token-window + compaction knobs (T5-R1 tier 1 + Q14 + R5)
- * OUTPUT: loadContextConfig(env) -> { contextTokens: {main, vision, utility}, historyRatio, includeUsage,
+ * OUTPUT: loadContextConfig(env) -> { contextTokens: {main, utility}, historyRatio, includeUsage,
  *         compact: {triggerRatio, keepMessages} }; fail-closed defaults
  * POS:    core/config — the token-window knobs (T5-R13); garbage values are fatal at boot, never silently
  *         defaulted. Panel surfaces are #26's
@@ -50,7 +50,6 @@ function parseBooleanFlag(value: unknown): unknown {
 export const ContextConfigSchema = z
   .object({
     TAKI_PROVIDER_CONTEXT_TOKENS: windowKnob(),
-    TAKI_VLM_CONTEXT_TOKENS: windowKnob(),
     TAKI_UTILITY_CONTEXT_TOKENS: windowKnob(),
     TAKI_CONTEXT_HISTORY_RATIO: ratioKnob(DEFAULT_HISTORY_RATIO),
     // Q14: opt-in streaming usage (`stream_options:{include_usage:true}` on the wire). DEFAULT OFF — gateway
@@ -62,7 +61,6 @@ export const ContextConfigSchema = z
   .transform((env) => ({
     contextTokens: {
       main: env.TAKI_PROVIDER_CONTEXT_TOKENS,
-      vision: env.TAKI_VLM_CONTEXT_TOKENS,
       utility: env.TAKI_UTILITY_CONTEXT_TOKENS,
     },
     historyRatio: env.TAKI_CONTEXT_HISTORY_RATIO,
@@ -78,7 +76,6 @@ export type ContextConfig = z.infer<typeof ContextConfigSchema>;
 export function loadContextConfig(env: Record<string, string | undefined>): ContextConfig {
   return ContextConfigSchema.parse({
     TAKI_PROVIDER_CONTEXT_TOKENS: env.TAKI_PROVIDER_CONTEXT_TOKENS,
-    TAKI_VLM_CONTEXT_TOKENS: env.TAKI_VLM_CONTEXT_TOKENS,
     TAKI_UTILITY_CONTEXT_TOKENS: env.TAKI_UTILITY_CONTEXT_TOKENS,
     TAKI_CONTEXT_HISTORY_RATIO: env.TAKI_CONTEXT_HISTORY_RATIO,
     TAKI_PROVIDER_INCLUDE_USAGE: env.TAKI_PROVIDER_INCLUDE_USAGE,

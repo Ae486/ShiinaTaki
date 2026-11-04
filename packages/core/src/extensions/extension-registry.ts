@@ -7,6 +7,8 @@ import { createHash } from "node:crypto";
 import type { Tool, ToolExecutionOptions } from "ai";
 import { selectedExecutableTools } from "../governance/executable-tool-selection.ts";
 import { createExtensionCallModelOutput } from "./extension-call-model-output.ts";
+import { copyNativeToolImages } from "../agents/native-tool-images.ts";
+import { retainContentOrigin } from "../agents/context-attribution.ts";
 import {
   EXTENSION_DISCOVERY_BUDGET,
   ExtensionDescribeResultSchema,
@@ -101,7 +103,8 @@ export function createExtensionRegistry(input: RegistryInput): ExtensionRegistry
       }
       try {
         const output = await item.candidate.call(params.input, options);
-        return normalizeOutput(owner, output, options.abortSignal?.aborted === true);
+        const origin = owner.kind === "mcp-tool" ? "mcp" : owner.kind === "skill" ? "skill" : "builtin";
+        return retainContentOrigin(normalizeOutput(owner, output, options.abortSignal?.aborted === true), origin);
       } catch {
         const cancelled = options.abortSignal?.aborted === true;
         return ownedFailure({
@@ -248,7 +251,7 @@ function matches(entry: ExtensionDescriptor, params: ExtensionDiscoverParams, qu
 }
 
 function normalizeOutput(owner: ExtensionIdentity, output: unknown, cancelled: boolean): ExtensionCallResult {
-  if (!isFailure(output)) return { ok: true, owner, output };
+  if (!isFailure(output)) return copyNativeToolImages(output, { ok: true, owner, output });
   const state = output.state === "outcome_unknown" ? "outcome_unknown" : output.state === "cancelled" || cancelled ? "cancelled" : undefined;
   if (output.code === "MCP_STALE_GENERATION") {
     return ownedFailure({ owner, code: "EXTENSION_STALE_GENERATION", message: "the captured extension generation is stale" });

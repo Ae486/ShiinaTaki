@@ -34,6 +34,7 @@ import type {
   CanonicalApprovalRespondResult,
   ConfigChanged,
   ConfigListResult,
+  ModelCapabilitiesResult,
   MemoryOperation,
   ConfigSetParams,
   ConfigSetResult,
@@ -160,6 +161,8 @@ export interface WsClient extends MemoryOperationMethods, UserTimezoneMethods, P
   costumeResolution(characterId: string, costume: string): Promise<CharacterCostumeResolutionResult>;
   /** Reads every config knob with its effective value + provenance (the settings pages' source of truth). */
   configList(): Promise<ConfigListResult>;
+  /** Catalog declarations for the configured MAIN identity; no endpoint probe or model invocation. */
+  configModelCapabilities(): Promise<ModelCapabilitiesResult>;
   /** Stores a knob value (null resets to env/default); refusals arrive as a CONFIG_REFUSED rejection. */
   configSet(params: ConfigSetParams): Promise<ConfigSetResult>;
   /** Subscribes this socket to config.changed pushes (another operator surface edited a knob). */

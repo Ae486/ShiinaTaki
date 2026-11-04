@@ -7,6 +7,7 @@ import type { Database } from "../db/sqlite.ts";
 import type { MemoryEngine } from "./memory-engine.ts";
 import type { MemorySubsystem } from "./bootstrap.ts";
 import { readMemoryAuthoritySelection } from "./legacy-migration/legacy-activation-repo.ts";
+import { forwardRenderedContextText } from "../agents/context-attribution.ts";
 
 export interface SelectedMemoryRuntime {
   memory: MemoryEngine;
@@ -67,9 +68,13 @@ export function selectMemoryRuntime(input: {
 }
 
 function delegatingEngine(current: () => MemoryEngine): MemoryEngine {
+  const assemble: MemoryEngine["assemble"] = (input) => {
+    const engine = current();
+    return forwardRenderedContextText(assemble, engine.assemble, engine.assemble(input));
+  };
   return {
     reconcile: () => current().reconcile(),
-    assemble: (input) => current().assemble(input),
+    assemble,
     createTools: (characterId, seq) => current().createTools(characterId, seq),
     createBackgroundTools: (characterId, seq) => current().createBackgroundTools(characterId, seq),
     writeEntry: (input) => current().writeEntry(input),

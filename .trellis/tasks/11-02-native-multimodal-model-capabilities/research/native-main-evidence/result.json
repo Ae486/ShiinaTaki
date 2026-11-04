@@ -1,0 +1,62 @@
+{
+  "passed": true,
+  "failure": null,
+  "requestedModel": "deepseek-v4-flash",
+  "physicalRequests": 4,
+  "maximumRequests": 4,
+  "captures": 1,
+  "wire": [
+    {
+      "request": 1,
+      "model": "deepseek-v4-flash",
+      "nativeImages": 1,
+      "toolResults": 0
+    },
+    {
+      "request": 2,
+      "model": "deepseek-v4-flash",
+      "nativeImages": 1,
+      "toolResults": 0
+    },
+    {
+      "request": 3,
+      "model": "deepseek-v4-flash",
+      "nativeImages": 0,
+      "toolResults": 0
+    },
+    {
+      "request": 4,
+      "model": "deepseek-v4-flash",
+      "nativeImages": 1,
+      "toolResults": 1
+    }
+  ],
+  "usage": [
+    {
+      "input": 2539,
+      "output": 9,
+      "cached": 256,
+      "estimatedInput": 4004
+    },
+    {
+      "input": 2571,
+      "output": 241,
+      "cached": 2176,
+      "estimatedInput": 4050
+    }
+  ],
+  "outcomes": [
+    {
+      "scenario": "user-image",
+      "text": "左边是红色，右边是蓝色。"
+    },
+    {
+      "scenario": "retained-image-followup",
+      "text": "左红右蓝，和刚才一样。\n\n不过说明一下：这条消息里没有附上新的图片，我是按上一条里那张图回答的。如果你换成新图了，我这边看到的仍然是原来那张。"
+    },
+    {
+      "scenario": "tool-image-next-request",
+      "text": "左边红色，右边蓝色。"
+    }
+  ]
+}

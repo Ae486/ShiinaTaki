@@ -22,7 +22,7 @@
 - invitation-source.ts — current same-page media selection before acceptance, without rebinding active work
 - viewing-playback.ts — same-player wall-time accumulation, seek/gap exclusion and bounded deterministic invitation eligibility
 - viewing-invitation-source.ts — finite Wake media opportunities, admitted evidence preparation, committed-delivery invitation projection and exact accept/defer suppression
-- viewing-invitation-evidence.ts — captured exact-service probe and screened Host frame description inside the admitted Run, with privacy/source authority rechecks
+- viewing-invitation-evidence.ts — captured exact-service probe and screened native Host frame for the admitted main decision; consumes transient extension-call sidecars before schema parsing with same-Attempt release
 - runtime-model.ts — original accepted-root/native stage and durable shared-child acceptance before releasing its Character lane
 - child-adapter.ts — shared private preparation, preserved checkpoint artifacts, natural-final validation including failure on N, committed result/edit handoff, exact controls and media/moment/generation sidecars
 - task-workspace.ts — protected original inputs, explicit bounded anchor selection and revision-specific model proposals

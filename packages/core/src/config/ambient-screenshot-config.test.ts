@@ -4,8 +4,8 @@ import { loadAmbientScreenshotConfig } from "./ambient-screenshot-config.ts";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 describe("loadAmbientScreenshotConfig", () => {
-  it("is OFF with drop-after-describe retention by default (the conservative factory posture)", () => {
-    expect(loadAmbientScreenshotConfig({})).toEqual({ enabled: false, retention: { mode: "drop-after-describe" } });
+  it("is OFF with drop-after-consumption retention by default (the conservative factory posture)", () => {
+    expect(loadAmbientScreenshotConfig({})).toEqual({ enabled: false, retention: { mode: "drop-after-consumption" } });
   });
 
   it("accepts only explicit true/1 as an enable", () => {
@@ -22,7 +22,7 @@ describe("loadAmbientScreenshotConfig", () => {
   it("parses the three retention shapes", () => {
     expect(loadAmbientScreenshotConfig({ TAKI_AMBIENT_SCREENSHOT_RETENTION: "keep" }).retention).toEqual({ mode: "keep" });
     expect(loadAmbientScreenshotConfig({ TAKI_AMBIENT_SCREENSHOT_RETENTION: "drop" }).retention).toEqual({
-      mode: "drop-after-describe",
+      mode: "drop-after-consumption",
     });
     expect(loadAmbientScreenshotConfig({ TAKI_AMBIENT_SCREENSHOT_RETENTION: "7" }).retention).toEqual({
       mode: "delete-after-days",

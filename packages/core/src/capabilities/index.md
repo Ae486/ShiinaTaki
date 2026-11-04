@@ -9,8 +9,8 @@
 - capture-stamp.ts — captureStamp(): the Q5 state-snapshot capture moment (ISO, stamped once at execute, persists byte-stable into replay); shared by the screenshot/process-list/clipboard-read results
 - route-capability.ts — explicit Host-qualified route→broker step with sealed pre-await Host/connection/catalog provenance and a live currentness guard; legacy fallback only for exactly one routable Host
 - screenshot-store.ts — the sanctioned Workspace write site: base64 PNG → screenshots/<ts>.png (invariant 2)
-- screenshot-describe.ts — source-aware screenshot→VLM bridge preserving visible speaker/quotation; admitted callers retain Run/Effect accounting and cancellation, with null on failure
-- screenshot-tool.ts — the agent tool: route → broker.request → persist(→describe, optional describePrompt focus → PII scrub → A1 fence, D44) → { ok, path, width, height, bytes, capturedAt, description? }
+- native-screenshot-result.ts — byte-free direct/opaque capture status with trusted native evidence; on-demand images use retained refs and ambient images use disposable sidecars
+- screenshot-tool.ts — governed route → broker → sanctioned capture/attachment persistence; native evidence enters the next primary request without a translator
 - process-list-tool.ts — the agent tool: route → broker → { ok, processes, count, capturedAt } (read-only, no kill)
 - clipboard-read-tool.ts — the agent tool: route → broker → { ok, text, capturedAt } (empty clipboard → "")
 - clipboard-write-tool.ts — the agent tool: route → broker → { ok:true } (text is content, never logged)

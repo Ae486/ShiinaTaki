@@ -48,11 +48,11 @@ describe("config groups", () => {
   });
 
   it("groups in fixed order while preserving the server's within-group order", () => {
-    const entries = [...KEYS, "TAKI_VLM_MODEL", "TAKI_PROVIDER_MODEL"].map((key) => entry(key));
+    const entries = [...KEYS, "TAKI_UTILITY_MODEL", "TAKI_PROVIDER_MODEL"].map((key) => entry(key));
     const views = groupConfigEntries(entries);
     expect(views.map((view) => view.group.id)).toEqual(["permissions", "model-context", "perception-privacy", "storage-cache", "advanced"]);
     const model = views.find((view) => view.group.id === "model-context")!;
-    expect(model.entries.map((row) => row.key)).toEqual(["TAKI_PROVIDER_MODEL", "TAKI_VLM_MODEL", "TAKI_PROVIDER_MODEL"]);
+    expect(model.entries.map((row) => row.key)).toEqual(["TAKI_PROVIDER_MODEL", "TAKI_UTILITY_MODEL", "TAKI_PROVIDER_MODEL"]);
     // every knob survives grouping (nothing removed or hidden)
     expect(views.flatMap((view) => view.entries)).toHaveLength(entries.length);
   });

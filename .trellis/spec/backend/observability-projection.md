@@ -256,12 +256,48 @@ const outcome = classifyToolOutcome({ type: "tool-result", output });
 ```
 
 
+## Per-dispatch request attribution (2026-11-02)
+
+- `context-request.v1` adds only `context.request.measured` to the existing Run Event union. Strict v1
+  `context.snapshot` remains admission/pressure evidence. A request is keyed solely by its committed model Effect;
+  measurement follows the native final post-filter envelope for each physical dispatch.
+- The closed nine-category/four-supplier matrix conserves estimator units within each row and across the whole
+  request. Provider totals stay exclusively in `run_usage`. Supplier is `builtin | mcp | skill | unknown`;
+  Skill-enabled Core tools retain built-in supplier ownership. Optional tool-part `contextOrigin` survives Timeline
+  input scrubbing without changing original output or raw execution semantics. Old parts remain absent/unknown.
+- Dispatch-window snapshots carry declared/effective real tokens independently from estimator window units and
+  calibration factor. Actual occupancy uses reported input/effective real tokens. Composition remains heuristic;
+  `hasHeuristicMedia` exposes multimodal estimator uncertainty without an image token category or meter.
+  Complete accounting permits known `other/builtin` framing; unknown-origin units or unestimated content require
+  partial coverage. Estimator units are never scaled into claimed per-component provider tokens.
+- `createRequestAttributionRepo(db).read(characterId)` selects the latest terminal primary request by captured
+  `primary_conversation_sources.original_user_seq`, then committed model Effect intent order within that source's
+  exact Run. Completion callback times, successful measurement and successful usage never determine selection.
+  Retracted/failed sources remain eligible. Background/worker calls and summary revisions do not replace this fact.
+  Missing measurement or reported usage stays attached to the selected current request, without fallback to old success.
+- Read at most 257 newest source rows and examine at most 256 sources; sparse exhaustion is `scan-exhausted`,
+  distinct from empty history. Intent/event lookups are scoped to an indexed exact Run, avoiding whole-history
+  per-Effect JSON sorting. Exact measurement lookup accepts at most two identical duplicates once; conflicting,
+  malformed or measurement source/model/attempt mismatched facts are unavailable. Canonical usage joins exactly once
+  by Effect and agrees on Run/Attempt/provider; its response model ID may differ from the requested model ID. Expose
+  optional `responseModelId` separately, without catalog lookup or rewriting stored identities. Only `quality=reported`
+  exposes actual input, preserving reported zero and failed/cancelled outcomes. See request-attribution.md for regression contracts.
+- `CacheUsageUpdate.latestPrimaryRequest` is an optional independent sibling of the unchanged cache snapshot.
+  The subscription's initial response and explicit flush payload both preserve it. Each reader/observer fails
+  independently; no second counter or polling exists. Existing coalesced after-commit usage and terminal model-Effect
+  hints refresh both projections, including terminal calls with no usage or measurement. Mode disable withdraws both.
+
+Required checks cover matrix conservation and old strict events, origin sanitizer fidelity, source/dispatch versus
+completion ordering, missing/zero/estimated/failed usage, duplicate/conflicting/exhausted records, summary independence,
+real SQLite reopen, indexed bounded read plans, and initial/pushed failure-isolated subscription payloads.
+
 ## Observed auxiliary model usage (2026-11-01)
 
-`auxiliary_model_calls` (migration 065) records actual Utility/VLM provider-model invocations outside existing Run
+`auxiliary_model_calls` (migration 065) records actual Utility provider-model invocations outside existing Run
 ownership. It is independent of authoritative `run_usage`: no synthetic Run, inferred historic cost, or merged task/request
-total. Core wraps the resolved Utility model and detached image/shared screenshot describers. Foreground Run observers
-retain ownership. AsyncLocalStorage captures the immutable Utility task at invocation and suppresses auxiliary recording
+total. Core wraps the resolved Utility model; the native-image migration removed detached image/shared screenshot
+describers while preserving their historical usage rows. Foreground Run observers retain ownership. AsyncLocalStorage
+captures the immutable Utility task at invocation and suppresses auxiliary recording
 inside `createModelEffectMiddleware` dispatch; stream consumption never consults a later task context.
 
 One invocation, including an SDK retry, is one row. `started` becomes completed/failed/cancelled/interrupted from observed

@@ -5,6 +5,7 @@
  */
 import { z } from "zod";
 import { CharacterIdSchema } from "./character-schema.ts";
+import { LatestPrimaryRequestSnapshotSchema } from "./request-attribution-schema.ts";
 
 const Count = z.int().nonnegative().max(Number.MAX_SAFE_INTEGER);
 const Timestamp = z.iso.datetime({ offset: true });
@@ -60,7 +61,10 @@ export const CacheUsageWindowSnapshotSchema = z.strictObject({
 });
 export type CacheUsageWindowSnapshot = z.infer<typeof CacheUsageWindowSnapshotSchema>;
 
-export const CacheUsageUpdateSchema = z.strictObject({ revision: Count, snapshot: CacheUsageWindowSnapshotSchema });
+export const CacheUsageUpdateSchema = z.strictObject({ revision: Count, snapshot: CacheUsageWindowSnapshotSchema,
+  latestPrimaryRequest: LatestPrimaryRequestSnapshotSchema.optional() }).refine(
+  (update) => update.latestPrimaryRequest === undefined || update.latestPrimaryRequest.characterId === update.snapshot.characterId,
+  "cache and latest request projections require the same Character scope");
 export type CacheUsageUpdate = z.infer<typeof CacheUsageUpdateSchema>;
 export const CacheUsageSubscribeParamsSchema = z.strictObject({ characterId: CharacterIdSchema });
 export type CacheUsageSubscribeParams = z.infer<typeof CacheUsageSubscribeParamsSchema>;

@@ -42,6 +42,7 @@ export interface ManagerState {
   connect: McpConnect;
   resolveSecret?: (ref: string) => string | null;
   governance?: TurnGovernance;
+  projectImageResult?: (result: unknown) => unknown;
   drainBudgetMs: number;
   shutdownBudgetMs: number;
   candidateDeadlineMs: number;
@@ -65,6 +66,7 @@ export interface ManagerStateDeps {
   connect?: McpConnect;
   resolveSecret?: (ref: string) => string | null;
   governance?: TurnGovernance;
+  projectImageResult?: (result: unknown) => unknown;
   drainBudgetMs?: number;
   shutdownBudgetMs?: number;
   candidateDeadlineMs?: number;
@@ -78,6 +80,7 @@ export function createManagerState(deps: ManagerStateDeps): ManagerState {
     connect: deps.connect ?? defaultConnect,
     resolveSecret: deps.resolveSecret,
     governance: deps.governance,
+    projectImageResult: deps.projectImageResult,
     drainBudgetMs: deps.drainBudgetMs ?? 5_000,
     shutdownBudgetMs: deps.shutdownBudgetMs ?? 5_000,
     candidateDeadlineMs: deps.candidateDeadlineMs ?? 8_000,

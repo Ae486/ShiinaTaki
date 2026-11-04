@@ -13,6 +13,7 @@ import type { ModelMessage } from "ai";
 import { renderToolResult } from "../agents/source-context.ts";
 import { toolSourceMaterials } from "../agents/tool-source-materials.ts";
 import type { PrivateToolResult, SubagentToolResultRepo } from "../db/subagent-tool-result-repo.ts";
+import { copyNativeToolImages } from "../agents/native-tool-images.ts";
 
 export interface ToolMaterialSink {
   register(invocation: { attemptId: string; stepNumber?: number; toolCallId: string; toolName: string }, materials: readonly ToolSourceMaterial[]): void;
@@ -58,7 +59,7 @@ export function createToolMaterialSink(storage?: Pick<SubagentToolResultRepo, "p
         if (!value || value.name !== part.toolName) return part;
         const refs = completed.get(key)?.map((item) => item.ref) ?? [];
         const original = referenceOutputs.get(part.output) ?? part.output;
-        const output = renderToolResult(withToolMaterialReferences(original, refs), value.materials);
+        const output = copyNativeToolImages(part.output, renderToolResult(withToolMaterialReferences(original, refs), value.materials));
         referenceOutputs.set(output, original);
         outputs.set(output, key);
         return { ...part, output };

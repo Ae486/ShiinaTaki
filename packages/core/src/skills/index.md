@@ -1,4 +1,5 @@
 # core/skills/
+- Request attribution — catalog header stays builtin guidance; package listing/body/resource content carries Skill origin independently of tool activation
 - skill-scanner.ts / skills-state.ts / skills-loader.ts — legacy seed compatibility and the Agent-facing metadata/instruction loader
 - skill-package-types.ts / skill-package-repo.ts — durable lifecycle rows and optimistic SQLite writes; optional commit observation precedes fallible projection read-back
 - skill-package-source.ts / skill-package-store.ts — bounded source enumeration, validation, hashing, quarantine, and immutable publication

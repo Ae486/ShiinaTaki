@@ -8,6 +8,7 @@ import { IMAGE_MEDIA_TYPES } from "./chat-schema.ts";
 import { getValidToolDisplayName } from "./tool-presentation.ts";
 import { readTimelinePresentation, sanitizeTimelinePresentations } from "./timeline-presentation-schema.ts";
 import { SourceContextSchema, ToolSourceMaterialSchema } from "./context-source-schema.ts";
+import { ContextContentOriginSchema } from "./request-attribution-schema.ts";
 
 export const TIMELINE_METHODS = {
   history: "timeline.history",
@@ -43,6 +44,7 @@ export const TimelinePartSchema = z.discriminatedUnion("type", [
     toolCallId: z.string().min(1),
     toolName: z.string().min(1),
     displayName: OptionalToolDisplayNameSchema,
+    contextOrigin: ContextContentOriginSchema.optional(),
     input: z.unknown().optional(),
   }),
   z.object({
@@ -51,11 +53,14 @@ export const TimelinePartSchema = z.discriminatedUnion("type", [
     toolName: z.string().min(1),
     displayName: OptionalToolDisplayNameSchema,
     output: TimelineToolOutputSchema,
+    contextOrigin: ContextContentOriginSchema.optional(),
+    // Only trusted capture producers supply this field; it preserves the exact call/result image association.
+    imageRefs: z.array(z.object({ mediaType: z.enum(IMAGE_MEDIA_TYPES), ref: z.string().min(1) })).max(20).optional(),
     sourceMaterials: z.array(ToolSourceMaterialSchema).max(200).refine(
       (items) => new Set(items.map((item) => item.key)).size === items.length, "material keys must be unique").optional(),
   }),
   // The image/file part (#17, advances D14): `ref` is a workspace-relative attachment path (attachments/<sha256>.<ext>),
-  // never bytes — the model replays the row's TEXT projection; the chat window fetches bytes lazily via media.get.
+  // never bytes — retained images are hydrated for selected model replay and fetched lazily by the chat window.
   z.object({
     type: z.literal("image"),
     mediaType: z.enum(IMAGE_MEDIA_TYPES),

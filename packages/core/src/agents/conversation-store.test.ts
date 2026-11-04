@@ -207,7 +207,7 @@ describe("createConversationStore", () => {
     expect(store.history("taki")).toEqual([{ role: "user", content: "hi" }]);
   });
 
-  it("appendUser with images persists image parts, but history replays only the TEXT projection (#17)", () => {
+  it("appendUser persists image refs and missing storage remains an explicit unavailable-image fact", () => {
     const emitted: TimelineEntry[] = [];
     const store = makeStore((entry) => emitted.push(entry));
     store.appendUser("taki", "look", [{ mediaType: "image/png", ref: "attachments/deadbeef.png" }]);
@@ -217,9 +217,8 @@ describe("createConversationStore", () => {
       { type: "text", text: "look" },
       { type: "image", mediaType: "image/png", ref: "attachments/deadbeef.png" },
     ]);
-    // ... but the model replay is text only — no ref, no bytes (decision 6).
-    expect(store.history("taki")).toEqual([{ role: "user", content: "look" }]);
-    expect(JSON.stringify(store.history("taki"))).not.toContain("attachments/deadbeef.png");
+    expect(JSON.stringify(store.history("taki"))).toContain("STORAGE_UNAVAILABLE");
+    expect(JSON.stringify(store.history("taki"))).not.toContain('"type":"file"');
   });
 });
 
@@ -450,14 +449,15 @@ describe("summary substitution (batch 7 — R3 head message)", () => {
 
     const projection = store.project("taki");
     const serialized = JSON.stringify(projection.messages);
-    expect(projection.messages[0]).toEqual({ role: "user", content: "看这张图里的拉面" });
+    expect(JSON.stringify(projection.messages[0])).toContain("看这张图里的拉面");
+    expect(JSON.stringify(projection.messages[0])).toContain("STORAGE_UNAVAILABLE");
     expect(repo.latestAscending("taki", 20)[0]?.parts).toContainEqual(
       expect.objectContaining({ type: "image", ref: `attachments/${"a".repeat(64)}.png` }),
     );
     for (let index = 0; index < 6; index += 1) {
       expect(serialized).toContain(`"toolCallId":"c${index}"`);
     }
-    // Persisted image references stay text-authoritative on replay; the source still carries the ref for UI display.
+    // Missing storage never fabricates visual contents; the exact ref remains durable for later valid hydration.
     expect(projection.measurement.historyTokens).toBeGreaterThan(600);
   });
 });

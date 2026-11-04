@@ -51,7 +51,8 @@ interface Dependencies {
 export function composePatternRuntime(input: Dependencies) {
   const completions = createInitiativeCompletionSource(input.db);
   const context = createInitiativeContextBuilder({ captureMemory: input.captureMemory,
-    avatarContext: input.avatarContext, screenContext: (at) => renderScreenContext(input.perception.screen, at) });
+    avatarContext: input.avatarContext, screenContext: (at) => renderScreenContext(input.perception.screen, at),
+    screenObservation: (at) => input.perception.screen.latest(at), acquireScreenInput: (key) => input.perception.screen.acquire(key) });
   let policyEpoch = 0;
   let stopped = false;
   const notify = createPublisher(input, () => stopped);
@@ -63,7 +64,10 @@ export function composePatternRuntime(input: Dependencies) {
   const wake = createInitiativeWakeEngine({ db: input.db, patterns: input.patterns, intentions: input.intentions, backoff, snapshot,
     policy: () => readInitiativePolicy(input.config), wakePolicy: () => readInitiativeWakePolicy(input.config),
      prepareContext: context.prepare, contextIsCurrent: context.isCurrent,
-     sourceIsCurrent: input.viewing?.isCurrent, prepareInput: input.viewing?.prepareInput, sourceAdmitted: input.viewing?.admitted,
+     sourceIsCurrent: input.viewing?.isCurrent, prepareInput: async (selection, turn) => {
+       if (selection.candidates.some((candidate) => candidate.kind === "media")) return input.viewing?.prepareInput(selection, turn);
+       return context.prepareInput(selection);
+     }, sourceAdmitted: input.viewing?.admitted,
     runtime: input.runtime, busy: input.queue.isBusy, invalidate,
     onChanged: (id) => { if (input.monitorEnabled()) notify(INITIATIVE_WAKE_METHODS.changed, id); },
     onError: () => input.logger.warn({ code: "INITIATIVE_WAKE_FAILED" }, "Initiative source evaluation failed") });

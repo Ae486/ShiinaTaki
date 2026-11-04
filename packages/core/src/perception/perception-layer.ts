@@ -1,9 +1,10 @@
 /**
- * INPUT:  governed routes, availability, optional VLM, ambient config/store, durable pause store and Logger
+ * INPUT: governed routes, availability, ambient config/store, durable pause store and Logger
  * OUTPUT: shared privacy, activity/screen producers, card reads and opt-in content-free invalidations
  * POS:    core/perception — single ambient composition; subscribing never captures or mutates pause consent
  */
 import type { PerceptionCard } from "@taki/shared";
+import type { NativeImageContext } from "../agents/native-image-context.ts";
 import { createActivityLayer, ACTIVITY_POLL_MS, type ActivityLayer } from "../activity/activity-layer.ts";
 import { renderActivityContext } from "../activity/render-activity.ts";
 import type { RouteResult } from "../capabilities/route-capability.ts";
@@ -26,8 +27,8 @@ import { createSensitiveProcessCheck } from "./sensitive-processes.ts";
 
 // Ambient defaults, beside the activity layer's own (D11 config-ize when #26 gives them a panel):
 // - POLL: 30s, the same ambient floor T3a took (research ra R2 — how often a capture is CONSIDERED, not taken).
-// - REFRESH: DERIVED (research ra §OMITTED holds no sourced number). Re-describe a still window every 5 min so the
-//   screen block cannot silently go stale, while capture stays event-driven (~12 VLM calls/h at rest, not 120).
+// - REFRESH: DERIVED (research ra §OMITTED holds no sourced number). Refresh a still window every 5 min so the
+//   screen block cannot silently go stale, while capture stays event-driven (~12 captures/h at rest, not 120).
 // - STALE: 2x REFRESH bounds a stopped sampler's observation age. Consent/source retirement clears it immediately.
 // - FOREGROUND_MAX_AGE: 2x the T3a poll — the same pulsetime tolerance the activity state uses to call a sample
 //   contiguous; older than that we do not know what is on screen (fail-closed, see captureTarget).
@@ -41,8 +42,6 @@ export interface PerceptionLayerDeps {
   route: (capability: string, input: unknown, targetHostId?: string) => Promise<RouteResult>;
   /** True iff a node currently provides `capability`; each sampler asks about its OWN capability name. */
   hasNode: (capability: string) => boolean;
-  /** The screenshot→VLM bridge (vision slot); absent = ambient sampling never starts (capture with no text is cost). */
-  describe?: (input: { dataBase64: string; mediaType: string; prompt?: string }) => Promise<string | null>;
   /** The ambient switch + raw-frame retention (env today, panel at #26). */
   ambient: AmbientScreenshotConfig;
   /** The ambient-ONLY frame directory — never the on-demand screenshots dir, which the sweeper must not reach. */
@@ -69,6 +68,8 @@ export interface PerceptionLayer {
   dispose(): void;
   /** The fenced ambient prompt sections (activity + screen), joined; "" when nothing is reportable. */
   renderContext(now: number): string;
+  /** Acquire the latest permitted frame once for the ordinary foreground Attempt. */
+  acquireScreenInput(): NativeImageContext | undefined;
   /** The human-facing status card served by `perception.card` (panel at #26) — never a prompt surface. */
   card(now: number): PerceptionCard;
 }
@@ -91,7 +92,7 @@ function ambientConfigOf(ambient: AmbientScreenshotConfig): AmbientScreenshotSam
     pollMs: AMBIENT_POLL_MS,
     refreshMs: AMBIENT_REFRESH_MS,
     foregroundMaxAgeMs: FOREGROUND_MAX_AGE_MS,
-    dropRawAfterDescribe: ambient.retention.mode === "drop-after-describe",
+    dropRawAfterConsumption: ambient.retention.mode === "drop-after-consumption",
     ...AMBIENT_BACKOFF,
   };
 }
@@ -106,11 +107,12 @@ function cardDepsOf(parts: { activity: ActivityLayer; ambient: AmbientScreenshot
   };
 }
 
-function disposePerception(parts: Pick<PerceptionLayer, "changes" | "activity" | "ambient">): void {
+function disposePerception(parts: Pick<PerceptionLayer, "changes" | "activity" | "ambient" | "screen">): void {
   // Retire interest before stopping schedules so Core shutdown cannot publish new view work.
   parts.changes.dispose();
   parts.activity.sampler.stop();
   parts.ambient.stop();
+  parts.screen.clear();
 }
 
 export function createPerceptionLayer(deps: PerceptionLayerDeps): PerceptionLayer {
@@ -150,7 +152,6 @@ export function createPerceptionLayer(deps: PerceptionLayerDeps): PerceptionLaye
     isPaused: () => pause.isPaused(),
     isSensitive,
     foreground: () => foregroundOf(activity),
-    describe: deps.describe,
     store,
     context: screen,
     logger: deps.logger,
@@ -169,13 +170,15 @@ function completeLayer(parts: PerceptionParts, deps: PerceptionLayerDeps, store:
   return {
     ...parts,
     start() {
+      // Sweep crash leftovers before any capture can become pending/in-use native evidence.
+      startAmbientShotGc({ store, retention: deps.ambient.retention, logger: deps.logger });
       activity.sampler.start();
       ambient.start();
       // Retention runs regardless of the enable flag: frames captured before ambient sensing was switched off must
       // still expire. `keep` schedules nothing at all.
-      startAmbientShotGc({ store, retention: deps.ambient.retention, logger: deps.logger });
     },
     dispose: () => disposePerception(parts),
+    acquireScreenInput() { evidence.generation(); return screen.acquire(); },
     renderContext: (now) => {
       evidence.generation();
       return [renderActivityContext(activity.state, now), renderScreenContext(screen, now)]

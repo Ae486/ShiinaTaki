@@ -53,7 +53,7 @@ export async function openSourceLiveEvidence(input: { maxRequests: number; paths
       input.inspectRequest?.(request);
     },
   } });
-  const supplied = createModels({ provider: { ...config, baseUrl: relay.baseUrl, apiKey: "synthetic-observer-only" }, vision: null, includeUsage: true }).model;
+  const supplied = createModels({ provider: { ...config, baseUrl: relay.baseUrl, apiKey: "synthetic-observer-only" }, includeUsage: true }).model;
   if (typeof supplied === "string" || supplied.specificationVersion !== "v4") {
     await relay.close(); throw new Error("SOURCE_ACCEPTANCE_MODEL_VERSION_UNEXPECTED");
   }

@@ -12,7 +12,7 @@ const snapshot: CacheUsageWindowSnapshot = {
   computedAt: "2026-11-01T11:00:00.000Z", observedRequests: 3, pairedRequests: 2,
   inputTokens: 100, cacheReadTokens: 80, ratio: 0.8, reason: null,
 };
-const view: CacheUsageView = { phase: "live", snapshot, error: null };
+const view: CacheUsageView = { phase: "live", snapshot, latestPrimaryRequest: null, error: null };
 const render = (value: CacheUsageView, connected = true) =>
   renderToStaticMarkup(<CacheUsageStrip view={value} connected={connected} retry={vi.fn()} />);
 
@@ -59,9 +59,9 @@ describe("rendered Monitor cache strip", () => {
   });
 
   it("renders cold loading and connection/disabled states without synthetic measurements", () => {
-    expect(render({ phase: "loading", snapshot: null, error: null })).toContain("正在读取统计…");
-    expect(render({ phase: "stale", snapshot: null, error: null }, false)).toContain("等待连接恢复");
-    expect(render({ phase: "disabled", snapshot: null, error: null })).toContain("运行监视未启用");
+    expect(render({ ...view, phase: "loading", snapshot: null })).toContain("正在读取统计…");
+    expect(render({ ...view, phase: "stale", snapshot: null }, false)).toContain("等待连接恢复");
+    expect(render({ ...view, phase: "disabled", snapshot: null })).toContain("运行监视未启用");
   });
 
   it("places the independent strip below policy and before the Run workspace with no selected Run", () => {

@@ -40,18 +40,17 @@ function harness(options: { ambient?: boolean; legacy?: boolean } = {}) {
     };
     return routeHook ? routeHook(capability, result) : result;
   });
-  const vision = vi.fn(async (): Promise<string | null> => "An editor window");
   const save = vi.fn();
   const { logger } = createCaptureLogger();
   const layer = createPerceptionLayer({
-    route, hasNode: () => online, describe: vision,
+    route, hasNode: () => online,
     ambient: { enabled: options.ambient ?? false, retention: { mode: "keep" } },
     ambientShotsDir: dir, pauseStore: { load: () => undefined, save }, logger,
   });
   layers.push(layer);
   layer.start();
   return {
-    layer, route, vision, save, dir,
+    layer, route, save, dir,
     show: (next: Partial<ForegroundWindowOutput>) => { sample = { ...sample, ...next }; },
     hook: (next: typeof routeHook) => { routeHook = next; },
     replaceHost: () => { generation += 1; },
@@ -158,14 +157,14 @@ describe("accepted Perception evidence and source lifetime", () => {
     await vi.advanceTimersByTimeAsync(2 * POLL);
     expect(h.layer.activity.state.current()?.samples).toBe(2);
     expect(h.layer.screen.latest(Date.now())).toBeDefined();
-    expect(h.vision).toHaveBeenCalledTimes(1);
+    expect(h.route.mock.calls.filter(([capability]) => capability === "screenshot-ambient")).toHaveLength(1);
     h.layer.pause.pauseUntilResumed();
     h.layer.pause.resume();
     expect(h.layer.renderContext(Date.now())).toBe("");
     expect(h.layer.evidence.latest(Date.now())).toBeUndefined();
     await vi.advanceTimersByTimeAsync(POLL);
     expect(h.layer.activity.state.current()?.samples).toBe(1);
-    expect(h.vision).toHaveBeenCalledTimes(2);
+    expect(h.route.mock.calls.filter(([capability]) => capability === "screenshot-ambient")).toHaveLength(2);
   });
 
   it.each(["host", "catalog"])("retires replaced %s evidence before reads and never stitches replacement dwell", async (kind) => {
@@ -200,46 +199,26 @@ describe("accepted Perception evidence and source lifetime", () => {
     expect(h.layer.evidence.latest(Date.now())?.source.connectionGeneration).toBe(2);
   });
 
-  it.each(["foreground-screen", "screenshot", "vision"])("fences pause+resume during ambient %s and discards retired raw frames even under keep retention", async (stage) => {
-    const h = harness({ ambient: true });
-    const pending = deferred<RouteResult>();
-    const description = deferred<string | null>();
-    let captured: RouteResult | undefined;
-    let foregroundCalls = 0;
+  it.each(["foreground-screen", "screenshot"])("fences pause+resume during ambient %s", async (stage) => {
+    const h = harness({ ambient: true }); const pending = deferred<RouteResult>(); let captured: RouteResult | undefined; let foregroundCalls = 0;
     h.hook(async (capability, result) => {
       if (capability === "foreground-window") foregroundCalls += 1;
-      if ((stage === "foreground-screen" && foregroundCalls === 2)
-        || (stage === "screenshot" && capability === "screenshot-ambient")) {
-        captured = result;
-        return pending.promise;
+      if ((stage === "foreground-screen" && foregroundCalls === 2) || (stage === "screenshot" && capability === "screenshot-ambient")) {
+        captured = result; return pending.promise;
       }
       return result;
     });
-    if (stage === "vision") h.vision.mockImplementation(() => description.promise);
-    await vi.advanceTimersByTimeAsync(POLL);
-    if (stage === "vision") expect(h.vision).toHaveBeenCalledOnce();
-    else expect(captured).toBeDefined();
-    h.layer.pause.pauseUntilResumed();
-    h.layer.pause.resume();
-    if (captured) pending.resolve(captured);
-    description.resolve("old description");
-    await vi.advanceTimersByTimeAsync(0);
-    expect(h.layer.screen.latest(Date.now())).toBeUndefined();
-    expect(readdirSync(h.dir)).toEqual([]);
-    if (stage !== "vision") expect(h.vision).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(POLL); expect(captured).toBeDefined();
+    h.layer.pause.pauseUntilResumed(); h.layer.pause.resume(); pending.resolve(captured!); await vi.advanceTimersByTimeAsync(0);
+    expect(h.layer.screen.latest(Date.now())).toBeUndefined(); expect(readdirSync(h.dir)).toEqual([]);
     if (stage === "foreground-screen") expect(h.route.mock.calls.some(([capability]) => capability === "screenshot-ambient")).toBe(false);
   });
 
-  it("pins ambient capture to the screened Host and rejects Host retirement during vision", async () => {
-    const h = harness({ ambient: true });
-    const description = deferred<string | null>();
-    h.vision.mockImplementation(() => description.promise);
-    await vi.advanceTimersByTimeAsync(POLL);
+  it("pins capture to the screened Host and rejects retired native input even under keep retention", async () => {
+    const h = harness({ ambient: true }); await vi.advanceTimersByTimeAsync(POLL);
     expect(h.route).toHaveBeenCalledWith("screenshot-ambient", {}, HOST);
-    h.replaceHost();
-    description.resolve("obsolete screen");
-    await vi.advanceTimersByTimeAsync(0);
-    expect(h.layer.screen.latest(Date.now())).toBeUndefined();
-    expect(readdirSync(h.dir)).toEqual([]);
+    const input = h.layer.acquireScreenInput()!; expect(input.isCurrent()).toBe(true); expect(readdirSync(h.dir)).toHaveLength(1);
+    h.replaceHost(); expect(input.isCurrent()).toBe(false); input.release();
+    expect(h.layer.screen.latest(Date.now())).toBeUndefined(); expect(readdirSync(h.dir)).toEqual([]);
   });
 });

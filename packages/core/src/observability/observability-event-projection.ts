@@ -9,6 +9,11 @@ import {
 } from "@taki/shared";
 
 export function projectEvent(event: RunEvent): TrajectoryRow {
+  if (event.schemaVersion === "context-request.v1") return projectMeasurement(event);
+  return projectRecordedEvent(event);
+}
+
+function projectRecordedEvent(event: Exclude<RunEvent, { schemaVersion: "context-request.v1" }>): TrajectoryRow {
   if (event.schemaVersion === "run-event.v3") return projectWorkEvent(event);
   if (event.schemaVersion === "run-event.v2") return TrajectoryRowSchema.parse({
     rowKey: event.eventId, seq: event.seq, groupKey: event.attemptId, kind: "lifecycle",
@@ -57,6 +62,16 @@ export function projectEvent(event: RunEvent): TrajectoryRow {
     return TrajectoryRowSchema.parse({ ...base, kind: "attempt", attemptOrdinal: payload.attemptOrdinal });
   }
   return TrajectoryRowSchema.parse({ ...base, kind: "lifecycle" });
+}
+
+function projectMeasurement(event: Extract<RunEvent, { schemaVersion: "context-request.v1" }>): TrajectoryRow {
+  const { payload } = event;
+  return TrajectoryRowSchema.parse({
+    ...projectBase(event), label: "请求上下文测量", kind: "context", modelEffectId: payload.effectId,
+    sourceCategories: Object.entries(payload.composition.categories).filter(([, units]) => units > 0)
+      .map(([category]) => observabilityLabel(category)),
+    accountingQuality: payload.composition.coverage.status === "complete" ? "完整归因估算" : "部分归因估算",
+  });
 }
 
 function projectBase(event: RunEvent) {

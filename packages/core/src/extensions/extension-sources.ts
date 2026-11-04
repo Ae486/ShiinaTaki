@@ -19,6 +19,7 @@ import type { ExtensionCandidate } from "./extension-registry.ts";
 import { routeExtensionTransfer } from "./extension-transfer.ts";
 import type { CapabilityRouteRequest } from "../capabilities/route-capability.ts";
 import { governedExecutionContext } from "../governance/captured-tool-execution.ts";
+import { retainContentOrigin } from "../agents/context-attribution.ts";
 
 type CapabilityRoute = (request: CapabilityRouteRequest & { targetHostId: string }) => Promise<unknown>;
 
@@ -77,7 +78,7 @@ export function snapshotMcpExtensions(manager: McpManager, interactive?: TurnInt
   const directTools: ToolSet = {};
   const names: [string, string][] = [];
   const candidates = snapshots.map((entry) => {
-    directTools[entry.toolKey] = entry.tool;
+    directTools[entry.toolKey] = retainContentOrigin(entry.tool, "mcp");
     names.push([entry.toolKey, formatMcpToolDisplayName(entry.ref)]);
     return mcpCandidate(entry);
   });
@@ -91,6 +92,7 @@ export function snapshotMcpExtensions(manager: McpManager, interactive?: TurnInt
 export function snapshotHostCapabilityExtensions(
   catalogs: HostCatalogStore,
   route: CapabilityRoute,
+  projections: { projectScreenshot?: (output: unknown) => unknown; projectAmbientScreenshot?: (output: unknown) => unknown } = {},
 ): readonly ExtensionCandidate[] {
   return Object.freeze(catalogs.list().flatMap((catalog) => catalog.capabilities.map((descriptor) => {
     const transfer = catalog.workspaces.some((workspace) =>
@@ -116,7 +118,12 @@ export function snapshotHostCapabilityExtensions(
           transferCapabilityId: descriptor.capabilityId,
           input: value,
         })
-      : route({ capabilityId: descriptor.capabilityId, input: value, targetHostId: catalog.hostId, ...hostExecution(options) }),
+      : route({ capabilityId: descriptor.capabilityId, input: value, targetHostId: catalog.hostId, ...hostExecution(options) })
+        .then((output) => {
+          const project = descriptor.capabilityId === "screenshot" ? projections.projectScreenshot
+            : descriptor.capabilityId === "screenshot-ambient" ? projections.projectAmbientScreenshot : undefined;
+          return project ? project(output) : output;
+        }),
     };
   })));
 }

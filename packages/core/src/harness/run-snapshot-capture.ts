@@ -16,6 +16,7 @@ import type { CapturedMemoryRun } from "../memory/canonical-memory-run.ts";
 import { createMemoryRunReference } from "../memory/memory-capability-snapshot.ts";
 import { createInitiativeMemoryRecall } from "../memory/initiative-memory-recall.ts";
 import { childMemoryExclusions, projectChildMemory } from "./delegation-tools.ts";
+import { attributedContextText, copyContentOrigin, retainContextText } from "../agents/context-attribution.ts";
 
 interface CaptureDeps {
   extensions: { runContext(interactive?: TurnInteractive, runId?: string): ExtensionRunContext };
@@ -49,10 +50,13 @@ async function captureWithLifetime(args: CaptureInput): Promise<CapturedRunSnaps
   finally { lifetime.dispose(); }
 }
 
+/* eslint max-lines-per-function: ["error", { "max": 55, "skipBlankLines": true, "skipComments": true }] -- Admission seals authority, captured closures and their nonserialized descriptors together. */
 async function captureSnapshot(args: CaptureInput): Promise<CapturedRunSnapshot> {
   const { input, request } = args;
   if (request.initiator === "heartbeat" && !args.selectedContext) throw new Error("INITIATIVE_CONTEXT_REQUIRED");
   const selected = args.selectedContext ? InitiativeSelectedContextSchema.parse(args.selectedContext) : undefined;
+  const selectedDescriptor = args.selectedContext && attributedContextText(args.selectedContext);
+  if (selected && selectedDescriptor) retainContextText(selected, selectedDescriptor);
   if (args.interactive) {
     args.interactive.runId = args.runId;
     args.interactive.effects ??= input.effects;
@@ -83,6 +87,7 @@ async function captureSnapshot(args: CaptureInput): Promise<CapturedRunSnapshot>
     assembleMemory: memory.assemble,
       toolDisplayNames: captureToolDisplayNames(context.toolDisplayNames),
     instructions: context.instructions,
+    instructionsAttribution: context.instructionsAttribution,
   });
   return { context: executionContext, snapshot: { schemaVersion: "slice1.v1", characterId: request.characterId,
     initiator: request.initiator, provenance: request.provenance, deliveryClass: request.deliveryClass,
@@ -150,6 +155,6 @@ function captureTools(tools: ToolSet): ToolSet {
   if (Object.isFrozen(tools) && Object.values(tools).every(Object.isFrozen)) return tools;
   // Preserve non-enumerable governance sidecars while detaching replaceable tool descriptors from the source.
   const entries = Object.entries(tools).map(([name, value]) => [name,
-    Object.freeze(Object.create(Object.getPrototypeOf(value), Object.getOwnPropertyDescriptors(value))) as ToolSet[string]]);
+    copyContentOrigin(value, Object.freeze(Object.create(Object.getPrototypeOf(value), Object.getOwnPropertyDescriptors(value)))) as ToolSet[string]]);
   return Object.freeze(Object.fromEntries(entries));
 }

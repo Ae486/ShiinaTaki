@@ -20,7 +20,7 @@ icons/ (the shared glyph set) and the two window-shared React hooks below.
 - rpc-deadline.ts — method-class timing table including read-only child attention/cache membership, typed deadline error and json-rpc-2.0 native timeout requester seam
 - timing-policy.ts — window-owned bootstrap/last-good timing policy store; validates full Core config refreshes without persistence
 - timing-policy-sync.ts — serialized last-good full-policy refresh after changes and recovered config membership
-- ws-config-methods.ts — retryable physical-client config subscription and config.list sharing only until a verified change, successful write or recovered observation gap
+- ws-config-methods.ts — retryable physical-client config subscription, bounded config.list sharing and separate Shared-validated model-capability reads
 - ws-read-subscriptions.ts — shared physical-client Perception/Extension subscriptions, strict acknowledgements, explicit unsupported-Core outcome and deliberate retry after setup failure
 - connection-status.ts — discriminated operator connection states plus the one semantic notice-copy mapping shared by every surface
 - connection-generation-controller.ts — framework-free fresh-client generation lifecycle: auth/restore promotion, full-jitter retry, stability reset, stale guards, disposal

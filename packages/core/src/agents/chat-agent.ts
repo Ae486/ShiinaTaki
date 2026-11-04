@@ -31,9 +31,15 @@ import type { WorkContext } from "./work-context.ts";
 import { createToolMaterialSink, type ToolMaterialSink } from "../harness/subagent-tool-materials.ts";
 import type { ForegroundInboxContext, ForegroundInboxInput } from "./foreground-inbox.ts";
 import { runAttempt } from "./agent-attempt.ts";
+import type { NativeImageContext } from "./native-image-context.ts";
+import type { ImageReplayReader } from "./native-image-replay.ts";
+import type { ContextWindowSnapshot } from "@taki/shared";
+import type { AttributedText } from "./context-attribution.ts";
 
 /** Per-turn execution handle. Primary chat supplies a WS connection; unattended non-primary Runs omit it. */
 export interface TurnContext {
+  /** Trusted initiative evidence, leased only for the current model Attempt. */
+  nativeImageContext?: NativeImageContext;
   /** Trusted synchronous fence and opportunity charge inside each model Effect intent transaction. */
   onCommitModelIntent?: (effect: EffectLifecycle) => void;
   /** Trusted shared-work execution. Never populated from a public request or source label. */
@@ -100,6 +106,7 @@ export interface AgentRunContext {
   readonly memoryPrompt?: string;
   readonly assembleMemory?: (currentMessage: string) => string;
   readonly instructions?: string;
+  readonly instructionsAttribution?: AttributedText;
   dispose?(): void;
 }
 
@@ -114,12 +121,10 @@ export interface ChatAgentDeps {
   autoMemory?: AutoMemory;
   /** Compatibility witness callback only when the ConversationStore has no durable primary-source writer. */
   onPrimaryCommitted?: (input: PrimaryConversationCommit) => void;
-  /** Vision model slot (TAKI_VLM_*, #17 decision 5); image-bearing turns route here. Absent = image turns rejected. */
-  visionModel?: LanguageModel;
   /** Content-addressed attachment writer — a NARROW structural type (zero coupling to the media module). */
-  attachments?: { save(dataBase64: string, mediaType: ImageAttachment["mediaType"]): { ref: string; bytes: number } };
-  /** Detached post-turn image-description hook (mirrors autoMemory); fired void, only when the turn carried images (D28). */
-  imageMemory?: { onImageTurn(input: { characterId: string; refs: string[]; caption: string }): void };
+  attachments?: { save(dataBase64: string, mediaType: ImageAttachment["mediaType"]): { ref: string; bytes: number }; read?: ImageReplayReader["read"] };
+  /** Optional live foreground observation; acquired once per Attempt, validated at every actual dispatch. */
+  acquireNativeImageContext?: () => NativeImageContext | undefined;
   /** Adapter-governed tools merged after Core governance (Skill/MCP/Host); stable across turns. */
   extraTools?: ToolSet;
   /** Connection-bound adapter tools built per turn (MCP); preferred over static extraTools for interactive authority. */
@@ -174,6 +179,8 @@ export interface ChatAgentDeps {
   onOverflow?: (observedInput: number) => void;
   /** Optional Core-owned effect boundary; omitted by focused legacy callers. */
   effectLifecycle?: EffectLifecycleService;
+  /** Captured at actual native dispatch; real provider tokens never divide by estimator units. */
+  requestWindowSnapshot?: () => ContextWindowSnapshot;
 }
 
 
@@ -182,16 +189,12 @@ export function createChatAgent(deps: ChatAgentDeps): ChatAgent {
   return { stream: (params, turn) => runTurn(deps, params, turn) };
 }
 
-// Narrowed vision pair (decision 5): model + attachment store, present iff the turn carries images.
-type VisionDeps = { model: LanguageModel; store: NonNullable<ChatAgentDeps["attachments"]> };
-
 /** The per-turn stable inputs each attempt replays; `state` is re-created per attempt (the R2 retry reads it). */
 export interface TurnAttempt {
   characterId: string;
   message: string;
   attachments: ImageAttachment[];
   images: UserImageInput[];
-  vision: VisionDeps | null;
   userSeq?: number;
   userEntry?: TimelineEntry;
   primarySourceId?: string;
@@ -217,14 +220,11 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
   const { store, approval } = deps;
   const { characterId, message } = params;
   const attachments = params.attachments ?? [];
-  // Image turns route to the vision slot (decision 5). A turn carrying images with no slot/store configured is rejected
-  // BEFORE any persistence — the text model must never be handed an image (chat-send maps this throw to a structured
-  // chat.error; the UI also disables attach). `vision` is null for a text turn, else the narrowed {model, store}.
-  const vision = attachments.length > 0 ? requireVisionDeps(deps) : null;
+  const imageStore = attachments.length > 0 ? requireAttachmentStore(deps) : undefined;
   // Save the in-flight bytes to the content-addressed store; only the refs (mediaType + ref) persist on the timeline row.
   const primary = (turn?.turnKind ?? "primary") === "primary";
-  const images = primary && vision
-    ? attachments.map((a) => ({ mediaType: a.mediaType, ref: vision.store.save(a.dataBase64, a.mediaType).ref }))
+  const images = primary && imageStore
+    ? attachments.map((a) => ({ mediaType: a.mediaType, ref: imageStore.save(a.dataBase64, a.mediaType).ref }))
     : [];
   const runContext = turn?.runContext ?? deps.runContext?.(turn);
   const ownsRunContext = turn?.runContext === undefined;
@@ -235,7 +235,7 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
     const userEntry = opened?.userEntry;
     if (turn?.runId) turn.materials ??= createToolMaterialSink();
     if (approval && turn) wireApprovalDenial(approval, turn);
-    const base = { characterId, message, attachments, images, vision, userSeq: userEntry?.seq, userEntry,
+    const base = { characterId, message, attachments, images, userSeq: userEntry?.seq, userEntry,
       primarySourceId: opened?.sourceId, primary, runContext, recall: {},
       toolDisplayNames: captureToolDisplayNames(runContext?.toolDisplayNames) };
     yield* executeAttempts(deps, base, turn);
@@ -256,7 +256,7 @@ async function* executeAttempts(deps: ChatAgentDeps, base: Omit<TurnAttempt, "st
         for await (const delta of runAttempt(deps, { ...base, state }, turn)) { yielded = true; yield delta; }
       } catch (error) {
         const clean = !yielded && !state.stepEnded && !state.inbox?.hasIntent();
-        if (ordinal === 0 && clean && deps.onOverflow && isContextOverflowError(error)
+        if (ordinal === 0 && clean && !turn?.nativeImageContext && deps.onOverflow && isContextOverflowError(error)
           && turn?.onRetry?.("context_overflow") !== false) {
           deps.onOverflow(observedTokensOf(error) ?? estimateTokens(state.instructions) + estimateMessagesTokens(state.outgoing));
           retrying = true;
@@ -320,23 +320,16 @@ function wireApprovalDenial(approval: ApprovalGate, turn: TurnContext): void {
   turn.signal?.addEventListener("abort", () => approval.denyPending("turn cancelled"), { once: true });
 }
 
-// The detached post-turn writes: the auto-memory pass + the image-description hook. Fired void so they never add
+// The detached post-turn auto-memory pass. Fired void so it never adds
 // latency to the user-facing turn (prd §3), and ONLY on the committed path — a retracted turn skips them (it never
 // entered model memory), and a throw ending never reaches here (it rethrew or already retracted).
-export function fireDetachedTurnWrites(deps: ChatAgentDeps, ctx: { characterId: string; imageRefs: string[]; message: string }): void {
+export function fireDetachedTurnWrites(deps: ChatAgentDeps, ctx: { characterId: string }): void {
   void deps.autoMemory?.onTurnCompleted(ctx.characterId);
-  // An image turn's authoritative cross-turn record is the vision model's TEXT description (decision 6).
-  if (ctx.imageRefs.length > 0) {
-    void deps.imageMemory?.onImageTurn({ characterId: ctx.characterId, refs: ctx.imageRefs, caption: ctx.message });
-  }
 }
 
 
-// Image turns need BOTH the vision slot and the attachment store; a turn with images but either missing is rejected
-// (the guard). Returns the narrowed non-optional pair so the save + model-pick sites carry no `undefined` (decision 5).
-function requireVisionDeps(deps: ChatAgentDeps): VisionDeps {
-  if (!deps.visionModel || !deps.attachments) {
-    throw new Error("Image attachments require a configured vision model (TAKI_VLM_*)");
-  }
-  return { model: deps.visionModel, store: deps.attachments };
+// Storage admission precedes persistence; the configured primary model receives both text and image input.
+function requireAttachmentStore(deps: ChatAgentDeps): NonNullable<ChatAgentDeps["attachments"]> {
+  if (!deps.attachments) throw new Error("Image attachments require configured attachment storage.");
+  return deps.attachments;
 }

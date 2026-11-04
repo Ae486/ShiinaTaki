@@ -80,10 +80,9 @@ async function boot() {
     onPairingCode: () => undefined, onAutoTrust: () => undefined }));
   const { logger } = createCaptureLogger();
   const route = vi.fn(async () => ({ ok: false as const, code: "NO_NODE" as const, message: "no synthetic capture host" }));
-  const describe = vi.fn(async () => "unused");
   const save = vi.fn();
   const perception = createPerceptionLayer({
-    route, describe, hasNode: () => false, logger,
+    route, hasNode: () => false, logger,
     ambient: { enabled: false, retention: { mode: "keep" } },
     ambientShotsDir: join(process.cwd(), "target", "unused-perception-ws"),
     pauseStore: { load: () => undefined, save },
@@ -101,7 +100,7 @@ async function boot() {
     expect(JsonRpcSuccessResponseSchema.parse((await client.take(1))[0]).result).toMatchObject({ status: "ok" });
     return client;
   }
-  return { server, perception, route, describe, save, open, authenticated };
+  return { server, perception, route, save, open, authenticated };
 }
 
 describe("Perception over authenticated WS connections", () => {
@@ -124,7 +123,7 @@ describe("Perception over authenticated WS connections", () => {
       expect(PerceptionSubscribeResultSchema.parse(response.result)).toEqual({ status: "ok" });
     }
     expect(h.perception.changes.subscriptions.count()).toBe(2);
-    for (const sideEffect of [h.route, h.describe, h.save]) expect(sideEffect).not.toHaveBeenCalled();
+    for (const sideEffect of [h.route, h.save]) expect(sideEffect).not.toHaveBeenCalled();
     h.perception.activity.state.push({ available: true, processName: "Code.exe", windowTitle: "accepted sample", idleSeconds: 0 }, Date.now());
     for (const client of [one, two]) {
       const hint = notification((await client.take(1))[0]);
@@ -146,7 +145,7 @@ describe("Perception over authenticated WS connections", () => {
     await h.server.close();
     servers.splice(servers.indexOf(h.server), 1);
     expect(h.perception.changes.subscriptions.count()).toBe(0);
-    for (const sideEffect of [h.route, h.describe]) expect(sideEffect).not.toHaveBeenCalled();
+    expect(h.route).not.toHaveBeenCalled();
     expect(h.save).toHaveBeenCalledExactlyOnceWith({ paused: true, until: null });
   });
 });

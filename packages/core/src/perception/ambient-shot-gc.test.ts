@@ -35,10 +35,10 @@ describe("startAmbientShotGc", () => {
     expect(h.records.some((r) => r.msg?.includes("ambient frames swept"))).toBe(true);
   });
 
-  it("reclaims EVERY leftover frame under drop-after-describe (the crash backstop)", () => {
-    const h = harness({ mode: "drop-after-describe" });
+  it("reclaims EVERY leftover frame under drop-after-consumption (the crash backstop)", () => {
+    const h = harness({ mode: "drop-after-consumption" });
     startAmbientShotGc({ store: h.store, retention: h.retention, logger: h.logger, now: () => NOW });
-    expect(h.cutoffs).toEqual([NOW]); // everything already on disk predates now
+    expect(h.cutoffs).toEqual([Number.POSITIVE_INFINITY]); // reclaim all unprotected leftovers, including future mtimes
   });
 
   it("schedules nothing at all under keep — the user asked for those frames", () => {

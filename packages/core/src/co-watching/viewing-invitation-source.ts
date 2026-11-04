@@ -9,15 +9,19 @@ import { HeartbeatDecisionSchema, type BrowserPlaybackView, type CoWatchingContr
   type CoWatchingInvitationRespondResult, type InitiativeViewingFact } from "@taki/shared";
 import type { Database } from "../db/sqlite.ts";
 import type { TurnContext } from "../agents/chat-agent.ts";
+import type { NativeImageContext } from "../agents/native-image-context.ts";
 import type { TurnInteractive } from "../mcp/mcp-turn-tools.ts";
 import type { BrowserPlaybackSources } from "../perception/browser-playback-sources.ts";
 import type { WakeSelection } from "../initiative/wake/wake-contract.ts";
+import type { InitiativePreparedInput } from "../initiative/initiative-prepared-input.ts";
 import { createViewingPlayback, eligiblePlayback, type ViewingInvitationPolicy, type ViewingPlayback } from "./viewing-playback.ts";
 
 export type { ViewingInvitationPolicy } from "./viewing-playback.ts";
 export interface ViewingInvitationPreparation { source: BrowserPlaybackView; expiresAt: number; isCurrent(): boolean }
 /** Return only after exact-media acquisition and real screened capture succeed under the supplied Run. */
-export interface ViewingInvitationEvidence { title: string; text: string; isCurrent(): boolean }
+export interface ViewingInvitationEvidence extends InitiativePreparedInput {
+  title: string; nativeImageContext: NativeImageContext; isCurrent(): boolean;
+}
 interface Dependencies {
   db: Database;
   sources: Pick<BrowserPlaybackSources, "read">;
@@ -34,7 +38,7 @@ interface Dependencies {
 interface Invitation {
   id: string; version: number; characterId: string; viewingId: string; sourceRevision: string;
   candidateId: string; runId: string; expiresAt: number; source: BrowserPlaybackView;
-  evidence?: ViewingInvitationEvidence; published?: { seq: number; expiresAt: number };
+  evidence?: Omit<ViewingInvitationEvidence, "nativeImageContext">; published?: { seq: number; expiresAt: number };
   retired?: boolean;
   handled?: "accept" | "defer";
 }
@@ -48,7 +52,7 @@ export interface ViewingInvitationSource {
   facts(characterId: string): InitiativeViewingFact[];
   isCurrent(selection: WakeSelection): boolean;
   admitted(selection: WakeSelection, identity: { runId: string; attemptId: string }): boolean;
-  prepareInput(selection: WakeSelection, turn: TurnContext): Promise<string | undefined>;
+  prepareInput(selection: WakeSelection, turn: TurnContext): Promise<InitiativePreparedInput | undefined>;
   read(characterId: string): CoWatchingInvitationReadResult;
   respond(input: CoWatchingInvitationRespond, interactive: TurnInteractive): CoWatchingInvitationRespondResult;
   changed(): void;
@@ -149,18 +153,24 @@ function evidenceCurrent(record: Invitation): boolean {
   record.retired = true;
   return false;
 }
-async function prepare(state: State, selection: WakeSelection, turn: TurnContext): Promise<string | undefined> {
+async function prepare(state: State, selection: WakeSelection, turn: TurnContext): Promise<InitiativePreparedInput | undefined> {
   const record = turn.runId && state.records.get(turn.runId);
   if (!record || !currentSelection(state, selection) || !turn.runContext || turn.signal?.aborted) return;
   const isCurrent = () => state.now() < (record.published?.expiresAt ?? record.expiresAt)
     && !turn.signal?.aborted && currentSource(state, record) !== undefined;
   const evidence = await state.deps.prepareEvidence({ source: structuredClone(record.source),
     expiresAt: record.expiresAt + state.deps.policy().invitationTtlMs, isCurrent }, turn);
-  if (!isCurrent() || !currentSelection(state, selection) || !evidence?.isCurrent() || !evidence.text.trim()
-    || evidence.text.length > 7_000 || !evidence.title.trim()) return;
-  record.evidence = { ...evidence, title: evidence.title.trim().slice(0, 240).replace(/[\uD800-\uDBFF]$/u, "") };
-  return evidence.text + "\nThis is an unsolicited Co-Watching invitation decision, not acceptance. "
-    + "If inviting, choose speak with responseExpectation=invitation. Do not claim detailed analysis is ready. Otherwise remain silent.";
+  let handedOff = false;
+  try {
+    if (!isCurrent() || !currentSelection(state, selection) || !evidence?.isCurrent() || !evidence.nativeImageContext.isCurrent()
+      || !evidence.text.trim() || evidence.text.length > 7_000 || !evidence.title.trim()) return;
+    record.evidence = { text: evidence.text, isCurrent: evidence.isCurrent,
+      title: evidence.title.trim().slice(0, 240).replace(/[\uD800-\uDBFF]$/u, "") };
+    handedOff = true;
+    return { nativeImageContext: evidence.nativeImageContext,
+      text: evidence.text + "\nThis is an unsolicited Co-Watching invitation decision, not acceptance. "
+        + "If inviting, choose speak with responseExpectation=invitation. Do not claim detailed analysis is ready. Otherwise remain silent." };
+  } finally { if (!handedOff) evidence?.nativeImageContext.release(); }
 }
 function syncPublication(state: State, record: Invitation): void {
   if (record.published || !record.evidence) return;

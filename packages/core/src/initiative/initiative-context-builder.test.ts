@@ -103,15 +103,31 @@ describe("initiative thin context construction", () => {
     expect(built?.manifest.sources.filter((source) => source.category === "observation")).toEqual([]);
   });
 
-  it("captures current fenced observations once before the awaited Memory read and preserves nullable idle", async () => {
-    const screen = createScreenContext({ staleAfterMs: 60_000 }); screen.push("Original accepted description", NOW);
-    const captureMemory = vi.fn(async () => { screen.push("Later unrelated description", NOW + 1); return memory(); });
-    const { builder: context } = builder({ captureMemory, screenContext: (at) => renderScreenContext(screen, at) });
-    const built = await context.prepare(withForeground(selection(["accepted_activity", "accepted_screen"])));
-    expect(built?.controlInput).toContain("Original accepted description"); expect(built?.controlInput).not.toContain("Later unrelated");
-    expect(built?.controlInput).toContain('"idleSeconds":null'); expect(built?.controlInput).toContain("<untrusted-observation");
-    expect(built?.manifest.sources.filter((source) => source.category === "observation")).toHaveLength(2);
-    expect(built?.manifest.expiresAt).toBe(new Date(NOW + 60_000).toISOString());
+  it("retains the exact selected frame key across awaited Memory and refuses its replacement", async () => {
+    const screen = createScreenContext({ staleAfterMs: 60_000, now: () => NOW });
+    const image = { mediaType: "image/png" as const, dataBase64: "AAAA" }; screen.push(image, NOW);
+    const original = screen.latest(NOW)!;
+    const captureMemory = vi.fn(async () => { screen.push({ ...image, dataBase64: "BBBB" }, NOW); return memory(); });
+    const { builder: context } = builder({ captureMemory, screenContext: (at) => renderScreenContext(screen, at),
+      screenObservation: (at) => screen.latest(at), acquireScreenInput: (key) => screen.acquire(key) });
+    const offered = withForeground(selection(["accepted_activity", "accepted_screen"])); const built = await context.prepare(offered);
+    expect(built?.controlInput).toContain('"idleSeconds":null'); expect(built?.controlInput).not.toContain("AAAA");
+    expect(built?.manifest.sources.some((source) => source.reference === `screen:${original.key}`)).toBe(true);
+    expect(context.prepareInput(offered).nativeImageContext).toBeUndefined();
+    expect(screen.acquire()?.images[0]?.dataBase64).toBe("BBBB"); screen.clear();
+  });
+
+  it("acquires native evidence only for the captured accepted-screen selector", async () => {
+    const screen = createScreenContext({ staleAfterMs: 60_000, now: () => NOW });
+    screen.push({ mediaType: "image/png", dataBase64: "AAAA" }, NOW);
+    const acquireScreenInput = vi.fn((key: string) => screen.acquire(key));
+    const { builder: context } = builder({ screenContext: (at) => renderScreenContext(screen, at),
+      screenObservation: (at) => screen.latest(at), acquireScreenInput });
+    const activity = withForeground(selection(["accepted_activity"])); await context.prepare(activity);
+    expect(context.prepareInput(activity).nativeImageContext).toBeUndefined(); expect(acquireScreenInput).not.toHaveBeenCalled();
+    const offered = withForeground(selection(["accepted_screen"])); await context.prepare(offered);
+    const prepared = context.prepareInput(offered); expect(prepared.nativeImageContext?.images[0]?.dataBase64).toBe("AAAA");
+    prepared.nativeImageContext?.release();
   });
 
   it("retains the original prepared authority and refuses a missing authority-currentness port", async () => {

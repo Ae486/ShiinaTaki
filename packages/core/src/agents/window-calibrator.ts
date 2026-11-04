@@ -5,6 +5,7 @@
  *         over our estimator; T5-R2: an overflow SHRINKS the persisted effective window (never triggers compaction)
  */
 import type { WindowStateRepo } from "../db/window-state-repo.ts";
+import type { ContextWindowSnapshot } from "@taki/shared";
 
 // EMA smoothing for the observed/estimated ratio. LOCAL choice: heavy enough that a handful of turns converge,
 // light enough that one outlier request cannot swing the window (the clamp below is the hard guard).
@@ -24,6 +25,8 @@ export interface WindowCalibrator {
    * against THIS number (history slice = effectiveWindow × historyRatio).
    */
   effectiveWindow(): number;
+  /** Read-only dispatch snapshot; provider occupancy uses the real-token denominator. */
+  snapshot(): ContextWindowSnapshot;
   /** Feed one turn's observed input tokens + our estimate for the SAME request; non-positive samples are ignored. */
   onUsage(observedInput: number, estimatedInput: number): void;
   /** R2: shrink the effective window to floor(observed × 0.9), persist, return the new REAL-token window. */
@@ -49,6 +52,8 @@ export function createWindowCalibrator(deps: WindowCalibratorDeps): WindowCalibr
 
   return {
     effectiveWindow: () => Math.max(1, Math.floor(effective / factor)),
+    snapshot: () => ({ declaredRealTokens: declared, effectiveRealTokens: effective,
+      estimatorWindowUnits: Math.max(1, Math.floor(effective / factor)), factor }),
     onUsage(observedInput, estimatedInput) {
       if (!isPositive(observedInput) || !isPositive(estimatedInput)) return;
       factor = clampFactor(EMA_ALPHA * (observedInput / estimatedInput) + (1 - EMA_ALPHA) * factor);

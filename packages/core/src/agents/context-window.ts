@@ -26,10 +26,11 @@ export interface WindowSelection<T extends ReplayEntry = TimelineEntry> {
  * Walk newest -> oldest by balanced tool-call/result units until the token budget. Source row bounding happens
  * earlier and emits its own explicit fact; this selector never silently applies another count boundary.
  */
-export function selectWindow<T extends ReplayEntry>(entries: T[], budgetTokens: number): WindowSelection<T> {
+export function selectWindow<T extends ReplayEntry>(entries: T[], budgetTokens: number, costOf?: (entry: T) => number): WindowSelection<T> {
   const measured = Number.isFinite(budgetTokens);
   const costs = entries.map((entry) => {
     if (!measured) return 0;
+    if (costOf) return costOf(entry);
     const message = toModelMessage(entry);
     return message === null ? 0 : estimateMessageTokens(message);
   });

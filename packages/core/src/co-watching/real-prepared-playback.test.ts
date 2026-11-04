@@ -88,7 +88,7 @@ File writes are proposals. A separate trusted caller validates the plan before p
     writeFileSync(join(output, "SKILL.md"), skill);
     const tools = { ...createReadFileTool({ paths: createWorkspacePaths({ root: f.workspaceRoot }), logger: createLogger("error") }),
       ...createWriteFileTool({ paths: createWorkspacePaths({ root: f.workspaceRoot, forbiddenPrefixes: ["native-analysis.json", "SKILL.md"] }), logger: createLogger("error") }) };
-    const agent = createChatAgent({ model: createModels({ provider, vision: null, includeUsage: true }).model,
+    const agent = createChatAgent({ model: createModels({ provider, includeUsage: true }).model,
       store: f.store, memory: f.memory, effectLifecycle: f.effects, maxSteps: 6 });
     const context = { tools, memoryTools: {}, memoryPrompt: "No memory operation is needed for this acceptance test.",
       assembleMemory: () => "You are Taki, a concise Chinese companion. This isolated test has no personal user memories.",

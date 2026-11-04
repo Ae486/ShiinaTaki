@@ -59,7 +59,7 @@ export type McpManagerDeps = ManagerStateDeps;
 export function createMcpManager(deps: McpManagerDeps): McpManager {
   const state = createManagerState(deps);
   return {
-    tools: (interactive) => buildTurnTools(state.active, state.governance, interactive),
+    tools: (interactive) => buildTurnTools(state.active, { governance: state.governance, interactive, projectImageResult: state.projectImageResult }),
     snapshot: (interactive) => snapshotTools(state, interactive),
     describe: (toolKey) => describeTool(state, toolKey),
     reconcile: (servers) => reconcileManager(state, servers),
@@ -75,7 +75,7 @@ export function createMcpManager(deps: McpManagerDeps): McpManager {
 }
 
 function snapshotTools(state: ManagerState, interactive?: TurnInteractive): readonly McpToolSnapshot[] {
-  const tools: ToolSet = buildTurnTools(state.active, state.governance, interactive);
+  const tools: ToolSet = buildTurnTools(state.active, { governance: state.governance, interactive, projectImageResult: state.projectImageResult });
   const entries: McpToolSnapshot[] = [];
   for (const record of state.active.values()) {
     for (const [toolKey, ref] of record.refs) {

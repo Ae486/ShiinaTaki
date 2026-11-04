@@ -1,4 +1,5 @@
 # core/memory/hindsight/
+- Request attribution — direct primary assembly forwards canonical construction spans without another native read or model operation
 - hindsight-recall-evidence.ts — exact current native/source/artifact/policy lifetime capture and original retain-completion bindings
 - hindsight-source-lifetime.ts — bounded immutable source/native/policy evidence codec shared by original ingestion and whole-write receipts
 - hindsight-contracts.ts — bounded Hindsight 0.9.0 raw-wire schemas and independently negotiated G1/D78 capabilities

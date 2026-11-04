@@ -11,11 +11,13 @@ import {
 } from "@taki/shared";
 import type { ExtensionRegistry } from "./extension-registry.ts";
 import { extensionDescribeModelOutput, extensionDiscoverModelOutput } from "./extension-tool-model-output.ts";
+import { copyNativeToolImages } from "../agents/native-tool-images.ts";
+import { copyContentOrigin, retainContentOrigin } from "../agents/context-attribution.ts";
 
 export function createExtensionTools(registry: ExtensionRegistry): ToolSet {
   const multiHost = new Set([registry.snapshot.primaryHostId, ...registry.snapshot.hosts.map((host) => host.hostId),
     ...registry.snapshot.entries.map((entry) => entry.identity.ownerHostId)]).size > 1;
-  return {
+  const tools: ToolSet = {
     extension_discover: tool({
       description: "Search bounded metadata for extensions captured at the start of this Run. Use returned extensionId with extension_describe to reveal a current integration's direct tool on the next model step. Results preserve availability and Host ownership where routing needs disambiguation. Truncated means incomplete: there is no cursor or eager fallback for overflow entries in this Run.",
       inputSchema: ExtensionDiscoverParamsSchema,
@@ -32,7 +34,9 @@ export function createExtensionTools(registry: ExtensionRegistry): ToolSet {
       description: "Call one extension from this Run snapshot through its sealed governed binding. Unknown, unavailable, or stale ids fail closed and are never redirected.",
       inputSchema: ExtensionCallParamsSchema,
       execute: (input, options) => registry.call(input, options),
-      toModelOutput: registry.modelCallOutput,
+      toModelOutput: async (input) => copyContentOrigin(input.output, copyNativeToolImages(input.output, await registry.modelCallOutput(input))),
     }),
   };
+  for (const value of Object.values(tools)) retainContentOrigin(value, "builtin");
+  return tools;
 }

@@ -96,8 +96,11 @@ describe("admitted request Context Reduction seam", () => {
     await drain(agent.stream({ characterId: "taki", message: "inspect" }));
     await new Promise((resolve) => setImmediate(resolve));
     expect(snapshots.length).toBeGreaterThanOrEqual(3);
-    expect(snapshots[1]).toBeGreaterThan(snapshots[0]!);
-    expect(snapshots.at(-1)).toBeLessThan(snapshots[1]!);
+    // Native dispatch also reports its exact envelope, so initial preparation/dispatch may be equal.
+    // The persisted full tool payload must still increase pressure before the final reduced projection.
+    const fullToolPressure = Math.max(...snapshots);
+    expect(fullToolPressure).toBeGreaterThan(snapshots[0]!);
+    expect(snapshots.at(-1)).toBeLessThan(fullToolPressure);
     const timeline = JSON.stringify(fixture.conversation.history("taki"));
     expect(timeline).toContain("x".repeat(6_000));
     const finalSnapshot = snapshots.at(-1);

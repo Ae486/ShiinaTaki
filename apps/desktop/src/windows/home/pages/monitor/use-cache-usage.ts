@@ -1,6 +1,6 @@
 /**
  * INPUT: Home's physical client, the current Monitor mode and effective page visibility.
- * OUTPUT: one disposable cache-window view and explicit retry action.
+ * OUTPUT: one coherent disposable cache/latest-primary-request view and explicit retry action.
  * POS: ui/monitor — hook wiring for independent aggregate subscriptions, never a Run filter or persisted cache.
  */
 import { useLayoutEffect, useMemo, useState } from "react";

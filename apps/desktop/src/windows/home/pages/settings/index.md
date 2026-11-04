@@ -1,9 +1,14 @@
 # windows/home/pages/settings/
+- model-capabilities-section.tsx — accessible configured MAIN model information, declared source/activation guidance and distinct connection-native versus application-tool search availability
+- model-catalog-summary.tsx — catalog display/provider names with the original configured model ID, brand icon and concise tool/image/reasoning/modality declarations
+- model-catalog-details.tsx — collapsed provider/canonical identity and token limits, explicitly separate from effective runtime settings
+- model-provider-logo.tsx — fixed-origin provider image with a local generic fallback for absent or failed artwork; no inline remote SVG
+- use-model-capabilities.ts — visible demand reads using existing retirement coordinator and safe SHA-256 model/base URL identity; refreshes on actual configured identity changes without polling or persistence
 - user-timezone-section.tsx — fixed/follow-this-device User Timezone controls, retained draft and current confirmation/refusal truth
 The Settings page: Core-owned permission governance appears before generic config knobs. Permission state is fresh per
 authenticated Home client generation and window-memory-only; config remains the guarded cached metadata surface.
 - settings-page.tsx — page root: permission governance, durable Approval management, then the knob list regrouped client-side (U7) into fixed Chinese sections with a key/label/description search box; Core order inside a group is preserved and no knob is removed or hidden
-- config-groups.ts — client-side key/group/Chinese label presentation, including viewing timing and child N/K check-in knobs with next-interval guidance; unknown keys retain the 高级 fallback and existing search/order
+- config-groups.ts — Chinese labels and grouping for primary/utility model, perception and runtime settings; no separate vision model controls
 - approval-decisions-section.tsx — fresh Core durable-allow list, current-client revoke readiness, retry, and no-cache presentation
 - approval-decision-row.tsx — safe operation/target names with Shared fallbacks, creation time, Core-owned usability and exact decision-id revoke binding
 - approval-decisions-controller.ts — current-Home-client list coordination and a visibility-independent revoke lock with post-outcome restoration; stale-generation feedback never assumes the covering read succeeded

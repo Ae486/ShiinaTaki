@@ -49,8 +49,9 @@ binding with an actual direct tool returns it. It is neither a display label nor
   completed SDK results. Skill text may omit its revision in the model view; directory views omit generation
   bookkeeping but preserve selectors, availability and overflow. The sealed extension bridge reuses the exact
   captured Skill's projector. Unknown MCP payloads retain their complete existing JSON view: blindly applying the
-  direct SDK content projector would lose unique structuredContent or isError. The direct MCP adapter is unchanged;
-  the indirect bridge's existing JSON-only image/resource presentation is not a new multimodal rendering path.
+  direct SDK content projector would lose unique structuredContent or isError. Explicit MCP image blocks and image
+  resource blobs use the shared native-image projection after governed execution in both direct tools and the
+  indirect bridge; preserve non-image content, structuredContent and isError. See [Native Image Input](native-image-input.md).
 - SDK validation uses the active subset: a hidden call in the same response as its loader fails even if loading
   finishes first. Disclosure cannot bypass Governance, retired generations, cancellation or initiative restrictions.
 - Product composition chooses non-primary eligibility; the generic hook needs no fake user message. Co-Watching

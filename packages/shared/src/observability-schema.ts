@@ -40,7 +40,7 @@ export const RunMonitorListParamsSchema = z.strictObject({
   outcomes: z.array(RunOutcomeSchema).max(8).optional(),
   deliveryClasses: z.array(DeliveryClassSchema).max(3).optional(),
   categories: z.array(RunEventCategorySchema).max(8).optional(),
-  kinds: z.array(RunEventKindSchema).max(32).optional(),
+  kinds: z.array(z.union([RunEventKindSchema, z.literal("context.request.measured")])).max(32).optional(),
   provider: z.string().trim().min(1).max(100).optional(),
   modelId: Id.optional(),
   toolName: Id.optional(),
@@ -107,7 +107,7 @@ const TrajectoryBaseSchema = z.strictObject({
   seq: Sequence.refine((value) => value > 0),
   groupKey: Id.optional(),
   // Correlation is machine-only. In particular, callId identifies a generation, not one model request.
-  eventKind: RunEventKindSchema.optional(),
+  eventKind: z.union([RunEventKindSchema, z.literal("context.request.measured")]).optional(),
   effectId: Id.optional(),
   callId: Id.optional(),
   toolCallId: Id.optional(),

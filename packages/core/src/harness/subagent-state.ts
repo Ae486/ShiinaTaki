@@ -1,5 +1,5 @@
 /**
- * INPUT: existing Core repositories, execution owners and trusted domain work bindings
+ * INPUT: Core repositories/image reader, execution owners and trusted domain work bindings
  * OUTPUT: closed service/executor ports and disposable queue/controller state
  * POS: core/harness — shared delegation composition; durable truth stays in canonical Run, private evidence and work-progress repositories
  */
@@ -19,6 +19,7 @@ import type { ChatAgent, TurnContext } from "../agents/chat-agent.ts";
 import type { TurnRegistry } from "../agents/turn-registry.ts";
 import type { TurnQueue } from "../agents/turn-queue.ts";
 import type { ConversationStore } from "../agents/conversation-store.ts";
+import type { ImageReplayReader } from "../agents/native-image-replay.ts";
 import type { ToolMaterialSink } from "./subagent-tool-materials.ts";
 import type { UtilitySlot } from "../memory/utility-slot.ts";
 import type { SubagentActivityStore } from "./subagent-activity.ts";
@@ -56,6 +57,7 @@ export interface SubagentDependencies {
   db: Database; children: SubagentRepo; inputs: SubagentInputRepo; executions: SubagentExecutionRepo; messages: RunMessageRepo;
   runRepo: RunRepo; runs: RunService<TurnInteractive>; effects: EffectLifecycleService; agent: ChatAgent;
   turns: TurnRegistry; queue: TurnQueue; store: ConversationStore; historyBudget(): number;
+  attachments?: ImageReplayReader;
   changed(characterId: string, subagentId: string): void;
   reportError(code: string): void;
   utility?: UtilitySlot;

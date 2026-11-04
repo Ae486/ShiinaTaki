@@ -44,6 +44,16 @@ function boot(env: Record<string, string | undefined>): CoreBootstrap {
 }
 
 describe("bootstrapCore", () => {
+  it("ignores retired vision settings while keeping their historical stored values", () => {
+    const dataDir = tempDataDir();
+    storeKnob(dataDir, "TAKI_VLM_MODEL", "old-vision");
+    const result = boot({ TAKI_DATA_DIR: dataDir, TAKI_VLM_BASE_URL: "partial-old-config", TAKI_VLM_CONTEXT_TOKENS: "obsolete" });
+    expect(result.model).toMatchObject({ modelId: PROVIDER_ENV.TAKI_PROVIDER_MODEL });
+    expect(result).not.toHaveProperty("visionModel");
+    expect(result.config.source.resolve("TAKI_VLM_MODEL")).toBeUndefined();
+    expect(result.config.repo.get("TAKI_VLM_MODEL")).toBe("old-vision");
+    expect(result.contextConfig.contextTokens).not.toHaveProperty("vision");
+  });
   it("reports committed callback failures with a bounded code and preserves later cleanup", () => {
     const result = boot({ TAKI_DATA_DIR: tempDataDir() });
     const warning = vi.spyOn(result.logger, "warn").mockImplementation(() => {});

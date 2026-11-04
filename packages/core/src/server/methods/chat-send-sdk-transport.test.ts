@@ -101,7 +101,6 @@ async function boot(scenario: Scenario) {
   const runs = createRunService({ repo: createRunRepo(companion.db), provider: "fixture", modelId: "fixture",
     snapshot: { async capture(request) { return { snapshot: snapshot(request) }; } } });
   const maintenance = vi.fn(async () => undefined);
-  const imageMaintenance = vi.fn();
   const usage = vi.fn();
   const witness = vi.fn();
   const execute = vi.fn(async () => ({ ok: true, value: "effect complete" }));
@@ -110,9 +109,9 @@ async function boot(scenario: Scenario) {
     binding: { identity: { capabilityId: "fixture.probe", ownerHostId: "core" }, cellKey: "probe" },
   });
   const capturedTools: ToolSet = scenario === "tool-partial" ? { probe: governed } : {};
-  const agent = createChatAgent({ model, visionModel: model, store: companion.conversation, memory: companion.memory,
+  const agent = createChatAgent({ model, store: companion.conversation, memory: companion.memory,
     effectLifecycle: effects, autoMemory: { onTurnCompleted: maintenance }, onUsage: usage, onPrimaryCommitted: witness,
-    imageMemory: { onImageTurn: imageMaintenance }, attachments: { save: () => ({ ref: `attachments/${"a".repeat(64)}.png`, bytes: 3 }) },
+    attachments: { save: () => ({ ref: `attachments/${"a".repeat(64)}.png`, bytes: 3 }) },
     runContext: () => ({ tools: capturedTools }),
   });
   const { logger } = createCaptureLogger();
@@ -131,7 +130,7 @@ async function boot(scenario: Scenario) {
   sendConnect(client, { deviceId: "550e8400-e29b-41d4-a716-446655440000", deviceName: "transport fixture", role: "operator" });
   const connected = ConnectResultSchema.parse(JsonRpcSuccessResponseSchema.parse((await client.take(1))[0]).result);
   expect(connected.status).toBe("ok");
-  return { companion, http, client, runs, activity, events, maintenance, imageMaintenance, usage, witness, execute,
+  return { companion, http, client, runs, activity, events, maintenance, usage, witness, execute,
     requests: () => fake?.doStreamCalls.length ?? http.requests() };
 }
 
@@ -186,7 +185,6 @@ describe("approved cancellation policy over real HTTP and WebSocket transports",
     expect(f.runs.status(ack.runId)).toMatchObject({ run: { state: outcome }, receipt: { outcome }, attempts: [{ state: outcome }] });
     expect(f.activity.read("taki")).toMatchObject({ status: "terminal", outcome });
     expect(f.maintenance).toHaveBeenCalledTimes(scenario === "success" ? 1 : 0);
-    expect(f.imageMaintenance).toHaveBeenCalledTimes(scenario === "success" && image ? 1 : 0);
     if (cancelled || scenario === "error") expect(f.usage).not.toHaveBeenCalled();
     const history = f.companion.conversation.history("taki");
     if (scenario === "prefill") {

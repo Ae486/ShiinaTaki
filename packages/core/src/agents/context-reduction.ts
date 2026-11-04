@@ -7,6 +7,7 @@ import type { ModelMessage, ToolResultPart } from "ai";
 import { estimateMessagesTokens, estimateTokens } from "../memory/token-estimator.ts";
 import type { TimelineEntry } from "@taki/shared";
 import { renderSourceContext, reduceSourcedToolResult } from "./source-context.ts";
+import { attributedContextText, contextText, copyContentOrigin, retainContextText } from "./context-attribution.ts";
 
 export type ReductionClass = "dialogue" | "summary" | "tool-result" | "snapshot" | "reasoning" | "media" | "observation";
 
@@ -182,12 +183,14 @@ function messageText(message: ModelMessage): string {
 function replaceMessage(message: ModelMessage, candidate: ReducedCandidate): ModelMessage {
   if (!candidate.reduced) return message;
   if (candidate.class === "summary" && message.role === "user" && typeof message.content === "string") {
-    return { ...message, content: reduceSummaryContent(message.content, candidate.text) };
+    const content = reduceSummaryContent(message.content, candidate.text);
+    const replacement = { ...message, content };
+    return attributedContextText(message) ? retainContextText(replacement, contextText(content, "summary")) : replacement;
   }
   if (message.role !== "tool" || !Array.isArray(message.content)) return message;
   const content = message.content.map((part) => {
     if (part.type !== "tool-result") return part;
-    return { ...part, output: reduceSourcedToolResult(part.output, (output) => reduceToolOutput(output) as ToolResultPart["output"]) };
+    return copyContentOrigin(part, { ...part, output: reduceSourcedToolResult(part.output, (output) => reduceToolOutput(output) as ToolResultPart["output"]) });
   });
   return { ...message, content } as ModelMessage;
 }

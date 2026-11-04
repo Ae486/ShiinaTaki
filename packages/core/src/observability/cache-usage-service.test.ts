@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { CACHE_USAGE_METHODS, type CacheUsageUpdate, type CacheUsageWindowSnapshot, type MonitorMode } from "@taki/shared";
+import type { LatestPrimaryRequestSnapshot } from "@taki/shared";
 import { createCacheUsageService } from "./cache-usage-service.ts";
 import { registerCacheUsageMethods } from "../server/methods/cache-usage-methods.ts";
 import { createMethodRegistry, type MethodContext } from "../server/method-registry.ts";
@@ -20,6 +21,48 @@ function fixture() {
 }
 
 describe("computed cache usage subscriptions", () => {
+  it("preserves the independent latest-primary sibling in initial and explicit pushed payloads", async () => {
+    const latest: LatestPrimaryRequestSnapshot = { scope: "latest-primary-request", characterId: "taki", status: "empty",
+      computedAt: at, reason: null, request: null };
+    const readLatestPrimaryRequest = vi.fn(() => latest);
+    const service = createCacheUsageService({ read: () => snapshot, readLatestPrimaryRequest,
+      mode: () => "FULL_LOCAL", logger: { warn: vi.fn() } });
+    const updates: CacheUsageUpdate[] = [];
+    expect(service.subscribe(connection(), "taki", (update) => updates.push(update)).update.latestPrimaryRequest).toEqual(latest);
+    service.changed(); service.changed(); await Promise.resolve();
+    expect(updates[0]?.latestPrimaryRequest).toEqual(latest);
+    expect(updates[0]?.snapshot).toEqual(snapshot);
+    expect(readLatestPrimaryRequest).toHaveBeenCalledTimes(2);
+  });
+  it("isolates attribution and cache read failures and per-observer payload mutations", async () => {
+    const latest: LatestPrimaryRequestSnapshot = { scope: "latest-primary-request", characterId: "taki", status: "empty",
+      computedAt: at, reason: null, request: null };
+    const read = vi.fn(() => snapshot); const readLatestPrimaryRequest = vi.fn(() => latest);
+    const service = createCacheUsageService({ read, readLatestPrimaryRequest, mode: () => "FULL_LOCAL", logger: { warn: vi.fn() } });
+    const updates: CacheUsageUpdate[] = [];
+    service.subscribe(connection(), "taki", (update) => { if (update.latestPrimaryRequest) update.latestPrimaryRequest.reason = "read-failed"; });
+    service.subscribe(connection(), "taki", (update) => updates.push(update));
+    service.changed(); await Promise.resolve();
+    expect(updates[0]?.latestPrimaryRequest?.reason).toBeNull();
+    readLatestPrimaryRequest.mockImplementation(() => { throw new Error("private attribution detail"); });
+    service.changed(); await Promise.resolve();
+    expect(updates[1]).toMatchObject({ snapshot, latestPrimaryRequest: { status: "unavailable", reason: "read-failed" } });
+    readLatestPrimaryRequest.mockReturnValue(latest); read.mockImplementation(() => { throw new Error("private cache detail"); });
+    service.changed(); await Promise.resolve();
+    expect(updates[2]).toMatchObject({ snapshot: { status: "unavailable" }, latestPrimaryRequest: latest });
+    expect(JSON.stringify(updates)).not.toContain("private");
+  });
+  it("withdraws both independent projections on mode disable without reading either authority", async () => {
+    let mode: MonitorMode = "FULL_LOCAL";
+    const read = vi.fn(() => snapshot);
+    const readLatestPrimaryRequest = vi.fn((): LatestPrimaryRequestSnapshot => ({ scope: "latest-primary-request",
+      characterId: "taki", status: "empty", computedAt: at, reason: null, request: null }));
+    const service = createCacheUsageService({ read, readLatestPrimaryRequest, mode: () => mode, logger: { warn: vi.fn() } });
+    const updates: CacheUsageUpdate[] = []; service.subscribe(connection(), "taki", (update) => updates.push(update));
+    read.mockClear(); readLatestPrimaryRequest.mockClear(); mode = "DISABLED"; service.changed(); await Promise.resolve();
+    expect(read).not.toHaveBeenCalled(); expect(readLatestPrimaryRequest).not.toHaveBeenCalled();
+    expect(updates[0]).toMatchObject({ snapshot: { reason: "monitor-disabled" }, latestPrimaryRequest: { reason: "monitor-disabled" } });
+  });
   it("does no aggregate work without an observer and returns an initial snapshot", async () => {
     const f = fixture(); f.service.changed(); await Promise.resolve();
     expect(f.read).not.toHaveBeenCalled();

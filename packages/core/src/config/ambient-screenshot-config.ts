@@ -1,6 +1,6 @@
 /**
  * INPUT:  process env (TAKI_AMBIENT_SCREENSHOT, TAKI_AMBIENT_SCREENSHOT_RETENTION)
- * OUTPUT: loadAmbientScreenshotConfig(env) -> { enabled, retention }; factory default = OFF + drop-after-describe
+ * OUTPUT: loadAmbientScreenshotConfig(env) -> { enabled, retention }; factory default = OFF + drop-after-consumption
  * POS:    core/config — the ambient screen-sampling switch + raw-frame retention policy (D11 env style; #26 turns both
  *         into panel controls). DEFAULT OFF is load-bearing: with no explicit enable the sampler is never scheduled —
  *         no capture, no dialog, no log. A garbage value is fatal at boot, never a silent fallback.
@@ -10,11 +10,11 @@ import { z } from "zod";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
- * What happens to the RAW frame once its description exists (prd ruling 2). The description is the durable artifact;
- * the pixels are the disposable byproduct — so the conservative factory default drops them immediately.
+ * The default retains pixels only until consumption, expiry, replacement or withdrawal.
+ * Retained policies preserve completed captures; consent/source withdrawal overrides retention while live.
  */
 export type AmbientRetention =
-  | { mode: "drop-after-describe" }
+  | { mode: "drop-after-consumption" }
   | { mode: "keep" }
   | { mode: "delete-after-days"; days: number; ttlMs: number };
 
@@ -33,7 +33,7 @@ function parseEnableFlag(value: unknown): unknown {
 // a non-integer / zero / negative / unknown word is fatal, so a typo can never silently disable expiry.
 function parseRetention(value: unknown): AmbientRetention {
   const raw = typeof value === "string" ? value.trim().toLowerCase() : "";
-  if (raw === "" || raw === "drop") return { mode: "drop-after-describe" };
+  if (raw === "" || raw === "drop") return { mode: "drop-after-consumption" };
   if (raw === "keep") return { mode: "keep" };
   const days = Number(raw);
   if (!Number.isInteger(days) || days <= 0) {

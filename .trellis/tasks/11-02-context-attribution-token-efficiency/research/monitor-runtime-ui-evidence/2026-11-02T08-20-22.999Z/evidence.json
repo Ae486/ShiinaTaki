@@ -1,0 +1,2350 @@
+{
+  "reports": [
+    {
+      "name": "actual-core-empty",
+      "node": "v24.18.0",
+      "snapshot": {
+        "revision": 1,
+        "snapshot": {
+          "scope": "all-observed-model-requests",
+          "characterId": "taki",
+          "summaryRevision": 0,
+          "summaryCommittedAt": null,
+          "boundary": "before-first-summary",
+          "status": "empty",
+          "computedAt": "2026-11-02T08:20:25.136Z",
+          "observedRequests": 0,
+          "pairedRequests": 0,
+          "inputTokens": 0,
+          "cacheReadTokens": 0,
+          "ratio": null,
+          "reason": null
+        },
+        "latestPrimaryRequest": {
+          "scope": "latest-primary-request",
+          "characterId": "taki",
+          "computedAt": "2026-11-02T08:20:25.138Z",
+          "status": "empty",
+          "reason": null,
+          "request": null
+        }
+      }
+    },
+    {
+      "name": "monitor-cold-connection",
+      "state": {
+        "text": "运行监视 · 请求用量\n输入缓存命中率\n--\n本次摘要以来\n包含对话与后台请求\n有效缓存数据未知\n等待连接恢复\n最新请求输入占用\n--\n--\n输入用量与窗口未知\n仅最新主对话请求 · 按请求完成更新 · 与上方摘要以来的缓存统计范围不同\n等待连接恢复后读取请求统计\n上下文组成未记录\n\n隔离运行验证 · 本地合成提供方 · 未调用付费模型",
+        "width": 1280,
+        "overflow": false,
+        "phase": "stale",
+        "snapshot": {
+          "phase": "stale",
+          "snapshot": null,
+          "latestPrimaryRequest": null,
+          "error": null
+        },
+        "reads": 0,
+        "stripHeight": 780
+      },
+      "artifact": "monitor-cold-connection.png",
+      "source": "actual Core/WS"
+    },
+    {
+      "name": "monitor-empty",
+      "state": {
+        "text": "运行监视 · 请求用量\n输入缓存命中率\n--\n首次摘要前\n包含对话与后台请求\n有效缓存数据 0 / 0 次请求\n暂无有效数据\n更新于 16:20:28\n最新请求输入占用\n--\n--\n输入用量与窗口未知\n仅最新主对话请求 · 按请求完成更新 · 与上方摘要以来的缓存统计范围不同\n暂无已完成的主对话请求\n上下文组成未记录\n\n隔离运行验证 · 本地合成提供方 · 未调用付费模型",
+        "width": 1280,
+        "overflow": false,
+        "phase": "live",
+        "snapshot": {
+          "phase": "live",
+          "snapshot": {
+            "scope": "all-observed-model-requests",
+            "characterId": "taki",
+            "summaryRevision": 0,
+            "summaryCommittedAt": null,
+            "boundary": "before-first-summary",
+            "status": "empty",
+            "computedAt": "2026-11-02T08:20:28.035Z",
+            "observedRequests": 0,
+            "pairedRequests": 0,
+            "inputTokens": 0,
+            "cacheReadTokens": 0,
+            "ratio": null,
+            "reason": null
+          },
+          "latestPrimaryRequest": {
+            "scope": "latest-primary-request",
+            "characterId": "taki",
+            "computedAt": "2026-11-02T08:20:28.037Z",
+            "status": "empty",
+            "reason": null,
+            "request": null
+          },
+          "error": null
+        },
+        "reads": 1,
+        "stripHeight": 780
+      },
+      "artifact": "monitor-empty.png",
+      "source": "actual Core/WS"
+    },
+    {
+      "name": "actual-native-first",
+      "runId": "53bc2f3c-2870-434e-8351-627bd33cc4d7",
+      "requests": 1,
+      "latest": {
+        "revision": 3,
+        "snapshot": {
+          "scope": "all-observed-model-requests",
+          "characterId": "taki",
+          "summaryRevision": 0,
+          "summaryCommittedAt": null,
+          "boundary": "before-first-summary",
+          "status": "ready",
+          "computedAt": "2026-11-02T08:20:28.533Z",
+          "observedRequests": 1,
+          "pairedRequests": 1,
+          "inputTokens": 200,
+          "cacheReadTokens": 80,
+          "ratio": 0.4,
+          "reason": null
+        },
+        "latestPrimaryRequest": {
+          "scope": "latest-primary-request",
+          "characterId": "taki",
+          "computedAt": "2026-11-02T08:20:28.534Z",
+          "status": "partial",
+          "reason": null,
+          "request": {
+            "runId": "53bc2f3c-2870-434e-8351-627bd33cc4d7",
+            "effectId": "84d68a56-e1d2-4a60-bd22-c3a4da5eeb49",
+            "primaryInputSeq": 1,
+            "stepNumber": 0,
+            "provider": "taki-provider.chat",
+            "modelId": "isolated-context-primary",
+            "dispatchedAt": "2026-11-02T08:20:28.427Z",
+            "completedAt": "2026-11-02T08:20:28.520Z",
+            "outcome": "completed",
+            "inputTokens": 200,
+            "window": {
+              "declaredRealTokens": 131072,
+              "effectiveRealTokens": 131072,
+              "estimatorWindowUnits": 131072,
+              "factor": 1
+            },
+            "composition": {
+              "estimator": "heuristic-v1",
+              "totalUnits": 17198,
+              "categories": {
+                "instructions": 2297,
+                "persona": 0,
+                "injected_memory": 0,
+                "runtime_context": 210,
+                "summary": 0,
+                "conversation": 1608,
+                "tool_definitions": 10071,
+                "tool_interactions": 0,
+                "other": 3012
+              },
+              "origins": {
+                "instructions": {
+                  "builtin": 2297,
+                  "mcp": 0,
+                  "skill": 0,
+                  "unknown": 0
+                },
+                "persona": {
+                  "builtin": 0,
+                  "mcp": 0,
+                  "skill": 0,
+                  "unknown": 0
+                },
+                "injected_memory": {
+                  "builtin": 0,
+                  "mcp": 0,
+                  "skill": 0,
+                  "unknown": 0
+                },
+                "runtime_context": {
+                  "builtin": 210,
+                  "mcp": 0,
+                  "skill": 0,
+                  "unknown": 0
+                },
+                "summary": {
+                  "builtin": 0,
+                  "mcp": 0,
+                  "skill": 0,
+                  "unknown": 0
+                },
+                "conversation": {
+                  "builtin": 0,
+                  "mcp": 0,
+                  "skill": 0,
+                  "unknown": 1608
+                },
+                "tool_definitions": {
+                  "builtin": 9072,
+                  "mcp": 0,
+                  "skill": 0,
+                  "unknown": 999
+                },
+                "tool_interactions": {
+                  "builtin": 0,
+                  "mcp": 0,
+                  "skill": 0,
+                  "unknown": 0
+                },
+                "other": {
+                  "builtin": 9,
+                  "mcp": 0,
+                  "skill": 0,
+                  "unknown": 3003
+                }
+              },
+              "coverage": {
+                "status": "partial",
+                "unestimatedParts": 0,
+                "unknownOriginUnits": 5610,
+                "hasHeuristicMedia": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "monitor-first-request-wide",
+      "state": {
+        "text": "运行监视 · 请求用量\n输入缓存命中率\n40.0%\n首次摘要前\n包含对话与后台请求\n有效缓存数据 1 / 1 次请求\n更新于 16:20:28\n最新请求输入占用\n200 / 131,072\n0.2%\n上游报告输入 / 有效窗口 · tokens\nisolated-context-primary\n循环第 1 步\n已完成\n完成于 16:20:28\n仅最新主对话请求 · 按请求完成更新 · 与上方摘要以来的缓存统计范围不同\n有效窗口依据\n上下文组成 · 估算比例\n覆盖不完整 · 多模态估算精度有限\n指令\n13.4%\n角色设定\n0.0%\n注入记忆\n0.0%\n运行上下文\n1.2%\n摘要\n0.0%\n对话\n9.3%\n工具定义\n58.6%\n工具交互\n0.0%\n其他\n17.5%\n估算与来源说明\n\n隔离运行验证 · 本地合成提供方 · 未调用付费模型",
+        "width": 1280,
+        "overflow": false,
+        "phase": "live",
+        "snapshot": {
+          "phase": "live",
+          "snapshot": {
+            "scope": "all-observed-model-requests",
+            "characterId": "taki",
+            "summaryRevision": 0,
+            "summaryCommittedAt": null,
+            "boundary": "before-first-summary",
+            "status": "ready",
+            "computedAt": "2026-11-02T08:20:28.533Z",
+            "observedRequests": 1,
+            "pairedRequests": 1,
+            "inputTokens": 200,
+            "cacheReadTokens": 80,
+            "ratio": 0.4,
+            "reason": null
+          },
+          "latestPrimaryRequest": {
+            "scope": "latest-primary-request",
+            "characterId": "taki",
+            "computedAt": "2026-11-02T08:20:28.534Z",
+            "status": "partial",
+            "reason": null,
+            "request": {
+              "runId": "53bc2f3c-2870-434e-8351-627bd33cc4d7",
+              "effectId": "84d68a56-e1d2-4a60-bd22-c3a4da5eeb49",
+              "primaryInputSeq": 1,
+              "stepNumber": 0,
+              "provider": "taki-provider.chat",
+              "modelId": "isolated-context-primary",
+              "dispatchedAt": "2026-11-02T08:20:28.427Z",
+              "completedAt": "2026-11-02T08:20:28.520Z",
+              "outcome": "completed",
+              "inputTokens": 200,
+              "window": {
+                "declaredRealTokens": 131072,
+                "effectiveRealTokens": 131072,
+                "estimatorWindowUnits": 131072,
+                "factor": 1
+              },
+              "composition": {
+                "estimator": "heuristic-v1",
+                "totalUnits": 17198,
+                "categories": {
+                  "instructions": 2297,
+                  "persona": 0,
+                  "injected_memory": 0,
+                  "runtime_context": 210,
+                  "summary": 0,
+                  "conversation": 1608,
+                  "tool_definitions": 10071,
+                  "tool_interactions": 0,
+                  "other": 3012
+                },
+                "origins": {
+                  "instructions": {
+                    "builtin": 2297,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "persona": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "injected_memory": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "runtime_context": {
+                    "builtin": 210,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "summary": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "conversation": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 1608
+                  },
+                  "tool_definitions": {
+                    "builtin": 9072,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 999
+                  },
+                  "tool_interactions": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "other": {
+                    "builtin": 9,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 3003
+                  }
+                },
+                "coverage": {
+                  "status": "partial",
+                  "unestimatedParts": 0,
+                  "unknownOriginUnits": 5610,
+                  "hasHeuristicMedia": true
+                }
+              }
+            }
+          },
+          "error": null
+        },
+        "reads": 1,
+        "stripHeight": 780
+      },
+      "artifact": "monitor-first-request-wide.png",
+      "source": "actual Core/WS"
+    },
+    {
+      "name": "actual-native-tool-loop",
+      "runId": "13461645-08ff-4e2b-ba02-60d58af0c89f",
+      "requests": 2,
+      "latest": {
+        "revision": 5,
+        "snapshot": {
+          "scope": "all-observed-model-requests",
+          "characterId": "taki",
+          "summaryRevision": 0,
+          "summaryCommittedAt": null,
+          "boundary": "before-first-summary",
+          "status": "ready",
+          "computedAt": "2026-11-02T08:20:28.844Z",
+          "observedRequests": 3,
+          "pairedRequests": 3,
+          "inputTokens": 1200,
+          "cacheReadTokens": 480,
+          "ratio": 0.4,
+          "reason": null
+        },
+        "latestPrimaryRequest": {
+          "scope": "latest-primary-request",
+          "characterId": "taki",
+          "computedAt": "2026-11-02T08:20:28.845Z",
+          "status": "partial",
+          "reason": null,
+          "request": {
+            "runId": "13461645-08ff-4e2b-ba02-60d58af0c89f",
+            "effectId": "62115cb7-eca5-42f0-ad75-5ca15a822f77",
+            "primaryInputSeq": 3,
+            "stepNumber": 1,
+            "provider": "taki-provider.chat",
+            "modelId": "isolated-context-primary",
+            "dispatchedAt": "2026-11-02T08:20:28.813Z",
+            "completedAt": "2026-11-02T08:20:28.839Z",
+            "outcome": "completed",
+            "inputTokens": 600,
+            "window": {
+              "declaredRealTokens": 131072,
+              "effectiveRealTokens": 131072,
+              "estimatorWindowUnits": 186317,
+              "factor": 0.7034887777648563
+            },
+            "composition": {
+              "estimator": "heuristic-v1",
+              "totalUnits": 18855,
+              "categories": {
+                "instructions": 2297,
+                "persona": 0,
+                "injected_memory": 0,
+                "runtime_context": 210,
+                "summary": 0,
+                "conversation": 3224,
+                "tool_definitions": 10071,
+                "tool_interactions": 24,
+                "other": 3029
+              },
+              "origins": {
+                "instructions": {
+                  "builtin": 2297,
+                  "mcp": 0,
+                  "skill": 0,
+                  "unknown": 0
+                },
+                "persona": {
+                  "builtin": 0,
+                  "mcp": 0,
+                  "skill": 0,
+                  "unknown": 0
+                },
+                "injected_memory": {
+                  "builtin": 0,
+                  "mcp": 0,
+                  "skill": 0,
+                  "unknown": 0
+                },
+                "runtime_context": {
+                  "builtin": 210,
+                  "mcp": 0,
+                  "skill": 0,
+                  "unknown": 0
+                },
+                "summary": {
+                  "builtin": 0,
+                  "mcp": 0,
+                  "skill": 0,
+                  "unknown": 0
+                },
+                "conversation": {
+                  "builtin": 0,
+                  "mcp": 0,
+                  "skill": 0,
+                  "unknown": 3224
+                },
+                "tool_definitions": {
+                  "builtin": 9072,
+                  "mcp": 0,
+                  "skill": 0,
+                  "unknown": 999
+                },
+                "tool_interactions": {
+                  "builtin": 0,
+                  "mcp": 0,
+                  "skill": 0,
+                  "unknown": 24
+                },
+                "other": {
+                  "builtin": 26,
+                  "mcp": 0,
+                  "skill": 0,
+                  "unknown": 3003
+                }
+              },
+              "coverage": {
+                "status": "partial",
+                "unestimatedParts": 0,
+                "unknownOriginUnits": 7250,
+                "hasHeuristicMedia": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "monitor-tool-loop-wide",
+      "state": {
+        "text": "运行监视 · 请求用量\n输入缓存命中率\n40.0%\n首次摘要前\n包含对话与后台请求\n有效缓存数据 3 / 3 次请求\n更新于 16:20:28\n最新请求输入占用\n600 / 131,072\n0.5%\n上游报告输入 / 有效窗口 · tokens\nisolated-context-primary\n循环第 2 步\n已完成\n完成于 16:20:28\n仅最新主对话请求 · 按请求完成更新 · 与上方摘要以来的缓存统计范围不同\n有效窗口依据\n上下文组成 · 估算比例\n覆盖不完整 · 多模态估算精度有限\n指令\n12.2%\n角色设定\n0.0%\n注入记忆\n0.0%\n运行上下文\n1.1%\n摘要\n0.0%\n对话\n17.1%\n工具定义\n53.4%\n工具交互\n0.1%\n其他\n16.1%\n估算与来源说明\n\n隔离运行验证 · 本地合成提供方 · 未调用付费模型",
+        "width": 1280,
+        "overflow": false,
+        "phase": "live",
+        "snapshot": {
+          "phase": "live",
+          "snapshot": {
+            "scope": "all-observed-model-requests",
+            "characterId": "taki",
+            "summaryRevision": 0,
+            "summaryCommittedAt": null,
+            "boundary": "before-first-summary",
+            "status": "ready",
+            "computedAt": "2026-11-02T08:20:28.844Z",
+            "observedRequests": 3,
+            "pairedRequests": 3,
+            "inputTokens": 1200,
+            "cacheReadTokens": 480,
+            "ratio": 0.4,
+            "reason": null
+          },
+          "latestPrimaryRequest": {
+            "scope": "latest-primary-request",
+            "characterId": "taki",
+            "computedAt": "2026-11-02T08:20:28.845Z",
+            "status": "partial",
+            "reason": null,
+            "request": {
+              "runId": "13461645-08ff-4e2b-ba02-60d58af0c89f",
+              "effectId": "62115cb7-eca5-42f0-ad75-5ca15a822f77",
+              "primaryInputSeq": 3,
+              "stepNumber": 1,
+              "provider": "taki-provider.chat",
+              "modelId": "isolated-context-primary",
+              "dispatchedAt": "2026-11-02T08:20:28.813Z",
+              "completedAt": "2026-11-02T08:20:28.839Z",
+              "outcome": "completed",
+              "inputTokens": 600,
+              "window": {
+                "declaredRealTokens": 131072,
+                "effectiveRealTokens": 131072,
+                "estimatorWindowUnits": 186317,
+                "factor": 0.7034887777648563
+              },
+              "composition": {
+                "estimator": "heuristic-v1",
+                "totalUnits": 18855,
+                "categories": {
+                  "instructions": 2297,
+                  "persona": 0,
+                  "injected_memory": 0,
+                  "runtime_context": 210,
+                  "summary": 0,
+                  "conversation": 3224,
+                  "tool_definitions": 10071,
+                  "tool_interactions": 24,
+                  "other": 3029
+                },
+                "origins": {
+                  "instructions": {
+                    "builtin": 2297,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "persona": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "injected_memory": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "runtime_context": {
+                    "builtin": 210,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "summary": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "conversation": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 3224
+                  },
+                  "tool_definitions": {
+                    "builtin": 9072,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 999
+                  },
+                  "tool_interactions": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 24
+                  },
+                  "other": {
+                    "builtin": 26,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 3003
+                  }
+                },
+                "coverage": {
+                  "status": "partial",
+                  "unestimatedParts": 0,
+                  "unknownOriginUnits": 7250,
+                  "hasHeuristicMedia": true
+                }
+              }
+            }
+          },
+          "error": null
+        },
+        "reads": 1,
+        "stripHeight": 780
+      },
+      "artifact": "monitor-tool-loop-wide.png",
+      "source": "actual Core/WS"
+    },
+    {
+      "name": "monitor-explanations-wide",
+      "state": {
+        "text": "运行监视 · 请求用量\n输入缓存命中率\n40.0%\n首次摘要前\n包含对话与后台请求\n有效缓存数据 3 / 3 次请求\n更新于 16:20:28\n最新请求输入占用\n600 / 131,072\n0.5%\n上游报告输入 / 有效窗口 · tokens\nisolated-context-primary\n循环第 2 步\n已完成\n完成于 16:20:28\n仅最新主对话请求 · 按请求完成更新 · 与上方摘要以来的缓存统计范围不同\n有效窗口依据\n请求发送时捕获的运行配置 / 溢出调整窗口：声明 131,072 tokens， 有效 131,072 tokens；此值不证明自定义端点的硬上限。\n上下文组成 · 估算比例\n覆盖不完整 · 多模态估算精度有限\n指令\n12.2%\n角色设定\n0.0%\n注入记忆\n0.0%\n运行上下文\n1.1%\n摘要\n0.0%\n对话\n17.1%\n工具定义\n53.4%\n工具交互\n0.1%\n其他\n16.1%\n估算与来源说明\n\n比例以同一请求的 18,855 估算单位为分母，不能视为各项实际 tokens。缓存输入仍占用上下文。\n\n多模态内容归入所属消息或工具交互；其用量由启发式估算。\n\n独立来源维度：内置 11,605 · MCP 0 · Skill 0 · 未知 7,250 估算单位。来源与上方内容类别重叠，不另计入组成。\n\n指令 2,297\n角色设定 0\n注入记忆 0\n运行上下文 210\n摘要 0\n对话 3,224\n工具定义 10,071\n工具交互 24\n其他 3,029\n\n隔离运行验证 · 本地合成提供方 · 未调用付费模型",
+        "width": 1280,
+        "overflow": false,
+        "phase": "live",
+        "snapshot": {
+          "phase": "live",
+          "snapshot": {
+            "scope": "all-observed-model-requests",
+            "characterId": "taki",
+            "summaryRevision": 0,
+            "summaryCommittedAt": null,
+            "boundary": "before-first-summary",
+            "status": "ready",
+            "computedAt": "2026-11-02T08:20:28.844Z",
+            "observedRequests": 3,
+            "pairedRequests": 3,
+            "inputTokens": 1200,
+            "cacheReadTokens": 480,
+            "ratio": 0.4,
+            "reason": null
+          },
+          "latestPrimaryRequest": {
+            "scope": "latest-primary-request",
+            "characterId": "taki",
+            "computedAt": "2026-11-02T08:20:28.845Z",
+            "status": "partial",
+            "reason": null,
+            "request": {
+              "runId": "13461645-08ff-4e2b-ba02-60d58af0c89f",
+              "effectId": "62115cb7-eca5-42f0-ad75-5ca15a822f77",
+              "primaryInputSeq": 3,
+              "stepNumber": 1,
+              "provider": "taki-provider.chat",
+              "modelId": "isolated-context-primary",
+              "dispatchedAt": "2026-11-02T08:20:28.813Z",
+              "completedAt": "2026-11-02T08:20:28.839Z",
+              "outcome": "completed",
+              "inputTokens": 600,
+              "window": {
+                "declaredRealTokens": 131072,
+                "effectiveRealTokens": 131072,
+                "estimatorWindowUnits": 186317,
+                "factor": 0.7034887777648563
+              },
+              "composition": {
+                "estimator": "heuristic-v1",
+                "totalUnits": 18855,
+                "categories": {
+                  "instructions": 2297,
+                  "persona": 0,
+                  "injected_memory": 0,
+                  "runtime_context": 210,
+                  "summary": 0,
+                  "conversation": 3224,
+                  "tool_definitions": 10071,
+                  "tool_interactions": 24,
+                  "other": 3029
+                },
+                "origins": {
+                  "instructions": {
+                    "builtin": 2297,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "persona": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "injected_memory": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "runtime_context": {
+                    "builtin": 210,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "summary": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "conversation": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 3224
+                  },
+                  "tool_definitions": {
+                    "builtin": 9072,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 999
+                  },
+                  "tool_interactions": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 24
+                  },
+                  "other": {
+                    "builtin": 26,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 3003
+                  }
+                },
+                "coverage": {
+                  "status": "partial",
+                  "unestimatedParts": 0,
+                  "unknownOriginUnits": 7250,
+                  "hasHeuristicMedia": true
+                }
+              }
+            }
+          },
+          "error": null
+        },
+        "reads": 1,
+        "stripHeight": 780
+      },
+      "artifact": "monitor-explanations-wide.png",
+      "source": "actual Core/WS"
+    },
+    {
+      "name": "monitor-reentry",
+      "state": {
+        "text": "运行监视 · 请求用量\n输入缓存命中率\n40.0%\n首次摘要前\n包含对话与后台请求\n有效缓存数据 3 / 3 次请求\n更新于 16:20:29\n最新请求输入占用\n600 / 131,072\n0.5%\n上游报告输入 / 有效窗口 · tokens\nisolated-context-primary\n循环第 2 步\n已完成\n完成于 16:20:28\n仅最新主对话请求 · 按请求完成更新 · 与上方摘要以来的缓存统计范围不同\n有效窗口依据\n上下文组成 · 估算比例\n覆盖不完整 · 多模态估算精度有限\n指令\n12.2%\n角色设定\n0.0%\n注入记忆\n0.0%\n运行上下文\n1.1%\n摘要\n0.0%\n对话\n17.1%\n工具定义\n53.4%\n工具交互\n0.1%\n其他\n16.1%\n估算与来源说明\n\n隔离运行验证 · 本地合成提供方 · 未调用付费模型",
+        "width": 1280,
+        "overflow": false,
+        "phase": "live",
+        "snapshot": {
+          "phase": "live",
+          "snapshot": {
+            "scope": "all-observed-model-requests",
+            "characterId": "taki",
+            "summaryRevision": 0,
+            "summaryCommittedAt": null,
+            "boundary": "before-first-summary",
+            "status": "ready",
+            "computedAt": "2026-11-02T08:20:29.216Z",
+            "observedRequests": 3,
+            "pairedRequests": 3,
+            "inputTokens": 1200,
+            "cacheReadTokens": 480,
+            "ratio": 0.4,
+            "reason": null
+          },
+          "latestPrimaryRequest": {
+            "scope": "latest-primary-request",
+            "characterId": "taki",
+            "computedAt": "2026-11-02T08:20:29.217Z",
+            "status": "partial",
+            "reason": null,
+            "request": {
+              "runId": "13461645-08ff-4e2b-ba02-60d58af0c89f",
+              "effectId": "62115cb7-eca5-42f0-ad75-5ca15a822f77",
+              "primaryInputSeq": 3,
+              "stepNumber": 1,
+              "provider": "taki-provider.chat",
+              "modelId": "isolated-context-primary",
+              "dispatchedAt": "2026-11-02T08:20:28.813Z",
+              "completedAt": "2026-11-02T08:20:28.839Z",
+              "outcome": "completed",
+              "inputTokens": 600,
+              "window": {
+                "declaredRealTokens": 131072,
+                "effectiveRealTokens": 131072,
+                "estimatorWindowUnits": 186317,
+                "factor": 0.7034887777648563
+              },
+              "composition": {
+                "estimator": "heuristic-v1",
+                "totalUnits": 18855,
+                "categories": {
+                  "instructions": 2297,
+                  "persona": 0,
+                  "injected_memory": 0,
+                  "runtime_context": 210,
+                  "summary": 0,
+                  "conversation": 3224,
+                  "tool_definitions": 10071,
+                  "tool_interactions": 24,
+                  "other": 3029
+                },
+                "origins": {
+                  "instructions": {
+                    "builtin": 2297,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "persona": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "injected_memory": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "runtime_context": {
+                    "builtin": 210,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "summary": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "conversation": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 3224
+                  },
+                  "tool_definitions": {
+                    "builtin": 9072,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 999
+                  },
+                  "tool_interactions": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 24
+                  },
+                  "other": {
+                    "builtin": 26,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 3003
+                  }
+                },
+                "coverage": {
+                  "status": "partial",
+                  "unestimatedParts": 0,
+                  "unknownOriginUnits": 7250,
+                  "hasHeuristicMedia": true
+                }
+              }
+            }
+          },
+          "error": null
+        },
+        "reads": 2,
+        "stripHeight": 780
+      },
+      "artifact": "monitor-reentry.png",
+      "source": "actual Core/WS"
+    },
+    {
+      "name": "monitor-disconnected-stale",
+      "state": {
+        "text": "运行监视 · 请求用量\n输入缓存命中率\n40.0%\n首次摘要前\n包含对话与后台请求\n有效缓存数据 3 / 3 次请求\n更新于 16:20:29\n上次结果已过期\n最新请求输入占用\n600 / 131,072\n0.5%\n上游报告输入 / 有效窗口 · tokens\nisolated-context-primary\n循环第 2 步\n已完成\n完成于 16:20:28\n仅最新主对话请求 · 按请求完成更新 · 与上方摘要以来的缓存统计范围不同\n有效窗口依据\n最新请求统计为上次结果 · 等待恢复\n上下文组成 · 估算比例\n覆盖不完整 · 多模态估算精度有限\n指令\n12.2%\n角色设定\n0.0%\n注入记忆\n0.0%\n运行上下文\n1.1%\n摘要\n0.0%\n对话\n17.1%\n工具定义\n53.4%\n工具交互\n0.1%\n其他\n16.1%\n估算与来源说明\n\n隔离运行验证 · 本地合成提供方 · 未调用付费模型",
+        "width": 1280,
+        "overflow": false,
+        "phase": "stale",
+        "snapshot": {
+          "phase": "stale",
+          "snapshot": {
+            "scope": "all-observed-model-requests",
+            "characterId": "taki",
+            "summaryRevision": 0,
+            "summaryCommittedAt": null,
+            "boundary": "before-first-summary",
+            "status": "ready",
+            "computedAt": "2026-11-02T08:20:29.216Z",
+            "observedRequests": 3,
+            "pairedRequests": 3,
+            "inputTokens": 1200,
+            "cacheReadTokens": 480,
+            "ratio": 0.4,
+            "reason": null
+          },
+          "latestPrimaryRequest": {
+            "scope": "latest-primary-request",
+            "characterId": "taki",
+            "computedAt": "2026-11-02T08:20:29.217Z",
+            "status": "partial",
+            "reason": null,
+            "request": {
+              "runId": "13461645-08ff-4e2b-ba02-60d58af0c89f",
+              "effectId": "62115cb7-eca5-42f0-ad75-5ca15a822f77",
+              "primaryInputSeq": 3,
+              "stepNumber": 1,
+              "provider": "taki-provider.chat",
+              "modelId": "isolated-context-primary",
+              "dispatchedAt": "2026-11-02T08:20:28.813Z",
+              "completedAt": "2026-11-02T08:20:28.839Z",
+              "outcome": "completed",
+              "inputTokens": 600,
+              "window": {
+                "declaredRealTokens": 131072,
+                "effectiveRealTokens": 131072,
+                "estimatorWindowUnits": 186317,
+                "factor": 0.7034887777648563
+              },
+              "composition": {
+                "estimator": "heuristic-v1",
+                "totalUnits": 18855,
+                "categories": {
+                  "instructions": 2297,
+                  "persona": 0,
+                  "injected_memory": 0,
+                  "runtime_context": 210,
+                  "summary": 0,
+                  "conversation": 3224,
+                  "tool_definitions": 10071,
+                  "tool_interactions": 24,
+                  "other": 3029
+                },
+                "origins": {
+                  "instructions": {
+                    "builtin": 2297,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "persona": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "injected_memory": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "runtime_context": {
+                    "builtin": 210,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "summary": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "conversation": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 3224
+                  },
+                  "tool_definitions": {
+                    "builtin": 9072,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 999
+                  },
+                  "tool_interactions": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 24
+                  },
+                  "other": {
+                    "builtin": 26,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 3003
+                  }
+                },
+                "coverage": {
+                  "status": "partial",
+                  "unestimatedParts": 0,
+                  "unknownOriginUnits": 7250,
+                  "hasHeuristicMedia": true
+                }
+              }
+            }
+          },
+          "error": null
+        },
+        "reads": 2,
+        "stripHeight": 780
+      },
+      "artifact": "monitor-disconnected-stale.png",
+      "source": "actual Core/WS"
+    },
+    {
+      "name": "monitor-reconnected",
+      "state": {
+        "text": "运行监视 · 请求用量\n输入缓存命中率\n40.0%\n首次摘要前\n包含对话与后台请求\n有效缓存数据 3 / 3 次请求\n更新于 16:20:29\n最新请求输入占用\n600 / 131,072\n0.5%\n上游报告输入 / 有效窗口 · tokens\nisolated-context-primary\n循环第 2 步\n已完成\n完成于 16:20:28\n仅最新主对话请求 · 按请求完成更新 · 与上方摘要以来的缓存统计范围不同\n有效窗口依据\n上下文组成 · 估算比例\n覆盖不完整 · 多模态估算精度有限\n指令\n12.2%\n角色设定\n0.0%\n注入记忆\n0.0%\n运行上下文\n1.1%\n摘要\n0.0%\n对话\n17.1%\n工具定义\n53.4%\n工具交互\n0.1%\n其他\n16.1%\n估算与来源说明\n\n隔离运行验证 · 本地合成提供方 · 未调用付费模型",
+        "width": 1280,
+        "overflow": false,
+        "phase": "live",
+        "snapshot": {
+          "phase": "live",
+          "snapshot": {
+            "scope": "all-observed-model-requests",
+            "characterId": "taki",
+            "summaryRevision": 0,
+            "summaryCommittedAt": null,
+            "boundary": "before-first-summary",
+            "status": "ready",
+            "computedAt": "2026-11-02T08:20:29.365Z",
+            "observedRequests": 3,
+            "pairedRequests": 3,
+            "inputTokens": 1200,
+            "cacheReadTokens": 480,
+            "ratio": 0.4,
+            "reason": null
+          },
+          "latestPrimaryRequest": {
+            "scope": "latest-primary-request",
+            "characterId": "taki",
+            "computedAt": "2026-11-02T08:20:29.366Z",
+            "status": "partial",
+            "reason": null,
+            "request": {
+              "runId": "13461645-08ff-4e2b-ba02-60d58af0c89f",
+              "effectId": "62115cb7-eca5-42f0-ad75-5ca15a822f77",
+              "primaryInputSeq": 3,
+              "stepNumber": 1,
+              "provider": "taki-provider.chat",
+              "modelId": "isolated-context-primary",
+              "dispatchedAt": "2026-11-02T08:20:28.813Z",
+              "completedAt": "2026-11-02T08:20:28.839Z",
+              "outcome": "completed",
+              "inputTokens": 600,
+              "window": {
+                "declaredRealTokens": 131072,
+                "effectiveRealTokens": 131072,
+                "estimatorWindowUnits": 186317,
+                "factor": 0.7034887777648563
+              },
+              "composition": {
+                "estimator": "heuristic-v1",
+                "totalUnits": 18855,
+                "categories": {
+                  "instructions": 2297,
+                  "persona": 0,
+                  "injected_memory": 0,
+                  "runtime_context": 210,
+                  "summary": 0,
+                  "conversation": 3224,
+                  "tool_definitions": 10071,
+                  "tool_interactions": 24,
+                  "other": 3029
+                },
+                "origins": {
+                  "instructions": {
+                    "builtin": 2297,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "persona": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "injected_memory": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "runtime_context": {
+                    "builtin": 210,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "summary": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "conversation": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 3224
+                  },
+                  "tool_definitions": {
+                    "builtin": 9072,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 999
+                  },
+                  "tool_interactions": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 24
+                  },
+                  "other": {
+                    "builtin": 26,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 3003
+                  }
+                },
+                "coverage": {
+                  "status": "partial",
+                  "unestimatedParts": 0,
+                  "unknownOriginUnits": 7250,
+                  "hasHeuristicMedia": true
+                }
+              }
+            }
+          },
+          "error": null
+        },
+        "reads": 3,
+        "stripHeight": 780
+      },
+      "artifact": "monitor-reconnected.png",
+      "source": "actual Core/WS"
+    },
+    {
+      "name": "monitor-narrow",
+      "state": {
+        "text": "运行监视 · 请求用量\n输入缓存命中率\n40.0%\n首次摘要前\n包含对话与后台请求\n有效缓存数据 3 / 3 次请求\n更新于 16:20:29\n最新请求输入占用\n600 / 131,072\n0.5%\n上游报告输入 / 有效窗口 · tokens\nisolated-context-primary\n循环第 2 步\n已完成\n完成于 16:20:28\n仅最新主对话请求 · 按请求完成更新 · 与上方摘要以来的缓存统计范围不同\n有效窗口依据\n上下文组成 · 估算比例\n覆盖不完整 · 多模态估算精度有限\n指令\n12.2%\n角色设定\n0.0%\n注入记忆\n0.0%\n运行上下文\n1.1%\n摘要\n0.0%\n对话\n17.1%\n工具定义\n53.4%\n工具交互\n0.1%\n其他\n16.1%\n估算与来源说明\n\n隔离运行验证 · 本地合成提供方 · 未调用付费模型",
+        "width": 420,
+        "overflow": false,
+        "phase": "live",
+        "snapshot": {
+          "phase": "live",
+          "snapshot": {
+            "scope": "all-observed-model-requests",
+            "characterId": "taki",
+            "summaryRevision": 0,
+            "summaryCommittedAt": null,
+            "boundary": "before-first-summary",
+            "status": "ready",
+            "computedAt": "2026-11-02T08:20:29.365Z",
+            "observedRequests": 3,
+            "pairedRequests": 3,
+            "inputTokens": 1200,
+            "cacheReadTokens": 480,
+            "ratio": 0.4,
+            "reason": null
+          },
+          "latestPrimaryRequest": {
+            "scope": "latest-primary-request",
+            "characterId": "taki",
+            "computedAt": "2026-11-02T08:20:29.366Z",
+            "status": "partial",
+            "reason": null,
+            "request": {
+              "runId": "13461645-08ff-4e2b-ba02-60d58af0c89f",
+              "effectId": "62115cb7-eca5-42f0-ad75-5ca15a822f77",
+              "primaryInputSeq": 3,
+              "stepNumber": 1,
+              "provider": "taki-provider.chat",
+              "modelId": "isolated-context-primary",
+              "dispatchedAt": "2026-11-02T08:20:28.813Z",
+              "completedAt": "2026-11-02T08:20:28.839Z",
+              "outcome": "completed",
+              "inputTokens": 600,
+              "window": {
+                "declaredRealTokens": 131072,
+                "effectiveRealTokens": 131072,
+                "estimatorWindowUnits": 186317,
+                "factor": 0.7034887777648563
+              },
+              "composition": {
+                "estimator": "heuristic-v1",
+                "totalUnits": 18855,
+                "categories": {
+                  "instructions": 2297,
+                  "persona": 0,
+                  "injected_memory": 0,
+                  "runtime_context": 210,
+                  "summary": 0,
+                  "conversation": 3224,
+                  "tool_definitions": 10071,
+                  "tool_interactions": 24,
+                  "other": 3029
+                },
+                "origins": {
+                  "instructions": {
+                    "builtin": 2297,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "persona": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "injected_memory": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "runtime_context": {
+                    "builtin": 210,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "summary": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "conversation": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 3224
+                  },
+                  "tool_definitions": {
+                    "builtin": 9072,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 999
+                  },
+                  "tool_interactions": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 24
+                  },
+                  "other": {
+                    "builtin": 26,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 3003
+                  }
+                },
+                "coverage": {
+                  "status": "partial",
+                  "unestimatedParts": 0,
+                  "unknownOriginUnits": 7250,
+                  "hasHeuristicMedia": true
+                }
+              }
+            }
+          },
+          "error": null
+        },
+        "reads": 3,
+        "stripHeight": 780
+      },
+      "artifact": "monitor-narrow.png",
+      "source": "actual Core/WS"
+    },
+    {
+      "name": "monitor-fixture-loading",
+      "state": {
+        "text": "运行监视 · 请求用量\n输入缓存命中率\n--\n本次摘要以来\n包含对话与后台请求\n有效缓存数据未知\n正在读取统计…\n最新请求输入占用\n--\n--\n输入用量与窗口未知\n仅最新主对话请求 · 按请求完成更新 · 与上方摘要以来的缓存统计范围不同\n正在读取请求统计…\n上下文组成未记录\n\n隔离运行验证 · 本地合成提供方 · 未调用付费模型",
+        "width": 420,
+        "overflow": false,
+        "phase": "live",
+        "snapshot": {
+          "phase": "live",
+          "snapshot": {
+            "scope": "all-observed-model-requests",
+            "characterId": "taki",
+            "summaryRevision": 0,
+            "summaryCommittedAt": null,
+            "boundary": "before-first-summary",
+            "status": "ready",
+            "computedAt": "2026-11-02T08:20:29.365Z",
+            "observedRequests": 3,
+            "pairedRequests": 3,
+            "inputTokens": 1200,
+            "cacheReadTokens": 480,
+            "ratio": 0.4,
+            "reason": null
+          },
+          "latestPrimaryRequest": {
+            "scope": "latest-primary-request",
+            "characterId": "taki",
+            "computedAt": "2026-11-02T08:20:29.366Z",
+            "status": "partial",
+            "reason": null,
+            "request": {
+              "runId": "13461645-08ff-4e2b-ba02-60d58af0c89f",
+              "effectId": "62115cb7-eca5-42f0-ad75-5ca15a822f77",
+              "primaryInputSeq": 3,
+              "stepNumber": 1,
+              "provider": "taki-provider.chat",
+              "modelId": "isolated-context-primary",
+              "dispatchedAt": "2026-11-02T08:20:28.813Z",
+              "completedAt": "2026-11-02T08:20:28.839Z",
+              "outcome": "completed",
+              "inputTokens": 600,
+              "window": {
+                "declaredRealTokens": 131072,
+                "effectiveRealTokens": 131072,
+                "estimatorWindowUnits": 186317,
+                "factor": 0.7034887777648563
+              },
+              "composition": {
+                "estimator": "heuristic-v1",
+                "totalUnits": 18855,
+                "categories": {
+                  "instructions": 2297,
+                  "persona": 0,
+                  "injected_memory": 0,
+                  "runtime_context": 210,
+                  "summary": 0,
+                  "conversation": 3224,
+                  "tool_definitions": 10071,
+                  "tool_interactions": 24,
+                  "other": 3029
+                },
+                "origins": {
+                  "instructions": {
+                    "builtin": 2297,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "persona": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "injected_memory": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "runtime_context": {
+                    "builtin": 210,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "summary": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "conversation": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 3224
+                  },
+                  "tool_definitions": {
+                    "builtin": 9072,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 999
+                  },
+                  "tool_interactions": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 24
+                  },
+                  "other": {
+                    "builtin": 26,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 3003
+                  }
+                },
+                "coverage": {
+                  "status": "partial",
+                  "unestimatedParts": 0,
+                  "unknownOriginUnits": 7250,
+                  "hasHeuristicMedia": true
+                }
+              }
+            }
+          },
+          "error": null
+        },
+        "reads": 3,
+        "stripHeight": 780
+      },
+      "artifact": "monitor-fixture-loading.png",
+      "source": "synthetic cold-read display state"
+    },
+    {
+      "name": "monitor-fixture-zero",
+      "state": {
+        "text": "运行监视 · 请求用量\n输入缓存命中率\n40.0%\n首次摘要前\n包含对话与后台请求\n有效缓存数据 3 / 3 次请求\n更新于 16:20:29\n最新请求输入占用\n0 / 131,072\n0.0%\n上游报告输入 / 有效窗口 · tokens\nisolated-context-primary\n循环第 2 步\n已完成\n完成于 16:20:28\n仅最新主对话请求 · 按请求完成更新 · 与上方摘要以来的缓存统计范围不同\n有效窗口依据\n上下文组成 · 估算比例\n覆盖不完整 · 多模态估算精度有限\n指令\n12.2%\n角色设定\n0.0%\n注入记忆\n0.0%\n运行上下文\n1.1%\n摘要\n0.0%\n对话\n17.1%\n工具定义\n53.4%\n工具交互\n0.1%\n其他\n16.1%\n估算与来源说明\n\n隔离运行验证 · 本地合成提供方 · 未调用付费模型",
+        "width": 420,
+        "overflow": false,
+        "phase": "live",
+        "snapshot": {
+          "phase": "live",
+          "snapshot": {
+            "scope": "all-observed-model-requests",
+            "characterId": "taki",
+            "summaryRevision": 0,
+            "summaryCommittedAt": null,
+            "boundary": "before-first-summary",
+            "status": "ready",
+            "computedAt": "2026-11-02T08:20:29.365Z",
+            "observedRequests": 3,
+            "pairedRequests": 3,
+            "inputTokens": 1200,
+            "cacheReadTokens": 480,
+            "ratio": 0.4,
+            "reason": null
+          },
+          "latestPrimaryRequest": {
+            "scope": "latest-primary-request",
+            "characterId": "taki",
+            "computedAt": "2026-11-02T08:20:29.366Z",
+            "status": "partial",
+            "reason": null,
+            "request": {
+              "runId": "13461645-08ff-4e2b-ba02-60d58af0c89f",
+              "effectId": "62115cb7-eca5-42f0-ad75-5ca15a822f77",
+              "primaryInputSeq": 3,
+              "stepNumber": 1,
+              "provider": "taki-provider.chat",
+              "modelId": "isolated-context-primary",
+              "dispatchedAt": "2026-11-02T08:20:28.813Z",
+              "completedAt": "2026-11-02T08:20:28.839Z",
+              "outcome": "completed",
+              "inputTokens": 600,
+              "window": {
+                "declaredRealTokens": 131072,
+                "effectiveRealTokens": 131072,
+                "estimatorWindowUnits": 186317,
+                "factor": 0.7034887777648563
+              },
+              "composition": {
+                "estimator": "heuristic-v1",
+                "totalUnits": 18855,
+                "categories": {
+                  "instructions": 2297,
+                  "persona": 0,
+                  "injected_memory": 0,
+                  "runtime_context": 210,
+                  "summary": 0,
+                  "conversation": 3224,
+                  "tool_definitions": 10071,
+                  "tool_interactions": 24,
+                  "other": 3029
+                },
+                "origins": {
+                  "instructions": {
+                    "builtin": 2297,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "persona": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "injected_memory": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "runtime_context": {
+                    "builtin": 210,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "summary": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "conversation": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 3224
+                  },
+                  "tool_definitions": {
+                    "builtin": 9072,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 999
+                  },
+                  "tool_interactions": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 24
+                  },
+                  "other": {
+                    "builtin": 26,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 3003
+                  }
+                },
+                "coverage": {
+                  "status": "partial",
+                  "unestimatedParts": 0,
+                  "unknownOriginUnits": 7250,
+                  "hasHeuristicMedia": true
+                }
+              }
+            }
+          },
+          "error": null
+        },
+        "reads": 3,
+        "stripHeight": 780
+      },
+      "artifact": "monitor-fixture-zero.png",
+      "source": "synthetic reported-zero display override"
+    },
+    {
+      "name": "monitor-fixture-estimate-only",
+      "state": {
+        "text": "运行监视 · 请求用量\n输入缓存命中率\n40.0%\n首次摘要前\n包含对话与后台请求\n有效缓存数据 3 / 3 次请求\n更新于 16:20:29\n最新请求输入占用\n18,855 / 186,317\n10.1%\n估算输入 / 估算窗口 · 单位\nisolated-context-primary\n循环第 2 步\n已完成\n完成于 16:20:28\n仅最新主对话请求 · 按请求完成更新 · 与上方摘要以来的缓存统计范围不同\n有效窗口依据\n上游输入用量未知 · 占用仅供估算\n上下文组成 · 估算比例\n覆盖不完整 · 多模态估算精度有限\n指令\n12.2%\n角色设定\n0.0%\n注入记忆\n0.0%\n运行上下文\n1.1%\n摘要\n0.0%\n对话\n17.1%\n工具定义\n53.4%\n工具交互\n0.1%\n其他\n16.1%\n估算与来源说明\n\n隔离运行验证 · 本地合成提供方 · 未调用付费模型",
+        "width": 420,
+        "overflow": false,
+        "phase": "live",
+        "snapshot": {
+          "phase": "live",
+          "snapshot": {
+            "scope": "all-observed-model-requests",
+            "characterId": "taki",
+            "summaryRevision": 0,
+            "summaryCommittedAt": null,
+            "boundary": "before-first-summary",
+            "status": "ready",
+            "computedAt": "2026-11-02T08:20:29.365Z",
+            "observedRequests": 3,
+            "pairedRequests": 3,
+            "inputTokens": 1200,
+            "cacheReadTokens": 480,
+            "ratio": 0.4,
+            "reason": null
+          },
+          "latestPrimaryRequest": {
+            "scope": "latest-primary-request",
+            "characterId": "taki",
+            "computedAt": "2026-11-02T08:20:29.366Z",
+            "status": "partial",
+            "reason": null,
+            "request": {
+              "runId": "13461645-08ff-4e2b-ba02-60d58af0c89f",
+              "effectId": "62115cb7-eca5-42f0-ad75-5ca15a822f77",
+              "primaryInputSeq": 3,
+              "stepNumber": 1,
+              "provider": "taki-provider.chat",
+              "modelId": "isolated-context-primary",
+              "dispatchedAt": "2026-11-02T08:20:28.813Z",
+              "completedAt": "2026-11-02T08:20:28.839Z",
+              "outcome": "completed",
+              "inputTokens": 600,
+              "window": {
+                "declaredRealTokens": 131072,
+                "effectiveRealTokens": 131072,
+                "estimatorWindowUnits": 186317,
+                "factor": 0.7034887777648563
+              },
+              "composition": {
+                "estimator": "heuristic-v1",
+                "totalUnits": 18855,
+                "categories": {
+                  "instructions": 2297,
+                  "persona": 0,
+                  "injected_memory": 0,
+                  "runtime_context": 210,
+                  "summary": 0,
+                  "conversation": 3224,
+                  "tool_definitions": 10071,
+                  "tool_interactions": 24,
+                  "other": 3029
+                },
+                "origins": {
+                  "instructions": {
+                    "builtin": 2297,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "persona": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "injected_memory": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "runtime_context": {
+                    "builtin": 210,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "summary": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "conversation": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 3224
+                  },
+                  "tool_definitions": {
+                    "builtin": 9072,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 999
+                  },
+                  "tool_interactions": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 24
+                  },
+                  "other": {
+                    "builtin": 26,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 3003
+                  }
+                },
+                "coverage": {
+                  "status": "partial",
+                  "unestimatedParts": 0,
+                  "unknownOriginUnits": 7250,
+                  "hasHeuristicMedia": true
+                }
+              }
+            }
+          },
+          "error": null
+        },
+        "reads": 3,
+        "stripHeight": 780
+      },
+      "artifact": "monitor-fixture-estimate-only.png",
+      "source": "synthetic display override of actual captured snapshot"
+    },
+    {
+      "name": "monitor-fixture-unavailable",
+      "state": {
+        "text": "运行监视 · 请求用量\n输入缓存命中率\n40.0%\n首次摘要前\n包含对话与后台请求\n有效缓存数据 3 / 3 次请求\n更新于 16:20:29\n重试\n最新请求输入占用\n--\n--\n输入用量与窗口未知\n仅最新主对话请求 · 按请求完成更新 · 与上方摘要以来的缓存统计范围不同\n请求统计读取失败\n上下文组成未记录\n\n隔离运行验证 · 本地合成提供方 · 未调用付费模型",
+        "width": 420,
+        "overflow": false,
+        "phase": "live",
+        "snapshot": {
+          "phase": "live",
+          "snapshot": {
+            "scope": "all-observed-model-requests",
+            "characterId": "taki",
+            "summaryRevision": 0,
+            "summaryCommittedAt": null,
+            "boundary": "before-first-summary",
+            "status": "ready",
+            "computedAt": "2026-11-02T08:20:29.365Z",
+            "observedRequests": 3,
+            "pairedRequests": 3,
+            "inputTokens": 1200,
+            "cacheReadTokens": 480,
+            "ratio": 0.4,
+            "reason": null
+          },
+          "latestPrimaryRequest": {
+            "scope": "latest-primary-request",
+            "characterId": "taki",
+            "computedAt": "2026-11-02T08:20:29.366Z",
+            "status": "partial",
+            "reason": null,
+            "request": {
+              "runId": "13461645-08ff-4e2b-ba02-60d58af0c89f",
+              "effectId": "62115cb7-eca5-42f0-ad75-5ca15a822f77",
+              "primaryInputSeq": 3,
+              "stepNumber": 1,
+              "provider": "taki-provider.chat",
+              "modelId": "isolated-context-primary",
+              "dispatchedAt": "2026-11-02T08:20:28.813Z",
+              "completedAt": "2026-11-02T08:20:28.839Z",
+              "outcome": "completed",
+              "inputTokens": 600,
+              "window": {
+                "declaredRealTokens": 131072,
+                "effectiveRealTokens": 131072,
+                "estimatorWindowUnits": 186317,
+                "factor": 0.7034887777648563
+              },
+              "composition": {
+                "estimator": "heuristic-v1",
+                "totalUnits": 18855,
+                "categories": {
+                  "instructions": 2297,
+                  "persona": 0,
+                  "injected_memory": 0,
+                  "runtime_context": 210,
+                  "summary": 0,
+                  "conversation": 3224,
+                  "tool_definitions": 10071,
+                  "tool_interactions": 24,
+                  "other": 3029
+                },
+                "origins": {
+                  "instructions": {
+                    "builtin": 2297,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "persona": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "injected_memory": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "runtime_context": {
+                    "builtin": 210,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "summary": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 0
+                  },
+                  "conversation": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 3224
+                  },
+                  "tool_definitions": {
+                    "builtin": 9072,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 999
+                  },
+                  "tool_interactions": {
+                    "builtin": 0,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 24
+                  },
+                  "other": {
+                    "builtin": 26,
+                    "mcp": 0,
+                    "skill": 0,
+                    "unknown": 3003
+                  }
+                },
+                "coverage": {
+                  "status": "partial",
+                  "unestimatedParts": 0,
+                  "unknownOriginUnits": 7250,
+                  "hasHeuristicMedia": true
+                }
+              }
+            }
+          },
+          "error": null
+        },
+        "reads": 3,
+        "stripHeight": 780
+      },
+      "artifact": "monitor-fixture-unavailable.png",
+      "source": "synthetic display override of actual captured snapshot"
+    },
+    {
+      "name": "synthetic-provider-summary",
+      "requests": 3,
+      "primaryRequests": 3,
+      "exactEffectsDistinct": 3,
+      "paidCalls": 0,
+      "liveDataWrites": false,
+      "browserIsTauriAcceptance": false
+    },
+    {
+      "name": "durable-usage",
+      "rows": [
+        {
+          "input_tokens": 200,
+          "output_tokens": 4,
+          "cache_read_tokens": 80,
+          "cache_read_observed": 1
+        },
+        {
+          "input_tokens": 400,
+          "output_tokens": 4,
+          "cache_read_tokens": 160,
+          "cache_read_observed": 1
+        },
+        {
+          "input_tokens": 600,
+          "output_tokens": 4,
+          "cache_read_tokens": 240,
+          "cache_read_observed": 1
+        }
+      ],
+      "measuredRequests": 3
+    },
+    {
+      "name": "cleanup",
+      "coreWsClosed": true,
+      "edgeClosed": true
+    }
+  ],
+  "requests": [
+    {
+      "model": "isolated-context-primary",
+      "stream": true,
+      "imageParts": 1,
+      "offeredTools": [
+        "avatar_play_motion",
+        "avatar_set_expression",
+        "clipboard_read",
+        "clipboard_write",
+        "delegate_subagent",
+        "exec",
+        "extension_call",
+        "extension_describe",
+        "extension_discover",
+        "get_current_time",
+        "inspect_subagent",
+        "load_skill",
+        "manage_interaction_pattern",
+        "memory_archive",
+        "memory_search",
+        "memory_write",
+        "plan_follow_up",
+        "process_list",
+        "read_file",
+        "read_skill_resource",
+        "schedule_task",
+        "screenshot",
+        "send_subagent_message",
+        "shell_open",
+        "stop_subagent",
+        "write_file"
+      ],
+      "nativePixelsExact": true,
+      "roles": [
+        "system",
+        "user"
+      ],
+      "toolCall": false,
+      "reportedInput": 200
+    },
+    {
+      "model": "isolated-context-primary",
+      "stream": true,
+      "imageParts": 2,
+      "offeredTools": [
+        "avatar_play_motion",
+        "avatar_set_expression",
+        "clipboard_read",
+        "clipboard_write",
+        "delegate_subagent",
+        "exec",
+        "extension_call",
+        "extension_describe",
+        "extension_discover",
+        "get_current_time",
+        "inspect_subagent",
+        "load_skill",
+        "manage_interaction_pattern",
+        "memory_archive",
+        "memory_search",
+        "memory_write",
+        "plan_follow_up",
+        "process_list",
+        "read_file",
+        "read_skill_resource",
+        "schedule_task",
+        "screenshot",
+        "send_subagent_message",
+        "shell_open",
+        "stop_subagent",
+        "write_file"
+      ],
+      "nativePixelsExact": true,
+      "roles": [
+        "system",
+        "user",
+        "assistant",
+        "user"
+      ],
+      "toolCall": true,
+      "reportedInput": 400
+    },
+    {
+      "model": "isolated-context-primary",
+      "stream": true,
+      "imageParts": 2,
+      "offeredTools": [
+        "avatar_play_motion",
+        "avatar_set_expression",
+        "clipboard_read",
+        "clipboard_write",
+        "delegate_subagent",
+        "exec",
+        "extension_call",
+        "extension_describe",
+        "extension_discover",
+        "get_current_time",
+        "inspect_subagent",
+        "load_skill",
+        "manage_interaction_pattern",
+        "memory_archive",
+        "memory_search",
+        "memory_write",
+        "plan_follow_up",
+        "process_list",
+        "read_file",
+        "read_skill_resource",
+        "schedule_task",
+        "screenshot",
+        "send_subagent_message",
+        "shell_open",
+        "stop_subagent",
+        "write_file"
+      ],
+      "nativePixelsExact": true,
+      "roles": [
+        "system",
+        "user",
+        "assistant",
+        "user",
+        "assistant",
+        "tool"
+      ],
+      "toolCall": false,
+      "reportedInput": 600
+    }
+  ],
+  "updates": [
+    {
+      "revision": 3,
+      "snapshot": {
+        "scope": "all-observed-model-requests",
+        "characterId": "taki",
+        "summaryRevision": 0,
+        "summaryCommittedAt": null,
+        "boundary": "before-first-summary",
+        "status": "ready",
+        "computedAt": "2026-11-02T08:20:28.533Z",
+        "observedRequests": 1,
+        "pairedRequests": 1,
+        "inputTokens": 200,
+        "cacheReadTokens": 80,
+        "ratio": 0.4,
+        "reason": null
+      },
+      "latestPrimaryRequest": {
+        "scope": "latest-primary-request",
+        "characterId": "taki",
+        "computedAt": "2026-11-02T08:20:28.534Z",
+        "status": "partial",
+        "reason": null,
+        "request": {
+          "runId": "53bc2f3c-2870-434e-8351-627bd33cc4d7",
+          "effectId": "84d68a56-e1d2-4a60-bd22-c3a4da5eeb49",
+          "primaryInputSeq": 1,
+          "stepNumber": 0,
+          "provider": "taki-provider.chat",
+          "modelId": "isolated-context-primary",
+          "dispatchedAt": "2026-11-02T08:20:28.427Z",
+          "completedAt": "2026-11-02T08:20:28.520Z",
+          "outcome": "completed",
+          "inputTokens": 200,
+          "window": {
+            "declaredRealTokens": 131072,
+            "effectiveRealTokens": 131072,
+            "estimatorWindowUnits": 131072,
+            "factor": 1
+          },
+          "composition": {
+            "estimator": "heuristic-v1",
+            "totalUnits": 17198,
+            "categories": {
+              "instructions": 2297,
+              "persona": 0,
+              "injected_memory": 0,
+              "runtime_context": 210,
+              "summary": 0,
+              "conversation": 1608,
+              "tool_definitions": 10071,
+              "tool_interactions": 0,
+              "other": 3012
+            },
+            "origins": {
+              "instructions": {
+                "builtin": 2297,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 0
+              },
+              "persona": {
+                "builtin": 0,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 0
+              },
+              "injected_memory": {
+                "builtin": 0,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 0
+              },
+              "runtime_context": {
+                "builtin": 210,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 0
+              },
+              "summary": {
+                "builtin": 0,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 0
+              },
+              "conversation": {
+                "builtin": 0,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 1608
+              },
+              "tool_definitions": {
+                "builtin": 9072,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 999
+              },
+              "tool_interactions": {
+                "builtin": 0,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 0
+              },
+              "other": {
+                "builtin": 9,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 3003
+              }
+            },
+            "coverage": {
+              "status": "partial",
+              "unestimatedParts": 0,
+              "unknownOriginUnits": 5610,
+              "hasHeuristicMedia": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "revision": 4,
+      "snapshot": {
+        "scope": "all-observed-model-requests",
+        "characterId": "taki",
+        "summaryRevision": 0,
+        "summaryCommittedAt": null,
+        "boundary": "before-first-summary",
+        "status": "ready",
+        "computedAt": "2026-11-02T08:20:28.764Z",
+        "observedRequests": 2,
+        "pairedRequests": 2,
+        "inputTokens": 600,
+        "cacheReadTokens": 240,
+        "ratio": 0.4,
+        "reason": null
+      },
+      "latestPrimaryRequest": {
+        "scope": "latest-primary-request",
+        "characterId": "taki",
+        "computedAt": "2026-11-02T08:20:28.765Z",
+        "status": "partial",
+        "reason": null,
+        "request": {
+          "runId": "13461645-08ff-4e2b-ba02-60d58af0c89f",
+          "effectId": "92cb57c2-6eb0-46bb-be48-90892d10236e",
+          "primaryInputSeq": 3,
+          "stepNumber": 0,
+          "provider": "taki-provider.chat",
+          "modelId": "isolated-context-primary",
+          "dispatchedAt": "2026-11-02T08:20:28.726Z",
+          "completedAt": "2026-11-02T08:20:28.759Z",
+          "outcome": "completed",
+          "inputTokens": 400,
+          "window": {
+            "declaredRealTokens": 131072,
+            "effectiveRealTokens": 131072,
+            "estimatorWindowUnits": 186317,
+            "factor": 0.7034887777648563
+          },
+          "composition": {
+            "estimator": "heuristic-v1",
+            "totalUnits": 18823,
+            "categories": {
+              "instructions": 2297,
+              "persona": 0,
+              "injected_memory": 0,
+              "runtime_context": 210,
+              "summary": 0,
+              "conversation": 3224,
+              "tool_definitions": 10071,
+              "tool_interactions": 0,
+              "other": 3021
+            },
+            "origins": {
+              "instructions": {
+                "builtin": 2297,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 0
+              },
+              "persona": {
+                "builtin": 0,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 0
+              },
+              "injected_memory": {
+                "builtin": 0,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 0
+              },
+              "runtime_context": {
+                "builtin": 210,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 0
+              },
+              "summary": {
+                "builtin": 0,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 0
+              },
+              "conversation": {
+                "builtin": 0,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 3224
+              },
+              "tool_definitions": {
+                "builtin": 9072,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 999
+              },
+              "tool_interactions": {
+                "builtin": 0,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 0
+              },
+              "other": {
+                "builtin": 18,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 3003
+              }
+            },
+            "coverage": {
+              "status": "partial",
+              "unestimatedParts": 0,
+              "unknownOriginUnits": 7226,
+              "hasHeuristicMedia": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "revision": 5,
+      "snapshot": {
+        "scope": "all-observed-model-requests",
+        "characterId": "taki",
+        "summaryRevision": 0,
+        "summaryCommittedAt": null,
+        "boundary": "before-first-summary",
+        "status": "ready",
+        "computedAt": "2026-11-02T08:20:28.844Z",
+        "observedRequests": 3,
+        "pairedRequests": 3,
+        "inputTokens": 1200,
+        "cacheReadTokens": 480,
+        "ratio": 0.4,
+        "reason": null
+      },
+      "latestPrimaryRequest": {
+        "scope": "latest-primary-request",
+        "characterId": "taki",
+        "computedAt": "2026-11-02T08:20:28.845Z",
+        "status": "partial",
+        "reason": null,
+        "request": {
+          "runId": "13461645-08ff-4e2b-ba02-60d58af0c89f",
+          "effectId": "62115cb7-eca5-42f0-ad75-5ca15a822f77",
+          "primaryInputSeq": 3,
+          "stepNumber": 1,
+          "provider": "taki-provider.chat",
+          "modelId": "isolated-context-primary",
+          "dispatchedAt": "2026-11-02T08:20:28.813Z",
+          "completedAt": "2026-11-02T08:20:28.839Z",
+          "outcome": "completed",
+          "inputTokens": 600,
+          "window": {
+            "declaredRealTokens": 131072,
+            "effectiveRealTokens": 131072,
+            "estimatorWindowUnits": 186317,
+            "factor": 0.7034887777648563
+          },
+          "composition": {
+            "estimator": "heuristic-v1",
+            "totalUnits": 18855,
+            "categories": {
+              "instructions": 2297,
+              "persona": 0,
+              "injected_memory": 0,
+              "runtime_context": 210,
+              "summary": 0,
+              "conversation": 3224,
+              "tool_definitions": 10071,
+              "tool_interactions": 24,
+              "other": 3029
+            },
+            "origins": {
+              "instructions": {
+                "builtin": 2297,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 0
+              },
+              "persona": {
+                "builtin": 0,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 0
+              },
+              "injected_memory": {
+                "builtin": 0,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 0
+              },
+              "runtime_context": {
+                "builtin": 210,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 0
+              },
+              "summary": {
+                "builtin": 0,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 0
+              },
+              "conversation": {
+                "builtin": 0,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 3224
+              },
+              "tool_definitions": {
+                "builtin": 9072,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 999
+              },
+              "tool_interactions": {
+                "builtin": 0,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 24
+              },
+              "other": {
+                "builtin": 26,
+                "mcp": 0,
+                "skill": 0,
+                "unknown": 3003
+              }
+            },
+            "coverage": {
+              "status": "partial",
+              "unestimatedParts": 0,
+              "unknownOriginUnits": 7250,
+              "hasHeuristicMedia": true
+            }
+          }
+        }
+      }
+    }
+  ],
+  "paidCalls": 0,
+  "liveDataWrites": false,
+  "browserIsTauriAcceptance": false,
+  "fixture": "H:\\TakiAgent-worktrees\\t4\\apps\\desktop\\target\\context-monitor-ui-2026-11-02T08-20-22.999Z",
+  "command": "node --experimental-strip-types .trellis/tasks/11-02-context-attribution-token-efficiency/research/verify-monitor-runtime-ui.mjs"
+}

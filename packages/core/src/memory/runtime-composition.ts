@@ -6,6 +6,7 @@
 import type { LanguageModel } from "ai";
 import { join } from "node:path";
 import { BASE_SYSTEM_PROMPT } from "../agents/base-prompt.ts";
+import { forwardRenderedContextText } from "../agents/context-attribution.ts";
 import { createCompactionPass } from "../agents/compaction-pass.ts";
 import type { RequestMeasurement } from "../agents/request-measurement.ts";
 import type { ConfigSource } from "../config/config-source.ts";
@@ -161,6 +162,10 @@ function captureLegacyRun(db: Database, subsystem: SelectedSubsystem, characterI
   const snapshot = diagnosticSnapshot(db);
   if (snapshot.providerId !== "legacy-markdown") throw new Error("MEMORY_AUTHORITY_MISMATCH");
   const engine = subsystem.engine;
+  const assemble = (currentMessage: string) => {
+    const text = engine.assemble({ characterId, currentMessage });
+    return forwardRenderedContextText(assemble, engine.assemble, text);
+  };
   const initiative = engine.captureInitiative ? captureTrackedInitiativeAssembly(() => {
     const capture = engine.captureInitiative?.(characterId);
     if (!capture) throw new Error("MEMORY_CAPABILITY_UNSUPPORTED"); return capture;
@@ -168,7 +173,7 @@ function captureLegacyRun(db: Database, subsystem: SelectedSubsystem, characterI
   return Object.freeze({ snapshot: createMemoryRunReference(snapshot),
     tools: Object.freeze(engine.createTools(characterId)), prompt: BASE_SYSTEM_PROMPT,
     assembleInitiative: initiative?.assemble, isCurrent: initiative?.isCurrent,
-    assemble: (currentMessage: string) => engine.assemble({ characterId, currentMessage }) });
+    assemble });
 }
 
 function operationsRuntime(hindsight: HindsightSubsystem): MemoryOperationsRuntime {

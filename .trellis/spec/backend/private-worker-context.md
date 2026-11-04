@@ -50,9 +50,20 @@ type WorkSegmentCheckpoint = { kind: "continue" } | {
   task model Effects to a summary witness; `subagent_context_summary_failures` suppresses a repeated unchanged range.
 - `subagent_tool_results` keys full raw output by Run/Attempt/global step/tool-call ID. SDK `toModelOutput` may compact
   provider replay but cannot replace these exact original bytes.
+- Native image replay accepts the same optional `ImageReplayReader` through Subagent dependencies and RunMessageStore.
+  Image refs use the Shared Timeline tool-result contract; ephemeral native sidecars remain Attempt-local.
 
 ## 3. Contracts
 
+- Private DB-backed replay follows [Native Image Input](native-image-input.md), including initial snapshots, later
+  Runs, tail selection and shrink/summary accounting. Hydrate and price retained image refs through the same reader
+  snapshot before deciding fit; do not reconstruct tool images as text merely because SDK objects were persisted.
+  Temporary native sidecars are associated with exact Run/Attempt/step/pair identity, never guessed from arbitrary JSON
+  or provider call ID alone. They do not enter SQL. A committed summary releases only the temporary images in its
+  retired coverage; a new Attempt drops old temporary state, and outer native lifetime cleanup still runs.
+  Utility summarization remains text-only: pixels do not become summary input or a new image-description job.
+  Missing/expired or unretained originals stay explicitly unavailable. Ordinary original tool text is preserved;
+  supported typed image content is represented by original retained refs rather than inline base64 in tool JSON.
 - Explicit SDK `isLoopFinished()` avoids the installed SDK fallback of 20 steps. Do not omit `stopWhen`, raise a total
   cap, or implement rollover as Run retry. SDK-local ordinals map to increasing global Attempt step numbers.
 - Price the actual instruction/schema envelope, current input, summary and history together. Use calibrated

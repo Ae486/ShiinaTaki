@@ -8,6 +8,7 @@ import { z } from "zod";
 import type { GovernancePolicyService } from "../governance/governance-policy-service.ts";
 import type { SkillsLoader } from "./skills-loader.ts";
 import { skillToolModelOutput } from "./skill-tool-model-output.ts";
+import { retainContentOrigin } from "../agents/context-attribution.ts";
 
 export function createLoadSkillTool(loader: SkillsLoader, governance?: { service: GovernancePolicyService; ownerHostId: string }): ToolSet {
   return {
@@ -20,7 +21,7 @@ export function createLoadSkillTool(loader: SkillsLoader, governance?: { service
       toModelOutput: skillToolModelOutput,
       execute: ({ name }) => {
         const ref = loader.describe(name);
-        if (!governance || !ref) return loader.load(name);
+        if (!governance || !ref) return retainContentOrigin(loader.load(name), "skill");
         const decision = governance.service.authorize({
           identity: {
             capabilityId: "skill.load",
@@ -30,7 +31,7 @@ export function createLoadSkillTool(loader: SkillsLoader, governance?: { service
           cellKey: "skill-load",
         });
         if (!decision.allowed) return { ok: false as const, code: decision.code, message: "skill instructions are unavailable under current governance" };
-        return loader.load(name);
+        return retainContentOrigin(loader.load(name), "skill");
       },
     }),
   };

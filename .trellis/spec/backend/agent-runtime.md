@@ -78,26 +78,13 @@ hinge its red→green on the **persisted tool record**, not on the model's behav
 test cannot catch this — see [E2E Harness](./e2e-harness.md). The test must be RED against pre-fix code (prove it by
 reverting the fix) or it proves nothing.
 
-## Multimodal turns: two model slots, in-flight bytes, text-authoritative memory (#17)
+## Native multimodal turns
 
-Image attachments landed in #17 as **additive seams** on the D1-frozen turn — the stream loop, `persistTurn`, abort
-wiring, and `toolApproval` stay byte-identical; only the pre-loop guard/save, the `appendUser` call-site, the `model:`
-pick, the in-flight `messages` tail swap, and the detached memory fire are new. When you extend the turn, preserve that
-discipline: the frozen regions are off-limits.
+All image sources use the primary model. The separate vision slot and image-to-text producers are removed.
+See [Native Image Input](native-image-input.md) for exact carrier, native tool projection, retained replay,
+window measurement, observation lifetime and validation contracts. Preserve the ordinary turn's cancellation,
+source membership and tool call/result fidelity; deleting a translator does not delete those responsibilities.
 
-- **Two parallel user-adjustable model slots**: the required text slot (`TAKI_PROVIDER_*`) and an OPTIONAL vision slot
-  (`TAKI_VLM_*`), which may hold identical values. A turn routes to the vision slot **iff the current message carries
-  attachments**, else the text slot. Attachments with no vision slot configured are **rejected before any persistence**
-  (structured error) — the text model never receives an image. Config load is all-or-nothing fail-closed (partial names
-  the missing var), matching the P3-flag parse discipline.
-- **Image bytes are in-flight only; TEXT is authoritative across turns.** The image reaches the model only on the turn
-  it is sent (AI SDK v7 `FilePart` = `{type:"file", mediaType, data:<RAW base64>}` — NOT the deprecated `ImagePart`, and
-  never a `data:` URL, which throws at the provider boundary). The persisted user row keeps the image for DISPLAY (an
-  `image` part with a content-addressed ref) but its model projection is text (`[image]`+caption). History replay never
-  re-sends bytes → no byte reader in the conversation store, no forcing later text turns onto the vision model, no
-  choking a text-only model on an image part. Cross-turn recall comes from a **detached post-turn writer** that has the
-  vision slot describe the image and stores that description as an ordinary episodic memory (thin, deletable module on
-  the EXISTING memory write path — the memory engine is untouched, its redesign deferred to D28).
 - **Binary refs are a closed content-addressed namespace**: `attachments/<sha256hex>.<ext>`, filename derived ONLY from
   the content hash, never from caller input. Read-side confinement is a strict whole-ref regex checked BEFORE any fs call
   (traversal is not even expressible), single-sourced in the store; the `media.*` WS methods are thin delegations and
@@ -123,7 +110,7 @@ The owner explicitly approved these contracts for the coordinated SDK upgrade:
   `chat.error{retracted:true}` so the client can restore the draft. Retraction remains identical for both endings.
 - After persistence, retraction and surfaced failure handling, the outer turn owner calls `state.afterCommit` only if
   its signal is not aborted. This gates the existing bundle: request-pressure remeasurement, auto-memory/compaction
-  maintenance, optional image-description maintenance and the detached turn-usage callback. An aborted turn starts
+  maintenance and the detached turn-usage callback; no image-description model call remains. An aborted turn starts
   none of that bundle, including a previously graceful partial cancellation.
 - The source-backed primary writer retains actual input/output membership atomically before this callback guard;
   later ordinary maintenance imports it into the selected provider's existing witness journal. Only compatibility
@@ -206,7 +193,7 @@ construction — the persisted `history` is never mutated; one-shot; not stored)
 
 ## Untrusted external content enters a prompt ONLY through the fence (T3a, A1 minimal)
 
-Any string sampled from the outside world — a window title, screen text, a VLM description — is an injection surface
+Any string sampled from the outside world — a window title, screen text, a retrieved description — is an injection surface
 (a title can literally read "ignore previous instructions"). The rule: such content reaches a prompt ONLY wrapped by
 `agents/untrusted-fence.ts::fenceUntrusted({source, content})` — an XML `<untrusted-observation source=...>` block whose
 label declares the payload DATA-never-INSTRUCTIONS (Hermes smart-review XML-delimiting [H-APR:2585]; survey injection-trap
@@ -220,31 +207,26 @@ mandate). Never hand-roll a second fence or paste raw sensed text into a section
 - **Scrub-then-fence, once at the sense seam** (T3b): sensed text is minimized by `perception/pii-scrub.ts::scrubPii`
   BEFORE it is fenced and before it is stored, so the prompt path and any store inherit the same string. The fence is a
   *labelling* control, the scrub a *content-minimization* one; they compose in that order, never the reverse.
-- The screenshot VLM description is fenced on the TOOL-RESULT path (`screenshot-tool.ts::safeDescription`) and on the
-  ambient path (`perception/screen-context.ts`) — D44 CLOSED (T3b). Remaining debt: a description written to episodic
-  memory is scrubbed but carries no observed-origin marker for the assembler to fence at render (D47).
-- **Ambient context joins via `instructionsExtra`, event notices via the outgoing-message seam** — an always-current
-  status block (activity) is a per-turn system-prompt section; a one-shot event (costume change) is a message prefix.
-  Pick by shape, don't mix.
+- Native image pixels travel as FileParts with trusted source association. Textual observation metadata remains
+  fenced. Fixed application instructions, including private-screen abstention, stay outside the untrusted fence.
+- Ambient activity metadata joins the late outgoing turn context; native observation images use the Attempt-owned
+  carrier. Do not move changing observations into the stable system-prefix solely to improve a display metric.
 
-## Ambient observation: two privacy layers, fail-closed, silent when off (T3b)
+## Ambient observation: screened native input and bounded lifetime
 
 Everything that observes the user *without being asked* composes in ONE place: `perception/perception-layer.ts` builds
 the privacy controls (Privacy Pause, sensitive-process skip, PII scrub) once and hands them to every sampler, so adding
 a sampler never adds a privacy decision. On-demand chat captures are deliberately NOT part of this layer — they are
 explicit in-the-moment consent through the Gate, and the pause never gates them.
 
-- **TWO independent layers over ambient capture; neither replaces the other.** *Layer 1 — deterministic, prevents
-  TRANSMISSION*: the exe-name skip (`perception/sensitive-processes.ts`), `ActivityState.seal()` on a sensitive hit,
-  and one FRESH `foreground-window` screen taken immediately before every capture (`perception/foreground-screen.ts`)
-  — which NARROWS but does not close the gap: foreground and capture are still two WS round-trips, so the residual
-  non-atomic window is real and tracked (D48), never described as closed.
-  *Layer 2 — semantic, prevents RETENTION/USE*: the mandatory ambient VLM pass doubles as a privacy screen
-  (`perception/sensitive-screen.ts` — a structural `SENSITIVE_SCREEN` sentinel whose matcher is deliberately more
-  forgiving than the prompt); a sensitive verdict discards the frame whatever the retention config says, publishes
-  nothing, and logs neither the description nor the window identity. Layer 2 can NEVER substitute for layer 1: the VLM
-  is a REMOTE endpoint, so by the time it can judge a frame the pixels have already left the machine. Layer 1 in turn
-  cannot see inside an app (incognito is still `chrome.exe`) — hence both, always.
+- **Deterministic capture screening remains.** Sensitive-process checks and a fresh foreground-window screen
+  precede capture; foreground and capture are still separate WS round-trips, so their non-atomic gap is not closed.
+  Consent, accepted source and Host validity must still be checked before native input is dispatched.
+- **The separate semantic VLM/sentinel stage is retired.** Permitted pixels now reach the primary model directly;
+  visual/private-screen abstention happens in its normal decision. Prompt guidance is not the former programmatic
+  pre-main barrier and must not be described as equivalent. Do not reintroduce an independent classifier call.
+  See [Native Image Input](native-image-input.md) and [Perception Evidence](perception-evidence.md) for native
+  consumption/disposal and keep/days behavior.
 - **Fail-closed is the rule for any observation we cannot screen.** Route failure, schema miss, no focused window, no
   process name, a foreground sample older than the freshness tolerance — all collapse into ONE refusal: the correct
   reaction to each is identical, and distinguishing them tempts a log line that discloses more than "we did not look".

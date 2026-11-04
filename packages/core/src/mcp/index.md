@@ -12,8 +12,9 @@
 - mcp-generations.ts — plane-3 generation records and leases; exact-once close observes immediate closed state separately from deferred cleanup, with forced-call unknown outcomes; never persisted or restored
 - mcp-manager-state.ts — process-local desired/candidate ownership, cancellation, locking and active/draining sets; bounded observations follow candidate start/removal and active withdrawal
 - mcp-publication.ts — current-token candidate publication; rejects key collisions, atomically swaps active truth, drains prior generations and observes publication/close without per-call noise
-- mcp-turn-tools.ts — per-turn MCP tools with exact durable unattended authority, interactive Approval context and original generation leases; Chinese approvals retain full server/tool names
-- mcp-boot.ts — desired/seed/manager/secret composition with change observation installed before reconciliation; seeds only an empty table after secret migration
+- mcp-turn-tools.ts — per-turn MCP tools with exact unattended authority, interactive Approval and original generation leases; settled typed images project natively after governance without repeating remote effects
+- mcp-image-result.ts — native projection of standard MCP image/image-resource blocks; non-image/unknown blocks and structured/error status survive; existing supported attachment formats retain refs, others remain explicit transient evidence
+- mcp-boot.ts — desired/seed/manager/secret and native-image attachment projection composition; change observation precedes reconciliation and seed runs only into an empty table after secret migration
 - mcp-manager.ts — runtime orchestration with immutable Run snapshots, governed leases and observed reload/retirement/shutdown; ordinary reads/leases and private Test remain silent
 - mcp-runtime-status.ts — pure runtime-status projection for active/draining generations and sanitized candidate/close outcomes
 - mcp-desired-repo.ts — optimistic SQLite desired writes and seed-only legacy import; bounded observation follows actual commit before fallible read-back/logging, and skipped/refused writes remain silent

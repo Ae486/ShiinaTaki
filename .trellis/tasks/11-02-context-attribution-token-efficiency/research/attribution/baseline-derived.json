@@ -1,0 +1,184 @@
+{
+  "date": "2026-11-02",
+  "source": {
+    "artifact": "new-conversation-cost-metrics.json",
+    "artifact_sha256": "7339c41e0cda92c10cf104c0317aa527311aea757fcd3a7b5b5a6fdffe2b44ab",
+    "generated_at_utc": "2026-11-01T13:40:28.624483+00:00",
+    "recorded_snapshot_hashes": {
+      "new_sha256": "a784b20064347b56bf3e897f785654e7ffc33d393094521804fa2ce8a779fd7a",
+      "old_sha256": "093bf8a11a25899b3fa1f7bdce865eb2c12006cffe01f245bfaf876eb4da4a39"
+    }
+  },
+  "measured": {
+    "scope": "Archived November 1 normal-use cohort; normalized reported usage, not an invoice or quality acceptance.",
+    "foreground": {
+      "requests": 39,
+      "runs": 20,
+      "known_input_requests": 39,
+      "cache_paired_requests": 39,
+      "input_tokens": 2120339,
+      "input_no_cache_tokens": 83475,
+      "cache_read_tokens": 2036864,
+      "output_tokens": 14370,
+      "reasoning_tokens": 9205,
+      "weighted_cache_ratio": 0.9606312952787267,
+      "mean_input_tokens": 54367.666666666664,
+      "median_input_tokens": 53827,
+      "conditional_cost_cny_estimate": 0.18169228
+    },
+    "phases": {
+      "first": {
+        "requests": 20,
+        "runs": 20,
+        "known_input_requests": 20,
+        "cache_paired_requests": 20,
+        "input_tokens": 1067828,
+        "input_no_cache_tokens": 76980,
+        "cache_read_tokens": 990848,
+        "output_tokens": 5889,
+        "reasoning_tokens": 3828,
+        "weighted_cache_ratio": 0.9279097382724558,
+        "mean_input_tokens": 53391.4,
+        "median_input_tokens": 52328.0,
+        "conditional_cost_cny_estimate": 0.12035296,
+        "share_of_foreground_input": 0.5036119224331581,
+        "share_of_foreground_conditional_cost": 0.6623999654800963
+      },
+      "continuation": {
+        "requests": 19,
+        "runs": 7,
+        "known_input_requests": 19,
+        "cache_paired_requests": 19,
+        "input_tokens": 1052511,
+        "input_no_cache_tokens": 6495,
+        "cache_read_tokens": 1046016,
+        "output_tokens": 8481,
+        "reasoning_tokens": 5377,
+        "weighted_cache_ratio": 0.993829043116889,
+        "mean_input_tokens": 55395.31578947369,
+        "median_input_tokens": 55142,
+        "conditional_cost_cny_estimate": 0.06133932,
+        "share_of_foreground_input": 0.4963880775668419,
+        "share_of_foreground_conditional_cost": 0.33760003451990367
+      }
+    },
+    "older_heartbeat_same_stored_alias": [
+      {
+        "phase": "continuation",
+        "requests": 2,
+        "runs": 2,
+        "known_input_requests": 2,
+        "cache_paired_requests": 2,
+        "input_tokens": 14710,
+        "input_no_cache_tokens": 1142,
+        "cache_read_tokens": 13568,
+        "output_tokens": 1013,
+        "reasoning_tokens": 624,
+        "weighted_cache_ratio": 0.9223657375934738,
+        "median_input_tokens": 7355.0
+      },
+      {
+        "phase": "first",
+        "requests": 2,
+        "runs": 2,
+        "known_input_requests": 2,
+        "cache_paired_requests": 2,
+        "input_tokens": 13178,
+        "input_no_cache_tokens": 9338,
+        "cache_read_tokens": 3840,
+        "output_tokens": 536,
+        "reasoning_tokens": 460,
+        "weighted_cache_ratio": 0.29139474882379723,
+        "median_input_tokens": 6589.0
+      }
+    ],
+    "older_heartbeat_limit": "Different dated deployment/context; no November 1 heartbeat sample or exact selected-source proportions.",
+    "avatar_correction_associated_upper_bound": {
+      "requests": 4,
+      "runs": 4,
+      "known_input_requests": 4,
+      "cache_paired_requests": 4,
+      "input_tokens": 220157,
+      "input_no_cache_tokens": 1405,
+      "cache_read_tokens": 218752,
+      "output_tokens": 208,
+      "reasoning_tokens": 42,
+      "weighted_cache_ratio": 0.9936181906548509,
+      "mean_input_tokens": 55039.25,
+      "median_input_tokens": 55439.5,
+      "conditional_cost_cny_estimate": 0.00661204,
+      "share_of_foreground_input": 0.10383103833868075,
+      "share_of_foreground_conditional_cost": 0.03639141960241789
+    },
+    "normal_background": {
+      "requests": 6,
+      "known_input_requests": 6,
+      "cache_paired_requests": 6,
+      "input_tokens": 8237,
+      "input_no_cache_tokens": 6061,
+      "cache_read_tokens": 2176,
+      "output_tokens": 3400,
+      "reasoning_tokens": 3009,
+      "weighted_cache_ratio": 0.26417384970256164,
+      "mean_input_tokens": 1372.8333333333333,
+      "median_input_tokens": 1409.0,
+      "conditional_cost_cny_estimate": 0.01970452,
+      "share_of_combined_input": 0.0038697232328091646,
+      "share_of_combined_conditional_cost": 0.0978392903958752
+    },
+    "context_snapshot_quality": [
+      {
+        "quality": "unknown",
+        "n": 20
+      }
+    ],
+    "invariants": {
+      "old_usage_unchanged": true,
+      "old_usage_rows": 288,
+      "new_usage_rows": 39,
+      "duplicate_usage_effects": 0,
+      "detail_sum_mismatches": 0
+    }
+  },
+  "estimated": {
+    "scope": "Fixed latest calibration and current code; history projection only, not exact historical wire requests.",
+    "replay_points": [
+      {
+        "boundary": "first",
+        "sourceRows": 51,
+        "selectedRows": 51,
+        "summaryTokens": 9493,
+        "historyTokens": 22112,
+        "foldedTokensSaved": 0,
+        "tokenBoundaryHit": false,
+        "sourceBackstopHit": false,
+        "summary_share_of_replay_estimate": 0.4293143994211288
+      },
+      {
+        "boundary": "last",
+        "sourceRows": 141,
+        "selectedRows": 141,
+        "summaryTokens": 9493,
+        "historyTokens": 29852,
+        "foldedTokensSaved": 0,
+        "tokenBoundaryHit": false,
+        "sourceBackstopHit": false,
+        "summary_share_of_replay_estimate": 0.3180021439099558
+      }
+    ],
+    "captured_latest_calibration": {
+      "effective_real_token_window": 131000,
+      "factor": 1.063771519480805,
+      "estimator_window_units": 123146,
+      "history_budget_estimator_units": 86202
+    },
+    "cost_scope": "Conditional current-Sunday estimate for new usage; fixed common-tariff counterfactual for old usage, never historical invoice reconstruction."
+  },
+  "unknown": [
+    "Historical exact instruction/persona/memory/runtime/tool-schema shares",
+    "Historical MCP/Skill origin without captured construction binding",
+    "Historical per-request effective-window/factor at dispatch",
+    "Current native-media category cost and real provider capability",
+    "Causal savings, equivalent-task quality and original-result recovery acceptance"
+  ]
+}

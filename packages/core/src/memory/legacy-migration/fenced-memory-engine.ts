@@ -7,11 +7,14 @@ import type { MemoryEngine } from "../memory-engine.ts";
 import type { ToolSet } from "ai";
 import type { MemoryAuthorityFence } from "./memory-authority-fence.ts";
 import type { InitiativeMemorySelection } from "../initiative-memory-assembly.ts";
+import { forwardRenderedContextText } from "../../agents/context-attribution.ts";
 
 export function fenceMemoryEngine(engine: MemoryEngine, fence: MemoryAuthorityFence): MemoryEngine {
+  const assemble: MemoryEngine["assemble"] = (input) => fence.admitSync(() =>
+    forwardRenderedContextText(assemble, engine.assemble, engine.assemble(input)));
   return {
     reconcile: () => fence.admitSync(engine.reconcile),
-    assemble: (input) => fence.admitSync(() => engine.assemble(input)),
+    assemble,
     captureInitiative: engine.captureInitiative ? (characterId) => {
       const capture = engine.captureInitiative;
       if (!capture) throw new Error("MEMORY_CAPABILITY_UNSUPPORTED");

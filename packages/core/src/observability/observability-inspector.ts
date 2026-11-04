@@ -51,6 +51,12 @@ function eventFields(payload: Payload): Fields {
 
 function semanticSection(payload: Payload): Section | undefined {
   switch (payload.kind) {
+    case "context.request.measured": return { key: "context", fields: [
+      { label: "估算输入", value: `${payload.composition.totalUnits} 估算单位` },
+      { label: "归因覆盖", value: payload.composition.coverage.status === "complete" ? "完整" : "部分" },
+      { label: "模型", value: payload.modelId },
+      { label: "估算方式", value: payload.composition.coverage.hasHeuristicMedia ? "多模态启发式" : "文本启发式" },
+    ] };
     case "model.request.started":
     case "model.stream.first":
     case "model.response.settled": return { key: "model", fields: modelFields(payload) };

@@ -41,7 +41,7 @@ export function createModelEffectMiddleware(context: ModelEffectContext): Langua
     async wrapGenerate({ doGenerate, params, model }) {
       const binding = prepareBinding(context, model, params);
       try {
-        const result = await withRunUsageOwner(doGenerate);
+        const result = await withRunUsageOwner(doGenerate, binding.effect);
         if (!context.observer) settleDirect({ context, effect: binding.effect, model, usage: result.usage });
         return result;
       } catch (error) {
@@ -53,7 +53,7 @@ export function createModelEffectMiddleware(context: ModelEffectContext): Langua
       const binding = prepareBinding(context, model, params);
       let result;
       try {
-        result = await withRunUsageOwner(doStream);
+        result = await withRunUsageOwner(doStream, binding.effect);
       } catch (error) {
         fail(context, binding, params.abortSignal?.aborted ? "provider_abort" : "provider_error");
         throw error;

@@ -49,14 +49,10 @@ const EXPECTED_KEYS = [
   "TAKI_PROVIDER_BASE_URL",
   "TAKI_PROVIDER_API_KEY",
   "TAKI_PROVIDER_MODEL",
-  "TAKI_VLM_BASE_URL",
-  "TAKI_VLM_API_KEY",
-  "TAKI_VLM_MODEL",
   "TAKI_UTILITY_BASE_URL",
   "TAKI_UTILITY_API_KEY",
   "TAKI_UTILITY_MODEL",
   "TAKI_PROVIDER_CONTEXT_TOKENS",
-  "TAKI_VLM_CONTEXT_TOKENS",
   "TAKI_UTILITY_CONTEXT_TOKENS",
   "TAKI_CONTEXT_HISTORY_RATIO",
   "TAKI_PROVIDER_INCLUDE_USAGE",
@@ -99,13 +95,12 @@ describe("CONFIG_KNOBS", () => {
     const keys = CONFIG_KNOBS.map((knob) => knob.key);
     expect(new Set(keys).size).toBe(keys.length);
     expect([...keys].sort()).toEqual([...EXPECTED_KEYS].sort());
-    expect(CONFIG_KNOBS).toHaveLength(86);
+    expect(CONFIG_KNOBS).toHaveLength(82);
   });
 
   it("flags exactly the three API keys as secrets", () => {
     expect(CONFIG_KNOBS.filter((knob) => knob.secret).map((knob) => knob.key)).toEqual([
       "TAKI_PROVIDER_API_KEY",
-      "TAKI_VLM_API_KEY",
       "TAKI_UTILITY_API_KEY",
     ]);
   });

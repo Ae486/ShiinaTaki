@@ -6,6 +6,7 @@
 import { createHash } from "node:crypto";
 import { InitiativeSelectedContextSchema, InitiativeSourceSchema, type InitiativeContextManifest } from "@taki/shared";
 import type { PersonaProvider } from "./persona-provider.ts";
+import { contextText, joinContextText, retainContextText } from "../agents/context-attribution.ts";
 
 export interface InitiativeMemorySelection { global: boolean; character: boolean }
 export interface InitiativeMemoryContext { text: string; sources: InitiativeContextManifest["sources"] }
@@ -21,15 +22,16 @@ export function captureInitiativeMemoryAssembly(input: {
   const character = input.character ? { ...input.character } : undefined;
   const personaSource = source("persona", input.characterId, persona);
   return (selection) => {
-    const sections = [persona]; const sources = [personaSource];
+    const sections = [contextText(persona, "persona")]; const sources = [personaSource];
     for (const [selected, fragment] of [[selection.global, global], [selection.character, character]] as const) {
       if (!selected || !fragment?.content.trim()) continue;
-      sections.push(fragment.content); sources.push(source("memory", fragment.reference, fragment.content));
+      sections.push(contextText(fragment.content, "injected_memory")); sources.push(source("memory", fragment.reference, fragment.content));
     }
     // Preserve the complete stable Persona and each owning Block renderer's existing budget semantics.
     // An oversized assembled profile refuses; it is never silently reinterpreted by parsing or slicing headings.
-    const text = InitiativeSelectedContextSchema.shape.instructions.parse(sections.join("\n\n"));
-    return { text, sources: sources.map((entry) => ({ ...entry })) };
+    const descriptor = joinContextText(sections, "\n\n", true);
+    const text = InitiativeSelectedContextSchema.shape.instructions.parse(descriptor.text);
+    return retainContextText({ text, sources: sources.map((entry) => ({ ...entry })) }, descriptor);
   };
 }
 

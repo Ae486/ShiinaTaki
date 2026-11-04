@@ -6,6 +6,7 @@
 import type { JSONRPCParams } from "json-rpc-2.0";
 import {
   CONFIG_METHODS, ConfigListResultSchema, ConfigSetResultSchema, ConfigSubscribeResultSchema,
+  MODEL_CAPABILITIES_METHOD, ModelCapabilitiesResultSchema,
   type ConfigListResult, type ConfigSetParams,
 } from "@taki/shared";
 
@@ -15,6 +16,7 @@ export function configMethods(request: <T>(method: string, params: JSONRPCParams
   let failedSetup = false;
   const recovered = new Set<() => void>();
   return {
+    configModelCapabilities: async () => ModelCapabilitiesResultSchema.parse(await request(MODEL_CAPABILITIES_METHOD, {})),
     // Stop new consumers joining a snapshot started before a verified change. Existing consumers retain
     // their promise and use their own update epochs; its finalizer must not clear a newer shared flight.
     invalidateConfigList() { listed = null; },

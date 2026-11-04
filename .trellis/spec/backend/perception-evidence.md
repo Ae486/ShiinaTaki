@@ -2,10 +2,10 @@
 
 ## 1. Scope / Trigger
 
-Use this contract when changing foreground Sampling, ambient screening/capture/description, Privacy Pause,
+Use this contract when changing foreground Sampling, ambient screening/capture/native consumption, Privacy Pause,
 capability route provenance, or a consumer of native presence evidence. It implements the accepted-evidence
 portion of [C2](../../tasks/09-11-initiative-presence-feedback/design.md). The existing
-[ambient privacy layers](agent-runtime.md#ambient-observation-two-privacy-layers-fail-closed-silent-when-off-t3b)
+[ambient privacy contract](agent-runtime.md#ambient-observation-two-privacy-layers-fail-closed-silent-when-off-t3b)
 and [Host lifecycle](host-operation-lifecycle.md) still apply.
 
 The owner is `packages/core/src/perception/perception-evidence.ts`, composed once by `perception-layer.ts`.
@@ -68,8 +68,8 @@ Post-capture publication uses:
 ```ts
 observeAmbientFrame(
   deps: AmbientObservationDeps,
-  frame: { dataBase64: string; mediaType: string },
-  observation: { observedAt: number; isCurrent: () => boolean },
+  frame: ImageAttachment,
+  observation: { observedAt: number; isCurrent(): boolean; sourceContext?: SourceContext; release?(): void },
 ): Promise<void>;
 ```
 
@@ -117,10 +117,10 @@ Policy still owns Pattern conditions, meaningful selection, all global limits an
 - A successful changed Privacy Pause write follows `store.save -> live consent -> observer -> evidence.retire`.
   A failed save leaves both the previous consent and observation epoch unchanged. A no-op write need not retire.
   The only production pause mutator caller remains the operator-only `perception.pauseSet` method.
-- `retire()` increments the epoch, discards evidence/source, clears cached activity history/dwell and screen text,
+- `retire()` increments the epoch, discards evidence/source, clears cached activity history/dwell and native screen state,
   and resets ambient refresh suppression. It does not restart a denied/stopped sampler.
 - `reject()` increments the epoch and removes current evidence. For a bound current source it seals the activity
-  stretch, clears screen text and resets ambient refresh suppression while retaining prior accepted history.
+  stretch, clears native screen state and resets ambient refresh suppression while retaining prior accepted history.
   Refusal is data-free; logs/invalidations must not reveal a refused application's identity or contents.
 - Explicit resume retires on its successful changed write. Automatic deadline expiry remains a timer-free pause
   read, not another consent write: the earlier pause already invalidated all pre-pause work. Both paths require
@@ -148,16 +148,31 @@ Policy still owns Pattern conditions, meaningful selection, all global limits an
 3. Pin `screenshot-ambient` to the screened Host. After that await, both source predicates must remain current and
    the two Host/connection/catalog tuples must match. If either result has provenance, both must have matching
    provenance; do not combine a bound result with an unbound one.
-4. Validate the screenshot before storing/describing it. Check the same attempt/source lifetime before saving,
-   before the VLM call and after it returns. Publish only the current, nonsensitive, scrubbed description.
-5. A sensitive semantic verdict rejects current evidence and publishes no description. In `finally`, discard a
-   saved frame when sensitive, configured `drop-after-describe`, or retired, including a throwing describer.
-   Retirement overrides `keep` for that in-flight frame. Cleanup occurs on settlement; this does not cancel an
-   already issued external request, retract transmitted pixels, or bulk-delete previously completed retained frames.
+4. Validate the screenshot before publishing it. Save the raw frame through the ambient-only store and protect its
+   file from retention sweeping while pending/in-use. Publish exactly one latest native frame with the original
+   observation timestamp and source predicate; capture performs no model call.
+5. `ScreenContext.latest(now)` exposes only `{key, at}`. `acquire(key?)` gives one `NativeImageContext` for the same
+   Attempt; images/callbacks never enter persisted selected context or Timeline. A selected accepted-screen purpose
+   captures the exact key before awaited Memory preparation and cannot acquire a replacement frame afterward.
+6. Check live source/consent/expiry before acquisition and each actual provider dispatch. Replacement, expiry,
+   withdrawal or consumption invalidates the carrier, releases GC protection and clears its in-memory pixels.
+   Agent finally releases after success/failure/cancellation; preparation refusal also releases before Agent entry.
+   A trusted extension ambient sidecar release can transfer into the frame lifetime; failed publication releases
+   before returning, while normal publication releases together with frame consumption/retirement.
+   A native frame cannot authorize a replacement Attempt or be revived from disk.
+7. Env retention `drop` maps to `drop-after-consumption`: retain only until consumption/expiry/replacement/withdrawal.
+   `keep`/N-days preserve completed captures under their existing policy. Source/consent withdrawal deletes a live
+   frame even under retained policies. UUID-suffixed names prevent concurrent ambient/viewing capture overwrite;
+   old timestamp-only names remain recognized. Boot drop sweeping clears unprotected leftovers even with future
+   mtimes; periodic sweeps must not delete protected pending/in-use frames. Retention grants no observation validity.
+8. The separate semantic translator and `SENSITIVE_SCREEN` sentinel are removed. The main model now sees permitted
+   pixels and receives concise private-screen abstention guidance in the same normal decision. Deterministic
+   process screening remains, but the old pre-main semantic suppression guarantee is not preserved. No separate
+   classifier or response-buffering privacy framework is introduced. Retirement cannot retract pixels already sent.
 
 **D48 remains open:** foreground screening and screenshot capture are separate Host round trips. Pinning Host and
 checking generations prevent stale/cross-Host use but cannot make those operations atomic. Session idle is neither
-physical-HID proof nor proof of reading; successful capture/description is not message presentation.
+physical-HID proof nor proof of reading; successful capture/model interpretation is not message presentation.
 
 ## 4. Validation & Error Matrix
 
@@ -167,13 +182,13 @@ physical-HID proof nor proof of reading; successful capture/description is not m
 | Legacy success without provenance | Activity compatibility only; native evidence remains unavailable |
 | Sensitive, unavailable, malformed or failed foreground result | No accepted replacement; retire eligibility and prevent old live dwell reuse |
 | Pause already active | Skip routing; no sampling approval/capture/model work |
-| Pause then resume/expiry during foreground, screen, screenshot or VLM await | Old epoch cannot publish or become fresh again |
+| Pause then resume/expiry during foreground, screen or screenshot await | Old epoch cannot publish or become fresh again |
 | Pause/resume durable save fails | Propagate the failure; leave prior consent/epoch intact |
 | Accepted Host/socket/catalog/dispatch policy becomes stale | Read-time retirement clears evidence and dependent cache |
 | Old Host removal callback after a replacement sample | Match connection generation; leave replacement evidence intact |
 | Fresh screen is sensitive, denied or unscreenable | No screenshot; reject current evidence; denial stops ambient sampling for the session |
-| Screenshot source absent/mismatched, stale or malformed | No VLM publication; never repair the identity from a later Host lookup |
-| VLM result arrives after retirement or returns a sensitive verdict | No screen text; discard its saved frame under every retention mode |
+| Screenshot source absent/mismatched, stale or malformed | No native publication; never repair the identity from a later Host lookup |
+| Native frame source retires while pending/in-use | No later model dispatch; discard live raw frame under every retention mode |
 | `now < observedAt` or native evidence is too old | Return unavailable, not absence or a fresh sample |
 
 Route failure codes retain their existing meanings (`NO_NODE`, `TARGET_HOST_REQUIRED`, `CAPABILITY_MISSING`, broker
@@ -185,7 +200,7 @@ failures). Stale evidence is locally discarded; do not invent a successful sampl
   evidence, the next accepted sample starts dwell at one, and late generation 1 removal cannot erase it.
 - Base: permitted foreground reports null idle. Activity still displays its accepted application context, while
   native presence remains unknown. Direct operator input can independently establish presence under its own contract.
-- Bad: pausing and resuming while a VLM call runs makes its old description publish because the final pause boolean
+- Bad: pausing and resuming while a capture runs makes its old frame publish because the final pause boolean
   is false, or `keep` retention preserves that retired in-flight frame.
 
 ## 6. Tests Required
@@ -193,14 +208,14 @@ failures). Stale evidence is locally discarded; do not invent a successful sampl
 - `perception/perception-evidence.test.ts`: real layer composition with fake time and an isolated ambient directory;
   assert nullable idle/defensive copies, legacy/future/stale refusal, sensitive/refused/malformed/unavailable
   retirement, fresh dwell after refusal, pause/resume/expiry during await, durable write ordering/failure, cache
-  retirement, Host/catalog replacement, old Host cleanup isolation, all three ambient await stages, Host-pinned
+  retirement, Host/catalog replacement, old Host cleanup isolation, both ambient await stages and native main-dispatch lifetime, Host-pinned
   screenshot routing and retired frame deletion under `keep`.
 - `capabilities/route-capability.test.ts`: explicit multi-Host routing, ambiguous/no-target refusal, original
   pre-await binding and currentness that changes after replacement/removal even after the route has settled.
 - `perception/privacy-pause-writer.test.ts`: resolve the called TypeScript declaration, so only actual `PrivacyPause`
   mutators count. An unrelated delivery `resume()` is not a consent writer. Keep the non-vacuous whole-tree guard.
 - Existing activity, foreground-screen, ambient-screenshot, screen-context and privacy-pause suites must retain
-  cadence, fail-closed screening, scrub/fence, retention, off-state and single-writer coverage.
+  cadence, fail-closed screening, source fencing, retention, off-state and single-writer coverage.
 
 These deterministic tests do not establish native window exposure, same-device association, physical input,
 real-provider behavior or owner acceptance. C2's native/feedback gates remain separate.
@@ -217,7 +232,7 @@ const epoch = evidence.generation();
 const observedAt = now();
 const result = await route("foreground-window", {});
 if (!result.ok || !evidence.isCurrent(epoch, result.provenance)) return;
-// First schema-validate, sensitive-screen and scrub the result at the existing sense seam.
+// First schema-validate, process-screen and scrub the result at the existing sense seam.
 evidence.acceptForeground({ epoch, observedAt, sample, provenance: result.provenance });
 ```
 

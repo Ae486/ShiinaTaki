@@ -15,8 +15,9 @@ under `test/`, `tests/`, `__tests__/`, `testing/` and `e2e/`, including native s
 rules, including max 3 params, naming and type safety, remain enabled. Do not move production code into a test tree to
 obtain an exemption.
 
-`packages/shared/src/index.ts` has a reviewed 500-line limit as the single public named-re-export entry, including the
-independently versioned D77 application-state contracts. This allowance
+`packages/shared/src/index.ts` has a reviewed 520-line limit as the single public named-re-export entry, including the
+independently versioned D77 application-state and request-attribution contracts. The modest registry-only allowance
+avoids artificial export-only entrypoints; implementation modules retain their existing limits. This allowance
 applies only to that exact file: ESLint permits only source-bearing `ExportNamedDeclaration` statements and rejects
 `export *`, imports, local declarations and side effects. Implementation modules retain the default 360-line guard.
 

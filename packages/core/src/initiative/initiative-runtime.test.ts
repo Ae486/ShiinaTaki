@@ -22,6 +22,7 @@ afterEach(async () => {
 
 function fixture(options: { ttl?: number; retire?: "before-intent" | "after-intent"; decision?: HeartbeatDecision } = {}) {
   vi.useFakeTimers(); vi.setSystemTime(new Date("2026-09-26T12:00:00.000Z"));
+  const nativeInputs: unknown[] = [];
   const f = initiativeFixture(); const queue = createTurnQueue(); const turns = createTurnRegistry();
   let revision = 1; let gate: "ready" | "hold" = "ready";
   const presentation = vi.fn(async () => "completed" as const);
@@ -34,6 +35,7 @@ function fixture(options: { ttl?: number; retire?: "before-intent" | "after-inte
       busyMaxWaitMs: 90_000, outputTtlMs: options.ttl ?? 600_000, scheduledOutputTtlMs: 86_400_000 }),
     capturePresentation: () => ({ isCurrent: () => true, accepts: () => true, execute: presentation }),
     agent: { async *stream(_params, turn) {
+      nativeInputs.push(turn?.nativeImageContext?.images.map((image) => ({ ...image })));
       if (options.retire === "before-intent") revision++;
       const effect = f.effects.prepare({ runId: turn!.runId!, attemptId: turn!.attemptId!, kind: "model",
         sourceRef: { type: "model", provider: "test", modelId: "test" }, replayPosture: "never", onCommitIntent: turn?.onCommitModelIntent });
@@ -51,7 +53,7 @@ function fixture(options: { ttl?: number; retire?: "before-intent" | "after-inte
       capturedAt: new Date().toISOString(), expiresAt: new Date(Date.now() + 100_000).toISOString(), policyRevision: "test",
       primaryVersion: 0, timezoneRevision: 1, accountingQuality: "unknown",
       sources: [{ category: "time", reference: "user-timezone", revision: "1", trust: "core" }] } };
-  const result = { ...f, runtime, presentation, selectedContext,
+  const result = { ...f, runtime, presentation, selectedContext, nativeInputs,
     retireTimezone: () => { revision++; }, hold: () => { gate = "hold"; },
     dispatch: () => runtime.dispatch({ opportunityId: "one", characterId: "taki", selectedContext, isCurrent: () => true, deliveryGate: () => gate }) };
   fixtures.push(result); return result;
@@ -71,12 +73,33 @@ describe("initiative expiry and timezone fences", () => {
       async prepareInput(turn) {
         await turn.runContext!.tools!.evidence_read!.execute!({}, { toolCallId: "evidence", messages: [], context: undefined });
         expect(f.effects.list?.(turn.runId!).filter(effect => effect.kind === "tool")).toHaveLength(1);
-        return "Verified captured evidence";
+        return { text: "Verified captured evidence" };
       } });
     expect(f.runs.status(result.runId!).run.state).toBe("completed");
     const effect = f.effects.list?.(result.runId!).find(effect => effect.kind === "tool");
     expect(effect).toMatchObject({ runId: result.runId, attemptId: result.attemptId, outcome: "completed" });
     expect(capturedContext?.tools?.evidence_read).toBe(read);
+  });
+
+  it("carries prepared native pixels into the single normal decision and releases after silent settlement", async () => {
+    const f = fixture({ decision: { outcome: "silent", selectedCandidateIds: [] } }); const release = vi.fn();
+    const input = { images: [{ mediaType: "image/png" as const, dataBase64: "AAAA" }], context: "Screen source",
+      isCurrent: () => true, release };
+    const result = await f.runtime.dispatch({ opportunityId: "native", characterId: "taki", selectedContext: f.selectedContext,
+      isCurrent: () => true, deliveryGate: () => "ready", prepareInput: async () => ({ text: "Screen evidence", nativeImageContext: input }) });
+    expect(f.nativeInputs).toEqual([[{ mediaType: "image/png", dataBase64: "AAAA" }]]);
+    expect(f.effects.list?.(result.runId!).filter((effect) => effect.kind === "model")).toHaveLength(1);
+    expect(release).toHaveBeenCalledOnce(); expect(JSON.stringify(f.selectedContext)).not.toContain("AAAA");
+    expect(f.db.prepare("SELECT count(*) AS n FROM timeline_messages").get()?.n).toBe(0);
+  });
+
+  it("releases invalidated preparation without beginning a main-model request", async () => {
+    const f = fixture(); const release = vi.fn();
+    const result = await f.runtime.dispatch({ opportunityId: "native-invalid", characterId: "taki", selectedContext: f.selectedContext,
+      isCurrent: () => true, deliveryGate: () => "ready", prepareInput: async () => ({ text: "Screen evidence",
+        nativeImageContext: { images: [{ mediaType: "image/png", dataBase64: "AAAA" }], context: "Screen source", isCurrent: () => false, release } }) });
+    expect(f.runs.status(result.runId!).run.state).toBe("failed"); expect(f.effects.list?.(result.runId!)).toEqual([]);
+    expect(f.nativeInputs).toEqual([]); expect(release).toHaveBeenCalledOnce();
   });
 
   it("refuses backoff before canonical admission without invoking its admission callback", async () => {

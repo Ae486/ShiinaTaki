@@ -29,6 +29,24 @@ function harness() {
 }
 
 describe("cache aggregate WS boundary", () => {
+  it("preserves the independent latest-primary sibling on initial responses and pushes without weakening validation", async () => {
+    const h = harness();
+    const latestPrimaryRequest = { scope: "latest-primary-request", characterId: "taki", status: "empty", reason: null,
+      request: null, computedAt: "2026-11-02T11:00:00.000Z" };
+    const combined = { ...update, latestPrimaryRequest };
+    const initial = h.client.subscribeCacheUsage({ characterId: "taki" }); h.reply(combined);
+    await expect(initial).resolves.toEqual(combined);
+    const observed = vi.fn(); h.client.onCacheUsageChanged(observed);
+    h.deliver({ jsonrpc: "2.0", method: CACHE_USAGE_METHODS.changed, params: combined });
+    expect(observed).toHaveBeenCalledWith(combined);
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    try {
+      h.deliver({ jsonrpc: "2.0", method: CACHE_USAGE_METHODS.changed,
+        params: { ...combined, latestPrimaryRequest: { ...latestPrimaryRequest, rawPrompt: "must-not-enter-ui" } } });
+      expect(observed).toHaveBeenCalledTimes(1);
+    } finally { warn.mockRestore(); h.client.close(); }
+  });
+
   it("validates initial snapshots and explicit unsubscribe acknowledgements", async () => {
     const h = harness();
     const subscribing = h.client.subscribeCacheUsage({ characterId: "taki" });

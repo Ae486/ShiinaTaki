@@ -25,8 +25,12 @@ The owning path is `InitiativeRuntime -> TurnQueue -> RunService -> ChatAgent/To
 - Advertised and executable tools are intersected with the fixed read registry plus `heartbeat_respond`; governance
   still wraps execution. Runtime restrictions never grant permission or infer safety from a name/annotation.
 - Deterministic `prepareInput` receives the original captured closures with this execution's Run/Attempt/Effect and
-  abort metadata, before the normal ChatAgent tool-binding phase. The evidence result is appended to the actual
-  Agent turn; the preparation callback's input object is not the final model input. See the captured unattended-tool
+  abort metadata, before the normal ChatAgent tool-binding phase. The evidence result `{text, nativeImageContext?}` is appended to the actual
+  Agent turn; native pixels and release/currentness callbacks remain same-Attempt transient input and never persist
+  into `InitiativeSelectedContext` or Timeline. Accepted-screen preparation acquires only the exact selected key;
+  missing/expired/replaced evidence is explicit, and failed preparation releases before Agent entry. The Agent
+  checks validity at provider dispatch and releases in finally; a native carrier cannot be reused by a new Attempt.
+  There is no separate image-description/model request; the preparation callback's input object is not the final model input. See the captured unattended-tool
   contract in `permission-authorization.md` for durable-only Core/MCP grants and unchanged Host ask boundaries.
 - A retained authority check must cover the captured policy, Memory mode/epoch/provider and retired runtime.
   Hindsight additionally compares the original endpoint/credential fingerprint and exact captured Global/Character

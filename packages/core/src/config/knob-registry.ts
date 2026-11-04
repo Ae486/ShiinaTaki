@@ -151,16 +151,12 @@ export const CONFIG_KNOBS: Knob[] = [
   { key: "TAKI_PROVIDER_BASE_URL", ...str(), default: null, apply: "restart", description: "Main chat provider base URL." },
   { key: "TAKI_PROVIDER_API_KEY", ...str(), default: null, apply: "restart", secret: true, description: "Main chat provider API key." },
   { key: "TAKI_PROVIDER_MODEL", ...str(), default: null, apply: "restart", description: "Main chat model id." },
-  { key: "TAKI_VLM_BASE_URL", ...str(), default: null, apply: "restart", description: "Vision slot base URL; the whole slot is all-or-nothing." },
-  { key: "TAKI_VLM_API_KEY", ...str(), default: null, apply: "restart", secret: true, description: "Vision slot API key." },
-  { key: "TAKI_VLM_MODEL", ...str(), default: null, apply: "restart", description: "Vision model id; unset disables vision." },
   { key: "TAKI_UTILITY_BASE_URL", ...str(), default: null, apply: "restart", description: "Background/utility slot base URL; all-or-nothing." },
   { key: "TAKI_UTILITY_API_KEY", ...str(), default: null, apply: "restart", secret: true, description: "Background/utility slot API key." },
   { key: "TAKI_UTILITY_MODEL", ...str(), default: null, apply: "restart", description: "Background model id; unset rides the main model." },
 
   // --- context window + compaction ---
   { key: "TAKI_PROVIDER_CONTEXT_TOKENS", ...int({ min: 1 }), default: DEFAULT_CONTEXT_TOKENS, apply: "restart", description: "Declared context window of the main slot." },
-  { key: "TAKI_VLM_CONTEXT_TOKENS", ...int({ min: 1 }), default: DEFAULT_CONTEXT_TOKENS, apply: "restart", description: "Declared context window of the vision slot." },
   { key: "TAKI_UTILITY_CONTEXT_TOKENS", ...int({ min: 1 }), default: DEFAULT_CONTEXT_TOKENS, apply: "restart", description: "Declared context window of the utility slot." },
   { key: "TAKI_CONTEXT_HISTORY_RATIO", ...ratio(), default: DEFAULT_HISTORY_RATIO, apply: "restart", description: "Share of the window replayed as history." },
   { key: "TAKI_PROVIDER_INCLUDE_USAGE", ...bool(), default: false, apply: "restart", description: "Ask the provider for streaming usage numbers." },
@@ -169,7 +165,7 @@ export const CONFIG_KNOBS: Knob[] = [
 
   // --- agent loop + media ---
   { key: "TAKI_MAX_STEPS", ...int({ min: 1, max: 50 }), default: DEFAULT_MAX_STEPS, apply: "restart", description: "Tool-loop step cap per turn." },
-  { key: "TAKI_ATTACHMENT_TTL_DAYS", ...int({ min: 1 }), default: DEFAULT_TTL_DAYS, apply: "restart", description: "Days raw attachment bytes are kept (descriptions are permanent)." },
+  { key: "TAKI_ATTACHMENT_TTL_DAYS", ...int({ min: 1 }), default: DEFAULT_TTL_DAYS, apply: "restart", description: "Days original image bytes remain available for native replay; expired images cannot be recovered." },
   // Read on every avatar tool call (the outcomes factory takes a deadline reader), hence live.
   { key: AVATAR_OUTCOME_DEADLINE_KEY, ...int({ min: 100, max: 10_000 }), default: DEFAULT_AVATAR_OUTCOME_DEADLINE_MS, apply: "live", description: "How long an avatar tool waits for the Pet window's presentation outcome." },
 
@@ -182,7 +178,7 @@ export const CONFIG_KNOBS: Knob[] = [
     ...pattern({ regex: DAYS_OR_MODE, message: 'expected "drop", "keep" or a positive number of days' }),
     default: "drop",
     apply: "restart",
-    description: 'Raw ambient frames: "drop" after describe, "keep", or a day count.',
+    description: 'Raw ambient frames: "drop" after consumption or expiry, "keep", or a day count.',
   },
 
   // --- memory engine ---

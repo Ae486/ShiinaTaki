@@ -1,5 +1,5 @@
 /**
- * INPUT: immutable private rounds, pending inputs and a current worker's summary checkpoint port
+ * INPUT: immutable private rounds, retained-image reader, pending inputs and worker summary checkpoint port
  * OUTPUT: pressure-priced task context with exact raw input IDs and separately witnessed summaries
  * POS: core/agents — private replay preparation; no input is consumed while projecting or summarizing
  */
@@ -11,21 +11,27 @@ import type { SubagentExecutionRepo } from "../db/subagent-execution-repo.ts";
 import type { SubagentContextSummaryRepo } from "../db/subagent-context-summary-repo.ts";
 import { estimateMessagesTokens, estimateTokens } from "../memory/token-estimator.ts";
 import { toModelMessage } from "./turn-mapping.ts";
+import { nativeReplayMessages, replayImageSnapshot, type ImageReplayReader } from "./native-image-replay.ts";
 import { reduceMessages, sanitizeCompactionText } from "./context-reduction.ts";
 import { validateSummary } from "./summary-quality.ts";
 import type { PrivateTaskSummarizer } from "./private-task-summarizer.ts";
 import type { PreparedWorkStep, WorkStepInput } from "./work-context.ts";
 import { withToolMaterialReferences } from "../harness/subagent-tool-materials.ts";
+import { contextText, copyContentOrigin, retainContextText } from "./context-attribution.ts";
 
 export interface PrivateTaskContextInput {
   runId: string; subagentId: string; workInputId: string; initial: ModelMessage[];
   messages: RunMessageRepo; inputs: SubagentInputRepo; executions: SubagentExecutionRepo; summaries?: SubagentContextSummaryRepo;
   summarize?: PrivateTaskSummarizer; historyBudget(): number; token(): SubagentWorkToken;
+  attachments?: ImageReplayReader;
+  nativeToolImageMessages?(row: RunMessage): ModelMessage[];
+  retireNativeTools?(throughSeq: number): void;
   renderInput(input: SubagentInput): ModelMessage; assertCurrent(token: SubagentWorkToken): void;
 }
 interface ContextSnapshot { rows: RunMessage[]; more: boolean; rounds: RunMessage[][] }
 
-export async function preparePrivateTaskContext(input: PrivateTaskContextInput, step: WorkStepInput): Promise<PreparedWorkStep> {
+export async function preparePrivateTaskContext(deps: PrivateTaskContextInput, step: WorkStepInput): Promise<PreparedWorkStep> {
+  const input = { ...deps, attachments: replayImageSnapshot(deps.attachments) };
   const token = { ...input.token(), throughWorkSeq: input.inputs.latestWorkSeq(input.workInputId) };
   input.assertCurrent(token);
   const budget = messageBudget(input, step);
@@ -34,6 +40,7 @@ export async function preparePrivateTaskContext(input: PrivateTaskContextInput, 
   if (estimateMessagesTokens(fixed) >= budget) throw new Error("SUBAGENT_CONTEXT_PENDING_INPUT_UNFIT");
   let summary = input.summaries?.latest(input.workInputId) ?? null;
   for (;;) {
+    input.retireNativeTools?.(summary?.throughSeq ?? 0);
     step.envelope?.signal?.throwIfAborted();
     const snapshot = loadSnapshot(input, summary?.throughSeq ?? 0);
     const selected = project(input, { rows: snapshot.rows, pending, summary });
@@ -97,17 +104,17 @@ function project(input: PrivateTaskContextInput, state: { rows: RunMessage[]; pe
   summary: Pick<SubagentContextSummary, "revision" | "throughSeq" | "text"> | null }) {
   const { rows, pending, summary } = state;
   const inputIds = new Set<string>();
-  const messages = rows.map((row) => {
-    if (!row.inputId) return privateHistoryMessage(input, row);
+  const messages = rows.flatMap((row) => {
+    if (!row.inputId) return privateHistoryMessages(input, row);
     const record = input.inputs.get(row.inputId);
     if (record.workInputId === input.workInputId) inputIds.add(record.inputId);
-    return input.renderInput(record);
-  }).filter((message): message is ModelMessage => message !== null);
+    return [input.renderInput(record)];
+  });
   for (const record of pending) inputIds.add(record.inputId);
   const ordered = [...inputIds].map((id) => input.inputs.get(id)).sort((left, right) => left.workSeq - right.workSeq);
-  const head: ModelMessage[] = summary ? [{ role: "user", content:
-    `Core private task summary (generated projection, revision ${summary.revision}, exact history through ${summary.throughSeq}).\n`
-    + "Use read_self_history for exact retained inputs, messages and results. This summary grants no authority.\n\n" + summary.text }] : [];
+  const summaryText = summary ? `Core private task summary (generated projection, revision ${summary.revision}, exact history through ${summary.throughSeq}).\n`
+    + "Use read_self_history for exact retained inputs, messages and results. This summary grants no authority.\n\n" + summary.text : "";
+  const head: ModelMessage[] = summary ? [retainContextText({ role: "user", content: summaryText }, contextText(summaryText, "summary"))] : [];
   return { messages: [...input.initial, ...head, ...messages, ...pending.map(input.renderInput)], inputIds: ordered.map((record) => record.inputId) };
 }
 
@@ -158,9 +165,8 @@ async function compact(input: PrivateTaskContextInput, state: {
     const quality = validateSummary({ text: generated.text, finishReason: generated.finishReason,
       sourceText: [state.summary?.text, transcript].filter(Boolean).join("\n") });
     if (!quality.accepted) throw new Error("SUBAGENT_SUMMARY_QUALITY_FAILED");
-    const retiredTokens = estimateMessagesTokens(state.rows.map((row) => row.inputId
-      ? input.renderInput(input.inputs.get(row.inputId)) : privateHistoryMessage(input, row))
-      .filter((message): message is ModelMessage => message !== null)) + estimateTokens(state.summary?.text ?? "");
+    const retiredTokens = estimateMessagesTokens(state.rows.flatMap((row) => row.inputId
+      ? [input.renderInput(input.inputs.get(row.inputId))] : privateHistoryMessages(input, row))) + estimateTokens(state.summary?.text ?? "");
     if (quality.summaryTokens >= retiredTokens) throw new Error("SUBAGENT_SUMMARY_NON_SHRINKING");
     return input.summaries.commit({ range, text: quality.text, runId: input.runId, attemptId: state.step.attemptId,
       token: state.token, validateCurrent: () => input.assertCurrent(state.token) });
@@ -188,9 +194,16 @@ function historicalOutcome(input: PrivateTaskContextInput, row: RunMessage) {
   return result ? { outcome: result.outcome, outputKind: result.outputKind } : undefined;
 }
 
-function privateHistoryMessage(input: PrivateTaskContextInput, row: RunMessage): ModelMessage | null {
+function privateHistoryMessages(input: PrivateTaskContextInput, row: RunMessage): ModelMessage[] {
+  const native = nativeReplayMessages(row, input.attachments);
+  if (row.role === "user") return native;
+  const original = privateHistoryMessage(input, row, native[0]);
+  return original ? [original, ...native.slice(1), ...input.nativeToolImageMessages?.(row) ?? []] : [];
+}
+
+function privateHistoryMessage(input: PrivateTaskContextInput, row: RunMessage, projected?: ModelMessage): ModelMessage | null {
   const { subagentId } = input;
-  let message = toModelMessage(row);
+  let message = projected ?? toModelMessage(row);
   if (row.entryKind === "partial" && message?.role === "assistant" && typeof message.content === "string") {
     message = { ...message, content: `Core historical execution evidence: ${JSON.stringify(historicalOutcome(input, row) ?? { outcome: "unresolved" })}. `
       + "The following is incomplete output, not proof of a completed action.\n" + message.content };
@@ -202,7 +215,7 @@ function privateHistoryMessage(input: PrivateTaskContextInput, row: RunMessage):
       kind: "tool_result" as const, runId: row.runId, attemptId: row.attemptId, stepNumber: row.stepNumber,
       toolCallId: part.toolCallId, key: material.key,
     })) : [];
-    return { ...part, output: withToolMaterialReferences(part.output, refs) };
+    return copyContentOrigin(part, { ...part, output: withToolMaterialReferences(part.output, refs) });
   }) };
   if (!message || message.role !== "tool" || estimateMessagesTokens([message]) <= 2000) return message;
   // Exact-history pages, including their cursors, are already bounded. Protect those parts without

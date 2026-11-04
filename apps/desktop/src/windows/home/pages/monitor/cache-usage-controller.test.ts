@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { CacheUsageUpdate, ConfigChanged } from "@taki/shared";
+import type { CacheUsageUpdate, ConfigChanged, LatestPrimaryRequestSnapshot } from "@taki/shared";
 import { CacheUsageController, INITIAL_CACHE_USAGE_VIEW, type CacheUsageClient, type CacheUsageView } from "./cache-usage-controller.ts";
 
 function update(revision = 5): CacheUsageUpdate {
@@ -9,6 +9,10 @@ function update(revision = 5): CacheUsageUpdate {
     computedAt: "2026-11-01T11:00:00.000Z", observedRequests: 4, pairedRequests: 2,
     inputTokens: 100, cacheReadTokens: 90, ratio: 0.9, reason: null,
   } };
+}
+function latest(characterId = "taki"): LatestPrimaryRequestSnapshot {
+  return { scope: "latest-primary-request", characterId, status: "empty", reason: null, request: null,
+    computedAt: "2026-11-02T11:00:00.000Z" };
 }
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -45,6 +49,33 @@ function setup() {
 }
 
 describe("whole-window cache subscription lifecycle", () => {
+  it("commits cache and latest request atomically, rejects late initial and clears unsupported legacy fields", async () => {
+    const h = setup();
+    h.push({ ...update(8), latestPrimaryRequest: latest() });
+    await Promise.resolve();
+    expect(h.read()).toMatchObject({ snapshot: update(8).snapshot, latestPrimaryRequest: latest() });
+    expect(h.publish.mock.calls.at(-1)?.[0]).toMatchObject({ snapshot: update(8).snapshot, latestPrimaryRequest: latest() });
+    h.push({ ...update(9), latestPrimaryRequest: latest("other") });
+    expect(h.read().latestPrimaryRequest).toEqual(latest());
+    h.push(update(10));
+    expect(h.read().latestPrimaryRequest).toBeNull();
+    h.controller.dispose();
+  });
+
+  it("preserves combined facts while disconnected and replaces them from the new process after hidden retirement", async () => {
+    const h = setup(); await Promise.resolve();
+    h.push({ ...update(100), latestPrimaryRequest: latest() });
+    const old = [...h.listeners][0]!;
+    h.controller.setVisible(false); old(update(101));
+    h.controller.bind(null); h.controller.setVisible(true);
+    expect(h.read()).toMatchObject({ phase: "stale", latestPrimaryRequest: latest() });
+    const replacement = fakeClient();
+    vi.mocked(replacement.client.subscribeCacheUsage).mockResolvedValue({ ...update(1), latestPrimaryRequest: { ...latest(), computedAt: "2026-11-02T12:00:00.000Z" } });
+    h.controller.bind(replacement.client); await Promise.resolve();
+    expect(h.read()).toMatchObject({ phase: "live", latestPrimaryRequest: { computedAt: "2026-11-02T12:00:00.000Z" } });
+    old(update(102)); expect(h.read().latestPrimaryRequest?.computedAt).toBe("2026-11-02T12:00:00.000Z");
+    h.controller.dispose();
+  });
   it("registers before initial read and ignores a late older initial result after a push", async () => {
     const h = setup();
     expect(h.order).toEqual(["handler", "subscribe"]);

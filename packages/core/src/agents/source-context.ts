@@ -8,6 +8,9 @@ import type { ContextMaterial, SourceContext, ToolSourceMaterial } from "@taki/s
 import { fenceUntrusted } from "./untrusted-fence.ts";
 import { toolSourceMaterials, withToolSourceMaterials } from "./tool-source-materials.ts";
 import type { TurnMessage } from "./turn-mapping.ts";
+import { copyNativeToolImages } from "./native-tool-images.ts";
+import { contentOrigin, copyContentOrigin, retainContentOrigin } from "./context-attribution.ts";
+import type { ContextContentOrigin } from "@taki/shared";
 
 type ToolOutput = ToolResultPart["output"];
 // Projection-local association lets reduction separate the source header from the original body.
@@ -15,13 +18,19 @@ type ToolOutput = ToolResultPart["output"];
 const projectedOutputs = new WeakMap<object, { original: ToolOutput; materials: readonly ToolSourceMaterial[] }>();
 
 /** The SDK's output conversion can discard non-enumerable producer facts; bind them to its exact completed pair. */
-export function retainStepToolSources(messages: TurnMessage[], results: readonly { toolCallId: string; toolName: string; output: unknown }[]): TurnMessage[] {
-  return messages.map((message) => message.role !== "tool" ? message : { ...message, content: message.content.map((part) => {
-    if (part.type !== "tool-result") return part;
+export function retainStepToolSources(messages: TurnMessage[], results: readonly { toolCallId: string; toolName: string; output: unknown }[], toolOrigins?: ReadonlyMap<string, ContextContentOrigin>): TurnMessage[] {
+  return messages.map((message) => typeof message.content === "string" ? message : { ...message, content: message.content.map((part) => {
+    if (part.type !== "tool-result" && part.type !== "tool-call") return part;
     const result = results.find((item) => item.toolCallId === part.toolCallId && item.toolName === part.toolName);
+    const origin = contentOrigin(result?.output) ?? toolOrigins?.get(part.toolName) ?? "unknown";
+    retainContentOrigin(part, origin);
+    retainContentOrigin(result?.output, origin);
+    if (part.type === "tool-call") return retainContentOrigin({ ...part }, origin);
+    retainContentOrigin(part.output, origin);
     const materials = toolSourceMaterials(result?.output);
-    return materials?.length ? { ...part, output: withToolSourceMaterials({ ...part.output }, materials) } : part;
-  }) });
+    const output = retainContentOrigin(copyNativeToolImages(result?.output, { ...part.output }), origin);
+    return retainContentOrigin({ ...part, output: materials?.length ? withToolSourceMaterials(output, materials) : output }, origin);
+  }) } as TurnMessage);
 }
 
 export function renderSourceContext(context: SourceContext | undefined): string {
@@ -53,7 +62,7 @@ export function renderToolResult(output: ToolOutput, materials?: readonly ToolSo
     rendered = { ...original, reason: `${header}\n${original.reason ?? "Tool execution denied."}` };
   }
   projectedOutputs.set(rendered, { original, materials });
-  return rendered;
+  return copyContentOrigin(output, rendered);
 }
 
 /** Reduce the body/status and keep the same source facts beside its surviving content or trace. */

@@ -6,6 +6,7 @@
 import type { ToolSet } from "ai";
 import type { InitiativeSelectedContext } from "@taki/shared";
 import type { ReplayProjection } from "./conversation-store.ts";
+import { attributedContextText, attributedRenderer, contextText, joinContextText } from "./context-attribution.ts";
 
 // Explicit registry membership, never tool-name substring inference. Skill resource reads retain their
 // own captured generation/governance wrappers; arbitrary MCP reads are not safe merely by annotation.
@@ -28,8 +29,10 @@ export function initiativeReplay(): ReplayProjection {
     tokenBoundaryHit: false, sourceBackstopHit: false } };
 }
 
-export function initiativeInstructions(selection: InitiativeSelectedContext): string {
-  return "Never claim a tool ran or a result was obtained without its matching tool result.\n" +
+export const initiativeInstructions = attributedRenderer((selection: InitiativeSelectedContext) => {
+  const guidance = "Never claim a tool ran or a result was obtained without its matching tool result.\n" +
     "This is a bounded autonomous judgment. Finish with one accepted heartbeat_respond decision. " +
-    "Ordinary text is private reasoning output and is not delivered. Silence is always permitted.\n\n" + selection.instructions;
-}
+    "Ordinary text is private reasoning output and is not delivered. Silence is always permitted.";
+  return joinContextText([contextText(guidance, "instructions"),
+    attributedContextText(selection) ?? contextText(selection.instructions, "other", "unknown")]);
+});

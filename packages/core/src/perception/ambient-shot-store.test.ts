@@ -28,7 +28,7 @@ describe("createAmbientShotStore", () => {
 
   it("writes the frame into its OWN directory under a prefixed timestamp name", () => {
     const saved = store().save(PNG_B64, AT);
-    expect(saved?.name).toBe("ambient-2026-07-26T10-00-00.000Z.png");
+    expect(saved?.name).toMatch(/^ambient-2026-07-26T10-00-00\.000Z-[a-f0-9-]{36}\.png$/);
     expect(saved?.bytes).toBe(14);
     expect(readdirSync(ambientDir)).toEqual([saved?.name]);
   });
@@ -87,8 +87,21 @@ describe("createAmbientShotStore", () => {
     expect(store().sweepOlderThan(AT)).toEqual({ removedCount: 0, freedBytes: 0 });
   });
 
+  it("protects live frames across store instances, then allows crash-backstop sweeping after release", () => {
+    const saved = store().save(PNG_B64, AT)!; age(join(ambientDir, saved.name), AT);
+    const release = store().protect!(saved.name);
+    expect(store().sweepOlderThan(AT + 60_000).removedCount).toBe(0);
+    expect(existsSync(join(ambientDir, saved.name))).toBe(true);
+    release(); release(); expect(store().sweepOlderThan(AT + 60_000).removedCount).toBe(1);
+  });
+
+  it("does not overwrite a live capture when another producer saves in the same millisecond", () => {
+    const first = store().save(PNG_B64, AT)!; const second = store().save(PNG_B64, AT)!;
+    expect(first.name).not.toBe(second.name); expect(readdirSync(ambientDir)).toHaveLength(2);
+  });
+
   it("degrades to null instead of throwing when the frame cannot be written", () => {
-    // A file where the directory should be: mkdir/write fail, perception must carry on with the description path.
+    // A file where the directory should be: mkdir/write fail, perception must carry on with transient native input.
     mkdirSync(root, { recursive: true });
     writeFileSync(ambientDir, "not a directory");
     expect(store().save(PNG_B64, AT)).toBeNull();

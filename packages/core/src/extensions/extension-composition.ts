@@ -22,6 +22,8 @@ interface ExtensionCompositionInput {
   skills: { catalog: SkillCatalogManager; loader: SkillsLoader; governance: GovernancePolicyService };
   mcp: McpManager;
   route: (request: CapabilityRouteRequest & { targetHostId: string }, interactive?: TurnInteractive) => Promise<unknown>;
+  projectScreenshot?: (output: unknown) => unknown;
+  projectAmbientScreenshot?: (output: unknown) => unknown;
 }
 
 export function createExtensionComposition(input: ExtensionCompositionInput): {
@@ -42,6 +44,8 @@ export function createExtensionComposition(input: ExtensionCompositionInput): {
       mcp: input.mcp,
       interactive,
       route: (request) => input.route(request, interactive),
+      projectScreenshot: input.projectScreenshot,
+      projectAmbientScreenshot: input.projectAmbientScreenshot,
     }),
   };
 }

@@ -21,16 +21,32 @@ import { completedWorkerFrontier, retainedWorkerBytes, workerEnvelope } from "./
 import { retainStepToolSources } from "./source-context.ts";
 import { createForegroundInboxProjection } from "./foreground-inbox.ts";
 import { companionTaskGuidance } from "./companion-task-guidance.ts";
+import type { NativeImageContext } from "./native-image-context.ts";
+import { createNativeImageAttempt } from "./native-image-attempt.ts";
+import { createNativeToolProjection } from "./native-tool-projection.ts";
+import { estimatePreparedToolSchemaTokens, measureRequest } from "./request-measurement.ts";
+import { nativeImageUser } from "./native-image-projection.ts";
+import { contextText, joinContextText, renderedContextText, retainContextText, type AttributedText } from "./context-attribution.ts";
+import { recordRequestAttribution } from "./request-attribution-observer.ts";
+import { createToolContentAttribution } from "./tool-content-attribution.ts";
 
 type PromptClock = { now: number; timezone?: string };
 const DEFAULT_MAX_STEPS = 10;
 
 // Each attempt rebuilds the calibrated Replay View and captures actual SDK material. The outer turn alone decides
 // retry/retraction and commits the captured batch before detached maintenance sees the updated relationship history.
-// eslint-disable-next-line max-lines-per-function
 export async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: TurnContext): AsyncIterable<string> {
+  const nativeContext = turn?.nativeImageContext ?? (attempt.primary ? deps.acquireNativeImageContext?.() : undefined);
+  const nativeTools = createNativeToolProjection();
+  try { yield* executeAttempt(deps, attempt, { turn, nativeContext, nativeTools }); }
+  finally { nativeTools.release(); nativeContext?.release(); }
+}
+
+// eslint-disable-next-line max-lines-per-function -- One SDK Attempt keeps request preparation and completed-step settlement together.
+async function* executeAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, context: { turn?: TurnContext; nativeContext?: NativeImageContext; nativeTools: ReturnType<typeof createNativeToolProjection> }): AsyncIterable<string> {
+  const { turn } = context;
   const { store, approval } = deps;
-  const { characterId, message, attachments, images, vision, primary, state } = attempt;
+  const { characterId, message, attachments, primary, state } = attempt;
   state.activity = turn?.activity?.beginAttempt(turn.attemptId);
   if (primary && turn?.runId && turn.attemptId) {
     state.inbox = deps.foregroundInbox?.({ characterId, runId: turn.runId, attemptId: turn.attemptId,
@@ -57,17 +73,40 @@ export async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, tur
   const controlMessage = selected ? [selected.controlInput, turn?.controlInput].filter(Boolean).join("\n\n")
     : turn?.controlInput ?? message;
   const replay = work ? work.project(turn!.attemptId!) : selected ? initiativeReplay() : store.project(characterId); const history = replay.messages;
+  const toolAttribution = createToolContentAttribution();
+  toolAttribution.prime(history);
   // Capture the clock and user zone together: awaited recall must not split the day/time lines across settings.
   const now = Date.now();
   const clock = { now, timezone: selected ? undefined : deps.userTimezone?.() };
   const memoryContext = selected || child ? "" : attempt.runContext?.assembleMemory?.(controlMessage) ?? deps.memory.assemble({ characterId, currentMessage: controlMessage });
-  const baseInstructions = child ? [work.instructions, attempt.runContext?.instructions, renderDayDate(clock.now, clock.timezone)].filter(Boolean).join("\n\n")
-    : selected ? initiativeInstructions(selected) : composeInstructions(deps, { characterId, memoryContext, memoryPrompt: attempt.runContext?.memoryPrompt,
-    runInstructions: [attempt.runContext?.instructions, work?.instructions].filter(Boolean).join("\n\n") }, clock);
+  const memoryAttribution = renderedContextText(attempt.runContext?.assembleMemory ?? deps.memory.assemble, memoryContext)
+    ?? contextText(memoryContext, "other", "unknown");
+  const selectedInstructions = selected ? initiativeInstructions(selected) : "";
+  const baseAttribution = child ? joinContextText([contextText(work.instructions, "instructions"),
+    attempt.runContext?.instructionsAttribution ?? contextText(attempt.runContext?.instructions ?? "", "other", "unknown"), contextText(renderDayDate(clock.now, clock.timezone), "runtime_context")])
+    : selected ? renderedContextText(initiativeInstructions, selectedInstructions)
+      ?? contextText(selectedInstructions, "other", "unknown") : composeInstructions(deps, { characterId, memoryContext, memoryAttribution, memoryPrompt: attempt.runContext?.memoryPrompt,
+    runInstructions: joinContextText([attempt.runContext?.instructionsAttribution ?? contextText(attempt.runContext?.instructions ?? "", "other", "unknown"),
+      contextText(work?.instructions ?? "", "instructions")]) }, clock);
   const companion = primary && !child && !selected;
-  const selectedModel = vision ? vision.model : deps.model;
+  const { nativeTools } = context;
+  const native = createNativeImageAttempt({ context: context.nativeContext,
+    interactionOrigin: toolAttribution.origin,
+    attachments: deps.attachments?.read ? { read: deps.attachments.read } : undefined,
+    onDispatch: (request, descriptors) => {
+      recordRequestAttribution({ lifecycle: deps.effectLifecycle, request,
+        descriptors: { ...descriptors, instructions: instructionAttribution, toolOrigins },
+        population: child ? "worker" : selected ? "initiative" : primary ? "primary" : "other",
+        primaryInputSeq: primary && !child && !selected ? attempt.userEntry?.seq : undefined,
+        stepNumber, window: deps.requestWindowSnapshot });
+      state.outgoing = request.outgoing;
+      usageCapture?.dispatched(request);
+      if (primary) deps.onRequestMeasured?.(characterId, measureRequest({ replay: replay.measurement,
+        messages: request.outgoing, instructions: request.instructions,
+        toolSchemaTokens: estimatePreparedToolSchemaTokens(request.preparedTools), envelopeReserveTokens: deps.requestEnvelopeReserve?.() ?? 0 }));
+    } });
   const { model, observability } = createRunObservabilityModel({
-    model: selectedModel, lifecycle: deps.effectLifecycle, runId: turn?.runId, attemptId: turn?.attemptId,
+    model: native.model(deps.model), lifecycle: deps.effectLifecycle, runId: turn?.runId, attemptId: turn?.attemptId,
     onCommitModelIntent: (effect) => {
       assertStepRecorded();
       stepModelEffectId = effect.effectId;
@@ -82,12 +121,14 @@ export async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, tur
     activity: inboxProjection.activity(state.activity?.observer),
   });
   if (turn && observability) turn.toolObserver = observability.tools;
-  const { tools, bundles } = assembleTurnTools(deps, { ...attempt, inbox: state.inbox }, turn);
+  const { tools, bundles, toolOrigins } = assembleTurnTools(deps, { ...attempt, inbox: state.inbox }, turn);
   if (turn) turn.executableTools = tools;
   const disclosure = createToolDisclosure({ tools, bundles, snapshot: attempt.runContext?.toolDisclosure });
   const visibleTools = disclosure.initialTools;
-  let instructions = [baseInstructions, companion ? companionTaskGuidance(Object.keys(visibleTools)) : "",
-    state.inbox?.instructions].filter(Boolean).join("\n\n");
+  let instructionAttribution = joinContextText([baseAttribution,
+    contextText(companion ? companionTaskGuidance(Object.keys(visibleTools)) : "", "instructions"),
+    contextText(state.inbox?.instructions ?? "", "runtime_context")]);
+  let instructions = instructionAttribution.text;
   const toolOrder = Object.keys(tools).sort((left, right) => left < right ? -1 : left > right ? 1 : 0);
   const usageCapture = primary && deps.onUsage ? createTurnUsageCapture() : undefined;
   const agent = new ToolLoopAgent({
@@ -105,15 +146,17 @@ export async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, tur
       const activeTools = disclosure.activeTools(steps).filter((toolName) =>
         !inboxProjection.isPrivate({ toolName }) || Boolean(state.inbox?.instructions));
       if (companion || state.inbox) {
-        instructions = [baseInstructions, companion ? companionTaskGuidance(activeTools) : "",
-          state.inbox?.instructions].filter(Boolean).join("\n\n");
+        instructionAttribution = joinContextText([baseAttribution, contextText(companion ? companionTaskGuidance(activeTools) : "", "instructions"),
+          contextText(state.inbox?.instructions ?? "", "runtime_context")]);
+        instructions = instructionAttribution.text;
         state.instructions = instructions;
       }
       if (child) envelope = await workerEnvelope({ deps, work, instructions, tools, activeTools, signal: turn?.signal });
       if (work) preparedWork = await work.prepareStep({ messages, stepNumber, attemptId: turn!.attemptId!, envelope });
-      const selectedMessages = preparedWork?.messages ?? (turn?.attemptId ? turn.materials?.render(turn.attemptId, messages) : undefined);
-      if (selectedMessages) state.outgoing = selectedMessages;
-      return { activeTools, ...(companion || state.inbox ? { instructions } : {}), ...(selectedMessages ? { messages: selectedMessages } : {}) };
+      const selectedMessages = preparedWork?.messages ?? (turn?.attemptId ? turn.materials?.render(turn.attemptId, messages) : undefined) ?? messages;
+      const nativeMessages = native.project(nativeTools.render(selectedMessages));
+      state.outgoing = nativeMessages;
+      return { activeTools, ...(companion || state.inbox ? { instructions } : {}), messages: nativeMessages };
     },
     telemetry: { isEnabled: true, recordInputs: false, recordOutputs: false,
       integrations: [...(observability ? [observability.telemetry] : []), ...(usageCapture ? [usageCapture.telemetry] : [])] },
@@ -148,7 +191,10 @@ export async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, tur
         segmentSteps = event.stepNumber + 1;
         if (child) retainedBytes += retainedWorkerBytes({ messages: event.response.messages, results: event.toolResults,
           prepared: preparedWork?.messages ?? [] });
-        const recorded = retainStepToolSources(event.response.messages, event.toolResults);
+        toolAttribution.capture(event.toolResults, toolOrigins);
+        const recorded = retainStepToolSources(event.response.messages, event.toolResults, toolOrigins);
+        nativeTools.capture({ results: event.toolResults, messages: event.response.messages,
+          originModelEffectId: stepModelEffectId, stepNumber: globalStep });
         const partition = inboxProjection.split(recorded);
         state.recording.capture(globalStep, partition.publicMessages,
           state.inbox?.hasIntent() ? state.inbox.sourceContext : undefined);
@@ -186,7 +232,7 @@ export async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, tur
   if (child) envelope = await workerEnvelope({ deps, work, instructions, tools,
     activeTools: disclosure.activeTools([]), signal: turn?.signal });
   if (work) preparedWork = await work.prepareStep({ messages: history, attemptId: turn!.attemptId!, stepNumber: 0, envelope });
-  const initialOutgoing = preparedWork?.messages ?? buildOutgoing({ history, isImageTurn: vision !== null, message: controlMessage, attachments, changed: primary ? (deps.costumeChanged?.(characterId) ?? false) : false, tail: selected ? "" : buildTurnTail(clock, deps.volatileContext, recalled), primary });
+  const initialOutgoing = native.project(preparedWork?.messages ?? buildOutgoing({ history, isImageTurn: attachments.length > 0, message: controlMessage, attachments, changed: primary ? (deps.costumeChanged?.(characterId) ?? false) : false, tail: selected ? contextText("", "runtime_context") : buildTurnTail(clock, deps.volatileContext, recalled), primary }));
   // Provider maintenance may still be pending when an autonomous Run starts. Its ephemeral control envelope must
   // not replace the last primary pressure snapshot used to decide whether the relationship Timeline needs compaction.
   const preparationDeps = primary ? deps : { ...deps, onRequestMeasured: undefined, ...(child ? { requestReduction: undefined } : {}) };
@@ -215,6 +261,7 @@ export async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, tur
     if (segment.rollover.kind === "context_rollover") {
       turn?.signal?.throwIfAborted();
       outgoing = segment.rollover.messages;
+      toolAttribution.prime(outgoing);
       state.outgoing = outgoing;
       state.recording.releaseThrough(segmentOffset + segmentSteps - 1);
       state.activity?.releaseThrough?.(segmentOffset + segmentSteps - 1);
@@ -227,7 +274,7 @@ export async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, tur
     if (!primary && turn?.onSettledText && !turn.signal?.aborted) turn.onSettledText(await result.text);
     if (primary) state.afterCommit = () => {
       measurePostTurnRequest(deps, { characterId, instructions, tools: visibleTools, toolOrder, toolSchemaTokens: prepared.toolSchemaTokens, store });
-      fireDetachedTurnWrites(deps, { characterId, imageRefs: images.map((img) => img.ref), message });
+      fireDetachedTurnWrites(deps, { characterId });
       const usage = usageCapture?.latest();
       if (usage) fireUsageReport(deps, { characterId, ...usage, tools: visibleTools, toolOrder, replay: replay.measurement });
     };
@@ -246,15 +293,15 @@ function buildOutgoing(args: {
   message: string;
   attachments: ImageAttachment[];
   changed: boolean;
-  tail: string;
+  tail: AttributedText;
   primary: boolean;
 }): ModelMessage[] {
-  const modelText = [args.changed ? COSTUME_CHANGE_NOTICE : "", args.message, args.tail]
-    .filter((part) => part.length > 0)
-    .join("\n\n");
+  const descriptor = joinContextText([contextText(args.changed ? COSTUME_CHANGE_NOTICE : "", "runtime_context"),
+    contextText(args.message, args.primary ? "conversation" : "runtime_context"), args.tail]);
+  const modelText = descriptor.text;
   const prefix = args.primary && args.history.at(-1)?.role === "user" ? args.history.slice(0, -1) : args.history;
-  if (args.isImageTurn) return [...prefix, buildMultimodalUser(modelText, args.attachments)];
-  return [...prefix, { role: "user", content: modelText }];
+  if (args.isImageTurn) return [...prefix, retainContextText(nativeImageUser({ text: modelText, images: args.attachments }), descriptor)];
+  return [...prefix, retainContextText({ role: "user" as const, content: modelText }, descriptor)];
 }
 
 // The volatile tail (Q4/ADR 0008): every minute-granular item — the wall-clock line first, unconditionally, then
@@ -263,10 +310,12 @@ function buildOutgoing(args: {
 // an <untrusted-observation> fence inside it keeps conveying "data, never instructions" — two orthogonal contracts,
 // two tags. The tag NAME is a LOCAL choice (grep-verified unused in-tree); the PATTERN is Claude Code's
 // <system-reminder> / Codex's <environment_context> (rb §P1 verdict).
-function buildTurnTail(clock: PromptClock, volatileContext?: (now: number) => string, recalled = ""): string {
+function buildTurnTail(clock: PromptClock, volatileContext?: (now: number) => string, recalled = ""): AttributedText {
   const volatile = volatileContext?.(clock.now) ?? "";
-  const body = [renderCurrentTime(clock.now, clock.timezone), volatile, recalled].filter((part) => part.length > 0).join("\n\n");
-  return `<turn-context>\n${body}\n</turn-context>`;
+  const body = joinContextText([contextText(renderCurrentTime(clock.now, clock.timezone), "runtime_context"),
+    contextText(volatile, "runtime_context"), contextText(recalled, "injected_memory")]);
+  return joinContextText([contextText("<turn-context>\n", "runtime_context"), body,
+    contextText("\n</turn-context>", "runtime_context")], "");
 }
 
 async function recallMemory(attempt: TurnAttempt, input: Parameters<AutomaticMemoryRecall>[0]): Promise<string> {
@@ -274,14 +323,6 @@ async function recallMemory(attempt: TurnAttempt, input: Parameters<AutomaticMem
   try { return await attempt.runContext?.automaticMemoryRecall?.(input) ?? ""; }
   catch { return ""; } // A failed optional read must not prevent the foreground response.
 }
-
-// The canonical v7 multimodal user message: a FilePart per attachment (ImagePart is @deprecated in v7), `data` = RAW
-// base64 (a tagged data-URL throws InvalidDataContentError — research r1). This message rides one turn and is never persisted.
-function buildMultimodalUser(text: string, attachments: ImageAttachment[]): ModelMessage {
-  const fileParts = attachments.map((a) => ({ type: "file" as const, mediaType: a.mediaType, data: a.dataBase64 }));
-  return { role: "user", content: text.length > 0 ? [{ type: "text" as const, text }, ...fileParts] : fileParts };
-}
-
 
 // Instructions = the stable base prompt (identity + the "never claim a tool ran without a tool-result" floor, D1 #2),
 // the day-date line (byte-stable for a calendar day), the assembled memory context, then any extra section (skills
@@ -291,19 +332,18 @@ function buildMultimodalUser(text: string, attachments: ImageAttachment[]): Mode
 // dropped; the skills list enters HERE, never through the memory assembler (module boundary, ruling 10).
 function composeInstructions(
   deps: ChatAgentDeps,
-  turn: { characterId: string; memoryContext: string; memoryPrompt?: string; runInstructions?: string },
+  turn: { characterId: string; memoryContext: string; memoryAttribution: AttributedText; memoryPrompt?: string; runInstructions?: AttributedText },
   clock: PromptClock,
-): string {
-  return [
-    turn.memoryPrompt ?? resolveMemoryPrompt(deps.memoryPrompt),
-    renderDayDate(clock.now, clock.timezone),
-    clock.timezone ? `User timezone: ${clock.timezone}.` : "",
-    turn.memoryContext,
-    deps.instructionsExtra?.(turn.characterId) ?? "",
-    turn.runInstructions ?? "",
-  ]
-    .filter((section) => section.length > 0)
-    .join("\n\n");
+): AttributedText {
+  const extra = deps.instructionsExtra?.(turn.characterId) ?? "";
+  return joinContextText([
+    contextText(turn.memoryPrompt ?? resolveMemoryPrompt(deps.memoryPrompt), "instructions"),
+    contextText(renderDayDate(clock.now, clock.timezone), "runtime_context"),
+    contextText(clock.timezone ? `User timezone: ${clock.timezone}.` : "", "runtime_context"),
+    turn.memoryAttribution,
+    (deps.instructionsExtra && renderedContextText(deps.instructionsExtra, extra)) ?? contextText(extra, "instructions", "unknown"),
+    turn.runInstructions ?? contextText("", "instructions"),
+  ]);
 }
 
 function resolveMemoryPrompt(prompt: ChatAgentDeps["memoryPrompt"]): string {

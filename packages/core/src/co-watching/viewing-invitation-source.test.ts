@@ -38,9 +38,12 @@ function fixture() {
   let afterDecision: (() => void) | undefined;
   let candidateIds: string[] = [];
   const preparedTurns: TurnContext[] = [];
+  const release = vi.fn();
+  const nativeImageContext = { images: [{ mediaType: "image/png" as const, dataBase64: "AAAA" }], context: "Native viewing source",
+    isCurrent: () => evidenceCurrent, release };
   const prepareEvidence = vi.fn(async (input: ViewingInvitationPreparation, turn: TurnContext): Promise<ViewingInvitationEvidence | undefined> => {
     expect(f.runs.status(turn.runId!).run.state).toBe("running"); preparedTurns.push(turn);
-    return { title: "Example video", text: "Captured frame and verified exact-media range access", isCurrent: () => evidenceCurrent && input.isCurrent() };
+    return { nativeImageContext, title: "Example video", text: "Captured frame and verified exact-media range access", isCurrent: () => evidenceCurrent && input.isCurrent() };
   });
   const startAccepted = vi.fn((): CoWatchingControlResult => {
     active = true;
@@ -93,7 +96,7 @@ function fixture() {
     }
   }
   closers.push(async () => { await engine.close(); await runtime.close(); source.close(); f.db.close(); });
-  return { ...f, source, engine, runtime, state, policy, initiativePolicy, wakePolicy, prepareEvidence, preparedTurns, model, prepareContext, startAccepted, changed, errors, tick,
+  return { ...f, source, engine, runtime, state, policy, initiativePolicy, wakePolicy, prepareEvidence, preparedTurns, model, prepareContext, release, startAccepted, changed, errors, tick,
     setSource: (value: Partial<BrowserPlaybackView>) => { view = { ...view, sequence: view.sequence + 1, ...value }; source.changed(); },
     view: () => view, setPresence: (value: boolean) => { present = value; }, setBusy: (value: boolean) => { busy = value; },
     setAvailable: (value: boolean) => { sourceAvailable = value; source.changed(); }, setEvidence: (value: boolean) => { evidenceCurrent = value; },
@@ -113,6 +116,8 @@ describe("viewing invitation through existing Wake, Run and Delivery", () => {
     expect(f.prepareEvidence).not.toHaveBeenCalled(); expect(f.prepareContext).not.toHaveBeenCalled(); expect(f.model).not.toHaveBeenCalled();
     f.tick(); await f.engine.evaluate(); f.source.changed();
     expect(f.errors).not.toHaveBeenCalled(); expect(f.prepareEvidence).toHaveBeenCalledTimes(1); expect(f.model).toHaveBeenCalledTimes(1);
+    expect(f.model.mock.calls[0]?.[0]?.nativeImageContext?.images[0]?.dataBase64).toBe("AAAA"); expect(f.release).toHaveBeenCalledOnce();
+    expect(JSON.stringify(f.source.read("taki"))).not.toContain("AAAA");
     expect(f.model.mock.calls[0]?.[0]?.controlInput).toContain("Captured frame"); expect(f.startAccepted).not.toHaveBeenCalled();
     expect(f.source.read("taki").invitation).not.toBeNull();
     const rows = f.db.prepare("SELECT role,content FROM timeline_messages").all();
@@ -157,7 +162,7 @@ describe("viewing invitation through existing Wake, Run and Delivery", () => {
     const f = fixture();
     f.prepareEvidence.mockImplementationOnce(async (input) => {
       f.setSource({ sourceRef: randomUUID(), attachmentGeneration: 2 });
-      return { title: "late", text: "late evidence", isCurrent: input.isCurrent };
+      return { nativeImageContext: { images: [], context: "Late source", isCurrent: () => false, release: vi.fn() }, title: "late", text: "late evidence", isCurrent: input.isCurrent };
     });
     expect(await f.invite()).toBeNull(); expect(f.model).not.toHaveBeenCalled();
   });

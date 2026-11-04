@@ -8,6 +8,10 @@ Dev serves without enforcing the `tauri.conf.json` CSP; packaged WebView2 enforc
 
 - Fix pattern: `import "pixi.js/unsafe-eval";` as the first pixi-touching import in the renderer entry (self-installing polyfill).
 - NEVER weaken the CSP to unblock a library; `wasm-unsafe-eval` (Cubism core) is the only sanctioned eval-adjacent grant in `script-src`.
+- Model provider icons use the explicitly approved `https://models.dev` entry in `img-src` only. Preserve local fallback
+  when an image cannot load; do not broaden `connect-src` or script policy for metadata. The installed Zod parser may
+  emit a caught `script-src`/`eval` capability probe before using its non-JIT path; this is distinct from blocked images
+  or a failed UI. Verify actual rendering and the image directive without granting `unsafe-eval` to suppress that probe.
 
 ## WebView2 quirks — failures with no error anywhere
 

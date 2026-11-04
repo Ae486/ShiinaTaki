@@ -101,7 +101,9 @@ describe("chat-agent usage-capture seam (batch 6, R1 tier 2)", () => {
       doStream: async () => { throw new Error("unused"); }, params: { prompt: [] },
       model: { provider: "test", modelId: "test" },
     } as never);
-    expect(owners).toEqual([{ owner: "run" }]);
+    expect(owners).toEqual([expect.objectContaining({ owner: "run", effect: expect.objectContaining({
+      effectId: "effect", runId: "run", attemptId: "attempt", kind: "model", state: "intent_committed",
+    }) })]);
     expect(currentModelUsageOwner()).toBeUndefined();
   });
 

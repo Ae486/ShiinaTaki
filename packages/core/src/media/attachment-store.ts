@@ -40,7 +40,7 @@ export interface SavedAttachment {
 /** No-throw read contract (mirrors workspace-paths): a bad ref rejects before fs; a missing file rejects after. */
 export type AttachmentRead =
   | { ok: true; mediaType: ImageMediaType; dataBase64: string }
-  | { ok: false; code: "INVALID_REF" | "NOT_FOUND" };
+  | { ok: false; code: "INVALID_REF" | "NOT_FOUND" | "EXPIRED" };
 
 export interface AttachmentUsage {
   count: number;
@@ -65,12 +65,12 @@ export interface AttachmentStore {
   clear(): AttachmentSweep;
 }
 
-export function createAttachmentStore(deps: { attachmentsDir: string }): AttachmentStore {
+export function createAttachmentStore(deps: { attachmentsDir: string; ttlMs?: () => number }): AttachmentStore {
   const dir = deps.attachmentsDir;
   return {
     save: (dataBase64, mediaType) => save(dir, dataBase64, mediaType),
-    read: (ref) => read(dir, ref),
-    // Only raw bytes older than the TTL are swept; the description-memory is permanent (decision 9).
+    read: (ref) => read(dir, ref, deps.ttlMs?.()),
+    // Existing conversation descriptions remain historical text; sweeping only removes raw image bytes.
     sweepExpired: (ttlMs) => removeWhere(dir, (path) => statSync(path).mtimeMs < Date.now() - ttlMs),
     usage: () => usage(dir),
     clear: () => removeWhere(dir, () => true),
@@ -93,7 +93,7 @@ function save(dir: string, dataBase64: string, mediaType: ImageMediaType): Saved
   return { ref: `${NAMESPACE}${filename}`, bytes: buffer.byteLength };
 }
 
-function read(dir: string, ref: string): AttachmentRead {
+function read(dir: string, ref: string, ttlMs?: number): AttachmentRead {
   // The WHOLE-ref confinement (decision 8): reject anything but the closed namespace BEFORE any fs — no traversal is
   // even expressible here. This is the single-sourced security surface; media.get is a thin delegation to it.
   if (!REF_RE.test(ref)) return { ok: false, code: "INVALID_REF" };
@@ -103,7 +103,9 @@ function read(dir: string, ref: string): AttachmentRead {
   if (!mediaType) return { ok: false, code: "INVALID_REF" }; // unreachable given REF_RE; fail-closed keeps TS honest
   let buffer: Buffer;
   try {
-    buffer = readFileSync(join(dir, filename));
+    const path = join(dir, filename);
+    if (ttlMs !== undefined && statSync(path).mtimeMs < Date.now() - ttlMs) return { ok: false, code: "EXPIRED" };
+    buffer = readFileSync(path);
   } catch {
     return { ok: false, code: "NOT_FOUND" }; // GC-swept or never existed
   }

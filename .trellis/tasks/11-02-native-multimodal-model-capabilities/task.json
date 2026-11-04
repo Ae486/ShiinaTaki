@@ -1,0 +1,30 @@
+{
+  "id": "native-multimodal-model-capabilities",
+  "name": "native-multimodal-model-capabilities",
+  "title": "Native multimodal main flow and model capabilities",
+  "description": "Route every image source directly into the primary model, remove the separate vision configuration and image-to-text translator pipelines, and reuse model-capability metadata without building a new detection framework.",
+  "status": "in_progress",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P1",
+  "creator": "pleia",
+  "assignee": "pleia",
+  "createdAt": "2026-11-02",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "11-02-context-attribution-token-efficiency",
+  "relatedFiles": [
+    ".trellis/tasks/11-02-native-multimodal-model-capabilities/prd.md",
+    ".trellis/tasks/11-02-native-multimodal-model-capabilities/design.md",
+    ".trellis/tasks/11-02-native-multimodal-model-capabilities/implement.md"
+  ],
+  "notes": "Original all-image migration remains verified. 2026-11-04 owner-approved maintained model metadata extension implemented: names, explicit canonical IDs, provider logos, reasoning/modalities/declared limits via existing models.dev reader and Settings. Public catalog and16-stage isolated Core/WS/browser with packaged CSP passed. Optional metadata independent of runtime settings/accounting; unknown and image failure use local fallback. See parent research/model-identity-catalog-delivery.md for exact gates/limits. No native owner acceptance, live user restart, paid calls, commit, push or archive.",
+  "meta": {}
+}

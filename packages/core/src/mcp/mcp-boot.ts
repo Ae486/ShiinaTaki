@@ -31,6 +31,7 @@ export function bootMcpLifecycle(deps: {
   approval: ApprovalInteractionService;
   logger: Logger;
   onChange?: ExtensionChangeObserver;
+  projectImageResult?: (result: unknown) => unknown;
 }): McpBoot {
   const log = deps.logger.child({ mod: "mcp" });
   const legacyMcpDeny = createLegacyMcpDenyReader({ filePath: join(deps.dataDir, "mcp-approvals.json"), logger: deps.logger });
@@ -41,6 +42,7 @@ export function bootMcpLifecycle(deps: {
   const manager = createMcpManager({
     logger: deps.logger,
     onChange: deps.onChange,
+    projectImageResult: deps.projectImageResult,
     resolveSecret: (ref) => deps.secretCatalog.resolve(ref),
     governance: {
       service: deps.governance,

@@ -1,0 +1,35 @@
+{
+  "id": "context-attribution-token-efficiency",
+  "name": "context-attribution-token-efficiency",
+  "title": "Context attribution and token efficiency",
+  "description": "Measure request composition alongside summary-window cache usage, then evaluate evidence-based token reductions while preserving task quality, recoverability and correct tool behavior.",
+  "status": "in_progress",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P1",
+  "creator": "pleia",
+  "assignee": "pleia",
+  "createdAt": "2026-11-02",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "11-02-native-multimodal-model-capabilities"
+  ],
+  "parent": null,
+  "relatedFiles": [
+    ".trellis/tasks/11-02-context-attribution-token-efficiency/prd.md",
+    ".trellis/tasks/11-02-context-attribution-token-efficiency/design.md",
+    ".trellis/tasks/11-02-context-attribution-token-efficiency/implement.md",
+    ".trellis/tasks/11-02-context-attribution-token-efficiency/research/planning-baseline.md"
+  ],
+  "notes": "2026-11-04 owner-approved Monitor identity repair implemented: all147 captured primary requests readable without data rewrite,146 reported response-name differences and1 unknown usage preserved. Actual isolated Monitor19 and Settings16 browser stages pass; models.dev metadata expanded in existing child. Quality gates and full Core4555 pass/17 timeout/6 skipped plus17 passing rechecks recorded in research/model-identity-catalog-delivery.md. Parent remains active for long-command/new-cohort analysis and evidence-selected token reduction. No paid calls, user restart, commit, push or archive.",
+  "meta": {
+    "baseline_task": ".trellis/tasks/archive/2026-11/11-01-cache-token-cost-diagnosis"
+  }
+}

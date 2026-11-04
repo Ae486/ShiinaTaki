@@ -1,18 +1,19 @@
 /**
- * INPUT: current physical Home client, Monitor mode/visibility and complete cache-window updates.
+ * INPUT: current physical Home client, Monitor mode/visibility and complete cache/latest-request updates.
  * OUTPUT: generation-guarded disposable live/stale/error snapshots and deliberate retry.
  * POS: ui/monitor — aggregate read controller; Core owns arithmetic, window boundaries and persistence.
  */
-import { MONITOR_MODE_CONFIG_KEY, MonitorModeSchema, type CacheUsageUpdate, type CacheUsageWindowSnapshot } from "@taki/shared";
+import { MONITOR_MODE_CONFIG_KEY, MonitorModeSchema, type CacheUsageUpdate, type CacheUsageWindowSnapshot, type LatestPrimaryRequestSnapshot } from "@taki/shared";
 import type { WsClient } from "@/lib/ws-client.js";
 
 export type CacheUsageClient = Pick<WsClient, "subscribeCacheUsage" | "unsubscribeCacheUsage" | "onCacheUsageChanged" | "onConfigChanged" | "onClose">;
 export type CacheUsageView = {
   phase: "loading" | "refreshing" | "live" | "stale" | "error" | "disabled";
   snapshot: CacheUsageWindowSnapshot | null;
+  latestPrimaryRequest: LatestPrimaryRequestSnapshot | null;
   error: string | null;
 };
-export const INITIAL_CACHE_USAGE_VIEW: CacheUsageView = { phase: "disabled", snapshot: null, error: null };
+export const INITIAL_CACHE_USAGE_VIEW: CacheUsageView = { phase: "disabled", snapshot: null, latestPrimaryRequest: null, error: null };
 
 export class CacheUsageController {
   private state = INITIAL_CACHE_USAGE_VIEW;
@@ -116,13 +117,14 @@ export class CacheUsageController {
   }
 
   private accept(update: CacheUsageUpdate, generation: number): void {
-    if (generation !== this.generation || update.revision <= this.revision || update.snapshot.characterId !== this.characterId) return;
+    if (generation !== this.generation || update.revision <= this.revision || update.snapshot.characterId !== this.characterId
+        || (update.latestPrimaryRequest && update.latestPrimaryRequest.characterId !== this.characterId)) return;
     this.revision = update.revision;
     if (update.snapshot.reason === "monitor-disabled") {
       this.setEnabled(false);
       return;
     }
-    this.update({ phase: "live", snapshot: update.snapshot, error: null });
+    this.update({ phase: "live", snapshot: update.snapshot, latestPrimaryRequest: update.latestPrimaryRequest ?? null, error: null });
   }
 
   private update(view: CacheUsageView): void {

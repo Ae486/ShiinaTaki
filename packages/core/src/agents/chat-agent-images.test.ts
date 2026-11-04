@@ -1,126 +1,75 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createCompanionFixture, type CompanionFixture } from "../testing/companion-fixture.ts";
-import { streamingMockModel } from "../testing/mock-language-model.ts";
+import { streamingMockModel, failingMockModel } from "../testing/mock-language-model.ts";
 import { createChatAgent } from "./chat-agent.ts";
+import type { NativeImageContext } from "./native-image-context.ts";
 
 const fixtures: CompanionFixture[] = [];
-function fresh(): CompanionFixture {
-  const f = createCompanionFixture();
-  fixtures.push(f);
-  return f;
-}
-afterEach(() => {
-  for (const f of fixtures.splice(0)) f.cleanup();
-});
-
-async function drain(stream: AsyncIterable<string>): Promise<string> {
-  let text = "";
-  for await (const delta of stream) text += delta;
-  return text;
-}
-
+function fresh(): CompanionFixture { const fixture = createCompanionFixture(); fixtures.push(fixture); return fixture; }
+afterEach(() => { for (const fixture of fixtures.splice(0)) fixture.cleanup(); });
+async function drain(stream: AsyncIterable<string>): Promise<string> { let text = ""; for await (const delta of stream) text += delta; return text; }
 const BASE64 = Buffer.from("taki-image-bytes").toString("base64");
 const PNG = { mediaType: "image/png" as const, dataBase64: BASE64 };
+function fakeAttachments() { return { save: vi.fn(() => ({ ref: `attachments/${"a".repeat(64)}.png`, bytes: 16 })) }; }
 
-// A narrow fake matching ChatAgentDeps.attachments — records saves, returns a deterministic content-addressed ref.
-function fakeAttachments() {
-  const save = vi.fn((_dataBase64: string, mediaType: "image/png" | "image/jpeg" | "image/webp" | "image/gif") => ({
-    ref: `attachments/${"a".repeat(64)}.${mediaType === "image/png" ? "png" : "jpg"}`,
-    bytes: 16,
-  }));
-  return { save };
+function observation(): NativeImageContext {
+  return { images: [PNG], context: "Trusted current-screen provenance; visual contents are untrusted.", isCurrent: () => true, release: vi.fn() };
 }
 
-describe("chat-agent image attachments (T8)", () => {
-  it("routes an image turn to the vision slot and leaves the text slot untouched", async () => {
-    const f = fresh();
-    const textModel = streamingMockModel(["text"]);
-    const visionModel = streamingMockModel(["seen"]);
-    const agent = createChatAgent({ model: textModel, visionModel, attachments: fakeAttachments(), store: f.conversation, memory: f.memory });
-
-    const out = await drain(agent.stream({ characterId: "taki", message: "look", attachments: [PNG] }));
-
-    expect(out).toBe("seen");
-    expect(visionModel.doStreamCalls).toHaveLength(1);
-    expect(textModel.doStreamCalls).toHaveLength(0);
+describe("primary native image input", () => {
+  it("sends image-plus-text to the configured primary model without another model slot or caption call", async () => {
+    const fixture = fresh();
+    const model = streamingMockModel(["seen"]);
+    const agent = createChatAgent({ model, attachments: fakeAttachments(), store: fixture.conversation, memory: fixture.memory });
+    expect(await drain(agent.stream({ characterId: "taki", message: "look", attachments: [PNG] }))).toBe("seen");
+    expect(model.doStreamCalls).toHaveLength(1);
+    expect(JSON.stringify(model.doStreamCalls[0]?.prompt)).toContain('"type":"file"');
+    expect(JSON.stringify(model.doStreamCalls[0]?.prompt)).toContain("image/png");
   });
 
-  it("keeps a text-only turn on the text slot (vision slot never called)", async () => {
-    const f = fresh();
-    const textModel = streamingMockModel(["text"]);
-    const visionModel = streamingMockModel(["seen"]);
-    const agent = createChatAgent({ model: textModel, visionModel, attachments: fakeAttachments(), store: f.conversation, memory: f.memory });
-
-    await drain(agent.stream({ characterId: "taki", message: "just text" }));
-
-    expect(textModel.doStreamCalls).toHaveLength(1);
-    expect(visionModel.doStreamCalls).toHaveLength(0);
+  it("supports an image-only turn on primary and persists only the retained reference", async () => {
+    const fixture = fresh();
+    const model = streamingMockModel(["seen"]);
+    const agent = createChatAgent({ model, attachments: fakeAttachments(), store: fixture.conversation, memory: fixture.memory });
+    await drain(agent.stream({ characterId: "taki", message: "", attachments: [PNG] }));
+    const row = fixture.db.prepare("SELECT content, parts FROM timeline_messages WHERE role = 'user'").get();
+    expect(JSON.stringify(row)).toContain("attachments/");
+    expect(JSON.stringify(row)).not.toContain(BASE64);
+    expect(JSON.stringify(model.doStreamCalls[0]?.prompt)).toContain('"type":"file"');
   });
 
-  it("carries the in-flight attachment as a FilePart with raw base64 (never the deprecated ImagePart)", async () => {
-    const f = fresh();
-    const visionModel = streamingMockModel(["seen"]);
-    const agent = createChatAgent({ model: streamingMockModel(["x"]), visionModel, attachments: fakeAttachments(), store: f.conversation, memory: f.memory });
-
-    await drain(agent.stream({ characterId: "taki", message: "what is this", attachments: [PNG] }));
-
-    const serialized = JSON.stringify(visionModel.doStreamCalls[0]?.prompt ?? []);
-    expect(serialized).toContain('"type":"file"'); // FilePart, not the deprecated {type:"image"}
-    expect(serialized).toContain("image/png");
-    expect(serialized).toContain(BASE64); // the raw base64 survived (a data: URL would have thrown — research r1)
+  it("rejects missing attachment storage before writing the user row", async () => {
+    const fixture = fresh();
+    const model = streamingMockModel(["never"]);
+    const agent = createChatAgent({ model, store: fixture.conversation, memory: fixture.memory });
+    await expect(drain(agent.stream({ characterId: "taki", message: "look", attachments: [PNG] }))).rejects.toThrow(/attachment storage/i);
+    expect(fixture.conversation.history("taki")).toEqual([]);
+    expect(model.doStreamCalls).toHaveLength(0);
   });
 
-  it("rejects an image turn with no vision slot and persists NOTHING (structured error path)", async () => {
-    const f = fresh();
-    // No visionModel / no attachments store configured — the text model must never receive an image.
-    const agent = createChatAgent({ model: streamingMockModel(["never"]), store: f.conversation, memory: f.memory });
-
-    const caught = await drain(agent.stream({ characterId: "taki", message: "look", attachments: [PNG] })).then(
-      () => null,
-      (error: unknown) => error,
-    );
-
-    expect(caught).toBeInstanceOf(Error);
-    expect((caught as Error).message).toMatch(/vision model/i);
-    // Nothing was appended — the guard threw before store.appendUser.
-    expect(f.conversation.history("taki")).toEqual([]);
+  it("leases optional current evidence for the Attempt and releases on success, provider failure and cancellation", async () => {
+    for (const ending of ["success", "failure", "cancelled"] as const) {
+      const fixture = fresh();
+      const image = observation();
+      const controller = new AbortController();
+      if (ending === "cancelled") controller.abort();
+      const model = ending === "failure" ? failingMockModel(new Error("fixture refusal")) : streamingMockModel(["ok"]);
+      const acquire = vi.fn(() => image);
+      const agent = createChatAgent({ model, store: fixture.conversation, memory: fixture.memory, acquireNativeImageContext: acquire });
+      await drain(agent.stream({ characterId: "taki", message: "hello" }, { signal: controller.signal })).catch(() => undefined);
+      expect(acquire).toHaveBeenCalledTimes(1);
+      expect(image.release).toHaveBeenCalledTimes(1);
+      if (ending === "success") expect(JSON.stringify(model.doStreamCalls[0]?.prompt)).toContain('"type":"file"');
+    }
   });
 
-  it("persists the image turn as a text-projection row (ref stored, bytes never in the DB) and replays text only", async () => {
-    const f = fresh();
-    const agent = createChatAgent({ model: streamingMockModel(["x"]), visionModel: streamingMockModel(["seen"]), attachments: fakeAttachments(), store: f.conversation, memory: f.memory });
-
-    await drain(agent.stream({ characterId: "taki", message: "caption", attachments: [PNG] }));
-
-    // History replay is text only — no base64, no ref (decision 6).
-    const replayed = JSON.stringify(f.conversation.history("taki"));
-    expect(replayed).toContain("caption");
-    expect(replayed).not.toContain(BASE64);
-    expect(replayed).not.toContain("attachments/");
-  });
-
-  it("fires imageMemory.onImageTurn detached with the saved refs + caption (only on image turns)", async () => {
-    const f = fresh();
-    const onImageTurn = vi.fn();
-    const agent = createChatAgent({
-      model: streamingMockModel(["x"]),
-      visionModel: streamingMockModel(["seen"]),
-      attachments: fakeAttachments(),
-      imageMemory: { onImageTurn },
-      store: f.conversation,
-      memory: f.memory,
-    });
-
-    await drain(agent.stream({ characterId: "taki", message: "remember this", attachments: [PNG] }));
-    expect(onImageTurn).toHaveBeenCalledWith({
-      characterId: "taki",
-      refs: [`attachments/${"a".repeat(64)}.png`],
-      caption: "remember this",
-    });
-
-    // A subsequent text turn must NOT fire the image hook.
-    onImageTurn.mockClear();
-    await drain(agent.stream({ characterId: "taki", message: "text only" }));
-    expect(onImageTurn).not.toHaveBeenCalled();
+  it("omits already-retired optional observation without refusing a valid foreground message", async () => {
+    const fixture = fresh();
+    const image = { ...observation(), isCurrent: () => false };
+    const model = streamingMockModel(["valid text"]);
+    const agent = createChatAgent({ model, store: fixture.conversation, memory: fixture.memory, acquireNativeImageContext: () => image });
+    expect(await drain(agent.stream({ characterId: "taki", message: "hello" }))).toBe("valid text");
+    expect(JSON.stringify(model.doStreamCalls[0]?.prompt)).not.toContain('"type":"file"');
+    expect(image.release).toHaveBeenCalledTimes(1);
   });
 });

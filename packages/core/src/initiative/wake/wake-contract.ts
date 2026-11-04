@@ -12,6 +12,7 @@ import type { Database } from "../../db/sqlite.ts";
 import type { InitiativePolicy } from "../../config/initiative-policy-config.ts";
 import type { InitiativeWakePolicy } from "../../config/initiative-wake-config.ts";
 import type { InitiativeRuntime } from "../initiative-runtime.ts";
+import type { InitiativePreparedInput } from "../initiative-prepared-input.ts";
 import type { IntentionService } from "../intentions/intention-service.ts";
 import type { InitiativeBackoff } from "../backoff/initiative-backoff.ts";
 
@@ -58,7 +59,7 @@ export interface InitiativeWakeDependencies {
   /** The thin-input assembler retains its original provider/authority binding across later C1 admission. */
   contextIsCurrent?(selection: WakeSelection): boolean;
   sourceIsCurrent?(selection: WakeSelection): boolean;
-  prepareInput?(selection: WakeSelection, turn: TurnContext): Promise<string | undefined>;
+  prepareInput?(selection: WakeSelection, turn: TurnContext): Promise<InitiativePreparedInput | undefined>;
   sourceAdmitted?(selection: WakeSelection, identity: { runId: string; attemptId: string }): boolean;
   runtime: InitiativeRuntime;
   /** Read-only availability. C1 still acquires the atomic Character lane immediately before Run admission. */

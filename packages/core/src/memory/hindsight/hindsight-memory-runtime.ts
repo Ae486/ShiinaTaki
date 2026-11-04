@@ -5,6 +5,7 @@
  */
 import type { MemoryEngine } from "../memory-engine.ts";
 import { CANONICAL_MEMORY_SYSTEM_PROMPT } from "../../agents/chat-agent.ts";
+import { forwardRenderedContextText } from "../../agents/context-attribution.ts";
 import { createCanonicalMemoryToolsWithCapabilities } from "../canonical-tools/canonical-memory-tools.ts";
 import { captureCanonicalMemoryAssembly } from "../canonical-memory-assembly.ts";
 import { createCanonicalMemoryRun, type CapturedMemoryRun } from "../canonical-memory-run.ts";
@@ -35,6 +36,7 @@ export function createHindsightMemoryRuntime(input: { state: HindsightRuntimeSta
     blocks: state.blocks.render([{ kind: "global", characterId: null }, { kind: "character", characterId }]),
     now: state.now ? Date.parse(state.now()) : undefined });
   const unsupported = (): never => { throw new Error("MEMORY_CAPABILITY_UNSUPPORTED"); };
+  const assemblePrompt = primaryAssembly(assemble);
   const tidy = createHindsightRuntimeTidyView(state);
   const engine: MemoryEngine = {
     reconcile: () => {
@@ -42,7 +44,7 @@ export function createHindsightMemoryRuntime(input: { state: HindsightRuntimeSta
       const row = state.db.prepare("SELECT count(*) AS n FROM hindsight_application_replica_projections WHERE object_kind='memory_unit' AND operation='upsert'").get();
       return { upserted: 0, deleted: 0, total: Number(row?.n ?? 0), invalid: [] };
     },
-    assemble: ({ characterId, currentMessage }) => assemble(characterId)(currentMessage),
+    assemble: assemblePrompt,
     createTools: (characterId) => consumers.wrapTools(createCanonicalMemoryToolsWithCapabilities({ coordinator: state.coordinator,
       authority: state.runtime.authority.authorityEpoch(state.runtime.epoch.epochId), router: router(characterId) }, capabilities())),
     createBackgroundTools: unsupported, writeEntry: unsupported,
@@ -66,6 +68,14 @@ export function createHindsightMemoryRuntime(input: { state: HindsightRuntimeSta
       if (signal?.aborted) throw new Error("MEMORY_OPERATION_CANCELLED");
       return withCurrentRuntimeBinding(captured, capturedRouter, () => router(characterId));
     }) };
+}
+
+function primaryAssembly(capture: (characterId: string) => (currentMessage: string) => string): MemoryEngine["assemble"] {
+  const assemble: MemoryEngine["assemble"] = ({ characterId, currentMessage }) => {
+    const render = capture(characterId);
+    return forwardRenderedContextText(assemble, render, render(currentMessage));
+  };
+  return assemble;
 }
 
 function withCurrentRuntimeBinding(run: CapturedMemoryRun, captured: MemoryToolBankRouter,

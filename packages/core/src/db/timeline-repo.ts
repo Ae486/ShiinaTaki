@@ -189,11 +189,13 @@ function sanitizeParts(parts: TimelinePart[] | undefined): TimelinePart[] | unde
       toolCallId: part.toolCallId,
       toolName: part.toolName,
       ...(displayName === undefined ? {} : { displayName }),
+      ...(part.contextOrigin === undefined ? {} : { contextOrigin: part.contextOrigin }),
     };
     // Do not recurse into output: its business data must survive even when it has a displayName or input field.
     return part.type === "tool-call"
       ? { type: part.type, ...identity }
       : { type: part.type, ...identity, output: part.output,
+        ...(part.imageRefs === undefined ? {} : { imageRefs: part.imageRefs }),
         ...(part.sourceMaterials === undefined ? {} : { sourceMaterials: part.sourceMaterials }) };
   });
 }

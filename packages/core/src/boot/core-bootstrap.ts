@@ -1,7 +1,7 @@
 /**
  * INPUT:  process env (the bootstrap view: TAKI_DATA_DIR + whatever the operator set at launch)
  * OUTPUT: bootstrapCore(env) -> { logger, db, config: {source, repo, subscriptions, writer}, serverConfig,
- *         agentConfig, attachmentConfig, ambientConfig, contextConfig, model, visionModel, env }
+ *         agentConfig, attachmentConfig, ambientConfig, contextConfig, model, env }
  * POS:    core/boot — the composition root's config+storage phase, lifted out of main.ts. THE place the settings
  *         store meets the loaders: the DB opens on the env-only data root, then every other loader parses the
  *         RESOLVED env (env > stored > default), which is what makes a knob's "restart to apply" badge true
@@ -19,7 +19,6 @@ import { loadContextConfig, type ContextConfig } from "../config/context-config.
 import { loadProviderConfig } from "../config/provider-config.ts";
 import { createModels } from "../config/provider-factory.ts";
 import { loadServerConfig, type ServerConfig } from "../config/server-config.ts";
-import { loadVisionConfig } from "../config/vision-config.ts";
 import { createConfigRepo, type ConfigRepo } from "../db/config-repo.ts";
 import { MIGRATIONS } from "../db/migrations/index-list.ts";
 import { openDatabase, type Database } from "../db/sqlite.ts";
@@ -44,7 +43,6 @@ export interface CoreBootstrap {
   ambientConfig: AmbientScreenshotConfig;
   contextConfig: ContextConfig;
   model: LanguageModel;
-  visionModel: LanguageModel | undefined;
 }
 
 /** The data root is read BEFORE the store exists, so it is the one knob env alone governs (registry: env-only). */
@@ -85,12 +83,9 @@ export function bootstrapCore(processEnv: Record<string, string | undefined>, op
     .child({ mod: "db" })
     .info({ applied }, applied.length > 0 ? "migrations applied" : "schema already up to date");
 
-  // Two user-adjustable model slots (#17 decision 5): the required text slot + an OPTIONAL vision slot. Both are
-  // fatal-fast — a partial TAKI_VLM_* set fails the boot, never silently degrades. The third slot (TAKI_UTILITY_*,
-  // background work) is parsed inside the memory subsystem's boot wiring, on the same fail-fast terms.
-  const { model, visionModel } = createModels({
+  // Native image input uses the primary model. Obsolete VLM settings do not affect startup.
+  const { model } = createModels({
     provider: loadProviderConfig(env),
-    vision: loadVisionConfig(env),
     includeUsage: contextConfig.includeUsage,
   });
 
@@ -107,10 +102,9 @@ export function bootstrapCore(processEnv: Record<string, string | undefined>, op
     serverConfig,
     agentConfig: loadAgentConfig(env),
     attachmentConfig: loadAttachmentConfig(env),
-    // Ambient screen sampling (#20 T3b): OFF unless explicitly enabled, raw frames dropped right after describe.
+    // Ambient capture remains opt-in; its native frame lifetime is owned by Perception.
     ambientConfig: loadAmbientScreenshotConfig(env),
     contextConfig,
     model,
-    visionModel,
   };
 }

@@ -2,10 +2,14 @@
 Read-only DSH presentation over Core Run/Event projections: compact Run browser, 32px Toolbar, fixed
 three-lane Overview, compact measured ledger, and temporary resizable Inspector/narrow drawer.
 System and accessible copy is Chinese. Correlation stays internal; unsupported payload panels are absent.
-- cache-usage-controller.ts — physical-generation and revision-guarded whole-window subscriptions, hidden/mode cleanup, stale results and explicit read retry
-- use-cache-usage.ts — Home client and effective visibility binding for the Run-independent cache metric
-- cache-usage-strip.tsx — compact weighted cache ratio, paired-request coverage, update time and truthful result/connection states
+- cache-usage-controller.ts — physical-generation and revision-guarded coherent cache/latest-primary subscriptions, hidden/mode cleanup, stale results and explicit read retry
+- use-cache-usage.ts — Home client and effective visibility binding for the Run-independent cache and latest-request metrics
+- cache-usage-strip.tsx — compact weighted cache ratio plus independent latest-request context composition, coverage and truthful connection states
 - cache-usage-strip.module.css — density-matched overall cache strip, reserved retry slot and narrow wrapping
+- request-context-strip.tsx — latest-request input/effective window, requested/response model and completion/step labels, and honest missing/stale states
+- request-composition.tsx — exclusive estimated composition bar/legend with optional orthogonal provenance/count detail
+- request-composition-display.ts — stable raw-category presentation mapping and display-only occupancy/percentage formatting
+- request-context.module.css — compact responsive context rows, composition colors and accessible disclosure detail
 - monitor-page.tsx — full-height Monitor composition with independent cache strip, committed Run keys, scoped replacement retry, stable read-status chrome and bounded initiative policy diagnostics
 - use-monitor-controller.ts — pre-paint Home client/route-visibility binding with visibility established before bind; returning pages reconcile current controller authority before paint, with disposable cleanup
 - monitor-controller.ts — generation-guarded browsing, coherent committed/requested snapshots, displayed-Run action guards, and atomic Inspector eviction from both mode snapshots and live config hints; hidden hints stay cheap and old mode reads cannot override them

@@ -1,3 +1,4 @@
+.group { flex: none; min-width: 0; }
 .strip {
   display: flex;
   flex: none;

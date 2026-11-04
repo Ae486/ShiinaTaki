@@ -3,7 +3,7 @@
  * OUTPUT: governed immutable executable lookup with captured Skill disclosure bundles
  * POS: core/agents — shared Agent tool assembly; indirect extension calls retain the same selected membership
  */
-import type { TimelineEntry } from "@taki/shared";
+import type { TimelineEntry, ContextContentOrigin } from "@taki/shared";
 import type { AgentRunContext, ChatAgentDeps, TurnContext } from "./chat-agent.ts";
 import { mergeToolSets } from "./tool-set-assembly.ts";
 import { bindCapturedSkillLoad } from "./tool-disclosure.ts";
@@ -11,6 +11,7 @@ import { restrictInitiativeTools } from "./initiative-context.ts";
 import { bindCapturedToolExecution } from "../governance/captured-tool-execution.ts";
 import { bindExecutableToolSelection } from "../governance/executable-tool-selection.ts";
 import type { ForegroundInboxContext } from "./foreground-inbox.ts";
+import { contentOrigin } from "./context-attribution.ts";
 
 export function assembleTurnTools(deps: ChatAgentDeps, attempt: { characterId: string; primary: boolean; userEntry?: TimelineEntry; runContext?: AgentRunContext; inbox?: ForegroundInboxContext }, turn?: TurnContext) {
   const bundles = (deps.skillTools?.({ characterId: attempt.characterId, userEntry: attempt.userEntry, turn }) ?? [])
@@ -46,6 +47,10 @@ export function assembleTurnTools(deps: ChatAgentDeps, attempt: { characterId: s
   // can restore an omitted tool. Original captured closures remain available to their trusted Run owner.
   const selectedTools = turn?.allowedToolNames === undefined ? eligible
     : Object.fromEntries(Object.entries(eligible).filter(([name]) => turn.allowedToolNames?.includes(name)));
-  return { tools: turn?.workContext ? bindExecutableToolSelection(selectedTools) : selectedTools, bundles };
+  const toolOrigins = new Map<string, ContextContentOrigin>();
+  for (const name of Object.keys(selectedTools)) toolOrigins.set(name,
+    name in capturedTools ? contentOrigin(attempt.runContext?.tools?.[name]) ?? "unknown"
+      : name in extra ? contentOrigin(extra[name]) ?? "unknown" : "builtin");
+  return { tools: turn?.workContext ? bindExecutableToolSelection(selectedTools) : selectedTools, bundles, toolOrigins };
 }
 

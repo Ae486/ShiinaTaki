@@ -18,6 +18,7 @@ import type { PersonaProvider } from "./persona-provider.ts";
 import { selectPinned } from "./pinned-block.ts";
 import { estimateTokens, fitToBudget } from "./token-estimator.ts";
 import { captureInitiativeMemoryAssembly, type InitiativeMemoryAssembler } from "./initiative-memory-assembly.ts";
+import { attributedRenderer, contextText, joinContextText } from "../agents/context-attribution.ts";
 
 // Emotion capsule is a static placeholder (D9, docs/deferred-decisions.md); the persona card now loads from disk (#16).
 export const EMOTION_CAPSULE = "Current mood: neutral.";
@@ -62,23 +63,24 @@ export function createAssembler(deps: AssemblerDeps): Assembler {
     captureInitiative: (characterId) => captureInitiativeMemoryAssembly({ characterId, persona,
       global: { reference: "legacy:global-blocks", content: renderBlocks(blocks, characterId, "global").join("\n\n") },
       character: { reference: `legacy:character-blocks:${characterId}`, content: renderBlocks(blocks, characterId, "per-character").join("\n\n") } }),
-    assemble({ characterId, currentMessage }) {
+    assemble: attributedRenderer(({ characterId, currentMessage }: AssembleParams) => {
       const nowMs = Date.now();
       const now = new Date(nowMs).toISOString();
       // Injection order (prompt/README.md): global assistant layer FIRST, then the per-character persona, then emotion,
       // then the always-visible blocks, then the pinned rows — deterministic push only; the retrieved section is gone
       // (T5-R6) and `recallPolicy: "retrieved"` now means reachable via memory_search alone.
-      const sections = [persona.assistantLayer(), persona.persona(characterId), EMOTION_CAPSULE];
-      sections.push(...renderBlocks(blocks, characterId));
+      const sections = [contextText(persona.assistantLayer(), "persona"), contextText(persona.persona(characterId), "persona"),
+        contextText(EMOTION_CAPSULE, "runtime_context")];
+      sections.push(...renderBlocks(blocks, characterId).map((text) => contextText(text, "injected_memory")));
 
       const pinned = selectPinned(repo.listActiveByLayers({ characterId, layers: PINNED_LAYER_IDS, now }), pinnedBudget);
-      if (pinned.length > 0) sections.push(renderBlock(PINNED_HEADER, pinned, nowMs));
+      if (pinned.length > 0) sections.push(contextText(renderBlock(PINNED_HEADER, pinned, nowMs), "injected_memory"));
 
       const intention = pickIntention({ repo, characterId, currentMessage, now });
-      if (intention) sections.push(`A quiet thought you might share: ${rowContent(intention)}`);
+      if (intention) sections.push(contextText(`A quiet thought you might share: ${rowContent(intention)}`, "injected_memory"));
 
-      return sections.join("\n\n");
-    },
+      return joinContextText(sections, "\n\n", true);
+    }),
   };
 }
 

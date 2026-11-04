@@ -24,7 +24,7 @@
 - scheduled-task-repo.ts — revision-safe Scheduled Task definitions and occurrence outbox persistence
 - sqlite.ts — DatabaseSync wrapper (open/pragmas/transaction/close); the ONLY node:sqlite importer; toSafeInteger; DatabaseSync wrapper with commit-failure rollback and aborted-transaction SQL isolation; the only node:sqlite importer
 - migration-runner.ts — startup migration runner: applies version > max(applied), one transaction each, tracked; max-version migrations with conservative bare-TEXT guards, exact schema branches and atomic SQL/receipt tracking
-- timeline-repo.ts — validated transactional Timeline batches, source/presentation round-trip, source-material retention, canonical paging and raw-input scrubbing; timeline_messages SQL: append / deleteEntry / pageBefore / latestAscending / latestSeq / rangeAscending
+- timeline-repo.ts — validated Timeline batches, source/presentation and exact tool-result image-ref round-trip, canonical paging and raw-input scrubbing; timeline_messages SQL: append / deleteEntry / pageBefore / latestAscending / latestSeq / rangeAscending
 - memory-repo.ts — memory_entries + memory_fts SQL: upsert / deleteByPath / listHashes / listActiveByLayers / listActiveInLayer / countActiveSince / search / resolvePath; the 4-column bm25 weights are baked in at construction from config; the retention + tidy-trigger reads anchor on COALESCE(updated_at, created_at)
 - memory-auto-repo.ts — memory_auto_state SQL: get / setEpisodic / setFlush / setTidy (per-character auto-write + tidy watermarks)
 - memory-events-repo.ts — memory_events SQL: record / listByCharacter (the memory system's decision log — skips, reinforcements, searches, tidy passes; ids/counts only, never memory content or a query)
@@ -144,3 +144,4 @@
 - primary-conversation-source-repo.ts — provider-independent atomic source lifecycle, exact Timeline membership, authority capture and boot recovery
 - primary-ingestion-progress.ts — shared Local/Hindsight gap-separated source groups and truthful continuous-coverage queries
 - auxiliary-usage-repo.ts — metadata-only auxiliary model-call lifecycle, interruption recovery, bounded usage aggregates and post-commit settlement notice
+- request-attribution-repo.ts — latest terminal primary request ordered by input/dispatch and joined by Effect lineage; preserves distinct requested/response model names, usage and bounded composition facts

@@ -13,6 +13,8 @@ import { BROWSER_PLAYBACK_ENABLED_KEY, CO_WATCHING_SKILL, MONITOR_MODE_CONFIG_KE
 import { CANONICAL_MEMORY_SYSTEM_PROMPT, createChatAgent } from "./agents/chat-agent.ts";
 import { BASE_SYSTEM_PROMPT } from "./agents/base-prompt.ts";
 import { createConversationStore } from "./agents/conversation-store.ts";
+import { createScreenshotStore } from "./capabilities/screenshot-store.ts";
+import { projectAmbientScreenshotRoute, projectScreenshotRoute } from "./capabilities/native-screenshot-result.ts";
 import { createChatActivityProjection } from "./agents/chat-activity-projection.ts";
 import { mergeToolSets } from "./agents/tool-set-assembly.ts";
 import { createTurnQueue } from "./agents/turn-queue.ts";
@@ -38,7 +40,6 @@ import { presentationTailStop } from "./avatar/presentation-stop.ts";
 import { createCapabilityBroker } from "./capabilities/capability-broker.ts";
 import { createCapabilityTools } from "./capabilities/capability-tools.ts";
 import { routeCapability } from "./capabilities/route-capability.ts";
-import { createScreenshotDescriber } from "./capabilities/screenshot-describe.ts";
 import { bootstrapCore } from "./boot/core-bootstrap.ts";
 import { avatarOutcomeDeadlineMs } from "./config/avatar-config.ts";
 import { composeHindsightSetup } from "./boot/hindsight-setup-boot.ts";
@@ -67,6 +68,7 @@ import { createHostCatalogStore } from "./hosts/host-catalog.ts";
 import { bindHostGenerationRetirement } from "./hosts/host-generation-retirement.ts";
 import { loadOrCreateHostIdentity } from "./hosts/host-identity.ts";
 import { bootMcpLifecycle } from "./mcp/mcp-boot.ts";
+import { projectMcpImageResult } from "./mcp/mcp-image-result.ts";
 import { createMcpLifecycleService } from "./mcp/mcp-lifecycle-service.ts";
 import { createCharacterImporter } from "./characters/character-import.ts";
 import { createCharacterStore } from "./characters/character-store.ts";
@@ -74,7 +76,6 @@ import { startAttachmentGc } from "./media/attachment-gc.ts";
 import { createAttachmentStore } from "./media/attachment-store.ts";
 import { directoryByteSize } from "./media/directory-size.ts";
 import { composeMemoryRuntime } from "./memory/runtime-composition.ts";
-import { createImageDescriptionWriter } from "./memory/image-description-writer.ts";
 import { readMemoryAuthorityStatus } from "./memory/operations/memory-authority-status.ts";
 import { createMemoryOperationService } from "./memory/operations/memory-operation-service.ts";
 import { createPerceptionLayer } from "./perception/perception-layer.ts";
@@ -149,7 +150,9 @@ import { registerAuxiliaryUsageMethod } from "./server/methods/auxiliary-usage-m
 import { registerObservabilityMethods } from "./server/methods/observability-methods.ts";
 import { registerCacheUsageMethods } from "./server/methods/cache-usage-methods.ts";
 import { createCacheUsageRepo } from "./db/cache-usage-repo.ts";
+import { createRequestAttributionRepo } from "./db/request-attribution-repo.ts";
 import { createCacheUsageService } from "./observability/cache-usage-service.ts";
+import { attributedRenderer, contextText, joinContextText, renderedContextText, retainContentOrigin } from "./agents/context-attribution.ts";
 import { composeInitiativeRuntime } from "./initiative/initiative-composition.ts";
 import { composePresenceRuntime } from "./initiative/presence-composition.ts";
 import { registerPresenceMethods } from "./server/methods/presence-methods.ts";
@@ -184,8 +187,10 @@ const boot = bootstrapCore(process.env, { onConfigChanged: (key) => {
   if (key === BROWSER_PLAYBACK_ENABLED_KEY) browserPlaybackLifecycle.current?.refresh();
   if (key === MONITOR_MODE_CONFIG_KEY) cacheUsageLifecycle.current?.changed();
 } });
-const { logger, db, serverConfig, contextConfig, model, visionModel } = boot;
+const { logger, db, serverConfig, contextConfig, model } = boot;
+const requestAttribution = createRequestAttributionRepo(db);
 const cacheUsage = createCacheUsageService({ read: createCacheUsageRepo(db).read,
+  readLatestPrimaryRequest: (characterId) => requestAttribution.read(characterId),
   mode: () => MonitorModeSchema.parse(boot.config.source.resolve(MONITOR_MODE_CONFIG_KEY)?.value ?? "DISABLED"), logger });
 cacheUsageLifecycle.current = cacheUsage;
 const auxiliaryUsage = createAuxiliaryUsageRepo(db, { onSettled: cacheUsage.changed });
@@ -205,7 +210,8 @@ const governance = createGovernancePolicyService(createGovernancePolicyRepo(db))
 const runEventRepo = createRunEventRepo(db);
 const runEventLive = createRunEventLiveBus((runId, afterSeq, limit) => runEventRepo.page({ runId, afterSeq, limit }),
   (events) => {
-    if (events.some((event) => event.kind === "usage.settled")) cacheUsage.changed();
+    if (events.some((event) => event.kind === "usage.settled"
+      || (event.payload.kind === "effect.settled" && event.payload.effectKind === "model"))) cacheUsage.changed();
     patternLifecycle.current?.committed(events); viewingLifecycle.current?.changed();
   });
 const subagentExecutions = createSubagentExecutionRepo(db);
@@ -218,8 +224,7 @@ const effectLifecycle = createEffectLifecycleService(
 );
 const timelineRepo = createTimelineRepo(db);
 const primarySources = createPrimaryConversationSourceRepo({ db, timeline: timelineRepo });
-// R1 tier 2: the MAIN slot's window calibrator (vision/utility declare windows but stay uncalibrated in v1 —
-// their traffic is rare and their windows generous; batch-6 design §2.5 records the gap).
+// Main request calibration owns the real input cap and its separate estimator budget. Utility remains uncalibrated.
 const windowStateRepo = createWindowStateRepo(db);
 const windowCalibrator = createWindowCalibrator({ repo: windowStateRepo, slot: "main", declared: contextConfig.contextTokens.main });
 const timelineSubscriptions = createTimelineSubscriptions();
@@ -229,10 +234,15 @@ const chatLog = logger.child({ mod: "chat" });
 // complete assembled request against effectiveWindow × compact.triggerRatio.
 const historyBudget = () => Math.floor(windowCalibrator.effectiveWindow() * contextConfig.historyRatio);
 const summaryRepo = createSummaryRepo(db);
+// Both user attachments and captured tool images use this retained native replay store.
+const attachmentStore = createAttachmentStore({ attachmentsDir: join(serverConfig.dataDir, "workspace", "attachments"),
+  ttlMs: () => boot.attachmentConfig.ttlMs });
+const screenshotStore = createScreenshotStore({ screenshotsDir: join(serverConfig.dataDir, "workspace", "screenshots") });
 const latestRequestMeasurements = new Map<string, RequestMeasurement>();
 const presenceLifecycle: { current?: ReturnType<typeof composePresenceRuntime> } = {};
 const conversationStore = createConversationStore({
   repo: timelineRepo,
+  attachments: attachmentStore,
   primarySources: { repo: primarySources, afterCommit: (callback) => db.afterCommit(callback) },
   onAppend: (entry) => {
     timelineSubscriptions.publish(entry); presenceLifecycle.current?.observeEntry(entry);
@@ -263,28 +273,14 @@ const memoryRuntime = composeMemoryRuntime({ db, dataDir: serverConfig.dataDir, 
   compact: contextConfig.compact, env: boot.env, logger, usageMeter: auxiliaryUsageMeter,
   onSummaryCommitted: cacheUsage.changed,
   hindsight: { source: boot.config.source, secrets: secretCatalog } });
-const { selected: selectedMemory, memory, autoMemory, tidy, memoryRoot, writeMemory } = memoryRuntime;
+const { selected: selectedMemory, memory, autoMemory, tidy, memoryRoot } = memoryRuntime;
 
-// Attachment store (#17): the sanctioned content-addressed Workspace R/W site for chat image attachments — the DB never
-// holds bytes (invariant 2). Retained under a user-editable TTL and GC-swept below; the description-memory is permanent.
-const attachmentStore = createAttachmentStore({ attachmentsDir: join(serverConfig.dataDir, "workspace", "attachments") });
 // Character store + importer (#18): the characterId-addressable model layer. Extraction is operator-driven Core-fs into
 // the Workspace `characters/` subtree (ADR 0007 v1, invariant 2 single writer) — same family as the attachment store,
 // not an agent OS action. Serving the extracted files to the renderer is the host-side Tauri asset: protocol (Phase B).
 const charactersDir = join(serverConfig.dataDir, "workspace", "characters");
 const characterStore = createCharacterStore({ charactersDir });
 const characterImporter = createCharacterImporter({ store: characterStore });
-// Image→text bridge (#17 decision 6, D28): ONLY when a vision slot exists — an image turn's authoritative cross-turn
-// record is the VLM's text description, written via the EXISTING episodic path (same bound op the episodic writer uses).
-// A thin, deletable writer riding its own detached hook; the memory engine itself is untouched.
-const imageDescriptionWriter = visionModel && writeMemory
-  ? createImageDescriptionWriter({
-      model: auxiliaryUsageMeter.wrapModel(visionModel, { source: "image-description", label: "image-memory" }),
-      attachments: attachmentStore,
-      writeEpisode: writeMemory,
-      logger: logger.child({ mod: "image-memory" }),
-    })
-  : undefined;
 
 const pairedDeviceStore = createPairedDeviceStore(join(serverConfig.dataDir, "devices.json"));
 const deviceRegistry = createDeviceRegistry({ store: pairedDeviceStore });
@@ -317,7 +313,8 @@ migrateMcpPlaintextSecrets({ catalog: secretCatalog, configPath: join(serverConf
 // a SEED-ONLY legacy input; the runtime manager owns in-memory generations (candidate → publish → lease → drain).
 // Boot reconcile is non-blocking so the WS server starts while candidates connect; a locked catalog skips only
 // the servers whose refs it cannot resolve, truthfully — one bad server never disables its siblings.
-const mcpBoot = bootMcpLifecycle({ db, dataDir: serverConfig.dataDir, coreHostId, secretCatalog, governance, approval, logger, onChange: extensionSubscriptions.publish });
+const mcpBoot = bootMcpLifecycle({ db, dataDir: serverConfig.dataDir, coreHostId, secretCatalog, governance, approval, logger,
+  onChange: extensionSubscriptions.publish, projectImageResult: (result) => projectMcpImageResult(result, attachmentStore) });
 resolveApprovalLabels = createMcpApprovalLabelResolver(() => mcpBoot.manager.snapshot());
 void mcpBoot.manager.reconcile(mcpBoot.desired.list()).then(() => undefined, () => undefined); // desired → candidates → publish
 registerSecretMethods(registry, { service: mcpBoot.catalog, logger: secretLog });
@@ -345,11 +342,6 @@ registry.register(memoryAuthorityStatusMethod({ logger,
 const capabilityBroker = createCapabilityBroker({ logger, approval, effects: effectLifecycle });
 bindHostGenerationRetirement({ connections: connectionRegistry, catalogs: hostCatalogs, broker: capabilityBroker });
 registry.register(capabilityChallengeMethod(capabilityBroker, connectionRegistry));
-// Screenshot→VLM bridge: reuses the OPTIONAL vision slot; without it a result stays path+dims (no pixels to the text
-// model) and ambient sampling never starts. ONE bridge, shared by the on-demand tool and the ambient sampler.
-const describeScreenshot = visionModel ? createScreenshotDescriber({
-  model: auxiliaryUsageMeter.wrapModel(visionModel, { source: "screenshot-description", label: "screenshot-description" }), logger,
-}).describe : undefined;
 // The six Shell-routed capability tools as one factory (invariant 7): per-call construction binds the initiating
 // operator socket (the challenge prompt targets exactly that connection); the no-argument bag stays for unattended
 // turns. The chat agent's turnTools, the unattended fallback, and the dev trigger all reuse this exact factory.
@@ -362,7 +354,7 @@ const capabilityTools = createCapabilityTools({
   approval,
   effects: effectLifecycle,
   screenshotsDir: join(serverConfig.dataDir, "workspace", "screenshots"),
-  describe: describeScreenshot,
+  attachments: attachmentStore,
 });
 
 // Ambient/system-initiated routing carries NO operator by design: an unattended ask fails closed at the broker
@@ -384,7 +376,6 @@ const ambientCapabilityDeps = {
 const perception = createPerceptionLayer({
   route: (capability, input, targetHostId) => routeCapability(ambientCapabilityDeps, { capabilityId: capability, input, targetHostId }),
   hasNode: (capability) => hostCatalogs.hostsForCapability(capability).length > 0,
-  describe: describeScreenshot,
   ambient: boot.ambientConfig,
   ambientShotsDir: join(serverConfig.dataDir, "workspace", "ambient-screenshots"),
   // A pause is a withdrawal of consent, so it lives in the DB (single writer, invariant 2) and is restored at boot —
@@ -427,6 +418,11 @@ const writeFileTool = createWriteFileTool({ paths: createWorkspacePaths({
 const staticCoreTools: ToolSet = { ...createCurrentTimeTool({ userTimezone: () => userTimezoneService.timezone() }), ...readFileTool, ...writeFileTool };
 const extensions = createExtensionComposition({
   coreHostId, catalogs: hostCatalogs,
+  projectScreenshot: (result) => projectScreenshotRoute({ store: screenshotStore, attachments: attachmentStore }, result),
+  projectAmbientScreenshot: (result) => {
+    const epoch = perception.evidence.generation();
+    return projectAmbientScreenshotRoute(result, () => boot.ambientConfig.enabled && perception.evidence.isCurrent(epoch));
+  },
   skills: { catalog: skillBoot.catalog, loader: skillsLoader, governance },
   mcp: mcpBoot.manager,
   route: (request, interactive) => routeCapability({ ...ambientCapabilityDeps, effects: effectLifecycle, interactive }, {
@@ -510,26 +506,22 @@ const chatAgent = createChatAgent({
       autoMemory,
       foregroundInbox: (input) => subagentLifecycle.current?.service.prepareInbox(input),
       contextWindowTokens: () => windowCalibrator.effectiveWindow(),
+      requestWindowSnapshot: () => windowCalibrator.snapshot(),
       maxSteps: boot.agentConfig.maxSteps,
       // Presentation tools return bounded outcomes; a spoken presentation-only step needs no filler generation.
       // Invalid inputs retain one correction chance. See presentation-stop.ts.
       stopConditions: [presentationTailStop],
-      // Vision slot + attachment store (#17): an image turn routes to visionModel and its bytes ride in-flight only; with
-      // no vision slot an image turn is rejected upstream (the text model never receives an image).
-      visionModel,
+      // The primary model receives native image parts; durable rows retain only attachment references.
       attachments: attachmentStore,
-      // Detached, fire-and-forget (mirrors autoMemory) — present only when a vision slot is configured.
-      imageMemory: imageDescriptionWriter
-        ? { onImageTurn: (input) => { void imageDescriptionWriter.onImageTurn(input); } }
-        : undefined,
+      acquireNativeImageContext: () => perception.acquireScreenInput(),
       // Compatibility tools remain available when no interactive socket exists. The same Skill tools are reused in
       // the interactive bag below; MCP and progressive discovery are captured by runContext once per Run.
-      extraTools: {
+      extraTools: builtinToolDefinitions({
         ...extensions.skillTools,
         ...capabilityTools(),
-      },
+      }),
       // Per-turn compatibility bag: Skill reads remain present and capabilities bind the initiating operator socket.
-      turnTools: (turn) => ({
+      turnTools: (turn) => builtinToolDefinitions({
         ...extensions.skillTools,
         ...capabilityTools({ connection: turn.connection, signal: turn.signal, runId: turn.runId, attemptId: turn.attemptId }),
       }),
@@ -558,11 +550,15 @@ const chatAgent = createChatAgent({
       // Skills list + the active character's reported avatar vocabulary (ruling 10 — non-memory sections enter HERE,
       // never via the memory assembler); blanks contribute nothing. Boot/costume-stable → the instructions stay
       // day-stable (T5 Q4).
-      instructionsExtra: (characterId) =>
-        [skillsLoader.renderList(), avatarVocabulary.render(characterId), coWatchingLifecycle.current?.context(characterId) ?? "",
-          mediaAnalysisLifecycle.current?.context(characterId) ?? ""]
-          .filter((section) => section.length > 0)
-          .join("\n\n"),
+      instructionsExtra: attributedRenderer((characterId: string) => {
+        const skills = skillsLoader.renderList();
+        return joinContextText([
+          renderedContextText(skillsLoader.renderList, skills) ?? contextText(skills, "instructions", "unknown"),
+          contextText(avatarVocabulary.render(characterId), "runtime_context"),
+          contextText(coWatchingLifecycle.current?.context(characterId) ?? "", "runtime_context"),
+          contextText(mediaAnalysisLifecycle.current?.context(characterId) ?? "", "runtime_context"),
+        ]);
+      }),
       // The fenced perception context (T3a activity + T3b screen) is minute-volatile, so it rides the <turn-context>
       // tail on the outgoing user message (T5 Q4/ADR 0008) — ruling 10 still holds: it never enters via the memory
       // assembler; only the sanctioned entry point moved from the instructions to the tail.
@@ -646,7 +642,7 @@ const { runtime: initiativeRuntime, finishScheduled, delivery: sharedDelivery, d
     outcomes: avatarOutcomes, logger, governance: coreToolGovernance } });
 const subagents = composeSubagents({ db, runRepo, runs: runService, effects: effectLifecycle, agent: chatAgent,
   children: createSubagentRepo(db), inputs: createSubagentInputRepo(db), executions: subagentExecutions, messages: createRunMessageRepo(db),
-  queue: turnControls.queue, turns: turnControls.turns, store: conversationStore, historyBudget, timeline: timelineRepo,
+  queue: turnControls.queue, turns: turnControls.turns, store: conversationStore, attachments: attachmentStore, historyBudget, timeline: timelineRepo,
   utility: memoryRuntime.utility,
   checkInPolicy: () => readSubagentCheckInPolicy(boot.config.source),
   deliveries: sharedDeliveries, delivery: sharedDelivery, registry, connections: connectionRegistry,
@@ -680,7 +676,7 @@ const mediaAnalysisRuntime = createMediaAnalysisRuntime({ catalog: coWatchingCat
 mediaAnalysisLifecycle.current = mediaAnalysisRuntime;
 const viewing = createViewingInvitationSource({ db, sources: browserPlayback,
   policy: () => readViewingInvitationPolicy(boot.config.source),
-  ready: () => boot.ambientConfig.enabled && visionModel !== null && visionModel !== undefined
+  ready: () => boot.ambientConfig.enabled
     && skillsLoader.describe(CO_WATCHING_SKILL) !== undefined
     && selectCoWatchingAnalysisTools(mcpBoot.manager.snapshot()).length === 1
     && mcpBoot.manager.snapshot().some((entry) => entry.ref.toolName === "bilinote_probe_media" && entry.isCurrent())
@@ -697,9 +693,8 @@ const viewing = createViewingInvitationSource({ db, sources: browserPlayback,
       return targets.length === 1 ? targets[0] : undefined;
     },
     enabled: () => boot.ambientConfig.enabled,
-    perception, describe: visionModel ? createScreenshotDescriber({ model: visionModel, logger }) : undefined,
-    effects: effectLifecycle, store: createAmbientShotStore({ ambientDir: join(serverConfig.dataDir, "workspace", "ambient-screenshots") }),
-    dropRawAfterDescribe: boot.ambientConfig.retention.mode === "drop-after-describe", logger,
+    perception, store: createAmbientShotStore({ ambientDir: join(serverConfig.dataDir, "workspace", "ambient-screenshots") }),
+    dropRawAfterConsumption: boot.ambientConfig.retention.mode === "drop-after-consumption",
   }),
   startAccepted: (input, interactive) => coWatchingRuntime.invite({ ...input, lifetimeMinutes: 120 }, interactive),
   onChanged: coWatchingSubscriptions.publish });
@@ -804,5 +799,11 @@ function cancelDurableWorkForShutdown(): void {
     cursor = page.nextCursor;
   } while (cursor);
 }
+// These factories are Core-owned; generic external tool bags keep their own captured/unknown origin.
+function builtinToolDefinitions(tools: ToolSet): ToolSet {
+  for (const tool of Object.values(tools)) retainContentOrigin(tool, "builtin");
+  return tools;
+}
+
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));

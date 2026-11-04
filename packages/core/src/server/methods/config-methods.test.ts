@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { CONFIG_METHODS, JSON_RPC_APP_ERROR, type ConfigEntry } from "@taki/shared";
+import { CONFIG_METHODS, MODEL_CAPABILITIES_METHOD, JSON_RPC_APP_ERROR, type ConfigEntry } from "@taki/shared";
 import { createConfigSource } from "../../config/config-source.ts";
 import { createConfigSubscriptions } from "../../config/config-subscriptions.ts";
 import { createConfigWriter } from "../../config/config-writer.ts";
@@ -65,6 +65,11 @@ function entriesOf(response: unknown): ConfigEntry[] {
 }
 
 describe("config methods", () => {
+  it("reads unconfigured model capabilities separately from the ordinary config list", async () => {
+    expect(await call(build(), { method: MODEL_CAPABILITIES_METHOD, params: {} })).toMatchObject({
+      result: { apply: "restart", catalog: { status: "unknown", reason: "unconfigured" }, adapter: { nativeWebSearch: false } },
+    });
+  });
   it("config.list reports every knob with its effective value", async () => {
     const registry = build({ TAKI_WS_PORT: "9100" });
     const entries = entriesOf(await call(registry, { method: CONFIG_METHODS.list, params: {} }));
@@ -178,6 +183,7 @@ describe("config methods", () => {
       [CONFIG_METHODS.list, {}],
       [CONFIG_METHODS.set, { key: "TAKI_MAX_STEPS", value: 22 }],
       [CONFIG_METHODS.subscribe, {}],
+      [MODEL_CAPABILITIES_METHOD, {}],
     ] as const;
     for (const [method, params] of calls) {
       const response = (await call(registry, { method, params }, ctx)) as { error: { data: { code: string } } };

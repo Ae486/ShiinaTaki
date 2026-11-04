@@ -1,5 +1,5 @@
 /**
- * INPUT: deterministic SDK model and optional test-owned executable tools
+ * INPUT: deterministic SDK model and optional test-owned executable tools/image reader
  * OUTPUT: real SQLite/Run/Effect/ChatAgent/SubagentService composition with isolated Memory and Timeline
  * POS: core/testing — synthetic captured authority; no external provider or real-user data
  */
@@ -53,6 +53,7 @@ export async function subagentFixture(model: LanguageModel, options: { tools?: T
   const children = createSubagentRepo(db); const inputs = createSubagentInputRepo(db); const messages = createRunMessageRepo(db);
   const errors: string[] = [];
   const service = createSubagentService({ db, runRepo, runs, effects, agent, children, inputs, executions, messages,
+    attachments: options.agent?.attachments?.read ? { read: options.agent.attachments.read } : undefined,
     turns, queue, store: base.conversation, historyBudget: options.historyBudget ?? (() => 8000), utility: options.utility, changed: () => undefined, reportError: (code) => { errors.push(code); } });
   const id = randomUUID();
   const parent = await runs.admit({ triggerRequestId: id, idempotencyKey: id, characterId: "taki", initiator: "primary",

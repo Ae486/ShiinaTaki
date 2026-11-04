@@ -5,6 +5,7 @@
  */
 import type { ToolExecutionOptions, ToolSet } from "ai";
 import type { ToolDisclosureSnapshot } from "../extensions/tool-disclosure-snapshot.ts";
+import { copyContentOrigin } from "./context-attribution.ts";
 
 export interface SkillToolBundle {
   readonly skillName: string;
@@ -25,7 +26,7 @@ export function bindCapturedSkillLoad(input: {
     // Reuse the captured Skill candidate's generation guard and normal governance once. The direct loader must
     // not read a newly published same-name package behind an older Run's immutable snapshot.
     const result = await execute({ extensionId: reference.extensionId, input: {} }, options);
-    return record(result) && result.ok === true ? result.output : result;
+    return record(result) && result.ok === true ? copyContentOrigin(result, result.output) : result;
   } } };
 }
 interface CompletedToolResult { toolName: string; input: unknown; output: unknown }

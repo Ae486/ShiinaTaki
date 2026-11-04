@@ -9,6 +9,7 @@ import type { GovernancePolicyService } from "../governance/governance-policy-se
 import { wrapGovernedTool, type GovernedDispatchLease, type InteractiveGovernanceContext } from "../governance/governed-tool.ts";
 import { acquireLease, releaseLease, type GenerationRecord } from "./mcp-generations.ts";
 import type { McpToolRef } from "./mcp-tool-identity.ts";
+import { withMcpImageProjection } from "./mcp-image-result.ts";
 
 export type TurnInteractive = Omit<InteractiveGovernanceContext, "presentation" | "approval">;
 
@@ -25,15 +26,15 @@ const UNKNOWN_OUTCOME_MESSAGE = "the MCP connection closed after dispatch; the r
 
 export function buildTurnTools(
   active: ReadonlyMap<string, GenerationRecord>,
-  governance: TurnGovernance | undefined,
-  interactive: TurnInteractive | undefined,
+  context: { governance?: TurnGovernance; interactive?: TurnInteractive; projectImageResult?: (result: unknown) => unknown },
 ): ToolSet {
+  const { governance, interactive } = context;
   const wrapped: ToolSet = {};
   for (const record of active.values()) {
     for (const [key, tool] of Object.entries(record.tools)) {
       const ref = record.refs.get(key);
       if (!ref) continue;
-      wrapped[key] = governance
+      const governed = governance
         ? wrapGovernedTool(tool, {
             service: governance.service,
             binding: mcpBinding(governance, record, ref),
@@ -44,6 +45,7 @@ export function buildTurnTools(
             dispatchLease: generationLease(record),
           })
         : withLease(record, tool);
+      wrapped[key] = withMcpImageProjection(governed, context.projectImageResult);
     }
   }
   return wrapped;

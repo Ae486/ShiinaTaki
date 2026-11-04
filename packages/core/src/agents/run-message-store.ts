@@ -1,5 +1,5 @@
 /**
- * INPUT: exact linked work, private repositories, currentness and optional governed task summarization
+ * INPUT: exact linked work, private repositories/image reader, currentness and governed task summarization
  * OUTPUT: bounded private context, actual-intent receipts and complete durable action checkpoints
  * POS: core/agents — shared WorkContext; never writes relationship Timeline or Memory
  */
@@ -13,7 +13,8 @@ import type { SubagentContextSummaryRepo } from "../db/subagent-context-summary-
 import type { SubagentToolResultRepo } from "../db/subagent-tool-result-repo.ts";
 import type { ReplayProjection } from "./conversation-store.ts";
 import type { PreparedWorkStep, WorkContext, WorkStepInput, WorkSegmentCheckpoint } from "./work-context.ts";
-import { toEntryInput, toModelMessage } from "./turn-mapping.ts";
+import { toEntryInput } from "./turn-mapping.ts";
+import { nativeReplayMessages, type ImageReplayReader } from "./native-image-replay.ts";
 import { estimateMessagesTokens } from "../memory/token-estimator.ts";
 import { resolveDelegationTools } from "../harness/delegation-tools.ts";
 import type { ToolMaterialSink } from "../harness/subagent-tool-materials.ts";
@@ -23,6 +24,7 @@ import type { PrivateTaskSummarizer } from "./private-task-summarizer.ts";
 import { createSubagentSelfHistoryTool } from "./subagent-self-history-tool.ts";
 import type { CompletedWorkStep } from "./work-context.ts";
 import type { EffectLifecycle } from "@taki/shared";
+import { createPrivateToolImages } from "./private-tool-images.ts";
 
 export interface RunMessageStoreInput {
   runId: string; scope: SubagentWorkScope; instructions: string; tools: ToolSet; stop?: StopCondition<ToolSet>;
@@ -31,6 +33,7 @@ export interface RunMessageStoreInput {
   children: SubagentRepo; inputs: SubagentInputRepo; executions: SubagentExecutionRepo; messages: RunMessageRepo;
   summaries?: SubagentContextSummaryRepo; summarize?: PrivateTaskSummarizer;
   toolResults?: SubagentToolResultRepo;
+  attachments?: ImageReplayReader;
   materialSink: ToolMaterialSink;
   parentReplay?: () => ReplayProjection;
   transaction?(action: () => void): void;
@@ -45,11 +48,14 @@ export function createRunMessageStore(input: RunMessageStoreInput): WorkContext 
   const child = input.scope.kind === "subagent" ? input.children.get(input.scope.subagentId) : undefined;
   const intrinsic = child ? createSubagentSelfHistoryTool({ ...input, characterId: child.characterId, subagentId: child.subagentId }) : {};
   const initial = child?.initialContext.kind === "snapshot" ? [
-    ...child.initialContext.messages.map(toModelMessage).filter((message): message is ModelMessage => message !== null),
+    ...child.initialContext.messages.flatMap((message) => nativeReplayMessages(message, input.attachments)),
     ...child.initialContext.materials.map((material) => ({ role: "user" as const, content: renderContextMaterial(material) })),
   ] : [];
   const state: { attempt?: string; prepared?: PreparedWorkStep } = {};
+  const images = createPrivateToolImages(input.runId);
   const context = child && input.scope.kind === "subagent" ? { ...input, initial, subagentId: child.subagentId,
+    nativeToolImageMessages: images.messages,
+    retireNativeTools: images.retireThrough,
     workInputId: input.scope.workInputId, token: () => input.executions.token(input.runId), renderInput: renderSubagentInput,
     assertCurrent: (token: SubagentWorkToken) => input.checkCurrent(token, "model_intent") } satisfies PrivateTaskContextInput : undefined;
   const prepare = (step: WorkStepInput) => prepareWorkStep({ state, context, materialSink: input.materialSink }, step);
@@ -59,6 +65,7 @@ export function createRunMessageStore(input: RunMessageStoreInput): WorkContext 
     selectTools: (tools) => ({ ...resolveDelegationTools({ tools, parentNames: input.parentNames ?? [...Object.keys(tools), ...input.fixedExcludedNames ?? []],
       scope: input.scope, selection: input.selection, fixedExcludedNames: input.fixedExcludedNames }), ...intrinsic }),
     project(attemptId) {
+      images.reset();
       state.attempt = attemptId; state.prepared = undefined;
       if (!context) {
         if (!input.parentReplay) throw new Error("SUBAGENT_PARENT_CONTEXT_REQUIRED");
@@ -77,7 +84,7 @@ export function createRunMessageStore(input: RunMessageStoreInput): WorkContext 
       }
       input.onModelIntent?.({ step, effect });
     },
-    recordCompletedStep: (step) => recordCompleted(input, step),
+    recordCompletedStep: (step) => { images.capture(step); recordCompleted(input, step); },
     checkpointSegment: (checkpoint) => checkpointWorkSegment(input, { context, prepare }, checkpoint),
     recordPartial(partial) {
       if (!partial.text) return;

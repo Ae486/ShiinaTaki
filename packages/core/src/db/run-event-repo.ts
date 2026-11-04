@@ -56,7 +56,7 @@ function readEvent(row: Record<string, unknown>): RunEvent {
     eventId: row.event_id, runId: row.run_id, attemptId: row.attempt_id ?? undefined,
     seq: Number(row.seq), schemaVersion: row.schema_version, category: row.category, kind: row.kind,
     occurredAt: row.occurred_at, source: row.source,
-    correlation: row.correlation_json ? JSON.parse(String(row.correlation_json)) : undefined,
+    ...(row.correlation_json ? { correlation: JSON.parse(String(row.correlation_json)) } : {}),
     payload: JSON.parse(String(row.payload_json)),
   });
 }

@@ -116,10 +116,9 @@ describe("chat-agent turn-context tail (Q4)", () => {
 
   it("rides an image turn inside the text part, before the FileParts", async () => {
     const f = fresh();
-    const visionModel = streamingMockModel(["seen"]);
+    const primaryModel = streamingMockModel(["seen"]);
     const agent = createChatAgent({
-      model: streamingMockModel(["x"]),
-      visionModel,
+      model: primaryModel,
       attachments: fakeAttachments(),
       store: f.conversation,
       memory: f.memory,
@@ -128,7 +127,7 @@ describe("chat-agent turn-context tail (Q4)", () => {
 
     await drain(agent.stream({ characterId: "taki", message: "look", attachments: [PNG] }));
 
-    const prompt = (visionModel as unknown as MockWithCalls).doStreamCalls[0]?.prompt ?? [];
+    const prompt = (primaryModel as unknown as MockWithCalls).doStreamCalls[0]?.prompt ?? [];
     const last = [...prompt].reverse().find((m) => m.role === "user");
     const parts = (Array.isArray(last?.content) ? last.content : []) as Array<{ type?: string; text?: unknown }>;
     expect(parts[0]?.type).toBe("text");

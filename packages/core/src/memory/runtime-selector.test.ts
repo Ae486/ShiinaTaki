@@ -5,6 +5,9 @@ import { memoryLegacyMigration021 } from "../db/migrations/021-memory-legacy-mig
 import { hindsightInitialCutoverMigration023 } from "../db/migrations/023-hindsight-initial-cutover.ts";
 import type { MemoryEngine } from "./memory-engine.ts";
 import { selectMemoryRuntime } from "./runtime-selector.ts";
+import { attributedRenderer, contextText, joinContextText, renderedContextText } from "../agents/context-attribution.ts";
+import { fenceMemoryEngine } from "./legacy-migration/fenced-memory-engine.ts";
+import { createMemoryAuthorityFence } from "./legacy-migration/memory-authority-fence.ts";
 
 const dbs: Database[] = [];
 afterEach(() => { for (const db of dbs.splice(0)) db.close(); });
@@ -12,6 +15,22 @@ function engine(): MemoryEngine { return { reconcile: () => ({ upserted: 0, dele
 function open(): Database { const db = openDatabase({ path: ":memory:", migrations: [canonicalMemoryMigration017, memoryLegacyMigration021] }); dbs.push(db); return db; }
 
 describe("memory runtime selector", () => {
+  it("preserves a single construction render through both the legacy fence and selected-runtime facade", () => {
+    const db = open();
+    const legacy = engine();
+    const render = vi.fn(() => joinContextText([contextText("Assistant persona", "persona"), contextText("Pinned memory", "injected_memory")]));
+    legacy.assemble = attributedRenderer(render);
+    const fence = createMemoryAuthorityFence();
+    const fenced = fenceMemoryEngine(legacy, fence);
+    const selected = selectMemoryRuntime({ db, createLegacy: () => ({ engine: fenced } as never), createCanonical: engine });
+    const text = selected.memory.assemble({ characterId: "taki", currentMessage: "ask" });
+    expect(text).toBe("Assistant persona\n\nPinned memory");
+    expect(render).toHaveBeenCalledOnce();
+    expect(renderedContextText(selected.memory.assemble, text)?.spans.map((span) => span.category)).toEqual(["persona", "other", "injected_memory"]);
+    fence.retire();
+    expect(() => selected.memory.assemble({ characterId: "taki", currentMessage: "ask" })).toThrow("MEMORY_AUTHORITY_FENCED");
+    expect(render).toHaveBeenCalledOnce();
+  });
   it("constructs legacy only while the marker is legacy-markdown", () => { const db = open(); const createLegacy = vi.fn(() => ({ engine: engine() } as never)); const createCanonical = vi.fn(engine); const selected = selectMemoryRuntime({ db, createLegacy, createCanonical }); expect(selected.canonical).toBe(false); expect(createLegacy).toHaveBeenCalledOnce(); expect(createCanonical).not.toHaveBeenCalled(); });
   it("constructs canonical only after activation and never falls back to Markdown", () => { const db = open(); db.exec("UPDATE memory_authority_selection SET mode='canonical-local',active_epoch_id='epoch',verified_snapshot_id='snapshot',activation_transaction_id='tx' WHERE singleton=1"); const createLegacy = vi.fn(() => ({ engine: engine() } as never)); const createCanonical = vi.fn(engine); const selected = selectMemoryRuntime({ db, createLegacy, createCanonical }); expect(selected.canonical).toBe(true); expect(createLegacy).not.toHaveBeenCalled(); expect(createCanonical).toHaveBeenCalledWith("epoch"); });
   it("delegates existing detached calls to canonical after an in-process activation", () => {

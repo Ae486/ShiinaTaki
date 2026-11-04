@@ -7,6 +7,8 @@ import type { AssistantModelMessage, ModelMessage, ToolModelMessage, ToolResultP
 import type { TimelineEntry, TimelinePart, TimelineRole, TimelineToolOutput } from "@taki/shared";
 import { renderSourceContext, renderToolResult } from "./source-context.ts";
 import { toolSourceMaterials } from "./tool-source-materials.ts";
+import { nativeToolImages } from "./native-tool-images.ts";
+import { contentOrigin, retainContentOrigin } from "./context-attribution.ts";
 
 /** What `result.responseMessages` yields (the SDK's ResponseMessage union, which it does not export). */
 export type TurnMessage = AssistantModelMessage | ToolModelMessage;
@@ -27,8 +29,8 @@ export function toEntryInput(message: TurnMessage): TurnEntryInput | null {
 
 // A user turn's persisted shape (#17): no images = legacy `{role:"user", content}` row (byte-identical to today); with
 // images the row carries a text part (only when the caption is non-empty) + one image part per attachment, and the
-// content projection is the caption or "[image]". Replay (toModelMessage) drops the image parts — bytes never re-enter
-// the model (decision 6); the vision model saw them in-flight, later recall rides the description-memory.
+// content projection is the caption or "[image]". native-image-replay hydrates only selected retained refs;
+// this lower-level shape converter never reads files or embeds bytes in durable records.
 export function toUserEntryInput(text: string, images: UserImageInput[]): TurnEntryInput {
   if (images.length === 0) return { role: "user", content: text };
   const parts: TimelinePart[] = [];
@@ -46,7 +48,9 @@ function assistantEntry(message: AssistantModelMessage): TurnEntryInput | null {
     if (part.type === "text") parts.push({ type: "text", text: part.text });
     // Reasoning/file/approval parts are dropped by design — no replay value (docs/deferred-decisions.md D14).
     else if (part.type === "tool-call") {
-      parts.push({ type: "tool-call", toolCallId: part.toolCallId, toolName: part.toolName });
+      const origin = contentOrigin(part);
+      parts.push({ type: "tool-call", toolCallId: part.toolCallId, toolName: part.toolName,
+        ...(origin ? { contextOrigin: origin } : {}) });
     }
   }
   if (parts.every((part) => part.type === "text")) {
@@ -62,13 +66,17 @@ function toolEntry(message: ToolModelMessage): TurnEntryInput | null {
   for (const part of message.content) {
     if (part.type !== "tool-result") continue; // approval responses carry no transcript value
     const sources = toolSourceMaterials(part.output) ?? toolSourceMaterials("value" in part.output ? part.output.value : undefined);
+    const images = nativeToolImages(part.output);
+    const origin = contentOrigin(part) ?? contentOrigin(part.output);
     // The SDK's tagged ToolResultOutput is persisted as-is; the zod schema re-validates it on read.
     parts.push({
       type: "tool-result",
       toolCallId: part.toolCallId,
       toolName: part.toolName,
       output: part.output as TimelineToolOutput,
+      ...(images?.refs.length ? { imageRefs: [...images.refs] } : {}),
       ...(sources ? { sourceMaterials: [...sources] } : {}),
+      ...(origin ? { contextOrigin: origin } : {}),
     });
   }
   return parts.length > 0 ? { role: "tool", content: summarize(parts), parts } : null;
@@ -107,17 +115,17 @@ export function toModelMessage(entry: Pick<TimelineEntry, "role" | "content" | "
       .map((part) =>
         part.type === "text"
           ? { type: "text" as const, text: part.text }
-          : { type: "tool-call" as const, toolCallId: part.toolCallId, toolName: part.toolName, input: {} },
+          : retainContentOrigin({ type: "tool-call" as const, toolCallId: part.toolCallId, toolName: part.toolName, input: {} }, part.contextOrigin ?? "unknown"),
       )],
   };
 }
 
 function toSdkToolResult(part: Extract<TimelinePart, { type: "tool-result" }>): ToolResultPart {
-  return {
+  return retainContentOrigin({
     type: "tool-result",
     toolCallId: part.toolCallId,
     toolName: part.toolName,
     // Round-trip of the tagged union the SDK wrote; the zod boundary guaranteed {type, value} shape.
     output: renderToolResult(part.output as ToolResultPart["output"], part.sourceMaterials),
-  };
+  }, part.contextOrigin ?? "unknown");
 }

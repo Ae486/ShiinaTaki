@@ -6,6 +6,7 @@
 import type { ToolSet } from "ai";
 import type { Database } from "../db/sqlite.ts";
 import { CANONICAL_MEMORY_SYSTEM_PROMPT } from "../agents/chat-agent.ts";
+import { forwardRenderedContextText } from "../agents/context-attribution.ts";
 import { loadMemoryConfig, type MemoryConfig } from "../config/memory-config.ts";
 import { createCanonicalMemoryAuthorityRepo } from "../db/canonical-memory-authority-repo.ts";
 import { createCanonicalMemoryRepo } from "../db/canonical-memory-repo.ts";
@@ -34,6 +35,10 @@ type LocalState = ReturnType<typeof createLocalState>;
 
 export function createCanonicalLocalRuntime(input: RuntimeInput) {
   const state = createLocalState(input);
+  const assemble: MemoryEngine["assemble"] = ({ characterId, currentMessage }) => {
+    const render = captureAssembly(state, characterId);
+    return forwardRenderedContextText(assemble, render, render(currentMessage));
+  };
   const { authority, provider, records, maintenanceStore, blocks, tokenizer, config, coordinator } = state;
   const banks = (characterId: string) => ensureCanonicalLocalBanks({ authority, epochId: input.epochId, characterId });
   const router = (characterId: string) => {
@@ -45,7 +50,7 @@ export function createCanonicalLocalRuntime(input: RuntimeInput) {
   const tidy = createCanonicalLocalTidyView({ repo: maintenanceStore, records, authority, blocks, tokenizer, epochId: input.epochId });
   const engine: MemoryEngine = {
     reconcile: () => ({ upserted: 0, deleted: 0, total: maintenanceStore.listRetention({ epochId: input.epochId }).length, invalid: [] }),
-    assemble: ({ characterId, currentMessage }) => captureAssembly(state, characterId)(currentMessage),
+    assemble,
     createTools: (characterId): ToolSet => createCanonicalMemoryToolsWithCapabilities({ coordinator,
       authority: authority.activeEpoch(input.epochId), router: router(characterId) }, LOCAL_MEMORY_CAPABILITIES),
     createBackgroundTools: (characterId) => { banks(characterId); return tidy.createTools(characterId); },

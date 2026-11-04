@@ -38,10 +38,10 @@ export interface FoldResult {
  * stage, stopping as soon as the view fits. Assistant prose and the user's own words are NEVER folded in v1 —
  * they degrade only via summary retirement or the emergency cut (design §2.2 gradient-to-mechanism mapping).
  */
-export function foldUnderPressure(entries: TimelineEntry[], budget: number): FoldResult {
+export function foldUnderPressure(entries: TimelineEntry[], budget: number, costOf = entryTokens): FoldResult {
   // Infinite budget = the legacy unmeasured mode: skip estimation entirely (selectWindow's 0-cost convention).
   if (!Number.isFinite(budget)) return { entries, estimatedTokens: 0 };
-  const costs = entries.map(entryTokens);
+  const costs = entries.map(costOf);
   let total = costs.reduce((sum, cost) => sum + cost, 0);
   if (total <= budget) return { entries, estimatedTokens: total };
 
@@ -52,7 +52,7 @@ export function foldUnderPressure(entries: TimelineEntry[], budget: number): Fol
     const folded = foldAt(working[point.entryIndex]!, point.partIndex);
     if (folded === null) continue;
     working[point.entryIndex] = folded;
-    const cost = entryTokens(folded);
+    const cost = costOf(folded);
     total += cost - costs[point.entryIndex]!;
     costs[point.entryIndex] = cost;
     if (total <= budget) break;

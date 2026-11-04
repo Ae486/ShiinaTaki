@@ -1,4 +1,5 @@
 # core/harness/
+- Request attribution — admission forwards nonserialized instructions/selected-context descriptors and tool supplier sidecars while persisted snapshots exclude raw prompts
 - prepared-publication-authorization.ts — immutable process-owned Class A handles with explicit finite/until-cancelled scope and original-primary witness gating
 - primary-request-witness.ts — exact live primary user-row and delegated-input witness; prevents copied or previously accepted work from minting unlimited report authority
 - run-work-binding.ts — strict synchronous accepted-purpose/authority and optional registered publication-grant checks; missing bindings require explicit continuation
@@ -9,7 +10,7 @@
 - recovery-coordinator.ts — boot classification before admission, including terminal-Run pending delivery reconciliation
 - initiative-recovery.ts — missing-decision and lost-binding recovery without model/presentation replay; expires unsent terminal text and preserves uncertain publication charges
 - delegation-tools.ts — immutable allow/inherit/exclude selection with fixed child Memory mutation exclusions and normal main-continuation authority
-- subagent-state.ts — trusted work/domain/source ports, failure proposals and disposable execution coordination state
+- subagent-state.ts — trusted work/domain/source and retained-image read ports, failure proposals and disposable execution coordination state
 - subagent-service.ts — Core create/reuse/input/stop/continue service, independent child scheduling and post-commit owner callbacks
 - subagent-execution.ts — one freshly captured shared-Agent Run per child execution, with explicit completion/wait/report-format instructions and exact cancellation ownership
 - subagent-completion.ts — durable completion outbox admission and deduplicated parent execution; speech remains separately authorized
@@ -17,7 +18,7 @@
 - subagent-recovery.ts — terminal linked restart classification without inferring success from the last model Effect or replaying unknown work
 - subagent-queries.ts — paged private input/message/result projections, scoped canonical event frontiers and joined authoritative Delivery state
 - subagent-subscriptions.ts — coalesced data-free child invalidations restricted to current authenticated operator connections
-- subagent-tool-materials.ts — exact completed tool bodies and producer sources, unknown-source fallback references, scoped durable selection for recoverable final reporting and post-checkpoint cache release
+- subagent-tool-materials.ts — exact completed tool bodies/sources and scoped durable selection; native capture sidecars survive rendering without serializing pixels; post-checkpoint cache release preserves recovery
 - subagent-composition.ts — single root wiring for child service, report adapter, authenticated methods and lifecycle cleanup
 
 - subagent-inbox-context.ts — lazy first foreground claim, eager idle binding, exact private handling ports and pending-result reply guidance without rewriting frozen claims

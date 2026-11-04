@@ -127,7 +127,7 @@ describe("createConfigSource", () => {
       const { source } = build({ TAKI_PROVIDER_API_KEY: "sk-secret" });
 
       expect(entry(source, "TAKI_PROVIDER_API_KEY")).toMatchObject({ secret: true, secretSet: true, value: null, default: null });
-      expect(entry(source, "TAKI_VLM_API_KEY")).toMatchObject({ secret: true, secretSet: false, value: null });
+      expect(entry(source, "TAKI_UTILITY_API_KEY")).toMatchObject({ secret: true, secretSet: false, value: null });
       expect(JSON.stringify(source.effectiveAll())).not.toContain("sk-secret");
     });
   });

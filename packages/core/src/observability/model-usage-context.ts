@@ -5,10 +5,11 @@
  */
 import { AsyncLocalStorage } from "node:async_hooks";
 import { randomUUID } from "node:crypto";
+import type { EffectLifecycle } from "@taki/shared";
 
 export type ModelUsageOwner =
   | Readonly<{ owner: "auxiliary"; taskId: string; label: string }>
-  | Readonly<{ owner: "run" }>;
+  | Readonly<{ owner: "run"; effect?: EffectLifecycle }>;
 
 const owners = new AsyncLocalStorage<ModelUsageOwner>();
 const RUN_OWNER = Object.freeze({ owner: "run" } as const);
@@ -18,8 +19,8 @@ export function withAuxiliaryUsageTask<T>(label: string, task: () => Promise<T>)
   return owners.run(owner, task);
 }
 
-export function withRunUsageOwner<T>(operation: () => T): T {
-  return owners.run(RUN_OWNER, operation);
+export function withRunUsageOwner<T>(operation: () => T, effect?: EffectLifecycle): T {
+  return owners.run(effect ? Object.freeze({ owner: "run", effect }) : RUN_OWNER, operation);
 }
 
 export function currentModelUsageOwner(): ModelUsageOwner | undefined {

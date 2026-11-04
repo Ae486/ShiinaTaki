@@ -37,7 +37,8 @@
 - capability-respond.ts — capability.respond (node-only): Host/generation/control-bound terminal settlement with authorization-lineage verification
 - capability-challenge.ts — capability.challenge (node-only): the Host ask handoff — validates the sealed challenge before any Approval work bridges it to the initiating operator
 - capability-trigger.ts — capability.trigger (operator-only, DEV-ONLY via TAKI_DEV_TRIGGER=1): drive a real capability tool's execute without the LLM while retaining Core governance and any Host final-enforcement path; + devTriggerEnabled(env)
-- config-methods.ts — the settings surface's single registration seam: config.list / config.set / config.subscribe
+- config-methods.ts — the settings surface's single registration seam: ordinary config reads/writes/subscription and independent model capabilities
+- config-model-capabilities.ts — config.modelCapabilities (operator-only): safe configured MAIN identity and public catalog declarations; no configured-endpoint probe or generation
 - config-list.ts — config.list (operator-only): every knob with effective value + provenance (stored/env-locked/apply class); secrets as set/not-set
 - config-set.ts — config.set (operator-only): thin controller over config-writer; refusals ride CONFIG_REFUSED + a machine-readable reason; logs keys, never values
 - config-subscribe.ts — config.subscribe (operator-only): config.changed pushes, ctx.onClose auto-unsubscribe

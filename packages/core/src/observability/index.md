@@ -1,5 +1,6 @@
 # core/observability/
-- cache-usage-service.ts — computed global cache-window subscriptions, post-commit burst coalescing, mode gating and isolated failures
+- Model dispatch attribution — existing Run usage ownership optionally carries its exact committed Effect to final native observation without changing auxiliary deduplication
+- cache-usage-service.ts — independent computed cache-window and latest-primary request subscriptions, post-commit burst coalescing, mode gating and isolated failures
 - primary-cache-usage.ts — raw-aware cache provenance for primary requests, reusing auxiliary normalization without retaining provider payloads
 - auxiliary-usage-meter.ts — non-interfering AI SDK v4 middleware recording one durable auxiliary row per provider invocation while skipping Run-owned calls
 - auxiliary-usage-normalization.ts — nullable safe-integer usage normalization with OpenAI-compatible raw-field presence recovery

@@ -101,7 +101,7 @@ describe("toModelMessage", () => {
     });
   });
 
-  it("replays a user image row as the TEXT projection only — image bytes never re-enter the model (#17 decision 6)", () => {
+  it("converts the durable user shape without reading image files; native replay owns selected-ref hydration", () => {
     const replayed = toModelMessage(
       entryOf({
         role: "user",

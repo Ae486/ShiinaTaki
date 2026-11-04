@@ -123,7 +123,7 @@ export function createMemoryEngine(deps: MemoryEngineDeps): MemoryEngine {
 
   return {
     reconcile: () => reconcile({ repo, tokenizer, store }),
-    assemble: (params) => assembler.assemble(params),
+    assemble: assembler.assemble,
     captureInitiative: assembler.captureInitiative,
     createTools: (characterId, seq) => createMemoryTools(ops, characterId, seq ?? turnSeq(characterId)),
     createBackgroundTools: (characterId, seq) =>
