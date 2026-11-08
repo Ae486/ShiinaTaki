@@ -59,6 +59,40 @@ admitted -> running and the only claim proof. `checkpoint(progress)` persists pr
 `pendingSummary()`), or `null` under Local authority or while unbound.
 `readMemoryAuthorityStatus({ db, live, binding?, hindsightBinding?, liveConnection, lifecycle?, setup, operations, backup? })`
 produces `MemoryAuthorityStatus`.
+
+Home authority/onboarding/activation/template status facades share one `createMemoryStatusObserver` per Core lifetime.
+Following `memory-authority-validation.md`, it reads current control identity and actual binding state inside the same
+SQLite read transaction. It does not reconstruct historical publication evidence or retain a verification cache.
+Binding state comes from the current detached publication metadata, including
+revision, lifetime, flush availability and the current Hindsight template hold. Returned selections/bindings are never
+retained. Only the RPC facades pass explicit observed selections. Actual admission/settlement/binding proof boundaries
+use the live owner's full verification ports; COMMIT and independent DB/copy validation retain full readers.
+Ordinary Hindsight connection guards check their bound current identity and consumed-data constraints as defined in
+`memory-authority-validation.md`; a status DTO is not an authority credential.
+Template status observation is removed from composition inputs before constructing producer dependencies.
+Regression evidence must cover current status identity, known-invalid binding unavailability, replacement/stop/hold
+behavior and independent full verification. Actual registered RPC bursts establish timing; isolated projection tests do
+not establish Home responsiveness or optimize deeper Hindsight connection/recovery guards.
+
+`createMemoryStatusObserver.readRuntime()` collects selection, detached bindings and the read-only Hindsight
+runtime projection inside one SQLite read transaction. The connection observation checks stopped state, current
+authority identity, hold, template selection and configuration before the evidence projection checks checkpoint floors.
+Original `driftReason`, `assertConnection`, Bank reads and scheduler status retain every current identity/connection
+guard and bound checkpoint floor. The observation port cannot dispatch work or enter an operation context.
+Scheduler observation reuses ordinary Bank validation/order and status projection, rereading schedule rows and
+current replica checkpoints. Pending summaries and parent-write counts retain their separate producers. Runtime
+guard failures preserve existing unavailable reasons and null evidence; unreadable current identity throws.
+Successful connection/template guards retain the bound selection identity even if checkpoint, scheduler or Pending evidence
+is unreadable. Such evidence failure makes authority details unavailable without suggesting that a bound template
+needs recovery; it reports `evidence_invalid`. A failed connection/template guard itself still clears the bound identity.
+No result, selection or availability verdict survives the read. The snapshot ends before `operations.list/recent`,
+because list may settle open operations and publish changes. Template producer settlement and recovery admission
+retain their full verification boundary through the live owner. Known-invalid selected authority is explicitly
+unavailable and cannot be hidden by a template hold or configuration-degraded Run.
+Regression evidence covers result truthfulness, independent full validation, current checkpoint/order,
+binding replacement/stop/hold, current identity refusal, diagnostic availability after proof failure and the settlement boundary.
+Actual Home initial/reconnect requests must all finish without error UI; isolated helper timing is insufficient.
+
 Storage: migration 048 `memory_operations` (STRICT) with the partial unique index
 `memory_operations_active_family(family) WHERE terminal_at IS NULL`.
 

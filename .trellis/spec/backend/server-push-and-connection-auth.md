@@ -2,6 +2,15 @@
 
 Two reusable backend patterns from the avatar/bubble work.
 
+## Receive fairness
+
+The WS server uses the installed `ws` option `allowSynchronousEvents: false`. Coalesced status requests can
+otherwise run several synchronous publication checks without returning to the event loop, delaying provider
+response processing past its unchanged deadline. Yield between received frames; retain every authentication,
+role, authority and publication check. This adds per-frame scheduling overhead and is not a bound on one
+handler or on aggregate work from multiple connections. Keep the real-socket burst regression and distinguish
+that scheduling evidence from connected Native timeout acceptance.
+
 ## Server→client push channel (the timeline/avatar fan-out pattern)
 
 When the Core must push events to a subscribed client mid-turn (timeline entries, avatar commands), clone the established fan-out — do NOT invent a new mechanism:

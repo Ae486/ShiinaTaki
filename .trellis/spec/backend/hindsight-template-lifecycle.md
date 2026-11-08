@@ -21,12 +21,42 @@ remain required even when protocol or individual Native transport checks pass.
 
 ## Composition and review
 
+### Runtime selection identity and full validation
+
+- `readTemplateSelectionIdentity(db, epochId)` retains its full history/receipt/snapshot validation contract and
+  all construction, publication, recovery and original receipt-comparison callers. Template-consuming readers
+  retain their independent full validation. It is not a cheap ordinary connection guard.
+- `readCurrentRuntimeTemplateIdentity(db, epochId)` reads current eligible verified setup, validated checkpoint
+  namespace/epoch/deletion, exact enrollment, applied pointer/selected-row metadata and selected-lineage defaults.
+  For intact data it returns exactly the full reader's identity: epoch, Bank-id-sorted managed selections with full
+  namespace, selection revision, receipt hash and template revision, plus defaults revision. Absent storage or no
+  eligible applied managed selections returns null. Untracked/enrolled-but-unapplied legacy Banks remain valid;
+  verified non-v1 Banks with missing, wrong-epoch or deleted checkpoints still refuse. New legacy routes remain live.
+- Current reads exclude mutable checkpoint cursors, legacy route inventory and unapplied desired user/catalog
+  revisions. They do not reconstruct previews or load historical selection documents. Exact enrollment identity,
+  current selection column/document metadata and defaults pointer/metadata must agree. Missing current evidence
+  refuses; a changed aggregate invalidates the captured connection identity.
+- Migration 058 stores no independent effective-projection digest on a selection. The current reader therefore
+  extracts only the selected projection and uses the existing digest function to preserve setup-digest drift
+  detection. SQLite reads the containing current JSON row; cost is not independent of its size. There is no cache,
+  TTL, schema addition, or new link from overlay selections to execution plans.
+- Template document bodies changed out of band with current metadata intact are rejected at the next full
+  validation (construction, publication, recovery or consuming read). Ordinary guards no longer verify enclosing
+  document hashes, historical previews or receipt/snapshot proofs. The selected projection is consumed for setup
+  consistency and still rejects a digest mismatch immediately. Full-reader corruption tests must not be weakened.
+
+### Applied choices
+
 - Preserve stored absence, tombstones and explicit values separately. User values equal to an earlier template
   value remain explicit choices. Reset reveals the current underlying template/base; suppression is deliberate.
 - Capture actual config/resource before-images and exact target identity before enrollment. Unreviewed collisions
   refuse; removing Taki restores captured/inherited values while retaining complete user resources and surviving
   user label overrides. Unowned captured resources cannot be deleted through suppression.
 - Keep the original v1 catalog byte-stable. New versions and explicit user revision history are independent.
+- Managed v3 changes only the retain mission to preserve source attribution, conditions, uncertainty and historical
+  time; questions/suggestions are not confirmed user facts, and plans are not completed events. Keep v2 definitions
+  and digests immutable and selectable. New managed choices use v3; existing Bank selections/defaults change only
+  through explicit preview/apply, preserving user values and suppression. Legacy setup remains v1.
 - An externally changed value/group must be preserved or explicitly adopted in the user revision; a reviewed
   snapshot hash alone is not permission to overwrite that drift. Native inherited changes may recompose.
 - Original receipt identity is immutable. Validate current proof progression for every model and directive,
@@ -296,3 +326,28 @@ remain required even when protocol or individual Native transport checks pass.
   row counts as well as full-table equality; an empty table cannot satisfy physical recovery acceptance.
   Freeze source plus Core/Shared fixture JSON, package/config/lock and isolation/cleanup inputs before this joint
   run. Retain subprocess/CLI argv, outputs/exits, original artifact digests and exact owned target cleanup.
+
+### Synchronous Core template history reads
+
+Healthy transition request guards reuse `readHindsightTemplateComponents(db, input)`. Each invocation owns one
+synchronous SQLite read transaction and one private history reader keyed by the complete `templateIdentityKey`.
+Initial histories, execution/publication checks and defaults share that reader; each distinct Bank incarnation
+still passes the complete original history validator. Nested callers use the existing savepoint wrapper.
+
+`readHindsightTemplateBackupExecution`, `assertHindsightTemplatePublicationIdentity` and
+`readHindsightTemplateBackupDefaults` accept an optional third `HindsightTemplateBackupHistoryReader` argument.
+Their default reader remains an independent database read. The shared reader is internal to the components call:
+it cannot escape into its returned DTO, a later invocation, an HTTP await, a write or another Database owner.
+Keep requested Bank targets separate from additional histories referenced by defaults or prior publications.
+
+All original document hashes, applied/default pointers, hold, receipt, publication and identity comparisons remain.
+Malformed history retains its existing validation error; unpublished effects retain
+`HINDSIGHT_BACKUP_TEMPLATE_UNPUBLISHED`; the transition guard continues mapping refusals to `MEMORY_TRANSITION_STALE`.
+Global-only input must still validate referenced Character history while returning only the requested Bank.
+Another generation of that Character must not inherit its predecessor's selected receipt.
+
+Regression coverage must prove complete commitment equality, one full history load per identity within each call,
+fresh reads and corruption refusal on the next call, out-of-input historical dependencies, incarnation separation,
+independent helper defaults and nested-transaction rollback. Repeated checks around network awaits remain required.
+Reuse `readHistory(identity)` inside the current read snapshot; do not retain a previous components result or a
+successful configuration verdict across requests. Profile real connected work before changing these guards.

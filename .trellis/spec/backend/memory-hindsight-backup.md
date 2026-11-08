@@ -84,6 +84,11 @@ point). Owner-only modes where the OS has them. Nothing is deleted automatically
 - Engine and Run write tools, observed `writeMemory`, `maintenance.run`, `memoryFlush` and `tidy` pass one write fence
   (`hindsight-writer-fence.ts`). While it is closed, tools return a retryable `MEMORY_AUTHORITY_FENCED` result and flush
   its retryable outcome. Recall/reflect, Run capture and the primary witness stay open. The fence is in-memory.
+- Chat completion and a drained Pending ledger do not mean detached post-turn maintenance has settled. That admitted
+  owner can legitimately outlive the 30-second capture pause. A `QUIESCENCE_TIMEOUT` at `quiescing` creates no backup
+  artifact and releases the fence; the operator can create a new capture after the existing work settles. Home must
+  explain this retry path. This is distinct from retrying an unknown Native outcome or claiming the failed attempt
+  succeeded. Connected acceptance records busy refusals and public button retries, then requires a real verified pair.
 - A mismatched pair fails `PAIR_MISMATCH` and carries `{ reason, bankId }` in the result.
 - After the claim, a vanished runtime settles `MEMORY_RUNTIME_UNAVAILABLE` and a moved epoch `MEMORY_AUTHORITY_MISMATCH`.
 - Boot: an open capture row becomes `outcome_unknown` / `producer_incomplete` and its partial dir moves to

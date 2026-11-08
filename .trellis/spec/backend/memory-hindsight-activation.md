@@ -35,8 +35,9 @@ MEMORY_ACTIVATION_METHODS = { status: "memory.activation.status" };  // strict {
 Core: `createHindsightActivationService(...)` -> `{ plan, status, authority, committedProducer, binding, runtime, start,
 resumeActivation, recover, stopRequested, stop }` (composed in `core/boot/hindsight-activation-boot.ts`);
 `carryHindsightActivationCustody` runs via `promoteHindsightAuthority({ ..., beforeCommit })`. Composition adds
-`activationLocalRuntime()`, `bindHindsight`, `recoverHindsightBinding`, `hindsightBindingSnapshot()`; the selector adds
-`bindHindsight`, `recoverHindsight` and the `hindsightLive()` input. No migration (head stays 049): durable truth is
+`activationLocalRuntime()`, `bindHindsight`, `recoverHindsightBinding`, `hindsightBindingSnapshot()` and asynchronous
+`prepareHindsightActivation({ epochId, bankIds, signal })`; activation-service `recover` also awaits preparation.
+The selector adds `bindHindsight`, `recoverHindsight` and the `hindsightLive()` input. This correction adds no migration: durable truth is
 `hindsight_cutover_runs`, the D78 evidence tables and the promotion receipts; the operation row holds ids + checkpoints.
 
 ## 3. Contracts
@@ -96,10 +97,26 @@ resumeActivation, recover, stopRequested, stop }` (composed in `core/boot/hindsi
   Hindsight selected with binding `unavailable`; the operation settles `failed` / `runtime_unavailable` /
   `MEMORY_RUNTIME_UNAVAILABLE` with result `binding_unavailable`; Local never reopens.
 - Committed-but-unbound `captureRun` throws `MEMORY_RUNTIME_UNAVAILABLE`; there is no Local or Legacy fallback.
+- New activation stays at the existing durable `binding` checkpoint while the selected subsystem synchronizes
+  the Banks from this activation's producer/receipt. Await the existing Bank service's owned synchronization
+  promises, including any earlier Bank barrier, using the existing `mode: "foreground"` owner. Keep the connection
+  timeout as a per-HTTP limit; it is not a total deadline for queueing plus all Bank preparation requests. Activation
+  owns cancellation and joins completion. Other explicit operations and Pending recovery keep their bounded mode.
+  Only after successful preparation may the operation persist `completed`. This also applies with automatic
+  scheduling disabled; a scheduler tick, installed runtime or elapsed sleep is not preparation evidence.
+- Preparation can lengthen activation. It does not change ordinary cold capture's 7.5-second budget or expose
+  unbound tools. Stop aborts and joins this preparation owner; post-COMMIT failure retains the selected Hindsight
+  epoch and original closed error with incomplete progress. An installed runtime can coexist with failed
+  preparation; use the existing nullable failure result instead of claiming it was uninstalled.
 - `recover` re-proves the marker, reconciles custody and constructs only when unavailable: `hindsightLive()` is false
   once the binding withdrew a failed start, so recovery republishes instead of answering `healthy`. It never re-promotes;
   a thrown repair settles `failed` with its closed code. At boot, construct and start failures are recorded as binding
   `unavailable` and Core keeps serving; `memory.authority.status` reports `not_installed` until bound.
+- Binding recovery always awaits the same receipt's required Bank preparation, even when the runtime is already
+  installed, then persists `completed`. A crash after COMMIT but before `binding`, or after preparation but before
+  `completed`, remains incomplete and can recover idempotently. Advance the in-memory latest producer only after
+  its durable checkpoint succeeds. Older completed rows retain their historical meaning; do not rewrite them or
+  claim this new first-preparation assurance retroactively. No parallel readiness cache or per-status Bank proof is needed.
 
 ### Settlement and boot classification (R9)
 
@@ -108,10 +125,12 @@ resumeActivation, recover, stopRequested, stop }` (composed in `core/boot/hindsi
 | thrown before COMMIT, marker Local, no receipt | `failed` / `producer_failed` + closed code (unknown causes -> `HINDSIGHT_ACTIVATION_INTERNAL_ERROR`) |
 | shutdown at a Bank boundary | `failed` / `producer_incomplete` / `HINDSIGHT_ACTIVATION_INTERRUPTED`; `resume` continues |
 | stopping service before claim | `failed` / `runtime_unavailable` / `HINDSIGHT_ACTIVATION_INTERRUPTED` |
-| receipt with this `transactionId` | `completed` / `activated`, or `failed` / `binding_unavailable` when the runtime is unavailable |
+| matching receipt, durable producer phase `completed`, installed matching runtime | `completed` / `activated` |
+| matching receipt, producer not yet `completed` | incomplete binding; never upgrade to completion from installed availability |
+| matching receipt, runtime unavailable | `failed` / `binding_unavailable`; Hindsight stays selected |
 | receipt with another transaction, marker not Local, or unreadable state | `outcome_unknown` / `commitment_unknown`; fail closed |
 | restart before COMMIT (`observeBoot`, marker Local, same run) | `outcome_unknown` / `producer_incomplete`, phase from the durable cutover row; explicit `resume`, no redispatch |
-| restart after COMMIT | Hindsight selected at boot; `observeBoot` rebuilds from the receipt; never re-promotes |
+| restart after COMMIT | Hindsight selected; `observeBoot` combines the receipt and durable producer checkpoint, without network work or re-promotion; unfinished preparation stays recoverable |
 | lost submit reply / duplicate submit | discovery through list/status; `MEMORY_OPERATION_BUSY` + `activeOperationId` |
 
 The receipt, never the exception, decides whether the authority switched.
@@ -120,7 +139,8 @@ The receipt, never the exception, decides whether the authority switched.
 
 - `memory.activation.status` is operator-only, invalidated by `memory.operations.changed` (no second subscription).
   Schema-enforced server-derived `actions`: `activate` = Local + proven run id + configured + no drift + no blocking +
-  no run; `resume` = uncommitted run under Local; `recoverBinding` = committed run + unavailable runtime; all false
+  no run; `resume` = uncommitted run under Local; `recoverBinding` = committed run plus either unavailable runtime
+  or a terminal incomplete producer matching its epoch/transaction; all false
   while the family row is open; `cancelOperationId` only for an `admitted` row. Custody counters read the Local ledger
   before COMMIT and the Hindsight ledger after it.
 
@@ -149,7 +169,7 @@ The receipt, never the exception, decides whether the authority switched.
 - Base: a chat turn during the interval gets fenced memory writes, its commit is carried and processed once by the first
   Hindsight flush; a crash mid-import resumes from evidence without a second POST.
 - Bad: counting unconsumed witnesses as a drain failure; answering `healthy` from a stale selector after a failed start;
-  reopening Local after COMMIT; inferring success from `bindingSnapshot()` after a swallowed repair error.
+  reopening Local after COMMIT; inferring successful preparation from `bindingSnapshot()` after a swallowed repair error.
 
 ## 6. Tests Required
 
@@ -163,6 +183,10 @@ The receipt, never the exception, decides whether the authority switched.
   `hindsight-runtime-composition.test.ts` (F2), status and Shared schema tests, the recapture-after-posted-verification
   service test (ids derived per preparation, unique, identical on replay), and the isolated Core boot
   (`research/isolated-process-check.mjs`: migrations through 049, both status reads, kind registered, zero fetches).
+- First Bank preparation held beyond 7.5 seconds keeps activation running at `binding`; release makes the first
+  subsequent Run expose working retain/recall and the transferred Character fact. Cover manual-only scheduling,
+  preparation failure/stop, both post-COMMIT crash windows, same-receipt recovery without duplicate transfers,
+  failed completed-checkpoint persistence and historical completed-row settlement. Retain the ordinary cold-capture tests.
 
 ## 7. Wrong vs Correct
 

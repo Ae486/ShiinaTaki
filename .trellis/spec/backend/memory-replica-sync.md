@@ -92,6 +92,13 @@ repo.applyPage({ page: canonical, expectedCheckpoint, lease });
 
 - Trigger: a configured Global or Character Bank is due, receives an explicit incremental/full request, or needs
   verified startup/reconnection catch-up after an outage.
+  A foreground Pending write arms the same Bank's existing automatic retry at its child's `nextRetryAt` (or the first
+  retry delay when no child retry time exists), preserving any earlier wake and immediately recomputing the scheduler timer.
+  A run ending with `HINDSIGHT_PENDING_REMAINS` likewise requests the earliest non-null `nextRetryAt` among that Bank's
+  Pending rows in the active Authority Epoch. Request through `requestRetry` after `fail` has cleared `run`: failure
+  overwrites an earlier request, and requesting during a run can shorten the wake to its lease expiry. The Bank's
+  backoff may wake earlier, but never later than that row; a run before any row is due leaves those rows unclaimed
+  and schedules a future wake, without a tight loop. Manual-only mode still arms no background recovery.
 - B5 owns deterministic synchronization execution. Heartbeat owns wake/budget policy; B6 owns runtime provider,
   recall, and tool wiring. This service neither changes Memory Authority nor replays Pending Memory.
 - A live run consumes a verified B4 checkpoint and trusted policy/provenance bindings. Offline fixtures and an
@@ -103,12 +110,12 @@ repo.applyPage({ page: canonical, expectedCheckpoint, lease });
   `MemoryReplicaSyncStateSchema`, and `MemoryReplicaSyncStatusSchema`.
 - A scheduled run binds `{ lease, kind, trigger, predecessor, manualRequestId? }`; a result binds `{ checkpoint, observedCursor }`.
   Bank identity is `{ bankId, scope, characterId }`, with a Character identity only for Character scope.
-- `createHindsightReplicaSchedulerRepo(db, now)` exposes `ensureBank`, `requestManual`, `requestCatchUp`, `recover`,
+- `createHindsightReplicaSchedulerRepo(db, now)` exposes `ensureBank`, `requestManual`, `requestCatchUp`, `requestRetry`, `nextPendingRetryAt`, `recover`,
   `claim`, `promoteToFull`, `succeed`, and `fail`. `ensureBank({ bank })` preserves existing configuration;
   an explicit `config` is required to change it.
 - `createHindsightReplicaScheduler(input)` exposes non-blocking `start()`, bounded `stop()`, `tick()`,
   `requestManual(bankId, kind, requestId?)`, `cancelManual(bankId, requestId?)`, `request(requestId)`,
-  `verifiedReconnect()`, `status()`, and the closed supervisor `lastError()`.
+  `requestRetry(bankId, dueAt)`, `verifiedReconnect()`, `status()`, and the closed supervisor `lastError()`.
 - `createHindsightReplicaSyncRunner(input)` implements real admitted-client `run`/`rebuild` paths.
   `syncHindsightBankPage` and repository snapshot/journal inputs accept internal `deadlineAt`, `expectedBank`, and
   `expectedAuthority?: Pick<MemoryAuthorityEpoch, "epochId" | "providerLineageId">`. Scheduled publication carries its
@@ -122,11 +129,19 @@ repo.applyPage({ page: canonical, expectedCheckpoint, lease });
 - Ordinary polling defaults to six hours; full reconciliation defaults independently to seven days. Adapter bounds
   are one minute to 31 days and one minute to 90 days respectively; these are not provider API limits.
 - Automatic retry delays are one minute, five minutes, fifteen minutes, one hour, then six hours repeatedly.
+  A Pending row's `retry` with `HINDSIGHT_PENDING_REMAINS` and non-null `acceptedAt` selects the first delay in that
+  same ladder at least as large as the elapsed time since acceptance, capped at six hours, and adds it to the current
+  time. With a result read just after acceptance, polls land about 1, 6, 21 and 81 minutes after acceptance, then
+  six hours apart. Exact equality still selects that rung. All other codes and unaccepted rows keep the claim-attempt
+  ladder. Claims/`forceRetry`, operation identity and terminal rules remain unchanged. Bank retry attempts and failed
+  run semantics (`mode`, `errorCode`, `consecutiveFailures`) remain unchanged; the post-failure request only bounds its wake.
   An outstanding retry suppresses overdue interval wakes. Manual action and verified catch-up may bypass backoff.
   Success clears consecutive failures and schedules the next ordinary interval from success. Only a full success
   advances the full-reconciliation interval. Manual mode schedules no background due or retry wake.
 - One asynchronous worker serves all configured Banks. A failure in one Bank does not discard another Bank's progress.
   Restart/reconnection performs one eligible catch-up; it does not replay every missed interval.
+  Timer callbacks use the scheduler's construction async context, so foreground rearming cannot inherit a settled
+  write owner; each new run still passes the current work fence and lease checks.
 - Migration 051 stores exact manual request/claim/outcome evidence separately from latest Bank diagnostics. The
   operation owner supplies a pre-persisted request ID; queue admission, claim, cancel and settlement update that
   evidence in the existing schedule transaction. Terminal request records cannot be updated or deleted. A queued
@@ -176,6 +191,8 @@ repo.applyPage({ page: canonical, expectedCheckpoint, lease });
   and failures. Known lag requires matching observed lineage/generation and a valid cursor difference; otherwise it is
   null. Pending Memory has no producer in Wave 2 and its count must not be invented. Diagnostics use the closed
   `MemoryReplicaErrorCodeSchema`; raw exceptions, provider payloads, and credentials never enter status.
+  The existing Core logger additionally records Bank/run identity and the known `MEMORY_AUTHORITY_FENCED` cause
+  for refused scheduled work; logging failure cannot change the original run outcome.
 
 ### 4. Validation & Error Matrix
 
@@ -293,6 +310,11 @@ silently promoting ambiguous rows. See the child task's `research/g1-validation-
   operation-scoped derived checks, then second pull and local confirmation. A slow or failed row does not prevent
   independent rows from being submitted; Bank failures retain other Banks' progress. Unresolved pending/failed/unknown
   rows prevent an overall convergence claim even when individual rows or replica pages succeeded.
+  With automatic scheduling, a retry requested for rows admitted after a run's final Pending summary survives that
+  run's success; the earliest pending retry remains scheduled through the existing scheduler.
+- In composed D77 recovery, each warm sync validates the live authenticated manifest against keyed admission evidence
+  without repeating health/version probes. After the first successful pull, native-result support comes from that
+  admitted evidence; a failed read throws instead of disabling support. Standalone legacy negotiation stays fresh.
 - Queued mutations compare the current target and expected revision; stale/missing targets become `superseded`.
   Submitted lost-acknowledgement mutations first replay their identical frozen normalized body and native UUID to
   obtain the stored receipt. Do not supersede a previously applied operation merely because the target later changed

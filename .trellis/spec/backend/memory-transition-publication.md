@@ -12,8 +12,8 @@ may reuse only its verified object identity and the same database. Every reuse c
 identity and complete body bytes; changed/deleted rows fail closed. JSON is deeply frozen, and returned body Maps
 and byte arrays are isolated. The context expires on return or throw and rejects asynchronous callbacks.
 
-Never cache across independent entrypoints or in process-global state. The context certifies immutable evidence
-only: it cannot certify current configuration, lease, executor, candidate mapping or source ownership. Keep every
+Contexts never retain artifacts after their callback. The former cross-read observation store and its reader
+entrypoints were removed after ordinary guards and status moved to current identity. A synchronous context cannot certify current configuration, lease, executor, candidate mapping or source ownership. Keep every
 existing current-state guard, W1 CAS and SQLite transaction. Candidate construction, independent proof creation,
 COMMIT and later boot/recovery each validate storage afresh. No lease/TTL extension or await inside SQLite is a
 substitute for removing repeated validation.
@@ -43,33 +43,69 @@ only IDs or sets. Tests must include genuine mixed models/directives and a chang
 
 ## Scope and signatures
 
-### Verified observation scope
+### Independent full publication verification
 
-`createTransitionPublicationObserver(db)` belongs to one healthy service and one selected receipt. It reexecutes
-the original complete publication/candidate reader and every mutable ancestry/history/preparation/delta/custody/
-queue/Pending/source/checkpoint/marker join inside a coherent SQLite read transaction. It retains no SQL result,
-candidate verdict, publication verdict, selected authority or readiness answer.
+`readVerifiedTransitionPublication(db, receiptId, context?)` reconstructs complete stored proof and current joins.
+An existing context may be supplied only inside the same synchronous validation boundary and Database owner.
+The context expires on callback completion. There is no service-owned publication verifier, receipt cache or
+independent-versus-observer mode. Standalone full reads always create a fresh context.
 
-Only native verification whose current row identity and complete bytes still match, and the frozen pure
-`projectTransitionLocalBank` output, may be reused. The projection key covers every semantic input, including future
-fields, exact ordered ancestry/previous mappings and verified baseline evidence. Returned native body bytes are
-detached. Each successful read prunes untouched dependency entries and keeps one current projection variant per Bank.
-Changed receipt/binding revision, any validation error, service close or a new Database owner invalidates reuse.
-The first eligible read performs full validation; no TTL, persistent/global cache or asynchronous guess is allowed.
-
-Independent COMMIT, bind, boot/reconstruction and data-admission readers retain fresh full contexts. Public full
-publication readers reject an observation context through `assertIndependent`; the internal candidate flow accepts
-an observation context only while the observer's synchronous read is active. Tests must prove unchanged corruption
-checks, legal current Local edits and custody evolution, actual boot status timing and independent full revalidation
-after warming. Existing cold ID-based native loading does not enforce a slot's semantic meaning; warm observation
-additionally rejects any saved row-slot change. Neither behavior permits trusting a changed native body or identity.
+Tests retain corrupted document/current joins, legal Local edits and custody evolution, full revalidation after
+an earlier read, and lost-COMMIT replay. Slot byte identity remains checked on reuse within one context; a cold
+ID-based document read retains its existing slot-label semantics.
 
 An independent synchronous context also retains one frozen pure projection variant per Bank until its callback
 ends. The shared pure key covers all semantic inputs, including ordered ancestry/mappings, baseline evidence and
 future fields; every hit first checks context/evidence ownership and rereads exact stored identity/body bytes.
 Changed inputs recompute; changed/deleted evidence refuses; caller-created envelopes and mutable body aliases are
 not admitted. Close on return/throw clears all entries. This permits one admission transaction's repeated full
-readers to share immutable computation, without importing the service-owned observer store or any mutable verdict.
+readers to share immutable computation, without retaining any artifact or mutable verdict across calls.
+
+### Runtime guard contract and failure cases
+
+The 2026-11-06 boundary correction supersedes the intermediate runtime-private artifact verifier. Profiling proved
+that artifact reuse alone left historical reconstruction on the ordinary path and did not restore usable recall.
+`memory-authority-validation.md` is authoritative for current identity, constructor proof, checkpoint floors,
+matching-binding invalidation and unavailable diagnostics. Ordinary runtime/status reads do not own an artifact
+store; full-proof owners use fresh synchronous validation boundaries.
+
+`createHindsightRuntimeConnection` constructs only after independent full validation, including initial B4 and private
+template execution. Its ordinary guard compares the complete bound identity against current marker/active-epoch rows
+and preserves current checkpoint pairing/floors. Historical-only damage is detected by a later full boundary;
+corruption in consumed data and changes to current identity still refuse. Epoch/provider/lineage, selected epoch,
+template hold/access/selection, configuration and secret checks remain current on each call.
+The Home `observeStatus` port and operator DTOs do not authorize data operations. Private template-execution
+connections retain `assertCurrent`, their access fence and their `finally` stop; evidence reuse cannot revive an
+expired executor. Await boundaries retain the original before/after guards and publication fence.
+
+| Condition | Required behavior |
+| --- | --- |
+| New or replacement connection | Fully verify current stored evidence before binding |
+| Ordinary read on a bound connection | Reread current identity and consumed-data guards; no historical candidate reconstruction |
+| Legitimate checkpoint advancement | Accept only after the original current checkpoint/native joins pass |
+| Current marker, checkpoint or template commitment corrupted | Refuse with the existing integrity/unavailable result |
+| Historical proof fails at a full boundary | Matching bound identity is withdrawn through the live owner; copies stay independent |
+| Configuration, secret, epoch or template access drifts | Preserve the original refusal |
+| Stop or late network response after loss of authority | Old closure refuses; no late body/checkpoint/publication write |
+| Emergency publication | Independently reconstruct surviving evidence; healthy artifacts cannot authorize it |
+| Direct COMMIT, bind or boot after warm runtime reads | Fully revalidate in its own independent context |
+
+Good: construction verifies the complete history; each later guard checks current identity, data and ownership.
+Base: an initial B4 marker retains its original independent activation verification at construction.
+Bad: a remembered readiness answer authorizes work after an await or binding replacement.
+
+Regression assertions must exercise a genuine completed REENTRY through the actual runtime service: full construction,
+current checkpoint advancement/floors, current marker/checkpoint/template/hold refusal, historical-proof failure at
+full boundaries, replacement construction and stopped-closure refusal. Pause a sync transport response and mutate
+current authority or stop before release; no late result may publish. Cover stale private template executors,
+B4 compatibility and independent boot/publication/COMMIT after ordinary reads. Connected ordinary retain/recall and
+clean shutdown establish integration behavior separately from these deterministic regressions.
+Corruption fixtures must use the Database wrapper's transaction API and assert the intended integrity error;
+an unrelated FK failure or raw-SAVEPOINT nesting error is not evidence that the runtime guard rejected corruption.
+
+Wrong: retain `selected`, `ready` or a previous `checkConnection()` answer to skip later guards.
+Correct: bind a fully verified identity, reread current identity at each ordinary guard, retain actual data/ownership
+validation, and use the owner-aware full-proof entrypoint at explicit verification boundaries.
 
 W4 is the production Core handoff seam. W5 owns healthy-operation orchestration and W6 owns emergency admission;
 neither a test fixture nor a prepared candidate enables an operator transition action.

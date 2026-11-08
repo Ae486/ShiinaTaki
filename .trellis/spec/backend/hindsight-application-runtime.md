@@ -26,7 +26,7 @@ authority integrity are not waived. A direct-unit eligibility result is not a co
 | Policy | `memory-policy-assessment-schema.ts`, `hindsight-application-policy.ts`, `hindsight-policy-{context,assessment,admission}.ts` |
 | Transport and proof | `hindsight-application-{client,body-transfer,bundle,bundle-loader,integrity}.ts` |
 | SQLite publication | `hindsight-application-replica-repo.ts`; verified bodies/artifacts/heads, projection, FTS, Blocks and paired checkpoints |
-| Source and first policy | `hindsight-application-{source-write,source-binding,binding-context,binding-runner}.ts` |
+| Source and first policy | `hindsight-application-{source-write,source-binding,binding-context,binding-collector,binding-runner}.ts` |
 | Application commands | `hindsight-application-command-repo.ts`, command runner and `hindsight-application-writer.ts` |
 | Whole foreground writes | `hindsight-memory-write-repo.ts`, `hindsight-memory-writes.ts` and its admission/recovery/result helpers |
 | Ingestion and policy work | `hindsight-ingestion.ts`, `hindsight-policy-curator.ts` and their durable repositories |
@@ -46,6 +46,15 @@ B5 native projection hashes and JSON1 limits must not be silently reinterpreted.
   `application_state` version `1.0.0`, and the actual client methods. The latter build does not imply transition
   readiness: its independently versioned contract, actual schema and client inventory must pass their own gate.
   `application_reflect` is a separate capability. A configured endpoint or native reflect method does not prove it.
+- Ordinary sync reads persisted admission for `(authorityEpochId, configFingerprint)`. Missing evidence uses full
+  health/version/compatibility admission; warm evidence requires one authenticated compatibility request, current
+  capability/client-method/lineage checks and whole-manifest `sameApplicationValue` equality. Changed manifests take
+  full admission or the existing refusal before pull; readable historical D77 namespaces do not prove live lineage.
+  Save only new/changed evidence under the existing request/connection/cancellation guards, including after awaits.
+  Availability failures retain historical evidence but every online retry still needs a successful live manifest.
+  Reflect reads sync-admitted evidence and independently requires guarded Reflect; D77 Pending recovery reads it after
+  the first successful pull for native-result support. Failed evidence reads throw. Standalone/legacy paths stay fresh;
+  private template sync stays fresh and nonpublishing, and explicit connection revalidation retains all three probes.
 - Namespace is application `taki` plus provider lineage and Bank generation. Every body, command, receipt, page,
   snapshot and event hash is scoped to the exact namespace and Bank.
 - Native revision/cursor and application revision/state cursor are distinct. A policy-only commit never invents a
@@ -86,11 +95,33 @@ B5 native projection hashes and JSON1 limits must not be silently reinterpreted.
   They write no artifacts, native heads, consumer projections or checkpoints; normal reads still require published
   state. A later bounded run reuses the bytes after validation, including across SQLite reopen. A different generation
   cannot reuse the old namespace's cache. This prevents cold reads from repeatedly discarding the same valid progress.
+- The same guarded cache read may reuse immutable bodies already persisted in the command outbox (migration 044),
+  including after a commit-before-pull interruption and SQLite reopen. Require the same Bank/namespace and complete ref;
+  a mismatched command-body ref is a cache miss and downloads normally. Keep existing replica corruption refusals.
+  The loader still verifies the reused bytes and complete event; local bytes never replace remote receipts, affected
+  version proof or paired publication. No extra cache, copied body store or readable state is created by this reuse.
 - Source-candidate queries filter their verified artifact envelopes by document/binding kind before loading body
   closure. Exact source association still validates every selected body/reference. Unrelated Source bodies must not
   be decoded again for every memory binding; the awaiting-source pass requests only awaiting bindings.
-- The binding runner selects native kind before candidate body validation and reads one candidate for its one-command
-  publication step. Looking for remaining documents must not rescan every unbound memory on every iteration.
+- The binding collector selects native kind before candidate body validation and scans past ineligible candidates.
+  Commit at most eight commands, packed within the existing 16 MiB unique direct closure including the command envelope;
+  end a batch before a member that would exceed it, and preserve the existing failure for an oversized singleton.
+  Preserve stage order: Bank alone, awaiting Source associations, Blocks, remaining Document/Source bindings, then
+  Memory bindings. Every committed batch requires a complete incremental pull before collecting again; dependent
+  Memories reference published exact Source versions. Looking for Documents never scans all unbound Memories.
+- Recover prepared/dispatched `binding:*` jobs from the existing outbox before assembling a new batch, even if the first
+  pull changed candidate membership or already published their effects. Preserve original bodies, labels and Native
+  operation IDs, including legacy singleton jobs. A recovered applied job continues collection; false means eligible
+  work is exhausted, and true means a committed batch needs pulling. Refused batches retain their complete receipts;
+  CAS conflicts use the existing three consecutive retry pulls, while timeout/lost ACK resumes the original job.
+- Each packing pass requests label evidence once for its eligible new Memory candidates, using the shared bounded
+  request schema. Exclude invalid extraction IDs individually. Validate every proof's target, unit ID, revision,
+  payload hash, scope, complete selected-group hash, value membership, canonical tag and layer ownership independently;
+  missing, malformed, duplicate or invalid unit proofs leave only those units neutral. Response-envelope failures
+  retain the existing whole-request handling; authentication, lifetime and transport failures are not missing evidence.
+  Recheck the complete selection after the await and before preparation; selection drift refuses the whole batch.
+  There is no spill-label lookahead: a byte-boundary continuation requests fresh evidence and rebuilds bodies after
+  pulling. Already prepared jobs always reuse their original bodies and labels without another evidence request.
 - Native publication, binding work and native mutations share the original transaction. Bank deletion closes a
   generation while preserving historical source evidence and receipts. All application tables belong to native backup.
 
@@ -128,10 +159,44 @@ B5 native projection hashes and JSON1 limits must not be silently reinterpreted.
 - Preserve a Source artifact before dispatching its native retain. Binding the original witness requires exact G1
   operation/namespace/request proof plus document content-hash and original-text evidence. Unknown witnesses remain null.
 
+### Synchronous runtime-row capture
+
+The connection captures a fully validated template selection identity at construction, including private rollout
+construction. Its ordinary `assertEvidence` compares the fresh `readCurrentRuntimeTemplateIdentity` to that captured
+value, while authority, configuration, secret, hold, executor and checkpoint-floor checks remain unchanged.
+The current template reader performs current-row consistency checks; it never reconstructs selection history or
+previews. It retains the selected projection digest check because setup's digest has no independent stored copy.
+`readTemplateSelectionIdentity` remains the full reader at construction, publication, recovery and original receipt
+comparisons. Document-body corruption with unchanged current metadata is detected at those full boundaries or when
+template data is consumed, rather than by unrelated ordinary guards. The consumed current projection still must
+match setup. See [Current Authority and Full Validation](./memory-authority-validation.md).
+
+`captureHindsightRuntimeRows(state, { characterId, intentions })` reads one coherent SQLite snapshot. Inside
+`state.db.transaction`, `runtime.resolveBanks(characterId)` performs the complete current connection/publication,
+configuration/secret and template guards and captures the exact Global/Character routes. A function-local
+`createHindsightApplicationReplicaRepo` then uses only those routes for scope resolution. Its existing checkpoint,
+namespace, body/artifact/head, projection, policy, pinned and ingress validators still run for every relevant record.
+An unknown Bank refuses with the existing route error. Only the final rows leave the synchronous callback; no local
+replica, route closure or selected/ready verdict may escape or cross an await. A later capture validates afresh.
+
+This avoids multiplying a full transition publication read by every body/head/record in a prompt. The repository
+factory only creates closures; this local use performs no writes. The shared `state.replica` and `createStores`
+Bank-scope callback remain unchanged: sync, cache, command and publication boundaries depend on their full current
+connection guard. The replica's own active epoch/provider/lineage checks do not replace that guard.
+
+Wrong: replace the shared Bank-scope callback with unguarded routing, or reuse a captured route for later I/O.
+Correct: validate routes once inside one runtime-row read transaction, use the original integrity readers locally,
+and discard that reader when the callback returns or throws. No global cache, invalidation state or bypass flag.
+
 ### Durable foreground writes and degraded reads
 
 - Whole-operation journal 047 owns the immutable original request, actor, captured mutation target, native child,
   application command and terminal result. Parent/native/source preparation is one SQLite transaction before I/O.
+- After durable admission, bounded recovery expiry permits reading the saved Pending/terminal result under current
+  cancellation, Authority and integrity guards; network work keeps its original shrinking deadline and recovery
+  failures permit this readback only for existing availability/Pending classifications.
+- A foreground Pending result hands its Bank to the existing scheduler retry policy without changing the receipt or
+  foreground deadline; manual-only Banks arm no background recovery and await an explicit action.
 - Same request identity reuses the original target, time and child. A changed request/actor is a conflict. Preserve all
   factual references, including results larger than 256; model previews do not truncate the actual execution result.
 - Pure layer changes have no native child. Compound text/layer writes retain independent native and application proof.
@@ -159,6 +224,12 @@ B5 native projection hashes and JSON1 limits must not be silently reinterpreted.
 - The curator is limited to Taki policy and authorized Block work, with separate Global/Character model inputs. Keep
   user-card ownership, filter hidden/expired/ineligible-mood input before each submission, and persist claims, prompts,
   results, command identities and retries. Restart resumes saved proposals without rerunning a completed model call.
+- Every curator tool checks run liveness and refuses a closed/finished review. `block_read` and finish do not reverify
+  review inputs; assessment and Block update recheck only the resolved work record before saving its proposal, including
+  a Block target's source/context dependencies. The full review check remains before each model submission, so changed
+  Blocks or newly restricted records cannot reach the next model step through a captured snapshot or tool result.
+  Publication and failed-assessment saving retain their currentness checks. Do not multiply full review verification
+  by the number of tools in one step; proposals remain unpublished until the existing publication checks succeed.
 - An interrupted policy attempt with a saved prompt but no saved result first publishes its truthful failed assessment.
   The old journal item can complete while the current policy remains failed/retryable; its new artifact enters the
   ordinary due queue. A pass with `status=failed` may still have real applied edits. Report recovered work, applied
@@ -212,6 +283,8 @@ B5 native projection hashes and JSON1 limits must not be silently reinterpreted.
 | Unavailable known pin binding | Refuse new Run; preserve durable data for retry |
 | Queued timeout/abort | Settle the waiter without acquiring a later lease or touching SQLite |
 | Stop while a captured read is active | Settle the complete consumer; no later DB access |
+| State changes between synchronous row captures | Next capture reruns full guards and refuses current corruption/drift/stop |
+| Corrupt current body/head/projection during row capture | Original replica integrity refusal; never omit it as an empty result |
 | Foreground read exceeds one HTTP allowance across multiple requests | Complete if each request progresses; keep renewing only the same live lease |
 | One HTTP request exceeds its allowance | Preserve the actual timeout/degraded result; no unbounded transport wait |
 | Cancelled cold admission without verified capability evidence | No extra cold request, late admission write or returned capture |
@@ -224,6 +297,8 @@ B5 native projection hashes and JSON1 limits must not be silently reinterpreted.
 - Good: a newly extracted unit receives verified neutral policy, is recalled immediately, and is classified later under
   a durable review claim. The original source, native version and model assessment remain separate facts.
 - Base: a policy-only change advances application state and FTS while keeping native content/cursor unchanged.
+- Good synchronous capture: many records share one fully guarded route snapshot, while every record retains its
+  original integrity/eligibility checks; the next capture obtains a new snapshot.
 - Bad: recovering missing original text from a similar native document, making G1 completion mean policy completion,
   using an old pin while its new native revision lacks binding, or dropping Effect metadata while wrapping a tool.
 
@@ -236,6 +311,10 @@ B5 native projection hashes and JSON1 limits must not be silently reinterpreted.
 - Deterministic native model/reranker/cache spies verify actual input exclusion. They do not prove model classification
   quality or real-model operational acceptance.
 - Captured tools/automatic recall, capability and route drift, source flush, stop/queue/held-reference behavior, live knobs.
+- Actual completed-REENTRY row capture with multiple records, pinned/intentions/filtering and exact output parity.
+  Count real publication `selected` calls, delegating to the original reader: fixed per snapshot rather than per
+  record, and fresh on the next call. Cover transaction enclosure, subsequent marker/native/checkpoint/config/
+  template/stop refusal and current body/head/projection corruption with the intended error, not a generic throw.
 - Default per-request configuration across long foreground sync/Recall, renewable lease CAS and immutable predecessor
   guards; explicit Run deadline and caller/runtime cancellation; abort-ignoring transport and cancelled cold admission.
 - Visible neutral/assessed observations in healthy/fallback Recall, automatic recall, pinned/intentions prompt and

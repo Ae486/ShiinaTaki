@@ -40,6 +40,8 @@ Related contracts: [publication](./memory-transition-publication.md), [backup](.
 
 ## Complete disclosure and immutable evidence
 
+Preview, both admission plans and reconstruction share one Memory binding rule: `bound` is usable, `binding_missing` requires exact verified predecessor policy, and `rebind_required` refuses. Complete closure and this correspondence are checked before admission or source withdrawal; unusable proof reports `incomplete-replica` without requiring Pending to be zero.
+
 - Preview enumerates actual current setup, current-epoch canonical/assigned primary scopes, Timeline and Blocks;
   it does not consume the backup status display's bounded Bank list. Unreadable inventory is unknown, never empty.
 - Complete verified consumable replica closure can be used even when the historical setup status is pending.

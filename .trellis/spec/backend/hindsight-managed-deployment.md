@@ -157,6 +157,12 @@ Record first failures, final inputs and owned cleanup. A substituted engine is n
 Windows pipes are not Linux sockets; process/volume markers are not a database. Reuse unchanged C1
 evidence and avoid repeating the same full fault matrix at every layer.
 
+Task-local real-image inspection must read optional Docker map fields with `index`, including
+`index .Config "Volumes"` and `index .Config "Cmd"`; a legal empty field may be omitted entirely.
+If an image build exited successfully and only its readback failed, preserve that failure and inspect
+the original iidfile/image/tag/labels/base-layer lineage. Do not rebuild or adopt by name to repair
+an observation error. Application/tokenizer artifact evidence remains separate from API/PG/Host readiness.
+
 ## 7. Wrong vs Correct
 
 Wrong: admit a fresh snapshot before looking up the original request, then resubmit after a timeout;

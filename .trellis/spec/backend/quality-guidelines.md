@@ -29,7 +29,7 @@ errors beyond these finite exact-path limits; the general function limit stays 5
 
 | Exact path under `packages/core/src/memory/` | Reviewed function / current lines | Limit | Responsibility |
 | --- | --- | --- | --- |
-| `hindsight-runtime-binding.ts` | `createHindsightRuntimeBinding` / 54 | 60 | One published Hindsight binding, draft replacement, failure withdrawal and disposal lifetime. |
+| `hindsight-runtime-binding.ts` | `createHindsightRuntimeBinding` / 65 | 65 | One published Hindsight binding, bound identity, draft replacement, failure withdrawal and disposal lifetime. |
 | `runtime-selector.ts` | `selectMemoryRuntime` / 55 | 60 | One selected provider/epoch state, marker-gated binding recovery and retirement. |
 | `transitions/transition-runtime.ts` | `createMemoryTransitionRuntime` / 66 | 70 | One transition runtime, shared liveness and intent-executor lifetime, including synchronous offline retirement over the same proof/publication/bind seams. |
 | `runtime-composition.ts` | `composeMemoryRuntime` / 51 | 60 | One selected runtime and its existing utility/compaction retirement generation. |
@@ -37,6 +37,8 @@ errors beyond these finite exact-path limits; the general function limit stays 5
 | `transitions/transition-native-session.ts` | `createTransitionNativeSession` / 63 | 65 | One active Bank map and exact acquire/claim/verify/decision/renewal command lifetime. |
 
 These are path-scoped rule overrides, not suppression of findings or authorization for unrelated functionality.
+The 2026-11-06 correction extends only the Hindsight binding owner from 60 to 65 lines for its bound identity and
+explicit unavailable transition. Both belong to the existing publication lifetime; no additional owner is introduced.
 The W6 additions above retain the same single owner per closure; separate emergency orchestration was split into
 named helpers in its own module instead of receiving a broad function-size exemption.
 Reassess cohesion before extending these limits. No `max-lines` override was needed by this review.

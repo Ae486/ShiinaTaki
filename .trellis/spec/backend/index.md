@@ -24,6 +24,8 @@ Stage 5C/C1: [Installed Host custody, private bootstrap and original-resource ob
 
 Stage 5C/C2a: [Admitted fake deployment, durable resource ownership and original-resource recovery](./hindsight-managed-deployment.md).
 
+Stage 5D/D1-A: [Complete candidate archive and immutable verification contracts](./hindsight-isolated-candidates.md).
+
 | Guide | Description |
 |-------|-------------|
 | [Directory Structure](./directory-structure.md) | Where files go in `packages/core` and `src-tauri` |
@@ -39,7 +41,8 @@ Stage 5C/C2a: [Admitted fake deployment, durable resource ownership and original
 | [Current-State Transfer and First Activation](./memory-current-state-cutover.md) | D78 structured Bank import, typed hash/mapping evidence, native input/outcome certificate, retained snapshot, drift invalidation and actual B4 raw staging/guards |
 | [Durable Memory Operations](./memory-operations.md) | Core-owned operation owner over B3/B5 producers: single-flight families, Core-minted identity, derived settlement, stage-aware cancel, restart reconciliation, composite `memory.authority.status` read and the operations push channel |
 | [Memory Transition Durable Protocol](./memory-transitions.md) | W1 durable admission/queue; W2 native fences/proof; W3 complete candidates/delta; W4 atomic publication, exact custody, runtime retirement/readiness and original target receipt recovery |
-| [Memory Transition Publication and Runtime](./memory-transition-publication.md) | Shared synchronous evidence validation; W4 atomic authority/custody/queue COMMIT, exact final inventory, source/native readiness, symmetric lifetime and factual target outcomes |
+| [Memory Transition Publication and Runtime](./memory-transition-publication.md) | Independent synchronous evidence validation and current runtime identity; independent W4 authority/custody/queue COMMIT, exact final inventory, readiness, lifetime and factual target outcomes |
+| [Current Authority and Full Validation](./memory-authority-validation.md) | Current identity versus complete proof, bound runtime checkpoint floors, scoped invalidation, diagnostic boot and receipt-based recovery |
 | [Healthy Transition Drivers](./memory-transition-healthy-drivers.md) | W5 composed healthy producers, immutable original requests,055-to056 partial-maintenance continuation, truthful operation status and separate native/real-data gates |
 | [Local Onboarding](./memory-local-onboarding.md) | `local.onboard.*` over the B2 producer: complete-inventory candidates, isolated replacement epochs, pure verification, trusted primary custody in the Chat path, one published Local runtime binding with receipt-proven recovery, and the `memory.onboarding.*` operator surface |
 | [Hindsight First Activation](./memory-hindsight-activation.md) | `hindsight.activate` over the unchanged B4 primitives: exclusive-family single-flight, fenced Local drain, checkpointed per-Bank chain with exactly-one-POST replay and lease takeover, PR03 custody carry at COMMIT, Local retirement and Hindsight rebind with binding-only recovery, receipt-based boot classification and the `memory.activation.status` read |

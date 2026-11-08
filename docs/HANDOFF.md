@@ -1,5 +1,101 @@
 # TakiAgent T4 Leader Handoff — Skills/MCP First
 
+> Main-worktree prompt continuation (2026-11-07): the owner approved prompt optimization. Managed v3 preserves
+> immutable v1/v2 and is exercised through registered template application before new Native retains. Final run
+> `sIlbXB` passed all six integration cases, real-role checks and targeted semantic review after the Local `context`
+> cue was corrected. Pending-status narration has a separate recorded limitation; parent/manual acceptance remains
+> open. Read the [current record](../.trellis/tasks/08-09-memory-operations-ui/research/prompt-grounding-20261107.md).
+> No original database, deployed Bank or Git lifecycle operation was changed.
+
+> Main-worktree Hindsight continuation (2026-11-06): session `01a1afc5-3141-74c1-9c9b-04c9cd5fe590`
+> was recovered in `H:/TakiAgent` and the existing `08-09-memory-operations-ui` task rebound to the new session.
+> Journey 17 retains its controlled-model service/recovery evidence. Bounded real-model and genuine-conversation
+> verification is authorized; `H:/TakiAgent-worktrees/t4/.env.local` supplies model configuration only.
+> The official DeepSeek endpoint and frozen source now passed all six Local/Hindsight integration scenarios and
+> the real-role gate in `Ld9jwy`, following the activation and durable Pending receipt corrections. Source-attribution
+> accuracy still fails in Native extraction and final answers; complete memory acceptance remains open. Read the
+> [latest real-model result](../.trellis/tasks/08-09-memory-operations-ui/research/real-model-delivery-20261106.md)
+> for current failures, exact timings, normal cleanup and the next step; older relay TLS failures are historical.
+>
+> Main-worktree Hindsight continuation (2026-11-05): the owner authorized practical first use and the
+> existing isolated backup/transition journeys in `08-09-memory-operations-ui`. Current results,
+> reproduced fixes, build evidence and remaining limits are consolidated in the
+> [usable-delivery report](../.trellis/tasks/08-09-memory-operations-ui/research/usable-delivery-2026-11-04.md).
+> Use that report and the live session task pointer for this continuation; older ownership and
+> planning-only snapshots below are historical. Managed installation/upgrades and D89 owner acceptance
+> remain separate; no original-data or Git lifecycle action is implied.
+
+> Hindsight evidence audit (2026-10-29): [current evidence and wiring](../.trellis/tasks/08-09-memory-operations-ui/research/first-use-evidence-2026-10-29.md)
+> confirms retained actual-data conversion/reconstruction, real Native smoke, corpus roundtrip,
+> emergency/paired restore and browser evidence. First-use implementation gaps are Home Hindsight-key
+> entry and scheduler settings; v1 setup then explicit v2 apply is already a supported staged path.
+> Reuse prior results and verify changed current-build edges. This audit changed only documentation.
+
+> Hindsight direction update (2026-10-28): the owner requested contraction of unnecessary implementation,
+> practical use first, and a task-plan update before further development. The
+> [current execution plan](../.trellis/tasks/08-09-memory-operations-ui/implement.md) supersedes the
+> C2b-first/parallel-D1/global-S6 schedule below. First verify and repair the existing-instance
+> setup -> activation -> retain/recall -> sync -> reopen/recovery path. Managed installation,
+> candidate/model upgrades and residual fault/platform work follow D94-D96 in Deferred Decisions.
+> Preserve inherited source, migrations and evidence; no task is created/activated, no source or
+> runtime work is performed, and no acceptance is claimed by this plan update. Older Hindsight
+> session ownership and next-action snapshots below are historical.
+>
+> Plan completion (2026-10-29): the owner confirmed filling the remaining schedule gaps. The parent
+> execution plan now schedules the existing backup/transition journeys on isolated data as section 2,
+> after the first usable path and before managed installation; the controlled-provider entry-point
+> decision is the first activity of the first-use path; and the measured first-use baseline records
+> its uncommitted integration state (including the D1-B work). Plan-only update; no source, runtime,
+> task activation or acceptance action.
+
+> Current continuation (2026-10-28, `01a180b6-1dac-7fc2-b365-15fcb34dd4b4`): restored
+> root `01a17d4f-80ca-7f53-8d2e-cefb89cd4908` and both child records; inherited changes preserved.
+> Root initially resumed D1 and is now bound to existing C2b for the offline application artifact. Read the
+> [current checkpoint](../.trellis/tasks/10-24-hindsight-isolated-candidate-foundation/research/continuation-2026-10-28-01a180b6.md)
+> for live ownership and next actions. D1-A source/check release passes (24 Shared and 39 Core tests);
+> independent D1-A source review and Native profile parity also pass. D1-B/C/D remain open. The C2b relay passed its
+> one-shot transport/cleanup run in 8.003 seconds; Root verified archive hashes and unchanged original
+> workloads; independent review is PASS_BOUNDED_TRANSPORT_DIAGNOSTIC. Its token is consumed and must not be replayed.
+> The original 221-distribution inventory now passes declared dependency constraints, with the explicit
+> LiteLLM extra-name conformance warning preserved. The complete application/cache image has now been built once;
+> actual file preservation and offline tokenizer checks passed with exact container cleanup in 26.7 seconds.
+> D1-B persistence/operation integration and migration 060 are implemented with checks in progress; a second Astra child
+> implements the fixed Native API/PG producer. One heavy runner; reviews are batched at the owner's request.
+> Original failures remain. API/PG/receipt/setup, full D1/C4/D2 and Stage 6 remain open. `deploymentReady=false`.
+> Earlier session ownership and preparation-only claims below are historical.
+
+> Codex continuation (2026-10-27): the owner confirmed the previous session and agents stopped and authorized
+> this session (`01a17caa-61c4-7010-a505-6061c49e1330`) to continue under Trellis, with Astra xhigh and at most
+> two child agents. The active task is the existing D1 child `10-24-hindsight-isolated-candidate-foundation`.
+> D1-A implementation/check and independent C2b prerequisite diagnosis are the current batch. C2b slice 1
+> actually ran: cached-image inventory and the masquerade-off network probe both FAILED; cleanup and retained
+> archive hashes pass. Managed setup remains unavailable. Read the two children's `research/leader-now.md`.
+> Older inventory-not-run, planning-only and Claude-ownership prose below is historical. Full D1/C4/D2 and
+> Stage 6 remain outstanding; no original-data/model or Git lifecycle action is included.
+
+> Leader takeover (2026-10-27): the Claude session bound to `10-14-hindsight-managed-deployment` now owns
+> C2b, D1 and the follow-on Stage 5/6 sequence; the Codex D1 session binding is historical. Sub-agents are
+> Claude Opus (Codex unavailable), at most two at a time. Plan review found one design gap: Docker does not
+> publish ports from an `--internal` network (moby#36174), so C2b's internal-bridge + loopback-port topology
+> must be replaced before slice 2. The owner approved probing a non-internal bridge with IP masquerade
+> disabled and a `127.0.0.1` publication during the slice 1 inventory run. See the C2b `research/leader-now.md`.
+>
+> Current preparation (2026-10-24): the owner directed C2b real API/receipt delivery, parallel Stage 5D/D1
+> isolated candidates, and Stage 6 after C2b with full machine journeys before one D89 owner packet.
+> The approved new task is `.trellis/tasks/10-24-hindsight-isolated-candidate-foundation`, `in_progress`,
+> session `codex_01a16dee-fae0-7510-9240-0a370847c658`; always verify the live session pointer.
+> C2b stays in its existing `10-14-hindsight-managed-deployment` task. Read the parent's updated
+> [execution map](../.trellis/tasks/08-09-memory-operations-ui/research/stage5-execution-map-2026-10-07.md),
+> [D1 plan](../.trellis/tasks/10-24-hindsight-isolated-candidate-foundation/implement.md),
+> [C2b preflight](../.trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-preflight-2026-10-24.md)
+> and [S6 journey plan](../.trellis/tasks/08-09-memory-operations-ui/research/s6-acceptance-plan-2026-10-24.md).
+> C2a database persistence passed on 2026-10-18; the next C2b gate is actual cached-image inventory.
+> D1 source work can overlap C2b, while Host/wire/migration integration stays serialized. Full model
+> upgrades still require C4/D2; starting S6 does not close those cases. This assignment is preparation
+> and review only. Taki source/evidence was locally committed on 2026-10-18 through `e260ff4`; Native
+> remains `eb6413a7` with uncommitted Stage 5 work. H: free space is only about 2.31 GiB at this snapshot;
+> use fresh capacity checks and G: staging for later heavy work. No source/runtime/Git lifecycle ran here.
+
 > Stage 5C/C2 continuation (2026-10-15): the owner approved the new
 > `10-14-hindsight-managed-deployment` child, design/independent review, then direct C2a source/fake-data work.
 > It remains the current `in_progress` task. **C2a SOURCE PASS**: all six source criteria are accepted;

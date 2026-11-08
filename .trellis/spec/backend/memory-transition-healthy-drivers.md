@@ -1,5 +1,15 @@
 # Healthy Transition Drivers and Historical Recovery
 
+## Renewal racing a terminal decision
+
+Native correctly rejects renewal once a Bank has a terminal outcome. An original retire/activate decision can
+complete while an earlier heartbeat request is still pending. The Native session coordinates that exact request:
+only typed `executor_lost` may join the same Bank's already dispatched decision, including response validation and
+durable observation. It may be superseded only by a strictly newer terminal observation with the same acquire
+request, executor and proof, matching the stored decision. No new status request, retry, claim or deadline extension
+is introduced. A failed decision, absent/mismatched terminal, different refusal or transport error remains a failure.
+Test both response orders and complete healthy-driver binding/settlement, preserving ownership/lease refusals.
+
 ## Synchronous work and failure diagnostics
 
 The 30-second heartbeat cannot execute while synchronous SQLite/corpus validation holds the event loop. Use the
@@ -18,13 +28,13 @@ Healthy boot readiness first uses `hasPublishedBinding(provider)` only to return
 That presence-only read uses the existing binding's `current()`; it neither verifies authority nor admits reads/writes.
 Absent, failed, retired and stopped bindings must not load a snapshot or rebuild committed corpus evidence on each
 status poll. Operation preview/admission/execution keep the independent full snapshot/receipt and lifetime/epoch
-checks. Status uses a separate verified observer: detached binding publication state plus the original publication
-reader's current DB queries and joins, with only byte-matched native verification and pure Bank projections reused.
-See `memory-transition-publication.md` for its bounded lifetime. No authority, candidate, publication or readiness
-verdict cache is permitted. Regression tests must call the actual boot-composed status path and cover corrupt
-evidence, replaced bindings and historical epochs with a newer binding.
+checks. Status uses detached binding publication state and `readCurrentMemoryAuthorityIdentity(db)`, including
+current marker shape and active provider/lineage checks, without reconstructing historical publication evidence.
+See `memory-authority-validation.md` for the current-identity/full-proof boundary. No authority, candidate,
+publication or readiness verdict cache is permitted. Regression tests must call the actual boot-composed status
+path for current-identity damage and replaced bindings, and full verification for historical evidence damage.
 
-Default already-bound boot primes the observer before native dispatch. A green warm-observer deadline replay alone
+Default already-bound boot does not create or prime a historical observer. A green status deadline replay alone
 does not establish complete driver responsiveness: actual heartbeat, native finalization, bind, full ready, intent
 execution and final release must be measured together. Do not change deadlines, skip validators or remove polling
 to hide long uninterrupted synchronous validation chains.
@@ -146,8 +156,8 @@ start independent validation. Nontransition handlers retain their existing conte
 
 Only byte-verified immutable native artifacts and complete-key pure Bank projections are reused. All authority,
 receipt/candidate/baseline/attempt, source/configuration/inventory, custody, queue, checkpoint and runtime binding
-joins still execute on every call. Never reuse an observer context, selected authority, readiness boolean, passed
-plan or mutable SQL result. Foreign, closed, observer and asynchronous/thenable contexts fail closed.
+joins still execute on every call. Never reuse a selected authority, readiness boolean, passed plan or mutable SQL
+result. Foreign or closed contexts and asynchronous/thenable callbacks fail closed; no observer-context mode exists.
 
 Both plan calls retain real-clock entry expiry, exact actor/request/preview and current-identity checks. Each plan
 also rereads the preview and real clock after expensive validation, so work crossing the normal 120-second TTL

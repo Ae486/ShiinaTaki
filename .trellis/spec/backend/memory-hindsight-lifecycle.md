@@ -119,7 +119,8 @@ no network call and is never a Local or Legacy fallback. Every such Run reaches 
 - Local refusals before any native call: marker/epoch moved -> `MEMORY_AUTHORITY_MISMATCH`; not ready ->
   `HINDSIGHT_CONNECTION_DISABLED`; live fingerprint differs from `fingerprintAfter` -> `HINDSIGHT_STATE_CONFLICT`; the
   revalidate blocker below -> its code.
-- `validating`: `admitHindsightApplication` with the epoch's lineage (different lineage ->
+- `validating`: fresh `admitHindsightApplication` (health, version and authenticated compatibility, even with persisted
+  admission evidence) with the epoch's lineage (different lineage ->
   `HINDSIGHT_REPLICA_LINEAGE_MISMATCH`, old binding kept). `verifying-banks`: export and verify the template of every
   verified Bank, writing no row. `recording`: save the new reviewed fingerprint, compatibility and the live
   `deploymentMode` in one snapshot UPDATE (never `markAllPending`), then the admission evidence for (epoch, fingerprint).
@@ -170,6 +171,10 @@ provisioning. Shutdown stops the lifecycle service with Local onboarding and act
 - Submits go through the same kinds and admission. A refusal (busy family, changed state) creates no row, is logged,
   and the Run stays degraded; nothing is queued. The trigger is late-bound (`bind` after the operation owner exists) and
   never throws into the Run.
+- The boot-created trigger binds `onUnavailable` to its construction async context. Automatic operation admission and
+  its continuations must not inherit the foreground capture's work-fence owner: capture returns before the lifecycle
+  producer reaches its first sync, and the released owner correctly refuses new work. Keep the real work fence,
+  retirement checks and operation admission unchanged; rebinding belongs at this automatic handoff, not in callees.
 
 ### Verified reconnect callers (R7, G13)
 
@@ -228,6 +233,11 @@ continues; in the revalidate caller a throw settles the operation `failed` after
   pre-claim cancel, both `observeBoot`s. `hindsight-unbound-run.test.ts`, `memory-authority-status.test.ts`,
   `memory-hindsight-lifecycle-status.test.ts`, migration 050, connection repo, Shared schema tests, isolated boot
   (head 050, zero fetches).
+- Automatic success must compose the real `captureRun`, work fence, trigger, operation owner and first replica sync:
+  the initial new-Character Run is degraded, the single automatic operation completes after capture releases its owner,
+  and the next Run has recall. An occupied-Bank refusal alone does not reach the former expired-owner failure.
+  The controlled first-use journey must require automatic completion for Mika and must not recover it with an operator
+  `bank.provision` fallback; retained observations still expose the actual operation state, origin and error.
 
 ## 7. Wrong vs Correct
 

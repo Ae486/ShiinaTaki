@@ -10,6 +10,11 @@ The provider implementation and maintenance inventory live in `H:/hindsight/TAKI
 Three proofs remain distinct: a complete current Local capture, a committed structured native transfer, and complete
 finite native maintenance bound to an immutable snapshot. None can be replaced by an old B2 receipt or a queue count.
 
+The shared tagged codec retains unsigned UTF-8 key ordering without normalization. After rejecting unpaired
+surrogates, scalar-value comparison is byte-order equivalent and avoids repeated `TextEncoder` allocation during
+sort. Do not replace it with UTF-16/default string ordering. Preserve the fixed Python fixture hash, scalar boundary
+and invalid-surrogate tests, and byte-for-byte retained-document comparisons when changing this integrity primitive.
+
 ## 2. Signatures
 
 | Entry | Responsibility |
