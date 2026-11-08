@@ -5,7 +5,7 @@
  */
 import type { MemoryOperationRequest } from "@taki/shared";
 import type { Database } from "../../db/sqlite.ts";
-import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
+import { readCurrentMemoryAuthorityIdentity } from "../legacy-migration/legacy-activation-repo.ts";
 import { activeTemplateHold, hasTemplateExecutionStorage } from "../hindsight/template-lifecycle/template-execution-reads.ts";
 import { MemoryOperationRefusal } from "./memory-operation-contract.ts";
 
@@ -14,7 +14,7 @@ export function assertTemplateOperationAdmission(db: Database, request: MemoryOp
   // do not create a second authority-proof boundary ahead of the transition owner's shared context.
   if (!hasTemplateExecutionStorage(db)
     || !db.prepare("SELECT 1 FROM hindsight_template_holds WHERE state='active' LIMIT 1").get()) return;
-  const selected = readMemoryAuthoritySelection(db);
+  const selected = readCurrentMemoryAuthorityIdentity(db);
   if (selected.mode !== "hindsight" || !selected.epochId) return;
   const hold = activeTemplateHold(db, selected.epochId);
   if (!hold || request.kind === "template.recover" && request.planId === hold.planId) return;

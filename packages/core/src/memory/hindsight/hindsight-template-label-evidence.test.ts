@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { HINDSIGHT_TEMPLATE_VERSION, HindsightTemplateLabelEvidenceResultSchema, type HindsightTemplateLabelGroup } from "@taki/shared";
 import { applicationTestBankPayload, applicationTestMemoryPayload, applicationTestNative, APPLICATION_TEST_SCOPE,
   APPLICATION_TEST_AT } from "../../testing/hindsight-application-fixtures.ts";
-import { loadHindsightTemplateUnitLabel } from "./hindsight-template-label-evidence.ts";
+import { loadHindsightTemplateUnitLabels } from "./hindsight-template-label-evidence.ts";
 import { hindsightBankBindings } from "./hindsight-bank-identity.ts";
 import { hindsightApplicationPolicyContext } from "./hindsight-application-binding-context.ts";
 import { projectHindsightApplicationNativeBank } from "./hindsight-application-projection.ts";
@@ -16,13 +16,13 @@ import { templateHash } from "./template-lifecycle/template-integrity.ts";
 const UNIT_ID = "33333333-3333-4333-8333-333333333333";
 const OTHER_ID = "44444444-4444-4444-8444-444444444444";
 
-function fixture(kind: "global" | "character" = "global", value = kind === "global" ? "profile" : "episodes") {
+function fixture(kind: "global" | "character" = "global", value = kind === "global" ? "profile" : "episodes", id = UNIT_ID) {
   const bankId = hindsightBankBindings("taki")[kind === "global" ? 0 : 1].externalBankId;
   const scope = { ...APPLICATION_TEST_SCOPE, bankId };
   const bankScope = kind === "global" ? { kind, characterId: null } as const : { kind, characterId: "taki" } as const;
   const nativeBank = applicationTestNative({ kind: "bank", scope, payload: applicationTestBankPayload(scope) }).body.content;
   const native = applicationTestNative({ kind: "memory_unit", scope, cursor: 7,
-    payload: applicationTestMemoryPayload({ memory_id: UNIT_ID, bank_id: bankId, document_id: null, revision: 3,
+    payload: applicationTestMemoryPayload({ memory_id: id, bank_id: bankId, document_id: null, revision: 3,
       tags: ["unrelated", "taki-layer:" + value] }) }).body.content;
   if (nativeBank.body_schema !== "application-native-record.v1" || native.body_schema !== "application-native-record.v1") throw new Error("fixture kind");
   const bank = projectHindsightApplicationNativeBank({ ...scope, authorityEpochId: "epoch", bankScope, native: nativeBank.value });
@@ -31,18 +31,22 @@ function fixture(kind: "global" | "character" = "global", value = kind === "glob
   const target = { bank_id: bankId, provider_lineage: scope.namespace.provider_lineage, bank_generation: scope.namespace.bank_generation };
   const result = HindsightTemplateLabelEvidenceResultSchema.parse({ contract_version: HINDSIGHT_TEMPLATE_VERSION, target,
     evidence: [{ contract_version: HINDSIGHT_TEMPLATE_VERSION,
-    target: { ...target }, unit_id: UNIT_ID, unit_revision: 3, unit_payload_hash: native.value.version.payload_hash,
+    target: { ...target }, unit_id: id, unit_revision: 3, unit_payload_hash: native.value.version.payload_hash,
     group_key: "taki-layer" as const, group_definition_hash: templateHash("definition", group), value,
     scope: kind, producer: "taki-structured-label-v1" as const }] });
   const control = { group: group as HindsightTemplateLabelGroup | null, stale: false };
   const method = vi.fn(async () => result);
   const request = vi.fn(() => { if (control.stale) throw new Error("HINDSIGHT_REPLICA_LEASE_LOST"); return { timeoutMs: 1000 }; });
-  const input = { client: { templateLabelEvidence: method }, context, group: () => control.group, request };
+  const input = { client: { templateLabelEvidence: method }, contexts: [context], group: () => control.group, request };
   return { input, result, control, method, group, context, request };
 }
 
+async function loadLabel(input: Parameters<typeof loadHindsightTemplateUnitLabels>[0]) {
+  return (await loadHindsightTemplateUnitLabels(input)).get(input.contexts[0]!.native.native.object_id);
+}
+
 async function firstPolicy(f: ReturnType<typeof fixture>) {
-  const label = await loadHindsightTemplateUnitLabel(f.input);
+  const label = await loadLabel(f.input);
   const context = f.context;
   const result = resolveHindsightApplicationPolicy({ context,
     state: { status: "authenticated-absence", namespace: context.namespace, bankId: context.bank.bankId, native: context.native.native },
@@ -52,6 +56,34 @@ async function firstPolicy(f: ReturnType<typeof fixture>) {
 }
 
 describe("authenticated per-unit template label consumption", () => {
+  it.each(["producer", "missing hash", "invalid UUID", "duplicate invalid proof"])(
+    "isolates %s through the real authenticated client without dropping a valid sibling", async (failure) => {
+      const f = fixture(); const sibling = fixture("global", "profile", OTHER_ID);
+      const invalid = { ...f.result.evidence[0]! };
+      if (failure === "missing hash") Object.assign(invalid, { unit_payload_hash: undefined });
+      else if (failure === "invalid UUID") invalid.unit_id = "invalid-id";
+      else Object.assign(invalid, { producer: "forged" });
+      const response = { ...f.result, evidence: [invalid, ...sibling.result.evidence,
+        ...(failure === "duplicate invalid proof" ? f.result.evidence : [])] };
+      const transport = vi.fn(async (_url: string | URL, init?: RequestInit) => {
+        expect(new Headers(init?.headers).get("Authorization")).toBe("Bearer fixture-key");
+        expect(JSON.parse(String(init?.body)).units).toHaveLength(2);
+        return { status: 200, body: JSON.stringify(response) };
+      });
+      const client = createHindsightClient({ endpoint: "http://127.0.0.1:18481", resolveApiKey: () => "fixture-key", transport });
+      const labels = await loadHindsightTemplateUnitLabels({ ...f.input, client, contexts: [f.context, sibling.context] });
+      expect([...labels.keys()]).toEqual([OTHER_ID]); expect(labels.get(OTHER_ID)?.layerId).toBe("profile");
+      expect(transport).toHaveBeenCalledOnce();
+    });
+
+  it("keeps the shared envelope/count contract while ignoring unsolicited unit proofs", async () => {
+    const f = fixture(); f.result.evidence.push({ ...f.result.evidence[0]!, unit_id: OTHER_ID });
+    expect((await firstPolicy(f)).policy.layerId).toBe("profile");
+    f.result.evidence = Array.from({ length: 257 }, () => ({ ...f.result.evidence[0]! }));
+    Object.assign(f.result.evidence[0]!, { producer: "invalid" });
+    expect((await firstPolicy(f)).policy.layerId).toBe("unclassified");
+  });
+
   it.each(["profile", "activity", "episodes"])("initializes the safe registry policy for %s using one exact requested version", async (layer) => {
     const f = fixture(layer === "episodes" ? "character" : "global", layer);
     const body = await firstPolicy(f);
@@ -91,7 +123,6 @@ describe("authenticated per-unit template label consumption", () => {
     ["selected group", (f: ReturnType<typeof fixture>) => { f.result.evidence[0]!.group_definition_hash = "0".repeat(64); }],
     ["scope", (f: ReturnType<typeof fixture>) => { f.result.evidence[0]!.scope = "character"; }],
     ["duplicate", (f: ReturnType<typeof fixture>) => { f.result.evidence.push(structuredClone(f.result.evidence[0]!)); }],
-    ["unsolicited", (f: ReturnType<typeof fixture>) => { f.result.evidence.push({ ...f.result.evidence[0]!, unit_id: OTHER_ID }); }],
     ["producer", (f: ReturnType<typeof fixture>) => { Object.assign(f.result.evidence[0]!, { producer: "caller-metadata" }); }],
     ["group key", (f: ReturnType<typeof fixture>) => { Object.assign(f.result.evidence[0]!, { group_key: "content-wide" }); }],
     ["missing", (f: ReturnType<typeof fixture>) => { f.result.evidence = []; }],
@@ -142,9 +173,9 @@ describe("authenticated per-unit template label consumption", () => {
 
   it("keeps old clients and non-extraction native IDs neutral", async () => {
     const f = fixture();
-    expect(await loadHindsightTemplateUnitLabel({ ...f.input, client: {} })).toBeUndefined();
+    expect(await loadLabel({ ...f.input, client: {} })).toBeUndefined();
     f.context.native.native.object_id = "old-import-id"; f.context.native.unit.memoryId = "old-import-id";
-    expect(await loadHindsightTemplateUnitLabel(f.input)).toBeUndefined(); expect(f.method).not.toHaveBeenCalled();
+    expect(await loadLabel(f.input)).toBeUndefined(); expect(f.method).not.toHaveBeenCalled();
   });
 
   it.each([new HindsightTemplateRefusal("unsupported_storage"), new HindsightTemplateRefusal("unsupported_value"),
@@ -158,23 +189,23 @@ describe("authenticated per-unit template label consumption", () => {
     new HindsightTemplateRefusal("generation_mismatch"), new Error("unclassified transport failure")])(
     "preserves authentication, lifetime and identity failures: %s", async (error) => {
       const f = fixture(); f.method.mockRejectedValueOnce(error);
-      await expect(loadHindsightTemplateUnitLabel(f.input)).rejects.toBe(error);
+      await expect(loadLabel(f.input)).rejects.toBe(error);
     });
 
   it("rechecks the owner before and after the await, including unsupported responses", async () => {
     const f = fixture(); f.control.stale = true;
-    await expect(loadHindsightTemplateUnitLabel(f.input)).rejects.toThrow("HINDSIGHT_REPLICA_LEASE_LOST");
+    await expect(loadLabel(f.input)).rejects.toThrow("HINDSIGHT_REPLICA_LEASE_LOST");
     expect(f.method).not.toHaveBeenCalled(); f.control.stale = false;
     f.method.mockImplementationOnce(async () => { f.control.stale = true; return f.result; });
-    await expect(loadHindsightTemplateUnitLabel(f.input)).rejects.toThrow("HINDSIGHT_REPLICA_LEASE_LOST");
+    await expect(loadLabel(f.input)).rejects.toThrow("HINDSIGHT_REPLICA_LEASE_LOST");
     f.control.stale = false;
     f.method.mockImplementationOnce(async () => { f.control.stale = true; throw new HindsightTemplateRefusal("unsupported_storage"); });
-    await expect(loadHindsightTemplateUnitLabel(f.input)).rejects.toThrow("HINDSIGHT_REPLICA_LEASE_LOST");
+    await expect(loadLabel(f.input)).rejects.toThrow("HINDSIGHT_REPLICA_LEASE_LOST");
   });
 
   it("refuses selection drift while authenticated evidence is in flight", async () => {
     const f = fixture(); f.method.mockImplementationOnce(async () => { f.group.values!.reverse(); return f.result; });
-    await expect(loadHindsightTemplateUnitLabel(f.input)).rejects.toThrow("MEMORY_TEMPLATE_IDENTITY_CHANGED");
+    await expect(loadLabel(f.input)).rejects.toThrow("MEMORY_TEMPLATE_IDENTITY_CHANGED");
   });
 
   it("uses the real authenticated bounded client and keeps a malformed producer response neutral", async () => {
@@ -183,7 +214,7 @@ describe("authenticated per-unit template label consumption", () => {
       return { status: 200, body: JSON.stringify({ ...f.result, evidence: [{ ...f.result.evidence[0], producer: "forged" }] }) };
     });
     const client = createHindsightClient({ endpoint: "http://127.0.0.1:18481", resolveApiKey: () => "fixture-key", transport });
-    expect(await loadHindsightTemplateUnitLabel({ ...f.input, client })).toBeUndefined();
+    expect(await loadLabel({ ...f.input, client })).toBeUndefined();
     expect(transport).toHaveBeenCalledOnce();
   });
 
@@ -195,6 +226,6 @@ describe("authenticated per-unit template label consumption", () => {
           : valid.replace('"value":"profile"', '"value":"activity","value":"profile"');
       const client = createHindsightClient({ endpoint: "http://127.0.0.1:18481", resolveApiKey: () => "fixture-key",
         transport: async () => ({ status: 200, body: raw }) });
-      expect(await loadHindsightTemplateUnitLabel({ ...f.input, client })).toBeUndefined();
+      expect(await loadLabel({ ...f.input, client })).toBeUndefined();
     });
 });

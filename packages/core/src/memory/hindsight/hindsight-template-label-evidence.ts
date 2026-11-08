@@ -1,11 +1,12 @@
 /**
- * INPUT:  verified native unit, canonical Bank routing and the currently selected complete label group
- * OUTPUT: optional exact-version structured label after bounded authenticated Native evidence validation
- * POS:    core/memory/hindsight — asynchronous first-binding preload; no SQLite writes or caller-label inference
+ * INPUT:  one Bank's verified candidate units and currently selected complete label group
+ * OUTPUT: exact-version labels from one bounded evidence request, isolating invalid IDs and per-unit proofs
+ * POS:    core/memory/hindsight — asynchronous batch preload; selection is rechecked before policy preparation
  */
+import type { z } from "zod";
 import {
-  HINDSIGHT_TEMPLATE_VERSION, HindsightTemplateLabelEvidenceRequestSchema, HindsightTemplateLabelEvidenceResultSchema,
-  HindsightTemplateLabelGroupSchema, type HindsightTemplateLabelGroup,
+  HINDSIGHT_TEMPLATE_VERSION, HindsightTemplateLabelEvidenceRequestSchema,
+  HindsightTemplateLabelGroupSchema, type HindsightTemplateLabelGroup, type HindsightTemplateLabelEvidenceSchema,
 } from "@taki/shared";
 import { getLayer } from "../layer-registry.ts";
 import { hindsightBankBindings } from "./hindsight-bank-identity.ts";
@@ -13,43 +14,60 @@ import type { HindsightClient, HindsightCallContext } from "./hindsight-client.t
 import { HindsightError } from "./hindsight-errors.ts";
 import type { HindsightTrustedUnitLabel } from "./hindsight-application-policy.ts";
 import { requireHindsightPolicyContext, type VerifiedHindsightPolicyContext } from "./hindsight-policy-context.ts";
-import { HindsightTemplateRefusal } from "./hindsight-template-client.ts";
+import { HindsightTemplateRefusal, HindsightTemplateLabelEvidenceResponseSchema } from "./hindsight-template-client.ts";
 import { templateEqual, templateHash } from "./template-lifecycle/template-integrity.ts";
 
 interface Input {
   client: Pick<HindsightClient, "templateLabelEvidence">;
-  context: VerifiedHindsightPolicyContext;
+  contexts: VerifiedHindsightPolicyContext[];
   group(): HindsightTemplateLabelGroup | null;
   request(): HindsightCallContext;
 }
 
 /** A label is consumed only while constructing an original provider-derived policy command. */
-export async function loadHindsightTemplateUnitLabel(input: Input): Promise<HindsightTrustedUnitLabel | undefined> {
+export async function loadHindsightTemplateUnitLabels(input: Input): Promise<Map<string, HindsightTrustedUnitLabel>> {
   input.request();
-  const context = requireHindsightPolicyContext(input.context);
+  const labels = new Map<string, HindsightTrustedUnitLabel>();
   const group = selectedGroup(input.group());
   const method = input.client.templateLabelEvidence;
-  if (!method || !group || !canonicalBank(context)) return undefined;
-  const native = context.native.native;
+  const contexts = input.contexts.map(requireHindsightPolicyContext).filter(canonicalBank);
+  const context = contexts[0];
+  if (!method || !group || !context) return labels;
   const target = { provider_lineage: context.namespace.provider_lineage,
     bank_generation: context.namespace.bank_generation, bank_id: context.bank.bankId };
-  const request = HindsightTemplateLabelEvidenceRequestSchema.safeParse({ contract_version: HINDSIGHT_TEMPLATE_VERSION, target,
-    units: [{ unit_id: native.object_id, unit_revision: native.object_revision, unit_payload_hash: native.payload_hash }] });
   // Older imported IDs may be valid D77 IDs without being Native extraction UUIDs.
-  // They remain usable but cannot gain this structured-extraction evidence.
-  if (!request.success) return undefined;
+  // Exclude them individually so the remaining candidates can still receive labels.
+  const units = contexts.flatMap(({ native: { native } }) => {
+    const unit = HindsightTemplateLabelEvidenceRequestSchema.shape.units.element.safeParse({
+      unit_id: native.object_id, unit_revision: native.object_revision, unit_payload_hash: native.payload_hash });
+    return unit.success ? [unit.data] : [];
+  });
+  const request = HindsightTemplateLabelEvidenceRequestSchema.safeParse({ contract_version: HINDSIGHT_TEMPLATE_VERSION, target, units });
+  if (!request.success || units.length === 0) return labels;
   let response: unknown;
   try { response = await method({ request: request.data, context: input.request() }); }
   catch (error) {
     assertCurrentSelection(input, group);
-    if (missingLabelEvidence(error)) return undefined;
+    if (missingLabelEvidence(error)) return labels;
     throw error;
   }
   assertCurrentSelection(input, group);
-  const parsed = HindsightTemplateLabelEvidenceResultSchema.safeParse(response);
-  if (!parsed.success || !templateEqual(parsed.data.target, target) || parsed.data.evidence.length !== 1) return undefined;
-  const evidence = parsed.data.evidence[0];
-  if (!evidence || !templateEqual(evidence.target, target) || evidence.unit_id !== native.object_id
+  const parsed = HindsightTemplateLabelEvidenceResponseSchema.safeParse(response);
+  if (!parsed.success || !templateEqual(parsed.data.target, target)) return labels;
+  for (const candidate of contexts) {
+    const proofs = parsed.data.evidence.filter((entry) => entry.unit_id === candidate.native.native.object_id);
+    const label = proofs.length === 1 ? trustedLabel(candidate, group, proofs[0]!) : undefined;
+    if (label) labels.set(candidate.native.native.object_id, label);
+  }
+  return labels;
+}
+
+function trustedLabel(context: VerifiedHindsightPolicyContext, group: HindsightTemplateLabelGroup,
+  evidence: z.infer<typeof HindsightTemplateLabelEvidenceSchema>): HindsightTrustedUnitLabel | undefined {
+  const native = context.native.native;
+  const target = { provider_lineage: context.namespace.provider_lineage,
+    bank_generation: context.namespace.bank_generation, bank_id: context.bank.bankId };
+  if (!templateEqual(evidence.target, target) || evidence.unit_id !== native.object_id
     || evidence.unit_revision !== native.object_revision || evidence.unit_payload_hash !== native.payload_hash
     || evidence.scope !== context.bank.scope.kind || evidence.group_definition_hash !== templateHash("definition", group)
     || !group.values?.some((entry) => entry.value === evidence.value) || !oneCanonicalTag(context, evidence.value)) return undefined;

@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { MemoryActivationStatusSchema, type MemoryOperationRequest } from "@taki/shared";
 import { createMemoryOperationRepo } from "../../db/memory-operation-repo.ts";
 import { createHindsightActivationHarness, type HindsightActivationHarness } from "./hindsight-activation-fixture.ts";
+import { readHindsightActivationStatus } from "./hindsight-activation-status.ts";
 
 const harnesses: HindsightActivationHarness[] = [];
 afterEach(async () => { for (const harness of harnesses.splice(0)) await harness.close(); });
@@ -74,5 +75,18 @@ describe("memory.activation.status read", () => {
     const status = h.owner("boot-b").status();
     expect(MemoryActivationStatusSchema.parse(status)).toEqual(status);
     expect(status).toMatchObject({ run: null, operation: { state: "outcome_unknown", reason: "producer_incomplete" }, actions: { activate: true, resume: false, cancelOperationId: null } });
+  });
+
+  it("offers installed-runtime recovery only for the matching committed attempt with incomplete preparation", async () => {
+    const h = harness(); const owner = h.owner();
+    h.binding.runtime.prepareHindsightActivation = async () => { throw new Error("HINDSIGHT_TIMEOUT"); };
+    const failed = await owner.settled(activate(h));
+    expect(failed).toMatchObject({ state: "failed", errorCode: "HINDSIGHT_TIMEOUT", producer: { progress: { phase: "binding" } } });
+    expect(owner.status()).toMatchObject({ runtime: { available: true }, actions: { recoverBinding: true } });
+    if (failed.producer?.kind !== "hindsight") throw new Error("fixture producer missing");
+    const foreign = { ...failed, producer: { ...failed.producer, transactionId: "another-transaction" } };
+    expect(readHindsightActivationStatus({ service: h.service, operations: { latest: () => foreign } }).actions.recoverBinding).toBe(false);
+    const completed = { ...failed, producer: { ...failed.producer, progress: { ...failed.producer.progress, phase: "completed" as const } } };
+    expect(readHindsightActivationStatus({ service: h.service, operations: { latest: () => completed } }).actions.recoverBinding).toBe(false);
   });
 });

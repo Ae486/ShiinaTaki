@@ -42,4 +42,24 @@ describe("memory.activation.status contract", () => {
     expect(MemoryActivationStatusSchema.safeParse({ ...local, runtime: { available: true, unavailableReason: "stopped" } }).success).toBe(false);
     expect(MemoryActivationStatusSchema.safeParse({ ...local, extra: 1 }).success).toBe(false);
   });
+
+  it("permits installed-runtime recovery only for a matching terminal receipt and incomplete producer", () => {
+    const producer = { kind: "hindsight", runId: "run", hindsightEpochId: "epoch-h", transactionId: "tx", configFingerprint: "a".repeat(64),
+      manifestId: null, banks: [], progress: { phase: "binding", bankCount: 0, preparedBankCount: 0, importedBankCount: 0, verifiedBankCount: 0, carriedWitnessCount: 0 } };
+    const failed = { ...operation, state: "failed", reason: "producer_incomplete", terminalAt: at, errorCode: "HINDSIGHT_TIMEOUT", producer };
+    const committed = { ...local, authority: { mode: "hindsight", epochId: "epoch-h" }, operation: failed,
+      run: { ...run, phase: "activated", status: "completed", lease: { active: false, fence: 2, expiresAt: null }, receipt },
+      actions: { ...actions, recoverBinding: true } };
+    expect(MemoryActivationStatusSchema.safeParse(committed).success).toBe(true);
+    for (const changed of [
+      { ...failed, producer: { ...producer, hindsightEpochId: "foreign-epoch" } },
+      { ...failed, producer: { ...producer, transactionId: "foreign-transaction" } },
+      { ...failed, producer: { ...producer, runId: "foreign-run" } },
+      { ...failed, producer: { ...producer, progress: { ...producer.progress, phase: "completed" } } },
+      { ...operation, producer },
+    ]) expect(MemoryActivationStatusSchema.safeParse({ ...committed, operation: changed }).success).toBe(false);
+    expect(MemoryActivationStatusSchema.safeParse({ ...committed, operation: null }).success).toBe(false);
+    expect(MemoryActivationStatusSchema.safeParse({ ...committed, run: { ...committed.run, receipt: null } }).success).toBe(false);
+    expect(MemoryActivationStatusSchema.safeParse({ ...committed, authority: { mode: "hindsight", epochId: "foreign-epoch" } }).success).toBe(false);
+  });
 });

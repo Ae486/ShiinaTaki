@@ -119,8 +119,11 @@ export function readCuratorSource(run: HindsightPolicyCuratorRun, input: {
   assertCuratorPolicyReadable(run, current.scope, target); return target;
 }
 
-export function assertCuratorReviewInputs(review: HindsightPolicyCuratorReview): void {
+export function assertCuratorReviewOpen(review: HindsightPolicyCuratorReview): void {
   review.run.alive(); if (review.closed || review.finished) throw new Error("MEMORY_OPERATION_CANCELLED");
+}
+export function assertCuratorReviewInputs(review: HindsightPolicyCuratorReview): void {
+  assertCuratorReviewOpen(review);
   if (!sameApplicationValue(captureCuratorBlocks(review.run, review.bank), review.blocks)) revision();
   for (const record of review.records.values()) assertCuratorWorkCurrent(review.run, { scope: record.key, target: record.target });
 }

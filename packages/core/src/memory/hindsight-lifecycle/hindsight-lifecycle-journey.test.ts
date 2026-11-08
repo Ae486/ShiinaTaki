@@ -392,13 +392,38 @@ describe("Stage 2c — connection revalidation and rebind", () => {
     await session.runtime.captureRun(JOURNEY_CHARACTER);
     expect(reconnect).toHaveBeenCalledTimes(1);
 
+    const health = vi.spyOn(j.client, "health"); const version = vi.spyOn(j.client, "version");
+    const compatibility = vi.spyOn(j.client, "compatibility");
     expect(await revalidate(session, epochId)).toMatchObject({ state: "completed", result: { outcome: "unchanged" } });
+    expect(health).toHaveBeenCalledOnce(); expect(version).toHaveBeenCalledOnce(); expect(compatibility).toHaveBeenCalledOnce();
     expect(reconnect).toHaveBeenCalledTimes(2);
     expect(subsystems).toHaveLength(1);
   });
 });
 
 describe("Stage 2c — automatic lifecycle triggers", () => {
+  it("completes automatic provisioning after the real Run capture releases its work-fence owner", async () => {
+    const j = journey({ characters: [MIKA], automatic: true });
+    const { session, epochId } = await activatedInstance(j);
+
+    const degraded = await session.runtime.captureRun(MIKA);
+    expect(degraded.snapshot.capabilities.recall).toBe(false);
+    await session.operations.stop();
+
+    const provisions = session.operations.list({ includeTerminal: true, limit: 20 })
+      .filter((operation) => operation.kind === "bank.provision");
+    expect(provisions).toEqual([expect.objectContaining({ state: "completed", errorCode: null,
+      result: { kind: "bank", characterId: MIKA, nativeBankId: MIKA_BANK, readiness: "ready" },
+      producer: expect.objectContaining({ origin: "automatic", phase: "completed", admittedEpochId: epochId }) })]);
+    expect(j.logs).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({ obj: expect.objectContaining({ cause: "MEMORY_AUTHORITY_FENCED" }) }),
+    ]));
+    expect(bank(session, MIKA)).toMatchObject({ readiness: "ready", errorCode: null });
+    const ready = await session.runtime.captureRun(MIKA);
+    expect(ready.snapshot).toMatchObject({ providerId: "hindsight", authorityEpochId: epochId, capabilities: { recall: true } });
+    expect(session.operations.list({ includeTerminal: true, limit: 20 }).filter((operation) => operation.kind === "bank.provision")).toHaveLength(1);
+  });
+
   it("submits one automatic bank.provision per Character and fingerprint, held across restart, and never retries a failed attempt", async () => {
     const j = journey({ characters: [MIKA], automatic: true });
     const { session } = await activatedInstance(j);

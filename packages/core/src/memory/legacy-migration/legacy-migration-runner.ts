@@ -6,7 +6,7 @@
  */
 import type { MemoryMigrationActivation, MemoryMigrationReport, MemoryMigrationStatus, MemoryMigrationVerify } from "@taki/shared";
 import type { Database } from "../../db/sqlite.ts";
-import { activateCanonicalLocal, readMemoryAuthoritySelection } from "./legacy-activation-repo.ts";
+import { activateCanonicalLocal, readCurrentMemoryAuthorityIdentity } from "./legacy-activation-repo.ts";
 import { ensureManifestInventory, publishMigrationBlocks, publishMigrationCandidate, requireMigrationRun } from "./legacy-candidate-repo.ts";
 import { excludeLegacySource, type ExclusionInput } from "./legacy-migration-exclusion.ts";
 import { sourceIdentity } from "./legacy-identities.ts";
@@ -83,7 +83,7 @@ export function createLegacyMigrationRunner(deps: RunnerDeps): LegacyMigrationRu
 function retireUnlessLegacy(db: Database, fence: MemoryAuthorityFence): void {
   // Even the marker read after COMMIT can fail. Only a positively verified legacy selection permits reopening.
   let legacy = false;
-  try { legacy = readMemoryAuthoritySelection(db).mode === "legacy-markdown"; }
+  try { legacy = readCurrentMemoryAuthorityIdentity(db).mode === "legacy-markdown"; }
   finally { if (!legacy) fence.retire(); }
 }
 

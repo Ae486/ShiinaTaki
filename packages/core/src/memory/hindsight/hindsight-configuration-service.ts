@@ -16,7 +16,8 @@ import { HindsightError } from "./hindsight-errors.ts";
 
 export interface HindsightConfigurationService {
   observe(params: HindsightConfigurationParams): Promise<HindsightConfigurationStatus>;
-  status(params: HindsightConfigurationParams): HindsightConfigurationStatus;
+  /** Only the status RPC supplies a freshly captured local view; observe keeps independent before/after reads. */
+  status(params: HindsightConfigurationParams, currentCapture?: HindsightConfigurationCapture | null): HindsightConfigurationStatus;
   dispose(): void;
 }
 export interface HindsightConfigurationServiceDeps {
@@ -49,7 +50,7 @@ export function createHindsightConfigurationService(deps: HindsightConfiguration
   const state: State = { deps, entries: new Map(), monotonic: deps.monotonic ?? (() => performance.now()),
     now: deps.now ?? (() => new Date().toISOString()), nonce: deps.nonce ?? randomUUID, disposed: false,
     sequence: 0, sessions: new Map() };
-  return { status: ({ scope }) => status(state, scope), observe: ({ scope }) => observe(state, scope), dispose: () => {
+  return { status: ({ scope }, currentCapture) => status(state, scope, currentCapture), observe: ({ scope }) => observe(state, scope), dispose: () => {
     state.disposed = true;
     for (const entry of state.entries.values()) entry.controller.abort();
     state.entries.clear();
@@ -78,8 +79,8 @@ function invalidate(entry: Entry, reason: HindsightConfigurationStatus["reason"]
   entry.expires = 0;
 }
 
-function status(state: State, scope: HindsightConfigurationScope): HindsightConfigurationStatus {
-  const current = capture(state, scope);
+function status(state: State, scope: HindsightConfigurationScope, currentCapture?: HindsightConfigurationCapture | null): HindsightConfigurationStatus {
+  const current = state.disposed ? null : currentCapture === undefined ? capture(state, scope) : currentCapture;
   const entry = state.entries.get(JSON.stringify(scope));
   if (!current) return empty(scope, null);
   if (!entry) return empty(scope, current);

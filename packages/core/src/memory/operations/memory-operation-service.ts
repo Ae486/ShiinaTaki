@@ -8,13 +8,16 @@
 import { randomUUID } from "node:crypto";
 import type { MemoryOperation, MemoryOperationListParams, MemoryOperationProducerRef, MemoryOperationRequest } from "@taki/shared";
 import { MemoryTemplateErrorCodeSchema, MemoryTransitionErrorCodeSchema } from "@taki/shared";
+import { HindsightCandidateErrorCodeSchema } from "@taki/shared/hindsight-candidate-domain";
 import { createMemoryOperationRepo, type MemoryOperationRepo } from "../../db/memory-operation-repo.ts";
 import { readReplicaRequest } from "../../db/hindsight-replica-request-repo.ts";
 import type { Database } from "../../db/sqlite.ts";
 import type { Logger } from "../../logging/logger.ts";
-import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
+import { readCurrentMemoryAuthorityIdentity } from "../legacy-migration/legacy-activation-repo.ts";
 import type { HindsightActivationService } from "../hindsight-activation/hindsight-activation-service.ts";
 import type { HindsightBackupService } from "../hindsight-backup/hindsight-backup-service.ts";
+import type { HindsightCandidateService } from "../hindsight-candidates/hindsight-candidate-service.ts";
+import { observeHindsightCandidateOperation } from "../hindsight-candidates/hindsight-candidate-service.ts";
 import type { HindsightLifecycleService } from "../hindsight-lifecycle/hindsight-lifecycle-service.ts";
 import type { HindsightSetupService } from "../hindsight/hindsight-setup-service.ts";
 import type { HindsightTemplateLifecycleService } from "../hindsight/template-lifecycle/template-lifecycle-service.ts";
@@ -52,6 +55,7 @@ export interface MemoryOperationServiceInput {
   lifecycle?: HindsightLifecycleService;
   backup?: HindsightBackupService;
   templates?: HindsightTemplateLifecycleService;
+  candidates?: HindsightCandidateService;
   transition?: MemoryTransitionDriver;
   bootId: string;
   onChanged(operation: MemoryOperation): void;
@@ -72,7 +76,8 @@ export function createMemoryOperationService(input: MemoryOperationServiceInput)
   const owner: Owner = {
     repo, kinds: input.kinds ?? MEMORY_OPERATION_KINDS,
     ctx: { live: input.live, setup: input.setup, local: input.local, hindsight: input.hindsight, lifecycle: input.lifecycle, backup: input.backup,
-      templates: input.templates, transition: input.transition, transitionStorage: createTransitionOperationStorage(input.db),
+      templates: input.templates, candidates: input.candidates, transition: input.transition, transitionStorage: createTransitionOperationStorage(input.db),
+      candidateOutcome: (operationId) => observeHindsightCandidateOperation(input.db, operationId),
       lookup: (operationId) => repo.get(operationId),
       replicaRequest: (requestId) => readReplicaRequest(input.db, requestId),
       activeInFamily: (family) => repo.activeInFamily(family), latestInFamily: (family) => repo.latestInFamily(family), now }, input, inflight: new Map(),
@@ -125,7 +130,7 @@ function submit(owner: Owner, request: MemoryOperationRequest, admission: Memory
           { repo: owner.repo, emergencyOperationId: operationId, epochId: request.expected.predecessorEpochId,
             bankIds: request.expected.banks.map((bank) => bank.sourceBankId), now: ctx.now() });
         admitted = owner.repo.insertAdmitted({ operationId, kind: request.kind, family, request, producer, bootId: owner.input.bootId,
-          authorityEpochId: readMemoryAuthoritySelection(owner.input.db, ctx.admissionVerification).epochId });
+          authorityEpochId: readCurrentMemoryAuthorityIdentity(owner.input.db).epochId });
         handler.persistAdmission?.(admitted, ctx);
       };
       // This lifetime is inside the transaction and ends before notification or async execution.
@@ -141,6 +146,8 @@ function submit(owner: Owner, request: MemoryOperationRequest, admission: Memory
     if (transitionError.success) throw new MemoryOperationRefusal(transitionError.data);
     const templateError = MemoryTemplateErrorCodeSchema.safeParse(error instanceof Error ? error.message : null);
     if (templateError.success) throw new MemoryOperationRefusal(templateError.data);
+    const candidateError = HindsightCandidateErrorCodeSchema.safeParse(error instanceof Error ? error.message : null);
+    if (candidateError.success) throw new MemoryOperationRefusal(candidateError.data);
     if (!(error instanceof Error) || error.message !== "MEMORY_OPERATION_BUSY") throw error;
     throw new MemoryOperationRefusal("MEMORY_OPERATION_BUSY", owner.repo.activeInFamily(family)?.operationId ?? null);
   }

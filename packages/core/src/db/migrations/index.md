@@ -61,3 +61,4 @@
 - 057-memory-transition-emergency.ts — additive immutable emergency capture, incident, surviving evidence, quarantine and foreign branch history; atomic admission trigger replacement.
 - 058-hindsight-template-overlays.ts — immutable exact-incarnation overlay enrollment, before-images, user/catalog/history and CAS applied/default selection; no legacy ownership backfill or second operation journal.
 - 059-hindsight-template-execution.ts — original template plans/admissions, executor CAS, durable holds/receipts/publications, lost-create reservations and monotonic configuration revisions; no legacy ownership backfill.
+- 060-hindsight-candidates.ts — controlling-Core candidate evidence and original request/effect links; empty additive storage, with no archived-Core migration or runtime dispatch.

@@ -34,6 +34,62 @@ afterEach(() => {
 });
 
 describe("Pending Memory repository", () => {
+  it.each([2, 5])("polls one minute after acceptance despite %i prior failed deliveries", (failures) => {
+    const f = fixture(); let row = f.repo.enqueue(intent());
+    const original = pendingMemoryRef(row); const remoteOperationId = row.remoteOperationId;
+    const delays = [60_000, 300_000, 900_000, 3_600_000, 21_600_000];
+    for (let attempt = 0; attempt < failures; attempt++) {
+      const claim = f.claim(row);
+      row = attempt === 0 ? f.repo.progress({ ...claim, change: { kind: "dispatch", preparedMutation: null } }) : claim.record;
+      row = f.repo.progress({ record: row, guard: claim.guard, change: { kind: "retry", code: "HINDSIGHT_UNREACHABLE" } });
+      expect(row).toMatchObject({ acceptedAt: null, attempts: attempt + 1, diagnosticCode: "HINDSIGHT_UNREACHABLE" });
+      expect(Date.parse(row.nextRetryAt!) - Date.parse(f.now())).toBe(delays[attempt]);
+      f.leases.release(claim.guard.lease); f.advance(delays[attempt]!);
+    }
+    const claim = f.claim(row); const acceptedAt = f.now();
+    row = f.repo.progress({ ...claim, change: { kind: "acknowledged" } });
+    row = f.repo.progress({ record: row, guard: claim.guard, change: { kind: "retry", code: "HINDSIGHT_PENDING_REMAINS" } });
+    expect(row).toMatchObject({ acceptedAt, attempts: failures + 1, remoteOperationId, diagnosticCode: "HINDSIGHT_PENDING_REMAINS" });
+    expect(pendingMemoryRef(row)).toEqual(original);
+    expect(Date.parse(row.nextRetryAt!) - Date.parse(acceptedAt)).toBe(60_000);
+  });
+
+  it("spaces stuck Native polls from acceptance through the six-hour cap", () => {
+    const f = fixture(); const first = f.claim(f.repo.enqueue(intent()));
+    let row = f.repo.progress({ ...first, change: { kind: "dispatch", preparedMutation: null } });
+    row = f.repo.progress({ record: row, guard: first.guard, change: { kind: "acknowledged" } });
+    const acceptedAt = row.acceptedAt; let guard = first.guard;
+    // The result read finishes just after acknowledgement, as in the recorded run.
+    f.advance(1);
+    const pollsAtMinutes = [1, 6, 21, 81, 441, 801];
+    for (const [index, delay] of [60_000, 300_000, 900_000, 3_600_000, 21_600_000, 21_600_000].entries()) {
+      row = f.repo.progress({ record: row, guard, change: { kind: "retry", code: "HINDSIGHT_PENDING_REMAINS" } });
+      expect(row).toMatchObject({ phase: "submitted", acceptedAt, attempts: index + 1 });
+      expect(Date.parse(row.nextRetryAt!) - Date.parse(f.now())).toBe(delay);
+      expect(Date.parse(row.nextRetryAt!) - Date.parse(acceptedAt!)).toBe(pollsAtMinutes[index]! * 60_000 + 1);
+      f.leases.release(guard.lease); f.advance(delay);
+      const next = f.claim(row); row = next.record; guard = next.guard;
+    }
+  });
+
+  it.each([
+    { accepted: false, code: "HINDSIGHT_PENDING_REMAINS" as const },
+    { accepted: true, code: "HINDSIGHT_UNREACHABLE" as const },
+  ])("keeps the attempts ladder for accepted=$accepted with $code, including forced claims", ({ accepted, code }) => {
+    const f = fixture(); let row = f.repo.enqueue(intent());
+    for (const [index, delay] of [60_000, 300_000, 900_000].entries()) {
+      const guard = f.guard(); row = f.repo.claim({ record: row, guard, forceRetry: true })!;
+      if (index === 0) {
+        row = f.repo.progress({ record: row, guard, change: { kind: "dispatch", preparedMutation: null } });
+        if (accepted) row = f.repo.progress({ record: row, guard, change: { kind: "acknowledged" } });
+      }
+      row = f.repo.progress({ record: row, guard, change: { kind: "retry", code } });
+      expect(row).toMatchObject({ attempts: index + 1, acceptedAt: accepted ? at : null });
+      expect(Date.parse(row.nextRetryAt!) - Date.parse(f.now())).toBe(delay);
+      f.leases.release(guard.lease);
+    }
+  });
+
   it("persists original identity and payload across reopen and rejects changed idempotency payloads", () => {
     const f = fixture(true); const original = f.repo.enqueue(intent());
     f.advance(20_000); expect(f.repo.enqueue(intent())).toEqual(original);
@@ -169,7 +225,7 @@ describe("Pending Memory repository", () => {
   it("applies the current migration tail after a populated version-34 database and reopens without changes", () => {
     const f = fixture(true, 34); const records = f.db.prepare("SELECT * FROM hindsight_replica_sync_records").all();
     const checkpoints = f.db.prepare("SELECT * FROM hindsight_replica_sync_checkpoints").all();
-    const applied = f.reopen(); expect(applied).toEqual([35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59]);
+    const applied = f.reopen(); expect(applied).toEqual([35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60]);
     const row = f.repo.enqueue(intent()); expect(f.reopen()).toEqual([]);
     expect(f.repo.get(pendingMemoryRef(row))).toEqual(row);
     expect(f.db.prepare("SELECT * FROM hindsight_replica_sync_records").all()).toEqual(records);

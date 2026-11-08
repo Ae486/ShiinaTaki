@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { scriptedGenerateModel } from "../../testing/mock-language-model.ts";
-import { curatorTestFixture, curatorTestAssessDriver, curatorTestPolicy, curatorTestReport, curatorTestRemotePolicy,
+import { curatorTestFixture, curatorTestBank, curatorTestAssessDriver, curatorTestPolicy, curatorTestReport, curatorTestRemotePolicy,
   curatorTestTool, curatorTestAssessment } from "./hindsight-policy-curator-fixtures.ts";
+import { runHindsightPolicyCuratorModel } from "./hindsight-policy-curator-model.ts";
 
 const cleanup: Array<() => void | Promise<void>> = [];
 afterEach(async () => { for (const close of cleanup.splice(0).reverse()) await close(); vi.useRealTimers(); vi.restoreAllMocks(); });
@@ -84,6 +85,131 @@ describe("policy curator cancellation and repeated input admission", () => {
     const running = f.curator.runNow("taki"); await entered.promise; let settled = false;
     const drain = f.curator.settle().then(() => { settled = true; }); await tick(); expect(settled).toBe(false);
     release.resolve(); await drain; expect(await running).toMatchObject({ status: "ran", assessed: 1 }); expect(settled).toBe(true);
+  });
+
+  it("allows an unchanged record's proposal but refuses the stale record and the next model submission", async () => {
+    const bank = curatorTestBank({ memories: [{ id: "memory-a" }, { id: "memory-b" }] });
+    const results: unknown[] = []; let nextStepError: unknown;
+    const f = fixture({ banks: [bank], driver: async (input) => {
+      input.assertInput(); const report = curatorTestReport(input);
+      curatorTestRemotePolicy(bank, "memory-b", (body) => ({ ...body,
+        policy: { ...body.policy, visibility: "hidden", policyVersion: body.policy.policyVersion + 1 } }));
+      await f.deps.refreshBank("bank-a", { timeoutMs: 10_000 });
+      for (const id of ["memory-a", "memory-b"]) {
+        const row = report.policies.find((value) => value.nativeId === id)!;
+        results.push(await curatorTestTool(input, "memory_policy_assess", curatorTestAssessment(row.policy, row.workId)));
+      }
+      try { input.assertInput(); } catch (error) { nextStepError = error; }
+      await curatorTestTool(input, "policy_review_finish"); input.onStepEnd();
+      return { steps: 1, usage: { inputTokens: 11, outputTokens: 7 } };
+    } });
+    expect(await f.curator.runNow("taki")).toMatchObject({ status: "failed", assessed: 1, edits: 1 });
+    expect(results).toMatchObject([{ ok: true, status: "proposal_saved" },
+      { ok: false, code: "MEMORY_REVISION_MISMATCH", message: "The policy proposal was not accepted." }]);
+    expect(nextStepError).toMatchObject({ message: "MEMORY_REVISION_MISMATCH" });
+    expect(curatorTestPolicy(f, bank, "memory-a").assessment.state).toBe("assessed");
+    expect(curatorTestPolicy(f, bank, "memory-b")).toMatchObject({ policy: { visibility: "hidden" }, assessment: { state: "due" } });
+  });
+
+  it("returns the captured Block but prevents its stale tool output reaching the next real AI SDK submission", async () => {
+    const model = scriptedGenerateModel([
+      { kind: "tool", toolCallId: "read", toolName: "block_read", input: { id: "user-card" } },
+      { kind: "tool", toolCallId: "finish", toolName: "policy_review_finish", input: {} },
+    ]);
+    const results: unknown[] = [];
+    const f = fixture({ model, driver: (input) => {
+      const read = input.tools.block_read!.execute!;
+      vi.spyOn(input.tools.block_read!, "execute").mockImplementation(async (...args) => {
+        const result = await read(...args); results.push(result); return result;
+      });
+      return runHindsightPolicyCuratorModel(input);
+    } });
+    const scope = f.banks[0]!.bankScope;
+    f.blocks.replace({ blockId: "user-card", scope, content: "Captured card", actor: "user", now: f.clock.at });
+    const generate = model.doGenerate;
+    vi.spyOn(model, "doGenerate").mockImplementationOnce(async (input) => {
+      const result = await generate(input);
+      f.blocks.replace({ blockId: "user-card", scope, content: "Changed card", actor: "user", now: f.clock.at });
+      return result;
+    });
+    expect(await f.curator.runNow("taki")).toMatchObject({ status: "failed", assessed: 0, edits: 0 });
+    expect(results).toMatchObject([{ ok: true, readOnly: true, value: { content: "Captured card", block_revision: 1 } }]);
+    expect(model.doGenerateCalls).toHaveLength(1);
+    expect(f.blocks.read("user-card", scope)?.content).toBe("Changed card");
+    expect(curatorTestPolicy(f).assessment.state).toBe("failed");
+  });
+
+  it.each(["block", "source"] as const)("refuses Block update when its %s changes before the tool saves", async (changed) => {
+    let result: unknown;
+    const f = fixture({ driver: async (input) => {
+      input.assertInput(); const bank = f.banks[0]!;
+      if (changed === "block") {
+        f.blocks.replace({ blockId: "user-model", scope: bank.bankScope, content: "Newer Block", actor: "background", now: f.clock.at });
+      } else {
+        curatorTestRemotePolicy(bank, "memory-a", (body) => ({ ...body,
+          policy: { ...body.policy, visibility: "hidden", policyVersion: body.policy.policyVersion + 1 } }));
+        await f.deps.refreshBank("bank-a", { timeoutMs: 10_000 });
+      }
+      result = await curatorTestTool(input, "block_update", { id: "user-model", content: "Stale proposal" });
+      input.onStepEnd(); return { steps: 1, usage: { inputTokens: 11, outputTokens: 7 } };
+    } });
+    const save = vi.spyOn(f.work, "saveResult");
+    expect(await f.curator.runNow("taki")).toMatchObject({ status: "failed", blocks: 0, edits: 0 });
+    expect(result).toEqual({ ok: false, code: "MEMORY_REVISION_MISMATCH", message: "The policy proposal was not accepted." });
+    expect(save.mock.calls.filter(([request]) => request.result.kind === "block-update")).toHaveLength(0);
+    expect(f.blocks.read("user-model", f.banks[0]!.bankScope)?.content).toBe(changed === "block" ? "Newer Block" : undefined);
+  });
+
+  it.each(["assessment", "block-update", "block-unchanged"] as const)("refuses a saved %s at publication after its input is hidden", async (kind) => {
+    let proposal: unknown;
+    const f = fixture({ driver: async (input) => {
+      input.assertInput(); const row = curatorTestReport(input).policies[0]!;
+      if (kind === "assessment") proposal = await curatorTestTool(input, "memory_policy_assess", curatorTestAssessment(row.policy, row.workId));
+      if (kind === "block-update") proposal = await curatorTestTool(input, "block_update", { id: "user-model", content: "Supported before restriction" });
+      const finish = await curatorTestTool(input, "policy_review_finish");
+      if (kind === "block-unchanged") proposal = finish;
+      curatorTestRemotePolicy(f.banks[0]!, "memory-a", (body) => ({ ...body,
+        policy: { ...body.policy, visibility: "hidden", policyVersion: body.policy.policyVersion + 1 } }));
+      await f.deps.refreshBank("bank-a", { timeoutMs: 10_000 });
+      input.onStepEnd(); return { steps: 1, usage: { inputTokens: 11, outputTokens: 7 } };
+    } });
+    const save = vi.spyOn(f.work, "saveResult");
+    expect(await f.curator.runNow("taki")).toMatchObject({ status: "failed", assessed: 0, blocks: 0, edits: 0 });
+    expect(proposal).toMatchObject({ ok: true });
+    expect(save.mock.calls.filter(([request]) => request.result.kind === kind)).toHaveLength(1);
+    expect(f.banks[0]!.server.calls).toHaveLength(0);
+    expect(f.blocks.read("user-model", f.banks[0]!.bankScope)).toBeUndefined();
+    expect(curatorTestPolicy(f)).toMatchObject({ policy: { visibility: "hidden" }, assessment: { state: "due" } });
+    expect(f.db.prepare("SELECT state FROM hindsight_policy_work WHERE work_kind=:kind")
+      .get({ kind: kind === "assessment" ? "policy" : "block" })?.state).toBe("superseded");
+  });
+
+  it.each(["finished", "closed"] as const)("refuses every tool callback after the review is %s without accessing SQLite", async (boundary) => {
+    let captured: Parameters<typeof curatorTestAssessDriver>[0] | undefined;
+    const results: unknown[] = [];
+    const invokeLateTools = async (input: Parameters<typeof curatorTestAssessDriver>[0]) => {
+      const row = curatorTestReport(input).policies[0]!;
+      results.push(await curatorTestTool(input, "memory_policy_assess", curatorTestAssessment(row.policy, row.workId)));
+      results.push(await curatorTestTool(input, "block_update", { id: "user-model", content: "Late proposal" }));
+      results.push(await curatorTestTool(input, "block_read", { id: "user-card" }));
+      results.push(await curatorTestTool(input, "policy_review_finish"));
+    };
+    let readsAfterCallbacks = -1;
+    const f = fixture({ driver: async (input) => {
+      captured = input; await curatorTestTool(input, "policy_review_finish");
+      if (boundary === "finished") {
+        prepare.mockClear(); await invokeLateTools(input); readsAfterCallbacks = prepare.mock.calls.length;
+      }
+      input.onStepEnd(); return { steps: 1, usage: { inputTokens: 11, outputTokens: 7 } };
+    } });
+    const prepare = vi.spyOn(f.db, "prepare");
+    await f.curator.runNow("taki"); expect(captured).toBeDefined();
+    if (boundary === "closed") {
+      prepare.mockClear(); await invokeLateTools(captured!); readsAfterCallbacks = prepare.mock.calls.length;
+    }
+    expect(results).toEqual(Array.from({ length: 4 }, () => ({ ok: false, code: "MEMORY_OPERATION_CANCELLED",
+      message: "The policy proposal was not accepted." })));
+    expect(readsAfterCallbacks).toBe(0);
   });
 
   it("bounds the whole pass and leaves a retryable admitted attempt after an abort-ignoring model timeout", async () => {

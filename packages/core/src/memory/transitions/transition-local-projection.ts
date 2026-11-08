@@ -1,6 +1,6 @@
 /**
  * INPUT:  fully verified native/application evidence, a stable Local Bank identity and original object mappings
- * OUTPUT: lossless Local records with translated logical references and preserved or explicit first neutral policies
+ * OUTPUT: shared Memory binding eligibility and lossless Local records with preserved or proved first neutral policies
  * POS:    core/memory/transitions — W3 reconstruction; original provider bytes remain in separate immutable evidence
  */
 import { createHash } from "node:crypto";
@@ -36,6 +36,13 @@ function semantic(value: object): unknown {
   return Object.fromEntries(Object.entries(value).filter(([key]) => key !== "authorityEpochId" && key !== "bankId"));
 }
 export function transitionObjectKey(kind: string, id: string): string { return JSON.stringify([kind, id]); }
+
+/** Admission and reconstruction must agree before emergency can withdraw the source. */
+export function requiresTransitionMemoryPolicy(head: TakiApplicationNativeHead): boolean {
+  if (head.object_kind !== "memory_unit" || !head.version || head.binding_state === "bound") return false;
+  if (head.bound_artifact || head.binding_state !== "binding_missing") invalid();
+  return true;
+}
 
 export function transitionProjectionContext(evidence: MemoryTransitionNativeEvidence, verification?: TransitionEvidenceContext) {
   const bundle = verification ? verification.bundle(evidence) : verifyTransitionNativeEvidence(evidence);
@@ -250,7 +257,7 @@ function projectMemory(value: ValueInput): CanonicalMemoryRecord {
   let record: CanonicalMemoryRecord;
   if (payload?.kind === "memory_unit") record = payload.value;
   else {
-    if (value.head.bound_artifact || value.head.binding_state !== "binding_missing") invalid();
+    if (!requiresTransitionMemoryPolicy(value.head)) invalid();
     if (!value.input.healthyProof) {
       const saved = value.input.survivingPolicies?.get(value.head.object_id);
       if (!saved || saved.record.unit.memoryId !== value.logicalId || saved.record.unit.bankId !== value.bank.bankId) invalid();

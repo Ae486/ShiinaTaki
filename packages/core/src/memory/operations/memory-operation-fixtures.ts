@@ -4,12 +4,13 @@
  * POS:    core/memory/operations — test support; not in the production path
  */
 import { vi } from "vitest";
-import type { HindsightSetupSnapshot, MemoryReplicaBank, MemoryReplicaRequest, MemoryReplicaRunKind, MemoryReplicaSyncStatus } from "@taki/shared";
+import type { HindsightSetupSnapshot, MemoryReplicaBank, MemoryReplicaRequest, MemoryReplicaRunKind, MemoryReplicaSyncStatus, MemoryReplicaScheduleConfig } from "@taki/shared";
 import type { Database } from "../../db/sqlite.ts";
 import { createCanonicalLocalWriteFence } from "../canonical-local-write-fence.ts";
 import type { HindsightSetupService } from "../hindsight/hindsight-setup-service.ts";
 import type { HindsightConnectionDrift } from "../hindsight/hindsight-runtime-connection.ts";
 import type { MemoryOperationsRuntime } from "./memory-operation-contract.ts";
+import { configureReplicaSchedule } from "../../db/hindsight-replica-schedule-state.ts";
 
 export const AT = "2026-09-19T00:00:00.000Z";
 export const GLOBAL: MemoryReplicaBank = { bankId: "global", scope: "global", characterId: null };
@@ -74,6 +75,14 @@ function settleFakeRequest(requests: Map<string, MemoryReplicaRequest>, input: {
     lastSuccessAt: state.lastSuccessAt });
 }
 
+function configureFakeSchedule(states: Map<string, MemoryReplicaSyncStatus>, input: { bankId: string; config: MemoryReplicaScheduleConfig; now: string }) {
+  const current = states.get(input.bankId);
+  if (!current) throw new Error("HINDSIGHT_REPLICA_BANK_NOT_SCHEDULED");
+  const next = { ...current, ...configureReplicaSchedule(current, input.config, input.now) };
+  states.set(input.bankId, next);
+  return next;
+}
+
 function fakeScheduler(banks: MemoryReplicaBank[], clock: () => string) {
   const states = new Map(banks.map((bank) => [bank.bankId, replicaState(bank)]));
   const requests = new Map<string, MemoryReplicaRequest>();
@@ -81,6 +90,7 @@ function fakeScheduler(banks: MemoryReplicaBank[], clock: () => string) {
   const required = (bankId: string) => { const state = states.get(bankId); if (!state) throw new Error("HINDSIGHT_REPLICA_BANK_NOT_SCHEDULED"); return state; };
   const scheduler: FakeScheduler = {
     started: () => control.started,
+    configure: vi.fn((bankId, config) => configureFakeSchedule(states, { bankId, config, now: clock() })),
     start: vi.fn(() => { control.started = true; }),
     stop: vi.fn(async () => { control.started = false; }),
     setStarted: (value) => { control.started = value; },

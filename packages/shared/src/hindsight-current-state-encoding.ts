@@ -28,15 +28,24 @@ function tagged(value: unknown): unknown[] {
 }
 
 function assertUnicode(value: string): void {
-  if (Array.from(value).some((character) => {
-    const point = character.codePointAt(0) ?? 0; return point >= 0xd800 && point <= 0xdfff;
-  })) throw new Error("HINDSIGHT_CURRENT_VALUE_UNSUPPORTED");
+  for (let index = 0; index < value.length; index++) {
+    const unit = value.charCodeAt(index);
+    if (unit < 0xd800 || unit > 0xdfff) continue;
+    const next = value.charCodeAt(++index);
+    if (unit > 0xdbff || !(next >= 0xdc00 && next <= 0xdfff)) throw new Error("HINDSIGHT_CURRENT_VALUE_UNSUPPORTED");
+  }
 }
 
 function compareUtf8(left: string, right: string): number {
-  const encoder = new TextEncoder(); const a = encoder.encode(left); const b = encoder.encode(right);
-  for (let index = 0; index < Math.min(a.length, b.length); index++) {
-    const difference = (a[index] ?? 0) - (b[index] ?? 0); if (difference) return difference;
+  // Keys have already passed Unicode validation. UTF-8 preserves scalar order,
+  // so compare code points without re-encoding both keys on every sort comparison.
+  // UTF-16 code-unit order would put supplementary characters before U+E000.
+  let a = 0; let b = 0;
+  while (a < left.length && b < right.length) {
+    const x = left.codePointAt(a) ?? 0; const y = right.codePointAt(b) ?? 0;
+    if (x !== y) return x - y;
+    a += x > 0xffff ? 2 : 1;
+    b += y > 0xffff ? 2 : 1;
   }
-  return a.length - b.length;
+  return (left.length - a) - (right.length - b);
 }

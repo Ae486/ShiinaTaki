@@ -50,8 +50,10 @@ export function readHindsightTemplateBackupHistory(db: Database, raw: TemplateBa
   return { ...value, selected, historyHash: hindsightBackupHash("history", value) };
 }
 export type HindsightTemplateBackupHistory = ReturnType<typeof readHindsightTemplateBackupHistory>;
+export type HindsightTemplateBackupHistoryReader = (identity: TemplateBankIdentity) => HindsightTemplateBackupHistory;
 
-export function readHindsightTemplateBackupDefaults(db: Database, providerLineage: string) {
+export function readHindsightTemplateBackupDefaults(db: Database, providerLineage: string,
+  readHistory: HindsightTemplateBackupHistoryReader = (identity) => readHindsightTemplateBackupHistory(db, identity)) {
   if (!hasHindsightTemplateHistory(db)) return defaultsResult({ providerLineage, currentRevision: 0, history: [], catalogs: [] });
   const current = readTemplateDefaults(db, providerLineage);
   const pointer = db.prepare("SELECT revision FROM hindsight_template_defaults WHERE provider_lineage=:lineage").get({ lineage: providerLineage });
@@ -64,7 +66,7 @@ export function readHindsightTemplateBackupDefaults(db: Database, providerLineag
       if (revision !== "none" && !readStoredTemplate(db, { revision, scope })) invalid();
     }
     for (const bank of value.banks) {
-      const selection = readHindsightTemplateBackupHistory(db, bank.identity).selections[bank.selectionRevision - 1];
+      const selection = readHistory(bank.identity).selections[bank.selectionRevision - 1];
       const revision = bank.identity.scope === "global" ? value.globalTemplateRevision : value.characterTemplateRevision;
       if (!selection || selection.receipt.receipt_hash !== bank.receiptHash || selection.templateRevision !== revision) invalid();
     }

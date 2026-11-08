@@ -144,6 +144,7 @@ function fakeBinding(db: Database, subsystem: ReturnType<typeof createCanonicalL
         publish(epochId);
         return { binding: "published", reconciledGroups };
       },
+      prepareHindsightActivation: async () => undefined,
     },
   };
   return binding;

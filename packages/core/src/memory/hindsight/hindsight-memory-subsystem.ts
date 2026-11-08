@@ -70,7 +70,8 @@ export function createHindsightMemorySubsystem(input: Input) {
     config: () => ({ memory: input.config, policy: loadHindsightPolicyConfig(input.source.env()) }) });
   const scheduleRepo = createHindsightReplicaSchedulerRepo(input.db, input.now);
   const scheduler = createHindsightReplicaScheduler({ repo: scheduleRepo, replica: state.nativeReplica,
-    banks: runtime.banks, runner: state.service.runner, ownerId: `hindsight:${input.epochId}` });
+    banks: runtime.banks, runner: state.service.runner, ownerId: `hindsight:${input.epochId}`, logger: input.logger });
+  state.writes.setRetryScheduler(scheduler);
   const tidy = createTidyAdapter({ state, curator, view: foreground.tidy, logger: input.logger });
   const maintenance: AutoMemoryMaintenance = { run: async (characterId, origin) => {
     runtime.assertConnection();

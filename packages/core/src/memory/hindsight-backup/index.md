@@ -5,10 +5,10 @@ only below `<dataDir>/backups/`.
 - hindsight-backup-pair.ts — the pure pair verifier (lineage, Bank set and native Bank ids, generations, replica/application cursors, terminal-operation receipt scope and membership; native superset accepted) and the shared operation-list digest
 - hindsight-template-backup-pair.ts — exact v2 copied attestation, complete receipt inventory, original selection and current definition/configuration comparison
 - hindsight-template-backup-integrity.ts — backup-domain hashes, verified full original Apply/snapshot requests and definition projection facets
-- hindsight-template-backup-attestation.ts — copied-Core template/default attestations, verified original selections and complete receipt/terminal-refresh membership; separate healthy and backup cardinality bounds.
-- hindsight-template-backup-history.ts — complete enrollment, user, selection and default history for exact admitted Bank incarnations.
-- hindsight-template-backup-execution.ts — original plan, dispatch, receipt, publication and clear-hold commitments; terminal operation labels cannot erase unpublished effects.
-- hindsight-template-backup-publication.ts — historical runtime selection reconstruction at each original publication's connection revision.
+- hindsight-template-backup-attestation.ts — copied-Core template/default attestations with complete history reuse confined to one synchronous transaction, verified original selections and complete receipt/terminal-refresh membership; separate healthy and backup cardinality bounds.
+- hindsight-template-backup-history.ts — complete enrollment, user, selection and default history for exact admitted Bank incarnations; independent readers with an optional transaction-owned history reader.
+- hindsight-template-backup-execution.ts — original plan, dispatch, receipt, publication and clear-hold commitments over only the requested targets; shared verified history never expands that scope, and terminal operation labels cannot erase unpublished effects.
+- hindsight-template-backup-publication.ts — historical runtime selection reconstruction at each original publication's connection revision, with independent or transaction-owned complete history reads.
 - hindsight-template-backup-observer.ts — authenticated fresh nonce/schema/context-bound Native observation shared by current-target readiness and healthy recovery.
 - hindsight-backup-staging.ts — strict separate v1/v2 staged Core records with exact request, scope and receipt-list binding
 - hindsight-backup-copied-identity.ts — immutable completed Core-copy identity and versioned template evidence, retaining the exact captured authority/configuration/request stamp.
@@ -18,7 +18,7 @@ only below `<dataDir>/backups/`.
 - hindsight-backup-preflight.ts — explicit D91 current-target readiness from fresh authenticated observation and a second immutable Core read-back before writer startup.
 - hindsight-backup-preflight-operator.ts — maintained operator adapter for stopped-copy readiness using the actual endpoint and presence-only current-host secret custody.
 - hindsight-backup-fixtures.ts — test support (not in the production path): manifest, native proof and Core Bank builders
-- hindsight-backup-identity.ts — capture step 3: authority, per-Bank replica/application checkpoints, terminal-operation ids and migration head in one SQLite transaction (lower bounds the native side must meet)
+- hindsight-backup-identity.ts — full source authority/Bank/checkpoint identity; explicit live verification callback is omitted for copied backups
 - hindsight-backup-capture-state.ts — versioned capture admission, immutable-copy comparison and live template/hold/connection revalidation before Native dispatch or sealing.
 - hindsight-backup-capture-connection.ts — exact configured revision/fingerprint/reviewed-mode and complete raw verified Bank setup commitment for capture race refusal.
 - hindsight-backup-receipts.ts — the test-pinned Core terminal write kind -> native receipt table map (ruling 3) and the reader that lists native-confirmed Pending and completed D77 job ids of the current lineage/generation

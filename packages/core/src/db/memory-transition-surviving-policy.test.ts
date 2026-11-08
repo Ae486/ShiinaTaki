@@ -13,6 +13,8 @@ import { MemorySurvivingBankEvidenceSchema } from "@taki/shared";
 import { readSurvivingBaselinePolicies } from "./memory-transition-surviving-policy.ts";
 import * as nativeVerification from "../memory/transitions/transition-native-evidence.ts";
 import * as survivingVerification from "../memory/transitions/transition-surviving-evidence.ts";
+import { readApplicationCheckpoint } from "./hindsight-application-replica-checkpoint.ts";
+import { listApplicationHeads } from "./hindsight-application-replica-heads.ts";
 
 beforeEach(() => { vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(W3_AT); });
 afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); });
@@ -48,6 +50,14 @@ it("reuses only the original committed policy for an exact unchanged missing-pol
     expect(original.unit.documentId).not.toBeNull(); expect(original.unit.sourceMemoryIds).toHaveLength(1);
     const before = { ...h.remote.calls };
     emergency = composeEmergencyFixture(h);
+    const nativeBankId = previous.scopes.find((scope) => scope.localBankId === mapping.localBankId)!.nativeBankId;
+    const checkpoint = readApplicationCheckpoint(h.db, nativeBankId)!;
+    const heads = listApplicationHeads(h.db, { bankId: checkpoint.bankId, namespace: checkpoint.namespace }).map((entry) => entry.head);
+    expect(heads.some((head) => head.object_kind === "memory_unit" && head.binding_state === "bound")).toBe(true);
+    expect(heads.find((head) => head.object_id === "owned-native-observation")?.binding_state).toBe("binding_missing");
+    expect(await emergency.emergency.preview({ kind: "transition.emergency-local" })).toMatchObject({
+      takeover: "eligible", blocking: [], expected: expect.objectContaining({ predecessorEpochId: receipt.newEpochId }),
+    });
     const publish = h.runtime.transitions.publish;
     vi.spyOn(h.runtime.transitions, "publish").mockImplementationOnce((work) => {
       const native = vi.spyOn(nativeVerification, "verifyTransitionNativeEvidence");

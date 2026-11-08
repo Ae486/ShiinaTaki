@@ -7,6 +7,8 @@ import { createHealthyTransitionHarness } from "../../testing/memory-transition-
 import { W3_AT } from "../../testing/memory-transition-candidate-fixtures.ts";
 import { readHindsightConfigurationContext } from "./hindsight-configuration-context.ts";
 import { projectHindsightCompatibilityManifest } from "./hindsight-compatibility-service.ts";
+import { createMemoryStatusObserver } from "../operations/memory-status-observer.ts";
+import * as native from "../transitions/transition-native-evidence.ts";
 
 afterEach(() => vi.useRealTimers());
 
@@ -41,5 +43,18 @@ it("captures actual pinned Bank identity and rejects config ABA, secret, setup a
     const local = readHindsightConfigurationContext(deps, { kind: "global" })!;
     expect(local.contextIdentity).not.toBe(setupChanged.contextIdentity);
     expect(local.bankGeneration).toBeNull();
+    const observer = createMemoryStatusObserver({ db: h.db, runtime: h.runtime });
+    try {
+      observer.read();
+      const verify = vi.spyOn(native, "verifyTransitionNativeEvidence");
+      try {
+        h.db.transaction(() => {
+          expect(readHindsightConfigurationContext(deps, { kind: "global" }, observer.read().selection)).toEqual(local);
+        });
+        expect(verify).not.toHaveBeenCalled();
+        expect(readHindsightConfigurationContext(deps, { kind: "global" })).toEqual(local);
+        expect(verify).toHaveBeenCalled();
+      } finally { verify.mockRestore(); }
+    } finally { observer.close(); }
   } finally { await h.close(); }
 }, 30_000);

@@ -1,7 +1,7 @@
 /**
  * INPUT:  persisted explicit transition receipt marker and immutable publication dependencies
- * OUTPUT: independent boot/recovery validation and service-owned verified observation without candidate reinstallation
- * POS:    core/db — every read retains current publication joins; observation reuses only byte-matched immutable computation
+ * OUTPUT: independent full publication proof without candidate reinstallation
+ * POS:    core/db — complete stored proof and current joins; immutable computation expires with the synchronous boundary
  */
 import { MemoryTransitionPublicationSchema, MemoryTransitionCommonBaselineSchema, type MemoryTransitionPublication, type MemoryEmergencyPublication } from "@taki/shared";
 import { transitionLocalHash } from "../memory/transitions/transition-local-encoding.ts";
@@ -17,47 +17,19 @@ import { transitionPublicationBanks } from "./memory-transition-publication-proo
 import { verifyTransitionCustodyAssignment } from "./memory-transition-custody.ts";
 import { classifyTransitionSources } from "./memory-transition-source-disposition.ts";
 import type { Database } from "./sqlite.ts";
-import { withTransitionEvidenceContext, withTransitionObservationContext, type TransitionEvidenceContext } from "../memory/transitions/transition-evidence-context.ts";
-import { TransitionObservationStore } from "../memory/transitions/transition-observation-store.ts";
+import { withTransitionEvidenceContext, type TransitionEvidenceContext } from "../memory/transitions/transition-evidence-context.ts";
 import { readVerifiedEmergencyPublication } from "./memory-transition-emergency-publication.ts";
 
 export function readVerifiedTransitionPublication(db: Database, receiptId: string, context?: TransitionEvidenceContext): MemoryTransitionPublication | MemoryEmergencyPublication {
-  context?.assertIndependent();
   return withTransitionEvidenceContext(db, (verification) => readVerifiedPublication(db, receiptId, verification), context);
 }
 
-/** Only status owns this scope. It re-runs the entire reader; no selected marker or publication verdict is retained. */
-export function createTransitionPublicationObserver(db: Database) {
-  const store = new TransitionObservationStore(db); let bindingRevision: string | undefined; let closed = false;
-  return {
-    selected: (revision: string): { epochId: string; provider: "local" | "hindsight" } | null => {
-      if (closed) invalid();
-      if (bindingRevision !== revision) { store.reset(); bindingRevision = revision; }
-      try {
-        let selected: { epochId: string; provider: "local" | "hindsight" } | null = null;
-        // A read snapshot prevents an external writer from changing a row between its byte check and later joins.
-        db.transaction(() => {
-          const marker = db.prepare("SELECT * FROM memory_authority_selection WHERE singleton=1").get();
-          if (!marker?.transition_receipt_id) { store.reset(); return; }
-          const value = withTransitionObservationContext({ db, store, receiptId: String(marker.transition_receipt_id) },
-            (verification) => readVerifiedPublication(db, String(marker.transition_receipt_id), verification));
-          const receipt = readTransitionReceipt(db, value.transitionId); if (!receipt) invalid();
-          selected = { epochId: receipt.newEpochId, provider: receipt.identity.targetProvider };
-        });
-        return selected;
-      } catch (error) { store.reset(); throw error; }
-    },
-    reset: () => { store.reset(); bindingRevision = undefined; },
-    close: () => { closed = true; store.close(); bindingRevision = undefined; },
-  };
-}
 function readVerifiedPublication(db: Database, receiptId: string, verification: TransitionEvidenceContext): MemoryTransitionPublication | MemoryEmergencyPublication {
   const row = db.prepare("SELECT * FROM memory_transition_publications WHERE receipt_id=:id").get({ id: receiptId });
   if (!row) invalid();
   const raw = JSON.parse(String(row.publication_json));
-  if (raw.version === 2 && raw.kind === "emergency-surviving") {
-    // Emergency shares only this fresh synchronous boundary. Healthy observer artifacts cannot authorize it.
-    return readVerifiedEmergencyPublication(db, receiptId, verification.isIndependent ? verification : undefined);
+  if (raw?.version === 2 && raw?.kind === "emergency-surviving") {
+    return readVerifiedEmergencyPublication(db, receiptId, verification);
   }
   const value = MemoryTransitionPublicationSchema.parse(raw);
   const { publicationId, ...body } = value;

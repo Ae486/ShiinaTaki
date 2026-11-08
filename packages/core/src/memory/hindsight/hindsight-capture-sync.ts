@@ -44,6 +44,12 @@ export async function synchronizeHindsightCapture(state: HindsightRuntimeState, 
   const drift = run.outcomes.every((outcome) => outcome === "synced") ? "none" : connectionDrift(state);
   if (drift !== "none") return drift;
   const partial = settle(input, run.outcomes);
+  // Capability negotiation precedes the first Bank snapshots. A partial Run can
+  // use the replica only after both routed Banks have their first application binding.
+  if (partial) {
+    const bindings = input.banks.map((bank) => state.replica.bankBinding(bank.bankId));
+    if (bindings.some((binding) => binding === undefined || binding.bindingState === "binding_missing")) return "admission_unavailable";
+  }
   // A readable replica does not prove negotiated capabilities. Missing evidence
   // must not start an implicit coordinator admission without this caller's signal;
   // an unfinished or failed sync degrades this Run instead of refusing the chat turn.

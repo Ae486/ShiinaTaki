@@ -39,8 +39,9 @@ export interface HindsightActivationRunRead {
 }
 export interface HindsightActivationPlanInput { setup: Pick<HindsightSetupService, "status">; fingerprint(): string | null }
 
-export function readHindsightActivationPlan(db: Database, input: HindsightActivationPlanInput): HindsightActivationPlan {
-  const selection = readMemoryAuthoritySelection(db);
+/** Only the operator facade supplies a freshly observed selection; admission/execution retain the default full read. */
+export function readHindsightActivationPlan(db: Database, input: HindsightActivationPlanInput,
+  selection: MemoryAuthoritySelection = readMemoryAuthoritySelection(db)): HindsightActivationPlan {
   const snapshot = input.setup.status();
   const base = { authority: { mode: selection.mode, epochId: selection.epochId, transactionId: selection.transactionId },
     setupPhase: snapshot.phase, setupRevision: snapshot.revision, configured: snapshot.phase === "configured" && snapshot.compatibility !== null,

@@ -482,6 +482,8 @@ export {
   MemoryOperationCancelResultSchema, MemoryOperationSubscribeParamsSchema, MemoryOperationSubscribeResultSchema,
   MemoryOperationChangedSchema, MemoryOperationErrorCodeSchema,
 } from "./memory-operation-schema.ts";
+export { MEMORY_REPLICA_METHODS, MemoryReplicaConfigureParamsSchema, MemoryReplicaConfigureResultSchema, MemoryReplicaChangedSchema } from "./memory-replica-rpc-schema.ts";
+export type { MemoryReplicaConfigureParams, MemoryReplicaConfigureResult, MemoryReplicaChanged } from "./memory-replica-rpc-schema.ts";
 export type {
   MemoryOperationKind, MemoryOperationState, MemoryOperationReason, MemoryOperationRefusalReason, MemoryOperationRequest,
   MemoryOperationProducerRef, MemoryOperationResult, MemoryOperation, MemoryOperationSubmitParams, MemoryOperationSubmitResult,
@@ -625,3 +627,13 @@ export { HINDSIGHT_BACKUP_V2_REQUEST_MAX_BYTES, HINDSIGHT_BACKUP_APPLY_MAX_BYTES
   type HindsightTemplateBackupHashDomain } from "./hindsight-template-backup-encoding.ts";
 export { MemoryTransitionTemplateCommitmentSchema, MemoryTransitionTemplateAssociationSchema,
   type MemoryTransitionTemplateCommitment, type MemoryTransitionTemplateAssociation } from "./memory-transition-template-schema.ts";
+export { HINDSIGHT_CANDIDATE_VERSION, HINDSIGHT_CANDIDATE_PROFILE, HindsightCandidateRefusalReasonSchema, HindsightCandidateSubjectSchema,
+  HindsightCandidateRefusalSchema, HindsightCandidateTableFamilySchema, HindsightCandidateColumnSchema, HindsightCandidateArchiveManifestSchema,
+  HindsightCandidateSchemaInventorySchema, HindsightCandidateTableInventorySchema, HindsightCandidateBankInventorySchema,
+  HindsightCandidateInventorySchema, HindsightCandidateOwnershipSchema, HindsightCandidatePhysicalIdentitySchema,
+  HindsightCandidateRestoredInventorySchema, HindsightCandidateEvidenceSchema, HindsightCandidateVerificationSchema,
+  HindsightCandidateEnvironmentSchema, HindsightCandidateProvenanceSchema,
+  type HindsightCandidateRefusalReason, type HindsightCandidateSubject, type HindsightCandidateRefusal, type HindsightCandidateTableFamily,
+  type HindsightCandidateColumn, type HindsightCandidateArchiveManifest, type HindsightCandidateSchemaInventory, type HindsightCandidateInventory,
+  type HindsightCandidateOwnership, type HindsightCandidatePhysicalIdentity, type HindsightCandidateRestoredInventory,
+  type HindsightCandidateVerification, type HindsightCandidateEnvironment, type HindsightCandidateProvenance } from "./hindsight-candidate-schema.ts";

@@ -24,28 +24,32 @@ function openService() {
 describe("governance policy service", () => {
   it("projects every registered cell/level and supports real optimistic mutations", () => {
     const policy = service();
+    const generation = policy.level().policyGeneration;
     const expected = CANONICAL_GOVERNANCE_REGISTRY.descriptors
       .reduce((count, descriptor) => count + descriptor.cells.length, 0) * 3;
     expect(policy.cells().cells).toHaveLength(expected);
-    expect(policy.setLevel("strict", 1)).toMatchObject({ level: "strict", policyGeneration: 2 });
-    expect(policy.setCell({ key: "screenshot", level: "strict", posture: "deny", expectedPolicyGeneration: 2 })).toMatchObject({ policyGeneration: 3, cell: { effectivePosture: "deny" } });
+    expect(policy.level().registryRevision).toBe(CANONICAL_GOVERNANCE_REGISTRY.registryRevision);
+    expect(policy.setLevel("strict", generation)).toMatchObject({ level: "strict", policyGeneration: generation + 1 });
+    expect(policy.setCell({ key: "screenshot", level: "strict", posture: "deny", expectedPolicyGeneration: generation + 1 })).toMatchObject({ policyGeneration: generation + 2, cell: { effectivePosture: "deny" } });
   });
 
   it("enforces immutable and second-confirm override legality before persistence", () => {
     const policy = service();
-    expect(() => policy.setCell({ key: "fs-write:self-escalation", level: "standard", posture: "auto", expectedPolicyGeneration: 1 })).toThrow(GovernanceMutationError);
-    expect(() => policy.setCell({ key: "exec:blocked", level: "standard", posture: "auto", expectedPolicyGeneration: 1 })).toThrow(/second confirmation/);
-    expect(policy.setCell({ key: "exec:blocked", level: "standard", posture: "auto", expectedPolicyGeneration: 1, secondConfirm: true })).toMatchObject({ policyGeneration: 2, cell: { effectivePosture: "auto" } });
+    const generation = policy.level().policyGeneration;
+    expect(() => policy.setCell({ key: "fs-write:self-escalation", level: "standard", posture: "auto", expectedPolicyGeneration: generation })).toThrow(GovernanceMutationError);
+    expect(() => policy.setCell({ key: "exec:blocked", level: "standard", posture: "auto", expectedPolicyGeneration: generation })).toThrow(/second confirmation/);
+    expect(policy.setCell({ key: "exec:blocked", level: "standard", posture: "auto", expectedPolicyGeneration: generation, secondConfirm: true })).toMatchObject({ policyGeneration: generation + 1, cell: { effectivePosture: "auto" } });
   });
 
   it("normalizes factory-equal requests to reset/no-op, including immutable cells", () => {
     const policy = service();
+    const generation = policy.level().policyGeneration;
     expect(policy.setCell({
-      key: "screenshot", level: "standard", posture: "ask", expectedPolicyGeneration: 1,
-    })).toMatchObject({ policyGeneration: 1, cell: { overridePosture: null, effectivePosture: "ask" } });
+      key: "screenshot", level: "standard", posture: "ask", expectedPolicyGeneration: generation,
+    })).toMatchObject({ policyGeneration: generation, cell: { overridePosture: null, effectivePosture: "ask" } });
     expect(policy.setCell({
-      key: "skill-load", level: "standard", posture: "auto", expectedPolicyGeneration: 1,
-    })).toMatchObject({ policyGeneration: 1, cell: { overridePosture: null, effectivePosture: "auto" } });
+      key: "skill-load", level: "standard", posture: "auto", expectedPolicyGeneration: generation,
+    })).toMatchObject({ policyGeneration: generation, cell: { overridePosture: null, effectivePosture: "auto" } });
   });
 
   it("fails startup closed for current-revision unknown, stale-descriptor, or immutable override rows", () => {
@@ -56,6 +60,8 @@ describe("governance policy service", () => {
     ] as const) {
       const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
       dbs.push(db);
+      // Current-revision corruption must not enter the legitimate old-registry upgrade cleanup.
+      createGovernancePolicyService(createGovernancePolicyRepo(db));
       db.prepare(
         "INSERT INTO governance_cell_overrides (cell_key, level, posture, descriptor_revision, updated_at) " +
         "VALUES (:key, :level, :posture, :descriptorRevision, 't')",

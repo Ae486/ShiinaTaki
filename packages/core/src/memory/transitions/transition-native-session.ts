@@ -28,6 +28,10 @@ export function createTransitionNativeSession(input: TransitionNativeSessionInpu
   requireHindsightApplicationClient(client);
   if (!client.currentSnapshotPage || !client.createCurrentSnapshot) unavailable();
   const active = new Map<string, HindsightTransitionStatus>();
+  // A renewal can race the single decision request for this Bank. Keep only that
+  // in-flight operation so a proven terminal result can settle the old renewal;
+  // this is coordination, never a retry or a second Native request.
+  const resolutions = new Map<string, Promise<HindsightTransitionStatus>>();
   const observe = (status: HindsightTransitionStatus) => {
     recordTransitionNativeObservation(input.db, { ...input.work(), status });
     active.set(status.bank_id, status); input.changed(); return status;
@@ -75,18 +79,51 @@ export function createTransitionNativeSession(input: TransitionNativeSessionInpu
       const command = transitionNativeDecision(input, status, decision);
       if (command.kind !== "decision") invalid();
       markTransitionNativeDispatched(input.db, { ...input.work(), command });
-      return observe(await client.resolveTransition({ bankId, request: command.request, context: input.request() }));
+      const pending = Promise.resolve(client.resolveTransition({ bankId, request: command.request, context: input.request() }))
+        .then((result) => observe(result));
+      resolutions.set(bankId, pending);
+      try { return await pending; }
+      finally { if (resolutions.get(bankId) === pending) resolutions.delete(bankId); }
     },
-    renew: async () => {
-      for (const [bankId, status] of active) {
-        if (status.outcome) continue;
-        // Validate against the dispatched executor first, then reconcile with any newer observation accepted
-        // while this response was pending. A late renewal cannot erase a finalized outcome or revive an old owner.
-        const renewed = await client.renewTransition({ bankId, request: status.executor, context: input.request() });
-        active.set(bankId, acceptRenewal(status, active.get(bankId), renewed));
-      }
-    },
+    renew: () => renewNativeSession(input, active, resolutions),
   };
+}
+
+async function renewNativeSession(input: TransitionNativeSessionInput, active: Map<string, HindsightTransitionStatus>,
+  resolutions: Map<string, Promise<HindsightTransitionStatus>>): Promise<void> {
+  const client = requireHindsightTransitionClient(input.client);
+  for (const [bankId, status] of active) {
+    if (status.outcome) continue;
+    // Both success and refusal can arrive after the original decision response.
+    // Reconcile only that executor's already verified outcome; never renew again.
+    try {
+      const renewed = await client.renewTransition({ bankId, request: status.executor, context: input.request() });
+      active.set(bankId, acceptRenewal(status, active.get(bankId), renewed));
+    } catch (error) {
+      const settled = await isTerminalRenewalRace(input, status, { error, resolving: resolutions.get(bankId), current: () => active.get(bankId) });
+      if (!settled) throw error;
+    }
+  }
+}
+
+async function isTerminalRenewalRace(input: TransitionNativeSessionInput, sent: HindsightTransitionStatus,
+  race: { error: unknown; resolving: Promise<HindsightTransitionStatus> | undefined; current(): HindsightTransitionStatus | undefined }): Promise<boolean> {
+  const { error, resolving } = race;
+  if (!(error instanceof HindsightTransitionRefusal) || error.refusal.reason !== "executor_lost") return false;
+  if (resolving) {
+    try { await resolving; } catch { return false; }
+  }
+  const current = race.current();
+  if (!current || current.bank_id !== sent.bank_id || !current.outcome || current.revision <= sent.revision
+    || hindsightTransitionHash(current.request) !== hindsightTransitionHash(sent.request)
+    || hindsightTransitionHash(current.executor) !== hindsightTransitionHash(sent.executor)
+    || (current.proof === null) !== (sent.proof === null)
+    || current.proof && sent.proof && hindsightTransitionHash(current.proof) !== hindsightTransitionHash(sent.proof)) return false;
+  try {
+    requireStoredNativeDecision(input, current, { disposition: current.outcome.request.disposition,
+      receiptId: current.outcome.request.core_receipt_id });
+    return true;
+  } catch { return false; }
 }
 export type TransitionNativeSession = ReturnType<typeof createTransitionNativeSession>;
 

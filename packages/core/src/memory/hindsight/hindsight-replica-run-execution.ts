@@ -1,11 +1,13 @@
 /**
  * INPUT:  one durable scheduler claim, a replica runner, and a bounded cancellation budget
- * OUTPUT: one absolute run/reset deadline, fenced settlement, and immediate lease revocation on stop or timeout
+ * OUTPUT: fenced settlement, post-failure Pending retry wake, bounded deadline/diagnostics and immediate lease revocation
  * POS:    core/memory/hindsight — execution lifetime; late/uncooperative adapters cannot publish after cancellation
  */
 import type { MemoryReplicaBank, MemoryReplicaErrorCode, MemoryReplicaRunResult, MemoryReplicaScheduledRun } from "@taki/shared";
 import type { HindsightReplicaSchedulerRepo } from "../../db/hindsight-replica-scheduler-repo.ts";
 import type { HindsightReplicaLeaseRepo } from "../../db/hindsight-replica-lease-repo.ts";
+import type { Logger } from "../../logging/logger.ts";
+import { isCanonicalLocalFenced } from "../canonical-local-write-fence.ts";
 import type { HindsightReplicaSchedulerRunner } from "./hindsight-replica-sync-runner.ts";
 import { replicaErrorCode, replicaOwnershipLost, replicaResetRequired } from "./hindsight-replica-errors.ts";
 
@@ -16,6 +18,7 @@ export interface ReplicaRunExecution {
 interface ExecutionInput {
   bank: MemoryReplicaBank; run: MemoryReplicaScheduledRun; repo: HindsightReplicaSchedulerRepo;
   leases: HindsightReplicaLeaseRepo; runner: HindsightReplicaSchedulerRunner; timeoutMs: number;
+  logger?: Logger;
 }
 interface ExecutionState {
   input: ExecutionInput; run: MemoryReplicaScheduledRun; controller: AbortController;
@@ -62,6 +65,11 @@ async function settleExecution(state: ExecutionState, result: Promise<MemoryRepl
       state.settled = true;
     }
   } catch (error) {
+    try {
+      state.input.logger?.warn({ bankId: state.input.bank.bankId, runId: state.run.lease.runId,
+        code: replicaErrorCode(error), cause: isCanonicalLocalFenced(error) ? "MEMORY_AUTHORITY_FENCED" : undefined },
+      "Hindsight scheduled synchronization failed");
+    } catch { /* Diagnostics cannot replace the original run failure or prevent durable settlement. */ }
     if (!state.cancelled && !replicaOwnershipLost(error)) {
       try { failRun(state, replicaErrorCode(error)); }
       catch (cause) { failure = cause; }
@@ -85,5 +93,10 @@ function failRun(state: ExecutionState, errorCode: MemoryReplicaErrorCode): void
       state.input.leases.release(state.run.lease);
       throw error;
     }
+  }
+  if (state.settled && errorCode === "HINDSIGHT_PENDING_REMAINS") {
+    // Failure replaces retryDueAt; requesting while run is active also caps it at lease expiry.
+    const dueAt = state.input.repo.nextPendingRetryAt(state.input.bank.bankId);
+    if (dueAt !== null) state.input.repo.requestRetry(state.input.bank.bankId, dueAt);
   }
 }

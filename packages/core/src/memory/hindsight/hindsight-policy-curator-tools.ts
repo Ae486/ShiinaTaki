@@ -1,6 +1,6 @@
 /**
  * INPUT:  claimed admitted work and its actual effective prompt evidence
- * OUTPUT: a small proposal-only toolset with immutable local result persistence
+ * OUTPUT: live proposal-only tools with addressed-record currentness checks before immutable result persistence
  * POS:    core/memory/hindsight — no native text/lifecycle mutation and no direct Core Block replacement
  */
 import { tool, type ToolSet } from "ai";
@@ -12,7 +12,7 @@ import { policyAssessmentTarget, type HindsightPolicyWorkRecord, type HindsightP
 import { isSafeAutomaticMemoryText } from "../canonical-ingestion-source.ts";
 import { proposeHindsightPolicyAssessment } from "./hindsight-policy-assessment.ts";
 import { HindsightPolicyRefusal } from "./hindsight-policy-context.ts";
-import { assertCuratorReviewInputs } from "./hindsight-policy-curator-targets.ts";
+import { assertCuratorReviewOpen, assertCuratorWorkCurrent } from "./hindsight-policy-curator-targets.ts";
 import { HINDSIGHT_POLICY_FINISH_TOOL } from "./hindsight-policy-curator-prompt.ts";
 import type { HindsightPolicyCuratorReview } from "./hindsight-policy-curator-context.ts";
 
@@ -53,6 +53,7 @@ function assess(review: HindsightPolicyCuratorReview, input: z.infer<typeof Poli
   const { id, ...policy } = input;
   const record = review.records.get(id);
   if (!record || record.target.kind !== "policy") throw new Error("MEMORY_CAPABILITY_UNSUPPORTED");
+  assertCuratorWorkCurrent(review.run, { scope: record.key, target: record.target });
   if (policy.disclosure?.trim() && !isSafeAutomaticMemoryText(policy.disclosure)) throw new Error("MEMORY_INVALID_REQUEST");
   const at = now(review);
   const body = proposeHindsightPolicyAssessment({ ...policyAssessmentTarget(record.key, record.target),
@@ -62,6 +63,7 @@ function assess(review: HindsightPolicyCuratorReview, input: z.infer<typeof Poli
 function updateBlock(review: HindsightPolicyCuratorReview, input: { id: string; content: string }) {
   const record = [...review.records.values()].find((value) => value.target.kind === "block" && value.target.blockId === input.id);
   if (!record || record.target.kind !== "block" || input.id === "user-card") throw new Error("MEMORY_CAPABILITY_UNSUPPORTED");
+  assertCuratorWorkCurrent(review.run, { scope: record.key, target: record.target });
   if (input.content.trim() && !isSafeAutomaticMemoryText(input.content)) throw new Error("MEMORY_INVALID_REQUEST");
   const at = now(review);
   const body = TakiApplicationBlockBodySchema.parse({ block_id: record.target.blockId, scope: record.target.bank.scope,
@@ -75,7 +77,10 @@ function save(review: HindsightPolicyCuratorReview, record: HindsightPolicyWorkR
   return { ok: true, status: "proposal_saved", workId: record.key.workId };
 }
 function guarded(review: HindsightPolicyCuratorReview, action: () => object): object {
-  try { assertCuratorReviewInputs(review); return action(); }
+  try {
+    assertCuratorReviewOpen(review);
+    return action();
+  }
   catch (error) {
     const code = MemoryErrorCodeSchema.safeParse(error instanceof Error ? error.message : "");
     return { ok: false, code: code.success ? code.data : error instanceof HindsightPolicyRefusal ? "MEMORY_INVALID_REQUEST" : "MEMORY_INTERNAL_ERROR",

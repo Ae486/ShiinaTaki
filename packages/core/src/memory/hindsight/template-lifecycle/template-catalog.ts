@@ -10,7 +10,8 @@ import { V1_MEMORY_LAYERS } from "../../layer-registry.ts";
 import { loadTakiBankTemplate, TAKI_BANK_TEMPLATE_REVISION } from "../taki-bank-template-v1.ts";
 import { templateHash } from "./template-integrity.ts";
 
-export const TAKI_MANAGED_TEMPLATE_REVISION = "taki-bank-v2";
+export const TAKI_MANAGED_TEMPLATE_REVISION = "taki-bank-v3";
+export const TAKI_MANAGED_TEMPLATE_REVISIONS = [TAKI_MANAGED_TEMPLATE_REVISION, "taki-bank-v2"] as const;
 export const TemplateCatalogEntrySchema = z.strictObject({
   revision: z.string().min(1).max(256), scope: z.enum(["global", "character"]),
   config: z.strictObject({ retain_mission: HindsightTemplateTextSchema,
@@ -27,24 +28,42 @@ export type TemplateCatalogEntry = z.infer<typeof TemplateCatalogEntrySchema>;
 
 // Cache immutable bytes at module initialization. A caller receives a detached value,
 // and cannot mutate the catalog for a later Bank. New definitions need a new revision.
-const CATALOG = new Map(["global", "character"].map((scope) => {
+const V2_CATALOG = new Map(["global", "character"].map((scope) => {
   const entry = buildEntry(scope === "global" ? "global" : "character");
   const digest = entry.scope === "global" ? "ab5b6584715cacc34b25bddedcbd326897e74e8330b4cd45d59b609d4a59b08b"
     : "ae04cbe36c061760dbd2172cba1297698c256058c318c158934131dca098e183";
   if (templateHash("definition", entry) !== digest) throw new Error("HINDSIGHT_TEMPLATE_INVALID");
   return [entry.scope, JSON.stringify(entry)] as const;
 }));
+const V3_CATALOG = new Map(["global", "character"].map((scope) => {
+  const legacy = buildEntry(scope === "global" ? "global" : "character");
+  const relation = scope === "global" ? "user-wide continuity across Characters" : "this Character-user relationship";
+  const entry = TemplateCatalogEntrySchema.parse({ ...legacy, revision: TAKI_MANAGED_TEMPLATE_REVISION,
+    config: { ...legacy.config, retain_mission: [
+      `Extract durable facts, preferences, experiences, intentions, and corrections that belong to ${relation}.`,
+      "Preserve the source speaker and actor, original time, uncertainty, and conditions.",
+      "A question or suggestion establishes that it was asked or given, not that its premise is true or accepted.",
+      "Do not turn another speaker's questions, guesses, or advice into user facts without supporting source evidence.",
+      "Retain directly observed actions as well as attributed statements.",
+      "Keep plans distinct from completed events, and historical events distinct from current activity or enduring habits.",
+      "Do not add unstated causes, preferences, chronology, or consequences.",
+    ].join(" ") } });
+  const digest = entry.scope === "global" ? "a8f3f2983a8f6325e987a2968d280296fa617620f0582c8fa45e11e5bf1e2fa4"
+    : "8962485fcab581ea7c18b1ac430a0ecc6128e43c17ead09aa64ea4af7dcd30dc";
+  if (templateHash("definition", entry) !== digest) throw new Error("HINDSIGHT_TEMPLATE_INVALID");
+  return [entry.scope, JSON.stringify(entry)] as const;
+}));
 
 export function loadManagedTemplate(revision: string, scope: TemplateCatalogEntry["scope"]): TemplateCatalogEntry {
-  const bytes = CATALOG.get(scope);
-  if (revision !== TAKI_MANAGED_TEMPLATE_REVISION || !bytes) throw new Error("HINDSIGHT_TEMPLATE_INVALID");
+  const bytes = (revision === TAKI_MANAGED_TEMPLATE_REVISION ? V3_CATALOG : revision === "taki-bank-v2" ? V2_CATALOG : null)?.get(scope);
+  if (!bytes) throw new Error("HINDSIGHT_TEMPLATE_INVALID");
   return TemplateCatalogEntrySchema.parse(JSON.parse(bytes));
 }
 
 function buildEntry(scope: TemplateCatalogEntry["scope"]): TemplateCatalogEntry {
   const legacy = loadTakiBankTemplate(TAKI_BANK_TEMPLATE_REVISION, scope).manifest;
   const ownership = scope === "global" ? "global" : "per-character";
-  return TemplateCatalogEntrySchema.parse({ revision: TAKI_MANAGED_TEMPLATE_REVISION, scope,
+  return TemplateCatalogEntrySchema.parse({ revision: "taki-bank-v2", scope,
     config: legacy.bank,
     models: legacy.mental_models?.map((model) => ({ ...model, trigger: model.trigger ?? null })),
     directives: legacy.directives,

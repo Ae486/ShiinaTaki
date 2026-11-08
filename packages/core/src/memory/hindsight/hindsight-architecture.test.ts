@@ -9,9 +9,11 @@ describe("Hindsight B3 architecture", () => {
   it("contains no OS/process/Docker execution or Memory Authority mutation imports", () => {
     const source = readdirSync(DIRECTORY).filter((name) => name.endsWith(".ts") && !name.endsWith(".test.ts"))
       .map((name) => readFileSync(join(DIRECTORY, name), "utf8")).join("\n");
-    for (const forbidden of ["node:child_process", "docker", "activateCanonicalLocal", "bindCanonical(", "memory_authority_selection SET"]) {
+    for (const forbidden of ["node:child_process", "activateCanonicalLocal", "bindCanonical(", "memory_authority_selection SET"]) {
       expect(source.toLowerCase()).not.toContain(forbidden.toLowerCase());
     }
+    // Host-owned Docker identity is data; importing an execution client would cross the Core boundary.
+    expect(source).not.toMatch(/(?:from\s*|import\s*\(|require\s*\()["'][^"']*docker[^"']*["']/i);
     expect(source).not.toMatch(/from ["']node:fs["']/);
   });
 

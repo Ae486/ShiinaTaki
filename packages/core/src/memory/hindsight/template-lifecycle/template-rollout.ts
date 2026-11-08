@@ -14,11 +14,13 @@ import { recordTemplateBankReceipt, recordTemplateDispatch, recordTemplateObserv
 import { publishTemplatePlan } from "./template-publication.ts";
 import type { TemplatePlan, TemplatePlanBank, TemplateObservation, TemplatePublication } from "./template-plan-schema.ts";
 import type { TemplateExecutorLease, TemplateExecutor } from "./template-executor-store.ts";
+import type { MemoryAuthorityVerification } from "../../runtime-authority-verification.ts";
 
 export interface TemplateRuntimeCall {
   plan: TemplatePlan; signal: AbortSignal; assertCurrent(): void;
 }
 export interface TemplateRuntimeControl {
+  verifySelectedAuthority?: MemoryAuthorityVerification["verifySelectedAuthority"];
   quiesce(input: TemplateRuntimeCall): Promise<void>;
   synchronize(input: TemplateRuntimeCall & { bank: TemplatePlanBank }): Promise<void>;
   replaceBinding(epochId: string): Promise<void>;

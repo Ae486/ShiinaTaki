@@ -52,7 +52,7 @@ export function buildEmergencyPublicationProof(db: Database, input: Input) {
 
 /** Called by publishMemoryTransition inside its same outer synchronous transaction. */
 export function publishEmergencyTransition(db: Database, input: Input & { currentTime(): string }, verification: TransitionEvidenceContext): MemoryTransitionReceipt {
-  verification.assertOwner(db); verification.assertIndependent();
+  verification.assertOwner(db);
   const current = boundary(db, input, verification); const { attempt, intent, candidate, incident, custody, queue } = current;
   const proof = attempt.lastEvidenceId ? readTransitionProof(db, attempt.lastEvidenceId) : undefined;
   if (attempt.phase !== "proven" || !proof || transitionLocalHash(proof) !== transitionLocalHash({ ...current.proof, recordedAt: proof.recordedAt })) invalid();
@@ -89,7 +89,6 @@ export function publishEmergencyTransition(db: Database, input: Input & { curren
 }
 
 export function readVerifiedEmergencyPublication(db: Database, receiptId: string, context?: TransitionEvidenceContext): MemoryEmergencyPublication {
-  context?.assertIndependent();
   return withTransitionEvidenceContext(db, (verification) => readEmergencyPublication(db, receiptId, verification), context);
 }
 function readEmergencyPublication(db: Database, receiptId: string, verification: TransitionEvidenceContext): MemoryEmergencyPublication {

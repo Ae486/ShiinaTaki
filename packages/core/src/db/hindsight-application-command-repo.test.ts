@@ -29,6 +29,31 @@ function receiptHash(receipt: TakiApplicationCommitReceipt) {
 }
 
 describe("durable application command preparation", () => {
+  it("finds only unfinished binding jobs in the exact scope, including legacy single-command jobs after reopen", () => {
+    const path = tempPath(); const f = fixture(path);
+    const input = applicationCommandTestInput({ requestId: "binding:legacy" });
+    const original = f.repo.prepare(input);
+    const scope = { authorityEpochId: input.key.authorityEpochId, bankId: input.key.bankId, namespace: input.namespace };
+    f.repo.prepare(applicationCommandTestInput({ requestId: "ordinary-write" }));
+    f.repo.prepare(applicationCommandTestInput({ requestId: "binding:other-bank", scope: { ...APPLICATION_TEST_SCOPE, bankId: "other-bank" } }));
+    const later = f.repo.prepare(applicationCommandTestInput({ requestId: "binding:z-next" }));
+    expect(f.repo.unfinishedBinding(scope)).toEqual(original);
+    const job = f.repo.markDispatched({ key: original.key, revision: original.revision });
+    f.close(); const reopened = fixture(path);
+    expect(reopened.repo.unfinishedBinding(scope)).toEqual(job);
+    const proof = applicationCommandTestReceipt({ job });
+    reopened.repo.recordReceipt({ key: job.key, revision: job.revision, receipt: proof.receipt, affectedVersionsBody: proof.body });
+    expect(reopened.repo.unfinishedBinding(scope)).toEqual(later);
+    const dispatched = reopened.repo.markDispatched({ key: later.key, revision: later.revision });
+    reopened.repo.recordReceipt({ key: later.key, revision: dispatched.revision,
+      receipt: applicationCommandTestReceipt({ job: dispatched, refusal: "artifact_conflict" }).receipt });
+    expect(reopened.repo.unfinishedBinding(scope)).toBeUndefined();
+    expect(reopened.repo.get(original.key)?.request).toEqual(original.request);
+    reopened.control.namespace.bank_generation = randomUUID();
+    expect(() => reopened.repo.unfinishedBinding(scope)).toThrow("MEMORY_AUTHORITY_MISMATCH");
+    expect(reopened.repo.unfinishedBinding({ ...scope, namespace: reopened.control.namespace })).toBeUndefined();
+  });
+
   it("freezes UUID, intent and all raw bodies once and reopens with the exact original wire request", () => {
     const path = tempPath(); const first = fixture(path); const input = applicationCommandTestInput({ content: "Original \uD800 \u0000 source" });
     const job = first.repo.prepare(input);

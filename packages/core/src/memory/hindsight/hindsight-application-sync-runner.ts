@@ -1,9 +1,6 @@
 /**
- * INPUT:  authenticated D77 state, captured authority/Bank leases and complete native/application checkpoints
- * OUTPUT: atomic joint snapshot/event publication through the existing B5 scheduler interface; a binding CAS conflict
- *         re-pulls and retries a bounded number of consecutive times before failing the run; a native head behind Core's
- *         own B5/application checkpoint in the same lineage and generation, reported by reset, page or full/seed initialize,
- *         surfaces as a rollback before any snapshot, never a rebuild or a stale publication
+ * INPUT:  authenticated D77 state, optional admission resolver, authority/Bank leases and paired checkpoints
+ * OUTPUT: atomic paired publication after binding batches, bounded CAS retries and rollback refusal before snapshots
  * POS:    core/memory/hindsight — application-aware pull; policy binding runs between complete pulls, never in SQL transactions
  */
 import { z } from "zod";
@@ -14,7 +11,6 @@ import {
 import type { CanonicalMemoryAuthorityRepo } from "../../db/canonical-memory-authority-repo.ts";
 import type { HindsightApplicationReplicaRepo, HindsightApplicationReplicaCheckpoint } from "../../db/hindsight-application-replica-contract.ts";
 import type { HindsightClient, HindsightCallContext } from "./hindsight-client.ts";
-import type { HindsightCompatibilityWire } from "./hindsight-contracts.ts";
 import { HindsightApplicationRefusal, type HindsightApplicationClient } from "./hindsight-application-client.ts";
 import { HindsightRollbackError } from "./hindsight-cursor-reset.ts";
 import { admitHindsightApplication, requireHindsightApplicationClient } from "./hindsight-application-capability.ts";
@@ -39,8 +35,9 @@ interface Dependencies {
   requestTimeoutMs: number;
   deadlineMs?: number;
   now?: () => string;
+  /** True: a committed batch needs a complete pull. False: all eligible binding work has been exhausted. */
   bind?: (input: HindsightApplicationBindingPass) => Promise<boolean>;
-  onAdmission?: (manifest: HindsightCompatibilityWire) => void;
+  resolveAdmission?: typeof admitHindsightApplication;
 }
 interface Context {
   deps: Dependencies;
@@ -115,8 +112,9 @@ function publicationGuard(context: Context) {
 
 async function synchronize(context: Context, reset: boolean): Promise<MemoryReplicaRunResult> {
   const { deps, input } = context;
-  const admitted = await admitHindsightApplication({ client: context.client, request: context.request, expectedLineage: context.authority.providerLineageId });
-  context.request(); deps.onAdmission?.(admitted.manifest);
+  await (deps.resolveAdmission ?? admitHindsightApplication)({ client: context.client,
+    request: context.request, expectedLineage: context.authority.providerLineageId });
+  context.request();
   let checkpoint = deps.repo.checkpoint(input.bank.bankId);
   if (reset || input.run.kind === "full" || !checkpoint) checkpoint = await full(context, reset);
   else {

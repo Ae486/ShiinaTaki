@@ -8,14 +8,14 @@ W5 owns orchestration. These modules never temporarily select a candidate or man
 - transition-native-loader.ts — authenticated complete native/application/maintenance/auxiliary page and body loading.
 - transition-native-evidence.ts — proof identity, page/hash/count and full original body/history closure verification.
 - transition-local-encoding.ts — lossless internal Local JSON hashes; frozen native wire hashes remain separate.
-- transition-local-projection.ts — stable physical/logical object identity, canonical projection, proved policy initialization and exact surviving Canonical policy reuse without translating logical references twice.
+- transition-local-projection.ts — shared Memory binding eligibility, stable object identity, canonical projection, proved policy initialization and exact surviving policy reuse without translating logical references twice.
 - transition-local-timestamps.ts — Local edit times preserved only by exact baseline/final field and native-reuse evidence.
 - transition-historical-references.ts — genuine native tombstone/source-reference lineage without fake live units.
 - transition-source-aliases.ts — independent append-fragment aliases and ordered exact historical Source references.
 - transition-pending-sources.ts — current awaiting Source evidence for factual W4 custody disposition, never confirmed records.
 - transition-local-candidate.ts — all-Bank isolated Local candidate, stable scope IDs, Blocks/history and common baseline.
-- transition-evidence-context.ts — fresh independent boundaries and isolated healthy observers; byte-checked native/surviving artifacts, separate complete-key frozen Bank projections including explicit policy Map entries, synchronous admission entry time and body/identity/lifetime guards.
-- transition-observation-store.ts — one service/Database/receipt's verified observation artifacts plus the shared pure projection key; dependency pruning, bounded variants and reset/close, never SQL or authority verdicts.
+- transition-evidence-context.ts — fresh synchronous boundaries; byte-checked native/surviving artifacts, separate complete-key frozen Bank projections including explicit policy Map entries, synchronous admission entry time and body/identity/lifetime guards.
+- transition-evidence-artifacts.ts — pure exact-byte comparison, JSON freezing and complete semantic projection keys for one expiring synchronous evidence context; no cross-read store.
 - transition-delta-rows.ts — complete native reuse/upsert/delete descriptors with actual Local retirement evidence.
 - transition-delta-application.ts — complete application inventory and policy/Block changes preserving old artifacts.
 - transition-delta-sources.ts — alias-only Source changes and exact existing/this-delta ordered Memory selectors.
@@ -27,8 +27,8 @@ W5 owns orchestration. These modules never temporarily select a candidate or man
 - transition-queue-mapping.ts — exact target scope, logical identity and original/current CAS revision before dispatch.
 - transition-intent-executor.ts — ordered fresh target requests, actual receipt/refusal recovery and unknown ownership across restart/shutdown.
 - transition-runtime.ts — production composition of drain, proof, COMMIT, native readiness/release, source repair and queued execution.
-- transition-current-identity.ts — current reviewed connection, independent Character coverage, healthy common-baseline and offline emergency identity; optional synchronous evidence context never caches current rows.
-- transition-native-session.ts — exact acquire/claim/verify/decision history; late renewal validates the dispatched request before preserving newer executor/proof/terminal state.
+- transition-current-identity.ts — healthy/emergency full identity capture with read-only surviving closure and predecessor-policy eligibility before admission; standalone DB readers remain independent
+- transition-native-session.ts — exact acquire/claim/verify/decision history; late renewal validates the dispatched request before preserving newer executor/proof/terminal state; a typed executor-lost refusal joins only the original in-flight decision and requires its exact stored terminal proof.
 - transition-native-decision.ts — immutable finalization decisions and proof-bound continuation of an original refused abort.
 - transition-healthy-candidate.ts — complete return candidate or current-Local delta followed by every Bank's final native proof; template-aware reuse preserves immutable documents and freshly observes every original Bank before returning a saved candidate.
 - transition-template-state.ts — complete Core template/default/hold commitments, exact-incarnation association inventory and final synchronous publication revalidation; new Native generations cannot inherit old ownership.

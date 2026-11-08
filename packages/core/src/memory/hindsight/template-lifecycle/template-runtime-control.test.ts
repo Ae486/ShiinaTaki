@@ -83,7 +83,7 @@ describe("durable hold through actual Hindsight runtime owners", () => {
     expect(f.native.calls.filter((call) => call.method === "apply")).toEqual([]);
   });
 
-  it("keeps ordinary admission closed during real private synchronization without Pending replay or early runtime admission", async () => {
+  it.each(["complete", "expired", "stopped"] as const)("keeps private synchronization guarded when its executor is %s", async (outcome) => {
     const { f, model } = fixture(); const runtime = f.base.compose();
     await runtime.captureRun("taki");
     const pending = seedPending(f);
@@ -100,17 +100,51 @@ describe("durable hold through actual Hindsight runtime owners", () => {
     const entered = deferred(); const release = deferred(); cleanup.push(release.resolve);
     f.base.remote.control.beforeChanges = async () => { entered.resolve(); await release.promise; };
     const syncing = runtime.templates.synchronize({ ...input, bank });
+    const result = syncing.then(() => null, (error: unknown) => error);
     await entered.promise;
     expect((await runtime.captureRun("taki")).tools).toEqual({});
     expect(() => createHindsightRuntimeConnection({ db: f.db, epochId: "epoch", config: f.deps.config,
       secrets: f.deps.secrets, client: f.native.client })).toThrow("MEMORY_TEMPLATE_HOLD");
     expect(readTemplateHold(f.db, plan.planId)?.state).toBe("active");
-    release.resolve(); await syncing;
+    const checkpoints = f.db.prepare("SELECT * FROM hindsight_application_replica_checkpoints").all();
+    if (outcome === "expired") f.state.now = new Date(lease.deadlineMs + 1).toISOString();
+    const stopping = outcome === "stopped" ? runtime.stop() : Promise.resolve();
+    release.resolve();
+    if (outcome === "complete") expect(await result).toBeNull();
+    else {
+      expect(await result).toBeInstanceOf(Error);
+      expect(f.db.prepare("SELECT * FROM hindsight_application_replica_checkpoints").all()).toEqual(checkpoints);
+    }
+    await stopping;
     expect(f.db.prepare("SELECT * FROM pending_memory").all()).toEqual(beforePending);
     expect(f.db.prepare("SELECT * FROM hindsight_application_runtime_admission").all()).toEqual(admissions);
     expect(pending.phase).toBe("queued"); expect(runtime.operations()).toBeNull();
     expect(model.doGenerateCalls).toHaveLength(0);
     expect(f.base.remote.calls.some((call) => call.operation.includes("/native/") || call.operation.includes("retain"))).toBe(false);
+  });
+
+  it("keeps holds current and rejects historical template damage at full construction", async () => {
+    const { f } = fixture();
+    const operation = f.owner.submit(await f.request()); await f.owner.stop();
+    expect(f.owner.status(operation.operationId).state).toBe("completed");
+    const runtime = createHindsightRuntimeConnection({ db: f.db, epochId: "epoch", config: f.deps.config,
+      secrets: f.deps.secrets, client: f.native.client });
+    try {
+      runtime.assertConnection(); runtime.assertConnection();
+      f.db.exec("DROP TRIGGER hindsight_template_bases_immutable_update");
+      const rollback = new Error("restore template fixture");
+      expect(() => f.db.transaction(() => {
+        f.db.prepare("UPDATE hindsight_template_bases SET document_hash=:hash").run({ hash: "0".repeat(64) });
+        expect(() => runtime.assertConnection()).not.toThrow();
+        expect(() => createHindsightRuntimeConnection({ db: f.db, epochId: "epoch", config: f.deps.config,
+          secrets: f.deps.secrets, client: f.native.client })).toThrow("HINDSIGHT_RESPONSE_INVALID");
+        throw rollback;
+      })).toThrow(rollback);
+      runtime.assertConnection();
+      f.admit(await f.request());
+      expect(runtime.driftReason()).toBe("template_hold");
+      expect(() => runtime.assertConnection()).toThrow("MEMORY_TEMPLATE_HOLD");
+    } finally { runtime.stop(); }
   });
 });
 

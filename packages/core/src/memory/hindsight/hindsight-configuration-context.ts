@@ -12,7 +12,7 @@ import { createHindsightConnectionRepo } from "../../db/hindsight-connection-rep
 import { readApplicationCheckpoint } from "../../db/hindsight-application-replica-checkpoint.ts";
 import { readReplicaCheckpoint } from "../../db/hindsight-replica-checkpoint-store.ts";
 import type { Database } from "../../db/sqlite.ts";
-import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
+import { readCurrentMemoryAuthorityIdentity, type MemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
 import { hindsightBankBindings } from "./hindsight-bank-identity.ts";
 import { hindsightConnectionFingerprint } from "./hindsight-compatibility-service.ts";
 import type { HindsightConnectionSecret } from "./hindsight-setup-service.ts";
@@ -34,7 +34,7 @@ export interface HindsightConfigurationContextDeps {
 }
 
 export function readHindsightConfigurationContext(deps: HindsightConfigurationContextDeps,
-  scope: HindsightConfigurationScope): HindsightConfigurationCapture | null {
+  scope: HindsightConfigurationScope, selection?: MemoryAuthoritySelection): HindsightConfigurationCapture | null {
   const config = resolveHindsightConfig(deps.config);
   if (config.state !== "ready") return null;
   const connectionFingerprint = hindsightConnectionFingerprint(config.projection, deps.secret.marker());
@@ -44,7 +44,8 @@ export function readHindsightConfigurationContext(deps: HindsightConfigurationCo
   const setup = createHindsightConnectionRepo(deps.db).read(banks.list());
   const bank = banks.get(binding.canonicalIdentity);
   const bankId = bank?.externalBankId ?? binding.externalBankId;
-  const selected = readMemoryAuthoritySelection(deps.db);
+  // Both status and network observation compare current control identity, not historical publication proof.
+  const selected = selection ?? readCurrentMemoryAuthorityIdentity(deps.db);
   const native = readReplicaCheckpoint(deps.db, bankId);
   const application = readApplicationCheckpoint(deps.db, bankId);
   const active = selected.mode === "hindsight";

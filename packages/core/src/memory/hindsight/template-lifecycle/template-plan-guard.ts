@@ -12,7 +12,8 @@ import { createHindsightBankSetupRepo } from "../../../db/hindsight-bank-setup-r
 import { createHindsightConnectionRepo } from "../../../db/hindsight-connection-repo.ts";
 import type { Database } from "../../../db/sqlite.ts";
 import type { SecretCatalogService } from "../../../secrets/secret-catalog-service.ts";
-import { readMemoryAuthoritySelection } from "../../legacy-migration/legacy-activation-repo.ts";
+import { readMemoryAuthoritySelection, type MemoryAuthoritySelection } from "../../legacy-migration/legacy-activation-repo.ts";
+import type { MemoryAuthorityVerification } from "../../runtime-authority-verification.ts";
 import { readHindsightLiveProjection } from "../hindsight-runtime-connection.ts";
 import { createHindsightConnectionSecret } from "../hindsight-secret-refs.ts";
 import { readTemplateDefaults } from "./template-default-store.ts";
@@ -22,7 +23,8 @@ import { TemplatePlanGuardSchema, type TemplatePlan, type TemplatePlanGuard, typ
 import { readTemplateEnrollment, readTemplateUser } from "./template-overlay-history.ts";
 import { readAppliedTemplateSelection } from "./template-overlay-store.ts";
 
-export interface TemplateGuardDependencies { db: Database; config: ConfigSource; secrets: SecretCatalogService }
+export interface TemplateGuardDependencies { db: Database; config: ConfigSource; secrets: SecretCatalogService;
+  verifySelectedAuthority?: MemoryAuthorityVerification["verifySelectedAuthority"] }
 
 export function captureTemplatePlanGuard(deps: TemplateGuardDependencies, manifestHash: string,
   provision?: Pick<TemplatePlanGuard["banks"][number], "identity" | "namespace">): TemplatePlanGuard {
@@ -32,7 +34,12 @@ export function captureTemplatePlanGuard(deps: TemplateGuardDependencies, manife
 /** Capture local identity before awaiting compatibility; its eventual manifest hash cannot conceal intervening drift. */
 export function captureTemplateLocalGuard(deps: TemplateGuardDependencies,
   provision?: Pick<TemplatePlanGuard["banks"][number], "identity" | "namespace">): Omit<TemplatePlanGuard, "manifestHash"> {
-  const selection = readMemoryAuthoritySelection(deps.db);
+  return captureLocalGuard(deps, provision, deps.verifySelectedAuthority?.() ?? readMemoryAuthoritySelection(deps.db));
+}
+
+function captureLocalGuard(deps: TemplateGuardDependencies,
+  provision: Pick<TemplatePlanGuard["banks"][number], "identity" | "namespace"> | undefined,
+  selection: MemoryAuthoritySelection): Omit<TemplatePlanGuard, "manifestHash"> {
   if (selection.mode !== "hindsight" || !selection.epochId) changed();
   const epoch = createCanonicalMemoryAuthorityRepo(deps.db).authorityEpoch(selection.epochId);
   const live = readHindsightLiveProjection(deps);
@@ -59,9 +66,12 @@ export function captureTemplateLocalGuard(deps: TemplateGuardDependencies,
     provisionBankId: provision?.identity.target.bank_id ?? null, banks });
 }
 
-export function assertTemplateLocalPlan(deps: TemplateGuardDependencies, input: { plan: TemplatePlan; publication?: TemplatePublication }): void {
+/** Observed selection is confined to recovery availability; execution keeps the independent default read. */
+export function assertTemplateLocalPlan(deps: TemplateGuardDependencies, input: { plan: TemplatePlan; publication?: TemplatePublication },
+  observedSelection?: MemoryAuthoritySelection): void {
   const provision = input.plan.guard.banks.find((entry) => entry.identity.target.bank_id === input.plan.guard.provisionBankId);
-  const current = captureTemplatePlanGuard(deps, input.plan.guard.manifestHash, provision);
+  const current = TemplatePlanGuardSchema.parse({
+    ...captureLocalGuard(deps, provision, observedSelection ?? deps.verifySelectedAuthority?.() ?? readMemoryAuthoritySelection(deps.db)), manifestHash: input.plan.guard.manifestHash });
   const expected: TemplatePlanGuard = input.publication ? { ...input.plan.guard,
     connectionRevision: input.publication.connectionRevision, defaultsRevision: input.publication.defaultsRevision,
     banks: input.plan.guard.banks.map((entry) => ({ ...entry, setup: publishedTemplateBankSetup(input.plan, entry.setup, input.publication!.committedAt) })),

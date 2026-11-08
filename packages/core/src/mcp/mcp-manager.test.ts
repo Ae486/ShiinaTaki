@@ -202,7 +202,7 @@ describe("createMcpManager", () => {
     const called: string[] = [];
     const service = policy();
     service.setCell({
-      key: "mcp-tool-call", level: "standard", posture: "auto", expectedPolicyGeneration: 1,
+      key: "mcp-tool-call", level: "standard", posture: "auto", expectedPolicyGeneration: service.level().policyGeneration,
     });
     const transport = new InMemoryTransport([ECHO_TOOL], (msg) => {
       called.push(msg.params.name);
@@ -220,7 +220,7 @@ describe("createMcpManager", () => {
 
   it("uses raw server/tool sidecars as authority instead of the model-facing key", async () => {
     const base = policy();
-    base.setCell({ key: "mcp-tool-call", level: "standard", posture: "auto", expectedPolicyGeneration: 1 });
+    base.setCell({ key: "mcp-tool-call", level: "standard", posture: "auto", expectedPolicyGeneration: base.level().policyGeneration });
     const seen: Parameters<GovernancePolicyService["authorize"]>[0][] = [];
     const service: GovernancePolicyService = {
       ...base,
@@ -295,7 +295,7 @@ describe("createMcpManager", () => {
   it("intersects legacy deny-only compatibility before the raw call", async () => {
     const called: string[] = [];
     const service = policy();
-    service.setCell({ key: "mcp-tool-call", level: "standard", posture: "auto", expectedPolicyGeneration: 1 });
+    service.setCell({ key: "mcp-tool-call", level: "standard", posture: "auto", expectedPolicyGeneration: service.level().policyGeneration });
     const transport = new InMemoryTransport([ECHO_TOOL], (msg) => {
       called.push(msg.params.name);
       return echoOk(msg);

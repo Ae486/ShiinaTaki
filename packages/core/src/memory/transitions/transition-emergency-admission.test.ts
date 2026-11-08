@@ -12,6 +12,7 @@ import { W3_AT } from "../../testing/memory-transition-candidate-fixtures.ts";
 import type { TransitionEvidenceContext } from "./transition-evidence-context.ts";
 import * as identity from "./transition-current-identity.ts";
 import * as native from "./transition-native-evidence.ts";
+import { appendUnboundEmergencyMemory } from "../../testing/memory-transition-emergency-service-fixtures.ts";
 
 beforeEach(() => { vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(W3_AT); });
 afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); });
@@ -42,6 +43,32 @@ async function fixture() {
 }
 
 describe("offline emergency admission confirmation time", () => {
+  it.each(["before-submit", "second-plan"] as const)("refuses newly unusable policy evidence at %s without admission or retirement", async (boundary) => {
+    const f = await fixture();
+    try {
+      const before = f.rows(); const remoteBefore = { ...f.h.remote.calls };
+      const binding = f.h.runtime.hindsightBindingSnapshot();
+      const admitted = vi.spyOn(f.service, "emergencyAdmitted");
+      const retired = vi.spyOn(f.h.runtime.transitions, "emergencyQuiesce");
+      const execute = vi.spyOn(f.service, "execute");
+      const append = () => appendUnboundEmergencyMemory(f.h.db, f.request.expected.banks[0]!.sourceBankId);
+      if (boundary === "before-submit") append();
+      else {
+        const plan = f.service.plan; let count = 0;
+        vi.spyOn(f.service, "plan").mockImplementation((...args) => {
+          if (++count === 2) append();
+          return plan(...args);
+        });
+      }
+      expect(() => f.owner.submit(f.request)).toThrow(/MEMORY_TRANSITION_(?:STALE|PROOF_INVALID)/);
+      expect(f.rows()).toEqual(before);
+      expect(admitted).not.toHaveBeenCalled(); expect(retired).not.toHaveBeenCalled(); expect(execute).not.toHaveBeenCalled();
+      expect(f.h.runtime.hindsightBindingSnapshot()).toEqual(binding);
+      expect(f.h.runtime.hasPublishedBinding("hindsight")).toBe(true);
+      expect(f.h.remote.calls).toEqual(remoteBefore);
+    } finally { await f.close(); }
+  }, 30_000);
+
   it("accepts a 6ms-old confirmation when both actual synchronous plans cross its 120s window", async () => {
     const f = await fixture();
     try {
@@ -105,7 +132,9 @@ describe("offline emergency admission confirmation time", () => {
           }
           return plan(...args);
         });
-        expect(() => f.owner.submit(f.request)).toThrow(/MEMORY_TRANSITION_(?:STALE|UNAVAILABLE|PROOF_INVALID)/);
+        const refusal = change === "epoch" ? "MEMORY_INTEGRITY_ERROR: authority epoch is closed"
+          : /MEMORY_TRANSITION_(?:STALE|UNAVAILABLE|PROOF_INVALID)/;
+        expect(() => f.owner.submit(f.request)).toThrow(refusal);
         expect(count).toBe(2); expect(execute).not.toHaveBeenCalled(); expect(f.rows()).toEqual(before);
         expect(f.h.remote.calls).toEqual(remoteBefore);
         expect(f.h.db.prepare("SELECT id FROM memory_transition_previews WHERE id=:id").get({ id: f.request.previewId })).toBeDefined();

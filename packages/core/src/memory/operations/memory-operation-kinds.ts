@@ -17,6 +17,7 @@ import { replicaSyncKind } from "./memory-operation-kind-replica.ts";
 import { setupApplyKind, setupValidateKind } from "./memory-operation-kind-setup.ts";
 import { transitionKind } from "./memory-operation-kind-transition.ts";
 import { templateKind } from "./memory-operation-kind-template.ts";
+import { candidateKind } from "./memory-operation-kind-candidate.ts";
 
 export type MemoryOperationKindRegistry = {
   [K in MemoryOperationKind]: MemoryOperationKindHandler<Extract<MemoryOperationRequest, { kind: K }>>;
@@ -39,6 +40,9 @@ export const MEMORY_OPERATION_KINDS: MemoryOperationKindRegistry = {
   "transition.emergency-local": transitionKind,
   "template.apply": templateKind,
   "template.recover": templateKind,
+  "candidate.prepare": candidateKind,
+  "candidate.inspect": candidateKind,
+  "candidate.resume": candidateKind,
 };
 
 /** Erases the per-kind request narrowing at the dispatch boundary; the service only ever passes a request of the matching kind. */

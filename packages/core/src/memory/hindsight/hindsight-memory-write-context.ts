@@ -18,6 +18,7 @@ import { hindsightApplicationDeadline } from "./hindsight-application-body-trans
 import { hindsightApplicationArtifactVersion, hindsightApplicationEvidenceReader } from "./hindsight-application-binding-context.ts";
 import { readHindsightApplicationNative } from "./hindsight-application-projection.ts";
 import { sameApplicationValue } from "./hindsight-application-integrity.ts";
+import { hindsightError } from "./hindsight-errors.ts";
 
 export interface HindsightMemoryWriteDeps {
   db: Database; epochId: string; journal: HindsightMemoryWriteRepo; replica: HindsightApplicationReplicaRepo;
@@ -31,6 +32,8 @@ export interface HindsightMemoryWriteDeps {
 export interface HindsightMemoryWriteContext {
   deps: HindsightMemoryWriteDeps; identity: HindsightMemoryWriteIdentity; bank: CanonicalMemoryBank; route: MemoryReplicaBank;
   request(): HindsightCallContext;
+  /** Local receipt readback keeps cancellation and Authority guards without spending an expired I/O budget. */
+  assertActive(): void;
 }
 export interface HindsightMemoryWriteAdvance {
   bankId: string; context: HindsightCallContext;
@@ -50,8 +53,12 @@ export function captureHindsightMemoryWrite(deps: HindsightMemoryWriteDeps, inpu
   const identity: HindsightMemoryWriteIdentity = { key: { authorityEpochId: deps.epochId, bankId, requestId: input.call.requestId },
     namespace: bound.namespace, actor: input.call.actor, operation: input.operation };
   const remaining = hindsightApplicationDeadline({ timeoutMs: deps.requestTimeoutMs, signal: input.call.signal });
-  const request = () => { const context = remaining(); deps.assertActive(identity); return context; };
-  request(); return { deps, identity, bank: bound.bank, route, request };
+  const assertActive = () => {
+    if (input.call.signal?.aborted) throw hindsightError("HINDSIGHT_CANCELLED");
+    deps.assertActive(identity);
+  };
+  const request = () => { const context = remaining(); assertActive(); return context; };
+  request(); return { deps, identity, bank: bound.bank, route, request, assertActive };
 }
 
 export function readHindsightMemoryWriteTarget(deps: HindsightMemoryWriteDeps, input: {

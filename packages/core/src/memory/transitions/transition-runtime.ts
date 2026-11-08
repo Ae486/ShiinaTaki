@@ -9,7 +9,6 @@ import { readTransitionReceipt } from "../../db/memory-transition-evidence-repo.
 import { readTransitionResolution } from "../../db/memory-transition-recovery-repo.ts";
 import { publishMemoryTransition } from "../../db/memory-transition-publication-repo.ts";
 import { buildTransitionPublicationProof } from "../../db/memory-transition-publication-proof.ts";
-import { readVerifiedTransitionPublication } from "../../db/memory-transition-publication-reader.ts";
 import { recordTransitionNativeOutcome, readTransitionNativeRelease } from "../../db/memory-transition-native-outcome.ts";
 import { abortMemoryTransition } from "../../db/memory-transition-abort.ts";
 import { transitionLocalHash } from "./transition-local-encoding.ts";
@@ -18,17 +17,18 @@ import type { PrimaryMemoryCustody } from "../../db/primary-memory-custody-repo.
 import type { LocalRuntimeBinding } from "../local-runtime-binding.ts";
 import type { HindsightRuntimeBinding } from "../hindsight-runtime-binding.ts";
 import type { SelectedMemoryRuntime } from "../runtime-selector.ts";
-import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
+import type { MemoryAuthorityVerification } from "../runtime-authority-verification.ts";
 import { transitionIsQuarantined } from "../../db/memory-transition-emergency-quarantine.ts";
 import { createTransitionIntentExecutor } from "./transition-intent-executor.ts";
 
 interface Dependencies { db: Database; local: LocalRuntimeBinding; hindsight: HindsightRuntimeBinding;
+  authority: MemoryAuthorityVerification;
   selected: SelectedMemoryRuntime; custody: PrimaryMemoryCustody; alive(): void; settle(): Promise<void>; startHindsight(): void;
   retireBackground?(): void }
 
 export function createMemoryTransitionRuntime(input: Dependencies) {
-  const executor = createTransitionIntentExecutor({ db: input.db, provider: (epochId) => {
-    input.alive(); const selected = readMemoryAuthoritySelection(input.db);
+  const executor = createTransitionIntentExecutor({ db: input.db, verifyTransitionPublication: input.authority.verifyTransitionPublication, provider: (epochId) => {
+    input.alive(); const selected = input.authority.verifySelectedAuthority();
     if (selected.epochId !== epochId) throw new Error("MEMORY_AUTHORITY_MISMATCH");
     if (selected.mode === "hindsight") {
       const runtime = input.hindsight.current();
@@ -48,9 +48,10 @@ export function createMemoryTransitionRuntime(input: Dependencies) {
   const quarantinedEpochs = new Set<string>();
   const alive = () => { input.alive(); if (stopped) throw new Error("MEMORY_OPERATION_CANCELLED"); };
   return {
+    ...input.authority,
     emergencyQuiesce: (epochId: string) => {
       alive();
-      const selection = readMemoryAuthoritySelection(input.db);
+      const selection = input.authority.verifySelectedAuthority();
       if (selection.mode === "hindsight" && selection.epochId !== epochId) throw new Error("MEMORY_TRANSITION_STALE");
       input.hindsight.quarantine(epochId);
       // A reentry can commit Hindsight before its bind has withdrawn the preceding Local instance.
@@ -61,8 +62,8 @@ export function createMemoryTransitionRuntime(input: Dependencies) {
       quarantinedEpochs.add(epochId);
       input.custody.reconcile();
     },
-    proof: (work: Parameters<typeof buildTransitionPublicationProof>[1]) => { alive(); return buildTransitionPublicationProof(input.db, work); },
-    publish: (work: Parameters<typeof publishMemoryTransition>[1]) => { alive(); return publishMemoryTransition(input.db, work); },
+    proof: (work: Parameters<typeof buildTransitionPublicationProof>[1]) => { alive(); return buildTransitionPublicationProof(input.db, { ...work, ...input.authority }); },
+    publish: (work: Parameters<typeof publishMemoryTransition>[1]) => { alive(); return publishMemoryTransition(input.db, { ...work, ...input.authority }); },
     nativeOutcome: (work: Parameters<typeof recordTransitionNativeOutcome>[1]) => { alive(); recordTransitionNativeOutcome(input.db, work); },
     nativeRelease: (work: Parameters<typeof readTransitionNativeRelease>[1]) => { alive(); return readTransitionNativeRelease(input.db, work); },
     abort: (work: Parameters<typeof abortMemoryTransition>[1]) => { alive(); return abortMemoryTransition(input.db, work); },
@@ -74,7 +75,7 @@ export function createMemoryTransitionRuntime(input: Dependencies) {
     bind: async (transitionId: string) => {
       alive(); const receipt = readTransitionReceipt(input.db, transitionId);
       if (!receipt) throw new Error("MEMORY_TRANSITION_PROOF_INVALID");
-      readVerifiedTransitionPublication(input.db, receipt.receiptId);
+      input.authority.verifyTransitionPublication(receipt.receiptId);
       // Old references are withdrawn and retired before any target constructor can execute. An unavailable selected
       // target is repaired through these same checks; no call below re-publishes an authority marker.
       if (receipt.identity.targetProvider === "local") {
@@ -106,7 +107,7 @@ async function resumeSource(input: Dependencies, operationId: string, alive: () 
     attemptId: resolution.release.attemptId, generation: resolution.release.generation }, now: resolution.release.recordedAt });
   if (transitionLocalHash(release) !== transitionLocalHash(resolution.release)) throw new Error("MEMORY_TRANSITION_PROOF_INVALID");
   const intent = readTransitionIntent(input.db, resolution.transitionId)!;
-  const selected = readMemoryAuthoritySelection(input.db);
+  const selected = input.authority.verifySelectedAuthority();
   if (selected.epochId !== intent.request.expected.predecessorEpochId) throw new Error("MEMORY_AUTHORITY_MISMATCH");
   if (selected.mode === "hindsight") {
     await input.hindsight.retire(); alive(); input.selected.recoverHindsight(selected.epochId); input.startHindsight();
@@ -118,7 +119,7 @@ async function resumeSource(input: Dependencies, operationId: string, alive: () 
 async function quiesce(input: Dependencies, work: { lease: TransitionLease; now: string; timeoutMs: number; signal: AbortSignal }): Promise<void> {
   requireTransitionLease(input.db, work);
   const intent = readTransitionIntent(input.db, work.lease.transitionId)!;
-  if (readMemoryAuthoritySelection(input.db).epochId !== intent.request.expected.predecessorEpochId) throw new Error("MEMORY_TRANSITION_STALE");
+  if (input.authority.verifySelectedAuthority().epochId !== intent.request.expected.predecessorEpochId) throw new Error("MEMORY_TRANSITION_STALE");
   if (intent.request.expected.sourceProvider === "local") {
     const runtime = input.local.current(); if (!runtime) throw new Error("MEMORY_RUNTIME_UNAVAILABLE");
     try { await runtime.fence.quiesce({ ...work, keepFencedOnFailure: true }); await input.settle(); await runtime.ingestion.settle(); }

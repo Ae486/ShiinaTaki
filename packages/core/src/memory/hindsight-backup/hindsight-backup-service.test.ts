@@ -4,6 +4,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { MIGRATIONS } from "../../db/migrations/index-list.ts";
 import { openDatabase, type Database } from "../../db/sqlite.ts";
 import { rmTempDir } from "../../testing/rm-temp.ts";
+import { createMaintenanceAutoMemory } from "../auto-memory.ts";
+import { fenceHindsightWriters, type HindsightWriters } from "../hindsight/hindsight-writer-fence.ts";
 import { AT, BACKUP_ID } from "./hindsight-backup-fixtures.ts";
 import {
   backupHarness, HARNESS_BANK as BANK, HARNESS_GENERATION as GENERATION, HARNESS_LINEAGE as LINEAGE, HARNESS_OPERATION_ID as OPERATION_ID, seedConfirmedRetain,
@@ -56,6 +58,39 @@ describe("hindsight backup capture producer", () => {
     h.scheduler.start.mockImplementation(() => { throw new Error("HINDSIGHT_REPLICA_BUSY"); });
     expect(await h.capture()).toMatchObject({ ok: true });
     expect(h.logs.some((log) => (log.obj as { code?: string } | undefined)?.code === "HINDSIGHT_REPLICA_SCHEDULE_STALE")).toBe(true);
+  });
+
+  it("times out behind detached post-turn maintenance, then retries after the same owner settles without repeating work", async () => {
+    const h = harness({ quiesceTimeoutMs: 20 });
+    let finish = (): void => undefined;
+    const maintenance = vi.fn(() => new Promise<void>((resolve) => { finish = resolve; }));
+    const raw = { maintenance: { run: maintenance } } as unknown as HindsightWriters;
+    const writers = fenceHindsightWriters(raw, h.fence);
+    const autoMemory = createMaintenanceAutoMemory({ maintenance: () => writers.maintenance,
+      logger: { info: vi.fn(), warn: vi.fn() } });
+
+    const detached = autoMemory.onTurnCompleted("taki");
+    try {
+      await vi.waitFor(() => { expect(maintenance).toHaveBeenCalledOnce(); });
+
+      expect(await h.capture()).toMatchObject({ ok: false, code: "HINDSIGHT_BACKUP_QUIESCENCE_TIMEOUT" });
+      expect(await h.store.list()).toEqual([]);
+      expect(leftovers(h)).toEqual([]);
+      expect(h.fence.writable()).toBe(true);
+
+      finish();
+      await detached;
+      await autoMemory.settle();
+
+      expect(await h.capture()).toMatchObject({ ok: true, verifiedAt: AT });
+      expect(maintenance).toHaveBeenCalledOnce();
+      expect(await h.store.list()).toHaveLength(1);
+      expect(leftovers(h)).toEqual([BACKUP_ID]);
+      expect(h.fence.writable()).toBe(true);
+    } finally {
+      finish();
+      await autoMemory.stop();
+    }
   });
 });
 

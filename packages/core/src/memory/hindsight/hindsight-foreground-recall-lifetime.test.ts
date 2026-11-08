@@ -75,9 +75,10 @@ describe("foreground Hindsight Recall lifetime", () => {
     const f = fixture(true); const subsystem = f.subsystem(); const bank = f.banks[0]!;
     await subsystem.state.provider.capabilities();
     const before = f.replica.checkpoint(bank.scope.bankId); const renew = vi.spyOn(subsystem.state.replica.leases, "renew");
-    const health = f.remote.client.health; const reflect = vi.spyOn(f.remote.client, "reflectApplication");
-    vi.spyOn(f.remote.client, "health").mockImplementationOnce(async (input) => {
-      const value = await health(input);
+    const compatibility = f.remote.client.compatibility; const reflect = vi.spyOn(f.remote.client, "reflectApplication");
+    const save = vi.spyOn(subsystem.state.admission, "save");
+    vi.spyOn(f.remote.client, "compatibility").mockImplementationOnce(async (input) => {
+      const value = await compatibility(input);
       // The response has finished; elapsed work before the next request still
       // counts against an explicit operation deadline, not its HTTP timeout.
       vi.setSystemTime(Date.now() + 300_000); return value;
@@ -86,6 +87,7 @@ describe("foreground Hindsight Recall lifetime", () => {
       { bankId: bank.scope.bankId, query: "fact", budget: "low", maxTokens: 128 }));
     expect(result).toMatchObject({ value: { ok: false, error: { code: "MEMORY_PROVIDER_UNAVAILABLE", retryable: true } } });
     expect(reflect).not.toHaveBeenCalled(); expect(renew).not.toHaveBeenCalled();
+    expect(save).not.toHaveBeenCalled();
     expect(f.replica.checkpoint(bank.scope.bankId)).toEqual(before);
   });
 

@@ -48,7 +48,16 @@ export const MemoryActivationStatusSchema = z.strictObject({
   if (actions.cancelOperationId !== null && (!open || actions.cancelOperationId !== operation.operationId)) fail("cancel names the open operation");
   if (actions.activate && (authority.mode !== "canonical-local" || run !== null || !status.setup.configured || status.prerequisites.blocking.length > 0)) fail("activate requires a configured Local instance without a run");
   if (actions.resume && (authority.mode !== "canonical-local" || run === null || run.receipt !== null)) fail("resume requires an uncommitted run under Local authority");
-  if (actions.recoverBinding && (authority.mode !== "hindsight" || run?.receipt === null || run === null || status.runtime.available)) fail("recoverBinding requires a committed run with an unavailable runtime");
+  if (actions.recoverBinding) {
+    const receipt = run?.receipt;
+    const producer = operation?.producer;
+    const committed = authority.mode === "hindsight" && receipt != null && receipt.epochId === authority.epochId;
+    const preparationIncomplete = !open && operation?.terminalAt != null && operation.kind === "hindsight.activate"
+      && producer?.kind === "hindsight" && producer.runId === run?.runId
+      && producer.hindsightEpochId === receipt?.epochId && producer.transactionId === receipt.transactionId
+      && producer.progress.phase !== "completed";
+    if (!committed || (status.runtime.available && !preparationIncomplete)) fail("recoverBinding requires matching committed evidence and an unavailable runtime or incomplete preparation");
+  }
 });
 export type MemoryActivationStatusParams = z.infer<typeof MemoryActivationStatusParamsSchema>;
 export type MemoryActivationReceipt = z.infer<typeof MemoryActivationReceiptSchema>;

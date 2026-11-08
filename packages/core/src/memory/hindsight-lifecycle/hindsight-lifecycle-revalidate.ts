@@ -19,7 +19,7 @@ import type { HindsightCompatibilityWire } from "../hindsight/hindsight-contract
 import { hindsightError } from "../hindsight/hindsight-errors.ts";
 import { loadTakiBankTemplate, verifyTakiBankTemplate } from "../hindsight/taki-bank-template-v1.ts";
 import { hindsightRuntimeAvailability } from "../hindsight-runtime-binding.ts";
-import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
+import { readCurrentMemoryAuthorityIdentity, readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
 import { hindsightLifecycleErrorCode, type HindsightLifecycleCall, type HindsightLifecycleDeps } from "./hindsight-lifecycle-context.ts";
 import { hindsightRevalidateBlocker, readHindsightLifecycleLive, type HindsightReadyLive } from "./hindsight-lifecycle-reads.ts";
 import { verifyManagedTemplateBank } from "../hindsight/template-lifecycle/template-revalidate.ts";
@@ -37,7 +37,7 @@ Promise<HindsightRevalidateOutcome> {
   const client = deps.client(live.projection);
   const request = (): HindsightCallContext => {
     if (call.signal.aborted) throw call.signal.reason;
-    const selected = readMemoryAuthoritySelection(deps.db);
+    const selected = readCurrentMemoryAuthorityIdentity(deps.db);
     if (selected.mode !== "hindsight" || selected.epochId !== ref.epochId) throw new Error("MEMORY_AUTHORITY_MISMATCH");
     return { timeoutMs: live.projection.requestTimeoutMs, signal: call.signal };
   };
@@ -53,7 +53,7 @@ Promise<HindsightRevalidateOutcome> {
 
 /** Every refusal is local: a foreign marker, a disabled or moved connection, or a Stage 4/5 change never reaches the provider. */
 function prepare(deps: HindsightLifecycleDeps, ref: MemoryConnectionProducerRef): { live: HindsightReadyLive; lineage: string } {
-  const selection = readMemoryAuthoritySelection(deps.db);
+  const selection = deps.verifySelectedAuthority?.() ?? readMemoryAuthoritySelection(deps.db);
   if (selection.mode !== "hindsight" || selection.epochId !== ref.epochId) throw new Error("MEMORY_AUTHORITY_MISMATCH");
   const epoch = createCanonicalMemoryAuthorityRepo(deps.db).authorityEpoch(ref.epochId);
   const live = readHindsightLifecycleLive(deps);

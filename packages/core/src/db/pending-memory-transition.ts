@@ -1,6 +1,6 @@
 /**
  * INPUT:  one validated Pending Memory row and an explicit recovery-stage transition
- * OUTPUT: legal next progress state preserving immutable intent and already-known native success
+ * OUTPUT: legal progress preserving immutable intent/native success, with acceptance-aged Pending polling
  * POS:    core/db — pure outbox transition rules; the repository supplies CAS, lease, authority, and checkpoint guards
  */
 import {
@@ -76,7 +76,10 @@ export function transitionPendingMemory(record: PendingMemoryRecord, change: Pen
 }
 
 function retry(state: PendingMemoryState, code: MemoryReplicaErrorCode, now: string): PendingMemoryState {
-  const delay = REPLICA_RETRY_DELAYS_MS[Math.min(Math.max(0, state.attempts - 1), 4)] ?? REPLICA_RETRY_DELAYS_MS[4];
+  const acceptedAt = state.acceptedAt;
+  const delay = code === "HINDSIGHT_PENDING_REMAINS" && acceptedAt !== null
+    ? REPLICA_RETRY_DELAYS_MS.find((rung) => rung >= Date.parse(now) - Date.parse(acceptedAt)) ?? REPLICA_RETRY_DELAYS_MS[4]
+    : REPLICA_RETRY_DELAYS_MS[Math.min(Math.max(0, state.attempts - 1), 4)] ?? REPLICA_RETRY_DELAYS_MS[4];
   return PendingMemoryStateSchema.parse({ ...state, lease: null, diagnosticCode: code,
     nextRetryAt: new Date(Date.parse(now) + delay).toISOString() });
 }

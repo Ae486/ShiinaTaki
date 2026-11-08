@@ -1,17 +1,15 @@
 /**
- * INPUT:  memory-unavailable Hindsight Run events (late-bound from the composition), the marker, the lifecycle service's
- *         live reads and the operation service's submit
- * OUTPUT: createHindsightLifecycleTrigger() -> onUnavailable() (R8: bank.provision once per Character + fingerprint on
- *         bank_not_ready, connection.revalidate once per epoch + fingerprint on a revalidatable config_changed) and bind()
- * POS:    core/memory/hindsight-lifecycle — automatic origin through the same kinds and admission; the once-guard is the
- *         persisted operation rows; a busy family refuses and nothing is queued; never throws into the Run
+ * INPUT:  memory-unavailable Run events, the marker and late-bound lifecycle/operation services
+ * OUTPUT: once-per-key automatic lifecycle submission in the trigger's construction context, independent of the Run owner
+ * POS:    core/memory/hindsight-lifecycle — same admission and persisted once-guard; busy refuses, never throws into the Run
  */
+import { AsyncResource } from "node:async_hooks";
 import type { MemoryOperationRequest } from "@taki/shared";
 import { automaticLifecycleAttempted, type AutomaticLifecycleAttempt } from "../../db/hindsight-lifecycle-attempt-reads.ts";
 import type { Database } from "../../db/sqlite.ts";
 import type { Logger } from "../../logging/logger.ts";
 import type { HindsightUnavailableRunEvent } from "../hindsight/hindsight-memory-runtime.ts";
-import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
+import { readCurrentMemoryAuthorityIdentity } from "../legacy-migration/legacy-activation-repo.ts";
 import type { MemoryOperationService } from "../operations/memory-operation-service.ts";
 import type { HindsightLifecycleService } from "./hindsight-lifecycle-service.ts";
 
@@ -26,7 +24,8 @@ export function createHindsightLifecycleTrigger(input: { db: Database; logger: L
   let bound: Bound | undefined;
   return {
     bind: (next) => { bound = next; },
-    onUnavailable: (event) => {
+    // Automatic work outlives capture; it must not inherit the Run's soon-to-be-released work-fence owner.
+    onUnavailable: AsyncResource.bind((event: HindsightUnavailableRunEvent) => {
       if (!bound || bound.lifecycle.stopRequested()) return;
       try {
         const planned = plan(input.db, bound.lifecycle, event);
@@ -37,12 +36,12 @@ export function createHindsightLifecycleTrigger(input: { db: Database; logger: L
         // A refusal (busy family, changed state) leaves the Run degraded; the operator action stays available.
         input.logger.warn({ kind: event.reason, code: error instanceof Error ? error.message : "UNKNOWN" }, "automatic Hindsight lifecycle operation not submitted");
       }
-    },
+    }, "HindsightLifecycleTrigger"),
   };
 }
 
 function plan(db: Database, lifecycle: HindsightLifecycleService, event: HindsightUnavailableRunEvent): Planned | null {
-  const selection = readMemoryAuthoritySelection(db);
+  const selection = readCurrentMemoryAuthorityIdentity(db);
   if (selection.mode !== "hindsight" || selection.epochId === null) return null;
   if (event.reason === "bank_not_ready") {
     const runtime = lifecycle.runtime();

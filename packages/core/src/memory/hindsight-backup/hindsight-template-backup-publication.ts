@@ -8,11 +8,11 @@ import { readTemplatePublication, readTemplatePlan } from "../hindsight/template
 import { templateEqual, templateHash } from "../hindsight/template-lifecycle/template-integrity.ts";
 import type { TemplatePlan, TemplatePublication } from "../hindsight/template-lifecycle/template-plan-schema.ts";
 import { templateProjectionDigest } from "../hindsight/template-lifecycle/template-projection.ts";
-import { readHindsightTemplateBackupHistory } from "./hindsight-template-backup-history.ts";
+import { readHindsightTemplateBackupHistory, type HindsightTemplateBackupHistoryReader } from "./hindsight-template-backup-history.ts";
 
 export function assertHindsightTemplatePublicationIdentity(db: Database, input: {
   plan: TemplatePlan; publication: TemplatePublication;
-}): void {
+}, readHistory: HindsightTemplateBackupHistoryReader = (identity) => readHindsightTemplateBackupHistory(db, identity)): void {
   const { plan, publication } = input;
   const preceding = readPrecedingPublications(db, publication.connectionRevision);
   const selections = plan.guard.banks.flatMap((entry) => {
@@ -23,7 +23,7 @@ export function assertHindsightTemplatePublicationIdentity(db: Database, input: 
     const prior = preceding.flatMap((value) => value.selections.filter((candidate) => templateEqual(candidate.identity, entry.identity))).at(-1);
     const reference = own ?? prior;
     if (!reference) return [];
-    const selection = readHindsightTemplateBackupHistory(db, entry.identity).selections[reference.revision - 1];
+    const selection = readHistory(entry.identity).selections[reference.revision - 1];
     if (!selection || reference.receiptHash !== selection.receipt.receipt_hash) invalid();
     if (!own && (entry.setup.templateRevision !== selection.templateRevision
       || entry.setup.templateDigest !== templateProjectionDigest(selection.projection))) invalid();

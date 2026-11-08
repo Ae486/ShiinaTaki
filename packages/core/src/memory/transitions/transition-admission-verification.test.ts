@@ -14,8 +14,7 @@ import { hindsightConnectionFingerprint } from "../hindsight/hindsight-compatibi
 import { createHindsightConnectionSecret } from "../hindsight/hindsight-secret-refs.ts";
 import { W3_AT } from "../../testing/memory-transition-candidate-fixtures.ts";
 import type { TransitionEvidenceContext } from "./transition-evidence-context.ts";
-import { withTransitionEvidenceContext, withTransitionObservationContext } from "./transition-evidence-context.ts";
-import { TransitionObservationStore } from "./transition-observation-store.ts";
+import { withTransitionEvidenceContext } from "./transition-evidence-context.ts";
 import { openDatabase } from "../../db/sqlite.ts";
 import { MIGRATIONS } from "../../db/migrations/index-list.ts";
 import { MEMORY_OPERATION_KINDS } from "../operations/memory-operation-kinds.ts";
@@ -73,12 +72,12 @@ describe("independent synchronous admission verification", () => {
     try {
       const verify = vi.spyOn(native, "verifyTransitionNativeEvidence");
       const plans = vi.spyOn(f.service, "plan");
-      const snapshots = vi.spyOn(f.h.runtime, "bindingSnapshot");
+      const proofs = vi.spyOn(f.h.runtime, "verifySelectedAuthority");
       const admitted = f.owner.submit(f.request);
       expect(plans).toHaveBeenCalledTimes(2);
       const context = plans.mock.calls[0]![1] as TransitionEvidenceContext;
       expect(context).toBeDefined(); expect(plans.mock.calls[1]![1]).toBe(context);
-      expect(snapshots.mock.calls).toEqual([[context], [context]]);
+      expect(proofs.mock.calls).toEqual([[context], [context]]);
       const ids = verify.mock.calls.map(([evidence]) => evidence.evidenceId);
       expect(ids.length).toBeGreaterThan(0); expect(new Set(ids).size).toBe(ids.length);
       expect(() => context.assertOwner(f.h.db)).toThrow("MEMORY_TRANSITION_PROOF_INVALID");
@@ -86,8 +85,8 @@ describe("independent synchronous admission verification", () => {
       expect(plans).toHaveBeenCalledTimes(2);
       f.owner.cancel(admitted.operationId); await f.owner.stop();
       verify.mockClear();
-      f.h.runtime.bindingSnapshot();
-      expect(verify).toHaveBeenCalled(); // The next independent boundary cannot borrow admission or observer work.
+      f.h.runtime.verifySelectedAuthority();
+      expect(verify).toHaveBeenCalled(); // A new full boundary cannot borrow the previous admission's evidence.
     } finally { await f.close(); }
   });
 
@@ -158,22 +157,17 @@ describe("independent synchronous admission verification", () => {
     } finally { await f.close(); }
   });
 
-  it("rejects observer, foreign and closed scopes before admission or runtime snapshot validation", async () => {
+  it("rejects foreign and closed verification scopes before admission", async () => {
     const f = await fixture(); const other = openDatabase({ path: ":memory:", migrations: [] });
-    const store = new TransitionObservationStore(f.h.db); let closed: TransitionEvidenceContext | undefined;
+    let closed: TransitionEvidenceContext | undefined;
     try {
       withTransitionEvidenceContext(other, (context) => {
         expect(() => f.service.plan(f.request, context)).toThrow("MEMORY_TRANSITION_PROOF_INVALID");
-        expect(() => f.h.runtime.bindingSnapshot(context)).toThrow("MEMORY_TRANSITION_PROOF_INVALID");
-      });
-      withTransitionObservationContext({ db: f.h.db, receiptId: "observer", store }, (context) => {
-        expect(() => f.service.plan(f.request, context)).toThrow("MEMORY_TRANSITION_PROOF_INVALID");
-        expect(() => f.h.runtime.hindsightBindingSnapshot(context)).toThrow("MEMORY_TRANSITION_PROOF_INVALID");
       });
       withTransitionEvidenceContext(f.h.db, (context) => { closed = context; });
       expect(() => f.service.plan(f.request, closed)).toThrow("MEMORY_TRANSITION_PROOF_INVALID");
       expect(() => withTransitionEvidenceContext(f.h.db, () => ({ then: () => undefined }))).toThrow("MEMORY_TRANSITION_PROOF_INVALID");
-    } finally { store.close(); other.close(); await f.close(); }
+    } finally { other.close(); await f.close(); }
   });
 
   it("leaves nontransition admission and async execution on the unchanged context", async () => {

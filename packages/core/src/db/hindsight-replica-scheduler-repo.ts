@@ -1,6 +1,6 @@
 /**
  * INPUT:  Core-owned Bank configuration, one clock, and per-Bank run/lease tokens
- * OUTPUT: atomic durable claims, manual/catch-up requests, fenced settlement, and restart recovery
+ * OUTPUT: atomic claims, retry requests, earliest active-epoch Pending retry, fenced settlement and restart recovery
  * POS:    core/db — scheduler state is separate from replica payloads, Pending Memory, and Memory Authority
  */
 import { z } from "zod";
@@ -15,7 +15,7 @@ import { canonicalJson } from "../memory/legacy-migration/legacy-identities.ts";
 import { createHindsightReplicaLeaseRepo, type HindsightReplicaLeaseRepo } from "./hindsight-replica-lease-repo.ts";
 import { readReplicaCheckpoint } from "./hindsight-replica-checkpoint-store.ts";
 import { claimReplicaRequest, insertReplicaRequest, readReplicaRequest, settleReplicaRequest, updateReplicaRequest } from "./hindsight-replica-request-repo.ts";
-import { after, configureReplicaSchedule, failedReplicaSchedule, initialReplicaSchedule, replicaScheduleDue } from "./hindsight-replica-schedule-state.ts";
+import { after, configureReplicaSchedule, failedReplicaSchedule, initialReplicaSchedule, replicaScheduleDue, requestReplicaRetry } from "./hindsight-replica-schedule-state.ts";
 
 interface Stored { version: number; state: MemoryReplicaSyncState }
 interface Context { db: Database; leases: HindsightReplicaLeaseRepo; now: () => string }
@@ -33,6 +33,8 @@ export interface HindsightReplicaSchedulerRepo {
   cancelManual(bankId: string, requestId?: string): MemoryReplicaSyncState;
   failManual(input: { bankId: string; requestId: string; errorCode: MemoryReplicaErrorCode }): MemoryReplicaSyncState;
   requestCatchUp(bankId: string): MemoryReplicaSyncState;
+  requestRetry(bankId: string, dueAt: string): MemoryReplicaSyncState;
+  nextPendingRetryAt(bankId: string): string | null;
   recover(bankId: string): MemoryReplicaSyncState;
   claim(input: ClaimInput): MemoryReplicaScheduledRun | undefined;
   promoteToFull(run: MemoryReplicaScheduledRun): MemoryReplicaScheduledRun;
@@ -48,20 +50,7 @@ export function createHindsightReplicaSchedulerRepo(db: Database, now: () => str
     get: (bankId) => read(db, bankId)?.state,
     list: () => db.prepare("SELECT bank_id FROM hindsight_replica_sync_schedule ORDER BY bank_id").all()
       .map((row) => required(db, String(row.bank_id)).state),
-    requestManual: (input) => {
-      const kind = MemoryReplicaRunKindSchema.parse(input.kind);
-      return mutate(context, input.bankId, (state) => {
-        const existing = input.requestId ? readReplicaRequest(db, input.requestId) : undefined;
-        if (existing) {
-          if (existing.bankId !== input.bankId || existing.kind !== kind) throw new Error("HINDSIGHT_REPLICA_SCHEDULE_STALE");
-          return state;
-        }
-        if (state.pendingManualRequestId || input.requestId && state.pendingManualKind !== null) throw new Error("HINDSIGHT_REPLICA_BUSY");
-        if (input.requestId) insertReplicaRequest(db, { requestId: input.requestId, bankId: input.bankId, kind,
-          state: "queued", claim: null, createdAt: clock(), settledAt: null, errorCode: null, nextAction: null, lastSuccessAt: null });
-        return { ...state, pendingManualKind: state.pendingManualKind === "full" ? "full" : kind, pendingManualRequestId: input.requestId ?? null };
-      });
-    },
+    requestManual: (input) => requestManual(context, input),
     cancelManual: (bankId, requestId) => mutate(context, bankId, (state) => {
       if (requestId) {
         const row = readReplicaRequest(db, requestId);
@@ -81,12 +70,40 @@ export function createHindsightReplicaSchedulerRepo(db: Database, now: () => str
     requestCatchUp: (bankId) => mutate(context, bankId, (state) => ({ ...state,
       catchUpRequested: state.automatic && state.run === null && (state.catchUpRequested || state.retryDueAt !== null
         || replicaScheduleDue(state, clock()) !== undefined) })),
+    requestRetry: (bankId, dueAt) => mutate(context, bankId, (state) =>
+      requestReplicaRetry(state, z.iso.datetime({ offset: true }).parse(dueAt), clock())),
+    nextPendingRetryAt: (bankId) => nextPendingRetryAt(db, bankId),
     recover: (bankId) => recover(context, bankId),
     claim: (input) => claim(context, input),
     promoteToFull: (run) => promoteToFull(context, run),
     succeed: (input) => succeed(context, input),
     fail: (input) => settle(context, input.run, (state) => failedReplicaSchedule(state, MemoryReplicaErrorCodeSchema.parse(input.errorCode), clock())),
   };
+}
+
+function requestManual(context: Context, input: Parameters<HindsightReplicaSchedulerRepo["requestManual"]>[0]): MemoryReplicaSyncState {
+  const { db, now } = context;
+  const kind = MemoryReplicaRunKindSchema.parse(input.kind);
+  return mutate(context, input.bankId, (state) => {
+    const existing = input.requestId ? readReplicaRequest(db, input.requestId) : undefined;
+    if (existing) {
+      if (existing.bankId !== input.bankId || existing.kind !== kind) throw new Error("HINDSIGHT_REPLICA_SCHEDULE_STALE");
+      return state;
+    }
+    if (state.pendingManualRequestId || input.requestId && state.pendingManualKind !== null) throw new Error("HINDSIGHT_REPLICA_BUSY");
+    if (input.requestId) insertReplicaRequest(db, { requestId: input.requestId, bankId: input.bankId, kind,
+      state: "queued", claim: null, createdAt: now(), settledAt: null, errorCode: null, nextAction: null, lastSuccessAt: null });
+    return { ...state, pendingManualKind: state.pendingManualKind === "full" ? "full" : kind, pendingManualRequestId: input.requestId ?? null };
+  });
+}
+
+function nextPendingRetryAt(db: Database, bankId: string): string | null {
+  const row = db.prepare(`SELECT min(json_extract(pending.state_json,'$.nextRetryAt')) AS due_at
+    FROM pending_memory AS pending JOIN canonical_memory_authority_state AS authority
+      ON authority.active_epoch_id=pending.authority_epoch_id AND authority.singleton=1
+    WHERE pending.bank_id=:bank AND pending.phase IN ('queued','submitted','awaiting_derived','awaiting_pull')`)
+    .get({ bank: z.string().min(1).max(256).parse(bankId) });
+  return z.iso.datetime({ offset: true }).nullable().parse(row?.due_at ?? null);
 }
 
 function ensureBank(context: Context, input: BankInput): MemoryReplicaSyncState {
@@ -118,11 +135,12 @@ function claim(context: Context, input: ClaimInput): MemoryReplicaScheduledRun |
     run = MemoryReplicaScheduledRunSchema.parse({ ...due, lease, predecessor: readReplicaCheckpoint(context.db, input.bankId) ?? null,
       ...(due.trigger === "manual" && current.state.pendingManualRequestId ? { manualRequestId: current.state.pendingManualRequestId } : {}) });
     claimReplicaRequest(context.db, run);
+    // Only requests made after this claim may survive its success; failure still needs the prior backoff metadata.
     save(context.db, { ...current, state: { ...current.state, run, mode: "running",
       fullReconciliationState: due.kind === "full" ? "running" : current.state.fullReconciliationState,
       pendingManualKind: due.trigger === "manual" ? null : current.state.pendingManualKind,
       pendingManualRequestId: due.trigger === "manual" ? null : current.state.pendingManualRequestId,
-      catchUpRequested: false, lastAttemptAt: context.now(), updatedAt: context.now(),
+      retryDueAt: null, catchUpRequested: false, lastAttemptAt: context.now(), updatedAt: context.now(),
     } });
   });
   return run;
@@ -166,7 +184,8 @@ function succeed(context: Context, input: { run: MemoryReplicaScheduledRun; resu
       lastFullReconciliationAt: full ? now : state.lastFullReconciliationAt,
       nextDueAt: state.automatic ? after(now, state.autoIntervalMs) : null,
       nextFullDueAt: !state.automatic ? null : full ? after(now, state.fullReconciliationIntervalMs) : state.nextFullDueAt,
-      retryAttempt: 0, retryKind: null, retryDueAt: null, consecutiveFailures: 0, errorCode: null, nextAction: null,
+      retryAttempt: state.retryDueAt === null ? 0 : 1, retryKind: state.retryDueAt === null ? null : state.retryKind,
+      consecutiveFailures: 0, errorCode: null, nextAction: null,
       lastObservedCursor: result.observedCursor, lastObservedLineageId: result.checkpoint.providerLineageId,
       lastObservedBankGeneration: result.checkpoint.bankGeneration, updatedAt: now,
     };

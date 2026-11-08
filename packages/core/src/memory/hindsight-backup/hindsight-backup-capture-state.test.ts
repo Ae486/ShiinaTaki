@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { HINDSIGHT_TEMPLATE_BACKUP_BUILD, type HindsightBackupRoute } from "@taki/shared";
 import { createJointTemplateBackupFixture, JOINT_TEMPLATE_USER_MODEL } from "../../testing/hindsight-template-backup-joint-fixture.ts";
 import { templateLifecycleFixture } from "../hindsight/template-lifecycle/template-lifecycle-fixtures.ts";
+import { TAKI_MANAGED_TEMPLATE_REVISION } from "../hindsight/template-lifecycle/template-catalog.ts";
 import { readHindsightBackupCopy } from "./hindsight-backup-copy-readback.ts";
 import { readHindsightBackupCustody } from "./hindsight-backup-custody.ts";
 import { createHindsightBackupService, type HindsightBackupPhase } from "./hindsight-backup-service.ts";
@@ -66,7 +67,7 @@ describe("template-capable capture preserves the admitted configured connection"
     if (copied.version !== 2) throw new Error("Template-capable capture downgraded");
     expect(copied.state.attestation.banks.map((bank) => ({ scope: bank.scope, receipts: bank.receiptInventory.count,
       selected: bank.selected?.templateRevision }))).toEqual([
-      { scope: "character", receipts: 3, selected: "none" }, { scope: "global", receipts: 1, selected: "taki-bank-v2" },
+      { scope: "character", receipts: 3, selected: "none" }, { scope: "global", receipts: 1, selected: TAKI_MANAGED_TEMPLATE_REVISION },
     ]);
     expect(staged.request.operationIds).toHaveLength(4);
     expect(h.snapshot).not.toHaveBeenCalled();

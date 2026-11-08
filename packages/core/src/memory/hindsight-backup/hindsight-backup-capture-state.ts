@@ -11,9 +11,10 @@ import { readHindsightBackupIdentity, type HindsightBackupRuntimeIdentity } from
 import { inspectHindsightBackupCopy, type HindsightBackupCopyInput } from "./hindsight-backup-copied-identity.ts";
 import { assertHindsightLegacyTemplateEmpty, readHindsightTemplateBackupState } from "./hindsight-template-backup-attestation.ts";
 import { readHindsightCaptureConnection } from "./hindsight-backup-capture-connection.ts";
+import type { MemoryOperationsRuntime } from "../operations/memory-operation-contract.ts";
 
-export function readHindsightCaptureState(db: Database, runtime: HindsightBackupRuntimeIdentity) {
-  const identity = readHindsightBackupIdentity(db, runtime);
+export function readHindsightCaptureState(db: Database, runtime: HindsightBackupRuntimeIdentity & Pick<MemoryOperationsRuntime, "verifySelectedAuthority">) {
+  const identity = readHindsightBackupIdentity(db, runtime, runtime.verifySelectedAuthority);
   const admitted = createHindsightRuntimeAdmissionRepo(db).read({ authorityEpochId: runtime.epochId, configFingerprint: runtime.configFingerprint });
   if (admitted && hindsightTemplateBackupAvailable(admitted.manifest)) {
     const templates = readHindsightTemplateBackupState(db, { epochId: runtime.epochId,
@@ -34,7 +35,7 @@ export function readHindsightCapturedCopy(path: string, input: HindsightBackupCo
   return copied;
 }
 
-export function assertHindsightCaptureCurrent(db: Database, runtime: HindsightBackupRuntimeIdentity, admitted: HindsightCaptureState): void {
+export function assertHindsightCaptureCurrent(db: Database, runtime: HindsightBackupRuntimeIdentity & Pick<MemoryOperationsRuntime, "verifySelectedAuthority">, admitted: HindsightCaptureState): void {
   const current = readHindsightCaptureState(db, runtime);
   if (current.version !== admitted.version || !templateEqual(current.identity.core.authority, admitted.identity.core.authority)
     || current.version === 2 && (admitted.version !== 2

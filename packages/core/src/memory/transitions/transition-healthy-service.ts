@@ -20,7 +20,6 @@ import { executeHealthyTransition, logHealthyTransitionFailure, type HealthyTran
 import type { MemoryTransitionDriver } from "../operations/memory-operation-transition-storage.ts";
 import type { Logger } from "../../logging/logger.ts";
 import { hasEmergencyStorage, transitionIsQuarantined } from "../../db/memory-transition-emergency-quarantine.ts";
-import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
 import { readTransitionOverview } from "./transition-operator-overview.ts";
 import { hindsightTemplateBackupAvailable } from "../hindsight/hindsight-template-backup-capability.ts";
 
@@ -31,7 +30,7 @@ export function createHealthyTransitionService(deps: Dependencies) {
   const controller = new AbortController(); const running = new Map<Promise<void>, { transitionId: string; controller: AbortController }>();
   const alive = () => { if (controller.signal.aborted) throw new Error("MEMORY_TRANSITION_UNAVAILABLE"); };
   const plan: MemoryTransitionDriver["plan"] = (request, verification) => {
-    verification?.assertOwner(deps.db); verification?.assertIndependent();
+    verification?.assertOwner(deps.db);
     alive(); if (request.kind === "transition.emergency-local") unavailable();
     const preview = readTransitionPreview(deps.db, request.previewId);
     if (preview.version !== 1) unavailable();
@@ -40,7 +39,7 @@ export function createHealthyTransitionService(deps: Dependencies) {
     else {
       const current = readHealthyTransitionIdentity(deps.db, { kind: request.kind, fingerprint: deps.fingerprint(),
         providerLineage: request.expected.sourceProvider === "hindsight" ? request.expected.sourceLineageId : request.expected.targetLineageId,
-        templateBackup: request.expected.templates !== undefined }, verification);
+        templateBackup: request.expected.templates !== undefined, verifySelectedAuthority: deps.runtime.verifySelectedAuthority }, verification);
       if (transitionLocalHash(current) !== transitionLocalHash(request.expected)
         || !deps.ready(current.predecessorEpochId, current.sourceProvider, verification)) throw new Error("MEMORY_TRANSITION_STALE");
     }
@@ -64,7 +63,7 @@ export function createHealthyTransitionService(deps: Dependencies) {
     preview: async (params: { kind: "transition.return-local" | "transition.reenter-hindsight"; recoveryTransitionId?: string }): Promise<MemoryHealthyTransitionPreview> => {
       alive(); const request = MemoryTransitionPreviewParamsSchema.parse(params);
       if (request.kind === "transition.emergency-local") unavailable();
-      const selected = readMemoryAuthoritySelection(deps.db);
+      const selected = deps.runtime.verifySelectedAuthority();
       if (selected.epochId && hasEmergencyStorage(deps.db) && deps.db.prepare("SELECT 1 FROM memory_transition_foreign_branches WHERE target_epoch_id=:epoch")
         .get({ epoch: selected.epochId })) throw new Error("MEMORY_TRANSITION_FOREIGN_BRANCH");
       if (request.recoveryTransitionId && transitionIsQuarantined(deps.db, request.recoveryTransitionId)) unavailable();
@@ -74,7 +73,7 @@ export function createHealthyTransitionService(deps: Dependencies) {
       if (fingerprint !== deps.fingerprint()) throw new Error("MEMORY_TRANSITION_STALE");
       const recovery = request.recoveryTransitionId ? recoveryIdentity(deps, request.recoveryTransitionId, request.kind) : null;
       const expected = recovery?.expected ?? readHealthyTransitionIdentity(deps.db, { kind: request.kind, fingerprint,
-        providerLineage: capability.providerLineage, templateBackup: hindsightTemplateBackupAvailable(manifest) });
+        providerLineage: capability.providerLineage, templateBackup: hindsightTemplateBackupAvailable(manifest), verifySelectedAuthority: deps.runtime.verifySelectedAuthority });
       if ((expected.sourceProvider === "hindsight" ? expected.sourceLineageId : expected.targetLineageId) !== capability.providerLineage) throw new Error("MEMORY_TRANSITION_STALE");
       if (!recovery && !deps.ready(expected.predecessorEpochId, expected.sourceProvider)) unavailable();
       const preview: MemoryHealthyTransitionPreview = { version: 1, previewId: randomUUID(), kind: request.kind, expected,
@@ -110,6 +109,7 @@ function recoveryIdentity(deps: Dependencies, transitionId: string, kind: string
   const intent = readTransitionIntent(deps.db, transitionId); const attempt = readTransitionAttempt(deps.db, transitionId);
   if (!intent || !attempt || intent.request.kind !== kind || attempt.phase === "terminal"
     || transitionIsQuarantined(deps.db, transitionId)) throw new Error("MEMORY_TRANSITION_STALE");
+  deps.runtime.verifySelectedAuthority();
   return { expected: intent.request.expected, recovery: { transitionId, expectedGeneration: attempt.generation,
     expectedReceiptId: readTransitionReceipt(deps.db, transitionId)?.receiptId ?? null } };
 }

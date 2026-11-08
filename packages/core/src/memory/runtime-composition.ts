@@ -16,7 +16,6 @@ import { createCompactionOperationRepo } from "../db/compaction-operation-repo.t
 import { createCanonicalIngestionSourceRepo } from "../db/canonical-ingestion-source-repo.ts";
 import { createPrimaryMemoryCustody, type PrimaryMemoryCustody } from "../db/primary-memory-custody-repo.ts";
 import type { Database } from "../db/sqlite.ts";
-import type { TransitionEvidenceContext } from "./transitions/transition-evidence-context.ts";
 import type { SummaryRepo } from "../db/summary-repo.ts";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
 import type { Logger } from "../logging/logger.ts";
@@ -28,7 +27,7 @@ import type { PrimaryConversationCommit } from "./canonical-ingestion-source.ts"
 import { createCanonicalLocalSubsystem } from "./canonical-local-subsystem.ts";
 import { createHindsightMemorySubsystem } from "./hindsight/hindsight-memory-subsystem.ts";
 import type { HindsightClient } from "./hindsight/hindsight-client.ts";
-import type { HindsightActivationLocalRuntime } from "./hindsight-activation/hindsight-activation-service.ts";
+import type { HindsightActivationLocalRuntime, HindsightActivationRuntime } from "./hindsight-activation/hindsight-activation-service.ts";
 import type { HindsightUnavailableRunEvent } from "./hindsight/hindsight-memory-runtime.ts";
 import { createHindsightRuntimeBinding, witnessHindsightPrimaryCommit, type HindsightBindingSnapshot, type HindsightSubsystem } from "./hindsight-runtime-binding.ts";
 import { readHindsightLiveConnection } from "./hindsight/hindsight-runtime-connection.ts";
@@ -40,7 +39,9 @@ import { createLocalRuntimeBinding, type LocalBindingSnapshot, type LocalSubsyst
 import { createMemoryRunReference } from "./memory-capability-snapshot.ts";
 import type { MemoryFlushPort } from "./memory-flush-port.ts";
 import { createMemoryAuthorityFence } from "./legacy-migration/memory-authority-fence.ts";
-import { readMemoryAuthoritySelection, verifyCanonicalLocalReceipt } from "./legacy-migration/legacy-activation-repo.ts";
+import { readCurrentMemoryAuthorityIdentity } from "./legacy-migration/legacy-activation-repo.ts";
+import { createMemoryAuthorityVerification, type MemoryAuthorityVerification } from "./runtime-authority-verification.ts";
+import { countPendingHindsightMemoryWrites } from "../db/hindsight-memory-write-repo.ts";
 import type { MemoryOperationsRuntime } from "./operations/memory-operation-contract.ts";
 import { selectMemoryRuntime, type BindingRecoveryOutcome } from "./runtime-selector.ts";
 import { createUtilitySlot, type UtilitySlot } from "./utility-slot.ts";
@@ -74,18 +75,21 @@ export function composeMemoryRuntime(input: MemoryRuntimeInput) {
   const compaction = createCompactionMaintenance(input, utility, current);
   const lifecycle = createRuntimeLifetime({ scope, utility, autoMemory: compaction.autoMemory });
   const alive = lifecycle.alive;
-  const transitions = createMemoryTransitionRuntime({ db: input.db, local, hindsight: hindsightBinding, selected, custody,
+  const transitions = createMemoryTransitionRuntime({ db: input.db, local, hindsight: hindsightBinding, selected, custody, authority: scope.authority,
     alive, settle: compaction.autoMemory.settle, startHindsight: lifecycle.startHindsight,
     retireBackground: () => { compaction.compact.retirePending(); compaction.autoMemory.retirePending(); utility.retirePending(); } });
   const bindingSeams = createBindingSeams({ input, scope, custody, lifecycle, settle: compaction.autoMemory.settle });
   const templates = createTemplateRuntimeControl({ db: input.db, config: loadMemoryConfig(input.env), connection: input.hindsight,
-    binding: hindsightBinding, alive, settle: compaction.autoMemory.settle, replaceBinding: bindingSeams.replaceHindsightBinding });
+    binding: hindsightBinding, alive, settle: compaction.autoMemory.settle, replaceBinding: bindingSeams.replaceHindsightBinding,
+    verifySelectedAuthority: scope.authority.verifySelectedAuthority });
   return {
-    selected, memory: selected.memory, fence, custody, transitions, templates, dataDir: input.dataDir,
+    selected, memory: selected.memory, fence, custody, transitions, templates, dataDir: input.dataDir, ...scope.authority,
     snapshot: () => { alive(); return scope.hindsight ? scope.hindsight.snapshot() : diagnosticSnapshot(input.db); },
     ...createBindingQueries(scope),
     // The ONE live accessor the memory operation owner uses (D-S1-1): resolved per call, never a captured subsystem.
-    operations: (): MemoryOperationsRuntime | null => scope.hindsight ? operationsRuntime(scope.hindsight) : null,
+    operations: (): MemoryOperationsRuntime | null => scope.hindsight ? operationsRuntime(scope.hindsight, scope.authority) : null,
+    /** Read-only operator port; the observer owns selection verification and the encompassing SQLite snapshot. */
+    observeHindsightStatus: () => scope.hindsight ? observeHindsightStatus(input.db, scope.hindsight) : null,
     captureRun: async (characterId: string, signal?: AbortSignal): Promise<CapturedMemoryRun> => {
       alive(); if (signal?.aborted) throw new Error("MEMORY_OPERATION_CANCELLED");
       if (scope.hindsight) return scope.hindsight.captureRun(characterId, signal);
@@ -93,13 +97,16 @@ export function composeMemoryRuntime(input: MemoryRuntimeInput) {
       if (published) return published.captureRun(characterId);
       // Committed but unbound: a setting-caused state admits a memory-unavailable Run, any other a structured refusal;
       // never a Local or Legacy fallback.
-      if (readMemoryAuthoritySelection(input.db).mode === "hindsight") return unbound(characterId);
+      if (readCurrentMemoryAuthorityIdentity(input.db).mode === "hindsight") return unbound(characterId);
       return captureLegacyRun(input.db, current(), characterId);
     },
     recordPrimaryCommitted: (commit: PrimaryConversationCommit) => {
       alive();
+      const binding = scope.hindsightBinding.publicationState().binding;
+      const localBinding = scope.local.publicationState().binding;
+      if ([binding, localBinding].some((value) => value.kind === "unavailable" && value.code === "MEMORY_AUTHORITY_INVALID")) return;
       if (witnessHindsightPrimaryCommit({ db: input.db, commit, logger: input.logger })) return;
-      const selection = readMemoryAuthoritySelection(input.db);
+      const selection = readCurrentMemoryAuthorityIdentity(input.db);
       if (selection.mode === "canonical-local" && selection.epochId) {
         // Selection can precede construction. The marker routes the source witness in both directions, including
         // the interval where an old published Hindsight reference still exists but the new Local binding failed.
@@ -123,19 +130,19 @@ export function composeMemoryRuntime(input: MemoryRuntimeInput) {
   };
 }
 
-/** Presence can disprove readiness without loading authority evidence; only a full snapshot can verify a live binding. */
+/** Publication queries describe current binding state; full validation has separate explicit entrypoints. */
 function createBindingQueries(scope: ReturnType<typeof createSelectedSubsystem>) {
   return {
     /** Presence only: never authorizes a Run, read/write or epoch; failed, retired and stopped drafts are absent. */
     hasPublishedBinding: (provider: "local" | "hindsight"): boolean =>
       (provider === "local" ? scope.local.current() : scope.hindsightBinding.current()) !== undefined,
-    /** Detached publication metadata for a separately verified status observer; never an authority proof. */
+    /** Detached publication metadata for current status observation; never an authority proof. */
     bindingPublication: (provider: "local" | "hindsight") =>
       provider === "local" ? scope.local.publicationState() : scope.hindsightBinding.publicationState(),
     /** Pure Local binding state for onboarding/authority status; no captureRun or Bank probe. */
-    bindingSnapshot: (verification?: TransitionEvidenceContext): LocalBindingSnapshot => scope.local.snapshot(verification),
-    /** Full Hindsight authority/binding state, including receipt verification before, during and after a rebind. */
-    hindsightBindingSnapshot: (verification?: TransitionEvidenceContext): HindsightBindingSnapshot => scope.hindsightBinding.snapshot(verification),
+    bindingSnapshot: (): LocalBindingSnapshot => scope.local.snapshot(),
+    /** Current Hindsight identity and binding state; never reconstructs historical receipt proof. */
+    hindsightBindingSnapshot: (): HindsightBindingSnapshot => scope.hindsightBinding.snapshot(),
   };
 }
 
@@ -144,9 +151,9 @@ function createBindingSeams(deps: {
   input: MemoryRuntimeInput; scope: ReturnType<typeof createSelectedSubsystem>; custody: PrimaryMemoryCustody;
   lifecycle: ReturnType<typeof createRuntimeLifetime>; settle(): Promise<void>;
 }) {
-  const { input, scope, custody, lifecycle } = deps; const { selected, local } = scope; const { alive } = lifecycle;
+  const { scope, custody, lifecycle } = deps; const { selected, local } = scope; const { alive } = lifecycle;
   const committed = (mode: "canonical-local" | "hindsight", epochId: string) => {
-    const selection = readMemoryAuthoritySelection(input.db);
+    const selection = scope.authority.verifySelectedAuthority();
     if (selection.mode !== mode || selection.epochId !== epochId) throw new Error("MEMORY_AUTHORITY_MISMATCH");
     return selection;
   };
@@ -154,7 +161,7 @@ function createBindingSeams(deps: {
     /** Same-epoch repair: receipt proof, custody reconciliation, then construction only when unavailable. Never activates. */
     recoverLocalBinding: (epochId: string): BindingRecovery => {
       alive();
-      verifyCanonicalLocalReceipt(input.db, committed("canonical-local", epochId));
+      committed("canonical-local", epochId);
       const reconciledGroups = custody.reconcile();
       return { binding: selected.recoverCanonical(epochId), reconciledGroups };
     },
@@ -167,7 +174,7 @@ function createBindingSeams(deps: {
     },
     /** After COMMIT: retire Local, then draft -> install -> publish -> start Hindsight as one binding; failure stays observable. */
     bindHindsight: (epochId: string): void => { alive(); selected.bindHindsight(epochId); lifecycle.startHindsight(); },
-    /** Same-epoch repair on the verified Hindsight receipt (the marker read proves it); never re-promotes and never reopens Local. */
+    /** Same-epoch repair after full selected receipt verification; never re-promotes or reopens Local. */
     recoverHindsightBinding: (epochId: string): BindingRecovery => {
       alive();
       committed("hindsight", epochId);
@@ -176,6 +183,8 @@ function createBindingSeams(deps: {
       lifecycle.startHindsight();
       return { binding, reconciledGroups };
     },
+    prepareHindsightActivation: (input: Parameters<HindsightActivationRuntime["prepareHindsightActivation"]>[0]) =>
+      prepareHindsightActivation({ scope, alive }, input),
     /** Revalidation: same-epoch swap onto the current connection, then start; a construct/start failure stays observable. */
     replaceHindsightBinding: async (epochId: string): Promise<void> => {
       alive();
@@ -187,14 +196,34 @@ function createBindingSeams(deps: {
   };
 }
 
+/** Activation owns preparation until completion/stop; the foreground Bank owner keeps each HTTP request finite. */
+async function prepareHindsightActivation(deps: {
+  scope: ReturnType<typeof createSelectedSubsystem>; alive(): void;
+}, input: Parameters<HindsightActivationRuntime["prepareHindsightActivation"]>[0]): Promise<void> {
+  deps.alive();
+  const subsystem = deps.scope.hindsight;
+  if (!subsystem || subsystem.state.runtime.epoch.epochId !== input.epochId) throw new Error("MEMORY_AUTHORITY_MISMATCH");
+  for (const bankId of input.bankIds) {
+    await subsystem.state.service.synchronize({ bankId, mode: "foreground",
+      context: { timeoutMs: subsystem.state.runtime.connection.requestTimeoutMs, signal: input.signal } });
+  }
+  if (input.signal?.aborted) throw new Error("HINDSIGHT_CANCELLED");
+  deps.alive();
+  if (deps.scope.hindsight !== subsystem) throw new Error("MEMORY_AUTHORITY_MISMATCH");
+  subsystem.state.runtime.assertConnection();
+}
+
 function createSelectedSubsystem(input: MemoryRuntimeInput, utility: UtilitySlot) {
   const fence = createMemoryAuthorityFence(); let activated = false;
   const local = createLocalRuntimeBinding({ db: input.db, logger: input.logger,
-    construct: (epochId) => createCanonicalLocalSubsystem({ ...input, epochId, utility, config: loadMemoryConfig(input.env) }) });
+    construct: (epochId) => createCanonicalLocalSubsystem({ ...input, epochId, utility, config: loadMemoryConfig(input.env),
+      boundIdentity: () => local.boundIdentity() }) });
   const hindsight = createHindsightRuntimeBinding({ db: input.db, logger: input.logger,
     construct: (epochId) => createHindsightMemorySubsystem({ ...input, ...input.hindsight!, epochId, utility, config: loadMemoryConfig(input.env),
       onUnavailable: input.onHindsightUnavailable }) });
+  const authority = createMemoryAuthorityVerification({ db: input.db, local, hindsight });
   const selected = selectMemoryRuntime({ db: input.db,
+    verifySelectedAuthority: authority.verifySelectedAuthority,
     createLegacy: () => createMemorySubsystem({ ...input, utility, authorityFence: fence, isCanonical: () => activated }),
     createCanonical: (epochId) => local.publish(epochId).engine,
     createHindsight: input.hindsight ? (epochId) => hindsight.publish(epochId).engine : undefined,
@@ -204,14 +233,19 @@ function createSelectedSubsystem(input: MemoryRuntimeInput, utility: UtilitySlot
     } : undefined,
     onLegacyRetired: () => { activated = true; fence.retire(); },
     onLocalRetired: () => local.retire(),
-    // The binding already recorded the unavailable state; boot continues with an observable, fail-closed facade.
-    onBootUnavailable: () => undefined,
+    onBootUnavailable: (error, selection, invalidAuthority) => {
+      if (!selection.epochId) throw error;
+      const owner = selection.mode === "hindsight" ? hindsight : local;
+      if (invalidAuthority) owner.unavailable(selection.epochId, "MEMORY_AUTHORITY_INVALID");
+      else if (owner.publicationState().binding.kind === "none") owner.unavailable(selection.epochId, "MEMORY_RUNTIME_UNAVAILABLE");
+    },
     hindsightLive: () => {
       const current = hindsight.current();
       if (!current) return false;
       try { current.state.runtime.assertConnection(); return true; } catch { return false; }
     },
     localLive: () => local.current() !== undefined,
+    bindingLive: () => local.current() !== undefined || hindsight.current() !== undefined,
     onHindsightRetired: () => { void hindsight.retire(); },
   });
   activated = selected.canonical;
@@ -220,7 +254,7 @@ function createSelectedSubsystem(input: MemoryRuntimeInput, utility: UtilitySlot
     if (!value) throw new Error("MEMORY_INTEGRITY_ERROR: selected runtime is unavailable");
     return value;
   };
-  return { selected, current, fence, local, hindsightBinding: hindsight, get hindsight() { return hindsight.current(); } };
+  return { selected, current, fence, local, authority, hindsightBinding: hindsight, get hindsight() { return hindsight.current(); } };
 }
 
 function createRuntimeLifetime(input: {
@@ -281,15 +315,33 @@ function captureLegacyRun(db: Database, subsystem: SelectedSubsystem, characterI
     assemble: (currentMessage: string) => engine.assemble({ characterId, currentMessage }) });
 }
 
-function operationsRuntime(hindsight: HindsightSubsystem): MemoryOperationsRuntime {
+function operationsRuntime(hindsight: HindsightSubsystem, authority: MemoryAuthorityVerification): MemoryOperationsRuntime {
   const { runtime, pending } = hindsight.state;
   return { epochId: runtime.epoch.epochId, configFingerprint: runtime.configFingerprint, deploymentMode: runtime.connection.deploymentMode,
     scheduler: hindsight.scheduler, writeFence: hindsight.writeFence, banks: runtime.banks, assertConnection: runtime.assertConnection,
-    driftReason: runtime.driftReason, pendingSummary: (bankId) => pending.summary({ authorityEpochId: runtime.epoch.epochId, bankId }) };
+    driftReason: runtime.driftReason, verifySelectedAuthority: authority.verifySelectedAuthority,
+    pendingSummary: (bankId) => pending.summary({ authorityEpochId: runtime.epoch.epochId, bankId }) };
+}
+
+function observeHindsightStatus(db: Database, hindsight: HindsightSubsystem) {
+  const { runtime, pending } = hindsight.state;
+  const observed = runtime.observeStatus();
+  if (observed.drift !== "none") return { ...observed, evidence: null };
+  try {
+    runtime.assertEvidence();
+    return { ...observed, evidence: { replica: hindsight.scheduler.statusForBanks(observed.banks),
+      pending: observed.banks.map(({ bankId }) => ({ bankId,
+        summary: pending.summary({ authorityEpochId: runtime.epoch.epochId, bankId }),
+        parentWritesPending: countPendingHindsightMemoryWrites(db, { authorityEpochId: runtime.epoch.epochId, bankId }) })) } };
+  } catch (error) {
+    if (error instanceof Error && error.message === "MEMORY_TEMPLATE_IDENTITY_CHANGED") throw error;
+    // Unreadable evidence cannot erase the already published template identity.
+    return { ...observed, evidence: { error } };
+  }
 }
 
 function diagnosticSnapshot(db: Database) {
-  const selection = readMemoryAuthoritySelection(db);
+  const selection = readCurrentMemoryAuthorityIdentity(db);
   return { providerId: selection.mode === "canonical-local" ? "local" : selection.mode,
     providerLineageId: selection.providerLineageId ?? undefined, authorityEpochId: selection.epochId ?? undefined,
     contractVersion: 1, capabilities: runtimeCapabilities(selection.mode) };

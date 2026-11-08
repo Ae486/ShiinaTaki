@@ -109,7 +109,7 @@ function assertPublished(deps: TemplateExecutionDependencies, input: {
   plan: TemplatePlan; publication: TemplatePublication; lease: TemplateExecutorLease; signal: AbortSignal;
 }): void {
   input.signal.throwIfAborted(); assertTemplateExecutor(deps.db, { lease: input.lease, now: deps.now() });
-  const selected = readMemoryAuthoritySelection(deps.db);
+  const selected = deps.verifySelectedAuthority?.() ?? readMemoryAuthoritySelection(deps.db);
   if (selected.mode !== "hindsight" || selected.epochId !== input.plan.guard.epochId
     || activeTemplateHold(deps.db, selected.epochId) || readTemplateSelectionIdentity(deps.db, selected.epochId) !== input.publication.selectionIdentity) {
     throw new Error("MEMORY_TEMPLATE_IDENTITY_CHANGED");

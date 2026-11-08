@@ -1,6 +1,6 @@
 /**
  * INPUT:  active authority/namespace guard, original application intent and complete prepared byte bodies
- * OUTPUT: transaction-safe original UUID/time allocation, CAS dispatch and immutable remote completion receipts
+ * OUTPUT: original UUID/time allocation, unfinished binding recovery, CAS dispatch and immutable completion receipts
  * POS:    core/db — D77 command outbox only; remote receipt persistence never confirms local replica application
  */
 import { randomUUID } from "node:crypto";
@@ -29,8 +29,11 @@ export interface HindsightApplicationCommandCompare { key: HindsightApplicationC
 export interface HindsightApplicationCommandCompletion extends HindsightApplicationCommandCompare {
   receipt: TakiApplicationCommitReceipt; affectedVersionsBody?: HindsightApplicationBody | null;
 }
+export type HindsightApplicationBindingJobScope = Pick<HindsightApplicationCommandKey, "authorityEpochId" | "bankId">
+  & Pick<HindsightApplicationCommandGuard, "namespace">;
 export interface HindsightApplicationCommandRepo {
   get(key: HindsightApplicationCommandKey): HindsightApplicationCommandJob | undefined;
+  unfinishedBinding(scope: HindsightApplicationBindingJobScope): HindsightApplicationCommandJob | undefined;
   prepare(input: PrepareHindsightApplicationCommand): HindsightApplicationCommandJob;
   markDispatched(input: HindsightApplicationCommandCompare): HindsightApplicationCommandJob;
   recordReceipt(input: HindsightApplicationCommandCompletion): HindsightApplicationCommandJob;
@@ -39,10 +42,23 @@ export interface HindsightApplicationCommandRepo {
 export function createHindsightApplicationCommandRepo(deps: HindsightApplicationCommandRepoDeps): HindsightApplicationCommandRepo {
   return {
     get: (key: HindsightApplicationCommandKey) => get(deps, key),
+    unfinishedBinding: (scope) => unfinishedBinding(deps, scope),
     prepare: (input: PrepareHindsightApplicationCommand) => prepare(deps, input),
     markDispatched: (input: HindsightApplicationCommandCompare) => markDispatched(deps, input),
     recordReceipt: (input: HindsightApplicationCommandCompletion) => recordReceipt(deps, input),
   };
+}
+
+function unfinishedBinding(deps: HindsightApplicationCommandRepoDeps, scope: HindsightApplicationBindingJobScope) {
+  const key = HindsightApplicationCommandKeySchema.parse({ authorityEpochId: scope.authorityEpochId, bankId: scope.bankId, requestId: "binding:" });
+  const namespace = TakiApplicationNamespaceSchema.parse(scope.namespace);
+  assertActive(deps, { key, namespace });
+  const row = deps.db.prepare(`SELECT request_id FROM hindsight_application_command_jobs
+    WHERE authority_epoch_id=:epoch AND bank_id=:bank AND provider_lineage=:lineage AND bank_generation=:generation
+      AND application_id=:application AND state IN ('prepared','dispatched') AND request_id GLOB 'binding:*'
+    ORDER BY prepared_at,request_id LIMIT 1`).get({ epoch: key.authorityEpochId, bank: key.bankId,
+      lineage: namespace.provider_lineage, generation: namespace.bank_generation, application: namespace.application_id });
+  return row ? get(deps, HindsightApplicationCommandKeySchema.parse({ ...key, requestId: row.request_id })) : undefined;
 }
 
 function get(deps: HindsightApplicationCommandRepoDeps, key: HindsightApplicationCommandKey): HindsightApplicationCommandJob | undefined {

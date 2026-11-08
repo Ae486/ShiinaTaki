@@ -19,6 +19,7 @@ import { assertTemplateRecovery } from "./template-recovery-admission.ts";
 import { observeTemplateDerived } from "./template-derived-observation.ts";
 
 export function createHindsightTemplateLifecycleService(deps: TemplateExecutionDependencies) {
+  deps = { ...deps, verifySelectedAuthority: deps.verifySelectedAuthority ?? deps.runtime.verifySelectedAuthority };
   const executor = createTemplateExecutionService(deps); const preview = createTemplatePreviewService(deps, executor.stopSignal);
   return {
     ...preview, ...executor,

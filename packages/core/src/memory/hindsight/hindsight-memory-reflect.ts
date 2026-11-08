@@ -1,12 +1,14 @@
 /**
- * INPUT:  a captured Bank, canonical reflect request and independently negotiated guarded-reflect capability
+ * INPUT:  a captured Bank, canonical request and sync-admitted evidence or standalone fresh admission
  * OUTPUT: actual native reflection, evidence, usage and trace under persisted policy and a fixed five-minute operation deadline
  * POS:    core/memory/hindsight — no local synthesis or unguarded native reflect fallback
  */
 import { randomUUID } from "node:crypto";
 import { TakiApplicationReadContextSchema, TakiApplicationJsonObjectSchema, type ReflectRequest, type ReflectResult } from "@taki/shared";
 import type { MemoryProviderCallContext } from "../memory-provider.ts";
-import { admitHindsightApplication } from "./hindsight-application-capability.ts";
+import { admitHindsightApplication, requireHindsightApplicationCapability } from "./hindsight-application-capability.ts";
+import { sameApplicationValue } from "./hindsight-application-integrity.ts";
+import type { HindsightCallContext } from "./hindsight-client.ts";
 import { prepareHindsightApplicationBody, uploadHindsightApplicationBody } from "./hindsight-application-body-transfer.ts";
 import { assertHindsightProviderScope, hindsightProviderBank, hindsightProviderCall,
   type HindsightMemoryProviderState } from "./hindsight-memory-provider-context.ts";
@@ -22,10 +24,8 @@ export async function reflectHindsightMemory(state: HindsightMemoryProviderState
     operationTimeoutMs: HINDSIGHT_REFLECT_OPERATION_TIMEOUT_MS });
   await state.deps.synchronize({ bankId: input.request.bankId, context: call() });
   const bank = hindsightProviderBank(state, { context: input.context, bankId: input.request.bankId });
-  const admission = await admitHindsightApplication({ client: state.client, request: call, expectedLineage: state.epoch.providerLineageId });
-  state.assert(input.context, bank.bankId);
-  state.deps.admission.save({ authorityEpochId: state.epoch.epochId, configFingerprint: state.deps.configFingerprint,
-    manifest: admission.manifest, admittedAt: state.now() });
+  const admission = await reflectAdmission(state, call);
+  call();
   if (!admission.guardedReflect) throw new Error("MEMORY_CAPABILITY_UNSUPPORTED");
   const policyContext = TakiApplicationReadContextSchema.parse({ namespace: bank.namespace, bank_id: bank.bankId,
     purpose: "reflect", policy_contract_version: "1.0.0", captured_at: state.now(), scope: bank.bankScope,
@@ -48,6 +48,18 @@ export async function reflectHindsightMemory(state: HindsightMemoryProviderState
       directiveIds: unique((response.based_on?.directives ?? []).map((item) => item.id)) },
     usage: { inputTokens: response.usage?.input_tokens ?? null, outputTokens: response.usage?.output_tokens ?? null },
     trace: response.trace ? TakiApplicationJsonObjectSchema.parse(response.trace) : null };
+}
+
+async function reflectAdmission(state: HindsightMemoryProviderState, request: () => HindsightCallContext) {
+  if (state.deps.readAdmission) return requireHindsightApplicationCapability(state.deps.readAdmission(request));
+  const admitted = await admitHindsightApplication({ client: state.client, request, expectedLineage: state.epoch.providerLineageId });
+  request();
+  const identity = { authorityEpochId: state.epoch.epochId, configFingerprint: state.deps.configFingerprint };
+  const evidence = state.deps.admission.read(identity);
+  if (!evidence || !sameApplicationValue(evidence.manifest, admitted.manifest)) {
+    state.deps.admission.save({ ...identity, manifest: admitted.manifest, admittedAt: state.now() });
+  }
+  return admitted;
 }
 
 function unique(values: string[]): string[] { return [...new Set(values)]; }

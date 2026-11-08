@@ -1,6 +1,6 @@
 /**
  * INPUT:  captured Hindsight authority, B3 connection/Bank routes and verified application replica
- * OUTPUT: guarded foreground HTTP allowances or explicit operation deadlines, verified capabilities, closed public error envelopes and
+ * OUTPUT: guarded request allowances, optional sync-admitted evidence, verified capabilities, closed public error envelopes and
  *         the failure-to-MemoryErrorCode classification (hindsightMemoryErrorCode)
  * POS:    core/memory/hindsight — runtime identity boundary; degraded availability never changes Memory Authority
  */
@@ -17,7 +17,8 @@ import type { PendingMemoryRepo } from "../../db/pending-memory-repo.ts";
 import type { MemoryProviderCallContext } from "../memory-provider.ts";
 import type { HindsightClient, HindsightCallContext } from "./hindsight-client.ts";
 import { HindsightApplicationRefusal } from "./hindsight-application-client.ts";
-import { admitHindsightApplication, requireHindsightApplicationCapability, requireHindsightApplicationClient } from "./hindsight-application-capability.ts";
+import { admitHindsightApplication, requireHindsightApplicationCapability, requireHindsightApplicationClient,
+  type HindsightApplicationAdmissionReader } from "./hindsight-application-capability.ts";
 import { hindsightApplicationDeadline } from "./hindsight-application-body-transfer.ts";
 import { sameApplicationValue, type HindsightApplicationScope } from "./hindsight-application-integrity.ts";
 import { HindsightPolicyRefusal } from "./hindsight-policy-context.ts";
@@ -38,6 +39,7 @@ export interface HindsightMemoryProviderDeps {
   bank(bankId: string): MemoryReplicaBank;
   assertConnection(): void;
   synchronize(input: HindsightRuntimeSynchronizeInput): Promise<void>;
+  readAdmission?: HindsightApplicationAdmissionReader;
   writes: HindsightMemoryWritePort;
   now?: () => string;
   signal?: AbortSignal;

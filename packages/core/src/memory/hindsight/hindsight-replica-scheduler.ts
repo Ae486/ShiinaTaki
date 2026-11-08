@@ -1,15 +1,18 @@
 /**
- * INPUT:  configured Banks, durable schedule/checkpoints, and the bounded replica data-plane runner
- * OUTPUT: asynchronous single-flight execution, bounded supervisor retries, exact manual outcomes and per-Bank status
+ * INPUT:  configured Banks, foreground retry requests, durable schedule/checkpoints, and the bounded replica data-plane runner
+ * OUTPUT: scheduler-owned async wakes, bounded retries/diagnostics, preserved manual outcomes and persisted per-Bank status
  * POS:    core/memory/hindsight — deterministic B5 scheduling; no chat, Heartbeat policy, Pending replay, or authority wiring
  */
 import { z } from "zod";
+import { AsyncResource } from "node:async_hooks";
 import {
   MemoryReplicaBankSchema, MemoryReplicaSyncStatusSchema, REPLICA_RETRY_DELAYS_MS,
   type MemoryReplicaBank, type MemoryReplicaErrorCode, type MemoryReplicaRunKind,
   type MemoryReplicaSyncState, type MemoryReplicaSyncStatus,
+  type MemoryReplicaScheduleConfig,
 } from "@taki/shared";
 import type { HindsightReplicaSchedulerRepo } from "../../db/hindsight-replica-scheduler-repo.ts";
+import type { Logger } from "../../logging/logger.ts";
 import type { HindsightReplicaSyncRepo } from "../../db/hindsight-replica-sync-repo.ts";
 import { replicaNextWake } from "../../db/hindsight-replica-schedule-state.ts";
 import { executeHindsightReplicaRun } from "./hindsight-replica-run-execution.ts";
@@ -26,12 +29,15 @@ export interface HindsightReplicaScheduler {
   retire(): void;
   tick(): Promise<void>;
   requestManual(bankId: string, kind?: MemoryReplicaRunKind, requestId?: string): MemoryReplicaSyncStatus;
+  /** Arms existing automatic recovery; scheduling errors stay observable without changing a durable write receipt. */
+  requestRetry(bankId: string, dueAt: string): void;
   /** Cancels the exact queued request even while a prior run is active; claimed requests refuse. */
   cancelManual(bankId: string, requestId?: string): MemoryReplicaSyncStatus;
   verifiedReconnect(): void;
   status(bankId?: string): MemoryReplicaSyncStatus[];
   lastError(): MemoryReplicaErrorCode | null;
   started(): boolean;
+  configure(bankId: string, config: MemoryReplicaScheduleConfig): MemoryReplicaSyncStatus;
 }
 interface SchedulerInput {
   repo: HindsightReplicaSchedulerRepo;
@@ -39,13 +45,16 @@ interface SchedulerInput {
   banks: MemoryReplicaBank[] | (() => MemoryReplicaBank[]);
   runner: HindsightReplicaSchedulerRunner;
   ownerId: string;
+  logger?: Logger;
   runTimeoutMs?: number;
   leaseDurationMs?: number;
   setTimer?: (callback: () => void, delayMs: number) => ReturnType<typeof setTimeout>;
   clearTimer?: (timer: ReturnType<typeof setTimeout>) => void;
 }
 
-export function createHindsightReplicaScheduler(input: SchedulerInput): HindsightReplicaScheduler {
+export function createHindsightReplicaScheduler(input: SchedulerInput): HindsightReplicaScheduler & {
+  statusForBanks(banks: readonly MemoryReplicaBank[]): MemoryReplicaSyncStatus[];
+} {
   return new ReplicaScheduler(input);
 }
 
@@ -61,6 +70,11 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
   private cancel: (() => void) | undefined;
   private error: MemoryReplicaErrorCode | null = null;
   private readonly supervisorRetries = new Map<string, number>();
+  // A wake belongs to this scheduler, never to the foreground fence owner that happened to rearm it.
+  private readonly wake = AsyncResource.bind(() => {
+    this.timer = undefined;
+    void this.tick().catch((error: unknown) => { this.error = replicaErrorCode(error); });
+  }, "HindsightReplicaScheduler");
 
   constructor(input: SchedulerInput) {
     this.input = { ...input, ownerId: z.string().min(1).max(256).parse(input.ownerId) };
@@ -143,8 +157,25 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
     this.armTimer();
   }
 
+  requestRetry(bankId: string, dueAt: string): void {
+    try {
+      if (this.transitionPaused) throw new Error("MEMORY_AUTHORITY_FENCED");
+      const bank = this.banks().find((candidate) => candidate.bankId === bankId);
+      if (!bank) throw new Error("HINDSIGHT_REPLICA_BANK_NOT_SCHEDULED");
+      this.input.repo.ensureBank({ bank });
+      this.input.repo.requestRetry(bankId, dueAt);
+      this.rerun = true;
+    } catch (error) { this.error = replicaErrorCode(error); }
+    this.armTimer();
+  }
+
   status(bankId?: string): MemoryReplicaSyncStatus[] {
-    return this.banks().filter((bank) => bankId === undefined || bank.bankId === bankId).flatMap((bank) => {
+    return this.statusForBanks(this.banks().filter((bank) => bankId === undefined || bank.bankId === bankId));
+  }
+
+  /** Operator projection over Banks verified in the caller's current SQLite read snapshot; never admits work. */
+  statusForBanks(banks: readonly MemoryReplicaBank[]): MemoryReplicaSyncStatus[] {
+    return orderedBanks(banks).flatMap((bank) => {
       const state = this.input.repo.get(bank.bankId);
       return state ? [this.projectStatus(state)] : [];
     });
@@ -155,6 +186,15 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
 
   started(): boolean { return this.running; }
 
+  configure(bankId: string, config: MemoryReplicaScheduleConfig): MemoryReplicaSyncStatus {
+    if (this.transitionPaused) throw new Error("MEMORY_AUTHORITY_FENCED");
+    const bank = this.banks().find((candidate) => candidate.bankId === bankId);
+    if (!bank) throw new Error("HINDSIGHT_REPLICA_BANK_NOT_SCHEDULED");
+    const state = this.input.repo.ensureBank({ bank, config });
+    this.armTimer();
+    return this.projectStatus(state);
+  }
+
   cancelManual(bankId: string, requestId?: string): MemoryReplicaSyncStatus {
     this.input.repo.cancelManual(bankId, requestId);
     const status = this.status(bankId)[0];
@@ -163,10 +203,7 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
   }
 
   private banks(): MemoryReplicaBank[] {
-    const source = typeof this.input.banks === "function" ? this.input.banks() : this.input.banks;
-    const banks = source.map((bank) => MemoryReplicaBankSchema.parse(bank));
-    if (new Set(banks.map((bank) => bank.bankId)).size !== banks.length) throw new Error("HINDSIGHT_REPLICA_BANK_BINDING_MISMATCH");
-    return banks.sort((a, b) => a.scope === b.scope ? a.bankId.localeCompare(b.bankId) : a.scope === "global" ? -1 : 1);
+    return orderedBanks(typeof this.input.banks === "function" ? this.input.banks() : this.input.banks);
   }
 
   private async drain(): Promise<void> {
@@ -202,7 +239,7 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
     const remaining = Date.parse(run.lease.expiresAt) - Date.parse(this.input.repo.now()) - 1;
     if (remaining <= 0) { this.input.repo.recover(bank.bankId); return; }
     const execution = executeHindsightReplicaRun({ bank, run, repo: this.input.repo, runner: this.input.runner,
-      leases: this.input.replica.leases, timeoutMs: Math.min(remaining, this.runTimeoutMs) });
+      leases: this.input.replica.leases, timeoutMs: Math.min(remaining, this.runTimeoutMs), logger: this.input.logger });
     this.cancel = execution.cancel;
     try { await execution.completion; }
     finally { this.cancel = undefined; }
@@ -229,10 +266,7 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
     if (due.length === 0) return;
     const delay = Math.max(0, Math.min(60 * 60_000, Math.min(...due.map(Date.parse)) - Date.parse(now)));
     const setTimer = this.input.setTimer ?? ((callback, ms) => setTimeout(callback, ms));
-    this.timer = setTimer(() => {
-      this.timer = undefined;
-      void this.tick().catch((error: unknown) => { this.error = replicaErrorCode(error); });
-    }, delay);
+    this.timer = setTimer(this.wake, delay);
     this.timer.unref?.();
   }
 
@@ -249,4 +283,10 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
     if (this.timer !== undefined) (this.input.clearTimer ?? clearTimeout)(this.timer);
     this.timer = undefined;
   }
+}
+
+function orderedBanks(source: readonly MemoryReplicaBank[]): MemoryReplicaBank[] {
+  const banks = source.map((bank) => MemoryReplicaBankSchema.parse(bank));
+  if (new Set(banks.map((bank) => bank.bankId)).size !== banks.length) throw new Error("HINDSIGHT_REPLICA_BANK_BINDING_MISMATCH");
+  return banks.sort((a, b) => a.scope === b.scope ? a.bankId.localeCompare(b.bankId) : a.scope === "global" ? -1 : 1);
 }

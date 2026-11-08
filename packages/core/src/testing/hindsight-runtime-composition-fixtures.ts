@@ -39,9 +39,10 @@ import { curatorTestBank, type CuratorTestBank } from "../memory/hindsight/hinds
 export interface TransportControl { offline: boolean; beforeChanges?: (bankId: string) => Promise<void>; beforeRecall?: (bankId: string) => Promise<void> }
 export interface RuntimeCall { operation: string; bankId?: string }
 export function hindsightRuntimeFixture(input: { mode?: "hindsight" | "local" | "legacy"; seed?: boolean;
-  banks?: CuratorTestBank[]; model?: LanguageModel } = {}) {
+  banks?: CuratorTestBank[]; model?: LanguageModel; coreMigrationHead?: number } = {}) {
   const dataDir = mkdtempSync(join(tmpdir(), "taki-hindsight-runtime-"));
-  const db = openDatabase({ path: join(dataDir, "memory.sqlite"), migrations: MIGRATIONS });
+  const migrations = MIGRATIONS.filter((migration) => migration.version <= (input.coreMigrationHead ?? Infinity));
+  const db = openDatabase({ path: join(dataDir, "memory.sqlite"), migrations });
   const banks = input.banks ?? [curatorTestBank(), curatorTestBank({ bankId: "bank-taki", characterId: "taki" })];
   const mode = input.mode ?? "hindsight"; const { logger, records: logs } = createCaptureLogger();
   const model = input.model ?? failingGenerateModel(new Error("fixture forbids unexpected Utility model calls"));
@@ -52,8 +53,7 @@ export function hindsightRuntimeFixture(input: { mode?: "hindsight" | "local" | 
   if (mode === "hindsight") seedHindsightAuthority(db, banks);
   else {
     const epoch = authority.initializeLocalAuthority(APPLICATION_TEST_AT);
-    if (mode === "local") db.prepare(`UPDATE memory_authority_selection SET mode='canonical-local',active_epoch_id=:epoch,
-      verified_snapshot_id='fixture-snapshot',activation_transaction_id='fixture-local' WHERE singleton=1`).run({ epoch: epoch.epochId });
+    if (mode === "local") seedLocalAuthority(db, epoch.epochId);
   }
   const setup = createHindsightBankSetupRepo(db);
   for (const bank of banks) setup.upsert({ scope: bank.bankScope.kind,
@@ -67,7 +67,7 @@ export function hindsightRuntimeFixture(input: { mode?: "hindsight" | "local" | 
   const boot = { db, dataDir, promptDir: join(dataDir, "prompt"), model, timeline, summaries, env: {}, logger, bootId: "fixture-boot",
     windowStart: () => 1, estimatedTokens: () => 0, budget: () => 100_000, compact: { triggerRatio: 0.8, keepMessages: 3 } };
   let closed = false;
-  return { ...boot, config, source, secrets, banks, replica, authority, setup, remote, logs,
+  return { ...boot, config, source, secrets, banks, replica, authority, setup, remote, logs, migrations,
     compose: (hindsight = true) => {
       const value = composeMemoryRuntime({ ...boot, ...(hindsight ? { hindsight: { source, secrets: secrets.catalog, client: remote.client } } : {}) });
       owners.push(value.stop); return value;
@@ -87,6 +87,16 @@ function seedReplica(repo: ReturnType<typeof createHindsightApplicationReplicaRe
     expectedBank: { bankId: bank.scope.bankId, scope: bank.bankScope.kind, characterId: bank.bankScope.characterId },
     expectedCheckpoint: null, expectedNativeCheckpoint: null, lease, deadlineAt: new Date(Date.now() + 60_000).toISOString() }); }
   finally { repo.leases.release(lease); }
+}
+function seedLocalAuthority(db: Database, epochId: string): void {
+  const at = APPLICATION_TEST_AT;
+  db.prepare(`INSERT INTO memory_migration_runs(run_id,snapshot_id,epoch_id,phase,status,requested_at,updated_at,lease_fence,activation_transaction_id)
+    VALUES ('fixture-local-run','fixture-snapshot',:epoch,'activated','completed',:at,:at,1,'fixture-local')`).run({ epoch: epochId, at });
+  db.prepare(`INSERT INTO memory_migration_activation_receipts(run_id,transaction_id,snapshot_id,manifest_digest,readiness_digest,epoch_id,lease_fence,committed_at,marker_mode)
+    VALUES ('fixture-local-run','fixture-local','fixture-snapshot',:digest,:digest,:epoch,1,:at,'canonical-local')`)
+    .run({ digest: "a".repeat(64), epoch: epochId, at });
+  db.prepare(`UPDATE memory_authority_selection SET mode='canonical-local',active_epoch_id=:epoch,
+    verified_snapshot_id='fixture-snapshot',activation_transaction_id='fixture-local' WHERE singleton=1`).run({ epoch: epochId });
 }
 function seedHindsightAuthority(db: Database, banks: CuratorTestBank[]) {
   const at = APPLICATION_TEST_AT; const lineage = banks[0]?.scope.namespace.provider_lineage ?? APPLICATION_TEST_SCOPE.namespace.provider_lineage;
@@ -172,7 +182,7 @@ export function hindsightApplicationClientOverlay(banks: CuratorTestBank[]) {
     const bank = requireBank(bankId, "native-baseline"); return applicationTestNativeBaseline(bankBundle(bank)); } };
   return { overlay, control, calls, requireBank };
 }
-function createNativeFixtureClient(input: { control: TransportControl; calls: RuntimeCall[]; secrets: SecretCatalogService;
+export function createNativeFixtureClient(input: { control: TransportControl; calls: RuntimeCall[]; secrets: SecretCatalogService;
   requireBank(bankId: string, operation: string): CuratorTestBank }): HindsightClient {
   const { control, calls, secrets, requireBank } = input;
   return createHindsightClient({ endpoint: "http://127.0.0.1:18481", resolveApiKey: () => secrets.resolve("memory.hindsight.connection.api-key"),

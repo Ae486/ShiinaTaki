@@ -1,6 +1,6 @@
 /**
  * INPUT:  active Hindsight connection, Core SQLite and immutable provider-specific configuration
- * OUTPUT: application replica, source/binding producer, Pending recovery, durable writes and real provider
+ * OUTPUT: replica, binding, keyed live-checked admission reuse, Pending recovery, writes and real provider
  * POS:    core/memory/hindsight — storage/transport composition; constructors never dispatch work or change Authority
  */
 import type { MemoryBankScope, TakiApplicationBlockBody } from "@taki/shared";
@@ -10,7 +10,7 @@ import { createHindsightApplicationCommandRepo } from "../../db/hindsight-applic
 import type { HindsightApplicationCommandGuard } from "../../db/hindsight-application-command-contract.ts";
 import { readHindsightApplicationBootstrapEvidence } from "../../db/hindsight-application-bootstrap-evidence.ts";
 import { createHindsightMemoryWriteRepo } from "../../db/hindsight-memory-write-repo.ts";
-import { createHindsightRuntimeAdmissionRepo } from "../../db/hindsight-runtime-admission-repo.ts";
+import { createHindsightRuntimeAdmissionRepo, type HindsightRuntimeAdmissionRepo } from "../../db/hindsight-runtime-admission-repo.ts";
 import { createPendingMemoryRepo } from "../../db/pending-memory-repo.ts";
 import { createStructuredMemoryBlockRepo } from "../../db/structured-memory-block-repo.ts";
 import type { Database } from "../../db/sqlite.ts";
@@ -19,7 +19,8 @@ import { createMemoryCoordinator } from "../memory-coordinator.ts";
 import { createPendingMemoryWriter } from "../pending-memory-writer.ts";
 import { createIntlSegmenterTokenizer } from "../search-tokenizer.ts";
 import { createHindsightApplicationCommandRunner } from "./hindsight-application-command-runner.ts";
-import { requireHindsightApplicationClient } from "./hindsight-application-capability.ts";
+import { requireHindsightApplicationClient, resolveHindsightApplicationAdmission,
+  type admitHindsightApplication, type HindsightApplicationAdmissionReader } from "./hindsight-application-capability.ts";
 import { createHindsightApplicationWriter } from "./hindsight-application-writer.ts";
 import { createHindsightApplicationBindingRunner } from "./hindsight-application-binding-runner.ts";
 import { createHindsightApplicationSyncRunner } from "./hindsight-application-sync-runner.ts";
@@ -42,19 +43,17 @@ export type HindsightRuntimeState = ReturnType<typeof createHindsightRuntimeStat
 export function createHindsightRuntimeState(input: Input) {
   const stores = createStores(input); const { runtime, db, config } = input;
   const { replica, writer, blocks, assertActive, bankScope, nativeReplica, pending, admission } = stores;
+  const admitted = createRuntimeAdmission(input, admission);
   const bind = createHindsightApplicationBindingRunner({ repo: replica, writer, client: runtime.client,
     bootstrap: (scope) => readHindsightApplicationBootstrapEvidence(db, scope),
     templateLabelGroup: (scope) => runtime.templateExecution ? runtime.templateExecution.labelGroup(scope) : readSelectedTemplateLabelGroup(db, scope),
     blocks: (scope) => readBlocks(blocks, scope.bankScope) });
   const sync = createHindsightApplicationSyncRunner({ client: runtime.client, repo: replica, authority: runtime.authority,
-    bankScope, requestTimeoutMs: runtime.connection.requestTimeoutMs, bind, now: input.now,
-    onAdmission: (manifest) => { runtime.assertConnection(); if (runtime.templateExecution) return;
-      admission.save({ authorityEpochId: runtime.epoch.epochId,
-      configFingerprint: runtime.configFingerprint, manifest, admittedAt: input.now?.() ?? new Date().toISOString() }); } });
+    bankScope, requestTimeoutMs: runtime.connection.requestTimeoutMs, bind, now: input.now, resolveAdmission: admitted.resolve });
   const unsupported = (): never => { throw new Error("HINDSIGHT_APPLICATION_NATIVE_PUBLICATION_REFUSED"); };
   const recovery = createHindsightPendingRecoveryRunner({ client: runtime.client, replica: nativeReplica, pending,
     authority: runtime.authority, projection: { bankScope, source: unsupported, memory: unsupported },
-    connection: runtime.connection, secretMarker: runtime.secretMarker, syncRunner: sync, now: input.now,
+    connection: runtime.connection, secretMarker: runtime.secretMarker, syncRunner: sync, now: input.now, readAdmission: admitted.read,
     beforeNativeDispatch: (work) => ensureHindsightPendingSource({ writer, ...work }) });
   let advance: (work: HindsightMemoryWriteAdvance) => Promise<void> = async () => { throw new Error("MEMORY_RUNTIME_NOT_READY"); };
   const service = createHindsightRuntimeBankService({ replica, sync, recovery, bank: runtime.bank,
@@ -65,9 +64,33 @@ export function createHindsightRuntimeState(input: Input) {
     requestTimeoutMs: runtime.connection.requestTimeoutMs, intentionsDefaultDays: config.intentionsDefaultDays, now: input.now });
   advance = writes.advanceBank;
   const provider = createHindsightMemoryProvider({ ...runtime, epochId: runtime.epoch.epochId, replica, admission, pending, writes,
-    synchronize: service.synchronize, now: input.now, workFence: input.workFence });
-  const coordinator = createMemoryCoordinator({ authority: runtime.authority, providers: new Map([["hindsight", transitionQueuedProvider(db, provider)]]) });
+    synchronize: service.synchronize, readAdmission: admitted.read, now: input.now, workFence: input.workFence });
+  const coordinator = createMemoryCoordinator({ authority: runtime.authority, providers: new Map([["hindsight", transitionQueuedProvider(db, provider, runtime.assertConnection)]]) });
   return { ...input, ...stores, sync, recovery, service, writes, provider, coordinator };
+}
+
+function createRuntimeAdmission(input: Input, repo: HindsightRuntimeAdmissionRepo) {
+  const { runtime } = input;
+  const identity = { authorityEpochId: runtime.epoch.epochId, configFingerprint: runtime.configFingerprint };
+  const read: HindsightApplicationAdmissionReader = (request) => {
+    runtime.assertConnection(); request();
+    const evidence = repo.read(identity);
+    if (!evidence) throw new Error("HINDSIGHT_APPLICATION_ADMISSION_INVALID");
+    return evidence.manifest;
+  };
+  const resolve: typeof admitHindsightApplication = async (work) => {
+    const request = () => { runtime.assertConnection(); return work.request(); };
+    request();
+    const evidence = runtime.templateExecution ? undefined : repo.read(identity);
+    const result = await resolveHindsightApplicationAdmission({ ...work, request, evidence: evidence?.manifest });
+    request();
+    const current = runtime.templateExecution ? undefined : repo.read(identity);
+    if (!runtime.templateExecution && (!current || !sameApplicationValue(current.manifest, result.manifest))) {
+      repo.save({ ...identity, manifest: result.manifest, admittedAt: input.now?.() ?? new Date().toISOString() });
+    }
+    return result;
+  };
+  return { resolve, read: runtime.templateExecution ? undefined : read };
 }
 
 function createStores(input: Input) {
@@ -83,7 +106,7 @@ function createStores(input: Input) {
   const replica = createHindsightApplicationReplicaRepo({ db, tokenizer, bankScope, now: input.now });
   const assertActive = (guard: HindsightApplicationCommandGuard) => {
     input.workFence?.admitSync(() => undefined);
-    runtime.assertConnection(); const checkpoint = replica.checkpoint(guard.key.bankId); const scope = bankScope(guard.key.bankId);
+    const scope = bankScope(guard.key.bankId); const checkpoint = replica.checkpoint(guard.key.bankId);
     if (guard.key.authorityEpochId !== runtime.epoch.epochId || !checkpoint || checkpoint.bankDeleted
       || checkpoint.authorityEpochId !== runtime.epoch.epochId || !sameApplicationValue(checkpoint.namespace, guard.namespace)
       || !sameApplicationValue(checkpoint.bankScope, scope)) throw new Error("MEMORY_AUTHORITY_MISMATCH");

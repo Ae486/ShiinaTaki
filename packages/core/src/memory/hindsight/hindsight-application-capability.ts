@@ -1,6 +1,6 @@
 /**
- * INPUT:  an authenticated compatibility manifest and the installed Hindsight transport methods
- * OUTPUT: explicit D77/G1 capability admission, independent of native reflect availability
+ * INPUT:  authenticated compatibility, installed transport methods and optional persisted admission evidence
+ * OUTPUT: fresh D77/G1 admission or whole-manifest reuse after a live capability/lineage check
  * POS:    core/memory/hindsight — application runtime negotiation; no authority or policy mutation
  */
 import {
@@ -17,6 +17,9 @@ import type { HindsightApplicationClient } from "./hindsight-application-client.
 import type { HindsightCompatibilityWire } from "./hindsight-contracts.ts";
 import { projectHindsightCompatibilityManifest } from "./hindsight-compatibility-service.ts";
 import { hindsightError } from "./hindsight-errors.ts";
+import { sameApplicationValue } from "./hindsight-application-integrity.ts";
+
+export type HindsightApplicationAdmissionReader = (request: () => HindsightCallContext) => HindsightCompatibilityWire;
 
 export function requireHindsightApplicationClient(client: HindsightClient): HindsightClient & HindsightApplicationClient {
   const methods: (keyof HindsightApplicationClient)[] = ["initializeApplication", "uploadApplicationBody", "applicationBody",
@@ -53,6 +56,20 @@ export async function admitHindsightApplication(input: {
   input.request();
   if (admission.providerLineage !== input.expectedLineage) throw new Error("HINDSIGHT_REPLICA_LINEAGE_MISMATCH");
   return { ...admission, manifest };
+}
+
+export async function resolveHindsightApplicationAdmission(input: Parameters<typeof admitHindsightApplication>[0] & {
+  evidence?: HindsightCompatibilityWire;
+}): ReturnType<typeof admitHindsightApplication> {
+  input.request();
+  requireHindsightApplicationClient(input.client);
+  if (!input.evidence) return admitHindsightApplication(input);
+  const manifest = await input.client.compatibility(input.request());
+  input.request();
+  const admission = requireHindsightApplicationCapability(manifest);
+  if (admission.providerLineage !== input.expectedLineage) throw new Error("HINDSIGHT_REPLICA_LINEAGE_MISMATCH");
+  if (sameApplicationValue(manifest, input.evidence)) return { ...admission, manifest: input.evidence };
+  return admitHindsightApplication(input);
 }
 
 function supported(value: { state: string; reason: string }): boolean {

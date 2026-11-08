@@ -32,7 +32,7 @@ describe("memory authority status contract", () => {
   it("carries the Hindsight section exactly under Hindsight authority, in every unavailable reason", () => {
     expect(MemoryAuthorityStatusSchema.safeParse({ ...local, hindsight: section }).success).toBe(false);
     const hindsight = { ...local, authority: { mode: "hindsight", epochId: "epoch", providerLineageId: "11111111-1111-4111-8111-111111111111" } } as const;
-    for (const reason of ["authority_mismatch", "connection_unavailable", "stopped", "not_installed", "connection_disabled", "config_changed"] as const) {
+    for (const reason of ["authority_mismatch", "authority_invalid", "evidence_invalid", "connection_unavailable", "stopped", "not_installed", "connection_disabled", "config_changed"] as const) {
       const status = { ...hindsight, runtime: { providerId: "hindsight", available: false, unavailableReason: reason } };
       expect(MemoryAuthorityStatusSchema.safeParse({ ...status, hindsight: section }).success).toBe(true);
       expect(MemoryAuthorityStatusSchema.safeParse(status).success).toBe(false);

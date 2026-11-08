@@ -1,5 +1,5 @@
 # core/server/
-- ws-server.ts — the only socket-owning module; frame parse/validate, peer-address capture, pre-auth gate, dispatch, reply/notify, close
+- ws-server.ts — the only socket-owning module; frame parse/validate, peer-address capture, pre-auth gate, dispatch, reply/notify, close; yields between received frames so status bursts do not monopolize the event loop
 - method-registry.ts — WS method table + dispatcher; role gate + app-error mapping (invariant-7 wiring point); logs each unexpected failure once (method + closed code or error class)
 - connection-registry.ts — per-socket auth state + Core-assigned per-Host generation and replacement-socket retirement
 - app-error.ts — app-error envelope helpers (JSON_RPC_APP_ERROR + error.data.code)

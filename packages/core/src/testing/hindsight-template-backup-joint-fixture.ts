@@ -40,13 +40,13 @@ export function jointTemplateBackupSeed() {
     banks: hindsightBankBindings("taki") };
 }
 
-export async function createJointTemplateBackupFixture(input: { endpoint: string; client: HindsightClient; targets: HindsightTemplateTarget[] }) {
+export async function createJointTemplateBackupFixture(input: { endpoint: string; client: HindsightClient; targets: HindsightTemplateTarget[]; coreMigrationHead?: number }) {
   const targets = input.targets.map((target) => HindsightTemplateTargetSchema.parse(target));
   if (targets.length !== 2 || new Set(targets.map((target) => target.provider_lineage)).size !== 1
     || !jointTemplateBackupSeed().banks.every((bank) => targets.some((target) => target.bank_id === bank.externalBankId))) {
     throw new Error("joint fixture requires Native-produced targets for the exact Core Bank set");
   }
-  const fixture = templateLifecycleFixture({ namespaces: new Map(targets.map((target) => [target.bank_id,
+  const fixture = templateLifecycleFixture({ coreMigrationHead: input.coreMigrationHead, namespaces: new Map(targets.map((target) => [target.bank_id,
     { provider_lineage: target.provider_lineage, bank_generation: target.bank_generation, application_id: "taki" }])) });
   try {
     fixture.service.stop(); await fixture.owner.stop();

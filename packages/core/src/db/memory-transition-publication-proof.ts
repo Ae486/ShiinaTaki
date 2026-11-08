@@ -8,6 +8,7 @@ import { readVerifiedTransitionCandidate } from "../memory/transitions/transitio
 import { transitionLocalHash } from "../memory/transitions/transition-local-encoding.ts";
 import { canonicalPayloadHash } from "../memory/legacy-migration/legacy-identities.ts";
 import { readMemoryAuthoritySelection, verifyCanonicalLocalReceipt } from "../memory/legacy-migration/legacy-activation-repo.ts";
+import type { MemoryAuthorityVerification } from "../memory/runtime-authority-verification.ts";
 import { readTransitionNativeEvidence } from "./memory-transition-candidate-repo.ts";
 import { assertTransitionLocalCurrent, readTransitionLocalCapture, type TransitionCaptureInput } from "./memory-transition-local-capture.ts";
 import { assertTransitionPredecessor, readTransitionIntent, requireTransitionLease } from "./memory-transition-repo.ts";
@@ -18,18 +19,19 @@ import type { Database } from "./sqlite.ts";
 import { withTransitionEvidenceContext, type TransitionEvidenceContext } from "../memory/transitions/transition-evidence-context.ts";
 import { assertTransitionTemplatePublication } from "../memory/transitions/transition-template-state.ts";
 
-export function readTransitionPublicationBoundary(db: Database, input: TransitionCaptureInput & { candidateId: string }, context?: TransitionEvidenceContext) {
-  context?.assertIndependent();
+type PublicationBoundaryInput = TransitionCaptureInput & { candidateId: string;
+  verifySelectedAuthority?: MemoryAuthorityVerification["verifySelectedAuthority"] };
+export function readTransitionPublicationBoundary(db: Database, input: PublicationBoundaryInput, context?: TransitionEvidenceContext) {
   return withTransitionEvidenceContext(db, (verification) => readPublicationBoundary(db, input, verification), context);
 }
-function readPublicationBoundary(db: Database, input: TransitionCaptureInput & { candidateId: string }, verification: TransitionEvidenceContext) {
+function readPublicationBoundary(db: Database, input: PublicationBoundaryInput, verification: TransitionEvidenceContext) {
   db.prepare("UPDATE canonical_memory_authority_state SET active_epoch_id=active_epoch_id WHERE singleton=1").run();
   const attempt = requireTransitionLease(db, input); const intent = readTransitionIntent(db, attempt.transitionId);
   if (!intent || !["fenced", "proven"].includes(attempt.phase) || attempt.cutoffSequence === null || intent.incidentId !== null) invalid();
   assertTransitionPredecessor(db, intent); input.assertConfiguration();
-  const selection = readMemoryAuthoritySelection(db);
+  const selection = input.verifySelectedAuthority?.(verification) ?? readMemoryAuthoritySelection(db, verification);
   if (selection.epochId !== intent.request.expected.predecessorEpochId) invalid();
-  if (selection.mode === "canonical-local") verifyCanonicalLocalReceipt(db, selection);
+  if (selection.mode === "canonical-local" && !input.verifySelectedAuthority) verifyCanonicalLocalReceipt(db, selection);
   const candidate = readVerifiedTransitionCandidate(db, input.candidateId, verification);
   if (candidate.transitionId !== intent.transitionId || candidate.predecessorEpochId !== selection.epochId) invalid();
   if (candidate.localCaptureId) assertTransitionLocalCurrent(db, readTransitionLocalCapture(db, candidate.localCaptureId));
@@ -79,7 +81,7 @@ export function transitionPublicationBanks(db: Database, candidate: MemoryTransi
 }
 
 /** Call while fenced to create the W1 proof, then compare the same facts immediately before publication. */
-export function buildTransitionPublicationProof(db: Database, input: TransitionCaptureInput & { candidateId: string }): MemoryTransitionFinalProof {
+export function buildTransitionPublicationProof(db: Database, input: PublicationBoundaryInput): MemoryTransitionFinalProof {
   let proof: MemoryTransitionFinalProof | undefined;
   db.transaction(() => { proof = readTransitionPublicationBoundary(db, input).proof; });
   if (!proof) invalid(); return proof;

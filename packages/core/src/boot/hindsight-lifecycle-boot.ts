@@ -14,12 +14,14 @@ import type { HindsightBindingSnapshot } from "../memory/hindsight-runtime-bindi
 import type { MemoryOperationsRuntime } from "../memory/operations/memory-operation-contract.ts";
 import type { SecretCatalogService } from "../secrets/secret-catalog-service.ts";
 import type { HindsightTemplateLifecycleService } from "../memory/hindsight/template-lifecycle/template-lifecycle-service.ts";
+import type { MemoryAuthorityVerification } from "../memory/runtime-authority-verification.ts";
 
 export function composeHindsightLifecycle(input: {
   db: Database;
   config: ConfigSource;
   secrets: SecretCatalogService;
   runtime: {
+    verifySelectedAuthority?: MemoryAuthorityVerification["verifySelectedAuthority"];
     operations(): MemoryOperationsRuntime | null;
     hindsightBindingSnapshot(): HindsightBindingSnapshot;
     replaceHindsightBinding(epochId: string): Promise<void>;
@@ -36,6 +38,7 @@ export function composeHindsightLifecycle(input: {
     secrets: input.secrets,
     client: (projection) => input.client ?? createHindsightClient({ endpoint: projection.endpoint, resolveApiKey: secret.resolve }),
     runtime: input.runtime.operations,
+    verifySelectedAuthority: input.runtime.verifySelectedAuthority,
     templates: input.templates,
     binding: input.runtime.hindsightBindingSnapshot,
     replaceBinding: input.runtime.replaceHindsightBinding,

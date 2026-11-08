@@ -4,7 +4,7 @@ import { basename, dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { MemoryReplicaScheduleConfigSchema, type MemoryReplicaCheckpoint } from "@taki/shared";
 import { createHindsightReplicaSchedulerRepo, type HindsightReplicaSchedulerRepo } from "./hindsight-replica-scheduler-repo.ts";
-import { replicaNextWake } from "./hindsight-replica-schedule-state.ts";
+import { replicaNextWake, replicaScheduleDue } from "./hindsight-replica-schedule-state.ts";
 import { publishReplicaCheckpoint } from "./hindsight-replica-checkpoint-store.ts";
 import { MIGRATIONS } from "./migrations/index-list.ts";
 import { openDatabase, type Database } from "./sqlite.ts";
@@ -42,6 +42,71 @@ function installCheckpoint(db: Database): MemoryReplicaCheckpoint {
 }
 
 describe("B5 durable scheduler recovery regressions", () => {
+  it.each(["retry", "manual", "catch_up"] as const)("consumes the outstanding retry on a %s claim and clears it on plain success", (trigger) => {
+    const f = fixture(); const checkpoint = installCheckpoint(f.db);
+    f.repo.requestManual({ bankId: bank.bankId, kind: "full" });
+    f.repo.fail({ run: take(f.repo), errorCode: "HINDSIGHT_UNREACHABLE" });
+    f.advance(60_000);
+    if (trigger === "manual") f.repo.requestManual({ bankId: bank.bankId, kind: "full" });
+    if (trigger === "catch_up") f.repo.requestCatchUp(bank.bankId);
+    const run = take(f.repo);
+    expect(run).toMatchObject({ trigger, kind: "full" });
+    expect(f.repo.get(bank.bankId)).toMatchObject({ run, retryDueAt: null, retryAttempt: 1, retryKind: "full" });
+    expect(f.repo.succeed({ run, result: { checkpoint, observedCursor: 8 } })).toMatchObject({
+      run: null, retryDueAt: null, retryAttempt: 0, retryKind: null, consecutiveFailures: 0,
+    });
+  });
+
+  it.each(["interval", "manual", "catch_up", "retry"] as const)("preserves a retry requested during a %s run and claims it at its due time", (trigger) => {
+    const f = fixture(); const checkpoint = installCheckpoint(f.db);
+    if (trigger === "retry") {
+      f.repo.requestManual({ bankId: bank.bankId, kind: "full" });
+      f.repo.fail({ run: take(f.repo), errorCode: "HINDSIGHT_UNREACHABLE" }); f.advance(60_000);
+      f.repo.fail({ run: take(f.repo), errorCode: "HINDSIGHT_UNREACHABLE" }); f.advance(300_000);
+    }
+    if (trigger === "manual") f.repo.requestManual({ bankId: bank.bankId, kind: "full" });
+    if (trigger === "catch_up") f.repo.requestCatchUp(bank.bankId);
+    const run = take(f.repo); expect(run.trigger).toBe(trigger);
+    const dueAt = new Date(Date.parse(f.repo.now()) + 30_000).toISOString();
+    const kind = trigger === "retry" ? "full" : "incremental";
+    f.repo.requestRetry(bank.bankId, dueAt); f.advance(1_000);
+    const settled = f.repo.succeed({ run, result: { checkpoint, observedCursor: 8 } });
+    expect(settled).toMatchObject({ run: null, retryDueAt: dueAt, retryAttempt: 1, retryKind: kind, consecutiveFailures: 0 });
+    expect(replicaNextWake(settled, f.repo.now())).toBe(dueAt);
+    f.advance(28_999);
+    expect(replicaScheduleDue(settled, f.repo.now())).toBeUndefined();
+    expect(f.repo.claim({ bankId: bank.bankId, ownerId: "process-a", leaseDurationMs: 60_000 })).toBeUndefined();
+    f.advance(1);
+    expect(replicaScheduleDue(settled, f.repo.now())).toEqual({ trigger: "retry", kind });
+    const retry = take(f.repo); expect(retry).toMatchObject({ trigger: "retry", kind });
+    expect(f.repo.succeed({ run: retry, result: { checkpoint, observedCursor: 8 } })).toMatchObject({
+      retryDueAt: null, retryAttempt: 0, retryKind: null,
+    });
+  });
+
+  it.each(["fail", "recover"] as const)("keeps failure backoff after a consumed retry and new request settle via %s", (settlement) => {
+    const f = fixture();
+    f.repo.requestManual({ bankId: bank.bankId, kind: "full" });
+    f.repo.fail({ run: take(f.repo), errorCode: "HINDSIGHT_UNREACHABLE" }); f.advance(60_000);
+    const run = take(f.repo);
+    f.repo.requestRetry(bank.bankId, new Date(Date.parse(f.repo.now()) + 10_000).toISOString());
+    if (settlement === "recover") f.advance(60_000);
+    const state = settlement === "fail" ? f.repo.fail({ run, errorCode: "HINDSIGHT_UNREACHABLE" }) : f.repo.recover(bank.bankId);
+    expect(state).toMatchObject({ run: null, mode: "failed", retryAttempt: 2, retryKind: "full", consecutiveFailures: 2 });
+    expect(Date.parse(state.retryDueAt!) - Date.parse(f.repo.now())).toBe(300_000);
+  });
+
+  it.each([
+    { first: 30_000, second: 45_000, earliest: 30_000 },
+    { first: 45_000, second: 30_000, earliest: 30_000 },
+    { first: 90_000, second: 120_000, earliest: 60_000 },
+  ])("keeps the earliest pending request or lease expiry during one run: %j", ({ first, second, earliest }) => {
+    const f = fixture(); const run = take(f.repo);
+    const dueAt = (delay: number) => new Date(Date.parse(at) + delay).toISOString();
+    f.repo.requestRetry(bank.bankId, dueAt(first));
+    expect(f.repo.requestRetry(bank.bankId, dueAt(second))).toMatchObject({ run, retryDueAt: dueAt(earliest), retryAttempt: 1 });
+  });
+
   it("preserves an explicit manual configuration when rediscovering the Bank", () => {
     const { repo } = fixture();
     repo.ensureBank({ bank, config: MemoryReplicaScheduleConfigSchema.parse({ automatic: false, autoIntervalMs: 120_000 }) });

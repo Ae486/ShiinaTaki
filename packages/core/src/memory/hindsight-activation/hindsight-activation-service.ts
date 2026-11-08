@@ -4,8 +4,8 @@
  *         custody and Core-minted activation identities
  * OUTPUT: createHindsightActivationService() — plan/status/authority/runtime/binding reads plus start/resumeActivation/recover: drain
  *         Local writers, lease the cutover run, capture coverage, activate every Bank over the D78 primitives, promote with
- *         the PR03 custody carry and rebind the runtime, checkpointing after each durable step; every pre-COMMIT failure maps
- *         to the closed activation code with Local reopened only on positive marker evidence; recover repairs the binding only
+ *         the PR03 custody carry, rebind and prepare the receipt Banks, checkpointing after each durable step; every pre-COMMIT
+ *         failure maps to the closed activation code with Local reopened only on positive marker evidence; recovery reuses the same receipt
  * POS:    core/memory/hindsight-activation — the Stage 2b coordinator; owns no timers and no second outcome ledger
  */
 import type { MemoryHindsightProducerRef } from "@taki/shared";
@@ -23,6 +23,7 @@ import type { HindsightCurrentStateClient } from "../hindsight/hindsight-current
 import type { HindsightSetupService } from "../hindsight/hindsight-setup-service.ts";
 import { hindsightRuntimeAvailability, type HindsightBindingSnapshot, type HindsightRuntimeAvailability } from "../hindsight-runtime-binding.ts";
 import { readMemoryAuthoritySelection, type MemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
+import type { MemoryAuthorityVerification } from "../runtime-authority-verification.ts";
 import { localRuntimeAvailability } from "../local-onboarding/local-onboarding-reads.ts";
 import type { LocalBindingSnapshot } from "../local-runtime-binding.ts";
 import type { BindingRecovery } from "../runtime-composition.ts";
@@ -40,12 +41,14 @@ export interface HindsightActivationLocalRuntime {
   settle(): Promise<void>;
   ingestion: Pick<CanonicalLocalIngestion, "run" | "settle">;
 }
-/** The composition's binding seam: pure snapshots, the post-COMMIT rebind and the same-epoch repair. */
+/** The composition's pure snapshots, post-COMMIT rebind, receipt-Bank preparation and same-epoch repair. */
 export interface HindsightActivationRuntime {
+  verifySelectedAuthority?: MemoryAuthorityVerification["verifySelectedAuthority"];
   bindingSnapshot(): LocalBindingSnapshot;
   hindsightBindingSnapshot(): HindsightBindingSnapshot;
   bindHindsight(epochId: string): void;
   recoverHindsightBinding(epochId: string): BindingRecovery;
+  prepareHindsightActivation(input: { epochId: string; bankIds: readonly string[]; signal?: AbortSignal }): Promise<void>;
 }
 export interface HindsightActivationControl {
   checkpoint(producer: MemoryHindsightProducerRef): void;
@@ -65,8 +68,8 @@ export interface HindsightActivationService {
   start(identity: HindsightActivationIdentity, control: HindsightActivationControl): Promise<HindsightActivationReceipt>;
   /** Continues a persisted run from its evidence (named apart from the privacy-pause `resume` mutator sweep). */
   resumeActivation(identity: HindsightActivationIdentity, control: HindsightActivationControl): Promise<HindsightActivationReceipt>;
-  /** Binding repair on the committed epoch; never a second promotion. */
-  recover(epochId: string): BindingRecovery;
+  /** Binding repair and required preparation on the committed epoch; never a second promotion. */
+  recover(epochId: string, bankIds: readonly string[]): Promise<BindingRecovery>;
   /** True once shutdown began: no new attempt may start and a running one stops at the next Bank boundary. */
   stopRequested(): boolean;
   /** Refuses new attempts and resolves once every in-flight attempt has settled or checkpointed. */
@@ -91,27 +94,31 @@ const QUIESCE_TIMEOUT_MS = 30_000;
 const NATIVE_TIMEOUT_MS = 60_000;
 const SNAPSHOT_TTL_SECONDS = 3_600;
 type Mode = "start" | "resume";
-interface Service { input: HindsightActivationServiceInput; now(): string; runs: HindsightCutoverRunRepo; stopping: boolean; inflight: Set<Promise<unknown>> }
+interface Service {
+  input: HindsightActivationServiceInput; now(): string; runs: HindsightCutoverRunRepo; stopping: boolean;
+  inflight: Set<Promise<unknown>>; preparation: AbortController;
+}
 interface Attempt { mode: Mode; identity: HindsightActivationIdentity; control: HindsightActivationControl }
 
 export function createHindsightActivationService(input: HindsightActivationServiceInput): HindsightActivationService {
   const service: Service = { input, now: input.now ?? (() => new Date().toISOString()), runs: createHindsightCutoverRunRepo(input.db),
-    stopping: false, inflight: new Set() };
+    stopping: false, inflight: new Set(), preparation: new AbortController() };
   return {
-    plan: () => readHindsightActivationPlan(input.db, { setup: input.setup, fingerprint: input.fingerprint }),
+    plan: () => readHindsightActivationPlan(input.db, { setup: input.setup, fingerprint: input.fingerprint },
+      input.runtime.verifySelectedAuthority?.() ?? readMemoryAuthoritySelection(input.db)),
     status: (scope) => {
       const read = readHindsightActivationRun(input.db, scope);
       return { ...read, custody: { ...read.custody, openGroups: input.custody.status().openGroups } };
     },
-    authority: () => readMemoryAuthoritySelection(input.db),
+    authority: () => input.runtime.verifySelectedAuthority?.() ?? readMemoryAuthoritySelection(input.db),
     committedProducer: (scope) => readCommittedHindsightProducer(input.db, scope),
     binding: input.runtime.hindsightBindingSnapshot,
     runtime: () => runtimeAvailability(input.runtime),
     start: (identity, control) => attempt(service, { mode: "start", identity, control }),
     resumeActivation: (identity, control) => attempt(service, { mode: "resume", identity, control }),
-    recover: (epochId) => input.runtime.recoverHindsightBinding(epochId),
+    recover: (epochId, bankIds) => recoverBinding(service, { epochId, bankIds }),
     stopRequested: () => service.stopping,
-    stop: async () => { service.stopping = true; await Promise.allSettled([...service.inflight]); },
+    stop: async () => { service.stopping = true; service.preparation.abort(); await Promise.allSettled([...service.inflight]); },
   };
 }
 
@@ -127,6 +134,22 @@ async function attempt(service: Service, input: Attempt): Promise<HindsightActiv
   const promise = run(service, { ...input, control });
   service.inflight.add(promise);
   try { return await promise; } finally { service.inflight.delete(promise); }
+}
+
+async function recoverBinding(service: Service, input: { epochId: string; bankIds: readonly string[] }): Promise<BindingRecovery> {
+  if (service.stopping) throw new Error("HINDSIGHT_ACTIVATION_INTERRUPTED");
+  const promise = (async () => {
+    const binding = service.input.runtime.recoverHindsightBinding(input.epochId);
+    await prepareBinding(service, input);
+    return binding;
+  })();
+  service.inflight.add(promise);
+  try { return await promise; } finally { service.inflight.delete(promise); }
+}
+
+function prepareBinding(service: Service, input: { epochId: string; bankIds: readonly string[] }): Promise<void> {
+  if (service.stopping) throw new Error("HINDSIGHT_ACTIVATION_INTERRUPTED");
+  return service.input.runtime.prepareHindsightActivation({ ...input, signal: service.preparation.signal });
 }
 
 async function run(service: Service, attempt: Attempt): Promise<HindsightActivationReceipt> {
@@ -151,10 +174,11 @@ async function run(service: Service, attempt: Attempt): Promise<HindsightActivat
     const failure = activationFailure(error);
     release(service, lease);
     reopenCanonicalLocal({ db, fence: local.fence, epochId: identity.predecessorEpochId });
-    logger.warn({ runId: identity.runId, code: failure.message, phase: progress.current().progress.phase }, "Hindsight activation did not commit");
+    logger.warn({ runId: identity.runId, code: failure.message, phase: progress.current().progress.phase }, "Hindsight activation attempt failed");
     throw failure;
   }
   bind(service, receipt);
+  await prepareBinding(service, { epochId: receipt.hindsightEpochId, bankIds: identity.banks.map((bank) => bank.nativeBankId) });
   progress.phase("completed");
   return receipt;
 }
@@ -203,7 +227,7 @@ function previousPreparation(db: Database, captureId: string, nativeBankId: stri
 }
 
 function requireSetup(service: Service, identity: HindsightActivationIdentity): { configFingerprint: string; providerLineage: string } {
-  const selection = readMemoryAuthoritySelection(service.input.db);
+  const selection = service.input.runtime.verifySelectedAuthority?.() ?? readMemoryAuthoritySelection(service.input.db);
   if (selection.mode !== "canonical-local" || selection.epochId !== identity.predecessorEpochId) throw activationFailure(new Error("HINDSIGHT_PREDECESSOR_STALE"));
   const { phase, configFingerprint, compatibility } = service.input.setup.status();
   if (phase !== "configured" || !configFingerprint || !compatibility?.providerLineage || service.input.fingerprint() !== configFingerprint) {

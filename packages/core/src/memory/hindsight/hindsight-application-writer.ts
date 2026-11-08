@@ -1,6 +1,6 @@
 /**
  * INPUT:  a stable Core intent and lazily prepared application artifact commands
- * OUTPUT: durable original command identity plus independently verified remote receipt/application status
+ * OUTPUT: shared preparation clock, original command recovery and independently verified receipt/application status
  * POS:    core/memory/hindsight — common D77 write seam; model retries never regenerate a persisted command
  */
 import type { JsonValue, TakiApplicationArtifactVersion, TakiApplicationCommand } from "@taki/shared";
@@ -21,6 +21,7 @@ export function createHindsightApplicationWriter(input: {
   commands: HindsightApplicationCommandRepo; runner: HindsightApplicationCommandRunner;
   replica: HindsightApplicationReplicaRepo; now?: () => string;
 }) {
+  const now = () => input.now?.() ?? new Date().toISOString();
   const prepare = (work: HindsightApplicationWriteInput): HindsightApplicationCommandJob => {
     const existing = input.commands.get(work.key);
     if (existing) {
@@ -29,12 +30,12 @@ export function createHindsightApplicationWriter(input: {
       }
       return existing;
     }
-    const plan = work.create(input.now?.() ?? new Date().toISOString());
+    const plan = work.create(now());
     const commands = prepareHindsightApplicationBody({ bankId: work.key.bankId, namespace: work.namespace,
       schema: "application-commands.v1", value: { commands: plan.commands } });
     return input.commands.prepare({ ...work, commands, bodies: plan.bodies });
   };
-  return { prepare, get: input.commands.get, run: input.runner.run,
+  return { prepare, now, get: input.commands.get, unfinishedBinding: input.commands.unfinishedBinding, run: input.runner.run,
     applied: (job: HindsightApplicationCommandJob) => applicationCommandApplied(input.replica, job),
     stop: input.runner.stop, settle: input.runner.settle };
 }

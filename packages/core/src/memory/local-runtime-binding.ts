@@ -8,8 +8,7 @@
 import type { Database } from "../db/sqlite.ts";
 import type { Logger } from "../logging/logger.ts";
 import type { createCanonicalLocalSubsystem } from "./canonical-local-subsystem.ts";
-import { readMemoryAuthoritySelection, type MemoryAuthoritySelection } from "./legacy-migration/legacy-activation-repo.ts";
-import type { TransitionEvidenceContext } from "./transitions/transition-evidence-context.ts";
+import { readCurrentMemoryAuthorityIdentity, type MemoryAuthorityIdentity, type MemoryAuthoritySelection } from "./legacy-migration/legacy-activation-repo.ts";
 
 export type LocalSubsystem = ReturnType<typeof createCanonicalLocalSubsystem>;
 export type LocalBindingState =
@@ -28,9 +27,11 @@ export interface LocalRuntimeBinding {
   /** Builds, installs, publishes and starts one draft; on any failure disposes it, records unavailable and rethrows. */
   publish(epochId: string): LocalSubsystem;
   current(): LocalSubsystem | undefined;
+  boundIdentity(): MemoryAuthorityIdentity | undefined;
+  unavailable(epochId: string, code: string): void;
   /** Detached in-memory state only; revision changes on any publication attempt, withdrawal or stop. */
   publicationState(): Pick<LocalBindingSnapshot, "binding" | "lifetime"> & { revision: number };
-  snapshot(verification?: TransitionEvidenceContext): LocalBindingSnapshot;
+  snapshot(): LocalBindingSnapshot;
   /** Irreversible: after a Hindsight COMMIT the publication is withdrawn so no caller can route to the retired Local runtime. */
   retire(): void;
   /** Waits for unpublished and failed drafts as well as the last published subsystem. */
@@ -42,7 +43,7 @@ const REQUIRED_MEMBERS = ["engine", "maintenance", "memoryFlush", "tidy", "write
 
 export function createLocalRuntimeBinding(input: { db: Database; construct: (epochId: string) => LocalSubsystem; logger: Logger }): LocalRuntimeBinding {
   let published: LocalSubsystem | undefined;
-  let state: LocalBindingState = { kind: "none" };
+  let state: LocalBindingState & { identity?: MemoryAuthorityIdentity } = { kind: "none" };
   let stopped = false;
   const retiring = new Set<Promise<void>>();
   const dispose = (subsystem: LocalSubsystem | undefined): void => {
@@ -64,7 +65,7 @@ export function createLocalRuntimeBinding(input: { db: Database; construct: (epo
       try {
         draft = input.construct(epochId);
         install(draft);
-        published = draft; state = { kind: "published", epochId };
+        published = draft; state = { kind: "published", epochId, identity: readCurrentMemoryAuthorityIdentity(input.db) };
         draft.start();
         return draft;
       } catch (error) {
@@ -75,6 +76,8 @@ export function createLocalRuntimeBinding(input: { db: Database; construct: (epo
       }
     },
     ...bindingQueries(input.db, () => ({ published, state, stopped })),
+    boundIdentity: () => published && state.kind === "published" ? state.identity : undefined,
+    unavailable: (epochId, code) => { dispose(published); published = undefined; state = { kind: "unavailable", epochId, code }; },
     retire: () => { published?.fence?.retire(); dispose(published); published = undefined; state = { kind: "none" }; },
     settle,
     stop: async () => { stopped = true; dispose(published); published = undefined; await settle(); },
@@ -82,18 +85,20 @@ export function createLocalRuntimeBinding(input: { db: Database; construct: (epo
 }
 
 /** Query revision tracks the existing state object's identity; it is not a second binding or authority owner. */
-function bindingQueries(db: Database, read: () => { published: LocalSubsystem | undefined; state: LocalBindingState; stopped: boolean }) {
+function bindingQueries(db: Database, read: () => { published: LocalSubsystem | undefined; state: LocalBindingState & { identity?: MemoryAuthorityIdentity }; stopped: boolean }) {
   let previous: LocalBindingState | undefined; let wasStopped = false; let revision = 0;
   return {
     current: () => read().published,
     publicationState: (): ReturnType<LocalRuntimeBinding["publicationState"]> => {
       const { state, stopped } = read();
       if (state !== previous || stopped !== wasStopped) { revision++; previous = state; wasStopped = stopped; }
-      return { binding: { ...state }, lifetime: stopped ? "stopped" : "running", revision };
+      const binding = state.kind === "published" ? { kind: state.kind, epochId: state.epochId } : { ...state };
+      return { binding, lifetime: stopped ? "stopped" : "running", revision };
     },
-    snapshot: (verification?: TransitionEvidenceContext): LocalBindingSnapshot => {
-      const { state, stopped, published } = read(); const selection = readMemoryAuthoritySelection(db, verification);
-      return { selection: selection.mode, selectedEpochId: selection.epochId, binding: state,
+    snapshot: (): LocalBindingSnapshot => {
+      const { state, stopped, published } = read(); const selection = readCurrentMemoryAuthorityIdentity(db);
+      const binding = state.kind === "published" ? { kind: state.kind, epochId: state.epochId } : { ...state };
+      return { selection: selection.mode, selectedEpochId: selection.epochId, binding,
         lifetime: stopped ? "stopped" : "running", flush: published && !stopped ? "available" : "failing" };
     },
   };

@@ -23,11 +23,12 @@ import { readTemplateEmergencyEffects } from "../../../db/hindsight-template-eme
 import { HindsightTemplateRefusal } from "../hindsight-template-client.ts";
 import { withoutApplicationHash } from "../hindsight-application-integrity.ts";
 import { signFixtureSnapshot } from "./template-test-fixtures.ts";
+import { TAKI_MANAGED_TEMPLATE_REVISION } from "./template-catalog.ts";
 
 const cleanup: Array<() => Promise<void>> = [];
 afterEach(async () => { for (const close of cleanup.splice(0).reverse()) await close(); });
 
-async function fixture(characterRevision?: "none") {
+async function fixture(characterRevision?: "none" | "taki-bank-v2") {
   const f = templateLifecycleFixture(); cleanup.push(f.close);
   const params = f.params();
   if (params.target.kind !== "defaults") throw new Error("expected defaults");
@@ -111,15 +112,15 @@ describe("managed Character provisioning", () => {
     }
   });
 
-  it.each([undefined, "none"] as const)("inherits the admitted Character scope default %s with an exact initialization receipt", async (revision) => {
+  it.each([undefined, "taki-bank-v2", "none"] as const)("inherits the admitted Character scope default %s with an exact initialization receipt", async (revision) => {
     const { f, binding, provision } = await fixture(revision);
     const operation = await provision();
     expect(operation).toMatchObject({ state: "completed", result: { readiness: "ready" } });
     const plan = readTemplatePlan(f.db, planId(operation));
     expect(plan.guard.provisionBankId).toBe(binding.externalBankId);
     const [planned] = plan.banks;
-    expect(planned!.preview.templateRevision).toBe(revision ?? "taki-bank-v2");
-    expect(planned!.preview.request.initialization).toEqual({ template_revision: revision ?? "taki-bank-v2",
+    expect(planned!.preview.templateRevision).toBe(revision ?? TAKI_MANAGED_TEMPLATE_REVISION);
+    expect(planned!.preview.request.initialization).toEqual({ template_revision: revision ?? TAKI_MANAGED_TEMPLATE_REVISION,
       template_hash: planned!.preview.effectiveDefinitionHash });
     const selected = readAppliedTemplateSelection(f.db, planned!.identity)!;
     expect(selected.receipt.initialization_proof_hash).not.toBeNull();

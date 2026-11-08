@@ -17,7 +17,7 @@ import { createHindsightConnectionSecret } from "../memory/hindsight/hindsight-s
 import { reconcileInterruptedSetup } from "../memory/hindsight/hindsight-setup-recovery.ts";
 import { createHindsightSetupService, type HindsightSetupService } from "../memory/hindsight/hindsight-setup-service.ts";
 import { HINDSIGHT_ACTIVATION_FAMILY } from "../memory/hindsight-activation/hindsight-activation-status.ts";
-import { readMemoryAuthoritySelection } from "../memory/legacy-migration/legacy-activation-repo.ts";
+import { readCurrentMemoryAuthorityIdentity } from "../memory/legacy-migration/legacy-activation-repo.ts";
 import type { SecretCatalogService } from "../secrets/secret-catalog-service.ts";
 import type { MethodRegistry } from "../server/method-registry.ts";
 import { registerHindsightSetupMethods } from "../server/methods/hindsight-setup-methods.ts";
@@ -44,7 +44,7 @@ export function composeHindsightSetup(input: {
     compatibility: createHindsightCompatibilityService(),
     connectionRepo,
     bankRepo,
-    authorityMode: () => readMemoryAuthoritySelection(input.db).mode,
+    authorityMode: () => readCurrentMemoryAuthorityIdentity(input.db).mode,
     activationOpen: () => operations.activeInFamily(HINDSIGHT_ACTIVATION_FAMILY) !== undefined,
   });
   registerHindsightSetupMethods(input.registry, { service, logger: input.logger });

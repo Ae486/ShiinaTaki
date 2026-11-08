@@ -16,11 +16,11 @@ import { createHindsightRuntimeAdmissionRepo } from "../db/hindsight-runtime-adm
 import { createHindsightBackupService } from "../memory/hindsight-backup/hindsight-backup-service.ts";
 import { readHindsightBackupCustody } from "../memory/hindsight-backup/hindsight-backup-custody.ts";
 
-export async function templateBackupConsumerFixture(scenario: "unselected" | "selected" | "removed" = "selected") {
-  const source = templateLifecycleFixture(); source.service.stop(); await source.owner.stop();
+export async function templateBackupConsumerFixture(scenario: "unselected" | "selected" | "removed" = "selected", coreMigrationHead?: number) {
+  const source = templateLifecycleFixture({ coreMigrationHead }); source.service.stop(); await source.owner.stop();
   source.native.manifest.source_identity.compatibility_build = HINDSIGHT_TEMPLATE_BACKUP_BUILD;
   source.native.manifest.contracts.template_backup = { version: "1.0.0", support: { state: "supported", reason: "all_contracts_available" } };
-  const joint = await createJointTemplateBackupFixture({ endpoint: "http://127.0.0.1:18481", client: source.native.client,
+  const joint = await createJointTemplateBackupFixture({ endpoint: "http://127.0.0.1:18481", client: source.native.client, coreMigrationHead,
     targets: source.base.banks.map(({ scope }) => ({ bank_id: scope.bankId, provider_lineage: scope.namespace.provider_lineage,
       bank_generation: scope.namespace.bank_generation })) });
   try {

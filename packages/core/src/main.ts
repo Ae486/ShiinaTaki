@@ -8,7 +8,7 @@
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import type { ToolSet } from "ai";
-import { MONITOR_MODE_CONFIG_KEY, MonitorModeSchema, type MemoryOnboardingChanged, type TimelineEntry } from "@taki/shared";
+import { MONITOR_MODE_CONFIG_KEY, MonitorModeSchema, type MemoryOnboardingChanged, type MemoryReplicaChanged, type TimelineEntry } from "@taki/shared";
 import { CANONICAL_MEMORY_SYSTEM_PROMPT, createChatAgent } from "./agents/chat-agent.ts";
 import { BASE_SYSTEM_PROMPT } from "./agents/base-prompt.ts";
 import { createConversationStore } from "./agents/conversation-store.ts";
@@ -69,8 +69,12 @@ import { composeMemoryRuntime } from "./memory/runtime-composition.ts";
 import { createImageDescriptionWriter } from "./memory/image-description-writer.ts";
 import { createLocalOnboardingService } from "./memory/local-onboarding/local-onboarding-service.ts";
 import { readLocalOnboardingStatus } from "./memory/local-onboarding/local-onboarding-status.ts";
+import { localRuntimeAvailability } from "./memory/local-onboarding/local-onboarding-reads.ts";
 import { readHindsightActivationStatus } from "./memory/hindsight-activation/hindsight-activation-status.ts";
+import { readHindsightActivationPlan } from "./memory/hindsight-activation/hindsight-activation-reads.ts";
+import { hindsightRuntimeAvailability } from "./memory/hindsight-runtime-binding.ts";
 import { readMemoryAuthorityStatus } from "./memory/operations/memory-authority-status.ts";
+import { createMemoryStatusObserver } from "./memory/operations/memory-status-observer.ts";
 import { readHindsightLiveConnection } from "./memory/hindsight/hindsight-runtime-connection.ts";
 import { createHindsightLifecycleTrigger } from "./memory/hindsight-lifecycle/hindsight-lifecycle-trigger.ts";
 import { createMemoryOperationService } from "./memory/operations/memory-operation-service.ts";
@@ -104,6 +108,8 @@ import { memoryAuthorityStatusMethod } from "./server/methods/memory-authority-s
 import { registerMemoryActivationMethods } from "./server/methods/memory-activation-methods.ts";
 import { registerMemoryOnboardingMethods } from "./server/methods/memory-onboarding-methods.ts";
 import { registerMemoryOperationMethods } from "./server/methods/memory-operation-methods.ts";
+import { registerMemoryReplicaMethods } from "./server/methods/memory-replica-methods.ts";
+import { createMemoryOperationRepo } from "./db/memory-operation-repo.ts";
 import { memoryTidyMethod } from "./server/methods/memory-tidy.ts";
 import { memoryStatusMethod } from "./server/methods/memory-status.ts";
 import { runStatusMethod } from "./server/methods/run-status.ts";
@@ -252,12 +258,14 @@ registerSkillMethods(registry, { service: skillLifecycle, logger: skillsLog });
 // Hindsight B3 setup is an operator-only inactive control plane. Composition registers methods and SQLite state only;
 // it makes no boot request, performs no LLM health probe, and has no Memory Authority writer/provider registration.
 const hindsightSetup = composeHindsightSetup({ db, config: boot.config.source, secrets: secretCatalog, registry, logger });
+const memoryStatusObserver = createMemoryStatusObserver({ db, runtime: memoryRuntime });
 const hindsightConfiguration = composeHindsightConfiguration({ db, config: boot.config.source, secrets: secretCatalog, registry,
-  configurationRevision: boot.config.subscriptions.revision });
+  configurationRevision: boot.config.subscriptions.revision, statusSelection: () => memoryStatusObserver.read().selection });
 // Durable memory operations (Stage 1): one Core-owned owner over the B3 setup service and the B5 scheduler. Construction
 // reconciles rows another boot left open (outcome_unknown); the per-process boot id is what tells those rows apart.
 // Local onboarding (Stage 2a) is the only caller of the B2 producer; its kinds observe their own receipts at boot first.
 const memoryOperationSubscriptions = createMemoryOperationSubscriptions();
+const memoryReplicaSubscriptions = createConnectionSubscriptions<MemoryReplicaChanged>();
 const memoryOnboardingSubscriptions = createConnectionSubscriptions<MemoryOnboardingChanged>();
 const localOnboarding = createLocalOnboardingService({
   db, workspaceRoot: join(serverConfig.dataDir, "workspace"), runner: memoryRuntime.migrationRunner, runtime: memoryRuntime, owner: bootId,
@@ -267,7 +275,7 @@ const localOnboarding = createLocalOnboardingService({
 const hindsightActivation = composeHindsightActivation({ db, config: boot.config.source, secrets: secretCatalog, setup: hindsightSetup, runtime: memoryRuntime, logger });
 // Hindsight lifecycle (Stage 2c): Bank provisioning and connection revalidation under a committed Hindsight authority.
 const hindsightTemplates = composeHindsightTemplates({ db, config: boot.config.source, secrets: secretCatalog,
-  registry, bootId, runtime: memoryRuntime.templates });
+  registry, bootId, runtime: memoryRuntime.templates, statusObservation: () => memoryStatusObserver.readRuntime() });
 const hindsightLifecycle = composeHindsightLifecycle({ db, config: boot.config.source, secrets: secretCatalog, runtime: memoryRuntime, logger, templates: hindsightTemplates });
 // Hindsight backup (Stage 3): capture pauses Hindsight writers and copies Core, then pairs it with the native half from the
 // opt-in native endpoint (W5) or, via backup.admit, from the operator's native CLI ZIP; verify re-checks a sealed pair.
@@ -280,15 +288,31 @@ const memoryOperations = createMemoryOperationService({
 });
 registerMemoryTransitionMethods(registry, memoryTransitions);
 hindsightLifecycleTrigger.bind({ lifecycle: hindsightLifecycle, operations: memoryOperations });
-registerMemoryOperationMethods(registry, { service: memoryOperations, subscriptions: memoryOperationSubscriptions, logger });
+registerMemoryOperationMethods(registry, { service: memoryOperations, subscriptions: memoryOperationSubscriptions, replicaSubscriptions: memoryReplicaSubscriptions, logger });
+registerMemoryReplicaMethods(registry, { logger, subscriptions: memoryReplicaSubscriptions,
+  context: { live: memoryRuntime.operations, activeInFamily: createMemoryOperationRepo(db).activeInFamily } });
 registerMemoryOnboardingMethods(registry, { local: localOnboarding, subscriptions: memoryOnboardingSubscriptions, logger,
-  status: () => readLocalOnboardingStatus({ local: localOnboarding, operations: memoryOperations }) });
-registerMemoryActivationMethods(registry, { logger, status: () => readHindsightActivationStatus({ service: hindsightActivation, operations: memoryOperations }) });
+  status: () => {
+    const view = memoryStatusObserver.read();
+    return readLocalOnboardingStatus({ local: { ...localOnboarding, authority: () => view.selection, binding: () => view.localBinding },
+      operations: memoryOperations });
+  } });
+registerMemoryActivationMethods(registry, { logger, status: () => {
+  const view = memoryStatusObserver.read();
+  return readHindsightActivationStatus({ service: { status: hindsightActivation.status,
+    plan: () => readHindsightActivationPlan(db, { setup: hindsightSetup,
+      fingerprint: () => readHindsightLiveConnection({ config: boot.config.source, secrets: secretCatalog }).fingerprint }, view.selection),
+    runtime: () => view.selection.mode === "hindsight" ? hindsightRuntimeAvailability(view.hindsightBinding) : localRuntimeAvailability(view.localBinding) },
+  operations: memoryOperations });
+} });
 registry.register(memoryAuthorityStatusMethod({ logger,
-  read: () => readMemoryAuthorityStatus({ db, live: memoryRuntime.operations, binding: memoryRuntime.bindingSnapshot,
-    hindsightBinding: memoryRuntime.hindsightBindingSnapshot, setup: hindsightSetup, operations: memoryOperations,
-    liveConnection: () => readHindsightLiveConnection({ config: boot.config.source, secrets: secretCatalog }), lifecycle: hindsightLifecycle,
-    backup: hindsightBackup }) }));
+  read: () => {
+    const view = memoryStatusObserver.readRuntime();
+    return readMemoryAuthorityStatus({ db, live: memoryRuntime.operations, binding: () => view.localBinding,
+      hindsightBinding: () => view.hindsightBinding, setup: hindsightSetup, operations: memoryOperations,
+      liveConnection: () => readHindsightLiveConnection({ config: boot.config.source, secrets: secretCatalog }), lifecycle: hindsightLifecycle,
+      backup: hindsightBackup }, view.selection, view);
+  } }));
 
 // Capability channel (#10): the screenshot tool routes to a connected node via the broker, which pushes a
 // capability.request notification and awaits the node's capability.respond. A node disconnect denies its pending
@@ -595,6 +619,7 @@ function shutdown(signal: string): void {
     // Stop MCP publication → cancel candidates → drain under one budget → force-close remaining clients
     // (each exactly once), before the db handle and process go away.
     await mcpBoot.manager.close();
+    memoryStatusObserver.close();
     db.close(); // release the sqlite file handle (and checkpoint the WAL) before exit
     process.exit(0);
   }).catch(() => {

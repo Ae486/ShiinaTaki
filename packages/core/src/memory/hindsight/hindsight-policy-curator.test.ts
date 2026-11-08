@@ -21,6 +21,39 @@ function commands(f: CuratorTestFixture) {
 function calls(f: CuratorTestFixture, name: string) { return f.banks.flatMap((bank) => bank.server.calls).filter((value) => value.startsWith(`${name}:`)); }
 
 describe("Hindsight policy curator through durable application state", () => {
+  it("verifies only each saved policy across 15 tool calls in one step, with no record reads for read or finish", async () => {
+    const bank = curatorTestBank({ memories: Array.from({ length: 15 }, (_, index) => ({ id: `memory-${index}` })) });
+    let stepDone!: () => void; const measured = new Promise<void>((resolve) => { stepDone = resolve; });
+    let releaseDriver!: () => void; const released = new Promise<void>((resolve) => { releaseDriver = resolve; });
+    let checkedIds: string[] = []; let readsAfterFinish = -1;
+    const results: Awaited<ReturnType<typeof curatorTestTool>>[] = [];
+    const f = fixture({ banks: [bank], driver: async (input) => {
+      input.assertInput(); const report = curatorTestReport(input); headReads.mockClear();
+      for (const row of report.policies) {
+        results.push(await curatorTestTool(input, "memory_policy_assess", curatorTestAssessment(row.policy, row.workId)));
+      }
+      checkedIds = headReads.mock.calls.map(([request]) => request.objectId);
+      results.push(await curatorTestTool(input, "block_read", { id: "user-card" }));
+      results.push(await curatorTestTool(input, "policy_review_finish"));
+      readsAfterFinish = headReads.mock.calls.length;
+      stepDone(); await released;
+      input.onStepEnd(); return { steps: 1, usage: { inputTokens: 11, outputTokens: 7 } };
+    } });
+    f.config.memory.reportClassCap = 15;
+    const headReads = vi.spyOn(f.replica, "nativeHead");
+    const running = f.curator.runNow("taki");
+    await measured;
+    // The cost boundary ends before publication, which has independent correctness coverage below.
+    try { await f.curator.stop(); } finally { releaseDriver(); }
+    await running;
+    expect(checkedIds).toHaveLength(15);
+    expect(new Set(checkedIds).size).toBe(15);
+    expect(readsAfterFinish).toBe(15);
+    expect(results).toHaveLength(17); expect(results.every((result) => result.ok)).toBe(true);
+    expect(f.db.prepare("SELECT COUNT(*) AS n FROM hindsight_policy_work WHERE work_kind='policy' AND state='saved'").get()?.n).toBe(15);
+    expect(calls(f, "commit")).toHaveLength(0);
+  });
+
   it("keeps neutral facts usable while proposals are saved and counts assessment only after application", async () => {
     const driver = vi.fn(async (input: Parameters<typeof curatorTestAssessDriver>[0]) => {
       const report = curatorTestReport(input);

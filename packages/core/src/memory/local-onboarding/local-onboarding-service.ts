@@ -12,6 +12,7 @@ import type {
 import type { PrimaryCustodyStatus, PrimaryMemoryCustody } from "../../db/primary-memory-custody-repo.ts";
 import type { Database } from "../../db/sqlite.ts";
 import { readMemoryAuthoritySelection, type MemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
+import type { MemoryAuthorityVerification } from "../runtime-authority-verification.ts";
 import { excludeLegacySource } from "../legacy-migration/legacy-migration-exclusion.ts";
 import { previewLegacyMigration, readMigrationReceipt, type MigrationReceipt } from "../legacy-migration/legacy-migration-reads.ts";
 import type { LegacyMigrationRunner } from "../legacy-migration/legacy-migration-runner.ts";
@@ -55,6 +56,7 @@ export interface LocalOnboardingServiceInput {
   workspaceRoot: string;
   runner(): Promise<LegacyMigrationRunner>;
   runtime: {
+    verifySelectedAuthority?: MemoryAuthorityVerification["verifySelectedAuthority"];
     bindingSnapshot(): LocalBindingSnapshot;
     recoverLocalBinding(epochId: string): LocalBindingRecovery;
     custody: Pick<PrimaryMemoryCustody, "status">;
@@ -75,7 +77,7 @@ export function createLocalOnboardingService(input: LocalOnboardingServiceInput)
   return {
     workspaceRoot: input.workspaceRoot,
     preview: () => previewLegacyMigration(input.workspaceRoot, service.now()),
-    authority: () => readMemoryAuthoritySelection(db),
+    authority: () => input.runtime.verifySelectedAuthority?.() ?? readMemoryAuthoritySelection(db),
     binding: input.runtime.bindingSnapshot,
     custody: () => input.runtime.custody.status(),
     discover: () => discoverOnboardingRun(db, service.now()),

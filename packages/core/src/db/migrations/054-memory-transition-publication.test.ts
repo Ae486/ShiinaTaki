@@ -63,12 +63,12 @@ describe("054 explicit transition publication lineage", () => {
     const receipts = db.prepare("SELECT * FROM migrations ORDER BY version").all(); db.close();
     const applied: number[][] = [];
     db = openFixture({ path, migrations: MIGRATIONS, onMigrated: (versions) => applied.push(versions) });
-    expect(applied).toEqual([[54, 55, 56, 57, 58, 59]]); expect(markerBytes(db)).toEqual(marker); expect(history(db)).toEqual(old);
+    expect(applied).toEqual([[54, 55, 56, 57, 58, 59, 60]]); expect(markerBytes(db)).toEqual(marker); expect(history(db)).toEqual(old);
     expect(db.prepare("SELECT transition_receipt_id FROM memory_authority_selection").get()?.transition_receipt_id).toBeNull();
     expect(db.prepare("SELECT * FROM migrations WHERE version<=53 ORDER BY version").all()).toEqual(receipts);
     expect(db.prepare("PRAGMA foreign_key_check").all()).toEqual([]); db.close();
     db = openFixture({ path, migrations: MIGRATIONS, onMigrated: (versions) => applied.push(versions) });
-    try { expect(applied).toEqual([[54, 55, 56, 57, 58, 59], []]); expect(markerBytes(db)).toEqual(marker); expect(history(db)).toEqual(old); }
+    try { expect(applied).toEqual([[54, 55, 56, 57, 58, 59, 60], []]); expect(markerBytes(db)).toEqual(marker); expect(history(db)).toEqual(old); }
     finally { db.close(); }
   });
 

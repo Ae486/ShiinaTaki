@@ -1,6 +1,6 @@
 /**
  * INPUT:  validated Bank scheduling state and one captured clock value
- * OUTPUT: deterministic due selection, configuration changes, and retry transitions; a provider rollback holds the Bank for
+ * OUTPUT: deterministic due/configuration transitions and earliest in-flight retry; a provider rollback holds the Bank for
  *         explicit runs only
  * POS:    core/db — pure policy for the fenced replica scheduler repository
  */
@@ -63,6 +63,17 @@ export function replicaNextWake(state: MemoryReplicaSyncState, now: string): str
   if (state.retryDueAt) return state.retryDueAt;
   const dates = [state.nextDueAt, state.nextFullDueAt].filter((value): value is string => value !== null);
   return dates.sort((a, b) => Date.parse(a) - Date.parse(b))[0] ?? null;
+}
+
+export function requestReplicaRetry(state: MemoryReplicaSyncState, dueAt: string, now: string): MemoryReplicaSyncState {
+  if (!state.automatic || heldForOperator(state.errorCode)) return state;
+  const wake = replicaNextWake(state, now);
+  let retryDueAt = wake !== null && Date.parse(wake) < Date.parse(dueAt) ? wake : dueAt;
+  if (state.run !== null && state.retryDueAt !== null && Date.parse(state.retryDueAt) < Date.parse(retryDueAt)) {
+    retryDueAt = state.retryDueAt;
+  }
+  return { ...state, retryDueAt, retryAttempt: Math.max(1, state.retryAttempt),
+    retryKind: state.retryKind ?? (isDue(state.nextFullDueAt, retryDueAt) ? "full" : "incremental") };
 }
 
 export function failedReplicaSchedule(state: MemoryReplicaSyncState, code: MemoryReplicaErrorCode, now: string): MemoryReplicaSyncState {

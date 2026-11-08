@@ -9,7 +9,14 @@ import { selectMemoryRuntime } from "./runtime-selector.ts";
 const dbs: Database[] = [];
 afterEach(() => { for (const db of dbs.splice(0)) db.close(); });
 function engine(): MemoryEngine { return { reconcile: () => ({ upserted: 0, deleted: 0, total: 0, invalid: [] }), assemble: () => "", createTools: () => ({}), createBackgroundTools: () => ({}), writeEntry: () => ({ id: "x", layer: "profile" }), retention: { listActive: () => [], archive: () => undefined, hardDelete: () => undefined }, tidy: { listActive: () => [], countSince: () => 0, readBlock: () => undefined, createTools: () => ({}) } }; }
-function open(): Database { const db = openDatabase({ path: ":memory:", migrations: [canonicalMemoryMigration017, memoryLegacyMigration021] }); dbs.push(db); return db; }
+function open(): Database { const db = openDatabase({ path: ":memory:", migrations: [canonicalMemoryMigration017, memoryLegacyMigration021] }); dbs.push(db); seedLocalEpoch(db, "epoch"); return db; }
+
+function seedLocalEpoch(db: Database, epochId: string): void {
+  const now = "2026-08-22T00:00:00.000Z";
+  db.prepare(`INSERT INTO canonical_memory_authority_epochs(epoch_id,provider_id,provider_lineage_id,status,started_at,reason)
+    VALUES (:epoch,'local','local-lineage','active',:now,'initial-local')`).run({ epoch: epochId, now });
+  db.prepare("INSERT INTO canonical_memory_authority_state VALUES (1,:epoch,:now)").run({ epoch: epochId, now });
+}
 
 describe("memory runtime selector", () => {
   it("constructs legacy only while the marker is legacy-markdown", () => { const db = open(); const createLegacy = vi.fn(() => ({ engine: engine() } as never)); const createCanonical = vi.fn(engine); const selected = selectMemoryRuntime({ db, createLegacy, createCanonical }); expect(selected.canonical).toBe(false); expect(createLegacy).toHaveBeenCalledOnce(); expect(createCanonical).not.toHaveBeenCalled(); });
@@ -58,6 +65,7 @@ describe("memory runtime selector", () => {
   });
   it("binds Hindsight only on positive marker proof, retires Local before construction and keeps a failed construction unavailable", () => {
     const db = openDatabase({ path: ":memory:", migrations: [canonicalMemoryMigration017, memoryLegacyMigration021, hindsightInitialCutoverMigration023] }); dbs.push(db);
+    seedLocalEpoch(db, "local-epoch");
     db.exec("UPDATE memory_authority_selection SET mode='canonical-local',active_epoch_id='local-epoch',verified_snapshot_id='snapshot',activation_transaction_id='tx' WHERE singleton=1");
     const local = engine(); const hindsight = engine(); local.assemble = () => "local"; hindsight.assemble = () => "hindsight";
     const failure = new Error("HINDSIGHT_APPLICATION_CONNECTION_UNAVAILABLE"); let fail = true;
@@ -96,8 +104,10 @@ function seedHindsightSelection(db: Database): void {
   db.prepare(`INSERT INTO canonical_memory_authority_epochs
     (epoch_id,provider_id,provider_lineage_id,status,started_at,ended_at,reason)
     VALUES ('local-epoch','local','local-lineage','closed',:now,:now,'initial-local'),
-      ('hindsight-epoch','hindsight','lineage','active',:now,NULL,'planned-switch')`).run({ now });
-  db.prepare("INSERT INTO canonical_memory_authority_state (singleton,active_epoch_id,updated_at) VALUES (1,'hindsight-epoch',:now)").run({ now });
+      ('hindsight-epoch','hindsight','lineage','active',:now,NULL,'planned-switch')
+    ON CONFLICT(epoch_id) DO UPDATE SET status=excluded.status,ended_at=excluded.ended_at`).run({ now });
+  db.prepare(`INSERT INTO canonical_memory_authority_state (singleton,active_epoch_id,updated_at) VALUES (1,'hindsight-epoch',:now)
+    ON CONFLICT(singleton) DO UPDATE SET active_epoch_id=excluded.active_epoch_id`).run({ now });
   db.prepare(`INSERT INTO memory_migration_runs
     (run_id,snapshot_id,epoch_id,phase,status,requested_at,updated_at,lease_fence,activation_transaction_id)
     VALUES ('run','snapshot','local-epoch','activated','completed',:now,:now,1,'local-tx')`).run({ now });

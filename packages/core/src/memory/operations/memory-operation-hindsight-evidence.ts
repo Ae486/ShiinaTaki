@@ -69,9 +69,10 @@ export function blockedSettlement(ref: HindsightRef, blocking: MemoryHindsightBl
   return completed({ kind: "hindsight", runId: ref.runId, outcome: "prerequisite_blocked", epochId: null, runtimeAvailable: false, blocking }, ref);
 }
 
-/** After a proven commit the only remaining question is the binding: published and matching, or unavailable. */
+/** A matching runtime proves installation; only the producer's completed checkpoint proves activation preparation finished. */
 export function committedSettlement(service: Pick<HindsightActivationService, "runtime">, ref: HindsightRef, epochId: string): MemoryOperationSettlement {
   const runtime = service.runtime();
+  if (runtime.available && ref.progress.phase !== "completed") return unknown("producer_incomplete", withPhase(ref, "binding"));
   const producer = withPhase(ref, runtime.available ? "completed" : "binding");
   const result: MemoryHindsightResult = { kind: "hindsight", runId: ref.runId, outcome: runtime.available ? "activated" : "binding_unavailable",
     epochId, runtimeAvailable: runtime.available, blocking: [] };

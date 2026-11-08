@@ -1,7 +1,7 @@
 /**
  * INPUT:  active Hindsight epoch, effective B3 configuration, verified Bank setup and the Secret Catalog
- * OUTPUT: captured authenticated client, exact epoch/connection/Bank/selection guards and closed drift/hold status
- * POS:    Core runtime construction — ordinary admission refuses durable holds; private rollout access checks its live executor
+ * OUTPUT: fully verified binding with current authority/configuration/template identity guards and an operator projection
+ * POS:    Core connection — full template proof at construction; ordinary guards compare current rows; private rollout checks its executor
  */
 import { HindsightConnectionProjectionSchema, MemoryReplicaBankSchema, type HindsightConnectionProjection, type HindsightTemplateLabelGroup,
   type MemoryReplicaBank, type TakiApplicationNamespace } from "@taki/shared";
@@ -10,14 +10,13 @@ import { resolveHindsightConfig, type HindsightResolvedConfig } from "../../conf
 import { createCanonicalMemoryAuthorityRepo } from "../../db/canonical-memory-authority-repo.ts";
 import { createHindsightBankSetupRepo } from "../../db/hindsight-bank-setup-repo.ts";
 import type { Database } from "../../db/sqlite.ts";
-import { requireTransitionTargetReady } from "../../db/memory-transition-native-outcome.ts";
 import type { SecretCatalogService } from "../../secrets/secret-catalog-service.ts";
 import { createHindsightClient, type HindsightClient } from "./hindsight-client.ts";
 import { hindsightConnectionFingerprint } from "./hindsight-compatibility-service.ts";
 import { createHindsightConnectionSecret } from "./hindsight-secret-refs.ts";
 import { activeTemplateHold } from "./template-lifecycle/template-execution-reads.ts";
-import { assertRuntimeTemplateBanks, readTemplateSelectionIdentity } from "./template-lifecycle/template-runtime-selection.ts";
-import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
+import { assertRuntimeTemplateBanks, readCurrentRuntimeTemplateIdentity, readTemplateSelectionIdentity } from "./template-lifecycle/template-runtime-selection.ts";
+import { bindHindsightRuntimeAuthority } from "./hindsight-runtime-authority.ts";
 
 /** Private rollout access: every read/publication remains tied to the original live executor, never a process-wide bypass. */
 export interface HindsightTemplateExecutionAccess {
@@ -36,6 +35,9 @@ export interface HindsightRuntimeConnectionInput {
 
 /** A changed or disabled connection under the same Authority; an epoch/lineage change is an integrity failure and throws instead. */
 export type HindsightConnectionDrift = "none" | "config_changed" | "connection_disabled" | "template_hold";
+export type HindsightConnectionObservation =
+  | { drift: "none"; banks: MemoryReplicaBank[]; templateSelectionIdentity: string | null }
+  | { drift: Exclude<HindsightConnectionDrift, "none">; banks: null; templateSelectionIdentity: null };
 export type HindsightLiveConnection =
   | { state: "ready"; fingerprint: string }
   | { state: Exclude<HindsightResolvedConfig["state"], "ready">; fingerprint: null };
@@ -57,7 +59,7 @@ export function readHindsightLiveConnection(input: { config: ConfigSource; secre
 }
 
 export function createHindsightRuntimeConnection(input: HindsightRuntimeConnectionInput) {
-  requireTransitionTargetReady(input.db, input.epochId);
+  const boundAuthority = bindHindsightRuntimeAuthority(input.db, input.epochId);
   const authority = createCanonicalMemoryAuthorityRepo(input.db); const epoch = authority.authorityEpoch(input.epochId);
   if (epoch.providerId !== "hindsight") throw new Error("MEMORY_AUTHORITY_MISMATCH");
   const configured = resolveHindsightConfig(input.config);
@@ -70,16 +72,21 @@ export function createHindsightRuntimeConnection(input: HindsightRuntimeConnecti
   assertTemplateAccess(input);
   assertRuntimeTemplateBanks(input.db, { epochId: input.epochId, rows: verifiedRows(setup), legacyRevision: connection.desiredTemplateRevision });
   let stopped = false;
-  const driftReason = (): HindsightConnectionDrift => {
+  const checkIdentity = (): HindsightConnectionDrift => {
     if (stopped) throw new Error("MEMORY_OPERATION_CANCELLED");
-    const current = authority.authorityEpoch(input.epochId);
-    if (current.providerId !== "hindsight" || current.providerLineageId !== epoch.providerLineageId) throw new Error("MEMORY_AUTHORITY_MISMATCH");
-    if (readMemoryAuthoritySelection(input.db).epochId !== input.epochId) throw new Error("MEMORY_AUTHORITY_MISMATCH");
+    boundAuthority.assertIdentity();
     if (!assertTemplateAccess(input, true)) return "template_hold";
-    if (readTemplateSelectionIdentity(input.db, input.epochId) !== templateSelectionIdentity) throw new Error("MEMORY_TEMPLATE_IDENTITY_CHANGED");
     const live = readHindsightLiveConnection(input);
-    if (live.state !== "ready") return "connection_disabled";
-    return live.fingerprint === configFingerprint ? "none" : "config_changed";
+    return live.state !== "ready" ? "connection_disabled" : live.fingerprint === configFingerprint ? "none" : "config_changed";
+  };
+  const assertEvidence = () => {
+    if (readCurrentRuntimeTemplateIdentity(input.db, input.epochId) !== templateSelectionIdentity) throw new Error("MEMORY_TEMPLATE_IDENTITY_CHANGED");
+    boundAuthority.assertCheckpointFloors();
+  };
+  const driftReason = () => {
+    const drift = checkIdentity();
+    assertEvidence();
+    return drift;
   };
   const assertConnection = () => {
     const drift = driftReason();
@@ -90,15 +97,13 @@ export function createHindsightRuntimeConnection(input: HindsightRuntimeConnecti
     return readRuntimeBanks(input, setup);
   };
   const bank = (bankId: string) => banks().find((candidate) => candidate.bankId === bankId) ?? missingRoute();
-  /** Global + Character routes, or undefined while the Character has no verified Bank; a missing Global Bank is an integrity failure. */
-  const routedBanks = (characterId: string): [MemoryReplicaBank, MemoryReplicaBank] | undefined => {
-    const rows = banks(); const global = rows.find((entry) => entry.scope === "global");
-    if (!global) throw new Error("HINDSIGHT_REPLICA_BANK_BINDING_MISMATCH");
-    const character = rows.find((entry) => entry.scope === "character" && entry.characterId === characterId);
-    return character ? [global, character] : undefined;
-  };
+  const routedBanks = (characterId: string) => routeRuntimeBanks(banks(), characterId);
   return { authority, epoch, connection, secretMarker, configFingerprint, templateSelectionIdentity,
     templateExecution: input.templateExecution, assertConnection, driftReason, banks, bank, routedBanks,
+    /** Data evidence is checked separately so a damaged replica cannot erase a valid template binding. */
+    observeStatus: () => observeConnectionStatus(input, setup,
+      { drift: checkIdentity(), templateSelectionIdentity }),
+    assertEvidence,
     /** Local B3 read without the connection guard: whether background work has any Bank to write into for this Character. */
     characterRouted: (characterId: string) => verifiedRows(setup).some((row) => row.canonicalIdentity === `character:${characterId}`),
     stop: () => { stopped = true; },
@@ -106,6 +111,20 @@ export function createHindsightRuntimeConnection(input: HindsightRuntimeConnecti
     resolveBanks: (characterId: string) => routedBanks(characterId) ?? missingRoute() };
 }
 export type HindsightRuntimeConnection = ReturnType<typeof createHindsightRuntimeConnection>;
+
+/** Global + Character routes, or undefined while the Character has no verified Bank; a missing Global Bank is an integrity failure. */
+function routeRuntimeBanks(rows: MemoryReplicaBank[], characterId: string): [MemoryReplicaBank, MemoryReplicaBank] | undefined {
+  const global = rows.find((entry) => entry.scope === "global");
+  if (!global) throw new Error("HINDSIGHT_REPLICA_BANK_BINDING_MISMATCH");
+  const character = rows.find((entry) => entry.scope === "character" && entry.characterId === characterId);
+  return character ? [global, character] : undefined;
+}
+
+function observeConnectionStatus(input: HindsightRuntimeConnectionInput, setup: ReturnType<typeof createHindsightBankSetupRepo>,
+  current: { drift: HindsightConnectionDrift; templateSelectionIdentity: string | null }): HindsightConnectionObservation {
+  return current.drift === "none" ? { ...current, drift: current.drift, banks: readRuntimeBanks(input, setup) }
+    : { drift: current.drift, banks: null, templateSelectionIdentity: null };
+}
 
 function readRuntimeBanks(input: HindsightRuntimeConnectionInput, setup: ReturnType<typeof createHindsightBankSetupRepo>): MemoryReplicaBank[] {
   const rows = setup.list().filter((bank) => bank.status === "verified"

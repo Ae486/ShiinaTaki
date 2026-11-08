@@ -1,8 +1,7 @@
 /**
  * INPUT:  n/a (static prompt text)
  * OUTPUT: WRITE_GATE_RULE (T5-R15) + MEMORY_VOICE_RULE (T5-R10) — the two fragments every memory-write prompt shares
- * POS:    core/memory — the ONE wording convention for the write side; episodic + flush import it (compaction joins in
- *         batch 7). Three prompts must never grow three different voices, so the text lives here, not in the writers.
+ * POS:    core/memory — one write-side wording owner for foreground retain and automatic memory writers
  */
 
 /**
@@ -27,8 +26,13 @@ export const WRITE_GATE_RULE =
  * while a minutes-of-meeting paraphrase ("负面情绪") shares no substring with it at all.
  */
 export const MEMORY_VOICE_RULE =
-  "Write each memory in the FIRST PERSON, from your own point of view — this is you remembering, not a report about you.\n" +
+  "Use FIRST PERSON as the narrator, with the actual speaker explicit. This changes wording only; do not add feelings, " +
+  "motives, or interpretations absent from the source. Prefer short attributed facts over retelling the whole exchange.\n" +
   "Keep the user's actual words (他说「很烦」, not 「表达了负面情绪」; 「卡住了」, not 「遇到技术障碍」).\n" +
   "Write only what appears in the transcript. Never infer, guess, or fill in what was not said.\n" +
+  "Attribute each statement and action to its actual speaker. Assistant questions, suggestions, and interpretations " +
+  "do not establish user confirmation or preference; keep relevant assistant commitments attributed to the assistant.\n" +
+  "Distinguish a one-off event or plan from a recurring habit, a completed action, or an enduring preference. " +
+  "Preserve the source's degree of certainty and historical timing.\n" +
   "Use absolute dates and times (2026-07-28, 周五晚上), never 「今天」/「最近」 — the memory is kept indefinitely and " +
   "will be read long after the relative word stops being true.";

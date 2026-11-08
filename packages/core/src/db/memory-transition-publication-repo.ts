@@ -16,6 +16,7 @@ import { transferTransitionCustody } from "./memory-transition-custody.ts";
 import { publishTransitionRepresentations } from "./memory-transition-representation.ts";
 import { readTransitionDocument } from "./memory-transition-document-repo.ts";
 import { readVerifiedTransitionPublication } from "./memory-transition-publication-reader.ts";
+import type { MemoryAuthorityVerification } from "../memory/runtime-authority-verification.ts";
 import type { Database } from "./sqlite.ts";
 import { withTransitionEvidenceContext, type TransitionEvidenceContext } from "../memory/transitions/transition-evidence-context.ts";
 import { readTransitionIntent, requireTransitionLease } from "./memory-transition-repo.ts";
@@ -23,7 +24,7 @@ import { publishEmergencyTransition } from "./memory-transition-emergency-public
 import { readTransitionNativeEvidence } from "./memory-transition-candidate-repo.ts";
 import { assertTransitionTemplatePublication } from "../memory/transitions/transition-template-state.ts";
 
-type PublicationInput = TransitionCaptureInput & { candidateId: string; currentTime(): string };
+type PublicationInput = TransitionCaptureInput & { candidateId: string; currentTime(): string } & Partial<MemoryAuthorityVerification>;
 export function publishMemoryTransition(db: Database, input: PublicationInput): MemoryTransitionReceipt {
   return withTransitionEvidenceContext(db, (verification) => publishTransition(db, input, verification));
 }
@@ -32,7 +33,7 @@ function publishTransition(db: Database, input: PublicationInput, verification: 
   db.transaction(() => {
     const prior = readTransitionReceipt(db, input.lease.transitionId);
     if (prior) {
-      const publication = readVerifiedTransitionPublication(db, prior.receiptId, verification);
+      const publication = input.verifyTransitionPublication?.(prior.receiptId, verification) ?? readVerifiedTransitionPublication(db, prior.receiptId, verification);
       if (publication.candidateId !== input.candidateId) invalid();
       receipt = prior; return;
     }

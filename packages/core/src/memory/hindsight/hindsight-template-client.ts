@@ -1,9 +1,9 @@
 /**
  * INPUT:  the existing authenticated deadline transport and bounded lifecycle-v1 requests
- * OUTPUT: exact snapshot/apply/result/child/provenance calls with closed Native refusal reasons
+ * OUTPUT: exact lifecycle calls with closed refusals and isolated invalid label-proof rows
  * POS:    Core Hindsight adapter — no implicit retry, evidence initialization or separate network client
  */
-import type { z } from "zod";
+import { z } from "zod";
 import {
   HINDSIGHT_TEMPLATE_MAX_BYTES, HindsightTemplateSnapshotRequestSchema, HindsightTemplateSnapshotSchema,
   HindsightTemplateApplyRequestSchema, HindsightTemplateReceiptSchema, HindsightTemplateResultRequestSchema,
@@ -32,6 +32,23 @@ export class HindsightTemplateRefusal extends Error {
 }
 type Request = <T>(input: HindsightRequestInput<T>) => Promise<T>;
 
+// A malformed unit proof must not discard valid siblings. Envelope errors,
+// including the shared evidence-count bound, still reject the whole response.
+export const HindsightTemplateLabelEvidenceResponseSchema = z.preprocess((value) => {
+  const parsed = HindsightTemplateLabelEvidenceResultSchema.safeParse(value);
+  if (parsed.success) return parsed.data;
+  if (!parsed.error.issues.every((issue) => issue.path[0] === "evidence" && typeof issue.path[1] === "number")
+    || !value || typeof value !== "object" || !("evidence" in value) || !Array.isArray(value.evidence)) return value;
+  const invalidIds = new Set<string>();
+  const evidence = value.evidence.flatMap((entry: unknown) => {
+    const proof = HindsightTemplateLabelEvidenceResultSchema.shape.evidence.element.safeParse(entry);
+    if (proof.success) return [proof.data];
+    if (entry && typeof entry === "object" && "unit_id" in entry && typeof entry.unit_id === "string") invalidIds.add(entry.unit_id);
+    return [];
+  });
+  return { ...value, evidence: evidence.filter((entry) => !invalidIds.has(entry.unit_id)) };
+}, HindsightTemplateLabelEvidenceResultSchema);
+
 export function createHindsightTemplateMethods(request: Request): HindsightTemplateClient {
   return {
     templateSnapshot: (input) => call(request, { path: "snapshot", payload: HindsightTemplateSnapshotRequestSchema.parse(input.request),
@@ -43,7 +60,7 @@ export function createHindsightTemplateMethods(request: Request): HindsightTempl
     templateRefreshResult: (input) => call(request, { path: "refresh-result", payload: HindsightTemplateRefreshResultRequestSchema.parse(input.request),
       schema: HindsightTemplateRefreshResultSchema, context: input.context }),
     templateLabelEvidence: (input) => call(request, { path: "label-evidence", payload: HindsightTemplateLabelEvidenceRequestSchema.parse(input.request),
-      schema: HindsightTemplateLabelEvidenceResultSchema, context: input.context }),
+      schema: HindsightTemplateLabelEvidenceResponseSchema, context: input.context }),
   };
 }
 

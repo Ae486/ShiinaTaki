@@ -1,20 +1,22 @@
 /**
  * INPUT:  provider writes, current Hindsight routing and the existing serialized Bank recovery service
- * OUTPUT: durable original intents, truthful queued results and restartable native/policy completion
+ * OUTPUT: durable original intents, truthful queued results and scheduler retry handoff for native/policy completion
  * POS:    core/memory/hindsight — actual foreground write gateway; shutdown cancels and settles its own continuations
  */
-import { PendingMemoryOperationSchema, type MutationRequest, type RetainRequest } from "@taki/shared";
+import { PendingMemoryOperationSchema, REPLICA_RETRY_DELAYS_MS, type MutationRequest, type RetainRequest } from "@taki/shared";
 import type { MemoryProviderCallContext } from "../memory-provider.ts";
 import { applicationCommandJsonBytes, applicationCommandJsonValue } from "../../db/hindsight-application-command-contract.ts";
 import { captureHindsightMemoryWrite, type HindsightMemoryWriteDeps, type HindsightMemoryWriteAdvance } from "./hindsight-memory-write-context.ts";
 import { admitHindsightMemoryWrite } from "./hindsight-memory-write-admission.ts";
-import { hindsightMemoryMutationPending, hindsightMemoryMutationResult, hindsightMemoryRetainResult } from "./hindsight-memory-write-result.ts";
+import { hindsightMemoryMutationPending, hindsightMemoryMutationResult, hindsightMemoryRetainResult, hindsightMemoryWriteChild } from "./hindsight-memory-write-result.ts";
 import { advanceHindsightMemoryWrites } from "./hindsight-memory-write-recovery.ts";
 import { hindsightAvailabilityFailure } from "./hindsight-memory-provider-context.ts";
 import { sameApplicationValue } from "./hindsight-application-integrity.ts";
+import type { HindsightReplicaScheduler } from "./hindsight-replica-scheduler.ts";
 
 export function createHindsightMemoryWrites(deps: HindsightMemoryWriteDeps) {
   const controller = new AbortController(); const active = new Set<Promise<unknown>>();
+  let retryScheduler: Pick<HindsightReplicaScheduler, "requestRetry"> | undefined;
   const signal = (external?: AbortSignal) => {
     if (controller.signal.aborted) throw new Error("MEMORY_OPERATION_CANCELLED");
     return external ? AbortSignal.any([controller.signal, external]) : controller.signal;
@@ -35,15 +37,23 @@ export function createHindsightMemoryWrites(deps: HindsightMemoryWriteDeps) {
     if (!job.terminal) {
       try { await deps.recover({ bankId: job.identity.key.bankId, context: context.request() }); }
       catch (error) {
-        context.request();
+        context.assertActive();
         if (!pendingRecoveryFailure(error)) throw error;
       }
     }
-    context.request(); const current = deps.journal.get(job.identity.key);
-    if (!current) throw new Error("MEMORY_INTEGRITY_ERROR"); return current;
+    context.assertActive(); const current = deps.journal.get(job.identity.key);
+    if (!current) throw new Error("MEMORY_INTEGRITY_ERROR");
+    if (!current.terminal && retryScheduler) {
+      const child = hindsightMemoryWriteChild(deps, current);
+      const dueAt = child?.nextRetryAt ?? new Date(Date.parse(deps.now?.() ?? new Date().toISOString()) + REPLICA_RETRY_DELAYS_MS[0]).toISOString();
+      retryScheduler.requestRetry(current.identity.key.bankId, dueAt);
+    }
+    return current;
   };
   const settle = async () => { while (active.size > 0) await Promise.allSettled([...active]); };
   return {
+    // The subsystem constructs the scheduler after the write/recovery cycle; both share its lifetime.
+    setRetryScheduler: (scheduler: Pick<HindsightReplicaScheduler, "requestRetry">) => { retryScheduler = scheduler; },
     retain: (call: MemoryProviderCallContext, request: RetainRequest) => track(async () =>
       hindsightMemoryRetainResult(deps, await execute(call, { kind: "retain", request, zeroResultAllowed: true }))),
     mutate: (call: MemoryProviderCallContext, request: MutationRequest) => track(async () =>

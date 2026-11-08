@@ -10,6 +10,7 @@
     "./hindsight-custody": "./src/hindsight-custody-schema.ts",
     "./hindsight-installation": "./src/hindsight-installation-schema.ts",
     "./hindsight-deployment": "./src/hindsight-deployment-schema.ts",
+    "./hindsight-candidate-domain": "./src/hindsight-candidate-domain-schema.ts",
     "./host-control": "./src/host-control-schema.ts",
     "./host-input": "./src/host-input-encoding.ts",
     "./host-approval": "./src/host-approval-schema.ts",

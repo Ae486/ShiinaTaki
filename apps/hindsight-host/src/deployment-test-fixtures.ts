@@ -11,6 +11,7 @@ import { HINDSIGHT_SECRET_REFS, type HindsightCredentialSlot, type HindsightFixe
 import { HindsightHostRegistrationSchema } from "@taki/shared/hindsight-installation";
 import { canonicalHostGovernanceProjection } from "@taki/shared/host-control";
 import { canonicalCapabilityInput } from "@taki/shared/host-input";
+import { GOVERNANCE_REGISTRY_REVISION } from "@taki/shared/governance";
 import { DeploymentInvocationSchema, HindsightDeploymentRegistrationV1Schema,
   type DeploymentEffectV1, type DeploymentPlanV1, type CustodyLinkV1, type DeploymentInvocation } from "@taki/shared/hindsight-deployment";
 import { invocationFixture } from "./custody-test-fixtures.ts";
@@ -73,7 +74,7 @@ export function deploymentInvocation(fixture: DeploymentFixture, action: "create
   const capabilityId = action === "observe" ? "hindsight-deployment-observe" : "hindsight-deployment";
   const input = action === "observe" ? { version: 1 as const, deploymentId: fixture.plan.deploymentId }
     : { version: 1, action, plan: fixture.plan, custody: fixture.custody, ...resource } as DeploymentEffectV1;
-  const projection = { registryRevision: 3, descriptorRevision: 1, classifierRevision: 1,
+  const projection = { registryRevision: GOVERNANCE_REGISTRY_REVISION, descriptorRevision: 1, classifierRevision: 1,
     cells: (action === "observe" ? ["hindsight-deployment-observe:read"] : ["hindsight-deployment:create", "hindsight-deployment:inject", "hindsight-deployment:start"])
       .map((key) => ({ key, posture: "auto" as const })) };
   return DeploymentInvocationSchema.parse({ version: 1, requestId: randomUUID(), owner: fixture.owner, input,

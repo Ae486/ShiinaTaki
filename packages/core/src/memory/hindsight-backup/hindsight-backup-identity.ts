@@ -10,6 +10,7 @@ import { applicationCheckpointHash, readApplicationCheckpoint } from "../../db/h
 import { readReplicaCheckpoint } from "../../db/hindsight-replica-checkpoint-store.ts";
 import type { Database } from "../../db/sqlite.ts";
 import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
+import type { MemoryAuthorityVerification } from "../runtime-authority-verification.ts";
 import type { MemoryOperationsRuntime } from "../operations/memory-operation-contract.ts";
 import { hindsightBackupOperationDigest, type HindsightBackupCoreIdentityV1 } from "./hindsight-backup-pair.ts";
 import { readHindsightTerminalOperations } from "./hindsight-backup-receipts.ts";
@@ -21,15 +22,17 @@ export interface HindsightBackupIdentity {
   migrationHead: number;
 }
 
-export function readHindsightBackupIdentity(db: Database, runtime: HindsightBackupRuntimeIdentity): HindsightBackupIdentity {
+export function readHindsightBackupIdentity(db: Database, runtime: HindsightBackupRuntimeIdentity,
+  verifySelectedAuthority?: MemoryAuthorityVerification["verifySelectedAuthority"]): HindsightBackupIdentity {
   let identity: HindsightBackupIdentity | undefined;
-  db.transaction(() => { identity = readIdentity(db, runtime); });
+  db.transaction(() => { identity = readIdentity(db, runtime, verifySelectedAuthority); });
   if (!identity) throw new Error("HINDSIGHT_BACKUP_CORE_CAPTURE_FAILED");
   return identity;
 }
 
-function readIdentity(db: Database, runtime: HindsightBackupRuntimeIdentity): HindsightBackupIdentity {
-  const selection = readMemoryAuthoritySelection(db);
+function readIdentity(db: Database, runtime: HindsightBackupRuntimeIdentity,
+  verifySelectedAuthority?: MemoryAuthorityVerification["verifySelectedAuthority"]): HindsightBackupIdentity {
+  const selection = verifySelectedAuthority?.() ?? readMemoryAuthoritySelection(db);
   const { epochId, transactionId, transitionReceiptId, providerLineageId, replicaCheckpointDigest } = selection;
   if (selection.mode !== "hindsight" || epochId !== runtime.epochId || (!transactionId && !transitionReceiptId) || !providerLineageId || !replicaCheckpointDigest) {
     throw new Error("MEMORY_AUTHORITY_MISMATCH");

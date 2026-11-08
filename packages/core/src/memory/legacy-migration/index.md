@@ -7,13 +7,13 @@
 - legacy-canonical-import-repo.ts — deterministic canonical/Block staging with exact replay and conflict refusal
 - memory-authority-fence.ts — bounded legacy admission drain and irrevocable retirement after durable authority commit
 - fenced-memory-engine.ts — invocation-time retirement fence for legacy engines and previously captured tools
-- legacy-activation-repo.ts — strict initial marker/receipt proofs plus the complete W4 publication join; optional independent synchronous context shares immutable artifacts while all selected-authority joins stay current
+- legacy-activation-repo.ts — current marker/active-epoch identity distinct from independent receipt/publication proof
 - legacy-candidate-repo.ts — isolated candidate epoch/run/full-inventory publication, supersession, run-scoped Block plans and candidate reads
 - legacy-source-stage.ts — per-source atomic canonical import with attempt/result/effects proof; failure evidence committed after rollback
 - legacy-migration-verification.ts — pure exact source/canonical/receipt/Block closure proof; lease-private readiness publication; completed runs immutable
 - legacy-migration-reads.ts — read-only dry-run/preview report, run status, bounded exceptions and positive activation receipt
 - legacy-migration-exclusion.ts — synchronous lease-guarded explicit exclusion; exact duplicates idempotent, changed audit identity conflicts
-- legacy-migration-runner.ts — cooperative prepare/resume orchestration, fresh-verify activation, optional custody reconciliation before resume/activate; post-commit callback failures never restore legacy authority
+- legacy-migration-runner.ts — cooperative preparation and fresh-verify activation with current-only Legacy eligibility; no post-commit fallback
 - legacy-migration-fixture.ts — test-only isolated SQLite + synthetic Legacy workspace harness shared by the producer tests
 - legacy-canonical-converter.test.ts — canonical lifecycle, zero-result, replay, Block isolation, and conflict coverage
 - legacy-retain-sanitizer.ts — frozen credential/hidden-envelope refusal reused by canonical staging and Pending Memory admission

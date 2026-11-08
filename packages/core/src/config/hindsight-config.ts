@@ -4,6 +4,7 @@
  * POS:    core/config — env > stored > default projection; API-key values remain in the Secret Catalog
  */
 import { HindsightConnectionProjectionSchema, type HindsightConnectionProjection } from "@taki/shared";
+import { HINDSIGHT_SECRET_REFS } from "@taki/shared/hindsight-custody";
 import type { ConfigSource } from "./config-source.ts";
 
 export type HindsightResolvedConfig =
@@ -19,7 +20,7 @@ export function resolveHindsightConfig(source: ConfigSource): HindsightResolvedC
     enabled: true,
     deploymentMode: value(source, "TAKI_HINDSIGHT_DEPLOYMENT_MODE"),
     endpoint,
-    apiKeySecretRef: "memory.hindsight.connection.api-key",
+    apiKeySecretRef: HINDSIGHT_SECRET_REFS.connectionApiKey,
     requestTimeoutMs: value(source, "TAKI_HINDSIGHT_REQUEST_TIMEOUT_MS"),
     setupTimeoutMs: value(source, "TAKI_HINDSIGHT_SETUP_TIMEOUT_MS"),
     desiredTemplateRevision: value(source, "TAKI_HINDSIGHT_TEMPLATE_REVISION"),

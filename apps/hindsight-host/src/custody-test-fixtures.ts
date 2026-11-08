@@ -7,6 +7,7 @@ import { readFileSync } from "node:fs";
 import { HindsightTrustedInvocationSchema, type HindsightCustodyResult, type HindsightTrustedInvocation } from "@taki/shared/hindsight-custody";
 import { canonicalHostGovernanceProjection } from "@taki/shared/host-control";
 import { canonicalCapabilityInput } from "@taki/shared/host-input";
+import { GOVERNANCE_REGISTRY_REVISION } from "@taki/shared/governance";
 import { sha256 } from "./installed-files.ts";
 
 export function invocationFixture(posture: "ask" | "auto" = "auto"): HindsightTrustedInvocation {
@@ -14,6 +15,8 @@ export function invocationFixture(posture: "ask" | "auto" = "auto"): HindsightTr
   invocation.control.dispatchedAt = new Date().toISOString(); invocation.control.deadlineAt = new Date(Date.now() + 60_000).toISOString();
   invocation.control.governanceProjection.cells[0]!.posture = posture;
   const projection = invocation.control.governanceProjection;
+  // The golden fixture preserves its historical wire example; live Host tests use the current registry.
+  projection.registryRevision = GOVERNANCE_REGISTRY_REVISION;
   projection.digest = sha256(canonicalHostGovernanceProjection({ registryRevision: projection.registryRevision,
     descriptorRevision: projection.descriptorRevision, classifierRevision: projection.classifierRevision, cells: projection.cells }));
   invocation.control.inputDigest = sha256(canonicalCapabilityInput(invocation.control.capabilityId, invocation.input));

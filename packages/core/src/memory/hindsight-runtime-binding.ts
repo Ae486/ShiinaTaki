@@ -9,11 +9,10 @@
 import type { MemoryRuntimeUnavailableReason } from "@taki/shared";
 import { createHindsightIngestionSourceRepo } from "../db/hindsight-ingestion-source-repo.ts";
 import type { Database } from "../db/sqlite.ts";
-import type { TransitionEvidenceContext } from "./transitions/transition-evidence-context.ts";
 import type { Logger } from "../logging/logger.ts";
 import type { PrimaryConversationCommit } from "./canonical-ingestion-source.ts";
 import type { createHindsightMemorySubsystem } from "./hindsight/hindsight-memory-subsystem.ts";
-import { readMemoryAuthoritySelection, type MemoryAuthoritySelection } from "./legacy-migration/legacy-activation-repo.ts";
+import { readCurrentMemoryAuthorityIdentity, type MemoryAuthorityIdentity, type MemoryAuthoritySelection } from "./legacy-migration/legacy-activation-repo.ts";
 import { activeTemplateHold } from "./hindsight/template-lifecycle/template-execution-reads.ts";
 
 export type HindsightSubsystem = ReturnType<typeof createHindsightMemorySubsystem>;
@@ -41,9 +40,11 @@ export interface HindsightRuntimeBinding {
   /** Starts the published subsystem once the composition runs; a failing start withdraws the publication as unavailable. */
   start(): void;
   current(): HindsightSubsystem | undefined;
+  boundIdentity(): MemoryAuthorityIdentity | undefined;
+  unavailable(epochId: string, code: string): void;
   /** Detached in-memory state only; revision changes on publication/replacement, failure and withdrawal. */
   publicationState(): Pick<HindsightBindingSnapshot, "binding" | "lifetime"> & { revision: number };
-  snapshot(verification?: TransitionEvidenceContext): HindsightBindingSnapshot;
+  snapshot(): HindsightBindingSnapshot;
   /** Withdraw this epoch and settle all its owners, while permitting a fresh subsystem on a later epoch. */
   retire(): Promise<void>;
   /** Explicit emergency only: withdraw all old-epoch owners without joining uncertain remote completion. */
@@ -56,7 +57,7 @@ const REQUIRED_MEMBERS = ["engine", "maintenance", "memoryFlush", "tidy", "write
 
 export function createHindsightRuntimeBinding(input: { db: Database; construct: (epochId: string) => HindsightSubsystem; logger: Logger }): HindsightRuntimeBinding {
   let published: HindsightSubsystem | undefined;
-  let state: HindsightBindingState = { kind: "none" };
+  let state: HindsightBindingState & { identity?: MemoryAuthorityIdentity } = { kind: "none" };
   let started = false; let stopped = false;
   const retirement = retirementQueue(input.logger);
   const dispose = retirement.dispose;
@@ -76,7 +77,7 @@ export function createHindsightRuntimeBinding(input: { db: Database; construct: 
       draft = input.construct(epochId);
       retirement.identify(draft, epochId);
       install(draft);
-      published = draft; state = { kind: "published", epochId }; started = false;
+      published = draft; state = { kind: "published", epochId, identity: readCurrentMemoryAuthorityIdentity(input.db) }; started = false;
       return draft;
     } catch (error) {
       // The draft was built for a changed connection the old runtime already refuses; keeping it published would hide that.
@@ -103,6 +104,11 @@ export function createHindsightRuntimeBinding(input: { db: Database; construct: 
       catch (error) { fail(state.epochId, error, published); }
     },
     ...bindingQueries(input.db, () => ({ published, state, stopped })),
+    boundIdentity: () => published && state.kind === "published" ? state.identity : undefined,
+    unavailable: (epochId, code) => {
+      const previous = published; published = undefined; started = false;
+      state = { kind: "unavailable", epochId, code }; void dispose(previous);
+    },
     retire: retireEpoch,
     quarantine: (epochId) => {
       retirement.quarantine(epochId);
@@ -117,17 +123,19 @@ export function createHindsightRuntimeBinding(input: { db: Database; construct: 
 }
 
 /** Detached publication observations follow the existing state object through replacement/failure/withdrawal. */
-function bindingQueries(db: Database, read: () => { published: HindsightSubsystem | undefined; state: HindsightBindingState; stopped: boolean }) {
+function bindingQueries(db: Database, read: () => { published: HindsightSubsystem | undefined; state: HindsightBindingState & { identity?: MemoryAuthorityIdentity }; stopped: boolean }) {
   let previous: HindsightBindingState | undefined; let wasStopped = false; let revision = 0;
   return {
     current: () => read().published,
     publicationState: (): ReturnType<HindsightRuntimeBinding["publicationState"]> => {
       const { state, stopped } = read();
       if (state !== previous || stopped !== wasStopped) { revision++; previous = state; wasStopped = stopped; }
-      return { binding: { ...state }, lifetime: stopped ? "stopped" : "running", revision };
+      const binding = state.kind === "published" ? { kind: state.kind, epochId: state.epochId } : { ...state };
+      return { binding, lifetime: stopped ? "stopped" : "running", revision };
     },
-    snapshot: (verification?: TransitionEvidenceContext) => { const { state, stopped, published } = read();
-      return snapshotOf(db, { binding: state, stopped, flushing: published !== undefined && !stopped }, verification); },
+    snapshot: () => { const { state, stopped, published } = read();
+      const binding = state.kind === "published" ? { kind: state.kind, epochId: state.epochId } : { ...state };
+      return snapshotOf(db, { binding, stopped, flushing: published !== undefined && !stopped }); },
   };
 }
 
@@ -155,6 +163,7 @@ function retirementQueue(logger: Logger) {
 export function hindsightRuntimeAvailability(snapshot: HindsightBindingSnapshot): HindsightRuntimeAvailability {
   if (snapshot.selection !== "hindsight") return { available: true, unavailableReason: null };
   if (snapshot.lifetime === "stopped") return { available: false, unavailableReason: "stopped" };
+  if (snapshot.binding.kind === "unavailable" && snapshot.binding.code === "MEMORY_AUTHORITY_INVALID") return { available: false, unavailableReason: "authority_invalid" };
   if (snapshot.binding.kind === "unavailable" && snapshot.binding.code === "MEMORY_TEMPLATE_HOLD") return { available: false, unavailableReason: "template_hold" };
   if (snapshot.binding.kind !== "published") return { available: false, unavailableReason: "not_installed" };
   if (snapshot.binding.epochId !== snapshot.selectedEpochId) return { available: false, unavailableReason: "authority_mismatch" };
@@ -168,7 +177,7 @@ export function hindsightRuntimeAvailability(snapshot: HindsightBindingSnapshot)
  */
 export function witnessHindsightPrimaryCommit(input: { db: Database; commit: PrimaryConversationCommit; logger: Logger; now?: () => string }): boolean {
   let selection: MemoryAuthoritySelection;
-  try { selection = readMemoryAuthoritySelection(input.db); }
+  try { selection = readCurrentMemoryAuthorityIdentity(input.db); }
   catch { input.logger.warn({ code: "MEMORY_INGESTION_WITNESS_FAILED" }, "primary memory source witness was not committed: marker unreadable"); return true; }
   if (selection.mode !== "hindsight" || !selection.epochId) return false;
   try {
@@ -185,9 +194,10 @@ function install(draft: HindsightSubsystem): void {
   if (typeof draft.memoryFlush.prepareRetirement !== "function") throw new Error("MEMORY_INTEGRITY_ERROR: Hindsight runtime draft lacks a flush port");
 }
 
-function snapshotOf(db: Database, input: { binding: HindsightBindingState; stopped: boolean; flushing: boolean }, verification?: TransitionEvidenceContext): HindsightBindingSnapshot {
-  const selection = readMemoryAuthoritySelection(db, verification);
-  const held = selection.mode === "hindsight" && selection.epochId ? activeTemplateHold(db, selection.epochId) : null;
+function snapshotOf(db: Database, input: { binding: HindsightBindingState; stopped: boolean; flushing: boolean }): HindsightBindingSnapshot {
+  const selection = readCurrentMemoryAuthorityIdentity(db);
+  const invalid = input.binding.kind === "unavailable" && input.binding.code === "MEMORY_AUTHORITY_INVALID";
+  const held = !invalid && selection.mode === "hindsight" && selection.epochId ? activeTemplateHold(db, selection.epochId) : null;
   return { selection: selection.mode, selectedEpochId: selection.epochId,
     binding: held ? { kind: "unavailable", epochId: held.epochId, code: "MEMORY_TEMPLATE_HOLD" } : input.binding,
     lifetime: input.stopped ? "stopped" : "running", flush: input.flushing && !held ? "available" : "failing" };

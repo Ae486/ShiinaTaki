@@ -19,8 +19,10 @@ import { historicalRows, sortState } from "../memory/transitions/transition-loca
 import { transitionLocalHash } from "../memory/transitions/transition-local-encoding.ts";
 import type { Database } from "./sqlite.ts";
 import { readSurvivingBaselinePolicies } from "./memory-transition-surviving-policy.ts";
+import type { MemoryAuthorityVerification } from "../memory/runtime-authority-verification.ts";
 
-export function prepareEmergencyCandidate(db: Database, input: { lease: TransitionLease; now: string; evidence: MemorySurvivingBankEvidence[] }): MemoryEmergencyCandidate {
+export function prepareEmergencyCandidate(db: Database, input: { lease: TransitionLease; now: string; evidence: MemorySurvivingBankEvidence[];
+  verifyTransitionPublication?: MemoryAuthorityVerification["verifyTransitionPublication"] }): MemoryEmergencyCandidate {
   return withTransitionEvidenceContext(db, (verification) => prepareCandidate(db, input, verification));
 }
 function prepareCandidate(db: Database, input: Parameters<typeof prepareEmergencyCandidate>[1], verification: TransitionEvidenceContext): MemoryEmergencyCandidate {
@@ -63,7 +65,7 @@ function prepareCandidate(db: Database, input: Parameters<typeof prepareEmergenc
     });
     const identity = { transitionId: intent.transitionId, predecessorEpochId: intent.request.expected.predecessorEpochId,
       targetEpochId: String(reservation.target_epoch_id), createdAt: String(reservation.created_at), scopes };
-    const projection = reconstruct(db, identity, verification);
+    const projection = reconstruct(db, { ...identity, verifyTransitionPublication: input.verifyTransitionPublication }, verification);
     const body = { version: 2 as const, kind: "emergency-surviving" as const, ...identity,
       incidentId: capture.incidentId, incidentHash: transitionLocalHash(incident), captureId: capture.captureId,
       localCaptureId: null, evidenceIds: scopes.map((scope) => scope.evidenceId), ...projection,
@@ -76,7 +78,6 @@ function prepareCandidate(db: Database, input: Parameters<typeof prepareEmergenc
 }
 
 export function readVerifiedEmergencyCandidate(db: Database, candidateId: string, context?: TransitionEvidenceContext): MemoryEmergencyCandidate {
-  context?.assertIndependent();
   return withTransitionEvidenceContext(db, (verification) => readEmergencyCandidate(db, candidateId, verification), context);
 }
 function readEmergencyCandidate(db: Database, candidateId: string, verification: TransitionEvidenceContext): MemoryEmergencyCandidate {
@@ -102,7 +103,8 @@ function readEmergencyCandidate(db: Database, candidateId: string, verification:
   return candidate;
 }
 
-function reconstruct(db: Database, identity: Pick<MemoryEmergencyCandidate, "transitionId" | "predecessorEpochId" | "targetEpochId" | "createdAt" | "scopes">,
+function reconstruct(db: Database, identity: Pick<MemoryEmergencyCandidate, "transitionId" | "predecessorEpochId" | "targetEpochId" | "createdAt" | "scopes">
+  & { verifyTransitionPublication?: MemoryAuthorityVerification["verifyTransitionPublication"] },
   verification: TransitionEvidenceContext) {
   const state: MemoryTransitionLocalState = { banks: [], sources: [], records: [], derived: [], blocks: [], history: [],
     historicalReferences: [], sourceAliases: [], sourceSets: [] };
@@ -113,7 +115,8 @@ function reconstruct(db: Database, identity: Pick<MemoryEmergencyCandidate, "tra
       || evidence.namespace.bank_generation !== scope.nativeGeneration) invalid();
     const context = verification.surviving(evidence);
     const nativeBaseline = readTransitionPublishedNativeBaseline(db, { epochId: identity.predecessorEpochId, nativeBankId: scope.nativeBankId, verification });
-    const survivingPolicies = readSurvivingBaselinePolicies(db, { evidence, predecessorEpochId: identity.predecessorEpochId, baseline: nativeBaseline, verification });
+    const survivingPolicies = readSurvivingBaselinePolicies(db, { evidence, predecessorEpochId: identity.predecessorEpochId, baseline: nativeBaseline, verification,
+      verifyTransitionPublication: identity.verifyTransitionPublication });
     const projected = projectSurvivingLocalBank({ evidence, scope, epochId: identity.targetEpochId, createdAt: identity.createdAt,
       nativeBaseline, survivingPolicies, verification, previous: nativeBaseline?.mappings, localEpochIds: readTransitionLocalAncestors(db, identity.predecessorEpochId) });
     state.banks.push(projected.bank); state.sources.push(...projected.sources); state.records.push(...projected.records);

@@ -122,7 +122,7 @@ export function promoteActivation(ctx: ActivationChainContext): HindsightActivat
       carriedWitnessCount = carryHindsightActivationCustody(db, { predecessorEpochId: identity.predecessorEpochId,
         hindsightEpochId: identity.hindsightEpochId, now: committedAt }).carriedWitnessCount;
     } });
-  // The commit is durable here; "binding" tells a restart that only the runtime rebind may still be outstanding.
+  // The commit is durable here; "binding" tells a restart that runtime binding or activation preparation may still be outstanding.
   progress.phase("binding", { carriedWitnessCount });
   return { runId: identity.runId, transactionId: identity.transactionId, hindsightEpochId: identity.hindsightEpochId,
     predecessorEpochId: identity.predecessorEpochId, committedAt, carriedWitnessCount };

@@ -1,7 +1,7 @@
 /**
- * INPUT: one synchronous boundary, its SQLite owner and optional service-owned observation artifacts
+ * INPUT: one synchronous validation boundary and its SQLite owner
  * OUTPUT: byte-verified immutable evidence, isolated body views and owner-scoped synchronous admission time
- * POS: core/memory/transitions — observation reuse never retains mutable ownership/configuration or a publication verdict
+ * POS: core/memory/transitions — evidence expires with the callback; no mutable ownership/configuration or publication verdict is retained
  */
 import { MemoryTransitionNativeEvidenceSchema, MemorySurvivingBankEvidenceSchema,
   type MemoryTransitionNativeEvidence, type MemorySurvivingBankEvidence } from "@taki/shared";
@@ -9,7 +9,7 @@ import { readTransitionDocument } from "../../db/memory-transition-document-repo
 import type { Database, SqlRow } from "../../db/sqlite.ts";
 import type { HindsightApplicationBundle } from "../hindsight/hindsight-application-bundle.ts";
 import { verifyTransitionNativeEvidence } from "./transition-native-evidence.ts";
-import { assertObservationBytes, freezeObservationJson, transitionProjectionKey, type TransitionObservationStore, type VerifiedObservationEvidence } from "./transition-observation-store.ts";
+import { assertEvidenceBytes, freezeEvidenceJson, transitionProjectionKey, type VerifiedEvidenceArtifact } from "./transition-evidence-artifacts.ts";
 import type { projectTransitionLocalBank, projectSurvivingLocalBank } from "./transition-local-projection.ts";
 import { verifySurvivingBankEvidence } from "./transition-surviving-evidence.ts";
 import { transitionLocalHash } from "./transition-local-encoding.ts";
@@ -20,11 +20,11 @@ export function readFreshTransitionEvidence(db: Database, id: string) {
   return { evidence, bundle: verifyTransitionNativeEvidence(evidence) };
 }
 
-type Verified = VerifiedObservationEvidence;
+type Verified = VerifiedEvidenceArtifact;
 type SurvivingInput = Omit<Parameters<typeof projectSurvivingLocalBank>[0], "verification">;
 type SurvivingVerified = ReturnType<typeof loadSurviving>;
 
-/** Constructed only by scoped runners. The context expires after its callback; only an observer can retain artifacts. */
+/** Constructed only by synchronous scoped runners; all retained artifacts expire with the callback. */
 class EvidenceContext {
   readonly #db: Database;
   readonly #byId = new Map<string, Verified>();
@@ -34,19 +34,14 @@ class EvidenceContext {
   readonly #survivingProjections = new Map<string, { key: string; value: ReturnType<typeof projectSurvivingLocalBank> }>();
   #survivingObjects = new WeakMap<MemorySurvivingBankEvidence, SurvivingVerified>();
   #active = true;
-  readonly #observation: TransitionObservationStore | undefined;
   readonly #admissionStartedAt: string | undefined;
-  constructor(db: Database, observation?: TransitionObservationStore, admissionStartedAt?: string) {
-    this.#db = db; this.#observation = observation; this.#admissionStartedAt = admissionStartedAt;
+  constructor(db: Database, admissionStartedAt?: string) {
+    this.#db = db; this.#admissionStartedAt = admissionStartedAt;
   }
 
   assertOwner(db: Database): void { if (!this.#active || db !== this.#db) invalid(); }
-  /** Public COMMIT/publication readers cannot be supplied an observer's reusable evidence context. */
-  assertIndependent(): void { if (!this.#active || this.#observation) invalid(); }
-  /** Emergency observation must open a fresh independent boundary, never borrow the healthy observer store. */
-  get isIndependent(): boolean { this.assertOwner(this.#db); return !this.#observation; }
   /** Only the operation owner's synchronous admission supplies this time; it is never a lease or execution clock. */
-  get admissionStartedAt(): string | undefined { this.assertIndependent(); return this.#admissionStartedAt; }
+  get admissionStartedAt(): string | undefined { this.assertOwner(this.#db); return this.#admissionStartedAt; }
 
   read(db: Database, id: string): MemoryTransitionNativeEvidence {
     this.assertOwner(db);
@@ -56,12 +51,11 @@ class EvidenceContext {
     if (prior) {
       // Even inside one boundary, a changed/deleted row must not reuse its old
       // validation. Compare the actual stored bytes and identity, not just ID.
-      assertObservationBytes({ ...row, body: row.body }, prior.row);
+      assertEvidenceBytes({ ...row, body: row.body }, prior.row);
       return prior.evidence;
     }
     const actual = { ...row, body: row.body };
-    const load = () => loadVerified(db, id, actual);
-    const entry = this.#observation ? this.#observation.evidence(actual, load) : load();
+    const entry = loadVerified(db, id, actual);
     this.#byId.set(id, entry); this.#byObject.set(entry.evidence, entry);
     return entry.evidence;
   }
@@ -74,13 +68,12 @@ class EvidenceContext {
       if (!this.#byObject.has(evidence)) invalid();
       this.read(this.#db, evidence.evidenceId);
     }
-    if (this.#observation) return this.#observation.project(input, compute);
     // An independent boundary shares only pure artifacts, never a candidate/SQL/authority verdict.
     // Keep one complete semantic variant per Bank and discard it with this synchronous context.
     const slot = input.scope.localBankId; const key = transitionProjectionKey(input);
     const prior = this.#projections.get(slot);
     if (prior?.key === key) return prior.value;
-    const value = compute(); freezeObservationJson(value);
+    const value = compute(); freezeEvidenceJson(value);
     this.#projections.set(slot, { key, value });
     return value;
   }
@@ -97,18 +90,18 @@ class EvidenceContext {
   }
 
   readSurviving(db: Database, id: string): MemorySurvivingBankEvidence {
-    this.assertOwner(db); this.assertIndependent();
+    this.assertOwner(db);
     const row = db.prepare("SELECT id,transition_id,slot,body FROM memory_transition_surviving_evidence WHERE id=:id").get({ id });
     if (!row || !(row.body instanceof Uint8Array)) invalid();
     const prior = this.#surviving.get(id);
-    if (prior) { assertObservationBytes({ ...row, body: row.body }, prior.row); return prior.evidence; }
+    if (prior) { assertEvidenceBytes({ ...row, body: row.body }, prior.row); return prior.evidence; }
     const entry = loadSurviving(db, id, { ...row, body: row.body });
     this.#surviving.set(id, entry); this.#survivingObjects.set(entry.evidence, entry);
     return entry.evidence;
   }
 
   surviving(evidence: MemorySurvivingBankEvidence) {
-    this.assertIndependent(); const entry = this.#survivingObjects.get(evidence);
+    this.assertOwner(this.#db); const entry = this.#survivingObjects.get(evidence);
     if (!entry) invalid(); this.readSurviving(this.#db, evidence.evidenceId);
     const { context } = entry;
     // The private closure stays immutable; callers receive isolated Maps and byte arrays, as in native bundle().
@@ -119,7 +112,7 @@ class EvidenceContext {
   }
 
   projectSurvivingBank(input: SurvivingInput, compute: () => ReturnType<typeof projectSurvivingLocalBank>) {
-    this.assertIndependent();
+    this.assertOwner(this.#db);
     if (!this.#survivingObjects.has(input.evidence)) invalid();
     this.readSurviving(this.#db, input.evidence.evidenceId);
     if (input.nativeBaseline) {
@@ -129,7 +122,7 @@ class EvidenceContext {
     const slot = input.scope.localBankId; const key = survivingProjectionKey(input);
     const prior = this.#survivingProjections.get(slot);
     if (prior?.key === key) return prior.value;
-    const value = compute(); freezeObservationJson(value);
+    const value = compute(); freezeEvidenceJson(value);
     this.#survivingProjections.set(slot, { key, value }); return value;
   }
 
@@ -143,18 +136,9 @@ export type TransitionEvidenceContext = EvidenceContext;
 
 /** One owner submission captures entry once; another submission, observer or executor cannot reuse that validity. */
 export function withTransitionAdmissionContext<T>(input: { db: Database; startedAt: string }, run: (context: TransitionEvidenceContext) => T): T {
-  const context = new EvidenceContext(input.db, undefined, input.startedAt);
+  const context = new EvidenceContext(input.db, input.startedAt);
   try { return withTransitionEvidenceContext(input.db, run, context); }
   finally { context.close(); }
-}
-
-/** The observer's outer reader commits reuse only after all current publication joins succeeded. */
-export function withTransitionObservationContext<T>(input: { db: Database; receiptId: string; store: TransitionObservationStore },
-  run: (context: TransitionEvidenceContext) => T): T {
-  input.store.begin(input.db, input.receiptId);
-  const context = new EvidenceContext(input.db, input.store); let success = false;
-  try { const value = withTransitionEvidenceContext(input.db, run, context); success = true; return value; }
-  finally { context.close(); input.store.finish(success); }
 }
 
 export function withTransitionEvidenceContext<T>(db: Database, run: (context: TransitionEvidenceContext) => T,
@@ -170,19 +154,19 @@ export function withTransitionEvidenceContext<T>(db: Database, run: (context: Tr
 
 function loadVerified(db: Database, id: string, row: SqlRow & { body: Uint8Array }): Verified {
   const loaded = readFreshTransitionEvidence(db, id);
-  freezeObservationJson(loaded.evidence);
-  freezeObservationJson(loaded.bundle.manifest); freezeObservationJson(loaded.bundle.pages);
-  for (const body of loaded.bundle.bodies.values()) { freezeObservationJson(body.ref); freezeObservationJson(body.content); }
+  freezeEvidenceJson(loaded.evidence);
+  freezeEvidenceJson(loaded.bundle.manifest); freezeEvidenceJson(loaded.bundle.pages);
+  for (const body of loaded.bundle.bodies.values()) { freezeEvidenceJson(body.ref); freezeEvidenceJson(body.content); }
   return { ...loaded, row };
 }
 function loadSurviving(db: Database, id: string, row: SqlRow & { body: Uint8Array }) {
   const evidence = readTransitionDocument(db, "surviving_evidence", { id, schema: MemorySurvivingBankEvidenceSchema });
   if (!evidence) invalid();
-  const context = verifySurvivingBankEvidence(evidence); freezeObservationJson(evidence);
-  freezeObservationJson(context.heads);
-  for (const artifact of context.artifacts.values()) freezeObservationJson(artifact);
+  const context = verifySurvivingBankEvidence(evidence); freezeEvidenceJson(evidence);
+  freezeEvidenceJson(context.heads);
+  for (const artifact of context.artifacts.values()) freezeEvidenceJson(artifact);
   for (const entry of evidence.bodies) {
-    const body = context.reader.body(entry.ref); freezeObservationJson(body.ref); freezeObservationJson(body.content);
+    const body = context.reader.body(entry.ref); freezeEvidenceJson(body.ref); freezeEvidenceJson(body.content);
   }
   return { evidence, context, row };
 }

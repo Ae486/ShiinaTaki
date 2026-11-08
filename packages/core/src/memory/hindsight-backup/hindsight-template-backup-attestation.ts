@@ -1,6 +1,6 @@
 /**
  * INPUT:  actual copied Core scope, authoritative application namespaces and verified original lifecycle history
- * OUTPUT: complete template attestation, selected original requests and all required template receipt membership keys
+ * OUTPUT: transactionally verified template attestation, original requests and complete receipt membership keys
  * POS:    Core backup producer; no inferred Native generation, hold clearance or selection publication
  */
 import { HindsightTemplateBackupAttestationSchema, HindsightBackupNativeRequestV2Schema,
@@ -12,8 +12,9 @@ import { readTemplateEmergencyEffects } from "../../db/hindsight-template-emerge
 import type { Database } from "../../db/sqlite.ts";
 import { TemplateBankIdentitySchema, type TemplateBankIdentity } from "../hindsight/template-lifecycle/template-overlay-schema.ts";
 import { templateEqual } from "../hindsight/template-lifecycle/template-integrity.ts";
-import { templateDocument } from "../hindsight/template-lifecycle/template-store-documents.ts";
-import { readHindsightTemplateBackupHistory, readHindsightTemplateBackupDefaults, hasHindsightTemplateHistory } from "./hindsight-template-backup-history.ts";
+import { templateDocument, templateIdentityKey } from "../hindsight/template-lifecycle/template-store-documents.ts";
+import { readHindsightTemplateBackupHistory, readHindsightTemplateBackupDefaults, hasHindsightTemplateHistory,
+  type HindsightTemplateBackupHistory, type HindsightTemplateBackupHistoryReader } from "./hindsight-template-backup-history.ts";
 import { readHindsightTemplateBackupExecution } from "./hindsight-template-backup-execution.ts";
 import { hindsightBackupHash, hindsightBackupProjectionHashes, readHindsightBackupRequest } from "./hindsight-template-backup-integrity.ts";
 
@@ -45,13 +46,35 @@ export function readHindsightTemplateAttestation(db: Database, input: {
 export function readHindsightTemplateComponents(db: Database, input: {
   epochId: string; providerLineageId: string; identities: TemplateBankIdentity[];
 }) {
+  let result: ReturnType<typeof readComponents> | undefined;
+  db.transaction(() => {
+    // Reuse only complete verified histories within this synchronous SQLite
+    // snapshot; subsequent calls must see current pointers, holds and documents.
+    const histories = new Map<string, HindsightTemplateBackupHistory>();
+    const readHistory: HindsightTemplateBackupHistoryReader = (identity) => {
+      const key = templateIdentityKey(identity);
+      let history = histories.get(key);
+      if (!history) {
+        history = readHindsightTemplateBackupHistory(db, identity);
+        histories.set(key, history);
+      }
+      return history;
+    };
+    result = readComponents(db, input, readHistory);
+  });
+  if (!result) unproven();
+  return result;
+}
+
+function readComponents(db: Database, input: Parameters<typeof readHindsightTemplateComponents>[1],
+  readHistory: HindsightTemplateBackupHistoryReader) {
   const identities = input.identities.map((value) => TemplateBankIdentitySchema.parse(value))
     .sort((left, right) => Buffer.compare(Buffer.from(left.canonicalIdentity, "utf8"), Buffer.from(right.canonicalIdentity, "utf8")));
   if (new Set(identities.map((value) => value.canonicalIdentity)).size !== identities.length
     || new Set(identities.map((value) => value.target.bank_id)).size !== identities.length
     || identities.some((value) => value.target.provider_lineage !== input.providerLineageId)) unproven();
-  const histories = identities.map((identity) => readHindsightTemplateBackupHistory(db, identity));
-  const execution = readHindsightTemplateBackupExecution(db, { epochId: input.epochId, histories });
+  const histories = identities.map(readHistory);
+  const execution = readHindsightTemplateBackupExecution(db, { epochId: input.epochId, histories }, readHistory);
   const receipts = new Map<string, HindsightTemplateReceipt>();
   for (const receipt of [...histories.flatMap((history) => history.selections.map((selection) => selection.receipt)), ...execution.receipts]) {
     const previous = receipts.get(receipt.request_id);
@@ -83,7 +106,7 @@ export function readHindsightTemplateComponents(db: Database, input: {
       ...hindsightBackupProjectionHashes(selected.projection) } };
   });
   const body = { version: 1 as const, authorityEpochId: input.epochId, providerLineageId: input.providerLineageId,
-    defaultsHash: readHindsightTemplateBackupDefaults(db, input.providerLineageId).defaultsHash, hold: execution.hold, banks };
+    defaultsHash: readHindsightTemplateBackupDefaults(db, input.providerLineageId, readHistory).defaultsHash, hold: execution.hold, banks };
   const templates: HindsightBackupNativeRequestV2["templates"] = histories.map((history) => ({ target: history.identity.target,
     selected: history.selected ? { request: history.selected.request, receiptHash: history.selected.receipt.receipt_hash } : null }));
   return { body, templates, receipts: [...receipts.values()],

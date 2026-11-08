@@ -8,10 +8,10 @@ import { createCanonicalMemoryAuthorityRepo } from "../../../db/canonical-memory
 import { readApplicationCheckpoint } from "../../../db/hindsight-application-replica-checkpoint.ts";
 import { createHindsightBankSetupRepo } from "../../../db/hindsight-bank-setup-repo.ts";
 import { createHindsightRuntimeAdmissionRepo } from "../../../db/hindsight-runtime-admission-repo.ts";
-import { readMemoryAuthoritySelection } from "../../legacy-migration/legacy-activation-repo.ts";
+import { readCurrentMemoryAuthorityIdentity, type MemoryAuthoritySelection } from "../../legacy-migration/legacy-activation-repo.ts";
 import { readHindsightLiveProjection } from "../hindsight-runtime-connection.ts";
 import { requireHindsightTemplateCapability } from "../hindsight-template-capability.ts";
-import { TAKI_MANAGED_TEMPLATE_REVISION } from "./template-catalog.ts";
+import { TAKI_MANAGED_TEMPLATE_REVISIONS } from "./template-catalog.ts";
 import { readTemplateDefaults } from "./template-default-store.ts";
 import { activeTemplateHold, readTemplateHold, readTemplatePlan, readTemplatePublication, templateHasDispatch } from "./template-execution-reads.ts";
 import { readTemplateExecutor } from "./template-executor-store.ts";
@@ -24,9 +24,10 @@ import { templateProjectionDigest } from "./template-projection.ts";
 import type { TemplateGuardDependencies } from "./template-plan-guard.ts";
 import { templateRecoveryAction } from "./template-recovery-admission.ts";
 
+/** Observation explains current control state; actual recovery admission separately verifies the full authority. */
 export function readTemplateStatus(deps: TemplateGuardDependencies & { bootId: string; now(): string; boundSelectionIdentity(): string | null },
-  input: { planId?: string; bankId?: string }): MemoryTemplateStatus {
-  const selection = readMemoryAuthoritySelection(deps.db);
+  input: { planId?: string; bankId?: string }, observedSelection?: MemoryAuthoritySelection): MemoryTemplateStatus {
+  const selection = observedSelection ?? readCurrentMemoryAuthorityIdentity(deps.db);
   const epoch = selection.mode === "hindsight" && selection.epochId ? createCanonicalMemoryAuthorityRepo(deps.db).authorityEpoch(selection.epochId) : null;
   const defaults = epoch ? readTemplateDefaults(deps.db, epoch.providerLineageId) : null;
   const hold = epoch ? activeTemplateHold(deps.db, epoch.epochId) : null;
@@ -34,10 +35,10 @@ export function readTemplateStatus(deps: TemplateGuardDependencies & { bootId: s
     "SELECT plan_id FROM hindsight_template_plans WHERE epoch_id=:epoch ORDER BY rowid DESC LIMIT 1").get({ epoch: epoch.epochId })?.plan_id : null);
   return MemoryTemplateStatusSchema.parse({ supported: supported(deps, epoch?.epochId ?? null),
     previewAvailable: epoch !== null && hold === null && readHindsightLiveProjection(deps).state === "ready", holdPlanId: hold?.planId ?? null,
-    ...templateRecoveryAction(deps, latest ? String(latest) : null),
+    ...templateRecoveryAction(deps, latest ? String(latest) : null, selection),
     boundSelectionIdentity: deps.boundSelectionIdentity(), defaults: defaults ? { revision: defaults.revision,
       globalTemplateRevision: defaults.globalTemplateRevision, characterTemplateRevision: defaults.characterTemplateRevision } : null,
-    catalogs: ["global", "character"].map((scope) => ({ revision: TAKI_MANAGED_TEMPLATE_REVISION, scope })),
+    catalogs: TAKI_MANAGED_TEMPLATE_REVISIONS.flatMap((revision) => ["global", "character"].map((scope) => ({ revision, scope }))),
     bank: input.bankId ? bankStatus(deps, { bankId: input.bankId, epochId: epoch?.epochId ?? null, holdPlanId: hold?.planId ?? null }) : null,
     plan: latest ? planStatus(deps, String(latest)) : null });
 }

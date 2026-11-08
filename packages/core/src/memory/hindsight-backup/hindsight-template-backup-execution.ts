@@ -14,7 +14,8 @@ import { TemplateDispatchSchema, TemplateObservationSchema, type TemplatePlan, t
 import { readTemplateDocument, templateIdentityKey } from "../hindsight/template-lifecycle/template-store-documents.ts";
 import { templateEqual } from "../hindsight/template-lifecycle/template-integrity.ts";
 import { verifyTemplateApplication } from "../hindsight/template-lifecycle/template-receipt.ts";
-import { readHindsightTemplateBackupHistory, type HindsightTemplateBackupHistory } from "./hindsight-template-backup-history.ts";
+import { readHindsightTemplateBackupHistory, type HindsightTemplateBackupHistory,
+  type HindsightTemplateBackupHistoryReader } from "./hindsight-template-backup-history.ts";
 import { hindsightBackupHash } from "./hindsight-template-backup-integrity.ts";
 import { assertHindsightTemplatePublicationIdentity } from "./hindsight-template-backup-publication.ts";
 
@@ -23,9 +24,8 @@ export interface HindsightTemplateBackupPublication {
 }
 export function readHindsightTemplateBackupExecution(db: Database, input: {
   epochId: string; histories: HindsightTemplateBackupHistory[];
-}) {
-  const histories = new Map(input.histories.map((history) => [templateIdentityKey(history.identity), history]));
-  const targets = new Set(histories.keys());
+}, readHistory: HindsightTemplateBackupHistoryReader = (identity) => readHindsightTemplateBackupHistory(db, identity)) {
+  const targets = new Set(input.histories.map((history) => templateIdentityKey(history.identity)));
   const publications = new Map<string, HindsightTemplateBackupPublication>();
   const receipts: HindsightTemplateReceipt[] = [];
   const refreshKeys = new Set<string>();
@@ -36,7 +36,7 @@ export function readHindsightTemplateBackupExecution(db: Database, input: {
     for (const row of rows) {
       const plan = readTemplatePlan(db, String(row.plan_id));
       if (!plan.banks.some((bank) => targets.has(templateIdentityKey(bank.identity)))) continue;
-      const record = readExecution(db, { plan, histories });
+      const record = readExecution(db, { plan, readHistory });
       records.push(record);
       for (const bank of plan.banks) {
         if (!targets.has(templateIdentityKey(bank.identity))) continue;
@@ -60,7 +60,7 @@ export function readHindsightTemplateBackupExecution(db: Database, input: {
   return { receipts, publications, refreshKeys: [...refreshKeys].sort(), hold: { state: "clear" as const, digest: hindsightBackupHash("hold", value) } };
 }
 
-function readExecution(db: Database, input: { plan: TemplatePlan; histories: Map<string, HindsightTemplateBackupHistory> }) {
+function readExecution(db: Database, input: { plan: TemplatePlan; readHistory: HindsightTemplateBackupHistoryReader }) {
   const { plan } = input;
   const hold = readTemplateHold(db, plan.planId);
   if (!hold || hold.epochId !== plan.guard.epochId || hold.originalOperationId !== plan.originalOperationId) invalid();
@@ -116,8 +116,8 @@ function readObservations(db: Database, input: { plan: TemplatePlan; receipts: H
 }
 
 function verifyPublication(db: Database, input: { plan: TemplatePlan; publication: TemplatePublication;
-  receipts: HindsightTemplateReceipt[]; histories: Map<string, HindsightTemplateBackupHistory> }): void {
-  const { plan, publication, histories } = input;
+  receipts: HindsightTemplateReceipt[]; readHistory: HindsightTemplateBackupHistoryReader }): void {
+  const { plan, publication, readHistory } = input;
   const defaultsRevision = plan.guard.defaultsRevision + (plan.params.target.kind === "defaults" ? 1 : 0);
   if (publication.planHash !== plan.planHash || publication.epochId !== plan.guard.epochId
     || publication.defaultsRevision !== defaultsRevision || publication.connectionRevision !== plan.guard.connectionRevision + 1
@@ -128,14 +128,14 @@ function verifyPublication(db: Database, input: { plan: TemplatePlan; publicatio
     const reference = publication.selections.find((entry) => templateIdentityKey(entry.identity) === key);
     if (!reference || seen.has(key) || reference.revision !== bank.expectedSelectionRevision + 1) invalid();
     seen.add(key);
-    const history = histories.get(key) ?? readHindsightTemplateBackupHistory(db, bank.identity); histories.set(key, history);
+    const history = readHistory(bank.identity);
     const selection = history.selections[reference.revision - 1];
     const receipt = input.receipts.find((entry) => entry.request_id === bank.preview.request.request_id);
     if (!selection || !receipt || !templateEqual(selection.request, bank.preview.request)
       || !templateEqual(selection.receipt, receipt) || reference.receiptHash !== receipt.receipt_hash
       || selection.committedAt !== publication.committedAt) invalid();
   }
-  assertHindsightTemplatePublicationIdentity(db, { plan, publication });
+  assertHindsightTemplatePublicationIdentity(db, { plan, publication }, readHistory);
 }
 function invalid(): never { throw new Error("HINDSIGHT_BACKUP_TEMPLATE_UNPROVEN"); }
 function unpublished(): never { throw new Error("HINDSIGHT_BACKUP_TEMPLATE_UNPUBLISHED"); }

@@ -1,10 +1,46 @@
 import { describe, expect, it } from "vitest";
 import {
   MemoryReplicaBankSchema, MemoryReplicaErrorCodeSchema, MemoryReplicaRunResultSchema,
-  MemoryReplicaScheduleConfigSchema, MemoryReplicaSyncStateSchema,
+  MemoryReplicaScheduleConfigSchema, MemoryReplicaSyncStateSchema, MemoryReplicaSyncStatusSchema,
+  type MemoryReplicaSyncState,
 } from "./memory-replica-schedule-schema.ts";
 
+const at = "2026-09-06T00:00:00.000Z";
+function runningRetry(): MemoryReplicaSyncState {
+  return { ...MemoryReplicaScheduleConfigSchema.parse({}), bankId: "global", scope: "global", characterId: null,
+    mode: "running", run: { kind: "incremental", trigger: "retry", predecessor: null, lease: {
+      bankId: "global", ownerId: "process", runId: "11111111-1111-4111-8111-111111111111", fence: 1,
+      expiresAt: "2026-09-06T00:01:00.000Z" } }, fullReconciliationState: "idle",
+    nextDueAt: at, nextFullDueAt: at, retryAttempt: 2, retryKind: "incremental", retryDueAt: null,
+    pendingManualKind: null, catchUpRequested: false, lastAttemptAt: at, lastSuccessAt: null,
+    lastFullReconciliationAt: null, lastObservedCursor: null, lastObservedLineageId: null,
+    lastObservedBankGeneration: null, consecutiveFailures: 2, errorCode: "HINDSIGHT_UNREACHABLE",
+    nextAction: "automatic_retry_scheduled", createdAt: at, updatedAt: at };
+}
+
 describe("Memory Replica scheduling contracts", () => {
+  it.each([null, at])("accepts active retry backoff with due time %s in durable state and status", (retryDueAt) => {
+    const state = { ...runningRetry(), retryDueAt };
+    expect(MemoryReplicaSyncStateSchema.parse(state)).toEqual(state);
+    expect(MemoryReplicaSyncStatusSchema.parse({ ...state, checkpoint: null, lag: null })).toMatchObject(state);
+  });
+
+  it.each(["idle", "failed"] as const)("rejects consumed retry metadata without a run in %s mode", (mode) => {
+    const state = { ...runningRetry(), run: null, mode };
+    expect(MemoryReplicaSyncStateSchema.safeParse(state).success).toBe(false);
+    expect(MemoryReplicaSyncStateSchema.safeParse({ ...state, retryDueAt: at }).success).toBe(true);
+    expect(MemoryReplicaSyncStateSchema.safeParse({ ...state, retryAttempt: 0, retryKind: null }).success).toBe(true);
+  });
+
+  it.each([
+    { retryDueAt: null, retryAttempt: 0, retryKind: "incremental" },
+    { retryDueAt: null, retryAttempt: 2, retryKind: null },
+    { retryDueAt: at, retryAttempt: 0, retryKind: "incremental" },
+    { retryDueAt: at, retryAttempt: 2, retryKind: null },
+  ])("rejects incomplete retry metadata even during a run: %j", (retry) => {
+    expect(MemoryReplicaSyncStateSchema.safeParse({ ...runningRetry(), ...retry }).success).toBe(false);
+  });
+
   it("defaults to independent six-hour polling and seven-day reconciliation", () => {
     expect(MemoryReplicaScheduleConfigSchema.parse({})).toEqual({ automatic: true,
       autoIntervalMs: 6 * 60 * 60_000, fullReconciliationIntervalMs: 7 * 24 * 60 * 60_000 });

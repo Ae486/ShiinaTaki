@@ -9,7 +9,7 @@ import { HindsightTemplateRefreshResultSchema, MemoryTemplateDerivedParamsSchema
 import { readApplicationCheckpoint } from "../../../db/hindsight-application-replica-checkpoint.ts";
 import { createHindsightBankSetupRepo } from "../../../db/hindsight-bank-setup-repo.ts";
 import { createHindsightConnectionRepo } from "../../../db/hindsight-connection-repo.ts";
-import { readMemoryAuthoritySelection } from "../../legacy-migration/legacy-activation-repo.ts";
+import { readCurrentMemoryAuthorityIdentity } from "../../legacy-migration/legacy-activation-repo.ts";
 import { readHindsightLiveProjection } from "../hindsight-runtime-connection.ts";
 import { requireHindsightTemplateCapability } from "../hindsight-template-capability.ts";
 import { HindsightTemplateRefusal } from "../hindsight-template-client.ts";
@@ -63,7 +63,7 @@ export async function observeTemplateDerived(deps: TemplatePreviewDependencies, 
 function captureReadGuard(deps: TemplatePreviewDependencies, input: { plan: TemplatePlan; bank: TemplatePlanBank }) {
   const { plan, bank } = input;
   if (readTemplateHold(deps.db, plan.planId)?.state === "quarantined") throw new Error("MEMORY_TEMPLATE_QUARANTINED");
-  const selection = readMemoryAuthoritySelection(deps.db);
+  const selection = readCurrentMemoryAuthorityIdentity(deps.db);
   if (selection.mode !== "hindsight" || selection.epochId !== plan.guard.epochId || selection.providerLineageId !== bank.namespace.provider_lineage) changed();
   const setup = createHindsightBankSetupRepo(deps.db).get(bank.identity.canonicalIdentity);
   if (!setup || setup.externalBankId !== bank.identity.target.bank_id || setup.scope !== bank.identity.scope) changed();

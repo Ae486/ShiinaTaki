@@ -16,7 +16,7 @@ import type { Database } from "../../db/sqlite.ts";
 import type { Logger } from "../../logging/logger.ts";
 import type { CanonicalLocalWriteFence } from "../canonical-local-write-fence.ts";
 import type { HindsightReplicaScheduler } from "../hindsight/hindsight-replica-scheduler.ts";
-import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
+import { readCurrentMemoryAuthorityIdentity } from "../legacy-migration/legacy-activation-repo.ts";
 import { admitHindsightBackup, type HindsightBackupAdmitInput } from "./hindsight-backup-admit.ts";
 import {
   codeOf, errorMessage, failedOutcome, HindsightBackupFailure, outcomeOf, step, stepAsync, type HindsightBackupOutcome,
@@ -99,7 +99,7 @@ export function createHindsightBackupService(input: HindsightBackupServiceInput)
   };
   return {
     markerEpochId: () => {
-      const selection = readMemoryAuthoritySelection(input.db);
+      const selection = readCurrentMemoryAuthorityIdentity(input.db);
       return selection.mode === "hindsight" ? selection.epochId : null;
     },
     capture: (capture) => changing(async () => {

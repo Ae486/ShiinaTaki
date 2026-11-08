@@ -19,7 +19,7 @@ import { join } from "node:path";
 import type { ToolSet } from "ai";
 
 afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
-async function queuedFixture(invalidPolicy = false) {
+async function queuedFixture(invalidPolicy = false, loseAuthority = false) {
   const dispatch = vi.fn(async (): Promise<never> => { throw new Error("queued source must not dispatch"); });
   const f = await createTransitionPublicationFixture({ beforeFence: async ({ db, intent }) => {
     vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(W3_AT);
@@ -27,7 +27,7 @@ async function queuedFixture(invalidPolicy = false) {
       capabilities: async () => ({ ...LOCAL_MEMORY_CAPABILITIES, providerId: "hindsight" }),
       retain: dispatch, mutate: dispatch, recall: dispatch, reflect: dispatch };
     const coordinator = createMemoryCoordinator({ authority: createCanonicalMemoryAuthorityRepo(db),
-      providers: new Map([["hindsight", transitionQueuedProvider(db, provider)]]) });
+      providers: new Map([["hindsight", transitionQueuedProvider(db, provider, () => undefined)]]) });
     const banks = intent.request.expected.banks;
     const tools = await createCanonicalMemoryTools({ coordinator, authority: createCanonicalMemoryAuthorityRepo(db).authorityEpoch(),
       router: { globalBankId: () => banks.find((bank) => bank.scope.kind === "global")!.sourceBankId,
@@ -38,10 +38,26 @@ async function queuedFixture(invalidPolicy = false) {
     expect(queued).toMatchObject({ ok: false, error: { code: "MEMORY_TRANSITION_QUEUED", queue: { status: "queued", sequence: 1 } } });
     expect(readTransitionQueue(db, intent.transitionId)[0]?.provenance).toEqual({ callerId: "original-run",
       runId: "original-run", attemptId: "original-attempt", effectId: "original-effect" });
+    if (loseAuthority) {
+      const saved = readTransitionQueue(db, intent.transitionId)[0]!;
+      if (saved.command.kind !== "retain") throw new Error("missing retained command");
+      let release!: (value: Awaited<ReturnType<MemoryProvider["capabilities"]>>) => void;
+      const deferred = new Promise<Awaited<ReturnType<MemoryProvider["capabilities"]>>>((resolve) => { release = resolve; });
+      let current = true;
+      const queued = transitionQueuedProvider(db, { ...provider, capabilities: () => deferred }, () => {
+        if (!current) throw new Error("MEMORY_AUTHORITY_MISMATCH");
+      });
+      const pending = queued.retain({ requestId: "drift-during-capabilities", authorityEpochId: saved.sourceEpochId,
+        actor: "foreground-agent" }, saved.command.request);
+      current = false; release(await provider.capabilities());
+      expect(await pending).toMatchObject({ ok: false, error: { code: "MEMORY_AUTHORITY_MISMATCH" } });
+      expect(readTransitionQueue(db, intent.transitionId)).toHaveLength(1);
+      expect(dispatch).not.toHaveBeenCalled();
+    }
     if (invalidPolicy) {
       const saved = readTransitionQueue(db, intent.transitionId)[0]!;
       if (saved.command.kind !== "retain") throw new Error("expected retain fixture");
-      await transitionQueuedProvider(db, provider).retain({ requestId: "invalid-policy", authorityEpochId: saved.sourceEpochId, actor: "foreground-agent" },
+      await transitionQueuedProvider(db, provider, () => undefined).retain({ requestId: "invalid-policy", authorityEpochId: saved.sourceEpochId, actor: "foreground-agent" },
         { ...saved.command.request, policy: { ...saved.command.request.policy, layerId: "unknown-layer" } });
     }
     for (let index = 0; index < 2; index += 1) {
@@ -59,6 +75,11 @@ async function queuedFixture(invalidPolicy = false) {
 }
 
 describe("transition intents through canonical tools and actual Local target receipts", () => {
+  it("refuses authority drift after capabilities resolve and before a new queue side effect", async () => {
+    const f = await queuedFixture(false, true);
+    await f.close();
+  });
+
   it("records a factual Local validation refusal and continues in order without inventing a completed effect", async () => {
     const f = await queuedFixture(true);
     try {
@@ -89,7 +110,7 @@ describe("transition intents through canonical tools and actual Local target rec
       const unexpected = async (): Promise<never> => { throw new Error("must not dispatch source"); };
       queuedProvider = transitionQueuedProvider(db, { providerId: "hindsight", providerLineageId: intent.request.expected.sourceLineageId,
         capabilities: async () => ({ ...LOCAL_MEMORY_CAPABILITIES, providerId: "hindsight" }),
-        retain: unexpected, mutate: unexpected, recall: unexpected, reflect: unexpected });
+        retain: unexpected, mutate: unexpected, recall: unexpected, reflect: unexpected }, () => undefined);
       const coordinator = createMemoryCoordinator({ authority: createCanonicalMemoryAuthorityRepo(db), providers: new Map([["hindsight", queuedProvider]]) });
       tools = await createCanonicalMemoryTools({ coordinator, authority: createCanonicalMemoryAuthorityRepo(db).authorityEpoch(),
         router: { globalBankId: () => intent.request.expected.banks[0]!.sourceBankId,

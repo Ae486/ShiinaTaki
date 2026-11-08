@@ -29,7 +29,7 @@ import { createSummaryRepo } from "../../db/summary-repo.ts";
 import { createTimelineRepo } from "../../db/timeline-repo.ts";
 import { createCaptureLogger } from "../../testing/capture-logger.ts";
 import { createHindsightActivationTransport, type HindsightActivationTransport } from "../../testing/hindsight-activation-transport.ts";
-import { hindsightApplicationClientOverlay, hindsightFixtureSecrets } from "../../testing/hindsight-runtime-composition-fixtures.ts";
+import { createNativeFixtureClient, hindsightApplicationClientOverlay, hindsightFixtureSecrets } from "../../testing/hindsight-runtime-composition-fixtures.ts";
 import { failingGenerateModel } from "../../testing/mock-language-model.ts";
 import { rmTempDir } from "../../testing/rm-temp.ts";
 import type { HindsightNativeBackupRoute } from "../hindsight-backup/hindsight-backup-route.ts";
@@ -56,7 +56,7 @@ export const JOURNEY_CHARACTER = "taki";
 const ENDPOINT = "http://127.0.0.1:18481";
 
 export function createHindsightActivationJourney(options: {
-  model?: MockLanguageModelV4; characters?: string[]; automatic?: boolean; backupRoute?: HindsightNativeBackupRoute;
+  model?: MockLanguageModelV4; characters?: string[]; automatic?: boolean; backupRoute?: HindsightNativeBackupRoute; characterFact?: string;
 } = {}) {
   const dataDir = mkdtempSync(join(tmpdir(), "taki-hindsight-journey-"));
   const workspaceRoot = join(dataDir, "workspace");
@@ -72,10 +72,14 @@ export function createHindsightActivationJourney(options: {
   const transport = createHindsightActivationTransport({ apiKey: secrets.state.value!, endpoint: ENDPOINT,
     banks: Object.fromEntries(native.map((binding) => [binding.externalBankId, baselineRecords(binding.externalBankId, loadTakiBankTemplate("taki-bank-v1", binding.scope))])) });
   const application = hindsightApplicationClientOverlay([...bindings.map((binding) => curatorTestBank({ bankId: binding.externalBankId,
-    ...(binding.scope === "character" ? { characterId: JOURNEY_CHARACTER } : {}) })),
+    ...(binding.scope === "character" ? { characterId: JOURNEY_CHARACTER,
+      ...(options.characterFact ? { memories: [{ id: "memory-a", text: options.characterFact }] } : {}) } : {}) })),
   ...extra.map((entry) => curatorTestBank({ bankId: entry.binding.externalBankId, characterId: entry.characterId, memories: [] }))]);
   // One client answers both the D78 activation routes (transport double) and the D77 application methods (in-memory overlay).
-  const client: HindsightClient = { ...transport.client, ...application.overlay };
+  const nativeClient = createNativeFixtureClient({ control: application.control, calls: application.calls,
+    secrets: secrets.catalog, requireBank: application.requireBank });
+  const client: HindsightClient = { ...transport.client, ...application.overlay,
+    ...(options.characterFact ? { recallNative: nativeClient.recallNative } : {}) };
   const boot = { dataDir, workspaceRoot, model, logger, logs, secrets, transport, application, client, bindings, automatic: options.automatic ?? false,
     backupRoute: options.backupRoute };
   let session = openSession(boot, "boot-a");

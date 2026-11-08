@@ -46,7 +46,7 @@ export function createHindsightLifecycleService(deps: HindsightLifecycleDeps): H
   const state: State = { deps, stopping: false, calls: new Map(), retired: new Set() };
   const runtimeFor = (epochId: string) => { const runtime = deps.runtime(); return runtime?.epochId === epochId ? runtime : null; };
   return {
-    authority: () => readMemoryAuthoritySelection(deps.db),
+    authority: () => deps.verifySelectedAuthority?.() ?? readMemoryAuthoritySelection(deps.db),
     bankFacts: (input) => readHindsightBankFacts(deps.db, input),
     live: () => readHindsightLifecycleLive(deps),
     runtime: deps.runtime,

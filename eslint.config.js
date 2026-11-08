@@ -57,6 +57,13 @@ export default tseslint.config(
     },
   },
   {
+    // Matching-authority withdrawal belongs to the existing publication lifetime owner.
+    files: ["packages/core/src/memory/hindsight-runtime-binding.ts"],
+    rules: {
+      "max-lines-per-function": ["error", { max: 65, skipBlankLines: true, skipComments: true }],
+    },
+  },
+  {
     // W7 adds a read-only overview to the same healthy service lifetime; no new producer owner.
     files: ["packages/core/src/memory/transitions/transition-healthy-service.ts"],
     rules: {

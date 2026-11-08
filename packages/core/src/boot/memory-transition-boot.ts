@@ -13,7 +13,7 @@ import { createHindsightClient, type HindsightClient } from "../memory/hindsight
 import { hindsightConnectionFingerprint } from "../memory/hindsight/hindsight-compatibility-service.ts";
 import type { composeMemoryRuntime } from "../memory/runtime-composition.ts";
 import { createHealthyTransitionService } from "../memory/transitions/transition-healthy-service.ts";
-import { createTransitionPublicationObserver } from "../db/memory-transition-publication-reader.ts";
+import { readCurrentMemoryAuthorityIdentity } from "../memory/legacy-migration/legacy-activation-repo.ts";
 import type { TransitionEvidenceContext } from "../memory/transitions/transition-evidence-context.ts";
 import type { MemoryTransitionPreview, MemoryHealthyTransitionPreview, MemoryEmergencyTransitionPreview } from "@taki/shared";
 import type { MemoryTransitionDriver } from "../memory/operations/memory-operation-transition-storage.ts";
@@ -55,29 +55,18 @@ export function composeMemoryTransitions(input: { db: Database; config: ConfigSo
 }
 
 function createReadiness(db: Database, runtime: ReturnType<typeof composeMemoryRuntime>) {
-  const observer = createTransitionPublicationObserver(db); let bindingRevision: string | undefined;
   const ready = (epochId: string, provider: "local" | "hindsight", verification?: TransitionEvidenceContext) => {
-      verification?.assertOwner(db); verification?.assertIndependent();
-      // No published subsystem means unavailable regardless of the receipt. Avoid rebuilding a large committed
-      // corpus on every status poll while native finalization still needs the event loop and request deadline.
+      verification?.assertOwner(db);
       if (!runtime.hasPublishedBinding(provider)) return false;
-      const snapshot = provider === "local" ? runtime.bindingSnapshot(verification) : runtime.hindsightBindingSnapshot(verification);
-      return snapshot.lifetime === "running" && snapshot.binding.kind === "published" && snapshot.binding.epochId === epochId;
+      const selected = runtime.verifySelectedAuthority(verification);
+      return selected.epochId === epochId && selected.mode === (provider === "local" ? "canonical-local" : "hindsight") && observe(epochId, provider);
   };
   const observe = (epochId: string, provider: "local" | "hindsight") => {
-    const local = runtime.bindingPublication("local"); const hindsight = runtime.bindingPublication("hindsight");
-    const revision = `${local.revision}:${hindsight.revision}`;
-    if (bindingRevision !== revision) { observer.reset(); bindingRevision = revision; }
-    const state = provider === "local" ? local : hindsight;
+    const state = runtime.bindingPublication(provider);
     if (!runtime.hasPublishedBinding(provider) || state.lifetime !== "running"
       || state.binding.kind !== "published" || state.binding.epochId !== epochId) return false;
-    const selected = observer.selected(revision);
-    return selected ? selected.epochId === epochId && selected.provider === provider : ready(epochId, provider);
+    const selected = readCurrentMemoryAuthorityIdentity(db);
+    return selected.epochId === epochId && selected.mode === (provider === "local" ? "canonical-local" : "hindsight");
   };
-  // Default committed-copy boot seeds full verification before any native request can be dispatched.
-  for (const provider of ["local", "hindsight"] as const) {
-    const state = runtime.bindingPublication(provider);
-    if (state.lifetime === "running" && state.binding.kind === "published") observe(state.binding.epochId, provider);
-  }
-  return { ready, observe, close: observer.close };
+  return { ready, observe, close: () => undefined };
 }

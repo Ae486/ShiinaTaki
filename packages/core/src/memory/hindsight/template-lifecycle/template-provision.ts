@@ -9,7 +9,7 @@ import { type MemoryBankProducerRef, type MemoryTemplatePreviewParams, type Memo
 import { createHindsightBankSetupRepo } from "../../../db/hindsight-bank-setup-repo.ts";
 import { createMemoryOperationRepo } from "../../../db/memory-operation-repo.ts";
 import { operationIsQuarantined } from "../../../db/memory-transition-emergency-quarantine.ts";
-import { readMemoryAuthoritySelection } from "../../legacy-migration/legacy-activation-repo.ts";
+import { readCurrentMemoryAuthorityIdentity } from "../../legacy-migration/legacy-activation-repo.ts";
 import { assertHindsightBankUnoccupied } from "../../hindsight-lifecycle/hindsight-bank-occupancy.ts";
 import { hindsightBankBindings } from "../hindsight-bank-identity.ts";
 import { readHindsightLiveProjection } from "../hindsight-runtime-connection.ts";
@@ -85,7 +85,7 @@ export async function prepareProvisionTemplate(deps: TemplateExecutionDependenci
 
 function assertProvisionCurrent(deps: TemplateExecutionDependencies, input: TemplateProvisionInput) {
   input.signal.throwIfAborted();
-  const selected = readMemoryAuthoritySelection(deps.db);
+  const selected = readCurrentMemoryAuthorityIdentity(deps.db);
   const live = readHindsightLiveProjection(deps);
   const operation = createMemoryOperationRepo(deps.db).get(input.operationId);
   if (selected.mode !== "hindsight" || selected.epochId !== input.ref.admittedEpochId || !selected.providerLineageId

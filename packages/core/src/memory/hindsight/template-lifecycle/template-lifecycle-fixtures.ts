@@ -14,7 +14,6 @@ import { createHindsightBankSetupRepo } from "../../../db/hindsight-bank-setup-r
 import { readApplicationCheckpoint, applicationCheckpointHash } from "../../../db/hindsight-application-replica-checkpoint.ts";
 import { createMemoryOperationRepo } from "../../../db/memory-operation-repo.ts";
 import { openDatabase, type Database } from "../../../db/sqlite.ts";
-import { MIGRATIONS } from "../../../db/migrations/index-list.ts";
 import { hindsightRuntimeFixture } from "../../../testing/hindsight-runtime-composition-fixtures.ts";
 import { fakeRuntime, fakeSetup } from "../../operations/memory-operation-fixtures.ts";
 import { createMemoryOperationService } from "../../operations/memory-operation-service.ts";
@@ -41,13 +40,13 @@ interface TemplateFixtureContext {
 }
 
 export function templateLifecycleFixture(input: { characterId?: string; globalOnly?: boolean; model?: LanguageModel;
-  namespaces?: ReadonlyMap<string, TakiApplicationNamespace> } = {}) {
+  namespaces?: ReadonlyMap<string, TakiApplicationNamespace>; coreMigrationHead?: number } = {}) {
   const characterId = input.characterId ?? "taki";
   const bindings = hindsightBankBindings(characterId);
   const banks = [curatorTestBank({ bankId: bindings[0].externalBankId, namespace: input.namespaces?.get(bindings[0].externalBankId), memories: [] }),
     ...input.globalOnly ? [] : [curatorTestBank({ bankId: bindings[1].externalBankId,
       namespace: input.namespaces?.get(bindings[1].externalBankId), characterId, memories: [] })]];
-  const base = hindsightRuntimeFixture({ banks, model: input.model });
+  const base = hindsightRuntimeFixture({ banks, model: input.model, coreMigrationHead: input.coreMigrationHead });
   // The base runtime fixture does not exercise return/emergency ancestry. This fixture
   // does, so retain the Local predecessor already named by its activation receipt.
   base.db.prepare("UPDATE canonical_memory_authority_epochs SET predecessor_epoch_id='fixture-local' WHERE epoch_id='epoch'").run();
@@ -88,7 +87,7 @@ function createFixtureSession(context: TemplateFixtureContext) {
     },
     reopen: async () => {
       service.stop(); await owner.stop(); db.close();
-      db = openDatabase({ path: join(base.dataDir, "memory.sqlite"), migrations: MIGRATIONS });
+      db = openDatabase({ path: join(base.dataDir, "memory.sqlite"), migrations: base.migrations });
       state.bootId = randomUUID(); state.bound = null;
       deps = makeDependencies(); service = createHindsightTemplateLifecycleService(deps); owner = makeOwner();
     },

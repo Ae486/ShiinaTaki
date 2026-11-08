@@ -18,7 +18,7 @@ const EXECUTION_TABLES = ["hindsight_template_plans", "hindsight_template_admiss
 
 describe("059 durable template execution lineage", () => {
   it("creates an empty fresh execution schema without inferring legacy effects", () => {
-    const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
+    const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS.filter((item) => item.version <= 59) });
     try {
       expect(db.prepare("SELECT max(version) AS version FROM migrations").get()?.version).toBe(59);
       for (const table of EXECUTION_TABLES) expect(db.prepare(`SELECT * FROM ${table}`).all()).toEqual([]);

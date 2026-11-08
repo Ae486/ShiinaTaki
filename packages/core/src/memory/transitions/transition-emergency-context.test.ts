@@ -5,11 +5,9 @@ import { openDatabase } from "../../db/sqlite.ts";
 import { publishMemoryTransition } from "../../db/memory-transition-publication-repo.ts";
 import { prepareEmergencyCandidate, readVerifiedEmergencyCandidate } from "../../db/memory-transition-emergency-candidate.ts";
 import { readVerifiedEmergencyPublication } from "../../db/memory-transition-emergency-publication.ts";
-import { createTransitionPublicationObserver } from "../../db/memory-transition-publication-reader.ts";
 import { readTransitionPublishedNativeBaseline, readTransitionLocalAncestors } from "../../db/memory-transition-candidate-repo.ts";
 import { readSurvivingBaselinePolicies } from "../../db/memory-transition-surviving-policy.ts";
-import { withTransitionEvidenceContext, withTransitionObservationContext, type TransitionEvidenceContext } from "./transition-evidence-context.ts";
-import { TransitionObservationStore } from "./transition-observation-store.ts";
+import { withTransitionEvidenceContext, type TransitionEvidenceContext } from "./transition-evidence-context.ts";
 import { projectSurvivingLocalBank } from "./transition-local-projection.ts";
 import * as surviving from "./transition-surviving-evidence.ts";
 import * as native from "./transition-native-evidence.ts";
@@ -119,23 +117,20 @@ describe("independent synchronous emergency evidence", () => {
     } finally { await f.close(); }
   }, 30_000);
 
-  it("opens a fresh emergency context for each observer read and still checks mutable publication joins", async () => {
-    const f = await createEmergencyCandidateFixture(); const observer = createTransitionPublicationObserver(f.db);
+  it("opens a fresh emergency context for each full read and still checks mutable publication joins", async () => {
+    const f = await createEmergencyCandidateFixture();
     try {
       const receipt = publishMemoryTransition(f.db, f.prove());
       const verify = vi.spyOn(surviving, "verifySurvivingBankEvidence");
-      const expected = { epochId: receipt.newEpochId, provider: "local" };
-      expect(observer.selected("same-binding")).toEqual(expected); expect(verify).toHaveBeenCalledTimes(2);
-      expect(observer.selected("same-binding")).toEqual(expected); expect(verify).toHaveBeenCalledTimes(4);
-      const store = new TransitionObservationStore(f.db);
-      withTransitionObservationContext({ db: f.db, receiptId: receipt.receiptId, store }, (context) => {
-        expect(() => readVerifiedEmergencyPublication(f.db, receipt.receiptId, context)).toThrow("MEMORY_TRANSITION_PROOF_INVALID");
-      }); store.close();
+      expect(readVerifiedEmergencyPublication(f.db, receipt.receiptId).candidateId).toBe(f.candidate.candidateId);
+      expect(verify).toHaveBeenCalledTimes(2);
+      expect(readVerifiedEmergencyPublication(f.db, receipt.receiptId).candidateId).toBe(f.candidate.candidateId);
+      expect(verify).toHaveBeenCalledTimes(4);
       withTransitionEvidenceContext(f.db, (context) => {
         readVerifiedEmergencyPublication(f.db, receipt.receiptId, context);
         f.db.prepare("UPDATE memory_authority_selection SET provider_lineage_id='changed'").run();
         expect(() => readVerifiedEmergencyPublication(f.db, receipt.receiptId, context)).toThrow("MEMORY_TRANSITION_PROOF_INVALID");
       });
-    } finally { observer.close(); await f.close(); }
+    } finally { await f.close(); }
   }, 30_000);
 });

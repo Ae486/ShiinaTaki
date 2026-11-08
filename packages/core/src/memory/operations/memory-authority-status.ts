@@ -8,7 +8,7 @@ import {
 } from "@taki/shared";
 import { countPendingHindsightMemoryWrites } from "../../db/hindsight-memory-write-repo.ts";
 import type { Database } from "../../db/sqlite.ts";
-import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
+import { readCurrentMemoryAuthorityIdentity, type MemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
 import type { HindsightBackupService } from "../hindsight-backup/hindsight-backup-service.ts";
 import { readHindsightBackupStatus } from "../hindsight-backup/hindsight-backup-status.ts";
 import type { HindsightSetupService } from "../hindsight/hindsight-setup-service.ts";
@@ -23,6 +23,7 @@ import { EXCLUSIVE_MEMORY_FAMILIES, type MemoryOperationsRuntime } from "./memor
 import { MEMORY_OPERATION_KINDS, memoryOperationHandler } from "./memory-operation-kinds.ts";
 import type { MemoryOperationService } from "./memory-operation-service.ts";
 import { activeTemplateHold } from "../hindsight/template-lifecycle/template-execution-reads.ts";
+import { memoryStatusUnavailableReason, type MemoryRuntimeStatusObservation } from "./memory-status-observer.ts";
 
 export interface MemoryAuthorityStatusInput {
   db: Database;
@@ -44,29 +45,31 @@ export interface MemoryAuthorityStatusInput {
 
 type Evidence = Pick<MemoryAuthorityStatus, "replica" | "pending">;
 
-export function readMemoryAuthorityStatus(input: MemoryAuthorityStatusInput): MemoryAuthorityStatus {
-  const selection = readMemoryAuthoritySelection(input.db);
+/** Status observes current identity and binding state; producer admission owns complete historical validation. */
+export function readMemoryAuthorityStatus(input: MemoryAuthorityStatusInput,
+  selection: MemoryAuthoritySelection = readCurrentMemoryAuthorityIdentity(input.db), observation?: MemoryRuntimeStatusObservation): MemoryAuthorityStatus {
   const hindsight = selection.mode === "hindsight";
-  const runtime = hindsight ? input.live() : null;
-  let unavailableReason: MemoryRuntimeUnavailableReason | null = hindsight && !runtime ? "not_installed" : null;
-  if (selection.mode === "canonical-local" && input.binding) unavailableReason = localRuntimeAvailability(input.binding()).unavailableReason;
-  const binding = hindsight ? input.hindsightBinding?.() : undefined;
-  if (binding) unavailableReason = hindsightRuntimeAvailability(binding).unavailableReason;
-  let evidence: Evidence = { replica: null, pending: null };
-  let drift: HindsightConnectionDrift | null = null;
+  const runtime = hindsight && !observation ? input.live() : null;
+  let unavailableReason: MemoryRuntimeUnavailableReason | null = observation ? observation.runtime.unavailableReason
+    : hindsight && !runtime ? "not_installed" : null;
+  if (!observation && selection.mode === "canonical-local" && input.binding) unavailableReason = localRuntimeAvailability(input.binding()).unavailableReason;
+  const binding = hindsight ? observation?.hindsightBinding ?? input.hindsightBinding?.() : undefined;
+  if (!observation && binding) unavailableReason = hindsightRuntimeAvailability(binding).unavailableReason;
+  let evidence: Evidence = observation ? { replica: observation.runtime.replica, pending: observation.runtime.pending } : { replica: null, pending: null };
+  let drift: HindsightConnectionDrift | null = observation?.runtime.drift ?? null;
   if (runtime && unavailableReason === null) {
     try {
       drift = runtime.driftReason();
       if (drift === "none") evidence = hindsightEvidence(input.db, runtime); else unavailableReason = drift;
-    } catch (error) { unavailableReason = unavailableReasonOf(error); }
+    } catch (error) { unavailableReason = memoryStatusUnavailableReason(error); }
   }
   const setup = input.setup.status();
   const live = hindsight ? liveConnection(input) : null;
   // A runtime a setting keeps unbound reports that setting (the same rule that admits its memory-unavailable Runs).
   const unbound = binding ? hindsightUnboundReason(binding, live) : null;
-  if (unbound) unavailableReason = unbound;
+  if (unbound && unavailableReason !== "authority_invalid") unavailableReason = unbound;
   const held = hindsight && selection.epochId ? activeTemplateHold(input.db, selection.epochId) : null;
-  if (held) unavailableReason = "template_hold";
+  if (held && unavailableReason !== "authority_invalid") unavailableReason = "template_hold";
   const active = input.operations.list({ includeTerminal: false, limit: 50 });
   const observedAt = (input.now ?? (() => new Date().toISOString()))();
   return MemoryAuthorityStatusSchema.parse({
@@ -127,11 +130,4 @@ function hindsightEvidence(db: Database, runtime: MemoryOperationsRuntime): Evid
     pending: banks.map((bank) => ({ bankId: bank.bankId, summary: runtime.pendingSummary(bank.bankId),
       parentWritesPending: countPendingHindsightMemoryWrites(db, { authorityEpochId: runtime.epochId, bankId: bank.bankId }) })),
   };
-}
-
-function unavailableReasonOf(error: unknown): MemoryRuntimeUnavailableReason {
-  const message = error instanceof Error ? error.message : "";
-  if (message === "MEMORY_OPERATION_CANCELLED") return "stopped";
-  if (message === "MEMORY_AUTHORITY_MISMATCH") return "authority_mismatch";
-  return "connection_unavailable";
 }

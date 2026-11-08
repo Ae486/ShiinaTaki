@@ -25,6 +25,9 @@ import { applicationCommandTestInput, applicationCommandTestReceipt } from "../.
 import { readApplicationCheckpoint } from "../../db/hindsight-application-replica-checkpoint.ts";
 import { PendingMemoryIntentSchema } from "@taki/shared";
 import { emergencyRowHash } from "../../db/memory-transition-row-hash.ts";
+import { appendUnboundEmergencyMemory, appendRebindingEmergencyMemory } from "../../testing/memory-transition-emergency-service-fixtures.ts";
+import { readCurrentReplicaClosure } from "../../db/memory-transition-surviving-capture.ts";
+import * as survivingPolicy from "../../db/memory-transition-surviving-policy.ts";
 
 beforeEach(() => { vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(W3_AT); });
 afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
@@ -148,6 +151,54 @@ describe("offline emergency through the production operation owner", () => {
       expect(preview).toMatchObject({ expected: null, takeover: "refused", inventory: "complete", blocking: ["incomplete-replica"] });
       expect(preview.banks.every((bank) => bank.evidence === (mode === "missing" ? "missing" : "native-only"))).toBe(true);
       expect(h.remote.calls).toEqual(before);
+    } finally { await h.close(); }
+  }, 30_000);
+  it.each(["binding_missing", "rebind_required"] as const)("refuses paired evidence with an unreconstructible %s Memory before withdrawing the source", async (binding) => {
+    const h = await fixture();
+    try {
+      const identity = (await h.emergencyRequest()).expected;
+      const bank = identity.banks[0]!;
+      const head = binding === "binding_missing" ? appendUnboundEmergencyMemory(h.db, bank.sourceBankId)
+        : appendRebindingEmergencyMemory(h.db, bank.sourceBankId);
+      const closure = readCurrentReplicaClosure(h.db, { epochId: identity.predecessorEpochId, bank, lineage: identity.sourceLineageId });
+      expect(closure.heads).toContainEqual(head);
+      expect(head.binding_state).toBe(binding);
+      const before = { ...h.remote.calls };
+      const selected = readMemoryAuthoritySelection(h.db);
+      const retired = vi.spyOn(h.runtime.transitions, "emergencyQuiesce");
+      const admitted = vi.spyOn(h.emergency, "emergencyAdmitted");
+      const preview = await h.emergency.preview({ kind: "transition.emergency-local" });
+      expect(preview).toMatchObject({ expected: null, takeover: "refused", inventory: "complete", blocking: ["incomplete-replica"] });
+      expect(preview.banks.every((row) => row.evidence === "paired-replica")).toBe(true);
+      expect(retired).not.toHaveBeenCalled(); expect(admitted).not.toHaveBeenCalled();
+      expect(h.runtime.hasPublishedBinding("hindsight")).toBe(true);
+      expect(readMemoryAuthoritySelection(h.db)).toEqual(selected); expect(h.remote.calls).toEqual(before);
+    } finally { await h.close(); }
+  }, 30_000);
+  it.each([1, 2])("refuses a previously issued rebinding preview at admission plan %i without sealing or retiring", async (planNumber) => {
+    const h = await fixture();
+    try {
+      const bank = (await h.emergencyRequest()).expected.banks[0]!;
+      appendRebindingEmergencyMemory(h.db, bank.sourceBankId);
+      // Represent a persisted preview issued by the old eligibility check; admission must independently reject it.
+      const oldEligibility = vi.spyOn(survivingPolicy, "readSurvivingBaselinePolicies").mockReturnValue(new Map());
+      const request = await h.emergencyRequest(); oldEligibility.mockRestore();
+      const selected = readMemoryAuthoritySelection(h.db); const remote = { ...h.remote.calls };
+      const rows = h.db.prepare("SELECT * FROM memory_operations").all();
+      const retired = vi.spyOn(h.runtime.transitions, "emergencyQuiesce");
+      const admitted = vi.spyOn(h.emergency, "emergencyAdmitted");
+      const copy = vi.spyOn(h.db, "backupTo");
+      const plan = vi.spyOn(h.emergency, "plan");
+      // Isolate the second plan's check from the first plan's refusal.
+      if (planNumber === 2) plan.mockReturnValueOnce({ current: request.expected, actorId: "operator" });
+      expect(() => h.emergencyOwner.submit(request)).toThrow("MEMORY_TRANSITION_PROOF_INVALID");
+      expect(plan).toHaveBeenCalledTimes(planNumber);
+      expect(retired).not.toHaveBeenCalled(); expect(admitted).not.toHaveBeenCalled(); expect(copy).not.toHaveBeenCalled();
+      expect(h.db.prepare("SELECT * FROM memory_transition_emergency_captures").all()).toEqual([]);
+      expect(h.db.prepare("SELECT * FROM memory_transition_incidents").all()).toEqual([]);
+      expect(h.db.prepare("SELECT * FROM memory_operations").all()).toEqual(rows);
+      expect(h.runtime.hasPublishedBinding("hindsight")).toBe(true);
+      expect(readMemoryAuthoritySelection(h.db)).toEqual(selected); expect(h.remote.calls).toEqual(remote);
     } finally { await h.close(); }
   }, 30_000);
   it.each(["replica", "backup"] as const)("passes a hung %s producer and rejects its later callback", async (kind) => {

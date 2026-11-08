@@ -8,13 +8,15 @@ import { createHealthyTransitionTransport } from "../../testing/memory-transitio
 import { initializeTransitionDriverBanks, markTransitionNativeDispatched, prepareTransitionNativeCommand } from "../../db/memory-transition-driver-repo.ts";
 import { createTransitionNativeSession } from "./transition-native-session.ts";
 import { signHindsightTransitionAcquire } from "../hindsight/hindsight-transition-proof.ts";
+import { HindsightTransitionRefusal } from "../hindsight/hindsight-transition-client.ts";
 
 afterEach(() => vi.restoreAllMocks());
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
-  const promise = new Promise<T>((accept) => { resolve = accept; });
-  return { promise, resolve };
+  let reject!: (error: unknown) => void;
+  const promise = new Promise<T>((accept, decline) => { resolve = accept; reject = decline; });
+  return { promise, resolve, reject };
 }
 
 function fixture() {
@@ -37,6 +39,72 @@ function fixture() {
 }
 
 describe("native session late renewal ordering", () => {
+  it.each(["before", "after"] as const)("joins the original terminal decision when renewal is refused %s its response", async (order) => {
+    const h = fixture();
+    try {
+      const renewal = deferred<HindsightTransitionStatus>();
+      const outcome = deferred<void>(); const dispatched = deferred<void>();
+      const renew = vi.spyOn(h.remote.client, "renewTransition").mockReturnValueOnce(renewal.promise);
+      const original = h.remote.client.resolveTransition!;
+      const resolve = vi.spyOn(h.remote.client, "resolveTransition").mockImplementationOnce(async (input) => {
+        const terminal = await original(input); terminal.revision++;
+        dispatched.resolve(); await outcome.promise; return terminal;
+      });
+      const pending = h.native.renew();
+      const resolving = h.native.resolve(h.bankId, { disposition: "retire", receiptId: "a".repeat(64) });
+      await dispatched.promise;
+      const refusal = new HindsightTransitionRefusal({ error: "taki_transition_refused", reason: "executor_lost" });
+      if (order === "after") { outcome.resolve(); await resolving; }
+      const result = pending.then(() => null, (error: unknown) => error);
+      renewal.reject(refusal);
+      // Let the refusal arrive before the separately delayed successful decision response.
+      await new Promise<void>((done) => setImmediate(done));
+      outcome.resolve(); const terminal = await resolving; expect(await result).toBeNull();
+      expect(h.native.active.get(h.bankId)).toEqual(terminal);
+      await h.native.renew(); expect(renew).toHaveBeenCalledTimes(1);
+      expect(resolve).toHaveBeenCalledTimes(1);
+      expect(h.db.prepare("SELECT count(*) n FROM memory_transition_native_commands WHERE kind='decision'").get()?.n).toBe(1);
+    } finally { h.db.close(); }
+  });
+
+  it.each(["unresolved", "foreign-executor", "foreign-decision", "changed-proof", "other-error", "other-refusal", "decision-failed"] as const)(
+    "does not hide renewal failure with %s", async (fault) => {
+      const h = fixture();
+      try {
+        const renewal = deferred<HindsightTransitionStatus>();
+        vi.spyOn(h.remote.client, "renewTransition").mockReturnValueOnce(renewal.promise);
+        const pending = h.native.renew();
+        const rejected = expect(pending).rejects.toThrow();
+        if (!["unresolved", "decision-failed"].includes(fault)) {
+          const original = h.remote.client.resolveTransition!;
+          vi.spyOn(h.remote.client, "resolveTransition").mockImplementationOnce(async (input) => {
+            const terminal = await original(input); terminal.revision++; return terminal;
+          });
+          const terminal = await h.native.resolve(h.bankId, { disposition: "retire", receiptId: "a".repeat(64) });
+          if (fault === "foreign-executor") h.native.active.set(h.bankId,
+            { ...terminal, executor: { ...terminal.executor, fence_token: randomUUID() } });
+          if (fault === "changed-proof") h.native.active.set(h.bankId, { ...terminal, proof: null });
+          if (fault === "foreign-decision") {
+            const changed = structuredClone(terminal); changed.outcome!.request.decision_id = randomUUID();
+            h.native.active.set(h.bankId, changed);
+          }
+        }
+        let resolving: Promise<unknown> | undefined;
+        let failedDecision: ReturnType<typeof deferred<HindsightTransitionStatus>> | undefined;
+        if (fault === "decision-failed") {
+          failedDecision = deferred<HindsightTransitionStatus>(); const sent = deferred<void>();
+          vi.spyOn(h.remote.client, "resolveTransition").mockImplementationOnce(() => { sent.resolve(); return failedDecision!.promise; });
+          resolving = expect(h.native.resolve(h.bankId, { disposition: "retire", receiptId: "a".repeat(64) })).rejects.toThrow("decision failed");
+          await sent.promise;
+        }
+        renewal.reject(fault === "other-error" ? new Error("HINDSIGHT_TIMEOUT")
+          : new HindsightTransitionRefusal({ error: "taki_transition_refused", reason: fault === "other-refusal" ? "transition_not_found" : "executor_lost" }));
+        await new Promise<void>((done) => setImmediate(done));
+        failedDecision?.reject(new Error("decision failed"));
+        await resolving; await rejected;
+      } finally { h.db.close(); }
+    });
+
   it("keeps a real session-resolved terminal outcome after the old proven renewal arrives", async () => {
     const h = fixture();
     try {

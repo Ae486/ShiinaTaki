@@ -21,6 +21,10 @@ import { createReplicaRecordStore } from "./hindsight-replica-record-store.ts";
 import { createStructuredMemoryBlockRepo } from "./structured-memory-block-repo.ts";
 import { MIGRATIONS } from "./migrations/index-list.ts";
 import { openDatabase, type Database } from "./sqlite.ts";
+import { storeApplicationCommandBody } from "./hindsight-application-command-storage.ts";
+import { prepareHindsightApplicationBody } from "../memory/hindsight/hindsight-application-body-transfer.ts";
+import { loadHindsightApplicationEvent } from "../memory/hindsight/hindsight-application-bundle-loader.ts";
+import { applicationCommandTestClient } from "./hindsight-application-command-fixtures.ts";
 
 const EPOCH = "hindsight-epoch";
 const AT = APPLICATION_TEST_AT;
@@ -31,6 +35,39 @@ const cleanup: Array<() => void> = [];
 afterEach(() => { for (const close of cleanup.splice(0).reverse()) close(); vi.restoreAllMocks(); });
 
 describe("D77 application replica publication", () => {
+  it("downloads a remote ref that differs from a valid prepared body with the same ID", async () => {
+    const f = fixture(); const source = sourceFixture(); const remote = source.application.body;
+    const local = prepareHindsightApplicationBody({ ...SCOPE, bodyId: remote.ref.body_id, schema: "application-source.v1",
+      value: { ...source.original, original_source: { ...source.original.original_source, retainedText: "Different local bytes" } } });
+    storeApplicationCommandBody(f.db, { ...SCOPE, body: local });
+    const guard = f.input(); expect(f.repo.cachedBody({ ...guard, ref: remote.ref })).toBeUndefined();
+    const event = applicationTestEvent({ from: { native_cursor: 0, state_cursor: 0 }, artifacts: [source.application], native: [source.native] });
+    const server = applicationCommandTestClient();
+    for (const body of event.bodies.values()) server.storeBody(body);
+    const client = { ...server.client, applicationChangePage: vi.fn(async () => event.pages[0]!) };
+    const loaded = await loadHindsightApplicationEvent({ ...SCOPE, manifest: event.manifest, client,
+      context: { timeoutMs: 1000 }, cachedBody: (ref) => f.repo.cachedBody({ ...guard, ref }) });
+    const downloaded = loaded.bodies.get(remote.ref.body_id)!;
+    expect(downloaded.ref).toEqual(remote.ref); expect(downloaded.content).toEqual(remote.content);
+    expect(Buffer.from(downloaded.bytes)).toEqual(Buffer.from(remote.bytes));
+    expect(server.calls).toContain(`read-body:${remote.ref.body_id}`);
+    expect(server.calls).toContain(`read-part:${remote.ref.body_id}:0`);
+    expect(client.applicationChangePage).toHaveBeenCalledOnce();
+    expect(f.repo.checkpoint(SCOPE.bankId)).toBeUndefined();
+  });
+
+  it.each(["bank", "lineage", "generation"])("does not reuse a prepared body from a different %s", (field) => {
+    const f = fixture(); const source = sourceFixture();
+    const foreign = { ...SCOPE, namespace: { ...SCOPE.namespace } };
+    if (field === "bank") foreign.bankId = "other-bank";
+    if (field === "lineage") foreign.namespace.provider_lineage = "55555555-5555-4555-8555-555555555555";
+    if (field === "generation") foreign.namespace.bank_generation = "55555555-5555-4555-8555-555555555555";
+    const body = prepareHindsightApplicationBody({ ...foreign, bodyId: source.application.body.ref.body_id,
+      schema: "application-source.v1", value: source.original });
+    storeApplicationCommandBody(f.db, { ...foreign, body });
+    expect(f.repo.cachedBody({ ...f.input(), ref: source.application.body.ref })).toBeUndefined();
+  });
+
   it("stores guarded download bytes without exposing a checkpoint or inheriting another generation's cache", () => {
     const f = fixture(); const body = sourceFixture().application.body; const guard = f.input();
     f.repo.cacheBodies({ ...guard, bodies: [body] });
@@ -564,7 +601,7 @@ function tempPath() {
 function fixture(path = ":memory:", options: {
   db?: Database; now?: string; acquire?: boolean; scope?: HindsightApplicationScope; bankScope?: MemoryBankScope; onTokenize?: () => void;
 } = {}) {
-  const db = options.db ?? openDatabase({ path, migrations: MIGRATIONS.filter(({ version: value }) => value <= 42) });
+  const db = options.db ?? openDatabase({ path, migrations: MIGRATIONS.filter(({ version: value }) => value <= 44) });
   let closed = false; const close = () => { if (!closed && !options.db) { closed = true; db.close(); } }; cleanup.push(close);
   const scope = options.scope ?? SCOPE; let ownership = options.bankScope ?? GLOBAL; let at = options.now ?? AT;
   if (!db.prepare("SELECT epoch_id FROM canonical_memory_authority_epochs WHERE epoch_id=:epoch").get({ epoch: EPOCH })) {

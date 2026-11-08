@@ -1,9 +1,10 @@
 /**
  * INPUT:  verified run identity, readiness/manifest digests, prepared epoch, and current fenced lease
- * OUTPUT: atomic canonical-local authority marker plus immutable activation receipt, and the receipt proof recovery requires
- * POS:    core/memory/legacy-migration — sole migration cutover transaction; no filesystem or async work inside
+ * OUTPUT: atomic canonical-local marker, current control identity and independent full receipt proof
+ * POS:    core/memory/legacy-migration — sole migration cutover transaction; identity discovery and full verification are explicit
  */
-import type { Database } from "../../db/sqlite.ts";
+import type { Database, SqlRow } from "../../db/sqlite.ts";
+import { createCanonicalMemoryAuthorityRepo } from "../../db/canonical-memory-authority-repo.ts";
 import type { Lease } from "./legacy-migration-ledger-repo.ts";
 import { readVerifiedTransitionPublication } from "../../db/memory-transition-publication-reader.ts";
 import type { TransitionEvidenceContext } from "../transitions/transition-evidence-context.ts";
@@ -17,10 +18,39 @@ export interface MemoryAuthoritySelection {
   replicaCheckpointDigest: string | null;
   transitionReceiptId?: string;
 }
+
+export interface MemoryAuthorityIdentity extends MemoryAuthoritySelection {
+  activeProviderId: "local" | "hindsight" | null;
+  activeProviderLineageId: string | null;
+}
+
+/** Current control identity only. Historical publication/receipt proof belongs to binding and recovery. */
+export function readCurrentMemoryAuthorityIdentity(db: Database): MemoryAuthorityIdentity {
+  const selected = selectionOf(readSelectionRow(db));
+  const { epochId, snapshotId, transactionId, providerLineageId, replicaCheckpointDigest } = selected;
+  const transitionReceiptId = selected.transitionReceiptId ?? null;
+  if (selected.mode === "legacy-markdown") {
+    if ([epochId, snapshotId, transactionId, providerLineageId, replicaCheckpointDigest, transitionReceiptId].some((value) => value !== null)) {
+      throw new Error("MEMORY_INTEGRITY_ERROR");
+    }
+    // A prepared initial Local epoch can coexist with the still-selected Legacy marker.
+    return { ...selected, activeProviderId: null, activeProviderLineageId: null };
+  }
+  if (!epochId || (transitionReceiptId !== null
+    ? !transitionReceiptId || !providerLineageId || !replicaCheckpointDigest || snapshotId !== null || transactionId !== null
+    : selected.mode === "canonical-local"
+      ? !snapshotId || !transactionId || providerLineageId !== null || replicaCheckpointDigest !== null
+      : snapshotId !== null || !transactionId || !providerLineageId || !replicaCheckpointDigest)) {
+    throw new Error("MEMORY_INTEGRITY_ERROR");
+  }
+  const active = createCanonicalMemoryAuthorityRepo(db).authorityEpoch(epochId);
+  if (active.providerId !== (selected.mode === "canonical-local" ? "local" : "hindsight")
+    || providerLineageId !== null && active.providerLineageId !== providerLineageId) throw new Error("MEMORY_AUTHORITY_MISMATCH");
+  return { ...selected, activeProviderId: active.providerId, activeProviderLineageId: active.providerLineageId };
+}
 export function readMemoryAuthoritySelection(db: Database, verification?: TransitionEvidenceContext): MemoryAuthoritySelection {
-  verification?.assertOwner(db); verification?.assertIndependent();
-  const row = db.prepare("SELECT * FROM memory_authority_selection WHERE singleton=1").get();
-  if (!row || !["legacy-markdown", "canonical-local", "hindsight"].includes(String(row.mode))) throw new Error("MEMORY_INTEGRITY_ERROR");
+  verification?.assertOwner(db);
+  const row = readSelectionRow(db);
   const transitionReceiptId = row.transition_receipt_id == null ? undefined : String(row.transition_receipt_id);
   if (transitionReceiptId) readVerifiedTransitionPublication(db, transitionReceiptId, verification);
   else {
@@ -28,6 +58,18 @@ export function readMemoryAuthoritySelection(db: Database, verification?: Transi
     if (row.mode === "hindsight" && (!row.active_epoch_id || row.verified_snapshot_id !== null || !row.activation_transaction_id || !row.provider_lineage_id || !row.replica_checkpoint_digest)) throw new Error("MEMORY_INTEGRITY_ERROR");
     if (row.mode === "hindsight") verifyHindsightSelection(db, row);
   }
+  return selectionOf(row);
+}
+
+function readSelectionRow(db: Database): SqlRow {
+  const row = db.prepare("SELECT * FROM memory_authority_selection WHERE singleton=1").get();
+  if (!row || !["legacy-markdown", "canonical-local", "hindsight"].includes(String(row.mode))) throw new Error("MEMORY_INTEGRITY_ERROR");
+  return row;
+}
+
+/** Mapping only; each caller chooses current identity validation or independent receipt proof. */
+function selectionOf(row: SqlRow): MemoryAuthoritySelection {
+  const transitionReceiptId = row.transition_receipt_id == null ? undefined : String(row.transition_receipt_id);
   return { mode: row.mode as MemoryAuthoritySelection["mode"], epochId: row.active_epoch_id === null ? null : String(row.active_epoch_id),
     snapshotId: row.verified_snapshot_id === null ? null : String(row.verified_snapshot_id), transactionId: row.activation_transaction_id === null ? null : String(row.activation_transaction_id),
     providerLineageId: row.provider_lineage_id === null || row.provider_lineage_id === undefined ? null : String(row.provider_lineage_id),

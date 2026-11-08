@@ -1,17 +1,20 @@
 /**
  * INPUT:  current Core authority, complete Local/replica rows and reviewed Bank setup
- * OUTPUT: source-backed healthy preview identity and separate final configuration/scope guards
+ * OUTPUT: healthy identity, consumable emergency replica identity and separate final configuration/scope guards
  * POS:    core/memory/transitions — no remote effects; full current logical coverage is independent of setup revision
  */
 import { MemoryTransitionIdentitySchema, type MemoryTransitionIdentity } from "@taki/shared";
 import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
+import type { MemoryAuthorityVerification } from "../runtime-authority-verification.ts";
 import { canonicalPayloadHash } from "../legacy-migration/legacy-identities.ts";
 import { discoverTransitionLocal } from "../../db/memory-transition-local-capture.ts";
 import { readTransitionCustody, readEmergencyTransitionCustody } from "../../db/memory-transition-custody.ts";
-import { requireTransitionCommonBaseline } from "../../db/memory-transition-candidate-repo.ts";
+import { requireTransitionCommonBaseline, readTransitionPublishedNativeBaseline } from "../../db/memory-transition-candidate-repo.ts";
+import { readCurrentReplicaClosure } from "../../db/memory-transition-surviving-capture.ts";
+import { readSurvivingBaselinePolicies } from "../../db/memory-transition-surviving-policy.ts";
 import { transitionLocalHash } from "./transition-local-encoding.ts";
 import type { Database, SqlRow } from "../../db/sqlite.ts";
-import type { TransitionEvidenceContext } from "./transition-evidence-context.ts";
+import { withTransitionEvidenceContext, type TransitionEvidenceContext } from "./transition-evidence-context.ts";
 import { readTransitionTemplateState, assertTransitionTemplatesCurrent } from "./transition-template-state.ts";
 
 export function transitionConfiguration(db: Database, fingerprint: string | null) {
@@ -37,8 +40,9 @@ export function assertTransitionScopeCoverage(db: Database, epochId: string, ban
   if (characters.some((row) => !banks.some((bank) => bank.scope.kind === "character" && bank.scope.characterId === row.character_id))) stale();
 }
 export function readHealthyTransitionIdentity(db: Database, input: { kind: "transition.return-local" | "transition.reenter-hindsight";
-  fingerprint: string | null; providerLineage: string; templateBackup?: boolean }, verification?: TransitionEvidenceContext): MemoryTransitionIdentity {
-  const selected = readMemoryAuthoritySelection(db, verification);
+  fingerprint: string | null; providerLineage: string; templateBackup?: boolean;
+  verifySelectedAuthority?: MemoryAuthorityVerification["verifySelectedAuthority"] }, verification?: TransitionEvidenceContext): MemoryTransitionIdentity {
+  const selected = input.verifySelectedAuthority?.(verification) ?? readMemoryAuthoritySelection(db, verification);
   const sourceProvider = input.kind === "transition.return-local" ? "hindsight" : "local";
   if (!selected.epochId || selected.mode !== (sourceProvider === "local" ? "canonical-local" : "hindsight")) unavailable();
   const epoch = db.prepare("SELECT provider_lineage_id FROM canonical_memory_authority_epochs WHERE epoch_id=:id").get({ id: selected.epochId });
@@ -70,17 +74,25 @@ export function currentTransitionBaseline(db: Database, epochId: string) {
 }
 
 /** The last admitted local configuration is evidence; no credential or live runtime is required. */
-export function readEmergencyTransitionIdentity(db: Database, verification?: TransitionEvidenceContext): MemoryTransitionIdentity {
-  const selected = readMemoryAuthoritySelection(db, verification);
-  if (selected.mode !== "hindsight" || !selected.epochId || !selected.providerLineageId) unavailable();
-  const config = emergencyConfiguration(db);
-  const banks = config.banks.map((row) => checkpointBankIdentity(db, row, { epochId: selected.epochId!, lineage: selected.providerLineageId! }));
-  assertTransitionScopeCoverage(db, selected.epochId, banks);
-  return MemoryTransitionIdentitySchema.parse({ predecessorEpochId: selected.epochId, sourceProvider: "hindsight",
-    sourceLineageId: selected.providerLineageId, targetProvider: "local", targetLineageId: localAncestorLineage(db, selected.epochId),
-    configRevision: config.configRevision, configFingerprint: config.configFingerprint, inventoryRevision: config.configRevision,
-    inventoryHash: config.inventoryHash, banks, baselineReceiptId: null, baselineHash: null,
-    custodyBoundaryHash: transitionLocalHash(readEmergencyTransitionCustody(db, selected.epochId)) });
+export function readEmergencyTransitionIdentity(db: Database, verification?: TransitionEvidenceContext,
+  verifySelectedAuthority?: MemoryAuthorityVerification["verifySelectedAuthority"]): MemoryTransitionIdentity {
+  return withTransitionEvidenceContext(db, (context) => {
+    const selected = verifySelectedAuthority?.(context) ?? readMemoryAuthoritySelection(db, context);
+    if (selected.mode !== "hindsight" || !selected.epochId || !selected.providerLineageId) unavailable();
+    const config = emergencyConfiguration(db);
+    const banks = config.banks.map((row) => checkpointBankIdentity(db, row, { epochId: selected.epochId!, lineage: selected.providerLineageId! }));
+    assertTransitionScopeCoverage(db, selected.epochId, banks);
+    for (const bank of banks) {
+      const evidence = readCurrentReplicaClosure(db, { epochId: selected.epochId, bank, lineage: selected.providerLineageId });
+      const baseline = readTransitionPublishedNativeBaseline(db, { epochId: selected.epochId, nativeBankId: evidence.bankId, verification: context });
+      readSurvivingBaselinePolicies(db, { evidence, predecessorEpochId: selected.epochId, baseline, verification: context });
+    }
+    return MemoryTransitionIdentitySchema.parse({ predecessorEpochId: selected.epochId, sourceProvider: "hindsight",
+      sourceLineageId: selected.providerLineageId, targetProvider: "local", targetLineageId: localAncestorLineage(db, selected.epochId),
+      configRevision: config.configRevision, configFingerprint: config.configFingerprint, inventoryRevision: config.configRevision,
+      inventoryHash: config.inventoryHash, banks, baselineReceiptId: null, baselineHash: null,
+      custodyBoundaryHash: transitionLocalHash(readEmergencyTransitionCustody(db, selected.epochId)) });
+  }, verification);
 }
 export function assertEmergencyConfiguration(db: Database, expected: MemoryTransitionIdentity): void {
   const actual = emergencyConfiguration(db);

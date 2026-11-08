@@ -164,7 +164,7 @@ describe("C03 — first Hindsight activation through registered operations", () 
     const j = journey(); const { session, localEpochId } = await readyInstance(j);
     vi.spyOn(hindsightSubsystem, "createHindsightMemorySubsystem").mockImplementationOnce(() => { throw new Error("synthetic Hindsight constructor failure"); });
     const first = await session.settled(activate(session, localEpochId));
-    expect(first).toMatchObject({ state: "failed", reason: "runtime_unavailable", errorCode: "MEMORY_RUNTIME_UNAVAILABLE",
+    expect(first).toMatchObject({ state: "failed", reason: "runtime_unavailable", errorCode: "HINDSIGHT_ACTIVATION_INTERNAL_ERROR",
       result: { outcome: "binding_unavailable", runtimeAvailable: false }, producer: { progress: { phase: "binding" } } });
     const epochId = (first.producer as { hindsightEpochId: string }).hindsightEpochId;
     expect(readMemoryAuthoritySelection(session.db)).toMatchObject({ mode: "hindsight", epochId });

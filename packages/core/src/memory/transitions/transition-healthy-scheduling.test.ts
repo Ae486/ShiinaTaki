@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createHealthyTransitionHarness } from "../../testing/memory-transition-healthy-fixtures.ts";
 import { W3_AT } from "../../testing/memory-transition-candidate-fixtures.ts";
 import { hindsightError } from "../hindsight/hindsight-errors.ts";
+import { HindsightTransitionRefusal } from "../hindsight/hindsight-transition-client.ts";
 
 beforeEach(() => { vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(W3_AT); });
 afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
@@ -14,8 +15,9 @@ function deferred() {
 }
 
 describe("healthy finalization event-loop scheduling", () => {
-  it.each(["transition.return-local", "transition.reenter-hindsight"] as const)(
-    "joins a genuinely delayed renewal before full binding and terminal resolution for %s", async (kind) => {
+  it.each((["transition.return-local", "transition.reenter-hindsight"] as const)
+    .flatMap((kind) => ["success", "executor-lost"].map((response) => ({ kind, response }))))(
+    "joins delayed renewal $response before full binding and terminal resolution for $kind", async ({ kind, response }) => {
       const h = await createHealthyTransitionHarness();
       try {
         if (kind === "transition.reenter-hindsight") {
@@ -32,7 +34,11 @@ describe("healthy finalization event-loop scheduling", () => {
           pending++; events.push("renew-start");
           const status = structuredClone(h.remote.status.get(JSON.stringify([input.bankId, input.request.transition_id]))!);
           started.resolve(); await nextTurn(); await nextTurn(); await nextTurn();
-          pending--; events.push("renew-end"); return status;
+          pending--; events.push("renew-end");
+          if (response === "executor-lost" && h.remote.status.get(JSON.stringify([input.bankId, input.request.transition_id]))?.outcome) {
+            throw new HindsightTransitionRefusal({ error: "taki_transition_refused", reason: "executor_lost" });
+          }
+          return status;
         });
         vi.spyOn(h.remote.client, "resolveTransition").mockImplementation(async (input) => {
           if (firstResolve) { firstResolve = false; vi.advanceTimersByTime(30_000); await started.promise; }

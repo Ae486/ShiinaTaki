@@ -26,7 +26,7 @@ interface Dependencies {
 export interface HindsightRuntimeSynchronizeInput {
   bankId: string;
   context: HindsightCallContext;
-  /** Ordinary foreground reads wait for completion; explicit operations retain the default bounded mode. */
+  /** Foreground reads and receipt-Bank activation preparation wait for completion; other operations keep bounded mode. */
   mode?: "foreground";
 }
 interface OnDemandInput extends HindsightRuntimeSynchronizeInput {
@@ -100,9 +100,11 @@ function foregroundOwner(deps: Dependencies, input: {
   lease: MemoryReplicaLease; context: HindsightCallContext;
 }): HindsightForegroundRunOwner {
   let lease = input.lease;
+  // The sync runner must call this only after its guarded Bank/authority publication check.
+  // This owner manages cancellation and the exact lease; it is not an authority credential.
   return { current: () => lease, request: () => {
     if (input.context.signal?.aborted) throw new Error("HINDSIGHT_CANCELLED");
-    deps.assertConnection(); deps.replica.leases.assert(lease);
+    deps.replica.leases.assert(lease);
     const remaining = Date.parse(lease.expiresAt) - Date.parse(deps.now?.() ?? new Date().toISOString());
     if (remaining < input.context.timeoutMs) lease = deps.replica.leases.renew({ lease, durationMs: input.context.timeoutMs + 1000 });
     return input.context;

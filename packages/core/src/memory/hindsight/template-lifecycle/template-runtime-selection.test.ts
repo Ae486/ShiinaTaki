@@ -4,10 +4,15 @@ import type { TakiApplicationNamespace } from "@taki/shared";
 import { createHindsightBankSetupRepo } from "../../../db/hindsight-bank-setup-repo.ts";
 import { MIGRATIONS } from "../../../db/migrations/index-list.ts";
 import { openDatabase } from "../../../db/sqlite.ts";
+import { applicationCheckpointHash, readApplicationCheckpoint } from "../../../db/hindsight-application-replica-checkpoint.ts";
 import { hindsightRuntimeFixture } from "../../../testing/hindsight-runtime-composition-fixtures.ts";
+import { createHindsightRuntimeConnection } from "../hindsight-runtime-connection.ts";
+import { curatorTestBank } from "../hindsight-policy-curator-fixtures.ts";
 import { createTemplateOverlayStore } from "./template-overlay-store.ts";
+import { publishTemplateDefaults, readTemplateDefaults } from "./template-default-store.ts";
+import { templateLifecycleFixture } from "./template-lifecycle-fixtures.ts";
 import { templateProjectionDigest } from "./template-projection.ts";
-import { readRuntimeTemplateSelection, readSelectedTemplateLabelGroup, readTemplateSelectionIdentity } from "./template-runtime-selection.ts";
+import { readCurrentRuntimeTemplateIdentity, readRuntimeTemplateSelection, readSelectedTemplateLabelGroup, readTemplateSelectionIdentity } from "./template-runtime-selection.ts";
 import { FIXTURE_AT, fixtureCommit, templateFixture } from "./template-test-fixtures.ts";
 
 const cleanup: Array<() => void | Promise<void>> = [];
@@ -87,5 +92,156 @@ describe("runtime template enrollment boundary", () => {
     const value = field === "canonical_identity" ? "character:different" : JSON.stringify({ ...f.identity, canonicalIdentity: "character:different" });
     f.db.prepare(`UPDATE hindsight_template_enrollments SET ${field}=:value WHERE bank_id=:bank`).run({ value, bank: f.address.bankId });
     expect(() => readRuntimeTemplateSelection(f.db, f.address)).toThrow();
+  });
+});
+
+async function boundManagedFixture() {
+  const f = templateLifecycleFixture(); cleanup.push(f.close);
+  const operation = f.owner.submit(await f.request()); await f.owner.stop();
+  expect(f.owner.status(operation.operationId).state).toBe("completed");
+  const connect = () => createHindsightRuntimeConnection({ db: f.db, epochId: "epoch", config: f.deps.config,
+    secrets: f.deps.secrets, client: f.native.client });
+  const runtime = connect(); cleanup.push(runtime.stop);
+  return { ...f, runtime, connect, plan: f.plan(operation) };
+}
+
+// Failure modes: identity drift must invalidate the bound runtime; legal cursor/desired changes must not.
+// Unconsumed body corruption moves to full validation, while setup's consumed projection keeps its digest check.
+describe("current template identity without historical reconstruction", () => {
+  it("matches full proof for two managed Banks and an independently advanced defaults revision", async () => {
+    const f = await boundManagedFixture();
+    expect(f.plan.banks).toHaveLength(2);
+    const original = readTemplateSelectionIdentity(f.db, "epoch");
+    expect(original).not.toBeNull();
+    expect(readCurrentRuntimeTemplateIdentity(f.db, "epoch")).toBe(original);
+    const defaults = readTemplateDefaults(f.db, f.plan.guard.providerLineage)!;
+    publishTemplateDefaults(f.db, { value: { ...defaults, revision: defaults.revision + 1 },
+      expectedRevision: defaults.revision, assertCurrent: () => undefined });
+    const next = readTemplateSelectionIdentity(f.db, "epoch");
+    expect(next).not.toBe(original);
+    expect(readCurrentRuntimeTemplateIdentity(f.db, "epoch")).toBe(next);
+    expect(() => f.runtime.assertConnection()).toThrow("MEMORY_TEMPLATE_IDENTITY_CHANGED");
+    const replacement = f.connect(); cleanup.push(replacement.stop);
+    expect(replacement.templateSelectionIdentity).toBe(next);
+    replacement.assertConnection();
+  });
+
+  it("preserves absent storage, untracked legacy and enrolled-but-unapplied null identities", () => {
+    const old = openDatabase({ path: ":memory:", migrations: MIGRATIONS.filter((migration) => migration.version < 58) });
+    cleanup.push(() => old.close());
+    const legacy = hindsightRuntimeFixture(); cleanup.push(legacy.close);
+    const f = templateFixture("character");
+    const unapplied = hindsightRuntimeFixture({ banks: [curatorTestBank({ bankId: f.identity.target.bank_id,
+      characterId: f.identity.canonicalIdentity.slice("character:".length), namespace: { application_id: "taki",
+        provider_lineage: f.identity.target.provider_lineage, bank_generation: f.identity.target.bank_generation } })] });
+    cleanup.push(unapplied.close);
+    createTemplateOverlayStore(unapplied.db).appendEnrollment({ enrollment: f.enrollment, expectedRevision: 0 });
+    expect(readApplicationCheckpoint(unapplied.db, f.identity.target.bank_id)?.authorityEpochId).toBe("epoch");
+    for (const db of [old, legacy.db, unapplied.db]) {
+      expect(readTemplateSelectionIdentity(db, "epoch")).toBeNull();
+      expect(readCurrentRuntimeTemplateIdentity(db, "epoch")).toBeNull();
+    }
+  });
+
+  it("notices newly eligible managed membership without freezing the verified Bank inventory", async () => {
+    const f = await boundManagedFixture();
+    f.db.exec("UPDATE hindsight_bank_setup SET status='pending' WHERE scope_kind='character'");
+    const onlyGlobal = f.connect(); cleanup.push(onlyGlobal.stop);
+    expect(onlyGlobal.banks()).toHaveLength(1);
+    f.db.exec("UPDATE hindsight_bank_setup SET status='verified' WHERE scope_kind='character'");
+    expect(() => onlyGlobal.assertConnection()).toThrow("MEMORY_TEMPLATE_IDENTITY_CHANGED");
+    expect(readCurrentRuntimeTemplateIdentity(f.db, "epoch")).toBe(f.runtime.templateSelectionIdentity);
+    f.runtime.assertConnection();
+  });
+
+  it.each([
+    ["setup canonical identity", "", "UPDATE hindsight_bank_setup SET canonical_identity='character:changed' WHERE scope_kind='character'"],
+    ["setup scope", "", "UPDATE hindsight_bank_setup SET scope_kind='global' WHERE scope_kind='character'"],
+    ["setup template revision", "", "UPDATE hindsight_bank_setup SET template_revision='taki-bank-v1' WHERE scope_kind='character'"],
+    ["setup digest", "", "UPDATE hindsight_bank_setup SET template_digest=printf('%064d',0) WHERE scope_kind='character'"],
+    ["setup removal", "", "DELETE FROM hindsight_bank_setup WHERE scope_kind='character'"],
+    ["enrollment canonical metadata", "hindsight_template_enrollments_immutable_update", "UPDATE hindsight_template_enrollments SET canonical_identity='character:changed' WHERE scope_kind='character'"],
+    ["enrollment identity document", "hindsight_template_enrollments_immutable_update", "UPDATE hindsight_template_enrollments SET identity_json=json_set(identity_json,'$.canonicalIdentity','character:changed') WHERE scope_kind='character'"],
+    ["enrollment removal", "hindsight_template_enrollments_immutable_delete", "DELETE FROM hindsight_template_enrollments WHERE scope_kind='character'"],
+    ["missing enrollment before-image", "hindsight_template_bases_immutable_delete", "DELETE FROM hindsight_template_bases"],
+    ["applied pointer removal", "hindsight_template_applied_no_delete", "DELETE FROM hindsight_template_applied"],
+    ["applied pointer without selection", "", "UPDATE hindsight_template_applied SET revision=revision+1"],
+    ["missing selected row", "hindsight_template_selections_immutable_delete", "DELETE FROM hindsight_template_selections"],
+    ["missing selected user row", "hindsight_template_users_immutable_delete", "DELETE FROM hindsight_template_users"],
+    ["receipt column", "hindsight_template_selections_immutable_update", "UPDATE hindsight_template_selections SET receipt_hash=printf('%064d',0)"],
+    ["receipt current metadata", "hindsight_template_selections_immutable_update", "UPDATE hindsight_template_selections SET document_json=json_set(document_json,'$.receipt.receipt_hash',printf('%064d',0))"],
+    ["defaults pointer removal", "hindsight_template_defaults_no_delete", "DELETE FROM hindsight_template_defaults"],
+    ["defaults pointer without history", "", "UPDATE hindsight_template_defaults SET revision=revision+1"],
+    ["missing defaults history", "hindsight_template_default_history_immutable_delete", "DELETE FROM hindsight_template_default_history"],
+    ["defaults revision metadata", "hindsight_template_default_history_immutable_update", "UPDATE hindsight_template_default_history SET document_json=json_set(document_json,'$.revision',99)"],
+    ["defaults lineage metadata", "hindsight_template_default_history_immutable_update", "UPDATE hindsight_template_default_history SET document_json=json_set(document_json,'$.providerLineage','99999999-9999-4999-8999-999999999999')"],
+  ])("refuses out-of-band %s drift", async (_name, trigger, sql) => {
+    const f = await boundManagedFixture();
+    // Emulate offline edits; normal writes cannot bypass immutable evidence/FK protections.
+    f.db.exec("PRAGMA foreign_keys=OFF");
+    if (trigger) f.db.exec(`DROP TRIGGER ${trigger}`);
+    f.db.exec(sql);
+    expect(() => f.runtime.assertConnection()).toThrow();
+    expect(() => {
+      if (readTemplateSelectionIdentity(f.db, "epoch") !== f.runtime.templateSelectionIdentity) throw new Error("identity changed");
+    }).toThrow();
+  });
+
+  it.each(["missing", "deleted", "wrong epoch", "wrong generation"] as const)("refuses a %s checkpoint", async (damage) => {
+    const f = await boundManagedFixture(); const bank = f.plan.banks[0]!;
+    const id = bank.identity.target.bank_id;
+    if (damage === "missing") f.db.prepare("DELETE FROM hindsight_application_replica_checkpoints WHERE bank_id=:bank").run({ bank: id });
+    else {
+      const prior = readApplicationCheckpoint(f.db, id)!;
+      const next = { ...prior, bankDeleted: damage === "deleted",
+        authorityEpochId: damage === "wrong epoch" ? "other-epoch" : prior.authorityEpochId,
+        namespace: { ...prior.namespace, bank_generation: damage === "wrong generation" ? randomUUID() : prior.namespace.bank_generation } };
+      next.native = { ...prior.native, authorityEpochId: next.authorityEpochId, bankGeneration: next.namespace.bank_generation };
+      f.db.prepare(`UPDATE hindsight_application_replica_checkpoints SET bank_deleted=:deleted,authority_epoch_id=:epoch,
+        bank_generation=:generation,checkpoint_json=:json,checkpoint_hash=:hash WHERE bank_id=:bank`).run({ bank: id,
+        deleted: next.bankDeleted ? 1 : 0, epoch: next.authorityEpochId, generation: next.namespace.bank_generation,
+        json: JSON.stringify(next), hash: applicationCheckpointHash(next) });
+    }
+    expect(() => f.runtime.assertConnection()).toThrow();
+    if (damage !== "wrong generation") expect(() => readCurrentRuntimeTemplateIdentity(f.db, "epoch")).toThrow("MEMORY_TEMPLATE_IDENTITY_CHANGED");
+    else expect(readCurrentRuntimeTemplateIdentity(f.db, "epoch")).not.toBe(f.runtime.templateSelectionIdentity);
+  });
+
+  it("ignores mutable checkpoint cursors and unapplied user/catalog revisions", async () => {
+    const f = await boundManagedFixture(); const bank = f.plan.banks[0]!;
+    const store = createTemplateOverlayStore(f.db);
+    const user = store.user(bank.identity)!;
+    store.appendUser({ identity: bank.identity, user: { ...user, revision: user.revision + 1 }, expectedRevision: user.revision });
+    store.storeCatalog({ ...bank.template!, revision: "unapplied-revision" });
+    const id = bank.identity.target.bank_id; const prior = readApplicationCheckpoint(f.db, id)!;
+    const next = { ...prior, checkpoint: { ...prior.checkpoint, state_cursor: prior.checkpoint.state_cursor + 1 } };
+    f.db.prepare(`UPDATE hindsight_application_replica_checkpoints SET state_cursor=:cursor,checkpoint_json=:json,
+      checkpoint_hash=:hash WHERE bank_id=:bank`).run({ bank: id, cursor: next.checkpoint.state_cursor,
+      json: JSON.stringify(next), hash: applicationCheckpointHash(next) });
+    expect(readCurrentRuntimeTemplateIdentity(f.db, "epoch")).toBe(f.runtime.templateSelectionIdentity);
+    expect(readTemplateSelectionIdentity(f.db, "epoch")).toBe(f.runtime.templateSelectionIdentity);
+    f.runtime.assertConnection();
+  });
+
+  it("defers unchanged-metadata document corruption to the unchanged full reader and fresh construction", async () => {
+    const f = await boundManagedFixture();
+    const before = f.db.prepare("SELECT template_revision,scope_kind,document_hash FROM hindsight_template_catalog").all();
+    f.db.exec("DROP TRIGGER hindsight_template_catalog_immutable_update");
+    f.db.exec("UPDATE hindsight_template_catalog SET document_json=json_set(document_json,'$.config.retain_mission','changed offline')");
+    expect(f.db.prepare("SELECT template_revision,scope_kind,document_hash FROM hindsight_template_catalog").all()).toEqual(before);
+    expect(readCurrentRuntimeTemplateIdentity(f.db, "epoch")).toBe(f.runtime.templateSelectionIdentity);
+    f.runtime.assertConnection();
+    expect(() => readTemplateSelectionIdentity(f.db, "epoch")).toThrow("HINDSIGHT_RESPONSE_INVALID");
+    expect(() => f.connect()).toThrow("HINDSIGHT_RESPONSE_INVALID");
+    const bank = f.plan.banks[0]!;
+    expect(() => readRuntimeTemplateSelection(f.db, { bankId: bank.identity.target.bank_id, namespace: bank.namespace })).toThrow();
+  });
+
+  it("still refuses corruption of the current projection consumed for the setup digest", async () => {
+    const f = await boundManagedFixture();
+    f.db.exec("DROP TRIGGER hindsight_template_selections_immutable_update");
+    f.db.exec("UPDATE hindsight_template_selections SET document_json=json_set(document_json,'$.projection.config[0].stored',json('{\"kind\":\"absent\"}'))");
+    expect(() => readCurrentRuntimeTemplateIdentity(f.db, "epoch")).toThrow("MEMORY_TEMPLATE_IDENTITY_CHANGED");
+    expect(() => readTemplateSelectionIdentity(f.db, "epoch")).toThrow();
   });
 });

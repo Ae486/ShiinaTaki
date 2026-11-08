@@ -1,5 +1,5 @@
 /**
- * INPUT:  real provider calls with immutable captured Run/Effect provenance and the durable transition owner
+ * INPUT:  real provider calls, current-authority assertion, captured Run/Effect provenance and the durable transition owner
  * OUTPUT: original provider execution or a committed distinct queue acknowledgement, never a successful write
  * POS:    core/memory/transitions — actual foreground retain/mutation seam shared by both provider compositions
  */
@@ -18,14 +18,14 @@ export function sourceTransition(db: Database, epochId: string): string | undefi
   return rows[0] ? String(rows[0].transition_id) : undefined;
 }
 
-export function transitionQueuedProvider(db: Database, provider: MemoryProvider): MemoryProvider {
+export function transitionQueuedProvider(db: Database, provider: MemoryProvider, assertCurrentAuthority: () => void): MemoryProvider {
   return { ...provider,
-    retain: (context, request) => route(db, { provider, context, command: { kind: "retain", request }, execute: () => provider.retain(context, request) }),
-    mutate: (context, request) => route(db, { provider, context, command: { kind: "mutation", request }, execute: () => provider.mutate(context, request) }),
+    retain: (context, request) => route(db, { provider, context, assertCurrentAuthority, command: { kind: "retain", request }, execute: () => provider.retain(context, request) }),
+    mutate: (context, request) => route(db, { provider, context, assertCurrentAuthority, command: { kind: "mutation", request }, execute: () => provider.mutate(context, request) }),
   };
 }
 
-async function route<T>(db: Database, input: { provider: MemoryProvider; context: MemoryProviderCallContext;
+async function route<T>(db: Database, input: { provider: MemoryProvider; context: MemoryProviderCallContext; assertCurrentAuthority(): void;
   command: { kind: "retain"; request: RetainRequest } | { kind: "mutation"; request: MutationRequest }; execute(): Promise<MemoryResult<T>>;
 }): Promise<MemoryResult<T>> {
   const { context, command, provider } = input;
@@ -36,6 +36,7 @@ async function route<T>(db: Database, input: { provider: MemoryProvider; context
   const capabilities = await provider.capabilities();
   try {
     if (context.signal?.aborted) throw new Error("MEMORY_OPERATION_CANCELLED");
+    input.assertCurrentAuthority();
     if (!bank) throw new Error("MEMORY_TRANSITION_STALE");
     if (command.kind === "retain" && command.request.documentId != null) throw new Error("MEMORY_TRANSITION_CONFLICT");
     if (command.kind === "retain" && intent.request.expected.targetProvider === "local"
@@ -66,7 +67,8 @@ async function route<T>(db: Database, input: { provider: MemoryProvider; context
 function queueErrorCode(message: string): MemoryErrorCode {
   switch (message) {
     case "MEMORY_TRANSITION_QUEUE_FULL": case "MEMORY_TRANSITION_CUTOFF":
-    case "MEMORY_CAPABILITY_UNSUPPORTED": case "MEMORY_OPERATION_CANCELLED": return message;
+    case "MEMORY_CAPABILITY_UNSUPPORTED": case "MEMORY_OPERATION_CANCELLED": case "MEMORY_AUTHORITY_MISMATCH": return message;
+    case "MEMORY_AUTHORITY_FENCED": return "MEMORY_AUTHORITY_MISMATCH";
     case "MEMORY_TRANSITION_CONFLICT": return "MEMORY_REQUEST_ID_CONFLICT";
     case "MEMORY_TRANSITION_STALE": return "MEMORY_AUTHORITY_MISMATCH";
     case "MEMORY_TRANSITION_PROOF_INVALID": return "MEMORY_INTEGRITY_ERROR";

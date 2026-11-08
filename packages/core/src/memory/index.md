@@ -1,4 +1,5 @@
 # core/memory/
+- runtime-authority-verification.ts — full selected/publication verification with exact bound-identity withdrawal; pure DB and copied-backup readers remain independent
 - transitions/ — W3 complete proof/candidate/delta preparation; W4 owns authority/custody publication and W5 orchestration (see transitions/index.md)
 - layer-registry.ts — the layer taxonomy as DATA (MemoryLayerDefinitionSchema + V1_MEMORY_LAYERS + writable-layer selectors); `retention` covers permanent / rolling-window / expiring / importance-decay, and is the retention sweeper's only policy source
 - block-registry.ts — the Memory Block taxonomy as DATA (BlockDefinitionSchema + V1_BLOCKS; array order = injection order; ownership/writer/header/budget are all rows)
@@ -27,7 +28,7 @@
 - utility-slot.ts — T5-R11's background model slot: the utility provider when configured else the MAIN model, one GLOBAL serial task chain, sanitized closed failure diagnostics, and cumulative token spend since boot
 - retention-sweeper.ts — shared registry retention verdict plus the legacy sweeper: rolling machine deletion, recoverable archival elsewhere, and reinforcement-aware age; canonical adapters reuse the verdict with authoritative writes
 - render-transcript.ts — shared helper: a timeline segment -> "role: text" transcript for the auto-write prompts
-- write-convention.ts — the ONE shared write-side prompt wording: WRITE_GATE_RULE (T5-R15 behaviour-change test) + MEMORY_VOICE_RULE (T5-R10 first person, user's words); episodic + flush import it so the voices cannot diverge
+- write-convention.ts — shared foreground/automatic write eligibility and first-person narrator guidance; preserves source facts, speaker attribution, event/plan certainty and historical timing
 - episodic-writer.ts — auto-write path 2: segment -> 0..3 entries in the layer the model chooses, write-gated (silence is the normal outcome), importance clamped below the pin line
 - flush-writer.ts — auto-write path 3: pre-compaction flush as one SILENT tool-enabled turn on the BACKGROUND toolset (prose discarded, successful-write count returned); optionally runs through the shared Utility Slot and shares the write-convention fragments
 - auto-memory.ts — shared detached per-Character maintenance chain plus Legacy provider pass: episodic → ordinary flush → tidy → provider-neutral Compaction; dynamic provider retirement cannot create a second chain
@@ -37,7 +38,8 @@
 - tidy-pass.ts — the model-led maintenance pass: write-count trigger (maybeRun) + operator runNow over one execute path; clean store = zero model calls; system-reminder input framing; six refinement principles + do-nothing permission + imported R10 voice; stopWhen finish-tool/step-cap; watermark advances only on success; tidy event + counts-only log line
 - memory-provider.ts — async provider context including immutable original caller Run/Attempt/Effect provenance
 - local-memory-provider.ts — structured Local provider with completed-only retain, applied/unchanged CAS mutations, and sparse recall
-- canonical-local-runtime.ts — canonical Local engine with real maintenance, observed writes and admission-bound tools/recall/prompt capture
+- canonical-local-runtime.ts — Local engine with current binding identity checks, real maintenance, observed writes and admission-bound tools/recall/prompt capture
+- canonical-local-provider.ts — Local runtime provider adapter with current bound identity and existing write-fence lifetime checks
 - canonical-local-banks.ts — preserved Local scope identities and writer-fenced creation of newly encountered Character Banks
 - canonical-local-subsystem.ts — Local ingestion/tidy/retention/flush, unresolved-source boot refusal and permanent writer retirement
 - canonical-local-write-fence.ts — shared counted work ownership with bounded drain, inherited live-child admission and irreversible retirement
@@ -54,11 +56,11 @@
 - canonical-observed-write.ts — trusted image-description writes via the Local provider with observed provenance and automatic visibility limits
 - canonical-memory-view.ts — revision-bearing opaque references and canonical row projection for reused T5 policy/report code
 - canonical-memory-assembly.ts — admission-frozen canonical prompt data, complete pinned relationships, deliberate profile promotion, intention selection and observed fences
-- runtime-selector.ts — marker/provider/epoch routing with symmetric retirement, persistent template-hold boot refusal and fresh same-epoch repair
-- local-runtime-binding.ts — draft/install/publish/start, detached metadata, full authority snapshots accepting a same-boundary independent context, permanent retirement and failed/replaced draft settlement
-- hindsight-runtime-binding.ts — draft publication, exact unavailable/template-hold snapshots, full retirement/quarantine lifetime and marker-routed primary witnesses
+- runtime-selector.ts — current identity routing, controlled full-proof boot refusal, symmetric retirement and same-epoch binding recovery
+- local-runtime-binding.ts — one published Local state with bound identity, current-only snapshots, explicit unavailable withdrawal and joined retirement
+- hindsight-runtime-binding.ts — one Hindsight publication with bound identity, current-only unavailable/hold snapshots, retirement/quarantine and source witnessing
 - hindsight-unbound-run.ts — truthful memory-unavailable captures for connection/configuration/template holds while retaining the selected authority and primary-source path
-- runtime-composition.ts — one Utility/Compaction owner, selected binding/custody, full transition and guarded template retirement/synchronization/replacement seams, plus joined shutdown
+- runtime-composition.ts — one Utility/Compaction owner, selected binding/custody, awaited receipt-Bank activation preparation, explicit full verification ports, read-only observation and joined shutdown
 - authority-aware-legacy-surfaces.ts — mutable authority wrappers that retire legacy auto-memory, tidy, and direct writes after canonical activation
 - memory-coordinator.ts — provider-neutral authority/capability verification and immutable caller provenance across queued foreground writes
 - memory-capability-snapshot.ts — detached immutable capabilities and one canonical Run/tool/coordinator digest; keeps dynamic vector health separate from stable operation identity
@@ -70,6 +72,7 @@
 - operations/ — the durable memory operation owner (Stage 1 + 2a): kind registry over the B3 setup service, B5 scheduler and the Local onboarding service; per-kind boot observation before restart reconciliation; the composite memory.authority.status read
 - hindsight-lifecycle/ — the Stage 2c lifecycle producers under a committed Hindsight authority: new-Character Bank provisioning, connection revalidation + rebind, and the automatic triggers
 - hindsight-backup/ — the Stage 3 backup primitives: artifact store below `<dataDir>/backups/` and the pure Core/native pair verifier
+- hindsight-candidates/ — experimental D1-A complete archive and immutable Core inventory, physical identity and explicitly gated candidate verification
 - hindsight-activation/ — the Stage 2b first-activation coordinator: plan/status reads, Local drain over the write fence, cutover lease, per-Bank D78 chain with checkpoints and evidence replay, promotion with the PR03 custody carry, closed error mapping
 - local-onboarding/ — the Local onboarding service (Stage 2a): the only caller of the B2 runner mutations, read projections (discovered run, exceptions, runtime availability), the memory.onboarding.status composite with server-derived actions, and shutdown checkpointing
 - canonical-tools/ — admission-bound capability-filtered canonical tool adapters and non-advertised compatibility aliases

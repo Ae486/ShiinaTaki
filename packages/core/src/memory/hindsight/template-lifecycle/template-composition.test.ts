@@ -6,6 +6,7 @@ import { previewTemplateOverlay } from "./template-preview.ts";
 import { captureTemplateEnrollment, selectTemplateResources } from "./template-enrollment.ts";
 import { emptyTemplateUserRevision } from "./template-overlay-schema.ts";
 import { deriveTemplateOwnership } from "./template-receipt.ts";
+import { templateHash } from "./template-integrity.ts";
 import { templateFixture, fixtureCommit, signFixtureSnapshot, fixtureProof, customModel } from "./template-test-fixtures.ts";
 
 function applied(fixture: ReturnType<typeof templateFixture>) {
@@ -18,13 +19,22 @@ describe("immutable catalog and independent explicit user composition", () => {
     const legacy = loadTakiBankTemplate("taki-bank-v1", scope); const before = takiBankTemplateDigest(legacy);
     expect(before).toBe(scope === "global" ? "feb8350d679658bfbb426426d1539b26df1551e37fc4afbb43c759479b627537"
       : "55bf2c07e2bf6c93fa393bb74677029310a67977da35bba6ed4df7dd915aec0f");
+    const v2 = loadManagedTemplate("taki-bank-v2", scope);
+    expect(templateHash("definition", v2)).toBe(scope === "global" ? "ab5b6584715cacc34b25bddedcbd326897e74e8330b4cd45d59b609d4a59b08b"
+      : "ae04cbe36c061760dbd2172cba1297698c256058c318c158934131dca098e183");
+    expect(v2.config).toEqual(legacy.manifest.bank);
     const entry = loadManagedTemplate(TAKI_MANAGED_TEMPLATE_REVISION, scope);
-    expect(entry.config).toEqual(legacy.manifest.bank);
+    expect(entry.config.retain_mission).not.toBe(v2.config.retain_mission);
+    expect({ ...entry, revision: v2.revision, config: { ...entry.config, retain_mission: v2.config.retain_mission } }).toEqual(v2);
     expect(entry.labelGroup).toMatchObject({ key: "taki-layer", type: "value", optional: true, tag: true });
     expect(entry.labelGroup.values?.map((item) => item.value)).toEqual(scope === "global"
       ? ["profile", "activity", "unclassified"] : ["relationship", "episodes", "intentions", "unclassified"]);
-    entry.config.retain_mission = "caller changed"; entry.labelGroup.values?.pop();
-    expect(loadManagedTemplate(TAKI_MANAGED_TEMPLATE_REVISION, scope).config).toEqual(legacy.manifest.bank);
+    for (const revision of ["taki-bank-v2", TAKI_MANAGED_TEMPLATE_REVISION]) {
+      const before = loadManagedTemplate(revision, scope);
+      const detached = loadManagedTemplate(revision, scope);
+      detached.config.retain_mission = "caller changed"; detached.labelGroup.values?.pop();
+      expect(loadManagedTemplate(revision, scope)).toEqual(before);
+    }
     expect(takiBankTemplateDigest(loadTakiBankTemplate("taki-bank-v1", scope))).toBe(before);
     expect(() => loadManagedTemplate("taki-bank-v1", scope)).toThrow("TEMPLATE_INVALID");
   });
@@ -82,14 +92,19 @@ describe("immutable catalog and independent explicit user composition", () => {
   });
 
   it("keeps explicit suppression through a new template and uses exact complete deletion proofs", () => {
-    const f = templateFixture(); const first = applied(f);
-    const user = { ...f.user, revision: 1, config: [{ key: "reflect_mission" as const, choice: { mode: "suppress" as const } }],
+    const f = templateFixture();
+    f.input.template = loadManagedTemplate("taki-bank-v2", "global");
+    f.preview = previewTemplateOverlay(f.input);
+    const first = applied(f);
+    const user = { ...f.user, revision: 1, config: [{ key: "retain_mission" as const, choice: { mode: "suppress" as const } },
+      { key: "reflect_mission" as const, choice: { mode: "suppress" as const } }],
       models: [{ id: f.template.models[0]!.id, choice: { mode: "suppress" as const } }],
       labels: [{ key: "taki-layer", choice: { mode: "suppress" as const } }] };
-    const preview = previewTemplateOverlay({ ...f.input, ...first, user, template: { ...f.template, revision: "fixture-v3" } });
+    const preview = previewTemplateOverlay({ ...f.input, ...first, user, template: loadManagedTemplate(TAKI_MANAGED_TEMPLATE_REVISION, "global") });
     expect(preview.request.changes.models).toEqual([{ kind: "delete", id: f.template.models[0]!.id,
       deletion_hash: first.snapshot.models[0]!.proof!.deletion_hash }]);
     expect(preview.consequences.deletions[0]).toMatchObject({ historyCount: 2, dependencyCount: 3, hasGeneratedContent: true });
+    expect(preview.projection.config.find((item) => item.key === "retain_mission")?.stored).toEqual({ kind: "value", value: "" });
     expect(preview.projection.config.find((item) => item.key === "reflect_mission")?.stored).toEqual({ kind: "value", value: "" });
     expect(preview.projection.config.find((item) => item.key === "entity_labels")?.stored)
       .toEqual({ kind: "value", value: [{ key: "parent-group", type: "text" }] });

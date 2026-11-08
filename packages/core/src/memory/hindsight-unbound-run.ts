@@ -13,7 +13,7 @@ import type { HindsightBindingSnapshot } from "./hindsight-runtime-binding.ts";
 import type { HindsightUnavailableRunEvent } from "./hindsight/hindsight-memory-runtime.ts";
 import type { HindsightLiveConnection } from "./hindsight/hindsight-runtime-connection.ts";
 import { createHindsightUnavailableRun } from "./hindsight/hindsight-unavailable-run.ts";
-import { readMemoryAuthoritySelection } from "./legacy-migration/legacy-activation-repo.ts";
+import { readCurrentMemoryAuthorityIdentity } from "./legacy-migration/legacy-activation-repo.ts";
 import { createFallbackPersonaProvider, createPersonaProvider } from "./persona-provider.ts";
 import { activeTemplateHold } from "./hindsight/template-lifecycle/template-execution-reads.ts";
 
@@ -42,10 +42,10 @@ export function createUnboundHindsightCapture(input: {
 }): (characterId: string) => CapturedMemoryRun {
   const persona = input.promptDir ? createPersonaProvider({ promptDir: input.promptDir }) : createFallbackPersonaProvider();
   return (characterId) => {
-    // The marker read re-verifies the committed receipt, so the Run carries the proven epoch/lineage identity.
-    const selection = readMemoryAuthoritySelection(input.db);
+    const selection = readCurrentMemoryAuthorityIdentity(input.db);
     if (selection.mode !== "hindsight" || !selection.epochId || !selection.providerLineageId) throw new Error("MEMORY_RUNTIME_UNAVAILABLE");
     const binding = input.binding();
+    if (binding.binding.kind === "unavailable" && binding.binding.code === "MEMORY_AUTHORITY_INVALID") throw new Error("MEMORY_AUTHORITY_INVALID");
     const held = binding.lifetime === "running" && activeTemplateHold(input.db, selection.epochId);
     const reason = held ? "template_hold" : hindsightUnboundReason(binding, readLive(input.live));
     if (!reason) throw new Error("MEMORY_RUNTIME_UNAVAILABLE");

@@ -40,7 +40,7 @@ describe("createLoadSkillTool", () => {
 
   it("loads through the immutable explicit-auto skill capability at every level", async () => {
     const service = policy();
-    service.setLevel("strict", 1);
+    service.setLevel("strict", service.level().policyGeneration);
     const tools = createLoadSkillTool(loader, { service, ownerHostId: OWNER_HOST_ID });
 
     expect(await tools.load_skill?.execute?.(
@@ -51,7 +51,7 @@ describe("createLoadSkillTool", () => {
   it("treats loaded Markdown as procedure, never as a grant for Core or MCP tools", async () => {
     const service = policy();
     service.setCell({
-      key: "memory-write", level: "standard", posture: "deny", expectedPolicyGeneration: 1,
+      key: "memory-write", level: "standard", posture: "deny", expectedPolicyGeneration: service.level().policyGeneration,
     });
     const untrustedLoader: SkillsLoader = {
       ...loader,

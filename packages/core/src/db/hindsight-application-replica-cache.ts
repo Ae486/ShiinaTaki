@@ -1,19 +1,24 @@
 /**
- * INPUT:  individually verified immutable bodies and the current Bank run's publication guard
- * OUTPUT: resumable body bytes without native heads, artifacts, projections or checkpoint publication
- * POS:    core/db — download progress only; complete snapshot/event proof still owns readable state
+ * INPUT:  verified replica/download bytes, durable prepared command bodies and the current Bank publication guard
+ * OUTPUT: exact-ref cached bodies without native heads, artifacts, projections or checkpoint publication
+ * POS:    core/db — immutable byte reuse only; complete snapshot/event proof still owns readable state
  */
 import type { TakiApplicationBodyRef } from "@taki/shared";
 import { sameApplicationValue, type HindsightApplicationBody } from "../memory/hindsight/hindsight-application-integrity.ts";
 import { assertApplicationPublication } from "./hindsight-application-replica-checkpoint.ts";
 import type { HindsightApplicationPublicationInput, HindsightApplicationReplicaState } from "./hindsight-application-replica-contract.ts";
 import { readApplicationBody, saveApplicationBody } from "./hindsight-application-replica-evidence.ts";
+import { readApplicationCommandBody } from "./hindsight-application-command-storage.ts";
 
 export function readApplicationCachedBody(state: HindsightApplicationReplicaState,
   input: HindsightApplicationPublicationInput & { ref: TakiApplicationBodyRef }): HindsightApplicationBody | undefined {
   assertApplicationPublication(state, input);
-  const body = readApplicationBody(state.db, { ...input, bodyId: input.ref.body_id });
+  let body = readApplicationBody(state.db, { ...input, bodyId: input.ref.body_id });
   if (body && !sameApplicationValue(body.ref, input.ref)) throw new Error("HINDSIGHT_APPLICATION_BODY_INTEGRITY_ERROR");
+  if (!body) {
+    const prepared = readApplicationCommandBody(state.db, { ...input, bodyId: input.ref.body_id });
+    if (prepared && sameApplicationValue(prepared.ref, input.ref)) body = prepared;
+  }
   assertApplicationPublication(state, input);
   return body;
 }

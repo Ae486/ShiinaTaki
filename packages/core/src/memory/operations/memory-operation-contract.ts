@@ -15,6 +15,7 @@ import type { CanonicalLocalWriteFence } from "../canonical-local-write-fence.ts
 import type { MemoryReplicaRequest } from "@taki/shared";
 import type { HindsightActivationService } from "../hindsight-activation/hindsight-activation-service.ts";
 import type { HindsightBackupService } from "../hindsight-backup/hindsight-backup-service.ts";
+import type { HindsightCandidateService } from "../hindsight-candidates/hindsight-candidate-service.ts";
 import type { HindsightLifecycleService } from "../hindsight-lifecycle/hindsight-lifecycle-service.ts";
 import type { HindsightReplicaScheduler } from "../hindsight/hindsight-replica-scheduler.ts";
 import type { HindsightConnectionDrift } from "../hindsight/hindsight-runtime-connection.ts";
@@ -23,6 +24,7 @@ import type { HindsightTemplateLifecycleService } from "../hindsight/template-li
 import type { LocalOnboardingService } from "../local-onboarding/local-onboarding-service.ts";
 import type { MemoryTransitionDriver, MemoryTransitionOperationStorage } from "./memory-operation-transition-storage.ts";
 import type { TransitionEvidenceContext } from "../transitions/transition-evidence-context.ts";
+import type { MemoryAuthorityVerification } from "../runtime-authority-verification.ts";
 
 /** The narrow live view of the selected Hindsight subsystem; null when the authority runtime is not Hindsight. */
 export interface MemoryOperationsRuntime {
@@ -31,11 +33,12 @@ export interface MemoryOperationsRuntime {
   configFingerprint: string;
   deploymentMode: HindsightConnectionProjection["deploymentMode"];
   scheduler: Pick<HindsightReplicaScheduler, "started" | "start" | "stop" | "requestManual" | "cancelManual" | "tick" | "status" | "lastError"
-    | "verifiedReconnect" | "request">;
+    | "verifiedReconnect" | "request" | "configure">;
   /** The subsystem's native-writer fence; only backup capture quiesces it, and always releases it. */
   writeFence: Pick<CanonicalLocalWriteFence, "quiesce" | "release">;
   banks(): MemoryReplicaBank[];
   assertConnection(): void;
+  verifySelectedAuthority?: MemoryAuthorityVerification["verifySelectedAuthority"];
   /** Throws on a stopped runtime or an epoch/lineage mismatch; otherwise names a changed or disabled connection. */
   driftReason(): HindsightConnectionDrift;
   pendingSummary(bankId: string): PendingMemorySummary;
@@ -53,6 +56,10 @@ export interface MemoryOperationContext {
   /** Absent when Core composes without a Hindsight backup producer; the backup kinds then refuse at admission. */
   backup?: HindsightBackupService;
   templates?: HindsightTemplateLifecycleService;
+  /** Absent until trusted archive admission and a candidate Host driver are composed. */
+  candidates?: HindsightCandidateService;
+  /** Local committed receipt classification remains available without a fresh candidate driver. */
+  candidateOutcome?: HindsightCandidateService["observeBoot"];
   transition?: MemoryTransitionDriver;
   transitionStorage?: MemoryTransitionOperationStorage;
   /** Fresh independent scope for one synchronous admission transaction; absent from execution and observation. */
@@ -66,7 +73,7 @@ export interface MemoryOperationContext {
 }
 
 /** Setup, Local onboarding, Hindsight activation, lifecycle and backup are mutually single-flight (grill G6); the open row wins and is named. */
-export const EXCLUSIVE_MEMORY_FAMILIES = ["setup", "local-onboarding", "hindsight-activation", "hindsight-lifecycle", "hindsight-backup", "memory-transition", "hindsight-template"] as const;
+export const EXCLUSIVE_MEMORY_FAMILIES = ["setup", "local-onboarding", "hindsight-activation", "hindsight-lifecycle", "hindsight-backup", "memory-transition", "hindsight-template", "hindsight-candidate"] as const;
 export function refuseWhileExclusiveFamilyBusy(ctx: Pick<MemoryOperationContext, "activeInFamily">): void {
   for (const family of EXCLUSIVE_MEMORY_FAMILIES) {
     const active = ctx.activeInFamily(family);

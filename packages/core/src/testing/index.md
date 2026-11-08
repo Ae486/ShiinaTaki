@@ -20,7 +20,7 @@
 - hindsight-application-fixtures.ts — complete hash-consistent D77 bundles/events and V1 baseline manifest fixtures
 - hindsight-application-runtime-fixtures.ts — bound native/artifact fixtures, an admitted capability manifest and an isolated SQLite authority
 
-- hindsight-runtime-composition-fixtures.ts — isolated SQLite/B3 runtime construction with exact native selectors and complete application history; D77 client overlay and fixture secrets explicitly refuse unsupported custody snapshots.
+- hindsight-runtime-composition-fixtures.ts — isolated Local/Hindsight construction with valid receipts, exact Native selectors, migration caps, D77 evidence and a reusable authenticated Native recall client
 - memory-chat-turn-fixture.ts — one chat.send-level primary turn through Harness admission and the chat agent with a streaming mock model; test-only
 - hindsight-fixture-routes.ts — the health/version/compatibility bodies shared by every in-memory Hindsight transport double
 - hindsight-activation-transport.ts — in-memory D78 transport double for activation tests: Bank setup, snapshots, current-state transfers, cutover verifications computed from the POSTed request (a changed request under a used verification id is a request_conflict, as native), Bank stats with occupy(), per-route counts, one-shot/persistent faults and a pre-answer hook; the opt-in native backup routes answer as absent
@@ -36,7 +36,7 @@
 - memory-transition-healthy-source-transport.ts — validated multipart Source bytes with exact sealed-body recovery and measurable ACK loss
 - memory-transition-final-fixtures.ts — complete post-delta native/application envelopes, nested Source bodies and final mapping result for Core journey tests
 - memory-transition-emergency-fixtures.ts — owned synthetic emergency capture/incident fixtures built on real healthy predecessors with live-clock publication work.
-- memory-transition-emergency-service-fixtures.ts — production offline service and original operation-owner composition for restart boundaries.
+- memory-transition-emergency-service-fixtures.ts — production offline service/operation owner and paired missing/rebinding Memory event fixtures for admission and restart boundaries.
 - memory-transition-operator-fixtures.ts — owned synthetic healthy/emergency producers with real authenticated WebSocket subscriptions, delayed replies and explicit binding release for observer lifetime tests; no live Native or private corpus.
 - memory-transition-emergency-process.test.ts — independent Node fresh/sealed/committed recovery and restart, real retention receipts, exact historical evidence and refusal without stopped-Core changes.
 - w6-owned-audit-boundary.test.ts — task-only audit yields to the existing heartbeat; expired, replaced, stopped and failed executors cannot continue long work.
@@ -44,9 +44,9 @@
 - hindsight-configuration-fixture.ts — actual service/client fixture with bounded synthetic Native transport
 - hindsight-template-exchange-fixture.ts — observed real Native HTTP exchanges and exact test-owned application command requests for cross-repository consumer assertions.
 - hindsight-template-native-consumer.fixture.ts — actual Core replica/application binding and policy consumer over isolated Native HTTP extraction evidence and owned SQLite reopen.
-- hindsight-template-backup-joint-fixture.ts — actual Core lifecycle/publication and copied backup over an admitted configured connection with Native-owned targets; used by isolated cross-repository customized/removed restore drills.
+- hindsight-template-backup-joint-fixture.ts — actual Core lifecycle/publication and copied backup over an admitted configured connection with Native-owned targets and an optional historical Core head; used by isolated cross-repository customized/removed restore drills.
 - hindsight-template-observation-fixtures.ts — deterministic independently held Native receipts, snapshots and semantic markers with fresh nonce and configurable source/projection drift; no Native producer acceptance claim.
 - memory-transition-template-evidence-fixtures.ts — complete W2 native/application/auxiliary fixture closure retaining full models and template receipts, with explicit SQL-row identity conversion.
 - memory-transition-template-fixtures.ts — actual B2 template operation history and healthy Native-session/candidate preparation; fixture work checks its lease and complete configured setup identity.
-- hindsight-template-backup-consumer-fixture.ts — real Core capture/staged/ZIP/verify/preflight consumers with independently held synthetic Native observations.
+- hindsight-template-backup-consumer-fixture.ts — real Core capture/staged/ZIP/verify/preflight consumers with independently held synthetic Native observations and explicit historical fixture versions.
 - memory-transition-template-healthy-fixture.ts — real selected/removed template history composed with complete Healthy drivers; post-delta Native fixture retains independent template receipts/results before proof observation.

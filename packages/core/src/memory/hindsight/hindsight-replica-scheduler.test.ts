@@ -1,4 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { mkdtempSync, rmSync } from "node:fs";
+import { basename, dirname, join, resolve } from "node:path";
+import { tmpdir } from "node:os";
 import { MemoryReplicaScheduleConfigSchema, type MemoryReplicaBank, type MemoryReplicaScheduledRun } from "@taki/shared";
 import { createHindsightReplicaSchedulerRepo } from "../../db/hindsight-replica-scheduler-repo.ts";
 import { createHindsightReplicaLeaseRepo } from "../../db/hindsight-replica-lease-repo.ts";
@@ -12,15 +15,20 @@ const at = "2026-09-06T00:00:00.000Z";
 const globalBank: MemoryReplicaBank = { bankId: "global", scope: "global", characterId: null };
 const characterBank: MemoryReplicaBank = { bankId: "character", scope: "character", characterId: "taki" };
 const dbs: Database[] = []; const schedulers: HindsightReplicaScheduler[] = [];
+const roots: string[] = [];
 beforeEach(() => { vi.useFakeTimers(); vi.setSystemTime(at); });
 afterEach(async () => {
   for (const scheduler of schedulers.splice(0)) await scheduler.stop();
   for (const db of dbs.splice(0)) db.close();
+  for (const root of roots.splice(0)) {
+    if (dirname(resolve(root)) !== resolve(tmpdir()) || !basename(root).startsWith("taki-b5-config-")) throw new Error("unsafe fixture path");
+    rmSync(root, { recursive: true, force: true });
+  }
   vi.useRealTimers();
 });
 
-function fixture(banks = [globalBank], now = () => new Date().toISOString()) {
-  const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS }); dbs.push(db);
+function fixture(banks = [globalBank], now = () => new Date().toISOString(), path = ":memory:") {
+  const db = openDatabase({ path, migrations: MIGRATIONS }); dbs.push(db);
   const repo = createHindsightReplicaSchedulerRepo(db, now);
   const leases = createHindsightReplicaLeaseRepo(db, now);
   const uuid = "11111111-1111-4111-8111-111111111111";
@@ -44,6 +52,174 @@ function fixture(banks = [globalBank], now = () => new Date().toISOString()) {
 }
 
 describe("B5 asynchronous single-flight scheduler", () => {
+  it("projects observed Banks with ordinary ordering and fresh checkpoints without scheduling work", () => {
+    const second: MemoryReplicaBank = { bankId: "a-character", scope: "character", characterId: "second" };
+    const banks = [characterBank, globalBank, second]; const f = fixture(banks);
+    const run = vi.fn(async (input: HindsightReplicaRunInput) => f.result(input));
+    const scheduler = f.create({ run, rebuild: run });
+    const before = scheduler.statusForBanks(banks);
+    expect(before).toEqual(scheduler.status());
+    expect(before.map((row) => row.bankId)).toEqual(["global", "a-character", "character"]);
+    expect(banks.map((bank) => bank.bankId)).toEqual(["character", "global", "a-character"]);
+    const previous = readReplicaCheckpoint(f.db, "global")!;
+    publishReplicaCheckpoint(f.db, { previous, next: { ...previous, endCursor: 10 } });
+    const current = scheduler.statusForBanks(banks);
+    expect(current).toEqual(scheduler.status());
+    expect(current[0]?.checkpoint?.endCursor).toBe(10);
+    expect(before[0]?.checkpoint?.endCursor).toBe(8);
+    expect(() => scheduler.statusForBanks([globalBank, globalBank])).toThrow("HINDSIGHT_REPLICA_BANK_BINDING_MISMATCH");
+    expect(run).not.toHaveBeenCalled(); expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("persists per-Bank settings across actual SQLite reopen without changing new-Bank defaults", async () => {
+    const root = mkdtempSync(join(tmpdir(), "taki-b5-config-")); roots.push(root);
+    const path = join(root, "schedule.db"); const f = fixture([globalBank, characterBank], undefined, path);
+    const run = vi.fn(async (input: HindsightReplicaRunInput) => f.result(input));
+    const scheduler = f.create({ run, rebuild: run }); scheduler.start();
+    const config = { automatic: false, autoIntervalMs: 120_000, fullReconciliationIntervalMs: 864_000_000 };
+    expect(scheduler.configure("global", config)).toMatchObject(config);
+    expect(scheduler.status("character")[0]).toMatchObject({ automatic: true, autoIntervalMs: 21_600_000, fullReconciliationIntervalMs: 604_800_000 });
+    await scheduler.stop(); f.db.close(); dbs.splice(dbs.indexOf(f.db), 1);
+    const reopened = openDatabase({ path, migrations: MIGRATIONS }); dbs.push(reopened);
+    const repo = createHindsightReplicaSchedulerRepo(reopened);
+    expect(repo.ensureBank({ bank: globalBank })).toMatchObject({ ...config, nextDueAt: null, nextFullDueAt: null });
+    const restored = createHindsightReplicaScheduler({ repo, banks: [globalBank], ownerId: "reopened",
+      replica: { leases: createHindsightReplicaLeaseRepo(reopened, () => new Date().toISOString()), checkpoint: (id) => readReplicaCheckpoint(reopened, id) },
+      runner: { run: async () => { throw new Error("manual Bank must stay idle"); }, rebuild: async () => { throw new Error("manual Bank must stay idle"); } } });
+    schedulers.push(restored); restored.start(); await restored.tick();
+    expect(restored.status("global")[0]).toMatchObject({ ...config, mode: "idle", lastAttemptAt: null });
+    expect(repo.ensureBank({ bank: { bankId: "new-character", scope: "character", characterId: "new" } })).toMatchObject({ automatic: true, autoIntervalMs: 21_600_000, fullReconciliationIntervalMs: 604_800_000 });
+  });
+
+  it("rearms shorter intervals and removes background wakes immediately in manual mode", async () => {
+    const f = fixture(); const run = vi.fn(async (input: HindsightReplicaRunInput) => f.result(input));
+    const scheduler = f.create({ run, rebuild: run }); scheduler.start(); await scheduler.tick();
+    scheduler.configure("global", { automatic: true, autoIntervalMs: 60_000, fullReconciliationIntervalMs: 604_800_000 });
+    await vi.advanceTimersByTimeAsync(59_999); expect(run).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(1); expect(run).toHaveBeenCalledTimes(2);
+    scheduler.configure("global", { automatic: false, autoIntervalMs: 120_000, fullReconciliationIntervalMs: 864_000_000 });
+    await vi.advanceTimersByTimeAsync(3_600_000); expect(run).toHaveBeenCalledTimes(2);
+    scheduler.configure("global", { automatic: true, autoIntervalMs: 120_000, fullReconciliationIntervalMs: 864_000_000 });
+    await vi.advanceTimersByTimeAsync(0); expect(run).toHaveBeenCalledTimes(3);
+  });
+
+  it("replaces the ordinary sleep with a foreground Pending retry and retains normal failure backoff", async () => {
+    const f = fixture(); const run = vi.fn(async (input: HindsightReplicaRunInput) => f.result(input));
+    const scheduler = f.create({ run, rebuild: run }); scheduler.start(); await scheduler.tick();
+    run.mockRejectedValueOnce(new Error("HINDSIGHT_PENDING_REMAINS"));
+    scheduler.requestRetry("global", "2026-09-06T00:01:00.000Z");
+    expect(scheduler.status()[0]).toMatchObject({ retryDueAt: "2026-09-06T00:01:00.000Z", consecutiveFailures: 0 });
+    await vi.advanceTimersByTimeAsync(59_999); expect(run).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(1); expect(run).toHaveBeenCalledTimes(2);
+    expect(run.mock.calls[1]?.[0].run).toMatchObject({ trigger: "retry", kind: "incremental" });
+    expect(scheduler.status()[0]).toMatchObject({ errorCode: "HINDSIGHT_PENDING_REMAINS", retryAttempt: 2,
+      retryDueAt: "2026-09-06T00:06:00.000Z", consecutiveFailures: 1 });
+    await vi.advanceTimersByTimeAsync(299_999); expect(run).toHaveBeenCalledTimes(2);
+    await vi.advanceTimersByTimeAsync(1); expect(run).toHaveBeenCalledTimes(3);
+    expect(scheduler.status()[0]).toMatchObject({ retryDueAt: null, consecutiveFailures: 0 });
+  });
+
+  it("arms the Pending poll after failure without shortening it to the expired run's lease", async () => {
+    const f = fixture(); const dueAt = "2026-09-06T00:11:00.000Z";
+    // The recovery integration tests supply real rows; this isolates automatic timer delivery.
+    vi.spyOn(f.repo, "nextPendingRetryAt").mockImplementation(() => {
+      expect(f.repo.get("global")?.run).toBeNull(); return dueAt;
+    });
+    const run = vi.fn(async (input: HindsightReplicaRunInput) => f.result(input));
+    run.mockRejectedValueOnce(new Error("HINDSIGHT_UNREACHABLE"))
+      .mockRejectedValueOnce(new Error("HINDSIGHT_UNREACHABLE"))
+      .mockRejectedValueOnce(new Error("HINDSIGHT_PENDING_REMAINS"));
+    const scheduler = f.create({ run, rebuild: run }); scheduler.start(); await scheduler.tick();
+    await vi.advanceTimersByTimeAsync(60_000); await vi.advanceTimersByTimeAsync(300_000);
+    expect(run).toHaveBeenCalledTimes(3);
+    expect(scheduler.status()[0]).toMatchObject({ mode: "failed", retryAttempt: 3,
+      consecutiveFailures: 3, errorCode: "HINDSIGHT_PENDING_REMAINS", retryDueAt: dueAt });
+    await vi.advanceTimersByTimeAsync(61_000); expect(run).toHaveBeenCalledTimes(3);
+    await vi.advanceTimersByTimeAsync(238_999); expect(run).toHaveBeenCalledTimes(3);
+    await vi.advanceTimersByTimeAsync(1); expect(run).toHaveBeenCalledTimes(4);
+    expect(run.mock.calls[3]?.[0].run.trigger).toBe("retry");
+    expect(scheduler.status()[0]).toMatchObject({ mode: "idle", retryDueAt: null, consecutiveFailures: 0 });
+  });
+
+  it("keeps a foreground Pending retry through active-run success and wakes at its due time", async () => {
+    const f = fixture(); let release!: () => void; let calls = 0;
+    const blocked = new Promise<void>((resolve) => { release = resolve; });
+    const run = vi.fn(async (input: HindsightReplicaRunInput) => {
+      if (++calls === 1) await blocked;
+      return f.result(input);
+    });
+    const scheduler = f.create({ run, rebuild: run }); scheduler.start(); const active = scheduler.tick();
+    try {
+      expect(scheduler.status()[0]?.mode).toBe("running");
+      const dueAt = "2026-09-06T00:00:30.000Z";
+      scheduler.requestRetry("global", dueAt);
+      await vi.advanceTimersByTimeAsync(10_000); expect(run).toHaveBeenCalledTimes(1);
+      release(); await active;
+      expect(scheduler.status()[0]).toMatchObject({ run: null, mode: "idle", retryDueAt: dueAt, retryAttempt: 1, retryKind: "incremental" });
+      await vi.advanceTimersByTimeAsync(19_999); expect(run).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(1); expect(run).toHaveBeenCalledTimes(2);
+      expect(run.mock.calls[1]?.[0].run).toMatchObject({ trigger: "retry", kind: "incremental" });
+      expect(scheduler.status()[0]).toMatchObject({ run: null, retryDueAt: null, retryAttempt: 0, retryKind: null });
+    } finally { release(); }
+  });
+
+  it("does not arm foreground Pending recovery in manual-only mode", async () => {
+    const f = fixture(); const run = vi.fn(async (input: HindsightReplicaRunInput) => f.result(input));
+    const scheduler = f.create({ run, rebuild: run });
+    scheduler.configure("global", MemoryReplicaScheduleConfigSchema.parse({ automatic: false })); scheduler.start();
+    scheduler.requestRetry("global", "2026-09-06T00:01:00.000Z");
+    expect(scheduler.status()[0]).toMatchObject({ retryDueAt: null, retryAttempt: 0, catchUpRequested: false });
+    expect(vi.getTimerCount()).toBe(0);
+    await vi.advanceTimersByTimeAsync(6 * 3_600_000); expect(run).not.toHaveBeenCalled();
+    scheduler.requestManual("global"); await scheduler.tick(); expect(run).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports a failed retry handoff without changing the foreground receipt or inventing a scheduled retry", async () => {
+    const f = fixture(); const run = vi.fn(async (input: HindsightReplicaRunInput) => f.result(input));
+    const scheduler = f.create({ run, rebuild: run }); scheduler.start(); await scheduler.tick();
+    f.db.exec(`CREATE TRIGGER fail_retry BEFORE UPDATE ON hindsight_replica_sync_schedule
+      BEGIN SELECT RAISE(ABORT, 'retry storage unavailable'); END;`);
+    expect(() => scheduler.requestRetry("global", "2026-09-06T00:01:00.000Z")).not.toThrow();
+    expect(scheduler.lastError()).toBe("HINDSIGHT_REPLICA_SYNC_FAILED");
+    expect(scheduler.status()[0]).toMatchObject({ retryDueAt: null, consecutiveFailures: 0 });
+    await vi.advanceTimersByTimeAsync(60_000); expect(run).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(["retry", "interval", "full"] as const)("never pushes an earlier %s wake later when another Pending write arms recovery", async (kind) => {
+    const f = fixture(); const run = vi.fn(async (input: HindsightReplicaRunInput) => f.result(input));
+    const scheduler = f.create({ run, rebuild: run }); scheduler.start(); await scheduler.tick();
+    if (kind === "retry") scheduler.requestRetry("global", "2026-09-06T00:01:00.000Z");
+    else scheduler.configure("global", MemoryReplicaScheduleConfigSchema.parse(kind === "full"
+      ? { fullReconciliationIntervalMs: 60_000 } : { autoIntervalMs: 60_000 }));
+    scheduler.requestRetry("global", "2026-09-06T00:02:00.000Z");
+    expect(scheduler.status()[0]?.retryDueAt).toBe("2026-09-06T00:01:00.000Z");
+    await vi.advanceTimersByTimeAsync(60_000); expect(run).toHaveBeenCalledTimes(2);
+    expect(run.mock.calls[1]?.[0].run.kind).toBe(kind === "full" ? "full" : "incremental");
+  });
+
+  it("preserves the active lease and exact queued full request while changing mode and intervals", async () => {
+    const f = fixture(); let release!: () => void;
+    const blocked = new Promise<void>((resolve) => { release = resolve; });
+    const kinds: string[] = [];
+    const run = vi.fn(async (input: HindsightReplicaRunInput) => {
+      kinds.push(input.run.kind); if (kinds.length === 1) await blocked; return f.result(input);
+    });
+    const scheduler = f.create({ run, rebuild: run }); scheduler.start(); const active = scheduler.tick();
+    const lease = scheduler.status("global")[0]?.run;
+    const requestId = "22222222-2222-4222-8222-222222222222";
+    scheduler.requestManual("global", "full", requestId);
+    const config = { automatic: false, autoIntervalMs: 180_000, fullReconciliationIntervalMs: 172_800_000 };
+    expect(scheduler.configure("global", config)).toMatchObject({ ...config, run: lease, pendingManualKind: "full", pendingManualRequestId: requestId });
+    expect(scheduler.started()).toBe(true); expect(scheduler.request(requestId)?.state).toBe("queued");
+    release(); await active;
+    expect(kinds).toEqual(["incremental", "full"]);
+    expect(scheduler.request(requestId)?.state).toBe("succeeded");
+    expect(scheduler.status("global")[0]).toMatchObject({ ...config, nextDueAt: null, nextFullDueAt: null, run: null, lastFullReconciliationAt: at });
+    await vi.advanceTimersByTimeAsync(180_000); expect(kinds).toHaveLength(2);
+    expect(() => scheduler.configure("unknown", config)).toThrow("HINDSIGHT_REPLICA_BANK_NOT_SCHEDULED");
+    await scheduler.pause();
+    expect(() => scheduler.configure("global", config)).toThrow("MEMORY_AUTHORITY_FENCED");
+  });
   it("transition pause drains the accepted run, cancels only queued manual work and refuses later admission", async () => {
     const f = fixture(); let release!: () => void;
     const blocked = new Promise<void>((resolve) => { release = resolve; });

@@ -3,7 +3,8 @@ import type { TakiApplicationCommitReceipt } from "@taki/shared";
 import { APPLICATION_TEST_AT, applicationTestEvent, applicationTestMemoryPayload, applicationTestNative,
   type ApplicationNativeFixture } from "../../testing/hindsight-application-fixtures.ts";
 import { hindsightRuntimeFixture, type HindsightRuntimeFixture } from "../../testing/hindsight-runtime-composition-fixtures.ts";
-import type { CuratorTestBank } from "./hindsight-policy-curator-fixtures.ts";
+import { curatorTestBank, type CuratorTestBank } from "./hindsight-policy-curator-fixtures.ts";
+import { HINDSIGHT_BINDING_BATCH_SIZE } from "./hindsight-application-binding-collector.ts";
 
 const fixtures: HindsightRuntimeFixture[] = [];
 afterEach(async () => {
@@ -67,6 +68,51 @@ function syncLogs(f: HindsightRuntimeFixture) {
 }
 
 describe("Run-admission Hindsight sync resilience", () => {
+  it("keeps cold Runs memory-unavailable until both Bank replicas are first bound, then admits memory after sync", async () => {
+    vi.useFakeTimers(); vi.setSystemTime(APPLICATION_TEST_AT);
+    const global = curatorTestBank(); const character = curatorTestBank({ bankId: "bank-taki", characterId: "taki", memories: [] });
+    const native = character.native[0]!;
+    character.native = [{ ...native, head: { ...native.head, binding_state: "binding_missing", bound_artifact: null } }];
+    character.artifacts = [];
+    const f = hindsightRuntimeFixture({ seed: false, banks: [global, character] }); fixtures.push(f);
+    const subsystem = f.subsystem();
+    let releaseSnapshot!: () => void; let snapshotStarted!: () => void; let releaseBinding!: () => void; let bindingStarted!: () => void;
+    const heldSnapshot = new Promise<void>((resolve) => { releaseSnapshot = resolve; });
+    const reachedSnapshot = new Promise<void>((resolve) => { snapshotStarted = resolve; });
+    const heldBinding = new Promise<void>((resolve) => { releaseBinding = resolve; });
+    const reachedBinding = new Promise<void>((resolve) => { bindingStarted = resolve; });
+    const snapshot = f.remote.client.createApplicationSnapshot;
+    vi.spyOn(f.remote.client, "createApplicationSnapshot").mockImplementation(async (input) => {
+      if (input.bankId === character.scope.bankId) { snapshotStarted(); await heldSnapshot; }
+      return snapshot(input);
+    });
+    const commit = character.server.client.commitApplication;
+    character.server.client.commitApplication = async (input) => { bindingStarted(); await heldBinding; return commit(input); };
+    let settled = false;
+    const captured = subsystem.captureRun("taki").then((run) => { settled = true; return run; },
+      (error: unknown) => { settled = true; return error; });
+    try {
+      await reachedSnapshot;
+      expect(subsystem.state.provider.capabilitiesSnapshot()?.recall).toBe(true);
+      expect(f.replica.bankBinding(global.scope.bankId)?.bindingState).toBe("bound");
+      expect(f.replica.bankBinding(character.scope.bankId)).toBeUndefined();
+      await vi.advanceTimersByTimeAsync(7499); expect(settled).toBe(false);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(await captured).toMatchObject({ tools: {}, snapshot: { providerId: "hindsight", authorityEpochId: "epoch",
+        capabilities: { recall: false, retain: false } } });
+      releaseSnapshot(); await reachedBinding;
+      expect(f.replica.bankBinding(character.scope.bankId)).toMatchObject({ bindingState: "binding_missing", bank: undefined });
+      const bindingCapture = subsystem.captureRun("taki").catch((error: unknown) => error);
+      await vi.advanceTimersByTimeAsync(7500);
+      expect(await bindingCapture).toMatchObject({ tools: {}, snapshot: { providerId: "hindsight", authorityEpochId: "epoch",
+        capabilities: { recall: false, retain: false } } });
+      expect(f.logs.filter((log) => log.msg === "Hindsight Run admitted without memory").map((log) => log.obj))
+        .toEqual([{ characterId: "taki", code: "admission_unavailable" }, { characterId: "taki", code: "admission_unavailable" }]);
+    } finally { releaseSnapshot(); releaseBinding(); await subsystem.state.service.settle(); }
+    expect(f.replica.bankBinding(character.scope.bankId)?.bindingState).toBe("bound");
+    expect(Object.keys((await subsystem.captureRun("taki")).tools)).toContain("recall");
+  });
+
   it("re-pulls and rebinds when native consolidation races the foreground binding commit (D1)", async () => {
     const { f, subsystem, bank } = await primed(); const [id] = remoteUnits(bank, 1); raceCommits(bank, 1, id!);
     const run = await subsystem.captureRun("taki");
@@ -117,10 +163,11 @@ describe("Run-admission Hindsight sync resilience", () => {
     expect(f.replica.checkpoint(bank.scope.bankId)).toEqual(before);
   });
 
-  // Fake admission time still includes real SQLite/hash work for all eight binding cycles.
+  // Fake admission time still includes real SQLite/hash work for every binding batch.
   it("bounds admission by its budget with many pending units; binding finishes in the background exactly once (D2)", async () => {
     vi.useFakeTimers(); vi.setSystemTime(APPLICATION_TEST_AT);
-    const { f, subsystem, bank } = await primed(); const ids = remoteUnits(bank, 8);
+    const { f, subsystem, bank } = await primed(); const ids = remoteUnits(bank, 8 * HINDSIGHT_BINDING_BATCH_SIZE);
+    const expectedCommits = Math.ceil(ids.length / HINDSIGHT_BINDING_BATCH_SIZE);
     const commit = bank.server.client.commitApplication;
     bank.server.client.commitApplication = async (request) => { await new Promise((resolve) => setTimeout(resolve, 2500)); return commit(request); };
     const budget = 7500;
@@ -129,14 +176,19 @@ describe("Run-admission Hindsight sync resilience", () => {
     await vi.advanceTimersByTimeAsync(budget - 1); expect(captured).toHaveLength(0);
     await vi.advanceTimersByTimeAsync(1); expect(captured).toHaveLength(1);
     expect(Object.keys((captured[0] as { tools: object }).tools)).toContain("recall");
-    const early = receipts(bank, "completed"); expect(early).toBeGreaterThan(0); expect(early).toBeLessThan(ids.length);
+    const early = receipts(bank, "completed"); expect(early).toBeGreaterThan(0); expect(early).toBeLessThan(expectedCommits);
     // A second Run queues behind the unfinished Bank work and is bounded the same way.
     capture();
-    await vi.advanceTimersByTimeAsync(budget); expect(captured).toHaveLength(2);
+    await vi.advanceTimersByTimeAsync(budget - 1); expect(captured).toHaveLength(1);
+    await vi.advanceTimersByTimeAsync(1); expect(captured).toHaveLength(2);
     expect(Object.keys((captured[1] as { tools: object }).tools)).toContain("recall");
-    expect(syncLogs(f).map((log) => ("outcome" in log ? log.outcome : null))).toEqual(["deferred", "deferred", "deferred", "deferred"]);
+    expect(receipts(bank, "completed")).toBeGreaterThan(early);
+    expect(receipts(bank, "completed")).toBeLessThan(expectedCommits);
+    const deferred = f.banks.map(({ scope }) => ({ level: "warn", characterId: "taki", bankId: scope.bankId,
+      code: "HINDSIGHT_DEADLINE_EXCEEDED", outcome: "deferred" }));
+    expect(syncLogs(f)).toEqual([...deferred, ...deferred]);
     await vi.runAllTimersAsync(); await subsystem.state.service.settle();
-    expect(receipts(bank, "completed")).toBe(ids.length); expect(receipts(bank, "refused")).toBe(0);
+    expect(receipts(bank, "completed")).toBe(expectedCommits); expect(receipts(bank, "refused")).toBe(0);
     for (const id of ids) expect(bound(f, bank, id)).toBe(true);
   }, 15_000);
 

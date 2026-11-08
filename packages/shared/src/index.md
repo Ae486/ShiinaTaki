@@ -50,7 +50,7 @@
 - memory-provider-envelope-schema.ts — validated success/error envelopes for canonical provider operations
 - memory-replica-schema.ts — bounded ordered journal upsert/tombstone and replica checkpoint contracts
 - memory-replica-request-schema.ts — durable per-request claim and terminal evidence independent of latest Bank status
-- memory-replica-schedule-schema.ts — durable Bank configuration, fenced run/result, exact manual identities, retry state and truthful status contracts
+- memory-replica-schedule-schema.ts — durable Bank configuration, fenced run/result, exact manual identities, active consumed-retry backoff and truthful status contracts
 - pending-memory-schema.ts — immutable write intents, legacy phases, versioned factual proof/dispatch state, and unconfirmed overlays
 - hindsight-native-result-schema.ts — tracked native commands, immutable paged full results, and compact G1 receipt contracts
 - hindsight-native-proof-encoding.ts — portable typed hash fields and UTF-8 serialization, independent of legacy local hashes
@@ -63,7 +63,7 @@
 - hindsight-current-canonical-schema.ts — existing Canonical constraints with lossless JSON validators for the new D78 adapter
 - hindsight-json-schema.ts — bounded own-key JSON validation preserving prototype-shaped keys as inert data
 - hindsight-current-state-schema.ts — mirrored D78 structured transfer, stable native object mappings and typed refusal contracts
-- hindsight-current-state-encoding.ts — separate tagged JSON/binary64 codec with cross-language Unicode ordering
+- hindsight-current-state-encoding.ts — separate tagged JSON/binary64 codec; validated scalar comparison preserves unsigned UTF-8 key ordering without repeated encoding allocations
 - hindsight-native-snapshot-schema.ts — strict original logical snapshot wire envelopes and bounded structured payload values
 - hindsight-current-evidence-schema.ts — immutable D78 preparation and validated current import evidence contracts
 - hindsight-cutover-verification-schema.ts — finite native requirement/input/action/model/certificate evidence and retained-snapshot binding
@@ -95,12 +95,13 @@
 - memory-local-operation-schema.ts — Local onboarding command, exact producer, checkpoint, outcome and closed failure contracts
 - memory-local-onboarding-schema.ts — operator preview/discovery, actionable runtime/custody status, exclusion and invalidation contracts
 - memory-hindsight-operation-schema.ts — hindsight.activate command (new/resume/recover), Core-minted producer identity + per-Bank progress, outcome and the closed activation error-code set
-- memory-activation-schema.ts — MEMORY_ACTIVATION_METHODS + the strict memory.activation.status read (authority, runtime, setup, Bank prerequisites, cutover run/receipt, custody counters, Core-derived actions)
-- memory-authority-status-schema.ts — MEMORY_AUTHORITY_METHODS + the strict composite memory.authority.status read (authority, runtime availability with closed reasons incl. connection_disabled/config_changed, setup, per-Bank replica/Pending, operations, the Hindsight lifecycle section present exactly under Hindsight authority, derivedFreshness literal unknown)
+- memory-activation-schema.ts — strict activation status/actions, including installed-runtime recovery only for matching terminal receipt/epoch/transaction and incomplete producer preparation
+- memory-authority-status-schema.ts — strict composite status with current authority identity, separate authority_invalid/evidence_invalid diagnostics, replica/Pending and lifecycle evidence
 - memory-hindsight-lifecycle-schema.ts — Hindsight Bank readiness (ready/syncing/provisioning/failed/not_provisioned) and the memory.authority.status `hindsight` section: live connection config/drift/admission time, per-scope readiness, Core-derived actions, the nullable `backup` block; bank.provision / connection.revalidate request, producer (Core-stamped operator/automatic origin), result and closed lifecycle error codes
 - hindsight-backup-schema.ts — explicit v1/v2 backup aggregates, closed pair failures, the `hindsight.backup` status block, backup.capture/admit/verify and emergency evidence
 - hindsight-backup-v1-schema.ts — unchanged strict historical request/proof/archive/manifest contracts, common custody and version-specific staged metadata bases
 - hindsight-backup-v2-schema.ts — strict complete backup request, proof body, endpoint response, archive, observation and copied-Core manifest variants
+- hindsight-candidate-schema.ts — versioned D1 candidate refusal, complete archive/Core inventory, physical identity, environment provenance and explicit unverified/historical-baseline contracts
 - hindsight-template-backup-schema.ts — independent receipt inventory and selected/unselected Bank proof with actual service configuration provenance
 - hindsight-template-backup-attestation-schema.ts — bounded copied-Core template history/default/publication/hold commitments for exact Bank incarnations
 - hindsight-template-backup-encoding.ts — independent backup hash domains, complete receipt inventory ordering and explicit request/response byte budgets
@@ -117,3 +118,5 @@
 - hindsight-custody-schema.ts — strict fixed-slot C1 prepare/invocation/result protocol and budgets; no values or deployment authority.
 - hindsight-installation-schema.ts — complete compiled artifact, external runtime/owner registration and separate Node enrollment/credential contracts.
 - host-input-encoding.ts — boot-free canonical input serialization shared by Core, installed Host and Rust parity fixtures.
+- hindsight-candidate-domain-schema.ts — strict candidate request, original dispatch, restore receipt and durable evidence contracts; exported through the candidate-domain subpath.
+- memory-replica-rpc-schema.ts — complete per-Bank schedule configuration and thin configuration invalidation; no durable operation or scheduler-run push.

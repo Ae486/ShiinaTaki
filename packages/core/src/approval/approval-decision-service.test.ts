@@ -18,11 +18,11 @@ import { createApprovalStateRepo } from "./approval-state-repo.ts";
 const dbs: Database[] = [];
 afterEach(() => { for (const db of dbs.splice(0)) db.close(); });
 
-function openService() {
+function openService(initialRegistry: GovernanceRegistry = CANONICAL_GOVERNANCE_REGISTRY) {
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
   dbs.push(db);
   const repo = createApprovalStateRepo(db);
-  return { db, repo, service: createApprovalDecisionService(repo) };
+  return { db, repo, service: createApprovalDecisionService(repo, initialRegistry) };
 }
 
 function digest(value: string) {
@@ -174,9 +174,9 @@ describe("Approval decision service", () => {
   });
 
   it("advances once when historical registry authority becomes inert", () => {
-    const { repo, service } = openService();
-    service.grantAlways({ binding: binding(), expectedApprovalGeneration: 1 });
     const historical = registry(1, 1);
+    const { repo, service } = openService(historical);
+    service.grantAlways({ binding: binding(), expectedApprovalGeneration: 1 });
     const current = registry(2, 2);
     const upgraded = createApprovalDecisionService(repo, current, (revision) => revision === 1 ? historical : undefined);
     expect(upgraded.snapshot()).toMatchObject({ approvalGeneration: 3, governanceRegistryRevision: 2 });
@@ -184,16 +184,20 @@ describe("Approval decision service", () => {
   });
 
   it("does not advance when a historical decision remains inert", () => {
-    const { repo, service } = openService();
+    const original = registry(1, 1);
+    const { repo, service } = openService(original);
     service.grantAlways({ binding: binding(), expectedApprovalGeneration: 1 });
-    const historical = registry(1, 2);
-    const current = registry(2, 3);
-    const upgraded = createApprovalDecisionService(repo, current, (revision) => revision === 1 ? historical : undefined);
-    expect(upgraded.snapshot()).toMatchObject({ approvalGeneration: 2, governanceRegistryRevision: 2 });
+    const historical = registry(2, 2);
+    const inert = createApprovalDecisionService(repo, historical, (revision) => revision === 1 ? original : undefined);
+    expect(inert.list()[0]?.usability).toEqual({ usable: false, reason: "descriptor_revision_mismatch" });
+    const generation = inert.snapshot().approvalGeneration;
+    const current = registry(3, 3);
+    const upgraded = createApprovalDecisionService(repo, current, (revision) => revision === 2 ? historical : undefined);
+    expect(upgraded.snapshot()).toMatchObject({ approvalGeneration: generation, governanceRegistryRevision: 3 });
   });
 
   it("fails closed when decisions need an unavailable historical registry", () => {
-    const { repo, service } = openService();
+    const { repo, service } = openService(registry(1, 1));
     service.grantAlways({ binding: binding(), expectedApprovalGeneration: 1 });
     expect(() => createApprovalDecisionService(repo, registry(2, 2))).toThrow(
       "historical governance registry 1 is unavailable",
@@ -202,7 +206,7 @@ describe("Approval decision service", () => {
   });
 
   it("fails closed on stored binding digest corruption before revision reconciliation", () => {
-    const { db, repo, service } = openService();
+    const { db, repo, service } = openService(registry(1, 1));
     service.grantAlways({ binding: binding(), expectedApprovalGeneration: 1 });
     db.prepare("UPDATE approval_decisions SET binding_digest = :digest").run({ digest: "f".repeat(64) });
     expect(() => createApprovalDecisionService(repo, registry(2, 2), (revision) =>

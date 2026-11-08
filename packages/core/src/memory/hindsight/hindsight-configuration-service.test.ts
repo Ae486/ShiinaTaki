@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { HINDSIGHT_TRANSITION_BUILD } from "@taki/shared";
 import { configurationObservationFixture } from "../../testing/hindsight-configuration-fixture.ts";
 import { createHindsightConfigurationService } from "./hindsight-configuration-service.ts";
@@ -41,6 +41,24 @@ describe("API-runtime configuration observations", () => {
     expect(f.service.status(params)).toMatchObject({ status: "stale", reason: "context_changed", observation: null });
     const restarted = createHindsightConfigurationService(f.deps);
     try { expect(restarted.status(params).status).toBe("not_observed"); } finally { restarted.dispose(); }
+  });
+
+  it("uses a status capture with the same observation state while network observation keeps independent reads", async () => {
+    const f = fixture(); const observed = await f.service.observe(params);
+    const read = vi.spyOn(f.deps, "read");
+    try {
+      expect(f.service.status(params, structuredClone(f.current))).toEqual(observed);
+      expect(read).not.toHaveBeenCalled();
+      f.state.time = 60_000;
+      expect(f.service.status(params, f.current)).toMatchObject({ status: "stale", reason: "expired", observation: null });
+      expect(await f.service.observe(params)).toMatchObject({ status: "observed" });
+      expect(read.mock.calls.length).toBeGreaterThan(1);
+      expect(f.service.status(params, { ...f.current, contextIdentity: "changed-selection" }))
+        .toMatchObject({ status: "stale", reason: "context_changed", observation: null });
+      expect(f.service.status(params, null)).toMatchObject({ status: "unavailable", observation: null });
+      f.service.dispose();
+      expect(f.service.status(params, f.current)).toMatchObject({ status: "unavailable", observation: null });
+    } finally { read.mockRestore(); }
   });
 
   it("coalesces concurrent observers and rejects a changed-context response without overwriting a newer request", async () => {

@@ -19,11 +19,13 @@ import { templateEqual } from "./template-integrity.ts";
 interface Dependencies {
   db: Database; config: MemoryConfig; binding: HindsightRuntimeBinding; alive(): void; settle(): Promise<void>;
   replaceBinding(epochId: string): Promise<void>;
+  verifySelectedAuthority?: TemplateRuntimeControl["verifySelectedAuthority"];
   connection?: { source: ConfigSource; secrets: SecretCatalogService; client?: HindsightClient };
 }
 
 export function createTemplateRuntimeControl(deps: Dependencies): TemplateRuntimeControl {
   return {
+    verifySelectedAuthority: deps.verifySelectedAuthority,
     quiesce: async (input) => {
       deps.alive(); input.assertCurrent();
       // Retirement closes every old read/write owner and scheduler synchronously. A hung completion

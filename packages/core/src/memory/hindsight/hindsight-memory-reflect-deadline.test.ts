@@ -9,6 +9,8 @@ import { createHindsightMemoryProvider } from "./hindsight-memory-provider.ts";
 import type { HindsightMemoryProviderDeps } from "./hindsight-memory-provider-context.ts";
 import { curatorTestBank } from "./hindsight-policy-curator-fixtures.ts";
 import { createHindsightRuntimeConnection } from "./hindsight-runtime-connection.ts";
+import { createHindsightRuntimeState } from "./hindsight-runtime-state.ts";
+import { loadMemoryConfig } from "../../config/memory-config.ts";
 
 const call = { requestId: "reflect-deadline", authorityEpochId: "epoch", actor: "foreground-agent" as const };
 const request = { bankId: "bank-a", query: "What do we know?", budget: "low" as const, maxTokens: 128 };
@@ -40,7 +42,7 @@ function afterDelay<Args extends unknown[], Result>(action: (...args: Args) => P
   return async (...args: Args): Promise<Result> => { const result = await action(...args); await waitFor(ms); return result; };
 }
 
-function createFixture(requestTimeoutMs?: number) {
+function createFixture(requestTimeoutMs?: number, composed = false) {
   const bank = curatorTestBank(); const base = hindsightRuntimeFixture({ banks: [bank] });
   if (requestTimeoutMs !== undefined) base.config.upsert("TAKI_HINDSIGHT_REQUEST_TIMEOUT_MS", requestTimeoutMs);
   const control = { reflectMs: 150_000, recallMs: 150_000, synchronizeMs: 0, invalidContextHash: false };
@@ -72,18 +74,23 @@ function createFixture(requestTimeoutMs?: number) {
   // controlled synchronization latency without synthesizing Bank/policy evidence.
   const synchronize = vi.fn<HindsightMemoryProviderDeps["synchronize"]>(async ({ context }) => waitFor(control.synchronizeMs, context.signal));
   const unused = async (): Promise<never> => { throw new Error("deadline fixture forbids memory writes"); };
-  const provider = createHindsightMemoryProvider({ ...runtime, epochId: "epoch", replica: base.replica,
+  const state = composed ? createHindsightRuntimeState({ db: base.db, runtime, config: loadMemoryConfig({}) }) : undefined;
+  const provider = state?.provider ?? createHindsightMemoryProvider({ ...runtime, epochId: "epoch", replica: base.replica,
     admission: createHindsightRuntimeAdmissionRepo(base.db), pending: createPendingMemoryRepo(base.db),
     writes: { retain: unused, mutate: unused }, synchronize, signal: runtimeAbort.signal });
   const calls = { health: vi.spyOn(client, "health"), version: vi.spyOn(client, "version"), compatibility: vi.spyOn(client, "compatibility"),
     upload: vi.spyOn(client, "uploadApplicationBody"), part: vi.spyOn(client, "putApplicationBodyPart"), seal: vi.spyOn(client, "sealApplicationBody"),
     reflect: vi.spyOn(client, "reflectApplication"), recall: vi.spyOn(client, "recallNative") };
-  return { base, bank, client, runtime, runtimeAbort, control, calls, synchronize, provider, transport, reflectEntered, recallEntered,
-    close: async () => { await provider.stop(); runtime.stop(); await base.close(); } };
+  return { base, bank, client, runtime, runtimeAbort, control, calls, synchronize, provider, transport, reflectEntered, recallEntered, state,
+    close: async () => {
+      runtime.stop(); state?.sync.stop();
+      await Promise.all([provider.stop(), state?.service.stop(), state?.writer.stop(), state?.writes.stop(), state?.sync.settle()]);
+      await base.close();
+    } };
 }
 
-async function fixture(requestTimeoutMs?: number) {
-  const value = createFixture(requestTimeoutMs); fixtures.push(value);
+async function fixture(requestTimeoutMs?: number, composed = false) {
+  const value = createFixture(requestTimeoutMs, composed); fixtures.push(value);
   await value.provider.capabilities();
   for (const spy of Object.values(value.calls)) spy.mockClear();
   return value;
@@ -105,7 +112,7 @@ describe("Hindsight provider Reflect operation deadline", () => {
     expect(f.calls.reflect).toHaveBeenCalledOnce(); expect(f.transport).toHaveBeenCalledOnce();
   });
 
-  it("subtracts synchronization, admission and every policy upload step from the final request budget", async () => {
+  it("subtracts synchronization, fresh standalone admission and every policy upload step from the final request budget", async () => {
     const f = await fixture(120_000); f.control.synchronizeMs = 40_000; f.control.reflectMs = 170_000;
     f.calls.health.mockImplementationOnce(afterDelay(f.base.remote.client.health, 20_000));
     f.calls.version.mockImplementationOnce(afterDelay(f.base.remote.client.version, 15_000));
@@ -125,6 +132,46 @@ describe("Hindsight provider Reflect operation deadline", () => {
     expect(Date.now() - Date.parse(APPLICATION_TEST_AT)).toBe(290_000);
   });
 
+  it("uses one admission request through warm composed synchronization and keeps every remaining Reflect allowance", async () => {
+    const f = await fixture(120_000, true); f.control.reflectMs = 170_000;
+    f.calls.compatibility.mockImplementationOnce(afterDelay(f.base.remote.client.compatibility, 10_000));
+    const changes = vi.spyOn(f.client, "applicationChanges").mockImplementationOnce(afterDelay(f.base.remote.client.applicationChanges, 40_000));
+    f.calls.upload.mockImplementationOnce(afterDelay(f.base.remote.client.uploadApplicationBody, 10_000));
+    f.calls.part.mockImplementationOnce(afterDelay(f.base.remote.client.putApplicationBodyPart, 15_000));
+    f.calls.seal.mockImplementationOnce(afterDelay(f.base.remote.client.sealApplicationBody, 10_000));
+    const save = vi.spyOn(f.state!.admission, "save"); const before = f.base.replica.checkpoint(f.bank.scope.bankId);
+    const running = f.provider.reflect(call, request);
+    await vi.advanceTimersByTimeAsync(85_000); await f.reflectEntered.promise;
+    expect(f.calls.health).not.toHaveBeenCalled(); expect(f.calls.version).not.toHaveBeenCalled();
+    expect(f.calls.compatibility).toHaveBeenCalledOnce(); expect(save).not.toHaveBeenCalled();
+    expect([f.calls.compatibility.mock.calls[0]![0].timeoutMs, changes.mock.calls[0]![0].context.timeoutMs,
+      f.calls.upload.mock.calls[0]![0].context.timeoutMs, f.calls.part.mock.calls[0]![0].context.timeoutMs,
+      f.calls.seal.mock.calls[0]![0].context.timeoutMs, f.calls.reflect.mock.calls[0]![0].context.timeoutMs])
+      .toEqual([120_000, 120_000, 250_000, 240_000, 225_000, 215_000]);
+    await vi.advanceTimersByTimeAsync(170_000);
+    expect(await running).toMatchObject({ ok: true, data: { text: "A completed reflection" } });
+    expect(f.base.replica.checkpoint(f.bank.scope.bankId)).toEqual(before);
+    expect(Date.now() - Date.parse(APPLICATION_TEST_AT)).toBe(255_000);
+  });
+
+  it("refuses guarded Reflect removed from a warm composed manifest without dispatching policy or generation", async () => {
+    const f = await fixture(undefined, true); const manifest = await f.base.remote.client.compatibility({ timeoutMs: 10_000 });
+    const contracts = { ...manifest.contracts }; delete contracts.application_reflect;
+    f.calls.compatibility.mockResolvedValue({ ...manifest, contracts });
+    const before = f.base.replica.checkpoint(f.bank.scope.bankId);
+    expect(await f.provider.reflect(call, request)).toMatchObject({ ok: false, error: { code: "MEMORY_CAPABILITY_UNSUPPORTED" } });
+    expect(f.calls.compatibility).toHaveBeenCalledTimes(2);
+    expect(f.calls.health).toHaveBeenCalledOnce(); expect(f.calls.version).toHaveBeenCalledOnce();
+    expect(f.provider.capabilitiesSnapshot()).toMatchObject({ recall: true, reflect: false });
+    expect(f.calls.upload).not.toHaveBeenCalled(); expect(f.calls.reflect).not.toHaveBeenCalled();
+    expect(f.base.replica.checkpoint(f.bank.scope.bankId)).toEqual(before);
+    f.calls.compatibility.mockClear(); f.calls.health.mockClear(); f.calls.version.mockClear();
+    expect(await f.provider.reflect(call, request)).toMatchObject({ ok: false, error: { code: "MEMORY_CAPABILITY_UNSUPPORTED" } });
+    expect(f.calls.compatibility).toHaveBeenCalledOnce();
+    expect(f.calls.health).not.toHaveBeenCalled(); expect(f.calls.version).not.toHaveBeenCalled();
+    expect(f.calls.reflect).not.toHaveBeenCalled();
+  });
+
   it("expires at five minutes even when the native reflection remains pending", async () => {
     const f = await fixture(); f.control.reflectMs = 400_000;
     let settled = false; const running = f.provider.reflect(call, request).then((result) => { settled = true; return result; });
@@ -136,7 +183,7 @@ describe("Hindsight provider Reflect operation deadline", () => {
     expect(f.calls.reflect).toHaveBeenCalledOnce(); expect(vi.getTimerCount()).toBe(0);
   });
 
-  it("refuses further admission or native dispatch once earlier work consumes the whole allowance", async () => {
+  it("refuses further standalone admission or native dispatch once earlier work consumes the whole allowance", async () => {
     const f = await fixture(); f.control.synchronizeMs = 299_000;
     f.calls.health.mockImplementationOnce(afterDelay(f.base.remote.client.health, 1_000));
     const running = f.provider.reflect(call, request);

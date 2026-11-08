@@ -37,7 +37,9 @@ export interface WsServer {
 export async function startWsServer(options: WsServerOptions): Promise<WsServer> {
   const { host, port, registry, connectionRegistry, logger } = options;
   const log = logger.child({ mod: "server" });
-  const wss = new WebSocketServer({ host, port });
+  // Status bursts can run expensive synchronous reads. Yield between frames so
+  // pending provider responses and their deadlines can progress between requests.
+  const wss = new WebSocketServer({ host, port, allowSynchronousEvents: false });
 
   wss.on("connection", (socket, request) => {
     // Socket-level notify: server-initiated pushes (chat/timeline events, the capability channel) reach

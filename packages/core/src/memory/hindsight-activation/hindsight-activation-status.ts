@@ -41,11 +41,18 @@ function deriveActions(view: { plan: HindsightActivationPlan; run: MemoryActivat
   const idle = operation === null || operation.terminalAt !== null;
   const local = plan.authority.mode === "canonical-local" && plan.runId !== null;
   const ready = plan.configured && !plan.drifted && plan.blocking.length === 0;
-  const committed = plan.authority.mode === "hindsight" && run?.receipt !== null && run !== null;
+  const receipt = run?.receipt;
+  const committed = plan.authority.mode === "hindsight" && receipt != null
+    && receipt.epochId === plan.authority.epochId && receipt.transactionId === plan.authority.transactionId;
+  const producer = operation?.producer;
+  const preparationIncomplete = committed && operation?.kind === "hindsight.activate" && producer?.kind === "hindsight"
+    && producer.runId === run?.runId
+    && producer.hindsightEpochId === receipt?.epochId && producer.transactionId === receipt.transactionId
+    && producer.progress.phase !== "completed";
   return {
     activate: idle && local && ready && run === null,
     resume: idle && local && ready && run !== null && run.receipt === null,
-    recoverBinding: idle && committed && !view.available,
+    recoverBinding: idle && committed && (!view.available || preparationIncomplete),
     cancelOperationId: operation?.state === "admitted" ? operation.operationId : null,
   };
 }

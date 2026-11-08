@@ -139,7 +139,8 @@ describe("hindsight.activate — claim, cancel and boot observation", () => {
     const producer = { ...reserved, progress: { ...reserved.progress, phase: "importing" as const } };
     const committed = foreignRow(h, { request, producer, running: true });
     const boot = h.owner("boot-b");
-    expect(boot.service.status(committed)).toMatchObject({ state: "completed", result: { outcome: "activated" }, producer: { progress: { phase: "completed" } } });
+    expect(boot.service.status(committed)).toMatchObject({ state: "outcome_unknown", reason: "producer_incomplete", result: null, producer: { progress: { phase: "binding" } } });
+    expect(boot.status().actions.recoverBinding).toBe(true);
     const mismatched = foreignRow(h, { request, producer: { ...producer, transactionId: "22222222-2222-4222-8222-222222222222" }, running: true });
     expect(h.owner("boot-c").service.status(mismatched)).toMatchObject({ state: "outcome_unknown", reason: "commitment_unknown" });
     h.binding.state = { kind: "unavailable", epochId: producer.hindsightEpochId, code: "MEMORY_HINDSIGHT_BINDING_FAILED" };
@@ -202,7 +203,7 @@ describe("hindsight.activate — binding repair", () => {
     const h = harness(); const owner = h.owner();
     h.binding.publishFails = true;
     const first = await owner.settled(activate(h));
-    expect(first).toMatchObject({ state: "failed", reason: "runtime_unavailable", errorCode: "MEMORY_RUNTIME_UNAVAILABLE",
+    expect(first).toMatchObject({ state: "failed", reason: "runtime_unavailable", errorCode: "HINDSIGHT_ACTIVATION_INTERNAL_ERROR",
       result: { outcome: "binding_unavailable", runtimeAvailable: false }, producer: { progress: { phase: "binding" } } });
     const epochId = (first.producer as HindsightRef).hindsightEpochId;
     expect(readMemoryAuthoritySelection(h.db)).toMatchObject({ mode: "hindsight", epochId });
@@ -228,7 +229,8 @@ describe("hindsight.activate — binding repair", () => {
     const recovery = h.binding.runtime.recoverHindsightBinding;
     h.binding.runtime.recoverHindsightBinding = () => { throw new Error("MEMORY_INGESTION_INCOMPLETE"); };
     const refused = await owner.settled(recover(producer.hindsightEpochId));
-    expect(refused).toMatchObject({ state: "failed", reason: "producer_failed", errorCode: "MEMORY_INGESTION_INCOMPLETE", result: { outcome: "activated", runtimeAvailable: true } });
+    expect(refused).toMatchObject({ state: "failed", reason: "producer_incomplete", errorCode: "MEMORY_INGESTION_INCOMPLETE", result: null,
+      producer: { progress: { phase: "binding" } } });
     h.binding.runtime.recoverHindsightBinding = recovery;
     expect(h.db.prepare("SELECT count(*) AS n FROM hindsight_authority_activation_receipts").get()?.n).toBe(1);
   });
@@ -244,5 +246,31 @@ describe("hindsight.activate — binding repair", () => {
     const rebuilt = (repaired.producer as HindsightRef).banks;
     expect(rebuilt.map((bank) => bank.verificationId)).toEqual(rebuilt.map((bank) =>
       preparationVerificationId(h.identity().banks.find((minted) => minted.nativeBankId === bank.nativeBankId)!.verificationId, bank.preparationId!)));
+  });
+
+  it("does not complete when preparation finished but the completed checkpoint could not be persisted", async () => {
+    const h = harness();
+    const request: Extract<MemoryOperationRequest, { kind: "hindsight.activate" }> = {
+      kind: "hindsight.activate", source: { mode: "new", setupRevision: 2, expectedEpochId: h.local.epochId },
+    };
+    const ctx: MemoryOperationContext = { live: () => null, setup: fakeSetup(), hindsight: h.service, lookup: () => undefined,
+      activeInFamily: () => undefined, latestInFamily: () => undefined, now: () => "2026-09-23T00:00:00.000Z" };
+    const producer = hindsightActivateKind.admit(request, ctx, { origin: "operator" });
+    const checkpoints: HindsightRef[] = [];
+    const preparation = vi.spyOn(h.binding.runtime, "prepareHindsightActivation");
+    const settlement = await hindsightActivateKind.execute({ operationId: crypto.randomUUID(), request, producer, ctx,
+      running: () => undefined, tryClaim: () => true,
+      checkpoint: (ref) => {
+        if (ref?.kind !== "hindsight") throw new Error("fixture producer missing");
+        if (ref.progress.phase === "completed") throw new Error("HINDSIGHT_ACTIVATION_INTERRUPTED");
+        checkpoints.push(ref);
+      } });
+    expect(preparation).toHaveBeenCalledTimes(1);
+    expect(checkpoints.at(-1)?.progress.phase).toBe("binding");
+    expect(settlement).toMatchObject({ state: "failed", errorCode: "HINDSIGHT_ACTIVATION_INTERRUPTED", result: null,
+      producer: { progress: { phase: "binding" } } });
+    expect(h.service.runtime().available).toBe(true);
+    expect(h.db.prepare("SELECT count(*) AS n FROM hindsight_authority_activation_receipts").get()?.n).toBe(1);
+    expect(h.transport.calls("transfer-post")).toBe(2);
   });
 });

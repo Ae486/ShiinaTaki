@@ -9,6 +9,7 @@ import type { Database } from "../../db/sqlite.ts";
 import { readTransitionQueue, readQueueOutcome, readQueueExecution, prepareQueueExecution, settleQueueIntent } from "../../db/memory-transition-queue-repo.ts";
 import { readTransitionReceipt } from "../../db/memory-transition-evidence-repo.ts";
 import { readVerifiedTransitionPublication } from "../../db/memory-transition-publication-reader.ts";
+import type { MemoryAuthorityVerification } from "../runtime-authority-verification.ts";
 import { readVerifiedTransitionCandidate } from "./transition-final-mapping.ts";
 import { readVerifiedEmergencyCandidate } from "../../db/memory-transition-emergency-candidate.ts";
 import { requireTransitionLease, type TransitionLease } from "../../db/memory-transition-repo.ts";
@@ -19,6 +20,7 @@ import { mapTransitionQueueIntent, transitionTargetCommand } from "./transition-
 import { transitionIsQuarantined } from "../../db/memory-transition-emergency-quarantine.ts";
 
 interface Dependencies { db: Database; provider(epochId: string): MemoryProvider; now?: () => string;
+  verifyTransitionPublication?: MemoryAuthorityVerification["verifyTransitionPublication"];
   recoverTarget?(execution: MemoryTransitionQueueExecution, signal: AbortSignal): Promise<void> }
 export function createTransitionIntentExecutor(input: Dependencies) {
   let stopped = false; const controller = new AbortController(); const active = new Map<Promise<void>, string>();
@@ -38,7 +40,7 @@ async function executeQueue(input: Dependencies & { now(): string;
   requireTransitionLease(db, { lease, now: input.now() });
   const receipt = readTransitionReceipt(db, lease.transitionId);
   if (!receipt) throw new Error("MEMORY_TRANSITION_PROOF_INVALID");
-  const publication = readVerifiedTransitionPublication(db, receipt.receiptId);
+  const publication = input.verifyTransitionPublication?.(receipt.receiptId) ?? readVerifiedTransitionPublication(db, receipt.receiptId);
   const candidate = receipt.kind === "transition.emergency-local" ? readVerifiedEmergencyCandidate(db, publication.candidateId)
     : readVerifiedTransitionCandidate(db, publication.candidateId);
   requireTransitionTargetReady(db, receipt.newEpochId);

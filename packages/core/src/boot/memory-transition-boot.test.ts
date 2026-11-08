@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { ZodError } from "zod";
 import { createConfigSource } from "../config/config-source.ts";
 import { createConfigRepo } from "../db/config-repo.ts";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
@@ -10,6 +11,7 @@ import * as hindsight from "../memory/hindsight/hindsight-memory-subsystem.ts";
 import * as publication from "../db/memory-transition-publication-reader.ts";
 import * as native from "../memory/transitions/transition-native-evidence.ts";
 import * as sources from "../db/memory-transition-source-disposition.ts";
+import { createMemoryStatusObserver } from "../memory/operations/memory-status-observer.ts";
 import { composeMemoryTransitions } from "./memory-transition-boot.ts";
 
 type Harness = Awaited<ReturnType<typeof createHealthyTransitionHarness>>;
@@ -76,25 +78,42 @@ describe("production healthy boot readiness", () => {
     } finally { await service.stop(); await h.close(); }
   }, 30_000);
 
-  it("still verifies complete publication evidence for a present binding and refuses corrupt stored native evidence", async () => {
+  it("separates present-binding status from full proof and refuses changed current receipt identity", async () => {
     const h = await createHealthyTransitionHarness(); const service = observer(h);
     try {
       const transitionId = await execute(h);
       const snapshot = vi.spyOn(h.runtime, "bindingSnapshot");
       const verification = vi.spyOn(native, "verifyTransitionNativeEvidence");
+      const fullProof = vi.spyOn(publication, "readVerifiedTransitionPublication");
       const status = service.status(transitionId);
       expect(status.progress.runtime).toBe("ready");
-      expect(snapshot).not.toHaveBeenCalled(); expect(verification).toHaveBeenCalled();
-      h.db.prepare("UPDATE memory_authority_selection SET transition_receipt_id=:id WHERE singleton=1").run({ id: "0".repeat(64) });
+      expect(snapshot).not.toHaveBeenCalled(); expect(verification).not.toHaveBeenCalled();
+      expect(fullProof).not.toHaveBeenCalled();
+      const receiptId = status.transition.receipt!.receiptId;
+      expect(h.runtime.verifyTransitionPublication(receiptId)).toMatchObject({ receiptId });
+      expect(verification).toHaveBeenCalled(); expect(fullProof).toHaveBeenCalled();
+      verification.mockClear(); fullProof.mockClear();
+      h.db.transaction(() => {
+        h.db.prepare("UPDATE memory_authority_selection SET transition_receipt_id=:id WHERE singleton=1").run({ id: "0".repeat(64) });
+      });
       expect(h.runtime.hasPublishedBinding("local")).toBe(true);
-      expect(() => service.status(transitionId)).toThrow("MEMORY_TRANSITION_PROOF_INVALID");
-      h.db.prepare("UPDATE memory_authority_selection SET transition_receipt_id=:id WHERE singleton=1").run({ id: status.transition.receipt!.receiptId });
-      // Corrupt only this disposable fixture after a genuine COMMIT. Presence must not hide failed reconstruction.
-      h.db.exec("DROP TRIGGER memory_transition_native_evidence_immutable_update");
-      h.db.prepare("UPDATE memory_transition_native_evidence SET body=x'7b7d'").run();
-      snapshot.mockClear(); verification.mockClear();
+      expect(() => service.status(transitionId)).toThrow("MEMORY_TRANSITION_STALE");
+      expect(verification).not.toHaveBeenCalled(); expect(fullProof).not.toHaveBeenCalled();
+      h.db.transaction(() => {
+        h.db.prepare("UPDATE memory_authority_selection SET transition_receipt_id=:id WHERE singleton=1").run({ id: receiptId });
+        // Historical-only damage belongs to the next full boundary, not ordinary status observation.
+        h.db.exec("DROP TRIGGER memory_transition_native_evidence_immutable_update");
+        h.db.prepare("UPDATE memory_transition_native_evidence SET body=x'7b7d'").run();
+      });
       expect(h.runtime.hasPublishedBinding("local")).toBe(true);
-      expect(() => service.status(transitionId)).toThrow();
+      expect(service.status(transitionId).progress.runtime).toBe("ready");
+      expect(verification).not.toHaveBeenCalled(); expect(fullProof).not.toHaveBeenCalled();
+      expect(() => h.runtime.verifyTransitionPublication(receiptId)).toThrow(ZodError);
+      expect(fullProof).toHaveBeenCalled();
+      expect(h.runtime.hasPublishedBinding("local")).toBe(false);
+      fullProof.mockClear();
+      expect(service.status(transitionId).progress.runtime).toBe("unavailable");
+      expect(fullProof).not.toHaveBeenCalled();
       expect(snapshot).not.toHaveBeenCalled();
     } finally { await service.stop(); await h.close(); }
   });
@@ -116,25 +135,49 @@ describe("production healthy boot readiness", () => {
     } finally { await service.stop(); await h.close(); }
   }, 20_000);
 
-  it.each(["application-checkpoint", "native-pair", "preparation", "delta"])("rereads Hindsight %s with warm projections", async (damage) => {
+  it.each(["application-checkpoint", "native-pair", "preparation", "delta"])("validates Hindsight %s at its owning boundary after warm status reads", async (damage) => {
     const h = await createHealthyTransitionHarness(); const service = observer(h);
+    const currentStatus = createMemoryStatusObserver({ db: h.db, runtime: h.runtime });
     try {
       await execute(h); const transitionId = await execute(h, "transition.reenter-hindsight");
-      expect(service.status(transitionId).progress.runtime).toBe("ready");
+      const status = service.status(transitionId);
+      expect(status.progress.runtime).toBe("ready");
+      const receiptId = status.transition.receipt!.receiptId;
+      expect(h.runtime.verifyTransitionPublication(receiptId)).toMatchObject({ receiptId });
       const classify = vi.spyOn(sources, "classifyTransitionSources");
+      const fullProof = vi.spyOn(publication, "readVerifiedTransitionPublication");
       expect(service.status(transitionId).progress.runtime).toBe("ready");
-      expect(classify).toHaveBeenCalled();
-      if (damage === "application-checkpoint") h.db.exec("DELETE FROM hindsight_application_replica_checkpoints");
-      if (damage === "native-pair") h.db.exec("UPDATE hindsight_replica_sync_checkpoints SET end_cursor=end_cursor+1");
-      if (damage === "preparation") {
-        h.db.exec("DROP TRIGGER memory_transition_preparations_immutable_delete");
-        h.db.exec("DELETE FROM memory_transition_preparations");
+      expect(currentStatus.readRuntime().runtime.unavailableReason).toBeNull();
+      expect(classify).not.toHaveBeenCalled(); expect(fullProof).not.toHaveBeenCalled();
+      h.db.transaction(() => {
+        if (damage === "application-checkpoint") h.db.exec("DELETE FROM hindsight_application_replica_checkpoints");
+        if (damage === "native-pair") h.db.exec("UPDATE hindsight_replica_sync_checkpoints SET end_cursor=end_cursor+1");
+        if (damage === "preparation") {
+          h.db.exec("DROP TRIGGER memory_transition_preparations_immutable_delete");
+          h.db.exec("DELETE FROM memory_transition_preparations");
+        }
+        if (damage === "delta") {
+          h.db.exec("DROP TRIGGER memory_transition_delta_results_immutable_update");
+          h.db.exec("UPDATE memory_transition_delta_results SET body=x'7b7d'");
+        }
+      });
+      // Transition progress observes the binding; current evidence status separately consumes checkpoints.
+      expect(service.status(transitionId).progress.runtime).toBe("ready");
+      if (damage === "application-checkpoint" || damage === "native-pair") {
+        expect(currentStatus.readRuntime().runtime).toMatchObject({ present: true, unavailableReason: "evidence_invalid", replica: null, pending: null });
+        expect(() => h.runtime.operations()!.assertConnection()).toThrow("MEMORY_TRANSITION_PROOF_INVALID");
+      } else {
+        expect(currentStatus.readRuntime().runtime.unavailableReason).toBeNull();
       }
-      if (damage === "delta") {
-        h.db.exec("DROP TRIGGER memory_transition_delta_results_immutable_update");
-        h.db.exec("UPDATE memory_transition_delta_results SET body=x'7b7d'");
-      }
-      expect(() => service.status(transitionId)).toThrow();
-    } finally { await service.stop(); await h.close(); }
+      expect(h.runtime.hasPublishedBinding("hindsight")).toBe(true);
+      expect(classify).not.toHaveBeenCalled(); expect(fullProof).not.toHaveBeenCalled();
+      expect(() => h.runtime.verifyTransitionPublication(receiptId)).toThrow(damage === "delta" ? ZodError : "MEMORY_TRANSITION_PROOF_INVALID");
+      expect(fullProof).toHaveBeenCalled();
+      expect(h.runtime.hasPublishedBinding("hindsight")).toBe(false);
+      fullProof.mockClear();
+      expect(service.status(transitionId).progress.runtime).toBe("unavailable");
+      expect(currentStatus.readRuntime().runtime.unavailableReason).toBe("authority_invalid");
+      expect(fullProof).not.toHaveBeenCalled();
+    } finally { currentStatus.close(); await service.stop(); await h.close(); }
   }, 20_000);
 });

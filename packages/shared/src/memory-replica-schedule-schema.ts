@@ -1,6 +1,6 @@
 /**
  * INPUT:  Core-owned replica scheduler configuration and bounded diagnostic state
- * OUTPUT: validated per-Bank scheduling/status contracts for automatic and manual sync
+ * OUTPUT: validated scheduling/status contracts, including consumed retry backoff while a run is active
  * POS:    shared protocol — durable replica scheduling and recovery diagnostics; no provider payloads or secrets
  */
 import { z } from "zod";
@@ -104,7 +104,9 @@ export const MemoryReplicaSyncStateSchema = z.strictObject({
   if ((state.mode === "running") !== (state.run !== null)) fail("running state requires its lease-bound run");
   if (state.run && state.run.lease.bankId !== state.bankId) fail("run belongs to another Bank");
   if (state.pendingManualRequestId && state.pendingManualKind === null) fail("manual identity requires a queued request");
-  if (state.retryDueAt === null ? state.retryKind !== null || state.retryAttempt !== 0 : state.retryKind === null || state.retryAttempt === 0) fail("retry fields disagree");
+  const consumedRetry = state.run !== null && state.retryDueAt === null && state.retryAttempt >= 1 && state.retryKind !== null;
+  if (!consumedRetry && (state.retryDueAt === null ? state.retryKind !== null || state.retryAttempt !== 0
+    : state.retryKind === null || state.retryAttempt === 0)) fail("retry fields disagree");
   if ((state.errorCode === null) !== (state.nextAction === null)) fail("diagnostic fields disagree");
   if ((state.fullReconciliationState === "running") !== (state.run?.kind === "full")) fail("full reconciliation state requires its running claim");
   if (!state.automatic && (state.nextDueAt !== null || state.nextFullDueAt !== null || state.retryDueAt !== null || state.catchUpRequested)) {

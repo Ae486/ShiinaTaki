@@ -61,4 +61,8 @@ async function main(): Promise<void> {
       if (sha256(readFileSync(join(root, "deployment-registration.json"))) !== sha256(content)) throw new Error("fixture changed");
     } }));
 }
-void main().catch(() => { process.exitCode = 1; }).finally(() => { process.disconnect?.(); });
+void main().catch(() => { process.exitCode = 1; }).finally(() => {
+  // A rejected owner constructor leaves the resident iterator suspended on inherited stdin.
+  process.stdin.destroy();
+  process.disconnect?.();
+});

@@ -13,9 +13,11 @@ import type { SecretCatalogService } from "../../secrets/secret-catalog-service.
 import type { HindsightClient } from "../hindsight/hindsight-client.ts";
 import type { HindsightBindingSnapshot } from "../hindsight-runtime-binding.ts";
 import type { MemoryOperationsRuntime } from "../operations/memory-operation-contract.ts";
+import type { MemoryAuthorityVerification } from "../runtime-authority-verification.ts";
 import type { HindsightTemplateLifecycleService } from "../hindsight/template-lifecycle/template-lifecycle-service.ts";
 
 export interface HindsightLifecycleDeps {
+  verifySelectedAuthority?: MemoryAuthorityVerification["verifySelectedAuthority"];
   db: Database;
   config: ConfigSource;
   secrets: SecretCatalogService;

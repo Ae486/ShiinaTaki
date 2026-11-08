@@ -8,7 +8,6 @@ import { MemoryEmergencyTransitionPreviewSchema, MemoryTransitionResolutionSchem
   type MemoryEmergencyTransitionPreview, type MemoryTransitionIntent } from "@taki/shared";
 import { openReadonlyDatabase, type Database } from "../../db/sqlite.ts";
 import { canonicalPayloadHash } from "../legacy-migration/legacy-identities.ts";
-import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
 import { saveTransitionPreview, readTransitionPreview, assertTransitionPreviewRequest } from "../../db/memory-transition-preview-repo.ts";
 import { claimTransition, readTransitionAttempt, readTransitionIntent, changeTransitionAdmission, updateTransitionAttempt,
   requireTransitionLease, renewTransitionLease, type TransitionLease } from "../../db/memory-transition-repo.ts";
@@ -18,7 +17,7 @@ import { recordTransitionDriverFailure } from "../../db/memory-transition-driver
 import { reserveEmergencyCapture, acknowledgeEmergencyIncident, readEmergencyIncident } from "../../db/memory-transition-emergency-repo.ts";
 import { captureSurvivingBankEvidence } from "../../db/memory-transition-surviving-capture.ts";
 import { prepareEmergencyCandidate } from "../../db/memory-transition-emergency-candidate.ts";
-import { buildEmergencyPublicationProof, readVerifiedEmergencyPublication } from "../../db/memory-transition-emergency-publication.ts";
+import { buildEmergencyPublicationProof } from "../../db/memory-transition-emergency-publication.ts";
 import { readQueueOutcome, readTransitionQueue } from "../../db/memory-transition-queue-repo.ts";
 import { sealEmergencyEvidence } from "../hindsight-backup/hindsight-backup-emergency.ts";
 import type { HindsightBackupStore } from "../hindsight-backup/hindsight-backup-store.ts";
@@ -43,7 +42,7 @@ export function createEmergencyTransitionService(deps: Dependencies) {
   const lifetime = new AbortController(); const active = new Set<Promise<void>>();
   const alive = () => { if (lifetime.signal.aborted) throw new Error("MEMORY_TRANSITION_UNAVAILABLE"); };
   const plan: MemoryTransitionDriver["plan"] = (request, verification) => {
-    alive(); verification?.assertOwner(deps.db); verification?.assertIndependent();
+    alive(); verification?.assertOwner(deps.db);
     if (request.kind !== "transition.emergency-local") stale();
     // This separately confirmed offline request must be fresh when its synchronous owner submission starts.
     // Full local verification may take longer than the confirmation window; it cannot manufacture user delay.
@@ -53,7 +52,7 @@ export function createEmergencyTransitionService(deps: Dependencies) {
     assertTransitionPreviewRequest(preview, { request, now: admissionAt, actorId: deps.actorId });
     if (preview.version !== 2 || !preview.offline || preview.takeover !== "eligible" || !preview.expected) stale();
     const actual = request.recovery ? recoveryIdentity(deps, request.recovery.transitionId, verification)
-      : { expected: readEmergencyTransitionIdentity(deps.db, verification), recovery: null };
+      : { expected: readEmergencyTransitionIdentity(deps.db, verification, deps.runtime.verifySelectedAuthority), recovery: null };
     if (transitionLocalHash(actual.expected) !== transitionLocalHash(request.expected)
       || transitionLocalHash(actual.recovery) !== transitionLocalHash(request.recovery ?? null)) stale();
     assertEmergencyConfiguration(deps.db, request.expected);
@@ -84,7 +83,7 @@ export function createEmergencyTransitionService(deps: Dependencies) {
 function recoveryIdentity(deps: Dependencies, transitionId: string, verification?: TransitionEvidenceContext) {
   const intent = readTransitionIntent(deps.db, transitionId); const attempt = readTransitionAttempt(deps.db, transitionId);
   if (!intent || intent.request.kind !== "transition.emergency-local" || !attempt || attempt.phase === "terminal") stale();
-  const receipt = readTransitionReceipt(deps.db, transitionId); const selected = readMemoryAuthoritySelection(deps.db, verification);
+  const receipt = readTransitionReceipt(deps.db, transitionId); const selected = deps.runtime.verifySelectedAuthority(verification);
   if (selected.epochId !== (receipt?.newEpochId ?? intent.request.expected.predecessorEpochId)) stale();
   return { expected: intent.request.expected, recovery: { transitionId, expectedGeneration: attempt.generation,
     expectedReceiptId: receipt?.receiptId ?? null } };
@@ -105,8 +104,9 @@ function previewEmergencyTransition(deps: Dependencies, params: { kind: "transit
       disclosure.backupAgeSeconds = incident.backupAgeSeconds;
     } else if (disclosure.blocking.length > 0) value.expected = null;
   } else if (disclosure.blocking.length === 0) {
-    try { value.expected = readEmergencyTransitionIdentity(deps.db); }
-    catch { disclosure.blocking.push("source-unavailable"); }
+    try { value.expected = readEmergencyTransitionIdentity(deps.db, undefined, deps.runtime.verifySelectedAuthority); }
+    catch (error) { disclosure.blocking.push(error instanceof Error && error.message === "MEMORY_TRANSITION_PROOF_INVALID"
+      ? "incomplete-replica" : "source-unavailable"); }
   }
   const preview = MemoryEmergencyTransitionPreviewSchema.parse({ version: 2, previewId: randomUUID(), kind: params.kind,
     ...value, ...disclosure, takeover: value.expected ? "eligible" : "refused",
@@ -188,7 +188,7 @@ async function captureAndPublish(deps: Dependencies, intent: MemoryTransitionInt
       await control.boundary();
     }
   } finally { copy.close(); }
-  const candidate = prepareEmergencyCandidate(deps.db, { ...work(), evidence });
+  const candidate = prepareEmergencyCandidate(deps.db, { ...work(), evidence, verifyTransitionPublication: deps.runtime.verifyTransitionPublication });
   await control.boundary();
   attempt = readTransitionAttempt(deps.db, intent.transitionId)!;
   const oldProof = attempt.lastEvidenceId ? readTransitionProof(deps.db, attempt.lastEvidenceId) : undefined;
@@ -203,7 +203,8 @@ async function captureAndPublish(deps: Dependencies, intent: MemoryTransitionInt
 }
 function resolveEmergency(deps: Dependencies, input: { operationId: string; intent: MemoryTransitionIntent; lease: TransitionLease; work: EmergencyWork }) {
   const { intent, lease, work } = input; const receipt = readTransitionReceipt(deps.db, intent.transitionId)!;
-  const publication = readVerifiedEmergencyPublication(deps.db, receipt.receiptId);
+  const publication = deps.runtime.verifyTransitionPublication(receipt.receiptId);
+  if (publication.version !== 2) throw new Error("MEMORY_TRANSITION_PROOF_INVALID");
   const body = { version: 1, operationId: input.operationId, transitionId: intent.transitionId,
     release: { protocol: "taki-transition-v1", attemptId: lease.attemptId, generation: lease.generation,
       disposition: "offline-quarantined", proofHash: transitionLocalHash(publication), incidentId: intent.incidentId,

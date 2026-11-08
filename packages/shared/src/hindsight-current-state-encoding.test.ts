@@ -12,7 +12,20 @@ describe("D78 native tagged JSON encoding", () => {
     expect(hindsightCurrentStateJson(1)).not.toBe(hindsightCurrentStateJson("1"));
     expect(hindsightCurrentStateJson(["number", "3ff0000000000000"])).not.toBe(hindsightCurrentStateJson(1));
   });
-  it.each([undefined, NaN, Infinity, "\ud800", { "\ud800": "x" }, new Date(), Array(1)])("refuses nonportable values: %p", (value) => {
+  it("preserves unsigned UTF-8 ordering across scalar boundaries, prefixes and unnormalized text", () => {
+    const points = [0, 0x7f, 0x80, 0x7ff, 0x800, 0xd7ff, 0xe000, 0xffff, 0x10000, 0x10ffff];
+    const keys = ["", "a", "aa", "é", "e\u0301", ...points.flatMap((point) => {
+      const char = String.fromCodePoint(point); return [char, char + "a", "x" + char, char + "😀"];
+    })];
+    const value = Object.fromEntries([...keys].reverse().map((key) => [key, key]));
+    const expected = [...keys].sort((left, right) => Buffer.compare(Buffer.from(left, "utf8"), Buffer.from(right, "utf8")));
+    expect(JSON.parse(hindsightCurrentStateJson(value))[1])
+      .toEqual(["object", expected.map((key) => [key, ["string", key]])]);
+    expect(hindsightCurrentStateJson("é")).not.toBe(hindsightCurrentStateJson("e\u0301"));
+  });
+
+  it.each([undefined, NaN, Infinity, "\ud800", "\udfff", "a\ud800z", "😀\udc00", "\ud800\ud800",
+    { "\ud800": "x" }, { "a\udfff": "x" }, new Date(), Array(1)])("refuses nonportable values: %p", (value) => {
     expect(() => hindsightCurrentStateJson(value)).toThrow();
   });
 });

@@ -1,6 +1,6 @@
 /**
  * INPUT:  MethodRegistry, the memory operation service, its subscription registry and a Logger
- * OUTPUT: operator-only memory.operations.submit/status/list/cancel/subscribe registrations + memory.operations.changed pushes
+ * OUTPUT: operator-only memory.operations registrations and connection membership for operation/replica configuration invalidations
  * POS:    core/server/methods — thin sanitized control plane; refusals ride MEMORY_OPERATION_REFUSED with a closed reason
  */
 import {
@@ -10,15 +10,20 @@ import {
   MemoryOperationSubscribeParamsSchema, MemoryOperationSubscribeResultSchema, MemoryOperationChangedSchema,
   type MemoryOperationCancelParams, type MemoryOperationListParams, type MemoryOperationStatusParams,
   type MemoryOperationSubmitParams,
+  MEMORY_REPLICA_METHODS, MemoryReplicaChangedSchema, type MemoryReplicaChanged,
 } from "@taki/shared";
 import type { Logger } from "../../logging/logger.ts";
 import { MemoryOperationRefusal } from "../../memory/operations/memory-operation-contract.ts";
 import type { MemoryOperationService } from "../../memory/operations/memory-operation-service.ts";
 import { appException } from "../app-error.ts";
-import type { MemoryOperationSubscriptions } from "../memory-operation-subscriptions.ts";
+import type { ConnectionSubscriptions, MemoryOperationSubscriptions } from "../memory-operation-subscriptions.ts";
 import type { MethodContext, MethodRegistry } from "../method-registry.ts";
 
-interface Deps { service: MemoryOperationService; subscriptions: MemoryOperationSubscriptions; logger: Logger }
+interface Deps {
+  service: MemoryOperationService; subscriptions: MemoryOperationSubscriptions; logger: Logger;
+  /** Present where schedule configuration is registered; reuses the same connection membership. */
+  replicaSubscriptions?: ConnectionSubscriptions<MemoryReplicaChanged>;
+}
 
 export function registerMemoryOperationMethods(registry: MethodRegistry, deps: Deps): void {
   registry.register({
@@ -41,8 +46,10 @@ export function registerMemoryOperationMethods(registry: MethodRegistry, deps: D
     method: MEMORY_OPERATION_METHODS.subscribe, roles: ["operator"], paramsSchema: MemoryOperationSubscribeParamsSchema,
     handler: (_params, ctx: MethodContext) => {
       deps.subscriptions.subscribe(ctx.connection, (operation) => ctx.notify(MEMORY_OPERATION_METHODS.changed, MemoryOperationChangedSchema.parse({ operation })));
+      deps.replicaSubscriptions?.subscribe(ctx.connection, (changed) => ctx.notify(MEMORY_REPLICA_METHODS.changed, MemoryReplicaChangedSchema.parse(changed)));
       // Connection-scoped: a replacement socket must subscribe again; no explicit unsubscribe this stage.
       ctx.onClose(() => deps.subscriptions.unsubscribe(ctx.connection));
+      if (deps.replicaSubscriptions) ctx.onClose(() => deps.replicaSubscriptions?.unsubscribe(ctx.connection));
       return MemoryOperationSubscribeResultSchema.parse({ status: "ok" });
     },
   });

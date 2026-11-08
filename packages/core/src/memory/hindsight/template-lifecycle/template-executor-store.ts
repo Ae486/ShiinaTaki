@@ -7,7 +7,7 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { MemoryTemplateErrorCodeSchema, MemoryTemplatePhaseSchema } from "@taki/shared";
 import type { Database } from "../../../db/sqlite.ts";
-import { readMemoryAuthoritySelection } from "../../legacy-migration/legacy-activation-repo.ts";
+import { readCurrentMemoryAuthorityIdentity } from "../../legacy-migration/legacy-activation-repo.ts";
 import { readTemplateHold } from "./template-execution-reads.ts";
 
 export const TEMPLATE_EXECUTOR_LEASE_MS = 300_000;
@@ -79,7 +79,7 @@ function assertPlanActive(db: Database, planId: string): void {
   const quarantined = db.prepare(`SELECT 1 FROM hindsight_template_admissions a
     JOIN memory_transition_emergency_quarantine q ON q.operation_id=a.operation_id WHERE a.plan_id=:id LIMIT 1`).get({ id: planId });
   if (hold.state === "quarantined" || quarantined) throw new Error("MEMORY_TEMPLATE_QUARANTINED");
-  const selection = readMemoryAuthoritySelection(db);
+  const selection = readCurrentMemoryAuthorityIdentity(db);
   if (selection.mode !== "hindsight" || selection.epochId !== hold.epochId) throw new Error("MEMORY_TEMPLATE_IDENTITY_CHANGED");
 }
 function writeExecutor(db: Database, input: { previous: TemplateExecutor; next: TemplateExecutor }): void {

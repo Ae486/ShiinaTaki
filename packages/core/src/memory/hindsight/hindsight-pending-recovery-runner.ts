@@ -1,6 +1,6 @@
 /**
- * INPUT:  the replica scheduler claim, admitted Hindsight client, durable outbox, and optional legacy derived port
- * OUTPUT: first pull, tracked native proof, second pull and factual checkpoint confirmation; explicit legacy compatibility
+ * INPUT:  scheduler claim, durable outbox, sync-admitted D77 evidence or fresh legacy compatibility
+ * OUTPUT: first pull, tracked native proof, second pull and factual checkpoint confirmation; negotiation failures throw
  * POS:    core/memory/hindsight — explicit B5 orchestration; no new scheduler, automatic authority change, or Run Effect replay
  */
 import { z } from "zod";
@@ -11,12 +11,14 @@ import {
   HINDSIGHT_TRANSITION_BUILD,
   HINDSIGHT_CONFIGURATION_BUILD,
   HINDSIGHT_TEMPLATE_BUILD,
+  HINDSIGHT_TEMPLATE_BACKUP_BUILD,
   type HindsightConnectionProjection, type MemoryAuthorityEpoch, type MemoryReplicaCheckpoint, type MemoryReplicaRunResult, type PendingMemoryRecord,
 } from "@taki/shared";
 import type { CanonicalMemoryAuthorityRepo } from "../../db/canonical-memory-authority-repo.ts";
 import type { HindsightReplicaSyncRepo } from "../../db/hindsight-replica-sync-repo.ts";
 import type { PendingMemoryRepo } from "../../db/pending-memory-repo.ts";
 import type { HindsightCallContext, HindsightClient } from "./hindsight-client.ts";
+import type { HindsightApplicationAdmissionReader } from "./hindsight-application-capability.ts";
 import type { HindsightReplicaProjection } from "./hindsight-replica-projection.ts";
 import {
   createHindsightReplicaSyncRunner, type HindsightReplicaRunInput, type HindsightReplicaSchedulerRunner,
@@ -31,6 +33,7 @@ interface RecoveryDependencies {
   connection: HindsightConnectionProjection; secretMarker: string; derivedCompletion?: MemoryDerivedCompletionPort;
   now?: () => string; deadlineMs?: number;
   syncRunner?: HindsightReplicaSchedulerRunner;
+  readAdmission?: HindsightApplicationAdmissionReader;
   beforeNativeDispatch?: PendingReplayContext["beforeNativeDispatch"];
 }
 interface RecoveryContext extends PendingReplayContext {
@@ -57,7 +60,7 @@ async function recover(deps: RecoveryDependencies, work: { input: HindsightRepli
   context.request();
   let result = await (work.rebuild ? work.sync.rebuild(context.input) : work.sync.run(context.input));
   context.request();
-  const stages = { ...context, checkpoint: result.checkpoint, nativeResultSupported: await nativeResultSupported(context),
+  const stages = { ...context, checkpoint: result.checkpoint, nativeResultSupported: await nativeResultSupported(context, deps.readAdmission),
     forceRetry: context.input.run.trigger === "manual" || context.input.run.trigger === "catch_up",
     derivedCompletion: deps.derivedCompletion ?? unavailableHindsightDerivedCompletion };
   const replayed = await replayPendingBank(stages);
@@ -127,8 +130,9 @@ function confirmReflected(context: RecoveryContext, records: PendingMemoryRecord
   });
 }
 
-async function nativeResultSupported(context: RecoveryContext): Promise<boolean> {
-  const manifest = await context.client.compatibility(context.request());
+async function nativeResultSupported(context: RecoveryContext, readAdmission?: HindsightApplicationAdmissionReader): Promise<boolean> {
+  context.request();
+  const manifest = readAdmission ? readAdmission(context.request) : await context.client.compatibility(context.request());
   context.request();
   if (manifest.provider.lineage !== context.authority.providerLineageId) throw new Error("HINDSIGHT_PENDING_AUTHORITY_MISMATCH");
   const contract = manifest.contracts.native_results;
@@ -139,7 +143,8 @@ async function nativeResultSupported(context: RecoveryContext): Promise<boolean>
       || manifest.source_identity.compatibility_build === HINDSIGHT_APPLICATION_STATE_BUILD
       || manifest.source_identity.compatibility_build === HINDSIGHT_TRANSITION_BUILD
       || manifest.source_identity.compatibility_build === HINDSIGHT_CONFIGURATION_BUILD
-      || manifest.source_identity.compatibility_build === HINDSIGHT_TEMPLATE_BUILD)
+      || manifest.source_identity.compatibility_build === HINDSIGHT_TEMPLATE_BUILD
+      || manifest.source_identity.compatibility_build === HINDSIGHT_TEMPLATE_BACKUP_BUILD)
     && contract?.version === HINDSIGHT_NATIVE_RESULT_VERSION && contract.support.state === "supported"
     && contract.support.reason === "all_contracts_available";
 }

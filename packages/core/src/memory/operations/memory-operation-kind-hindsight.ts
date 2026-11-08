@@ -2,7 +2,7 @@
  * INPUT:  hindsight.activate requests (new / resume / recover), the Hindsight activation service and the owner's row lookups
  * OUTPUT: the activation kind handler — synchronous side-effect-free admission with Core-minted identities, deferred claim,
  *         producer checkpoints from the chain, receipt-based settlement, pre-claim cancel and read-only boot observation
- * POS:    core/memory/operations — family hindsight-activation; recover on a committed epoch repairs the binding only
+ * POS:    core/memory/operations — family hindsight-activation; recovery repairs and prepares the same committed epoch
  */
 import type { MemoryActivationRun, MemoryHindsightActivateSource, MemoryOperationRequest } from "@taki/shared";
 import { hindsightActivationErrorCode } from "../hindsight-activation/hindsight-activation-errors.ts";
@@ -83,7 +83,7 @@ function priorProducer(ctx: MemoryOperationContext, runId: string): HindsightRef
   return prior?.producer?.kind === "hindsight" && prior.producer.runId === runId ? prior.producer : null;
 }
 
-/** Under a committed Hindsight authority only the exact committed epoch may be re-submitted, and only to repair its binding. */
+/** Under Hindsight authority recovery reuses the exact committed epoch for binding and receipt-Bank preparation. */
 function admitRecover(source: Extract<MemoryHindsightActivateSource, { mode: "recover" }>, ctx: MemoryOperationContext,
   input: { service: HindsightActivationService; plan: HindsightActivationPlan }): HindsightRef {
   const { authority } = input.plan;
@@ -101,7 +101,7 @@ async function activate(service: HindsightActivationService, execution: Executio
   let latest = input.ref;
   const identity = identityOf(input.ref, { operationId: execution.operationId, predecessorEpochId: input.predecessorEpochId });
   const control: HindsightActivationControl = {
-    checkpoint: (producer) => { latest = producer; execution.checkpoint(producer); },
+    checkpoint: (producer) => { execution.checkpoint(producer); latest = producer; },
     stopRequested: () => false,
     ...(execution.request.source.mode === "resume" ? takeOver(service, execution.ctx, identity.runId) : {}),
   };
@@ -133,21 +133,31 @@ function activateFailure(service: HindsightActivationService, ref: HindsightRef,
   } catch {
     return unknown("commitment_unknown", ref);
   }
-  if (receipt) return receipt.transactionId === ref.transactionId ? committedSettlement(service, ref, receipt.epochId) : unknown("commitment_unknown", ref);
+  if (receipt) {
+    if (receipt.transactionId !== ref.transactionId) return unknown("commitment_unknown", ref);
+    const settlement = committedSettlement(service, ref, receipt.epochId);
+    return ref.progress.phase === "completed" ? settlement : { ...settlement, state: "failed",
+      reason: settlement.reason ?? "producer_failed", errorCode: hindsightActivationErrorCode(error) };
+  }
   if (!localSelected) return unknown("commitment_unknown", ref);
   const code = hindsightActivationErrorCode(error);
   return failed({ code, reason: code === "HINDSIGHT_ACTIVATION_INTERRUPTED" ? "producer_incomplete" : "producer_failed", producer: ref });
 }
 
-function repairBinding(service: HindsightActivationService, ref: HindsightRef, checkpoint: (producer: HindsightRef) => void): MemoryOperationSettlement {
-  checkpoint(withPhase(ref, "binding"));
-  try { service.recover(ref.hindsightEpochId); }
+async function repairBinding(service: HindsightActivationService, ref: HindsightRef, checkpoint: (producer: HindsightRef) => void): Promise<MemoryOperationSettlement> {
+  const binding = withPhase(ref, "binding");
+  checkpoint(binding);
+  try {
+    await service.recover(ref.hindsightEpochId, ref.banks.map((bank) => bank.nativeBankId));
+    const prepared = withPhase(binding, "completed");
+    checkpoint(prepared);
+    return committedSettlement(service, prepared, ref.hindsightEpochId);
+  }
   catch (error) {
     // The commit is proven; a thrown repair (custody refusal, failed construction) is this command's own failure, never a completion.
-    const settlement = committedSettlement(service, ref, ref.hindsightEpochId);
+    const settlement = committedSettlement(service, binding, ref.hindsightEpochId);
     return { ...settlement, state: "failed", reason: settlement.reason ?? "producer_failed", errorCode: hindsightActivationErrorCode(error) };
   }
-  return committedSettlement(service, ref, ref.hindsightEpochId);
 }
 
 function observeBoot(service: HindsightActivationService, ref: HindsightRef): MemoryOperationSettlement {

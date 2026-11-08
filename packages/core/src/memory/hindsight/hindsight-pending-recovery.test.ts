@@ -1,11 +1,11 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createHash, randomUUID } from "node:crypto";
 import { mkdtempSync, rmSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import {
   CanonicalMemoryUnitSchema, MemoryReplicaScheduleConfigSchema, type CanonicalMemoryRecord, type CanonicalMemoryUnit,
-  HindsightNativeResultSchema, nativeResultFields, nativeReceiptFields,
+  HindsightNativeResultSchema, HindsightNativeResultStatusSchema, HINDSIGHT_NATIVE_RESULT_VERSION, HINDSIGHT_TEMPLATE_BACKUP_BUILD, nativeResultFields, nativeReceiptFields,
   type HindsightConnectionProjection, type HindsightJournalChange, type HindsightLogicalSnapshotMetadata,
   type HindsightLogicalSnapshotRecord, type MemoryReplicaBank, type MemoryReplicaScheduledRun,
   type MutationRequest, type PendingMemoryOperation, type PendingMemoryRecord,
@@ -28,6 +28,9 @@ import { createHindsightReplicaScheduler, type HindsightReplicaScheduler } from 
 import type { HindsightReplicaProjection } from "./hindsight-replica-projection.ts";
 import { replicaErrorCode, replicaOwnershipLost } from "./hindsight-replica-errors.ts";
 import { snapshotManifestHash } from "./hindsight-snapshot-validator.ts";
+import { hindsightRuntimeFixture } from "../../testing/hindsight-runtime-composition-fixtures.ts";
+import { writeTestBank, writeTestCall, writeTestRetain } from "./hindsight-memory-write-fixtures.ts";
+import { writeNativeFixture } from "./hindsight-memory-write-native-fixtures.ts";
 
 const at = "2026-09-06T00:00:00.000Z";
 const lineage = "11111111-1111-4111-8111-111111111111";
@@ -48,6 +51,84 @@ afterEach(async () => {
 });
 
 describe("Pending Memory recovery through the real client and SQLite repositories", () => {
+  it("settles the accepted tracked write on the first due poll after two failed deliveries", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(at);
+    const bank = writeTestBank(); const f = hindsightRuntimeFixture({ banks: [bank] });
+    try {
+      const { state, scheduler } = f.subsystem(); const bankId = bank.scope.bankId;
+      const native = writeNativeFixture(bank, state.pending); let outage = true; let ready = false;
+      Object.assign(f.remote.client, native.client);
+      f.remote.client.trackedNativeWrite = async (input) => {
+        if (outage) throw new Error("HINDSIGHT_UNREACHABLE");
+        const response = await native.client.trackedNativeWrite(input);
+        if ("error" in response) throw new Error("unexpected fixture refusal");
+        return { ...response, status: "pending", result: null };
+      };
+      f.remote.client.nativeResult = async (input) => {
+        if (!native.results.has(input.identity.operation_id)) return HindsightNativeResultStatusSchema.parse({
+          ...input.identity, bank_id: bankId, operation_kind: "retain", request_hash: null,
+          status: "unavailable", reason: "receipt_not_found", progress: null, result: null,
+        });
+        const response = await native.client.nativeResult(input);
+        return ready ? response : { ...response, status: "pending", result: null };
+      };
+      await state.service.synchronize({ bankId, context: { timeoutMs: 30_000 } });
+      const writer = createPendingMemoryWriter({ authority: f.authority, replica: state.nativeReplica, pending: state.pending });
+      const row = writer.enqueue({ kind: "retain", zeroResultAllowed: true, request: writeTestRetain() },
+        writeTestCall("accepted-after-outage"), state.runtime.bank(bankId));
+      const current = () => state.pending.get(pendingMemoryRef(row))!;
+      await expect(state.service.recover({ bankId, context: { timeoutMs: 30_000 } })).rejects.toThrow("HINDSIGHT_UNREACHABLE");
+      scheduler.requestRetry(bankId, current().nextRetryAt!);
+      expect(current()).toMatchObject({ acceptedAt: null, attempts: 1, dispatch: { protocol: "tracked_native_v1" } });
+      vi.setSystemTime(Date.now() + 7_800); scheduler.start(); await scheduler.tick();
+      expect(current()).toMatchObject({ acceptedAt: null, attempts: 2 });
+      expect(scheduler.status(bankId)[0]).toMatchObject({ retryAttempt: 2, consecutiveFailures: 1, errorCode: "HINDSIGHT_UNREACHABLE" });
+      expect(Date.parse(current().nextRetryAt!) - Date.now()).toBe(300_000);
+      outage = false; vi.setSystemTime(Date.now() + 300_000); await scheduler.tick();
+      const acceptedAt = new Date().toISOString(); const dueAt = new Date(Date.now() + 60_000).toISOString();
+      expect(current()).toMatchObject({ phase: "submitted", acceptedAt, attempts: 3, nextRetryAt: dueAt,
+        remoteOperationId: row.remoteOperationId, diagnosticCode: "HINDSIGHT_PENDING_REMAINS" });
+      expect(scheduler.status(bankId)[0]).toMatchObject({ mode: "failed", run: null, retryAttempt: 3,
+        consecutiveFailures: 2, errorCode: "HINDSIGHT_PENDING_REMAINS", retryDueAt: dueAt });
+      vi.setSystemTime(Date.now() + 900); ready = true;
+      vi.setSystemTime(Date.now() + 59_099); await scheduler.tick(); expect(current().attempts).toBe(3);
+      vi.setSystemTime(Date.now() + 1); await scheduler.tick();
+      expect(current()).toMatchObject({ phase: "completed", attempts: 4, acceptedAt, remoteOperationId: row.remoteOperationId });
+      expect(current().nativeResultReceipt).not.toBeNull();
+      expect(state.replica.checkpoint(bankId)!.checkpoint.native_cursor)
+        .toBeGreaterThanOrEqual(current().nativeResultReceipt!.result.native_through_cursor);
+      expect(scheduler.status(bankId)[0]).toMatchObject({ mode: "idle", retryDueAt: null, consecutiveFailures: 0 });
+      expect(native.calls.filter((event) => event.startsWith("dispatch:"))).toEqual([`dispatch:${row.remoteOperationId}`]);
+    } finally { await f.close(); vi.useRealTimers(); }
+  });
+
+  it("wakes for the earlier Pending row and leaves a future row alone on an early wake", async () => {
+    const f = fixture(); f.useProvenFixtureFence(); f.autoComplete = false;
+    f.schedule.ensureBank({ bank: globalBank, config: MemoryReplicaScheduleConfigSchema.parse({ automatic: true }) });
+    const first = f.enqueue(retain("first waiting source"));
+    f.after = (url, response) => { if (url.pathname.includes("/operations/")) f.advance(1); return response; };
+    const scheduler = f.scheduler(); scheduler.start(); await scheduler.tick(); f.after = undefined;
+    f.advance(60_000); const second = f.enqueue(retain("second waiting source")); await scheduler.tick();
+    const firstDueAt = f.row(first).nextRetryAt!; const secondDueAt = f.row(second).nextRetryAt!;
+    expect(Date.parse(firstDueAt) - Date.parse(f.at)).toBe(300_000);
+    expect(Date.parse(secondDueAt) - Date.parse(f.at)).toBe(60_000);
+    expect(scheduler.status("global")[0]?.retryDueAt).toBe(secondDueAt);
+    f.complete(second.remoteOperationId); f.advance(60_000); await scheduler.tick();
+    expect(f.row(second).phase).toBe("completed"); expect(f.row(first).attempts).toBe(2);
+    // The first row is four minutes away, beyond the completed run's 61-second lease.
+    expect(scheduler.status("global")[0]).toMatchObject({ run: null, retryDueAt: firstDueAt,
+      errorCode: "HINDSIGHT_PENDING_REMAINS", consecutiveFailures: 3 });
+    scheduler.requestRetry("global", new Date(Date.parse(f.at) + 10_000).toISOString());
+    f.advance(10_000); await scheduler.tick();
+    expect(f.row(first)).toMatchObject({ attempts: 2, nextRetryAt: firstDueAt });
+    expect(scheduler.status("global")[0]).toMatchObject({ retryDueAt: firstDueAt, consecutiveFailures: 4 });
+    const calls = f.logs.length;
+    await scheduler.tick(); await scheduler.tick(); expect(f.logs).toHaveLength(calls);
+    f.advance(Date.parse(firstDueAt) - Date.parse(f.at)); f.complete(first.remoteOperationId); await scheduler.tick();
+    expect(f.row(first)).toMatchObject({ phase: "completed", attempts: 3 });
+    expect(scheduler.status("global")[0]).toMatchObject({ mode: "idle", retryDueAt: null, consecutiveFailures: 0 });
+  });
+
   it("orders first pull, retain-first replay, native completion, derived evidence, and second-pull publication", async () => {
     const f = fixture(); f.useProvenFixtureFence(); const authority = f.authorityState();
     const edit = f.enqueue(mutation({ patch: { text: "corrected memory", context: null } }));
@@ -94,6 +175,73 @@ describe("Pending Memory recovery through the real client and SQLite repositorie
     f.useProvenFixtureFence(); await f.execute();
     expect(f.row(row).phase).toBe("completed");
     expect(f.events.filter((event) => event.startsWith("retain:"))).toHaveLength(1);
+  });
+
+  it("dispatches through tracked native results on the template-backup build instead of the fenceless legacy path", async () => {
+    const f = fixture(); const row = f.enqueue(retain());
+    const manifest = compatibility(lineage);
+    manifest.source_identity.compatibility_build = HINDSIGHT_TEMPLATE_BACKUP_BUILD;
+    f.override = (url) => url.pathname === "/ext/taki-memory/version"
+      ? json({ ...manifest, contracts: { ...manifest.contracts, native_results: { version: HINDSIGHT_NATIVE_RESULT_VERSION, support: manifest.support } } })
+      : url.pathname.endsWith("/retains") ? { status: 503, body: "fixture outage" } : undefined;
+    await f.execute().catch(() => undefined);
+    expect(f.row(row).dispatch?.protocol).toBe("tracked_native_v1");
+    expect(f.events.filter((event) => event.startsWith("retain:"))).toHaveLength(0);
+  });
+
+  it("reuses D77 admission for tracked Pending recovery with two warm sync requests and complete factual confirmation", async () => {
+    const bank = writeTestBank(); const f = hindsightRuntimeFixture({ banks: [bank] });
+    try {
+      const subsystem = f.subsystem(); const { state } = subsystem;
+      const native = writeNativeFixture(bank, state.pending); Object.assign(f.remote.client, native.client);
+      const compatibility = f.remote.client.compatibility;
+      vi.spyOn(f.remote.client, "compatibility").mockImplementation(async (context) => {
+        const manifest = await compatibility(context);
+        return { ...manifest, source_identity: { ...manifest.source_identity, compatibility_build: HINDSIGHT_TEMPLATE_BACKUP_BUILD } };
+      });
+      await state.service.synchronize({ bankId: bank.scope.bankId, context: { timeoutMs: 30_000 } });
+      const writer = createPendingMemoryWriter({ authority: f.authority, replica: state.nativeReplica, pending: state.pending });
+      const row = writer.enqueue({ kind: "retain", zeroResultAllowed: true, request: writeTestRetain() },
+        writeTestCall("f2-composed-pending"), state.runtime.bank(bank.scope.bankId));
+      const sync = vi.spyOn(state.sync, "run"); const save = vi.spyOn(state.admission, "save");
+      f.remote.calls.length = 0;
+      await state.service.recover({ bankId: bank.scope.bankId, context: { timeoutMs: 30_000 } });
+      const completed = state.pending.get(pendingMemoryRef(row));
+      expect(completed).toMatchObject({ phase: "completed", dispatch: { protocol: "tracked_native_v1" } });
+      expect(completed?.nativeResultReceipt).not.toBeNull();
+      expect(state.replica.checkpoint(bank.scope.bankId)!.checkpoint.native_cursor)
+        .toBeGreaterThanOrEqual(completed!.nativeResultReceipt!.result.native_through_cursor);
+      expect(native.calls.filter((entry) => entry.startsWith("dispatch:"))).toEqual([`dispatch:${row.remoteOperationId}`]);
+      expect(sync).toHaveBeenCalledTimes(2);
+      expect(f.remote.calls.filter((entry) => entry.operation.startsWith("/")).map((entry) => entry.operation))
+        .toEqual(["/ext/taki-memory/version", "/ext/taki-memory/version"]);
+      expect(save).not.toHaveBeenCalled();
+    } finally { await f.close(); vi.restoreAllMocks(); }
+  });
+
+  it.each(["missing", "corrupt"] as const)("refuses %s admitted evidence after the first D77 pull before dispatching Pending", async (failure) => {
+    const bank = writeTestBank(); const f = hindsightRuntimeFixture({ banks: [bank] });
+    try {
+      const { state } = f.subsystem(); const native = writeNativeFixture(bank, state.pending);
+      Object.assign(f.remote.client, native.client);
+      await state.service.synchronize({ bankId: bank.scope.bankId, context: { timeoutMs: 30_000 } });
+      const writer = createPendingMemoryWriter({ authority: f.authority, replica: state.nativeReplica, pending: state.pending });
+      const row = writer.enqueue({ kind: "retain", zeroResultAllowed: true, request: writeTestRetain() },
+        writeTestCall("f2-refused-pending"), state.runtime.bank(bank.scope.bankId));
+      const pull = vi.spyOn(f.remote.client, "applicationChanges"); const read = state.admission.read;
+      vi.spyOn(state.admission, "read").mockImplementation((identity) => {
+        if (pull.mock.calls.length === 0) return read(identity);
+        if (failure === "corrupt") throw new Error("HINDSIGHT_APPLICATION_ADMISSION_INVALID");
+        return undefined;
+      });
+      f.remote.calls.length = 0;
+      await expect(state.service.recover({ bankId: bank.scope.bankId, context: { timeoutMs: 30_000 } }))
+        .rejects.toThrow("HINDSIGHT_APPLICATION_ADMISSION_INVALID");
+      expect(pull).toHaveBeenCalledOnce(); expect(native.calls).toEqual([]);
+      expect(state.pending.get(pendingMemoryRef(row))).toEqual(row);
+      expect(f.remote.calls.filter((entry) => entry.operation.startsWith("/")).map((entry) => entry.operation))
+        .toEqual(["/ext/taki-memory/version"]);
+    } finally { await f.close(); vi.restoreAllMocks(); }
   });
 
   it("resumes an interrupted second pull without repeating native writes or a persisted derived check", async () => {

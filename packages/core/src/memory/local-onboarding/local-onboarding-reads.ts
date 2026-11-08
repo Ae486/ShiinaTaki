@@ -71,6 +71,7 @@ export function readOnboardingExceptions(db: Database, params: MemoryOnboardingE
 export function localRuntimeAvailability(snapshot: LocalBindingSnapshot): LocalRuntimeAvailability {
   if (snapshot.selection !== "canonical-local") return { available: true, unavailableReason: null };
   if (snapshot.lifetime === "stopped") return { available: false, unavailableReason: "stopped" };
+  if (snapshot.binding.kind === "unavailable" && snapshot.binding.code === "MEMORY_AUTHORITY_INVALID") return { available: false, unavailableReason: "authority_invalid" };
   if (snapshot.binding.kind !== "published") return { available: false, unavailableReason: "not_installed" };
   if (snapshot.binding.epochId !== snapshot.selectedEpochId) return { available: false, unavailableReason: "authority_mismatch" };
   return { available: true, unavailableReason: null };

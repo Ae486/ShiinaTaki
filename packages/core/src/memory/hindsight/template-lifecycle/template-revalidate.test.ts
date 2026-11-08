@@ -6,6 +6,7 @@ import { createMemoryOperationService } from "../../operations/memory-operation-
 import { fakeSetup } from "../../operations/memory-operation-fixtures.ts";
 import { templateLifecycleFixture, type TemplateLifecycleFixture } from "./template-lifecycle-fixtures.ts";
 import { signFixtureSnapshot } from "./template-test-fixtures.ts";
+import { TAKI_MANAGED_TEMPLATE_REVISION } from "./template-catalog.ts";
 
 const cleanup: Array<() => Promise<void>> = [];
 afterEach(async () => { for (const close of cleanup.splice(0).reverse()) await close(); });
@@ -20,7 +21,7 @@ function connectionOwner(f: TemplateLifecycleFixture) {
   return owner;
 }
 
-async function fixture(revision = "taki-bank-v2") {
+async function fixture(revision = TAKI_MANAGED_TEMPLATE_REVISION) {
   const f = templateLifecycleFixture(); cleanup.push(f.close);
   const params = f.params();
   if (params.target.kind !== "defaults") throw new Error("expected defaults");
@@ -33,7 +34,7 @@ async function fixture(revision = "taki-bank-v2") {
 }
 
 describe("connection revalidation of independently managed selections", () => {
-  it.each(["taki-bank-v2", "none"])("verifies %s using its exact receipt/current snapshot without new Native writes", async (revision) => {
+  it.each([TAKI_MANAGED_TEMPLATE_REVISION, "taki-bank-v2", "none"])("verifies %s using its exact receipt/current snapshot without new Native writes", async (revision) => {
     const { f, owner, exports } = await fixture(revision);
     const setup = createHindsightBankSetupRepo(f.db).list();
     const selections = f.db.prepare("SELECT * FROM hindsight_template_selections").all();

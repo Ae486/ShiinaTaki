@@ -1,6 +1,6 @@
 /**
- * INPUT: surviving missing-policy heads and the exact already committed healthy predecessor
- * OUTPUT: original Canonical records/policy history for byte-identical native/application versions only
+ * INPUT: surviving Memory heads and the exact already committed healthy predecessor
+ * OUTPUT: shared binding eligibility and original Canonical policy only for byte-identical missing-policy versions
  * POS: core/db — historical policy reuse; never creates policy or treats an old proof as a fresh emergency certificate
  */
 import { z } from "zod";
@@ -10,24 +10,27 @@ import { readTransitionReceipt } from "./memory-transition-evidence-repo.ts";
 import { readVerifiedTransitionPublication } from "./memory-transition-publication-reader.ts";
 import { readTransitionCandidate, readTransitionNativeEvidence, type readTransitionPublishedNativeBaseline } from "./memory-transition-candidate-repo.ts";
 import { withTransitionEvidenceContext, type TransitionEvidenceContext } from "../memory/transitions/transition-evidence-context.ts";
-import { transitionProjectionContext } from "../memory/transitions/transition-local-projection.ts";
+import { requiresTransitionMemoryPolicy, transitionProjectionContext } from "../memory/transitions/transition-local-projection.ts";
 import { transitionLocalHash } from "../memory/transitions/transition-local-encoding.ts";
 import type { Database } from "./sqlite.ts";
+import type { MemoryAuthorityVerification } from "../memory/runtime-authority-verification.ts";
 
 export interface SurvivingPolicyRecord { record: CanonicalMemoryRecord; history: MemoryTransitionLocalState["history"][number] }
 const InitialPolicy = z.strictObject({ proofHash: z.string(), native: TakiApplicationNativeVersionSchema,
   logicalMemoryId: z.string(), localBankId: z.string(), body: TakiApplicationMemoryBodySchema });
 
-export function readSurvivingBaselinePolicies(db: Database, input: { evidence: MemorySurvivingBankEvidence;
-  predecessorEpochId: string; baseline: ReturnType<typeof readTransitionPublishedNativeBaseline>; verification?: TransitionEvidenceContext }): Map<string, SurvivingPolicyRecord> {
-  input.verification?.assertOwner(db); input.verification?.assertIndependent();
-  const wanted = input.evidence.heads.filter((head) => head.object_kind === "memory_unit" && head.version && head.binding_state === "binding_missing");
+export function readSurvivingBaselinePolicies(db: Database, input: {
+  evidence: Pick<MemorySurvivingBankEvidence, "bankId" | "namespace" | "heads" | "nativeRecords">;
+  predecessorEpochId: string; baseline: ReturnType<typeof readTransitionPublishedNativeBaseline>; verification?: TransitionEvidenceContext;
+  verifyTransitionPublication?: MemoryAuthorityVerification["verifyTransitionPublication"] }): Map<string, SurvivingPolicyRecord> {
+  input.verification?.assertOwner(db);
+  const wanted = input.evidence.heads.filter(requiresTransitionMemoryPolicy);
   if (wanted.length === 0) return new Map();
   const baseline = input.baseline; if (!baseline) invalid();
   return withTransitionEvidenceContext(db, (verification) => {
     const receipt = readTransitionReceipt(db, baseline.evidence.transitionId);
     if (!receipt || receipt.newEpochId !== input.predecessorEpochId || receipt.identity.targetProvider !== "hindsight") invalid();
-    const publication = readVerifiedTransitionPublication(db, receipt.receiptId, verification);
+    const publication = input.verifyTransitionPublication?.(receipt.receiptId, verification) ?? readVerifiedTransitionPublication(db, receipt.receiptId, verification);
     if (publication.version !== 1) invalid();
     const candidate = readTransitionCandidate(db, publication.candidateId);
     const scope = candidate.scopes.find((row) => row.nativeBankId === input.evidence.bankId);

@@ -108,7 +108,10 @@ describe.skipIf(process.platform !== "win32")("C2a actual helper/Native processe
   it.each(["missing", "corrupt"])("refuses %s ownership without initializing or dispatching", async (condition) => {
     const h = await harness(); const path = join(h.fixture.root, "state", "deployment.json");
     if (condition === "missing") unlinkSync(path); else writeFileSync(path, "corrupt generated test data");
-    await expect(h.invoke(h.helper(), "create")).rejects.toThrow();
+    const child = h.helper();
+    await expect(h.invoke(child, "create")).rejects.toThrow("fixture pipe closed");
+    await child.exited;
+    expect(child.child.exitCode).toBe(1);
     expect(h.engine.counts).toMatchObject({ createVolume: 0, createContainer: 0, startContainer: 0, authorize: 0, submit: 0 });
     expect(existsSync(path)).toBe(condition === "corrupt");
   });

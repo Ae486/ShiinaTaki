@@ -17,7 +17,7 @@ const Id = z.string().min(1).max(256);
 const Timestamp = z.iso.datetime({ offset: true });
 
 export const MemoryRuntimeUnavailableReasonSchema = z.enum([
-  "authority_mismatch", "connection_unavailable", "stopped", "not_installed", "connection_disabled", "config_changed", "template_hold",
+  "authority_mismatch", "authority_invalid", "evidence_invalid", "connection_unavailable", "stopped", "not_installed", "connection_disabled", "config_changed", "template_hold",
 ]);
 export type MemoryRuntimeUnavailableReason = z.infer<typeof MemoryRuntimeUnavailableReasonSchema>;
 

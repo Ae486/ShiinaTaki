@@ -1,5 +1,5 @@
 /**
- * INPUT:  active Local epoch, timeline, canonical repositories and the process Utility Slot
+ * INPUT:  active Local epoch, current binding identity, timeline, canonical repositories and the process Utility Slot
  * OUTPUT: real Local ingestion/tidy/retention, source witnessing and pre-retirement durability behind one write fence;
  *         start() owns retention; unresolved source transitions refuse reconstruction until positive release
  * POS:    core/memory — provider-specific background composition built as a draft and started by the runtime binding; Compaction remains Core-owned
@@ -21,10 +21,12 @@ import type { MemoryWriteOp } from "./episodic-writer.ts";
 import { createTidyPass } from "./tidy-pass.ts";
 import type { UtilitySlot } from "./utility-slot.ts";
 import { sourceTransition } from "./transitions/transition-queued-provider.ts";
+import type { MemoryAuthorityIdentity } from "./legacy-migration/legacy-activation-repo.ts";
 
 export function createCanonicalLocalSubsystem(input: {
   db: Database; epochId: string; promptDir: string; timeline: TimelineRepo;
   utility: UtilitySlot; config: MemoryConfig; logger: Logger;
+  boundIdentity?(): MemoryAuthorityIdentity | undefined;
 }) {
   if (sourceTransition(input.db, input.epochId)) throw new Error("MEMORY_TRANSITION_OUTCOME_UNKNOWN");
   const fence = createCanonicalLocalWriteFence();
