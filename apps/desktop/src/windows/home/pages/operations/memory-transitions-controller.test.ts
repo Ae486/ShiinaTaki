@@ -28,6 +28,8 @@ function fake() {
   const client = { memoryAuthorityStatus: async () => hindsightStatus(), memoryActivationStatus: async () => activationStatus(),
     memoryOperationSubmit: vi.fn(async () => operation()), memoryOperationCancel: vi.fn(async () => operation()),
     subscribeMemoryOperations: vi.fn(async () => { order.push("subscribe"); }), onMemoryOperationChanged: vi.fn(() => () => undefined),
+    onMemoryReplicaChanged: vi.fn(() => () => undefined),
+    memoryReplicaConfigure: vi.fn(async () => { throw new Error("transition fixture does not configure replicas"); }),
     memoryTransitionOverview: vi.fn(async () => { order.push("read"); return overview(); }),
     memoryTransitionPreview: vi.fn(async (params) => preview(params.kind)),
   } satisfies MemoryTransitionsClient;

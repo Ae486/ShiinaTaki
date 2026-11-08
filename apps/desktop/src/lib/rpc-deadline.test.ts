@@ -8,8 +8,10 @@ import {
   MEMORY_AUTHORITY_METHODS,
   MEMORY_METHODS,
   MEMORY_OPERATION_METHODS,
+  MEMORY_REPLICA_METHODS,
   MEMORY_TRANSITION_METHODS,
   PERMISSION_METHODS,
+  SECRET_METHODS,
   SKILL_METHODS,
   TIMING_POLICY_DEVELOPMENT_DEFAULTS,
 } from "@taki/shared";
@@ -56,6 +58,10 @@ describe("RPC deadline method policy", () => {
     expect(rpcMethodPolicy(MEMORY_OPERATION_METHODS.list).timeoutOutcome).toBe("read-only");
     expect(rpcMethodPolicy(MEMORY_OPERATION_METHODS.submit)).toEqual({ class: "interactive", timing: "interactiveRpcMs", timeoutOutcome: "unknown" });
     expect(rpcMethodPolicy(MEMORY_OPERATION_METHODS.cancel).timeoutOutcome).toBe("unknown");
+    expect(rpcMethodPolicy(MEMORY_REPLICA_METHODS.configure).timeoutOutcome).toBe("unknown");
+    expect(rpcMethodPolicy(SECRET_METHODS.set).timeoutOutcome).toBe("unknown");
+    expect(rpcMethodPolicy(SECRET_METHODS.clear).timeoutOutcome).toBe("unknown");
+    expect(rpcMethodPolicy(SECRET_METHODS.presence).timeoutOutcome).toBe("read-only");
   });
 });
 

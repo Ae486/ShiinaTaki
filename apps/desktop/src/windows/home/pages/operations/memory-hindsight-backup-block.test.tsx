@@ -12,7 +12,7 @@ type State = keyof typeof BACKUP_STATES;
 
 function ops(state: State, patch: Partial<MemoryOperationsView> = {}): MemoryOperationsView {
   return { status: BACKUP_STATES[state], loading: false, error: null, busyKey: null, feedback: null, connectionReady: true,
-    refresh: noop, submit: noop, submitSync: noop, cancel: noop, ...patch };
+    refresh: noop, submit: noop, submitSync: noop, configureSync: noop, cancel: noop, ...patch };
 }
 
 function block(state: State, locked = false, busyKey: string | null = null): string {

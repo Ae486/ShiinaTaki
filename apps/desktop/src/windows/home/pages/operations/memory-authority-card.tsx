@@ -2,7 +2,7 @@
  * INPUT:  the useMemoryOperations() view (composite memory.authority.status + serialized actions).
  * OUTPUT: <MemoryAuthorityCard> — authority/runtime/setup lines, the Hindsight connection + Bank readiness block (创建 Bank /
  *         重新校验连接 from Core actions), the Hindsight backup block (创建备份 / 校验备份 / 导入备份), one block per Bank (replica status, Pending counts, Sync now / Full reconcile /
- *         Retry), and the active operations with Cancel for admitted replica.sync only.
+ *         Retry and persisted mode/interval settings), and active operations with Cancel for admitted replica.sync only.
  * POS:    ui/windows/home/pages/operations — presentational; every number is a Core read and unknown renders as
  *         "未知". Setup validate/apply stay on the Hindsight activation card.
  */
@@ -10,6 +10,7 @@
 import { FeedbackLine } from "@/components/ui/feedback-line.js";
 import { Skeleton } from "@/components/ui/skeleton.js";
 import { ActionButton } from "../../action-button.tsx";
+import { MemoryReplicaSettingsForm } from "./memory-replica-settings-form.tsx";
 import { LabeledRows, PageCard } from "../../page-card.tsx";
 import { memoryAuthorityView, type ActiveOperationRow, type BankRow, type MemoryAuthorityView, type PendingRow } from "./memory-authority-state.ts";
 import { HindsightBackupBlock } from "./memory-hindsight-backup-block.tsx";
@@ -51,6 +52,7 @@ function CardBody({ view, ops }: { view: MemoryAuthorityView; ops: MemoryOperati
 
 function BankBlock({ bank, pending, ops, locked }: { bank: BankRow; pending: PendingRow | null; ops: MemoryOperationsView; locked: boolean }) {
   const busy = ops.busyKey === `sync:${bank.bankId}`;
+  const settingsLocked = locked || ops.loading || ops.error !== null;
   return (
     <div className="rounded-lg border border-border-subtle p-3">
       <p className="mb-2 text-xs font-semibold text-text-strong">{bank.label}</p>
@@ -62,6 +64,8 @@ function BankBlock({ bank, pending, ops, locked }: { bank: BankRow; pending: Pen
         { label: "下一步", value: bank.nextAction },
         ...(pending ? [{ label: "Pending", value: `${pending.pending} 待写 / ${pending.failed} 失败 / ${pending.unknown} 未知 / ${pending.parentWrites} 父写` }] : []),
       ]} />
+      <MemoryReplicaSettingsForm key={`${bank.schedule.automatic}:${bank.schedule.autoIntervalMs}:${bank.schedule.fullReconciliationIntervalMs}`}
+        bankId={bank.bankId} schedule={bank.schedule} ops={ops} locked={settingsLocked} />
       <div className="mt-3 flex flex-wrap gap-2">
         {bank.retryKind && (
           <ActionButton tone="primary" busy={busy} disabled={locked} onClick={() => void ops.submitSync(bank.bankId, bank.retryKind ?? "incremental")}>

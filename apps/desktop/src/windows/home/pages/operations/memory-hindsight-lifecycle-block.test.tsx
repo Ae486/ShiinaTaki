@@ -20,7 +20,7 @@ function actionButtons(node: ReactNode): ReactElement<ActionButtonProps>[] {
 function block(locked: boolean, busyKey: string | null = null) {
   const submit = vi.fn<MemoryOperationsView["submit"]>(noop);
   const ops: MemoryOperationsView = { status, loading: false, error: null, busyKey, feedback: null, connectionReady: true,
-    refresh: noop, submit, submitSync: noop, cancel: noop };
+    refresh: noop, submit, submitSync: noop, configureSync: noop, cancel: noop };
   const lifecycle = hindsightLifecycleView(status);
   if (!lifecycle) throw new Error("fixture must carry a Hindsight section");
   return { submit, buttons: actionButtons(HindsightLifecycleBlock({ lifecycle, ops, locked })) };

@@ -1,16 +1,16 @@
 /**
  * INPUT:  replaceable authenticated WsClient generations (one status read — memory.authority.status or
- *         memory.activation.status — memory.operations.submit/cancel, the memory.operations.changed push) and a sink
+ *         memory.activation.status — operations submit/cancel, replica configure and both configuration/operation pushes) and a sink
  *         for validated views/outcomes.
  * OUTPUT: createMemoryOperationsController() — current-generation-only status reads behind the push subscription,
- *         serialized generic submit/cancel, one push subscription per generation, and coalesced refetch on every
+ *         serialized submit/configure/cancel, one shared subscription per generation, and coalesced refetch on every
  *         changed push and after every mutation outcome (Core is the only truth).
  * POS:    ui/windows/home/pages/operations — framework-free authority guard shared by the Stage 1 and Hindsight
  *         activation cards; never replays a timed-out mutation and never derives an operation outcome locally.
  */
 import type { WsClient } from "@/lib/ws-client.js";
 import { RpcDeadlineExceededError } from "@/lib/rpc-deadline.js";
-import type { MemoryOperation, MemoryOperationRequest, MemoryReplicaRunKind } from "@taki/shared";
+import type { MemoryOperation, MemoryOperationRequest, MemoryReplicaRunKind, MemoryReplicaScheduleConfig } from "@taki/shared";
 import { MEMORY_OPERATION_KIND_LABEL, memoryOperationAppError } from "./memory-authority-state.ts";
 
 export interface MemoryOperationsFeedback { tone: "ok" | "warn" | "danger"; message: string }
@@ -29,6 +29,7 @@ export interface MemoryOperationsController {
   /** Submits one durable request under the serialized mutation guard; `key` names the pending control for the card. */
   submit(request: MemoryOperationRequest, key: string): Promise<void>;
   submitSync(bankId: string, syncKind: MemoryReplicaRunKind): Promise<void>;
+  configureSync(bankId: string, config: MemoryReplicaScheduleConfig): Promise<void>;
   cancel(operationId: string): Promise<void>;
   dispose(): void;
 }
@@ -36,6 +37,7 @@ export interface MemoryOperationsController {
 export type MemoryOperationsClient = Pick<
   WsClient,
   "memoryAuthorityStatus" | "memoryActivationStatus" | "memoryOperationSubmit" | "memoryOperationCancel" | "subscribeMemoryOperations" | "onMemoryOperationChanged"
+  | "memoryReplicaConfigure" | "onMemoryReplicaChanged"
 >;
 
 export type MemoryStatusReader<TStatus> = (client: MemoryOperationsClient) => Promise<TStatus>;
@@ -158,14 +160,24 @@ export function createMemoryOperationsController<TStatus>(sink: MemoryOperations
       state.client = next;
       if (!next) { sink.loading(); return; }
       const token = state.epoch;
-      state.unsubscribe = next.onMemoryOperationChanged(() => {
+      const invalidate = () => {
         if (isCurrent(state, next, token)) void refreshController(state);
-      });
+      };
+      const removeOperation = next.onMemoryOperationChanged(invalidate);
+      const removeReplica = next.onMemoryReplicaChanged(invalidate);
+      state.unsubscribe = () => { removeOperation(); removeReplica(); };
       void refreshController(state);
     },
     refresh: () => refreshController(state),
     submit,
     submitSync: (bankId, syncKind) => submit({ kind: "replica.sync", bankId, syncKind }, `sync:${bankId}`),
+    configureSync: (bankId, config) => mutateController(state, {
+      key: `configure:${bankId}`,
+      operation: async (candidate) => {
+        await candidate.memoryReplicaConfigure(bankId, config);
+        return { tone: "ok", message: "Core 已保存此 Bank 的同步设置。" };
+      },
+    }),
     cancel: (operationId) => mutateController(state, {
       key: `cancel:${operationId}`,
       operation: async (candidate) => {

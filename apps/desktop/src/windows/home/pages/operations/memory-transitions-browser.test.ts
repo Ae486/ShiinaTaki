@@ -21,7 +21,7 @@ it.skipIf(!existsSync(python) || !existsSync(chromium))("owns real browser confi
   const repo = fileURLToPath(new URL("../../../../../../../", import.meta.url));
   const artifacts = join(repo, ".trellis/.runtime/w7-browser-artifacts", crypto.randomUUID()); mkdirSync(artifacts, { recursive: true });
   const entryPath = join(root, "w7-owned-entry.tsx").replaceAll("\\", "/");
-  const server = await createServer({ configFile: false, root, logLevel: "error", plugins: [tailwindcss(), {
+  const server = await createServer({ configFile: false, root, cacheDir: join(artifacts, "vite-cache"), logLevel: "error", plugins: [tailwindcss(), {
     name: "owned-w7-browser", resolveId: (id) => id === "/w7-owned-entry.tsx" ? entryPath : undefined,
     load: (id) => id === entryPath ? browserEntry(fixture.url) : undefined,
     configureServer(vite) { vite.middlewares.use((request, response, next) => {

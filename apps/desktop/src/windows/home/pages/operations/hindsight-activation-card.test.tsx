@@ -52,7 +52,9 @@ describe("Hindsight activation card", () => {
     const busyPhase = card({ status: unconfiguredStatus("applying-templates") });
     expect(busyPhase).toContain("配置进行中");
     expect(buttons(busyPhase)).toEqual(["刷新状态"]);
-    expect(buttons(card({ status: unconfiguredStatus("unconfigured") }))).toEqual(["刷新状态"]);
+    const fresh = card({ status: unconfiguredStatus("unconfigured") });
+    expect(buttons(fresh)).toEqual(["刷新状态", "校验连接"]);
+    expect(fresh).not.toContain("disabled=");
   });
 
   it("blocks on an extra Hindsight Bank without an activate button", () => {

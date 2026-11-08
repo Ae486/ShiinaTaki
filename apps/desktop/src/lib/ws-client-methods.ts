@@ -53,6 +53,7 @@ import {
   OBSERVABILITY_METHODS,
   SECRET_METHODS,
   SecretSetResultSchema,
+  SecretClearResultSchema, SecretPresenceResultSchema,
   PerceptionCardSchema,
   PerceptionPauseStateSchema,
   PERMISSION_METHODS,
@@ -80,6 +81,7 @@ import {
   type SkillImportParams,
   type SkillMutationParams,
   type SecretSetParams,
+  type SecretClearParams, type SecretPresenceParams,
   type PerceptionPauseSetParams,
   type PermissionCellSetParams,
   type PermissionLevelSetParams,
@@ -141,6 +143,8 @@ function mcpMethods(request: <T>(method: string, params: JSONRPCParams) => Promi
     // The MCP page's write-only secret-value path: the value goes ONLY to secret.set (the sanctioned sensitive
     // method), never into any mcp.* frame or cached view; the desired config keeps the opaque marker.
     secretSet: async (params: SecretSetParams) => SecretSetResultSchema.parse(await request(SECRET_METHODS.set, params)),
+    secretClear: async (params: SecretClearParams) => SecretClearResultSchema.parse(await request(SECRET_METHODS.clear, params)),
+    secretPresence: async (params: SecretPresenceParams) => SecretPresenceResultSchema.parse(await request(SECRET_METHODS.presence, params)),
   };
 }
 

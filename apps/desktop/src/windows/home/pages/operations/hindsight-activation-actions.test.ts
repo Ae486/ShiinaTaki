@@ -6,7 +6,7 @@ import { activatedStatus, activationBank, activationOperation, activationStatus,
   committedUnavailableStatus, interruptedStatus, legacyStatus, missingBankStatus, runningStatus, unconfiguredStatus, unknownStatus } from "./hindsight-activation-fixtures.ts";
 import { initialActivationState, type HindsightActivationState } from "./hindsight-activation-state.ts";
 import { createMemoryOperationsController, type MemoryOperationsClient } from "./memory-operations-controller.ts";
-import { hindsightStatus } from "./memory-authority-fixtures.ts";
+import { bankStatus, hindsightStatus } from "./memory-authority-fixtures.ts";
 
 const ACTIONS: ActivationAction[] = ["validate", "apply", "activate", "resume", "recoverBinding", "cancel"];
 const settle = () => new Promise((resolve) => setImmediate(resolve));
@@ -22,10 +22,12 @@ function client(status = activationStatus()) {
   return {
     memoryAuthorityStatus: vi.fn(async () => hindsightStatus()),
     memoryActivationStatus: vi.fn(async () => status),
+    memoryReplicaConfigure: vi.fn<MemoryOperationsClient["memoryReplicaConfigure"]>(async (bankId) => bankStatus(bankId)),
     memoryOperationSubmit: vi.fn<MemoryOperationsClient["memoryOperationSubmit"]>(async () => activationOperation()),
     memoryOperationCancel: vi.fn<MemoryOperationsClient["memoryOperationCancel"]>(async () => activationOperation({ state: "cancelled", reason: "cancelled_before_claim", terminalAt: ACTIVATION_AT })),
     subscribeMemoryOperations: vi.fn<MemoryOperationsClient["subscribeMemoryOperations"]>(async () => undefined),
     onMemoryOperationChanged: (handler: (operation: MemoryOperation) => void) => { handlers.add(handler); return () => { handlers.delete(handler); }; },
+    onMemoryReplicaChanged: vi.fn<MemoryOperationsClient["onMemoryReplicaChanged"]>(() => () => undefined),
     handlers, push: () => { for (const handler of handlers) handler(activationOperation()); },
   } satisfies MemoryOperationsClient & Record<string, unknown>;
 }
@@ -58,7 +60,9 @@ describe("Hindsight activation actions", () => {
     expect(allowed(unconfiguredStatus())).toEqual(["validate"]);
     expect(allowed(unconfiguredStatus("compatible"))).toEqual(["validate", "apply"]);
     expect(allowed(unconfiguredStatus("failed"))).toEqual(["validate", "apply"]);
-    expect(allowed(unconfiguredStatus("unconfigured"))).toEqual([]);
+    expect(allowed(unconfiguredStatus("unconfigured"))).toEqual(["validate"]);
+    expect(allowed({ ...unconfiguredStatus("unconfigured"), authority: { mode: "hindsight", epochId: "epoch-hindsight" } })).toEqual([]);
+    expect(allowed({ ...unconfiguredStatus("unconfigured"), operation: activationOperation({ state: "running" }) })).toEqual([]);
     expect(allowed(unconfiguredStatus("disabled"))).toEqual([]);
     expect(allowed(unconfiguredStatus("applying-templates"))).toEqual([]);
     expect(allowed({ ...unconfiguredStatus("compatible"), authority: { mode: "legacy-markdown", epochId: null } })).toEqual([]);
@@ -76,6 +80,7 @@ describe("Hindsight activation actions", () => {
   });
 
   it("builds every request from the status alone", () => {
+    expect(activationRequest(unconfiguredStatus("unconfigured"), "validate")).toEqual({ kind: "setup.validate", expectedRevision: 2 });
     expect(activationRequest(unconfiguredStatus(), "validate")).toEqual({ kind: "setup.validate", expectedRevision: 2 });
     expect(activationRequest(unconfiguredStatus("compatible"), "apply")).toEqual({ kind: "setup.apply", expectedRevision: 2, characterId: "taki" });
     const twoCharacters = { ...unconfiguredStatus("compatible"), prerequisites: { blocking: [],
@@ -117,6 +122,7 @@ describe("Hindsight activation dispatch through the generic controller", () => {
   });
 
   it.each([
+    ["validate", unconfiguredStatus("unconfigured"), { kind: "setup.validate", expectedRevision: 2 }],
     ["validate", unconfiguredStatus(), { kind: "setup.validate", expectedRevision: 2 }],
     ["apply", unconfiguredStatus("compatible"), { kind: "setup.apply", expectedRevision: 2, characterId: "taki" }],
     ["activate", activationStatus(), { kind: "hindsight.activate", source: { mode: "new", setupRevision: 3, expectedEpochId: "epoch-local-1" } }],

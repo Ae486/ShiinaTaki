@@ -52,6 +52,7 @@ import type {
   SkillReconcileResult,
   SecretSetParams,
   SecretSetResult,
+  SecretClearParams, SecretClearResult, SecretPresenceParams, SecretPresenceResult, MemoryReplicaChanged,
   PerceptionCard,
   PerceptionPauseSetParams,
   PerceptionPauseState,
@@ -87,6 +88,7 @@ import {
   addConfigChangedHandler,
   addApprovalHandler,
   addMemoryOperationHandler,
+  addMemoryReplicaHandler,
   addMemoryOnboardingHandler,
   addMonitorHandler,
   bindTransport,
@@ -181,6 +183,8 @@ export interface WsClient extends MemoryOperationMethods, MemoryOnboardingMethod
   skillReconcile(): Promise<SkillReconcileResult>;
   /** Stores one secret value through the sensitive write-only path (the MCP page's set-value flow). */
   secretSet(params: SecretSetParams): Promise<SecretSetResult>;
+  secretClear(params: SecretClearParams): Promise<SecretClearResult>;
+  secretPresence(params: SecretPresenceParams): Promise<SecretPresenceResult>;
   approvalRespond(params: CanonicalApprovalRespondParams): Promise<CanonicalApprovalRespondResult>;
   approvalList(): Promise<ApprovalListResult>;
   approvalRevoke(params: ApprovalRevokeParams): Promise<ApprovalRevokeResult>;
@@ -194,6 +198,7 @@ export interface WsClient extends MemoryOperationMethods, MemoryOnboardingMethod
   onMonitorEvent(handler: (event: RunMonitorEvent) => void): () => void;
   /** Registers a memory.operations.changed sink (the Operations page refetches the composite status on each push). */
   onMemoryOperationChanged(handler: (operation: MemoryOperation) => void): () => void;
+  onMemoryReplicaChanged(handler: (changed: MemoryReplicaChanged) => void): () => void;
   /** Invalidates the Local onboarding read model after committed producer, exclusion, candidate or binding changes. */
   onMemoryOnboardingChanged(handler: (changed: MemoryOnboardingChanged) => void): () => void;
   /** Registers the fire-and-forget avatar command sink (core -> operator push). Replaces any prior handler. */
@@ -304,6 +309,7 @@ function pushRegistrations(state: ReturnType<typeof createRoutes>) {
     onApproval: (handler: (event: ApprovalPushEvent) => void) => addApprovalHandler(state, handler),
     onMonitorEvent: (handler: (event: RunMonitorEvent) => void) => addMonitorHandler(state, handler),
     onMemoryOperationChanged: (handler: (operation: MemoryOperation) => void) => addMemoryOperationHandler(state, handler),
+    onMemoryReplicaChanged: (handler: (changed: MemoryReplicaChanged) => void) => addMemoryReplicaHandler(state, handler),
     onMemoryOnboardingChanged: (handler: (changed: MemoryOnboardingChanged) => void) => addMemoryOnboardingHandler(state, handler),
   };
 }

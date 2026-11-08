@@ -1,10 +1,13 @@
 # windows/home/pages/settings/
 The Settings page: Core-owned permission governance appears before generic config knobs. Permission state is fresh per
 authenticated Home client generation and window-memory-only; config remains the guarded cached metadata surface.
-- settings-page.tsx — page root: permission governance, durable Approval management, then the knob list regrouped client-side (U7) into fixed Chinese sections with a key/label/description search box; Core order inside a group is preserved and no knob is removed or hidden
+- settings-page.tsx — permission governance, durable Approval, dedicated Hindsight key entry, then grouped generic knobs with search; Core order inside a group is preserved
 - config-groups.ts — client-side presentation map only (U7): exact key → group + Chinese primary label, key-prefix → group fallback, the 高级 fallback for unknown keys, fixed-order grouping (empty groups skipped) and the search filter
 - approval-decisions-section.tsx — fresh Core durable-allow list, optimistic revoke feedback, retry, and no-cache presentation
 - approval-decisions-controller.ts — current-Home-client-only Approval list/revoke guard with stale-result suppression
+- hindsight-key-section.tsx — dedicated write-only Hindsight API Key form; distinguishes storage presence from connection validation
+- use-hindsight-key.ts — fresh Home client key seam; transient password cleared on submission and retirement, never cached
+- hindsight-key-controller.ts — encrypted secret presence/set/clear with generation guards and no mutation replay
 - permission-section.tsx — permission section composition: loading/reconnecting/failure/saved/conflict/refusal truth (Skeleton + FeedbackLine, failure keeps its retry)
 - use-permissions.ts — the ONLY permission WS seam: fresh per-client reads, generation-safe mutation completion, conflict refetch, no replay/cache
 - permission-controller.ts — framework-free async guard: one mutation at a time, replacement refetch, retired-client suppression, conflict reread

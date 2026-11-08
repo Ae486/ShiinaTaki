@@ -73,6 +73,7 @@ describe("Hindsight lifecycle view model", () => {
       memoryAuthorityStatus: async () => unreviewed, memoryActivationStatus: async () => { throw new Error("unused"); },
       memoryOperationSubmit: submitted, memoryOperationCancel: async () => operation(),
       subscribeMemoryOperations: async () => undefined, onMemoryOperationChanged: () => () => undefined,
+      memoryReplicaConfigure: async () => { throw new Error("unused"); }, onMemoryReplicaChanged: () => () => undefined,
     };
     const started = vi.fn();
     const controller = createMemoryOperationsController<MemoryAuthorityStatus>({

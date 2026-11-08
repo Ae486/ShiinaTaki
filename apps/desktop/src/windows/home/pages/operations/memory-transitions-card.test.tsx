@@ -22,15 +22,19 @@ describe("minimal transition card states", () => {
     expect(markup.match(/disabled=""/g)).toHaveLength(4);
     expect(render({ loading: true })).toContain("animate-pulse");
   });
-  it("shows a safe refused emergency disclosure and never enables confirmation", () => {
+  it.each([
+    ["inventory-unreadable", "无法读取完整的本地证据清单。"],
+    ["incomplete-replica", "本地副本或记忆策略证据不完整，无法接管。"],
+  ])("shows the %s emergency blocker and never enables confirmation", (blocker, label) => {
     const preview = MemoryTransitionPreviewSchema.parse({ version: 2, kind: "transition.emergency-local", previewId: crypto.randomUUID(),
       previewHash: "a".repeat(64), expected: null, actorId: "operator", createdAt: new Date().toISOString(), expiresAt: new Date().toISOString(),
       capabilityHash: null, recovery: null, takeover: "refused", inventory: "unreadable", banks: [], backupAgeSeconds: null,
-      lastVerifiedBackupId: null, blocking: ["inventory-unreadable"], offline: true, remoteHead: "unknown", remoteLoss: "unknown" });
+      lastVerifiedBackupId: null, blocking: [blocker], offline: true, remoteHead: "unknown", remoteLoss: "unknown" });
     const markup = render({ status: status(), preview });
     expect(markup).toContain("没有已验证备份；仍可能存在"); expect(markup).toContain("游标相等也不能证明没有丢失");
     expect(markup).toMatch(/<button[^>]*disabled=""[^>]*>确认紧急接管<\/button>/);
     expect(markup).not.toContain("确认切换");
+    expect(markup).toContain(label); expect(markup).not.toContain(blocker);
   });
   it("rejects contradictory permissions and undeclared refusal reasons at the Shared boundary", () => {
     expect(() => MemoryTransitionOverviewSchema.parse({ ...status(), actions: actions.map((a) => ({ ...a, reason: "private-error" })) })).toThrow();

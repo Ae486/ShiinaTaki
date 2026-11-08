@@ -1,14 +1,14 @@
 # lib/
 Cross-cutting Pet UI clients + seams (talk to the Agent Core / hold window-shared services). Framework-free apart from
 icons/ (the shared glyph set) and the two window-shared React hooks below.
-- ws-client.ts — operator WS JSON-RPC client to the Core (browser WebSocket): public turn/handshake/monitor subscribe-unsubscribe wiring plus the memory-operation family
-- ws-client-routes.ts — inbound half: the zod boundary (frame parse + chat/avatar/timeline/config/Approval/monitor/memory-operation push routing) and the D29 mid-turn-close abort
-- ws-client-methods.ts — outbound half: handshake plus schema-validated operator methods including extension convergence
-- ws-client-memory-operations.ts — Shared-validated authority/activation, transition preview/status/overview and operation wrappers; exact-once memory.operations.subscribe per client.
+- ws-client.ts — operator WS JSON-RPC client to the Core (browser WebSocket): public turn/handshake/monitor subscribe-unsubscribe wiring, typed secret presence/clear and memory-operation/replica configuration families
+- ws-client-routes.ts — inbound half: the zod boundary (frame parse + chat/avatar/timeline/config/Approval/monitor/memory-operation/replica configuration push routing) and the D29 mid-turn-close abort
+- ws-client-methods.ts — outbound half: handshake plus schema-validated operator methods including extension convergence and write-only secret presence/clear
+- ws-client-memory-operations.ts — Shared-validated authority/activation, complete replica configure, transition preview/status/overview and operation wrappers; exact-once memory.operations.subscribe covers operation and replica invalidations per client.
 - ws-client-memory-onboarding.ts — outbound sibling: memory.onboarding.preview/status/exceptions/exclude wrappers and the exact-once memory.onboarding.subscribe (retryable after failure)
 - ws-client-hindsight-configuration.ts — strict optional configuration status/observe reads over the authenticated client; both use ordinary read deadlines and never invoke model health.
 - ws-client-hindsight-templates.ts — strict template preview, exact Bank consequences, status and one-child observation reads; apply/recover retain the existing durable operation adapter.
-- rpc-deadline.ts — method-class timing table and native JSON-RPC cleanup; transition reads use bounded long read deadlines, transition submit is a parameter-sensitive long unknown-outcome mutation.
+- rpc-deadline.ts — method-class timing table and native JSON-RPC cleanup; transition reads use bounded long reads, while secret presence stays read-only and replica/secret writes retain unknown-outcome mutation semantics.
 - timing-policy.ts — window-owned bootstrap/last-good timing policy store; validates full Core config refreshes without persistence
 - timing-policy-sync.ts — exact-once config subscription and serialized full-policy refresh for an authenticated client
 - connection-status.ts — discriminated operator connection states plus the one semantic notice-copy mapping shared by every surface

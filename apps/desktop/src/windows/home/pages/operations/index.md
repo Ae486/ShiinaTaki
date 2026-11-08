@@ -24,20 +24,23 @@ The transition browser's synthetic control HTTP requests close after each respon
 - use-operations.ts — the page's ws touchpoint: memory.tidy plus the cached memory.status / media.usage reads (a failed re-read keeps the last counters on screen; refresh() backs the retry)
 - use-media-clear.ts — destructive purge owner: immediate exact-once guard, media.clear call, terminal release, and refresh
 - operations-state.ts — pure view models + media.clear state machine; Cancel is valid only before destructive execution
-- memory-authority-card.tsx — memory.authority.status card: authority/runtime/setup lines, the Hindsight lifecycle and backup blocks, per-Bank replica + Pending rows with Sync now / Full reconcile / Retry, active operations with Cancel (admitted replica.sync only)
-- memory-authority-state.ts — pure card view models and shared Bank/operation/runtime labels, including template operations and durable holds; unknown stays unknown and refusals remain Core-owned
+- memory-authority-card.tsx — memory.authority.status card: authority/runtime/setup, lifecycle/backup, per-Bank persisted mode/interval form and replica/Pending rows with Sync now / Full reconcile / Retry; active operations with Cancel (admitted replica.sync only)
+- memory-authority-state.ts — pure authority view models and shared Local/Hindsight reason labels, including authority/evidence invalidity; unknown stays unknown
 - memory-hindsight-lifecycle-block.tsx — the card's Hindsight connection + Bank readiness block: 重新校验连接 / 创建 Bank buttons through the generic submit, collapsed diagnostics
 - memory-hindsight-lifecycle-state.ts — pure projection of the status `hindsight` section: connection rows, per-scope readiness rows, diagnostics (native ids, error codes) and action descriptors from Core `actions` only
 - memory-hindsight-backup-block.tsx — the card's Hindsight backup block: rollback warning, state / age / per-Bank missing interval, in-flight or failure line, route-b 导入备份 form, 创建备份 / 校验备份 through the generic submit, collapsed 备份诊断
-- memory-hindsight-backup-state.ts — pure projection of `hindsight.backup` plus the backup.* operation rows: closed-code messages including missing/unpublished template evidence, explicit unknown remote-only writes, the newest staged route-b capture and the unverified newest backup from the section, action descriptors (校验备份 targets the newest sealed backup) and the inbox-validated admit request; the only client rule is disabling while a backup operation is open
+- memory-hindsight-backup-state.ts — pure backup inventory/operation projection, explicit quiescence-busy retry guidance, template evidence and unknown remote writes, staged captures, newest sealed verification and inbox admit actions; actions wait only for an open backup operation
 - memory-hindsight-backup-fixtures.ts — test support (not in the production path): one MemoryAuthorityStatus per backup block state plus backup.* operation rows
-- memory-operations-controller.ts — framework-free guard shared by the Stage 1 and Hindsight cards: one injected status read per instance behind the changed-push subscription, generic serialized submit(request, key)/cancel, coalesced refetch on push and after every mutation outcome, injected subscription/mutation error formatting, no replay
-- use-memory-operations.ts — the React seam for memory.authority.status + memory.operations.*: state + the controller lifecycle bound to the authenticated client, generic submit / submitSync / cancel
+- memory-operations-controller.ts — framework-free guard shared by the Stage 1 and Hindsight cards: generation-guarded status behind the shared operation/replica invalidation subscription, serialized submit/configureSync/cancel and coalesced outcome refetch; no replay
+- use-memory-operations.ts — the React seam for memory.authority.status + memory.operations.* / memory.replica.configure: authenticated-client state and serialized submit / submitSync / configureSync / cancel
+- memory-replica-settings-state.ts — lossless visible interval units, complete draft-to-config conversion and existing 1-minute/31-day/90-day bounds.
+- use-memory-replica-settings.ts — disposable mode/interval drafts preserving both intervals on toggles and explicit complete-config save through the common controller.
+- memory-replica-settings-form.tsx — labelled per-Bank background mode and interval/unit form, range guidance and manual-mode foreground/transition explanation.
 - memory-transition-state.ts — contextual closed Chinese refusal/Native phase labels, one confirmed request and separate authority/runtime/queue facts; no permission derivation.
 - memory-transitions-controller.ts — disposable preview generation and consumed request identity over the existing operation subscription/mutation controller; never replays after replacement.
 - use-memory-transitions.ts — Home-client-bound transition hook with last-good status and explicit preview/confirm/recovery/cancel actions.
 - memory-transitions-card.tsx — current authority/actions, inline confirmation and bounded durable history under every provider/runtime state.
-- memory-transition-confirmation.tsx — one healthy confirmation or separate emergency confirmation with cancel focus and Escape restoration.
+- memory-transition-confirmation.tsx — healthy/emergency confirmation with explicit Chinese blocker labels, cancel focus and Escape restoration.
 - memory-transition-disclosure.tsx — nullable surviving Bank evidence, backup age and explicitly unknown remote loss.
 - memory-transition-progress.tsx — original operation facts, separate commit/runtime/queue outcomes, Core-permitted recovery/cancel and diagnostics.
 - memory-authority-fixtures.ts — test support (not in the production path): MemoryAuthorityStatus / Bank / MemoryOperation fixtures plus the Hindsight lifecycle section (every readiness state) shared by the card, view-model and controller tests

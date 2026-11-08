@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import type { MemoryAuthorityStatus, MemoryOperation } from "@taki/shared";
+import type { MemoryAuthorityStatus, MemoryOperation, MemoryReplicaChanged } from "@taki/shared";
 import { activationStatus } from "./hindsight-activation-fixtures.ts";
-import { hindsightStatus, operation } from "./memory-authority-fixtures.ts";
+import { bankStatus, hindsightStatus, operation } from "./memory-authority-fixtures.ts";
 import { createMemoryOperationsController, type MemoryOperationsClient, type MemoryOperationsSink } from "./memory-operations-controller.ts";
 
 type Handler = (operation: MemoryOperation) => void;
@@ -10,11 +10,14 @@ interface FakeClient extends MemoryOperationsClient {
   calls: string[];
   handlers: Set<Handler>;
   push(operation: MemoryOperation): void;
+  replicaHandlers: Set<(changed: MemoryReplicaChanged) => void>;
+  pushReplica(changed: MemoryReplicaChanged): void;
 }
 
 function client(behavior: Partial<MemoryOperationsClient> = {}): FakeClient {
   const calls: string[] = [];
   const handlers = new Set<Handler>();
+  const replicaHandlers = new Set<(changed: MemoryReplicaChanged) => void>();
   const base: MemoryOperationsClient = {
     memoryAuthorityStatus: async () => { calls.push("status"); return hindsightStatus(); },
     memoryActivationStatus: async () => { calls.push("activation"); return activationStatus(); },
@@ -22,9 +25,13 @@ function client(behavior: Partial<MemoryOperationsClient> = {}): FakeClient {
     memoryOperationCancel: async () => { calls.push("cancel"); return operation({ state: "cancelled", reason: "cancelled_before_claim", terminalAt: "2026-09-19T00:00:01.000Z" }); },
     subscribeMemoryOperations: async () => { calls.push("subscribe"); },
     onMemoryOperationChanged: (handler) => { handlers.add(handler); return () => handlers.delete(handler); },
+    memoryReplicaConfigure: async () => { calls.push("configure"); return bankStatus("global"); },
+    onMemoryReplicaChanged: (handler) => { replicaHandlers.add(handler); return () => replicaHandlers.delete(handler); },
     ...behavior,
   };
-  return Object.assign(base, { calls, handlers, push: (changed: MemoryOperation) => { for (const handler of handlers) handler(changed); } });
+  return Object.assign(base, { calls, handlers, replicaHandlers,
+    push: (changed: MemoryOperation) => { for (const handler of handlers) handler(changed); },
+    pushReplica: (changed: MemoryReplicaChanged) => { for (const handler of replicaHandlers) handler(changed); } });
 }
 
 function sink() {
@@ -35,6 +42,36 @@ const readAuthority = (target: MemoryOperationsClient) => target.memoryAuthority
 const settle = () => new Promise((resolve) => setImmediate(resolve));
 
 describe("memory operations controller", () => {
+  it("saves a complete schedule once, refetches after the result and invalidates on replica changes", async () => {
+    const config = { automatic: false, autoIntervalMs: 120_000, fullReconciliationIntervalMs: 172_800_000 };
+    const saved = vi.fn<MemoryOperationsClient["memoryReplicaConfigure"]>(async () => bankStatus("global", config));
+    const target = client({ memoryReplicaConfigure: saved }); const s = sink();
+    const controller = createMemoryOperationsController(s, readAuthority); controller.replace(target); await settle();
+    await controller.configureSync("global", config);
+    expect(saved).toHaveBeenCalledExactlyOnceWith("global", config);
+    expect(s.mutationStarted).toHaveBeenCalledWith("configure:global");
+    expect(s.mutationSettled).toHaveBeenCalledWith({ tone: "ok", message: "Core 已保存此 Bank 的同步设置。" });
+    expect(target.calls.filter((value) => value === "status")).toHaveLength(2);
+    target.pushReplica({ bankId: "global" }); await settle();
+    expect(target.calls.filter((value) => value === "status")).toHaveLength(3);
+    const lateHandler = [...target.replicaHandlers][0]!;
+    controller.replace(null); expect(target.replicaHandlers.size).toBe(0);
+    lateHandler({ bankId: "global" }); await settle();
+    expect(target.calls.filter((value) => value === "status")).toHaveLength(3);
+    expect(target.calls).not.toContain("submit"); controller.dispose();
+  });
+
+  it("drops retired configuration results and never replays them in the replacement generation", async () => {
+    const gate: { release: (() => void) | null } = { release: null };
+    const first = client({ memoryReplicaConfigure: async () => {
+      await new Promise<void>((resolve) => { gate.release = resolve; }); return bankStatus("global");
+    } });
+    const second = client(); const s = sink(); const controller = createMemoryOperationsController(s, readAuthority);
+    controller.replace(first); await settle();
+    const save = controller.configureSync("global", { automatic: false, autoIntervalMs: 120_000, fullReconciliationIntervalMs: 172_800_000 });
+    controller.replace(second); await settle(); s.mutationSettled.mockClear(); gate.release?.(); await save;
+    expect(s.mutationSettled).not.toHaveBeenCalled(); expect(second.calls).toEqual(["subscribe", "status"]); controller.dispose();
+  });
   it("reads status and subscribes on replace, then drops results from a retired generation", async () => {
     const s = sink();
     const controller = createMemoryOperationsController(s, readAuthority);

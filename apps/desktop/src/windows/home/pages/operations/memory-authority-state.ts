@@ -5,7 +5,7 @@
  * POS:    ui/windows/home/pages/operations — node-testable; no DOM, no socket. Unknown stays "unknown", never "0".
  */
 
-import { ErrorCodeSchema, type MemoryAuthorityStatus, type MemoryOperation, type MemoryReplicaRunKind } from "@taki/shared";
+import { ErrorCodeSchema, type MemoryAuthorityStatus, type MemoryOperation, type MemoryReplicaRunKind, type MemoryReplicaScheduleConfig } from "@taki/shared";
 
 export interface BankRow {
   bankId: string;
@@ -17,6 +17,7 @@ export interface BankRow {
   nextAction: string;
   /** Set only when the Bank reports explicit_retry_required: the Retry action submits this kind. */
   retryKind: MemoryReplicaRunKind | null;
+  schedule: MemoryReplicaScheduleConfig;
 }
 
 export interface PendingRow { bankId: string; pending: number; failed: number; unknown: number; parentWrites: number }
@@ -46,6 +47,8 @@ export const MEMORY_RUNTIME_UNAVAILABLE_LABEL: Record<NonNullable<MemoryAuthorit
   authority_mismatch: "运行时与权威标记不一致", connection_unavailable: "连接不可用", stopped: "运行时已停止", not_installed: "运行时未安装",
   connection_disabled: "Hindsight 连接已关闭", config_changed: "连接配置已变更，需要重新校验",
   template_hold: "模板变更尚未完成，需要恢复原操作",
+  authority_invalid: "权威证据校验失败，记忆已停用；请检查原操作或使用已校验的备份恢复",
+  evidence_invalid: "本地记忆证据校验失败，需要检查证据并选择相应的校验或恢复操作",
 };
 export const MEMORY_OPERATION_STATE_LABEL: Record<MemoryOperation["state"], string> = {
   admitted: "已受理（未认领）", running: "执行中", completed: "已完成", failed: "失败", cancelled: "已取消", outcome_unknown: "结果未知",
@@ -56,6 +59,7 @@ export const MEMORY_OPERATION_KIND_LABEL: Record<MemoryOperation["kind"], string
   "bank.provision": "创建 Bank", "connection.revalidate": "重新校验连接",
   "backup.capture": "创建备份", "backup.admit": "导入备份", "backup.verify": "校验备份",
   "template.apply": "应用模板", "template.recover": "恢复模板操作",
+  "candidate.prepare": "准备隔离候选", "candidate.inspect": "检查隔离候选", "candidate.resume": "继续候选操作",
   "transition.return-local": "返回 Local", "transition.reenter-hindsight": "重新进入 Hindsight", "transition.emergency-local": "紧急接管至 Local",
 };
 const UNKNOWN = "未知";
@@ -89,6 +93,7 @@ function bankRow(bank: NonNullable<MemoryAuthorityStatus["replica"]>[number]): B
     error: bank.errorCode ?? "无",
     nextAction: bank.nextAction === null ? "无" : explicit ? "需要显式重试" : "已排定自动重试",
     retryKind: explicit ? bank.retryKind ?? "incremental" : null,
+    schedule: { automatic: bank.automatic, autoIntervalMs: bank.autoIntervalMs, fullReconciliationIntervalMs: bank.fullReconciliationIntervalMs },
   };
 }
 

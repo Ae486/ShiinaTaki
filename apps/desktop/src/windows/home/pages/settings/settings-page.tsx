@@ -1,6 +1,6 @@
 /**
- * INPUT:  none (page root); reads Core permission policy and every generic knob through focused hooks.
- * OUTPUT: <SettingsPage> — permission governance first, then the knob list regrouped client-side (U7) into
+ * INPUT:  none (page root); reads Core permissions, encrypted Hindsight key presence and config through focused hooks.
+ * OUTPUT: <SettingsPage> — permission governance and write-only Hindsight key entry, then generic knobs grouped (U7) into
  *         权限与审批/模型与上下文/感知与隐私/存储与缓存/高级 sections with a key/description search box.
  * POS:    ui/windows/home/pages/settings — the Settings composition root; grouping/filtering live in config-groups.ts
  *         (pure), Core order inside a group is preserved, and no knob is removed or hidden. Loading rides the shared
@@ -16,6 +16,7 @@ import { useConfig } from "./use-config.ts";
 import { KnobField } from "./knob-field.tsx";
 import { PermissionSection } from "./permission-section.tsx";
 import { ApprovalDecisionsSection } from "./approval-decisions-section.tsx";
+import { HindsightKeySection } from "./hindsight-key-section.tsx";
 import { configLabelOf, filterConfigEntries, groupConfigEntries } from "./config-groups.ts";
 
 export function SettingsPage() {
@@ -29,6 +30,7 @@ export function SettingsPage() {
       <PageBody>
         <PermissionSection />
         <ApprovalDecisionsSection />
+        <HindsightKeySection />
         {error && <PageAlert action={{ label: "重试", onClick: () => void refresh() }}>读取配置失败：{error}</PageAlert>}
         {entries.length === 0 && !error && <Skeleton lines={6} />}
         {entries.length > 0 && (

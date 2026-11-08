@@ -1,6 +1,6 @@
 /**
  * INPUT:  the operator socket's JSON-RPC request function + call params from the Home operations page.
- * OUTPUT: memoryOperationMethods(request) — typed memory.authority.status / memory.activation.status / memory.operations.*
+ * OUTPUT: memoryOperationMethods(request) — typed authority/activation reads, immediate replica configure and memory.operations.*
  *         wrappers, each result parsed through its @taki/shared schema; subscribe is memoized per client generation.
  * POS:    ui/lib — a sibling of ws-client-methods (kept separate so that file stays under the size baseline).
  */
@@ -10,6 +10,8 @@ import {
   MEMORY_ACTIVATION_METHODS,
   MEMORY_AUTHORITY_METHODS,
   MEMORY_OPERATION_METHODS,
+  MEMORY_REPLICA_METHODS, MemoryReplicaConfigureResultSchema,
+  type MemoryReplicaScheduleConfig, type MemoryReplicaSyncStatus,
   MEMORY_TRANSITION_METHODS,
   MemoryTransitionPreviewSchema, MemoryTransitionReadSchema, MemoryTransitionOverviewSchema,
   type MemoryTransitionPreview, type MemoryTransitionRead, type MemoryTransitionOverview,
@@ -28,6 +30,7 @@ import {
 } from "@taki/shared";
 
 export interface MemoryOperationMethods {
+  memoryReplicaConfigure(bankId: string, config: MemoryReplicaScheduleConfig): Promise<MemoryReplicaSyncStatus>;
   memoryTransitionPreview(params: { kind: MemoryTransitionPreview["kind"]; recoveryTransitionId?: string }): Promise<MemoryTransitionPreview>;
   memoryTransitionStatus(transitionId: string): Promise<MemoryTransitionRead>;
   memoryTransitionOverview(): Promise<MemoryTransitionOverview>;
@@ -48,6 +51,7 @@ export interface MemoryOperationMethods {
 export function memoryOperationMethods(request: <T>(method: string, params: JSONRPCParams) => Promise<T>): MemoryOperationMethods {
   let subscription: Promise<void> | null = null;
   return {
+    memoryReplicaConfigure: async (bankId, config) => MemoryReplicaConfigureResultSchema.parse(await request(MEMORY_REPLICA_METHODS.configure, { bankId, config })).status,
     memoryTransitionPreview: async (params) => MemoryTransitionPreviewSchema.parse(await request(MEMORY_TRANSITION_METHODS.preview, params)),
     memoryTransitionStatus: async (transitionId) => MemoryTransitionReadSchema.parse(await request(MEMORY_TRANSITION_METHODS.status, { transitionId })),
     memoryTransitionOverview: async () => MemoryTransitionOverviewSchema.parse(await request(MEMORY_TRANSITION_METHODS.overview, {})),

@@ -17,6 +17,7 @@ import {
   JSON_RPC_APP_ERROR,
   MEDIA_METHODS,
   MEMORY_OPERATION_METHODS,
+  MEMORY_REPLICA_METHODS, SECRET_METHODS,
   PERMISSION_METHODS,
   TIMELINE_METHODS,
   TIMING_POLICY_DEVELOPMENT_DEFAULTS,
@@ -25,6 +26,8 @@ import { createTimingPolicyStore } from "./timing-policy.ts";
 import { createWsClient } from "./ws-client.ts";
 import { addConfigChangedHandler, bindTransport, createRoutes, installRoutes } from "./ws-client-routes.ts";
 import type { WsTransport } from "./ws-transport.ts";
+import { bankStatus, hindsightStatus } from "../windows/home/pages/operations/memory-authority-fixtures.ts";
+import { createMemoryOperationsController } from "../windows/home/pages/operations/memory-operations-controller.ts";
 
 interface Harness {
   transport: WsTransport;
@@ -61,6 +64,56 @@ function lastRequestId(sent: string[]): number | string {
 }
 
 describe("createWsClient inbound routing", () => {
+  it("refetches the connected operations controller when a replica configuration notification crosses the WS boundary", async () => {
+    const h = harness(); const client = createWsClient({ transport: h.transport }); h.open();
+    const loaded = vi.fn(); const controller = createMemoryOperationsController({
+      loading: vi.fn(), loaded, loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationSettled: vi.fn(),
+    }, (candidate) => candidate.memoryAuthorityStatus());
+    controller.replace(client); await flush();
+    expect(JSON.parse(h.sent.at(-1)!)).toMatchObject({ method: MEMORY_OPERATION_METHODS.subscribe });
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { status: "ok" } }); await flush();
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: hindsightStatus() }); await flush();
+    expect(loaded).toHaveBeenCalledWith(hindsightStatus());
+    h.deliver({ jsonrpc: "2.0", method: MEMORY_REPLICA_METHODS.changed, params: { bankId: "global" } }); await flush();
+    expect(JSON.parse(h.sent.at(-1)!)).toMatchObject({ method: "memory.authority.status" });
+    const updated = hindsightStatus({ replica: [bankStatus("global", { automatic: false, autoIntervalMs: 120_000 })] });
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: updated }); await flush();
+    expect(loaded).toHaveBeenLastCalledWith(updated);
+    const requests = h.sent.length; controller.replace(null); h.closeSocket();
+    h.deliver({ jsonrpc: "2.0", method: MEMORY_REPLICA_METHODS.changed, params: { bankId: "global" } }); await flush();
+    expect(h.sent).toHaveLength(requests);
+    expect(h.sent.map((frame) => JSON.parse(frame).method)).not.toContain(MEMORY_REPLICA_METHODS.configure); controller.dispose();
+  });
+  it("validates replica configuration invalidations, isolates sinks and clears them on close", async () => {
+    const h = harness(); const client = createWsClient({ transport: h.transport });
+    const changed = vi.fn(); const warning = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    try {
+      client.onMemoryReplicaChanged(() => { throw new Error("sink failed"); }); client.onMemoryReplicaChanged(changed); h.open();
+      h.deliver({ jsonrpc: "2.0", method: MEMORY_REPLICA_METHODS.changed, params: { bankId: "global", operation: {} } }); await flush();
+      expect(changed).not.toHaveBeenCalled();
+      h.deliver({ jsonrpc: "2.0", method: MEMORY_REPLICA_METHODS.changed, params: { bankId: "global" } }); await flush();
+      expect(changed).toHaveBeenCalledExactlyOnceWith({ bankId: "global" });
+      h.closeSocket(); h.deliver({ jsonrpc: "2.0", method: MEMORY_REPLICA_METHODS.changed, params: { bankId: "global" } }); await flush();
+      expect(changed).toHaveBeenCalledTimes(1);
+    } finally { warning.mockRestore(); }
+  });
+
+  it("sends complete replica config and parses the returned status, with existing typed secret presence/clear adapters", async () => {
+    const h = harness(); const client = createWsClient({ transport: h.transport }); h.open();
+    const config = { automatic: false, autoIntervalMs: 120_000, fullReconciliationIntervalMs: 172_800_000 };
+    const save = client.memoryReplicaConfigure("global", config); await flush();
+    expect(JSON.parse(h.sent.at(-1)!)).toMatchObject({ method: MEMORY_REPLICA_METHODS.configure, params: { bankId: "global", config } });
+    const status = bankStatus("global", config);
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { status } }); expect(await save).toEqual(status);
+    const params = { secretRef: "memory.hindsight.connection.api-key" };
+    const presence = client.secretPresence(params); await flush();
+    expect(JSON.parse(h.sent.at(-1)!)).toMatchObject({ method: SECRET_METHODS.presence, params });
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { ...params, present: false, provenance: null, health: "ok" } });
+    expect(await presence).toMatchObject({ present: false, health: "ok" });
+    const clear = client.secretClear(params); await flush();
+    expect(JSON.parse(h.sent.at(-1)!)).toMatchObject({ method: SECRET_METHODS.clear, params });
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { ...params, present: false } }); expect(await clear).toEqual({ ...params, present: false });
+  });
   it("routes canonical Approval request/closed pushes and isolates failing handlers", () => {
     const h = harness();
     const client = createWsClient({ transport: h.transport });

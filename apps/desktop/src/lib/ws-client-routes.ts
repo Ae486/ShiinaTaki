@@ -16,6 +16,7 @@ import {
   CHAT_METHODS,
   CONFIG_METHODS,
   MEMORY_OPERATION_METHODS,
+  MEMORY_REPLICA_METHODS, MemoryReplicaChangedSchema, type MemoryReplicaChanged,
   MEMORY_ONBOARDING_METHODS,
   MemoryOperationChangedSchema,
   MemoryOnboardingChangedSchema,
@@ -66,6 +67,7 @@ interface PushSlots {
   approval: Set<(event: ApprovalPushEvent) => void>;
   monitor: Set<(event: RunMonitorEvent) => void>;
   memoryOperation: Set<(operation: MemoryOperation) => void>;
+  memoryReplica: Set<(changed: MemoryReplicaChanged) => void>;
   memoryOnboarding: Set<(changed: MemoryOnboardingChanged) => void>;
 }
 
@@ -79,7 +81,7 @@ export interface Routes {
 }
 
 export function createRoutes(): Routes {
-  return { current: null, push: { avatar: null, timeline: null, timelineRemoved: null, config: new Set(), approval: new Set(), monitor: new Set(), memoryOperation: new Set(), memoryOnboarding: new Set() } };
+  return { current: null, push: { avatar: null, timeline: null, timelineRemoved: null, config: new Set(), approval: new Set(), monitor: new Set(), memoryOperation: new Set(), memoryReplica: new Set(), memoryOnboarding: new Set() } };
 }
 
 export function addConfigChangedHandler(state: Routes, handler: (changed: ConfigChanged) => void): () => void {
@@ -95,6 +97,11 @@ export function addMonitorHandler(state: Routes, handler: (event: RunMonitorEven
 export function addMemoryOperationHandler(state: Routes, handler: (operation: MemoryOperation) => void): () => void {
   state.push.memoryOperation.add(handler);
   return () => state.push.memoryOperation.delete(handler);
+}
+
+export function addMemoryReplicaHandler(state: Routes, handler: (changed: MemoryReplicaChanged) => void): () => void {
+  state.push.memoryReplica.add(handler);
+  return () => state.push.memoryReplica.delete(handler);
 }
 
 export function addMemoryOnboardingHandler(state: Routes, handler: (changed: MemoryOnboardingChanged) => void): () => void {
@@ -117,6 +124,7 @@ function clearPushHandlers(state: Routes): void {
   state.push.approval.clear();
   state.push.monitor.clear();
   state.push.memoryOperation.clear();
+  state.push.memoryReplica.clear();
   state.push.memoryOnboarding.clear();
 }
 
@@ -184,6 +192,12 @@ function installFanOutRoutes(rpc: JSONRPCServerAndClient, state: Routes): void {
     const changed = MemoryOnboardingChangedSchema.parse(params);
     for (const handler of [...state.push.memoryOnboarding]) {
       try { handler(changed); } catch { console.warn("[ws-client] memory.onboarding.changed handler failed"); }
+    }
+  });
+  rpc.addMethod(MEMORY_REPLICA_METHODS.changed, (params: unknown) => {
+    const changed = MemoryReplicaChangedSchema.parse(params);
+    for (const handler of [...state.push.memoryReplica]) {
+      try { handler(changed); } catch { console.warn("[ws-client] memory.replica.changed handler failed"); }
     }
   });
 }

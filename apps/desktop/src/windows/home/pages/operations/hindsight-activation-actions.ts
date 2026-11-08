@@ -16,7 +16,7 @@ export type ActivationAction = keyof typeof ACTIVATION_ACTION_LABEL;
 
 /** setup.apply needs compatibility evidence (a validated connection); both stay offered after a failed attempt. */
 const SETUP_ACTION_PHASES: Record<"validate" | "apply", readonly HindsightSetupPhase[]> = {
-  validate: ["ready-to-validate", "compatible", "failed"], apply: ["compatible", "failed"],
+  validate: ["unconfigured", "ready-to-validate", "compatible", "failed"], apply: ["compatible", "failed"],
 };
 
 export function activationActionAllowed(status: MemoryActivationStatus, action: ActivationAction): boolean {

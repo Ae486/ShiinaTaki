@@ -12,15 +12,12 @@ import { ONBOARDING_ACTION_LABEL, onboardingActionAllowed, type OnboardingAction
 import { LocalOnboardingExceptions } from "./local-onboarding-exceptions.tsx";
 import { ONBOARDING_PHASE, onboardingHeadline, onboardingProgress } from "./local-onboarding-state.ts";
 import type { LocalOnboardingView } from "./use-local-onboarding.ts";
+import { MEMORY_RUNTIME_UNAVAILABLE_LABEL } from "./memory-authority-state.ts";
 
 const OPERATION_STATE: Record<MemoryOperation["state"], string> = {
   admitted: "已受理，尚未开始", running: "执行中", completed: "已完成", failed: "失败", cancelled: "已取消", outcome_unknown: "结果未知",
 };
-const RUNTIME_REASON: Record<NonNullable<MemoryOnboardingStatus["runtime"]["unavailableReason"]>, string> = {
-  authority_mismatch: "运行时与权威不一致", connection_unavailable: "连接不可用", stopped: "运行时已停止", not_installed: "运行时未安装",
-  connection_disabled: "Hindsight 连接已关闭", config_changed: "连接配置已变更，需要重新校验",
-  template_hold: "模板变更尚未完成，需要恢复原操作",
-};
+const RUNTIME_REASON = MEMORY_RUNTIME_UNAVAILABLE_LABEL;
 const ACTIONS = Object.keys(ONBOARDING_ACTION_LABEL) as OnboardingAction[];
 
 export function LocalOnboardingCard({ onboarding }: { onboarding: LocalOnboardingView }) {

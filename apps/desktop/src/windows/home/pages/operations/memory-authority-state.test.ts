@@ -29,6 +29,7 @@ describe("memory authority view model", () => {
     expect(view.hindsight).toBe(true);
     expect(view.banks).toEqual([{
       bankId: "global", label: "Global", lastSuccess: "未知", lastAttempt: "未知", nextDue: "未知", error: "无", nextAction: "无", retryKind: null,
+      schedule: { automatic: true, autoIntervalMs: 21_600_000, fullReconciliationIntervalMs: 604_800_000 },
     }]);
     expect(view.pending).toEqual([{ bankId: "global", pending: 1, failed: 0, unknown: 1, parentWrites: 2 }]);
   });
@@ -60,6 +61,13 @@ describe("memory authority view model", () => {
     const [admitted, running] = memoryAuthorityView(status).active;
     expect(admitted).toMatchObject({ cancellable: true, label: "同步副本 · global (incremental) · 已受理（未认领）" });
     expect(running).toMatchObject({ cancellable: false, state: "running" });
+  });
+
+  it.each(["authority_invalid", "evidence_invalid"] as const)("explains %s without presenting replica evidence", (reason) => {
+    const view = memoryAuthorityView(hindsightStatus({ runtime: { providerId: "hindsight", available: false, unavailableReason: reason },
+      replica: null, pending: null }));
+    expect(view.runtimeLine).toContain(reason === "authority_invalid" ? "权威证据校验失败" : "本地记忆证据校验失败");
+    expect(view.banks).toEqual([]); expect(view.pending).toEqual([]); expect(view.hindsight).toBe(false);
   });
 
   it("labels a running hindsight.activate without offering Cancel", () => {

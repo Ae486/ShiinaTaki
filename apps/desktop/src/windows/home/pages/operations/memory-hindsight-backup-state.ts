@@ -33,7 +33,7 @@ type BackupSection = MemoryHindsightStatusSection["backup"];
 
 export const BACKUP_ERROR_LABEL: Record<MemoryBackupErrorCode, string> = {
   HINDSIGHT_BACKUP_ROUTE_UNAVAILABLE: "原生备份接口不可用，可改用手动导出原生数据",
-  HINDSIGHT_BACKUP_QUIESCENCE_TIMEOUT: "等待写入暂停超时",
+  HINDSIGHT_BACKUP_QUIESCENCE_TIMEOUT: "已有记忆处理尚未结束，本次未创建备份；请稍后再次点击“创建备份”",
   HINDSIGHT_BACKUP_CORE_CAPTURE_FAILED: "Core 数据复制失败",
   HINDSIGHT_BACKUP_NATIVE_FAILED: "原生快照失败",
   HINDSIGHT_BACKUP_PAIR_MISMATCH: "Core 与原生快照不一致",

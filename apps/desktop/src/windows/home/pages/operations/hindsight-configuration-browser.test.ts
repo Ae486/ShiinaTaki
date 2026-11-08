@@ -19,7 +19,7 @@ it.skipIf(!existsSync(python) || !existsSync(chromium))("drives actual Home cont
   const artifacts = join(repo, ".trellis/tasks/10-07-hindsight-configuration-observation/research/home-browser", crypto.randomUUID());
   mkdirSync(artifacts, { recursive: true });
   const entry = join(root, "owned-configuration-entry.tsx").replaceAll("\\", "/");
-  const server = await createServer({ configFile: false, root, logLevel: "error", plugins: [tailwindcss(), {
+  const server = await createServer({ configFile: false, root, cacheDir: join(artifacts, "vite-cache"), logLevel: "error", plugins: [tailwindcss(), {
     name: "owned-configuration-home", resolveId: (id) => id === "/owned-configuration-entry.tsx" ? entry : undefined,
     load: (id) => id === entry ? browserEntry(fixture.url) : undefined,
     configureServer(vite) { vite.middlewares.use((request, response, next) => {

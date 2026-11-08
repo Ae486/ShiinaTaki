@@ -7,7 +7,7 @@ import type { MemoryOperationsView } from "./use-memory-operations.ts";
 const noop = async () => undefined;
 
 function view(overrides: Partial<MemoryOperationsView> = {}): MemoryOperationsView {
-  return { status: null, loading: false, error: null, busyKey: null, feedback: null, connectionReady: true, refresh: noop, submit: noop, submitSync: noop, cancel: noop, ...overrides };
+  return { status: null, loading: false, error: null, busyKey: null, feedback: null, connectionReady: true, refresh: noop, submit: noop, submitSync: noop, configureSync: noop, cancel: noop, ...overrides };
 }
 
 function card(overrides: Partial<MemoryOperationsView> = {}): string {
@@ -21,6 +21,17 @@ const lifecycleBlock = (markup: string) => markup.split("Hindsight 连接与 Ban
 const unreviewed = hindsightStatus({ hindsight: unreviewedSection() });
 
 describe("memory authority card", () => {
+  it("renders persisted mode, interval units and bounds in each Bank's sync form", () => {
+    const markup = card({ status: hindsightStatus() });
+    for (const text of ["后台同步模式", "已保存：自动", "增量同步间隔", "完整对账间隔", "1 分钟至 31 天", "1 分钟至 90 天", "保存同步设置", "仅手动关闭后台同步"]) expect(markup).toContain(text);
+    expect(markup).toContain('value="6"'); expect(markup).toContain('value="7"');
+    expect(markup).toContain('value="hours" selected=""'); expect(markup).toContain('value="days" selected=""');
+  });
+  it.each([{ name: "refresh", overrides: { loading: true } }, { name: "read failure", overrides: { error: "refresh failed" } }])("keeps last-good settings visible but locks stale saves during $name", ({ overrides }) => {
+    const markup = card({ status: hindsightStatus(), ...overrides });
+    expect(markup).toContain("已保存：自动");
+    expect(markup).toMatch(/<button[^>]*disabled=""[^>]*>保存同步设置<\/button>/);
+  });
   it("renders no Hindsight lifecycle block outside Hindsight authority", () => {
     expect(card({ status: localStatus() })).not.toContain("Hindsight 连接与 Bank");
   });
@@ -82,7 +93,7 @@ describe("memory authority card", () => {
     expect(markup).toContain("1 待写 / 0 失败 / 1 未知 / 2 父写");
     expect(markup).toContain("未知");
     expect(markup.match(/立即同步/g)).toHaveLength(2);
-    expect(markup.match(/完整对账/g)).toHaveLength(2);
+    expect(buttons(markup).filter((label) => label === "完整对账")).toHaveLength(2);
     expect(markup.match(/重试（full）/g)).toHaveLength(1);
     expect(markup).toContain("HINDSIGHT_UNREACHABLE");
   });
@@ -94,7 +105,7 @@ describe("memory authority card", () => {
     expect(markup).toContain("已受理（未认领）");
     expect(markup).toContain("执行中");
     const busy = card({ status: hindsightStatus({ operations: { active, recent: [] } }), busyKey: "sync:global" });
-    expect(busy.match(/disabled=""/g)).toHaveLength(4);
+    expect(busy.match(/disabled=""/g)).toHaveLength(10);
     expect(busy.match(/aria-busy="true"/g)).toHaveLength(2);
   });
 
