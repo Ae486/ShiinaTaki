@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "G:/anaconda3/python.exe",
+    "-I",
+    "-B",
+    "-S",
+    "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-dependency-inventory-v2\\compare.py"
+  ],
+  "exitCode": 2,
+  "stdout": "{\n  \"comparisonComplete\": false,\n  \"metadataCompatible\": false,\n  \"deploymentReady\": false,\n  \"failure\": \"metadata_version_unsupported\"\n}\n",
+  "stderr": ""
+}

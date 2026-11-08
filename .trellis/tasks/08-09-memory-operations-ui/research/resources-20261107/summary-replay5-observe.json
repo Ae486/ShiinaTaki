@@ -1,0 +1,59 @@
+{
+ "samples": 35,
+ "spanSeconds": 206,
+ "system": {
+  "totalMB": 16011,
+  "freeAtStartMB": 5684,
+  "minFreeMB": 3118,
+  "maxCommitMB": 21467
+ },
+ "components": {
+  "harness": {
+   "samples": 32,
+   "maxProcesses": 1,
+   "wsMB": {
+    "p50": 134,
+    "p95": 538,
+    "max": 538
+   },
+   "privateMB": {
+    "p50": 106,
+    "max": 528
+   },
+   "largestProcessWsMB": 538,
+   "cpuSeconds": 5
+  },
+  "pg": {
+   "samples": 32,
+   "maxProcesses": 20,
+   "wsMB": {
+    "p50": 379,
+    "p95": 496,
+    "max": 498
+   },
+   "privateMB": {
+    "p50": 100,
+    "max": 146
+   },
+   "largestProcessWsMB": 41,
+   "cpuSeconds": 11
+  },
+  "core": {
+   "samples": 23,
+   "maxProcesses": 1,
+   "wsMB": {
+    "p50": 624,
+    "p95": 851,
+    "max": 972
+   },
+   "privateMB": {
+    "p50": 634,
+    "max": 988
+   },
+   "largestProcessWsMB": 972,
+   "cpuSeconds": 135
+  }
+ },
+ "steps": [],
+ "disk": null
+}

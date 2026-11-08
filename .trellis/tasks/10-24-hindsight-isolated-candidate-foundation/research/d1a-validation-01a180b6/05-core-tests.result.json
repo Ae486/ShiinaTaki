@@ -1,0 +1,8 @@
+{
+  "startedAt": "2026-10-28T04:33:05.3038663Z",
+  "command": "pnpm --filter @taki/core test src/memory/hindsight-candidates src/memory/hindsight-backup/hindsight-backup-pair.test.ts src/memory/hindsight-backup/hindsight-template-backup-consumers.test.ts --maxWorkers=2",
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "completedAt": "2026-10-28T04:34:41.7968025Z",
+  "temporaryDirectory": "G:/TakiAgent-staging/d1a-01a180b6-7655aa66-05d6-4e4b-854e-1b144d33689d"
+}

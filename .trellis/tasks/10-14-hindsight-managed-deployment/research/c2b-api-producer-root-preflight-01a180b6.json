@@ -1,0 +1,239 @@
+{
+  "token": "5c7480e7-4501-447a-a3bf-2e02f28a9fda",
+  "observedAt": "2026-10-28T10:43:34.7432159Z",
+  "complete": true,
+  "deploymentReady": false,
+  "commands": [
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\producer-root-5c7480e7-4501-447a-a3bf-2e02f28a9fda\\client-config",
+        "info",
+        "--format",
+        "{\"id\":{{json .ID}},\"version\":{{json .ServerVersion}},\"os\":{{json .OSType}},\"architecture\":{{json .Architecture}}}"
+      ],
+      "dispatchedAt": "2026-10-28T10:43:35.9244894Z",
+      "exitCode": 0,
+      "closed": true,
+      "pid": 38788,
+      "stdout": "{\"id\":\"93e8319e-24b7-4a7d-88f1-60923ad681e0\",\"version\":\"29.0.1\",\"os\":\"linux\",\"architecture\":\"x86_64\"}\n",
+      "stderr": "",
+      "stdoutSha256": "8d37e1e9d9172e46e96b6f847a8fba37b9e3902494cb639161d12d33ee53a7cb",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\producer-root-5c7480e7-4501-447a-a3bf-2e02f28a9fda\\client-config",
+        "image",
+        "inspect",
+        "taki-c2b-application:ad8bf8b8-9577-4420-9fd9-212574bd4568",
+        "--format",
+        "{\"id\":{{json .Id}},\"os\":{{json .Os}},\"architecture\":{{json .Architecture}},\"volumes\":{{json (index .Config \"Volumes\")}}}"
+      ],
+      "dispatchedAt": "2026-10-28T10:43:36.3061954Z",
+      "exitCode": 0,
+      "closed": true,
+      "pid": 64864,
+      "stdout": "{\"id\":\"sha256:c57385ec5ad1243659db1e1159f65218c1a48dd0481e94f468cbc0ada376b11e\",\"os\":\"linux\",\"architecture\":\"amd64\",\"volumes\":null}\n",
+      "stderr": "",
+      "stdoutSha256": "ef2795283abc9fe2d0afc393b552a1572e927bdbac5fe74213084e0e0f34726f",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\producer-root-5c7480e7-4501-447a-a3bf-2e02f28a9fda\\build-config",
+        "buildx",
+        "inspect",
+        "default"
+      ],
+      "dispatchedAt": "2026-10-28T10:43:36.6853170Z",
+      "exitCode": 0,
+      "closed": true,
+      "pid": 64936,
+      "stdout": "Name:   default\nDriver: docker\n\nNodes:\nName:             default\nEndpoint:         default\nStatus:           running\nBuildKit version: v0.25.2\nPlatforms:        linux/amd64, linux/amd64/v2, linux/amd64/v3, linux/arm64, linux/riscv64, linux/ppc64le, linux/s390x, linux/arm/v7, linux/arm/v6\nLabels:\n org.mobyproject.buildkit.worker.containerd.namespace: moby\n org.mobyproject.buildkit.worker.containerd.uuid:      4707fb8c-2f6e-4519-a576-0bd47876dc6d\n org.mobyproject.buildkit.worker.executor:             containerd\n org.mobyproject.buildkit.worker.hostname:             docker-desktop\n org.mobyproject.buildkit.worker.moby.host-gateway-ip: 192.168.65.254\n org.mobyproject.buildkit.worker.network:              host\n org.mobyproject.buildkit.worker.selinux.enabled:      false\n org.mobyproject.buildkit.worker.snapshotter:          overlayfs\nDevices:\n Name:                  docker.com/gpu=webgpu\n Automatically allowed: false\nGC Policy rule#0:\n All:            false\n Filters:        type==source.local,type==exec.cachemount,type==source.git.checkout\n Keep Duration:  48h0m0s\n Max Used Space: 2.764GiB\nGC Policy rule#1:\n All:            false\n Keep Duration:  1440h0m0s\n Reserved Space: 20GiB\nGC Policy rule#2:\n All:            false\n Reserved Space: 20GiB\nGC Policy rule#3:\n All:            true\n Reserved Space: 20GiB\n",
+      "stderr": "",
+      "stdoutSha256": "58ee06d08202159709f02353b89d07f597077c1c6c859ded07b5f5d632b71706",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\producer-root-5c7480e7-4501-447a-a3bf-2e02f28a9fda\\build-config",
+        "context",
+        "inspect",
+        "--format",
+        "{{json .Endpoints.docker.Host}}",
+        "default"
+      ],
+      "dispatchedAt": "2026-10-28T10:43:37.2815097Z",
+      "exitCode": 0,
+      "closed": true,
+      "pid": 63348,
+      "stdout": "\"npipe:////./pipe/dockerDesktopLinuxEngine\"\n",
+      "stderr": "",
+      "stdoutSha256": "0d1284cdbf15f9de9be8524a923374e8dffede3d62a65a022b0c8f58bfaa26b7",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\producer-root-5c7480e7-4501-447a-a3bf-2e02f28a9fda\\client-config",
+        "ps",
+        "-a",
+        "--no-trunc",
+        "--format",
+        "{{.ID}}"
+      ],
+      "dispatchedAt": "2026-10-28T10:43:37.4344861Z",
+      "exitCode": 0,
+      "closed": true,
+      "pid": 63584,
+      "stdout": "1e389e0a2f95121ca804c186c20916196e9e46f67a7691c3d184404a7292deb8\nc07d86d32382757d292dd4ebf318e6c44260c817d95f35187663d4d33a26b865\na38b49e64f74ee4fa4f5cf5531e467d74dda2b64dc7e28e78a9bdadd37272519\n8f5e4468c3a7c0100330e012fdca3da843abfcc732361b71308f06d6eeada5c2\n7992fb2bba71e13dc290e305941ded32b9046c1ec4b67a3697863ff79079cf8b\nba11af042db0879902996426522611b267f38eab7d21f05e21036929c415cc24\n9d4fc8fb7a4869ac422d9e78a924b49e698e61a562de3af7576dfd18ef81cd98\n697330c3cd8966e02d97fa228c5233a0805531bff00275107630e34fadda0b1a\n",
+      "stderr": "",
+      "stdoutSha256": "a5e0e03604ba98f082761a61a9e510c280ba9e1f5b9d305fc8d835dcdea21583",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\producer-root-5c7480e7-4501-447a-a3bf-2e02f28a9fda\\client-config",
+        "container",
+        "inspect",
+        "1e389e0a2f95121ca804c186c20916196e9e46f67a7691c3d184404a7292deb8",
+        "c07d86d32382757d292dd4ebf318e6c44260c817d95f35187663d4d33a26b865",
+        "a38b49e64f74ee4fa4f5cf5531e467d74dda2b64dc7e28e78a9bdadd37272519",
+        "8f5e4468c3a7c0100330e012fdca3da843abfcc732361b71308f06d6eeada5c2",
+        "7992fb2bba71e13dc290e305941ded32b9046c1ec4b67a3697863ff79079cf8b",
+        "ba11af042db0879902996426522611b267f38eab7d21f05e21036929c415cc24",
+        "9d4fc8fb7a4869ac422d9e78a924b49e698e61a562de3af7576dfd18ef81cd98",
+        "697330c3cd8966e02d97fa228c5233a0805531bff00275107630e34fadda0b1a",
+        "--format",
+        "{\"id\":{{json .Id}},\"name\":{{json .Name}},\"image\":{{json .Image}},\"status\":{{json .State.Status}},\"running\":{{json .State.Running}},\"startedAt\":{{json .State.StartedAt}},\"finishedAt\":{{json .State.FinishedAt}}}"
+      ],
+      "dispatchedAt": "2026-10-28T10:43:37.7305674Z",
+      "exitCode": 0,
+      "closed": true,
+      "pid": 63068,
+      "stdout": "{\"id\":\"1e389e0a2f95121ca804c186c20916196e9e46f67a7691c3d184404a7292deb8\",\"name\":\"/taki-openbili-backend\",\"image\":\"sha256:f24e8519df02cee288cada771654064d8f133894ab2648fb0da1513d1238a7e6\",\"status\":\"running\",\"running\":true,\"startedAt\":\"2026-10-28T04:16:16.884341361Z\",\"finishedAt\":\"2026-10-28T04:16:14.871199781Z\"}\n{\"id\":\"c07d86d32382757d292dd4ebf318e6c44260c817d95f35187663d4d33a26b865\",\"name\":\"/taki-hindsight-api-retest\",\"image\":\"sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db\",\"status\":\"exited\",\"running\":false,\"startedAt\":\"2026-08-18T16:47:39.697781196Z\",\"finishedAt\":\"2026-10-14T14:27:17.510076459Z\"}\n{\"id\":\"a38b49e64f74ee4fa4f5cf5531e467d74dda2b64dc7e28e78a9bdadd37272519\",\"name\":\"/taki-hindsight-api\",\"image\":\"sha256:02f4b13387a3dde494e1edb414519e0ee4f1d13f14503f2e15050549818a0ef5\",\"status\":\"exited\",\"running\":false,\"startedAt\":\"2026-08-18T14:11:54.085514229Z\",\"finishedAt\":\"2026-08-18T16:31:05.802894207Z\"}\n{\"id\":\"8f5e4468c3a7c0100330e012fdca3da843abfcc732361b71308f06d6eeada5c2\",\"name\":\"/redis\",\"image\":\"sha256:c6a3c149aae23f911f2f4dbd9d144718f802046b6f1706d4abf4ff84cc2792aa\",\"status\":\"running\",\"running\":true,\"startedAt\":\"2026-10-28T04:16:16.889156733Z\",\"finishedAt\":\"2026-10-28T04:16:14.871158042Z\"}\n{\"id\":\"7992fb2bba71e13dc290e305941ded32b9046c1ec4b67a3697863ff79079cf8b\",\"name\":\"/my_pgvector\",\"image\":\"sha256:494dff7e67e7bc2c826b94c331364978d145ebb86fd338154138b084223b7f67\",\"status\":\"exited\",\"running\":false,\"startedAt\":\"2026-04-11T08:18:53.87731237Z\",\"finishedAt\":\"2026-07-13T16:08:02.340463365Z\"}\n{\"id\":\"ba11af042db0879902996426522611b267f38eab7d21f05e21036929c415cc24\",\"name\":\"/rustfs_loacl\",\"image\":\"sha256:0725587f6fcca83c1898f321424327d6e6da5e01ea20382905dd258ed5af3be4\",\"status\":\"exited\",\"running\":false,\"startedAt\":\"2026-04-11T08:18:55.176936785Z\",\"finishedAt\":\"2026-07-13T16:08:02.340598508Z\"}\n{\"id\":\"9d4fc8fb7a4869ac422d9e78a924b49e698e61a562de3af7576dfd18ef81cd98\",\"name\":\"/rpa-redis\",\"image\":\"sha256:976ab0f0939b78c06d802bcd3bea44c5142ea9a756a57b861e08819817f768c8\",\"status\":\"exited\",\"running\":false,\"startedAt\":\"2026-02-20T17:46:12.832921192Z\",\"finishedAt\":\"2026-02-22T09:08:37.904271714Z\"}\n{\"id\":\"697330c3cd8966e02d97fa228c5233a0805531bff00275107630e34fadda0b1a\",\"name\":\"/arboris-app\",\"image\":\"sha256:862344867ee7582178ddb83d278a5c682f6a919b3e8bd4dbb2f6a7c37c362343\",\"status\":\"running\",\"running\":true,\"startedAt\":\"2026-10-28T04:16:16.886215724Z\",\"finishedAt\":\"2026-10-28T04:16:14.871281854Z\"}\n",
+      "stderr": "",
+      "stdoutSha256": "3f28260169dd0383860b8b468cd267a1c67804bdceb9540c658335db754372fb",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "stage": "G:/TakiAgent-c2b-native-api/producer-root-5c7480e7-4501-447a-a3bf-2e02f28a9fda",
+  "dockerSha256": "0a4d8fe2ab107ceae44ee5f5fc1e1c155790042b7e3d3163826660da882b389d",
+  "buildxSha256": "c8d20cd80c940cf866717dd938eca50dbe588e06e0c0ced5a9d97b06b27bf8a7",
+  "diskFreeBytes": {
+    "G": 230066065408,
+    "C": 31817064448,
+    "H": 4993687552
+  },
+  "engine": {
+    "id": "93e8319e-24b7-4a7d-88f1-60923ad681e0",
+    "version": "29.0.1",
+    "os": "linux",
+    "architecture": "x86_64"
+  },
+  "base": {
+    "id": "sha256:c57385ec5ad1243659db1e1159f65218c1a48dd0481e94f468cbc0ada376b11e",
+    "os": "linux",
+    "architecture": "amd64",
+    "volumes": null
+  },
+  "builder": "Name:   default\nDriver: docker\n\nNodes:\nName:             default\nEndpoint:         default\nStatus:           running\nBuildKit version: v0.25.2\nPlatforms:        linux/amd64, linux/amd64/v2, linux/amd64/v3, linux/arm64, linux/riscv64, linux/ppc64le, linux/s390x, linux/arm/v7, linux/arm/v6\nLabels:\n org.mobyproject.buildkit.worker.containerd.namespace: moby\n org.mobyproject.buildkit.worker.containerd.uuid:      4707fb8c-2f6e-4519-a576-0bd47876dc6d\n org.mobyproject.buildkit.worker.executor:             containerd\n org.mobyproject.buildkit.worker.hostname:             docker-desktop\n org.mobyproject.buildkit.worker.moby.host-gateway-ip: 192.168.65.254\n org.mobyproject.buildkit.worker.network:              host\n org.mobyproject.buildkit.worker.selinux.enabled:      false\n org.mobyproject.buildkit.worker.snapshotter:          overlayfs\nDevices:\n Name:                  docker.com/gpu=webgpu\n Automatically allowed: false\nGC Policy rule#0:\n All:            false\n Filters:        type==source.local,type==exec.cachemount,type==source.git.checkout\n Keep Duration:  48h0m0s\n Max Used Space: 2.764GiB\nGC Policy rule#1:\n All:            false\n Keep Duration:  1440h0m0s\n Reserved Space: 20GiB\nGC Policy rule#2:\n All:            false\n Reserved Space: 20GiB\nGC Policy rule#3:\n All:            true\n Reserved Space: 20GiB",
+  "defaultEndpoint": "\"npipe:////./pipe/dockerDesktopLinuxEngine\"",
+  "containers": [
+    {
+      "id": "1e389e0a2f95121ca804c186c20916196e9e46f67a7691c3d184404a7292deb8",
+      "name": "/taki-openbili-backend",
+      "image": "sha256:f24e8519df02cee288cada771654064d8f133894ab2648fb0da1513d1238a7e6",
+      "status": "running",
+      "running": true,
+      "startedAt": "2026-10-28T04:16:16.884341361Z",
+      "finishedAt": "2026-10-28T04:16:14.871199781Z"
+    },
+    {
+      "id": "c07d86d32382757d292dd4ebf318e6c44260c817d95f35187663d4d33a26b865",
+      "name": "/taki-hindsight-api-retest",
+      "image": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+      "status": "exited",
+      "running": false,
+      "startedAt": "2026-08-18T16:47:39.697781196Z",
+      "finishedAt": "2026-10-14T14:27:17.510076459Z"
+    },
+    {
+      "id": "a38b49e64f74ee4fa4f5cf5531e467d74dda2b64dc7e28e78a9bdadd37272519",
+      "name": "/taki-hindsight-api",
+      "image": "sha256:02f4b13387a3dde494e1edb414519e0ee4f1d13f14503f2e15050549818a0ef5",
+      "status": "exited",
+      "running": false,
+      "startedAt": "2026-08-18T14:11:54.085514229Z",
+      "finishedAt": "2026-08-18T16:31:05.802894207Z"
+    },
+    {
+      "id": "8f5e4468c3a7c0100330e012fdca3da843abfcc732361b71308f06d6eeada5c2",
+      "name": "/redis",
+      "image": "sha256:c6a3c149aae23f911f2f4dbd9d144718f802046b6f1706d4abf4ff84cc2792aa",
+      "status": "running",
+      "running": true,
+      "startedAt": "2026-10-28T04:16:16.889156733Z",
+      "finishedAt": "2026-10-28T04:16:14.871158042Z"
+    },
+    {
+      "id": "7992fb2bba71e13dc290e305941ded32b9046c1ec4b67a3697863ff79079cf8b",
+      "name": "/my_pgvector",
+      "image": "sha256:494dff7e67e7bc2c826b94c331364978d145ebb86fd338154138b084223b7f67",
+      "status": "exited",
+      "running": false,
+      "startedAt": "2026-04-11T08:18:53.87731237Z",
+      "finishedAt": "2026-07-13T16:08:02.340463365Z"
+    },
+    {
+      "id": "ba11af042db0879902996426522611b267f38eab7d21f05e21036929c415cc24",
+      "name": "/rustfs_loacl",
+      "image": "sha256:0725587f6fcca83c1898f321424327d6e6da5e01ea20382905dd258ed5af3be4",
+      "status": "exited",
+      "running": false,
+      "startedAt": "2026-04-11T08:18:55.176936785Z",
+      "finishedAt": "2026-07-13T16:08:02.340598508Z"
+    },
+    {
+      "id": "9d4fc8fb7a4869ac422d9e78a924b49e698e61a562de3af7576dfd18ef81cd98",
+      "name": "/rpa-redis",
+      "image": "sha256:976ab0f0939b78c06d802bcd3bea44c5142ea9a756a57b861e08819817f768c8",
+      "status": "exited",
+      "running": false,
+      "startedAt": "2026-02-20T17:46:12.832921192Z",
+      "finishedAt": "2026-02-22T09:08:37.904271714Z"
+    },
+    {
+      "id": "697330c3cd8966e02d97fa228c5233a0805531bff00275107630e34fadda0b1a",
+      "name": "/arboris-app",
+      "image": "sha256:862344867ee7582178ddb83d278a5c682f6a919b3e8bd4dbb2f6a7c37c362343",
+      "status": "running",
+      "running": true,
+      "startedAt": "2026-10-28T04:16:16.886215724Z",
+      "finishedAt": "2026-10-28T04:16:14.871281854Z"
+    }
+  ]
+}

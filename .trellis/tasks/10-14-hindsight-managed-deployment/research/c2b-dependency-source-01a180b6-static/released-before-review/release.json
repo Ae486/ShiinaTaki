@@ -1,0 +1,53 @@
+{
+  "schema": "c2b-dependency-release-v1",
+  "token": "0ab89a2a-ccac-4350-a4ea-ed90ed7a3e6d",
+  "deploymentReady": false,
+  "status": "source-released-independent-review-pending",
+  "node": {
+    "path": "C:/Program Files/nodejs/node.exe",
+    "version": "v24.18.0",
+    "sha256": "9a4eb5f1c29c6a2e93852ead46b999e284a6a5ca8bab4d4e241d587d025a52de"
+  },
+  "docker": {
+    "path": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+    "sha256": "0a4d8fe2ab107ceae44ee5f5fc1e1c155790042b7e3d3163826660da882b389d"
+  },
+  "engine": {
+    "endpoint": "npipe:////./pipe/dockerDesktopLinuxEngine",
+    "id": "93e8319e-24b7-4a7d-88f1-60923ad681e0",
+    "version": "29.0.1"
+  },
+  "archive": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\c2b-dependencies-run-0ab89a2a-ccac-4350-a4ea-ed90ed7a3e6d",
+  "hostPython": {
+    "path": "G:/anaconda3/python.exe",
+    "sha256": "6965927a96b81d1717c1d2186de7feb9b29ebf8775464020ebc2f25de6ef8ee0"
+  },
+  "packaging": {
+    "path": "G:\\anaconda3\\Lib\\site-packages\\packaging",
+    "version": "24.1",
+    "files": {
+      "__init__.py": "76dc366cd996090f569cca0addb93f7a52f5b2f4a58a45ed2e9661085201f521",
+      "_elffile.py": "fcb7095b860d2b2c18b25e35ebd076ba4291ab0c63c6cb7ff07d0545540a973f",
+      "_manylinux.py": "5e8e15d0f673f2c6ee5426d39e2d2dd424740077a2affee26f8953995f2c703e",
+      "_musllinux.py": "a7d66a35888e22d19e7bc29c64578717f61c76157018774aeabfbc9608b1bc64",
+      "_parser.py": "b3f4ef4ef0cd2b436b336401dd529385d58533835cd0fe899e439b925dcc8e93",
+      "_structures.py": "ab77953666d62461bf4b40e2b7f4b7028f2a42acffe4f6135c500a0597b9cabe",
+      "_tokenizer.py": "27abf91fb273bdbfa0f35c69ff640008ac0eecbc47400ea292bc8c53bcd7c0df",
+      "markers.py": "756292aa7e52a7e8c398e1be5b719f2c72a3c217f522cce76d3ef55650680793",
+      "metadata.py": "28836e4a4275daef92ca828d4f2fe91cd1807cc52dc4dbd9e77a80d7300a70a2",
+      "requirements.py": "818c9148075bac8c8a0d8ebaba02035108d132fc641f600b8a84e65f7b672faa",
+      "specifiers.py": "ae3a5cde1a09bae9d1213e83747ee02d39d0e63e50292b968e84c2e6c747b472",
+      "tags.py": "cbc11b85e3aef564bbb3e31e6da5cc707305fa3cec03f0b52f3e57453892cb8c",
+      "utils.py": "3407585309e500ea646adfd1b616af5fc6b4ed8b95c6018bfefc2bc7bdc64833",
+      "version.py": "5741f748e8fff307abaefa2badbe900cb46195ca9212b3534e40afbdfb338432"
+    }
+  },
+  "files": {
+    "collect.py": "0d5a48f1d0580092c808a13ba4f92cc972c8dea89c47a48eb53c09b51bd843c1",
+    "compare.py": "295019f820a34073070ef7d8e21102a0f8644f6cb33db4ac40afa3309ac39f87",
+    "docker-commands.mjs": "9e602b34f79adfe5c0cf2050846e8a72e263291cd647de2bbc92240ebabc3a73",
+    "evidence-store.mjs": "6bc6bfc2fe8040feac627bfe31c9e50cee7978bf4637de536e71cb2cad9f55a2",
+    "launch.mjs": "273f085262025c6377f91a63686e7328cb465734caea32b0b725322497855035",
+    "source-pyproject.toml": "6a1735ecb0d5e5f86662cb2138af8c616f36ec1ce071067f190887b4864f59b5"
+  }
+}

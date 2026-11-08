@@ -1,0 +1,97 @@
+[
+  {
+    "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-admission.test.ts",
+    "bytes": 10146,
+    "sha256": "c2bcd0bbbd7a534b825d8cebb9d92bbc8adfe8d3c56652c425716916475a863f"
+  },
+  {
+    "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-admission.ts",
+    "bytes": 2972,
+    "sha256": "18d1897b4bcc57134c9f1b5fbf245e169d54f7ba0662faf85a32e3fc4ae6b16d"
+  },
+  {
+    "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-archive.ts",
+    "bytes": 6909,
+    "sha256": "c241f85cf63ef89924fb449f89cf1767ff1c5626b6b4eae26c6dd71611631af6"
+  },
+  {
+    "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-copy-stream.test.ts",
+    "bytes": 3161,
+    "sha256": "ac32fe5c1450dabd9ecfe8f28bd743844e34eb4727b152c1882f6617552062f3"
+  },
+  {
+    "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-copy-stream.ts",
+    "bytes": 4720,
+    "sha256": "8d5cc4fdd30e27bf5d0955d1e27ddcf5a9ecec9e29fcfd4b8cce73853f265771"
+  },
+  {
+    "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-core.ts",
+    "bytes": 5048,
+    "sha256": "23bcc08ac1e7498eca511fbb2d1ef242c72766d0253dd650fa80d6aaf5dcf88b"
+  },
+  {
+    "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-files.test.ts",
+    "bytes": 1398,
+    "sha256": "ae00cac1b6a2b9e737e94c6a0c48b2d5a8d654b97d27719dd082f74914640a02"
+  },
+  {
+    "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-files.ts",
+    "bytes": 2275,
+    "sha256": "927ec43b4572f38a2d7763edbccbdd28e394d55ff8e41402f17d333508e70f30"
+  },
+  {
+    "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-fixtures.ts",
+    "bytes": 9437,
+    "sha256": "1ccc0d6fdb46e1d32a735b366ff3acaca9fa13b80d995a8d7af2046717f76e6d"
+  },
+  {
+    "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-identity.test.ts",
+    "bytes": 2028,
+    "sha256": "9061f65cee549447d5bb9075494e9cb7579298f720c3e29a61a64336da5ccb53"
+  },
+  {
+    "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-identity.ts",
+    "bytes": 3078,
+    "sha256": "7bcf644e6654ddb7278d7bbeeeee9173dd198a19b3fcf53b2b40be3ac633a8a0"
+  },
+  {
+    "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-profile.ts",
+    "bytes": 3438,
+    "sha256": "95f2e5c54a7621c5a6f76a79ef71d749b89cb6b91ab613ed552dbcc9c7d8ca33"
+  },
+  {
+    "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-refusal.ts",
+    "bytes": 2934,
+    "sha256": "ef23fc538dc5ffc674d17237d239f22912436d43f43fd106e2e45955ae660b6c"
+  },
+  {
+    "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-schema-admission.ts",
+    "bytes": 4305,
+    "sha256": "7611854563b55fb6085fcb43cdd1013a09b1250a63dff7152d3d4c16f828b8fb"
+  },
+  {
+    "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-verifier.test.ts",
+    "bytes": 13198,
+    "sha256": "72ac96aae9a6835c8ad1c90aa2edfa32063213933ba8d2615d6d059db5c46cd2"
+  },
+  {
+    "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-verifier.ts",
+    "bytes": 8835,
+    "sha256": "3f2b57e7cfc091fd9445ea42d927c1c9097df5dc5bfb359c801629c6bfe606f0"
+  },
+  {
+    "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/index.md",
+    "bytes": 1472,
+    "sha256": "15f0bb914db943d12441d8366d52eb6659a84add12ba1e38598a77c74c7a12db"
+  },
+  {
+    "path": "H:/TakiAgent/packages/shared/src/hindsight-candidate-schema.test.ts",
+    "bytes": 2073,
+    "sha256": "f86a61bc7a80682c8db5f88f8b460a285768e10109aa21730516d27ec24e5f50"
+  },
+  {
+    "path": "H:/TakiAgent/packages/shared/src/hindsight-candidate-schema.ts",
+    "bytes": 11040,
+    "sha256": "27e739489e330f8b3bfadbdfaa563b7263931b1b5d30aaf4295bd600a61f64f1"
+  }
+]

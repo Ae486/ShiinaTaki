@@ -1,0 +1,59 @@
+{
+  "schema": "c2b-api-producer-source-v1",
+  "deploymentReady": false,
+  "runtimeExecuted": false,
+  "sourceRoot": "H:\\hindsight\\docker\\standalone\\managed_bootstrap",
+  "files": {
+    "api_profile.py": {
+      "bytes": 2442,
+      "sha256": "a603e77ae2e95881b7ac681a60c6ce2a45269451e35fd864919fbe0142d1721a"
+    },
+    "api_artifact.py": {
+      "bytes": 1790,
+      "sha256": "38fcee7286c25897a4bd4067a0e942e701c2ae04307d88f26c75fc98f4f7a232"
+    },
+    "api_state.py": {
+      "bytes": 5443,
+      "sha256": "2e0cee933e3f9e86dd2a7c8af29411faafbd1a44522005587eafb2b55e6ccf1a"
+    },
+    "api_consumer.py": {
+      "bytes": 4317,
+      "sha256": "bb66a3cdca87bb6cc94b97ad6bbdbf16bf8a1c7fde9b9178dbd0d74f82cf39f2"
+    },
+    "api_database.py": {
+      "bytes": 17718,
+      "sha256": "79a82255eea4dfdc36ce21fa88389f26e8a853956eb03a173b8d8aa8cd998d8a"
+    },
+    "api_server.py": {
+      "bytes": 7393,
+      "sha256": "4f33aac52e5f6d233d592e4c288502e0591776f4fade257189247e76de2d2daf"
+    },
+    "api_child.py": {
+      "bytes": 4921,
+      "sha256": "8acda336acff93d98f28dfd7c52957cb3e2877d1b8b7db6a773d6c3f02d1fc1a"
+    },
+    "test_api_producer.py": {
+      "bytes": 8762,
+      "sha256": "e66052d2a33018869188b33d549571cb529efa3389bf2dceece9f0c14ddb94ae"
+    }
+  },
+  "checks": {
+    "checks-initial.json": {
+      "bytes": 20224,
+      "sha256": "47d28f5f129d55b8abefc10c0142ea1a9d81cae9aaf366b7211b9d638be0897e"
+    },
+    "checks-final.json": {
+      "bytes": 5745,
+      "sha256": "6f995b7c4aa45f179a6b98534060cbb3f3997337c515181f8d9a59d6ed925f3a"
+    },
+    "checks-final-2.json": {
+      "bytes": 5035,
+      "sha256": "419577db9d911342d4fcc7eb57f1475cc79e5ca2fd55384348bdf291e45d86a0"
+    },
+    "run-checks.py": {
+      "bytes": 2306,
+      "sha256": "95a9a0d9977284cad784e3a7136e47134c5ba618d9992d672c69b6597cd2d10c"
+    }
+  },
+  "boundary": "Native source and deterministic generated markers only; Root owner/wire/image/Host/relay/API/PG acceptance remains required"
+}

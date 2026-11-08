@@ -1,0 +1,86 @@
+{
+ "samples": 70,
+ "spanSeconds": 408,
+ "system": {
+  "totalMB": 16011,
+  "freeAtStartMB": 6791,
+  "minFreeMB": 4579,
+  "maxCommitMB": 19043
+ },
+ "components": {
+  "harness": {
+   "samples": 34,
+   "maxProcesses": 1,
+   "wsMB": {
+    "p50": 134,
+    "p95": 382,
+    "max": 382
+   },
+   "privateMB": {
+    "p50": 107,
+    "max": 385
+   },
+   "largestProcessWsMB": 382,
+   "cpuSeconds": 6
+  },
+  "pg": {
+   "samples": 39,
+   "maxProcesses": 20,
+   "wsMB": {
+    "p50": 366,
+    "p95": 490,
+    "max": 490
+   },
+   "privateMB": {
+    "p50": 96,
+    "max": 144
+   },
+   "largestProcessWsMB": 39,
+   "cpuSeconds": 11
+  },
+  "native": {
+   "samples": 32,
+   "maxProcesses": 2,
+   "wsMB": {
+    "p50": 1386,
+    "p95": 1433,
+    "max": 1450
+   },
+   "privateMB": {
+    "p50": 2663,
+    "max": 3224
+   },
+   "largestProcessWsMB": 1446,
+   "cpuSeconds": 231
+  },
+  "core": {
+   "samples": 24,
+   "maxProcesses": 1,
+   "wsMB": {
+    "p50": 622,
+    "p95": 774,
+    "max": 782
+   },
+   "privateMB": {
+    "p50": 634,
+    "max": 796
+   },
+   "largestProcessWsMB": 782,
+   "cpuSeconds": 139
+  }
+ },
+ "steps": [],
+ "disk": {
+  "last": {
+   "root": "G:\\taki-post-reentry-DFgV2j",
+   "pg-data": 83,
+   "core-data": 27,
+   "native-backups": 0
+  },
+  "maxMB": {
+   "pg-data": 83,
+   "core-data": 27,
+   "native-backups": 0
+  }
+ }
+}

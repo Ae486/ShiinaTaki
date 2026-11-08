@@ -1,0 +1,207 @@
+{
+  "schema": "c2b-application-execution-plan-v1",
+  "token": "ad8bf8b8-9577-4420-9fd9-212574bd4568",
+  "deploymentReady": false,
+  "executor": "Root-owned separate execution wrapper; this file does not dispatch effects",
+  "stage": "G:/TakiAgent-c2b-native-api/application-ad8bf8b8-9577-4420-9fd9-212574bd4568",
+  "context": "G:/TakiAgent-c2b-native-api/application-ad8bf8b8-9577-4420-9fd9-212574bd4568/context",
+  "tag": "taki-c2b-application:ad8bf8b8-9577-4420-9fd9-212574bd4568",
+  "containerName": "taki-c2b-application-check-ad8bf8b8-9577-4420-9fd9-212574bd4568",
+  "archive": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\c2b-application-run-ad8bf8b8-9577-4420-9fd9-212574bd4568",
+  "docker": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+  "endpoint": "npipe:////./pipe/dockerDesktopLinuxEngine",
+  "clearedEnvironment": {
+    "SystemRoot": "C:/Windows",
+    "TEMP": "G:/TakiAgent-c2b-native-api/application-ad8bf8b8-9577-4420-9fd9-212574bd4568/temp",
+    "TMP": "G:/TakiAgent-c2b-native-api/application-ad8bf8b8-9577-4420-9fd9-212574bd4568/temp"
+  },
+  "buildConfig": {
+    "path": "G:/TakiAgent-c2b-native-api/application-ad8bf8b8-9577-4420-9fd9-212574bd4568/build-config/config.json",
+    "content": {
+      "cliPluginsExtraDirs": [
+        "C:/Program Files/Docker/Docker/resources/cli-plugins"
+      ]
+    }
+  },
+  "emptyClientConfig": "G:/TakiAgent-c2b-native-api/application-ad8bf8b8-9577-4420-9fd9-212574bd4568/client-config",
+  "windowsHide": true,
+  "shell": false,
+  "build": {
+    "maximumSeconds": 600,
+    "stdoutBytes": 1048576,
+    "stderrBytes": 1048576,
+    "intentFence": "G:/TakiAgent-c2b-native-api/application-ad8bf8b8-9577-4420-9fd9-212574bd4568/build.started",
+    "iidfile": "G:/TakiAgent-c2b-native-api/application-ad8bf8b8-9577-4420-9fd9-212574bd4568/image-id.txt",
+    "argv": [
+      "--host",
+      "npipe:////./pipe/dockerDesktopLinuxEngine",
+      "--config",
+      "G:/TakiAgent-c2b-native-api/application-ad8bf8b8-9577-4420-9fd9-212574bd4568/build-config",
+      "buildx",
+      "build",
+      "--builder",
+      "default",
+      "--pull=false",
+      "--network=none",
+      "--load",
+      "--progress=plain",
+      "--label",
+      "taki.c2b.application=ad8bf8b8-9577-4420-9fd9-212574bd4568",
+      "--label",
+      "taki.c2b.role=application-source-cache-prerequisite",
+      "--iidfile",
+      "G:/TakiAgent-c2b-native-api/application-ad8bf8b8-9577-4420-9fd9-212574bd4568/image-id.txt",
+      "--tag",
+      "taki-c2b-application:ad8bf8b8-9577-4420-9fd9-212574bd4568",
+      "--file",
+      "G:/TakiAgent-c2b-native-api/application-ad8bf8b8-9577-4420-9fd9-212574bd4568/context/Dockerfile",
+      "G:/TakiAgent-c2b-native-api/application-ad8bf8b8-9577-4420-9fd9-212574bd4568/context"
+    ],
+    "requireBefore": [
+      "source/release/snapshot pins",
+      "exact Docker/Buildx and Engine",
+      "default Docker-driver builder and endpoint",
+      "local base reference exact ID",
+      "tag and iidfile/fence absent"
+    ],
+    "requireAfter": [
+      "successful bounded process",
+      "iidfile=result image ID=owned tag ID",
+      "exact token/role labels",
+      "unchanged base reference",
+      "exact original base RootFS layer prefix",
+      "fixed image entrypoint/user/env; no volumes"
+    ],
+    "unknown": "Retain fence/context/result streams and observe only. Never retry build or adopt/clean an uncertain image."
+  },
+  "check": {
+    "workSeconds": 180,
+    "totalIncludingCleanupArchiveSeconds": 240,
+    "cleanupReserveSeconds": 60,
+    "stdoutBytes": 32768,
+    "stderrBytes": 16384,
+    "createArgvTemplate": [
+      "--host",
+      "npipe:////./pipe/dockerDesktopLinuxEngine",
+      "--config",
+      "G:/TakiAgent-c2b-native-api/application-ad8bf8b8-9577-4420-9fd9-212574bd4568/client-config",
+      "create",
+      "--name",
+      "taki-c2b-application-check-ad8bf8b8-9577-4420-9fd9-212574bd4568",
+      "--label",
+      "taki.c2b.application=ad8bf8b8-9577-4420-9fd9-212574bd4568",
+      "--label",
+      "taki.c2b.role=application-source-cache-check",
+      "--pull",
+      "never",
+      "--restart",
+      "no",
+      "--network",
+      "none",
+      "--read-only",
+      "--user",
+      "1000:1000",
+      "--log-driver",
+      "none",
+      "--memory",
+      "256m",
+      "--cpus",
+      "1",
+      "--pids-limit",
+      "16",
+      "--cap-drop",
+      "ALL",
+      "--security-opt",
+      "no-new-privileges=true",
+      "--entrypoint",
+      "/app/api/.venv/bin/python",
+      "<verified-original-result-image-id>",
+      "-I",
+      "-B",
+      "-S",
+      "/opt/taki-c2b-application/artifact-check.py"
+    ],
+    "startArgvTemplate": [
+      "--host",
+      "npipe:////./pipe/dockerDesktopLinuxEngine",
+      "--config",
+      "G:/TakiAgent-c2b-native-api/application-ad8bf8b8-9577-4420-9fd9-212574bd4568/client-config",
+      "start",
+      "--attach",
+      "<verified-original-container-id>"
+    ],
+    "expected": {
+      "schema": "c2b-application-artifact-check-v1",
+      "token": "ad8bf8b8-9577-4420-9fd9-212574bd4568",
+      "complete": true,
+      "fileGatePassed": true,
+      "refusalCasesPassed": true,
+      "tokenizerLoadPassed": true,
+      "deploymentReady": false,
+      "files.build": "taki-memory-hindsight-0.9.0-template-backup-v1",
+      "files.metadata.count": 221,
+      "tokenizer.loaded": true,
+      "tokenizer.roundtrip": true,
+      "tokenizer.cacheReads": 1,
+      "tokenizer.forbiddenEffects": 0,
+      "tokenizer.postLoadCacheRechecked": true,
+      "uid": 1000,
+      "gid": 1000,
+      "python": "3.11.16"
+    },
+    "identityBeforeStart": {
+      "image": "verified original result ID",
+      "user": "1000:1000",
+      "entrypoint": "/app/api/.venv/bin/python",
+      "args": [
+        "-I",
+        "-B",
+        "-S",
+        "/opt/taki-c2b-application/artifact-check.py"
+      ],
+      "network": "none",
+      "readOnlyRootfs": true,
+      "mounts": [],
+      "publications": [],
+      "tty": false,
+      "interactiveStdin": false,
+      "memoryBytes": 268435456,
+      "nanoCpus": 1000000000,
+      "pidsLimit": 16,
+      "capAdd": [],
+      "capDrop": [
+        "ALL"
+      ],
+      "securityOpt": [
+        "no-new-privileges=true"
+      ],
+      "privileged": false,
+      "logDriver": "none",
+      "restart": "no",
+      "status": "created",
+      "running": false
+    },
+    "refusalCases": [
+      "wrong_build",
+      "cache_missing",
+      "cache_corrupt"
+    ],
+    "unknown": "Preserve original create/start dispatch. Name-only observation cannot authorize mutation, adoption or retry."
+  },
+  "retention": {
+    "success": "Keep exact derived image/tag and marked G: snapshot for later producer gate; archive bounded evidence first.",
+    "container": "Reprove original ID/settings; stop only if needed; remove only the stopped original CID; verify ID/name absence.",
+    "failedImage": "Only after exact iidfile/label/tag/no-consumer proof; image rm --no-prune owned-tag, no force or base cleanup.",
+    "stage": "Root-only later marked-stage removal after exact archive readback; keep on failure or ambiguous ownership."
+  },
+  "limits": {
+    "sourceEntriesPerTree": 2048,
+    "sourceTreeBytes": 33554432,
+    "sourceFileBytes": 8388608,
+    "protectedEntries": 150000,
+    "protectedTreeBytes": 8589934592,
+    "protectedFileBytes": 1073741824,
+    "protectedTreeScanSeconds": 180,
+    "metadataDistributions": 221
+  }
+}

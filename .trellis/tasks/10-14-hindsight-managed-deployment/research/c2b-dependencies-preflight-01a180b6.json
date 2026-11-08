@@ -1,0 +1,46 @@
+{
+  "session": "01a180b6-1dac-7fc2-b365-15fcb34dd4b4",
+  "observedAt": "2026-10-28T07:41:13.201391+00:00",
+  "releaseSha256": "b83d9284e23ded4dbd18157a7ba3e1791661c867d8f11a0084051096d8c43a59",
+  "sourcePinsMatch": true,
+  "runtimeAttempted": false,
+  "sourceReviewPending": true,
+  "commands": [
+    {
+      "args": [
+        "info",
+        "--format",
+        "{\"id\":{{json .ID}},\"version\":{{json .ServerVersion}},\"os\":{{json .OSType}}}"
+      ],
+      "exitCode": 0,
+      "stdout": "{\"id\":\"93e8319e-24b7-4a7d-88f1-60923ad681e0\",\"version\":\"29.0.1\",\"os\":\"linux\"}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "image",
+        "inspect",
+        "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+        "--format",
+        "{\"id\":{{json .Id}},\"os\":{{json .Os}},\"architecture\":{{json .Architecture}},\"volumes\":{{json (index .Config \"Volumes\")}}}"
+      ],
+      "exitCode": 0,
+      "stdout": "{\"id\":\"sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db\",\"os\":\"linux\",\"architecture\":\"amd64\",\"volumes\":null}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "container",
+        "inspect",
+        "taki-c2b-dependencies-0ab89a2a-ccac-4350-a4ea-ed90ed7a3e6d",
+        "--format",
+        "{{json .Id}}"
+      ],
+      "exitCode": 1,
+      "stdout": "\n",
+      "stderr": "Error response from daemon: No such container: taki-c2b-dependencies-0ab89a2a-ccac-4350-a4ea-ed90ed7a3e6d\n"
+    }
+  ],
+  "stageAbsent": true,
+  "archiveAbsent": true
+}

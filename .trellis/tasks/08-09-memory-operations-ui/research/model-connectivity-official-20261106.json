@@ -1,0 +1,16 @@
+{
+  "date": "2026-11-06",
+  "workspace": "H:/TakiAgent",
+  "configurationSource": "H:/TakiAgent-worktrees/t4/.env.local",
+  "endpoint": "https://api.deepseek.com",
+  "model": "deepseek-flash",
+  "credentialsRecorded": false,
+  "probes": [
+    { "kind": "sdk-text", "status": "passed", "responseModel": "deepseek-flash", "seconds": 1.83, "reportedTotalTokens": 47 },
+    { "kind": "sdk-tool-roundtrip", "status": "passed", "responseModel": "deepseek-flash", "toolExecutions": 1, "steps": 2, "seconds": 1.60, "reportedTotalTokens": 856 },
+    { "kind": "sdk-complete-stream", "status": "passed", "seconds": 0.74, "reportedTotalTokens": 46 },
+    { "kind": "native-structured-output", "status": "failed", "httpStatus": 503, "errorCode": "service_unavailable_error", "reason": "Official service reported that it was too busy", "seconds": 41.34 },
+    { "kind": "native-structured-output-recheck", "status": "passed", "adapter": "OpenAICompatibleLLM", "seconds": 33.99, "adapterUsage": { "inputTokens": 142, "visibleOutputTokens": 7, "visibleTotalTokens": 149, "thoughtsTokens": 25 } }
+  ],
+  "scope": "Official text/tool/stream/Native JSON compatibility. One transient 503 is retained; this is not complete memory or reliability acceptance."
+}

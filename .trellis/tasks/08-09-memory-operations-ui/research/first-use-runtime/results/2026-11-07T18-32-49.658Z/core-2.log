@@ -1,0 +1,22 @@
+{"level":30,"time":1794076791027,"pid":42584,"hostname":"tianxuanji","mod":"db","applied":[],"msg":"schema already up to date"}
+{"level":30,"time":1794076791031,"pid":42584,"hostname":"tianxuanji","msg":"Core Host identity loaded"}
+{"level":30,"time":1794076791042,"pid":42584,"hostname":"tianxuanji","mod":"secrets","mod":"secrets","health":"ok","keySource":"credentials-directory","msg":"secret catalog opened"}
+{"level":30,"time":1794076791081,"pid":42584,"hostname":"tianxuanji","mod":"skills","active":0,"invalidated":0,"seeded":0,"seedRejected":0,"msg":"skill lifecycle ready"}
+{"level":30,"time":1794076791082,"pid":42584,"hostname":"tianxuanji","mod":"mcp","msg":"no legacy mcp-servers.json to seed"}
+{"level":30,"time":1794076791102,"pid":42584,"hostname":"tianxuanji","mod":"mcp","servers":0,"published":0,"failed":0,"msg":"mcp reconcile from desired state complete"}
+{"level":30,"time":1794076791114,"pid":42584,"hostname":"tianxuanji","mod":"server","host":"127.0.0.1","port":10055,"msg":"ws server listening"}
+{"level":30,"time":1794076791146,"pid":42584,"hostname":"tianxuanji","mod":"server","msg":"client connected"}
+{"level":30,"time":1794076791154,"pid":42584,"hostname":"tianxuanji","mod":"pairing","deviceId":"659d6144-bbcd-4069-9091-3063b56da8f0","deviceName":"native smoke after restart","remoteAddress":"127.0.0.1","msg":"loopback operator auto-trusted"}
+{"level":30,"time":1794076793500,"pid":42584,"hostname":"tianxuanji","mod":"server","msg":"client connected"}
+{"level":30,"time":1794076793510,"pid":42584,"hostname":"tianxuanji","mod":"pairing","deviceId":"cb8de636-1e4a-4e83-bb1e-35219819cb40","deviceName":"owned first-use Home","remoteAddress":"127.0.0.1","msg":"loopback operator auto-trusted"}
+{"level":30,"time":1794076793831,"pid":42584,"hostname":"tianxuanji","mod":"server","msg":"client connected"}
+{"level":30,"time":1794076793832,"pid":42584,"hostname":"tianxuanji","mod":"server","msg":"client disconnected"}
+{"level":30,"time":1794076793855,"pid":42584,"hostname":"tianxuanji","mod":"pairing","deviceId":"08f846d7-6c6f-449e-9468-fdea74df75f8","deviceName":"owned first-use Home","remoteAddress":"127.0.0.1","msg":"loopback operator auto-trusted"}
+{"level":30,"time":1794076794507,"pid":42584,"hostname":"tianxuanji","mod":"server","msg":"client disconnected"}
+{"level":30,"time":1794076796930,"pid":42584,"hostname":"tianxuanji","mod":"server","msg":"client connected"}
+{"level":30,"time":1794076796939,"pid":42584,"hostname":"tianxuanji","mod":"pairing","deviceId":"d9090f43-8455-416a-bbe6-97623c2af38d","deviceName":"owned first-use Home","remoteAddress":"127.0.0.1","msg":"loopback operator auto-trusted"}
+{"level":30,"time":1794076798516,"pid":42584,"hostname":"tianxuanji","mod":"server","msg":"client disconnected"}
+{"level":30,"time":1794076810757,"pid":42584,"hostname":"tianxuanji","mod":"server","msg":"client disconnected"}
+{"level":30,"time":1794076810757,"pid":42584,"hostname":"tianxuanji","signal":"SIGINT","msg":"shutting down"}
+{"level":40,"time":1794076810761,"pid":42584,"hostname":"tianxuanji","mod":"memory-auto","kind":"provider","characterId":"taki","code":"MEMORY_PROVIDER_MAINTENANCE_FAILED","msg":"memory provider maintenance failed; will retry"}
+{"level":30,"time":1794076810763,"pid":42584,"hostname":"tianxuanji","mod":"mcp","clients":0,"msg":"mcp manager closed"}

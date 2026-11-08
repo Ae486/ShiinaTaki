@@ -1,0 +1,146 @@
+{
+ "samples": 341,
+ "spanSeconds": 2093,
+ "system": {
+  "totalMB": 16011,
+  "freeAtStartMB": 5532,
+  "minFreeMB": 1719,
+  "maxCommitMB": 24644
+ },
+ "components": {
+  "harness": {
+   "samples": 338,
+   "maxProcesses": 1,
+   "wsMB": {
+    "p50": 410,
+    "p95": 419,
+    "max": 518
+   },
+   "privateMB": {
+    "p50": 1207,
+    "max": 1429
+   },
+   "largestProcessWsMB": 518,
+   "cpuSeconds": 32
+  },
+  "pg": {
+   "samples": 336,
+   "maxProcesses": 29,
+   "wsMB": {
+    "p50": 595,
+    "p95": 819,
+    "max": 836
+   },
+   "privateMB": {
+    "p50": 159,
+    "max": 259
+   },
+   "largestProcessWsMB": 79,
+   "cpuSeconds": 88
+  },
+  "native": {
+   "samples": 311,
+   "maxProcesses": 2,
+   "wsMB": {
+    "p50": 1958,
+    "p95": 2025,
+    "max": 2028
+   },
+   "privateMB": {
+    "p50": 4325,
+    "max": 4631
+   },
+   "largestProcessWsMB": 2023,
+   "cpuSeconds": 1178
+  },
+  "core": {
+   "samples": 319,
+   "maxProcesses": 1,
+   "wsMB": {
+    "p50": 697,
+    "p95": 897,
+    "max": 956
+   },
+   "privateMB": {
+    "p50": 729,
+    "max": 992
+   },
+   "largestProcessWsMB": 956,
+   "cpuSeconds": 1199
+  },
+  "home-driver": {
+   "samples": 175,
+   "maxProcesses": 1,
+   "wsMB": {
+    "p50": 35,
+    "p95": 35,
+    "max": 35
+   },
+   "privateMB": {
+    "p50": 25,
+    "max": 25
+   },
+   "largestProcessWsMB": 35,
+   "cpuSeconds": 18
+  },
+  "home-browser": {
+   "samples": 172,
+   "maxProcesses": 4,
+   "wsMB": {
+    "p50": 342,
+    "p95": 406,
+    "max": 507
+   },
+   "privateMB": {
+    "p50": 214,
+    "max": 284
+   },
+   "largestProcessWsMB": 295,
+   "cpuSeconds": 45
+  },
+  "python-other": {
+   "samples": 8,
+   "maxProcesses": 2,
+   "wsMB": {
+    "p50": 453,
+    "p95": 527,
+    "max": 527
+   },
+   "privateMB": {
+    "p50": 892,
+    "max": 966
+   },
+   "largestProcessWsMB": 523,
+   "cpuSeconds": 21
+  },
+  "node-other": {
+   "samples": 2,
+   "maxProcesses": 1,
+   "wsMB": {
+    "p50": 527,
+    "p95": 527,
+    "max": 527
+   },
+   "privateMB": {
+    "p50": 536,
+    "max": 536
+   },
+   "largestProcessWsMB": 527,
+   "cpuSeconds": 13
+  }
+ },
+ "steps": [],
+ "disk": {
+  "last": {
+   "root": "G:\\taki-first-use-XW38s1",
+   "pg-data": 159,
+   "core-data": 103,
+   "native-backups": 4
+  },
+  "maxMB": {
+   "pg-data": 159,
+   "core-data": 110,
+   "native-backups": 4
+  }
+ }
+}

@@ -1,0 +1,19 @@
+{
+  "releaseSha256": "5fd19647e62dc6791066eb5a216d3ee9eb7fe911a5e0c49d10a97374c61a77a1",
+  "runtimeExecuted": false,
+  "r1ChecksPassed": true,
+  "packetFiles": {
+    "collect.py": "ff6202e46397e0754a9d104d4ac06948940134c77fbf9f6b72f347788d6028bb",
+    "compare.py": "ad0df247e44c194380eae62ad191d927a90fb9aca103abb6b841ac61688ba2a7",
+    "docker-commands.mjs": "9e602b34f79adfe5c0cf2050846e8a72e263291cd647de2bbc92240ebabc3a73",
+    "evidence-store.mjs": "6bc6bfc2fe8040feac627bfe31c9e50cee7978bf4637de536e71cb2cad9f55a2",
+    "launch.mjs": "273f085262025c6377f91a63686e7328cb465734caea32b0b725322497855035",
+    "README.md": "d6feea675bbe098777dd0f3afc1c272779c1ee57b6176e9e0400397a9abf4054",
+    "release.json": "5fd19647e62dc6791066eb5a216d3ee9eb7fe911a5e0c49d10a97374c61a77a1",
+    "source-pyproject.toml": "6a1735ecb0d5e5f86662cb2138af8c616f36ec1ce071067f190887b4864f59b5"
+  },
+  "r1Evidence": {
+    "r1-checks.json": "e1147972a91113b32690cf939945e6d06f8981dd3c64d86088497e04205d0ad4",
+    "test-metadata.py": "49b0ffb301507f628ed76873b6f494232657d47420b324792314784fc8b0da4b"
+  }
+}

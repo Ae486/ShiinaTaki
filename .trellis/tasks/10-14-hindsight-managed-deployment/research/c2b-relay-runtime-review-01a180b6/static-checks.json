@@ -1,0 +1,40 @@
+{
+  "scope": "Existing completed scoped checks for the review-only evidence verifier; no checks rerun during final release.",
+  "commands": [
+    {
+      "argv": [
+        "H:/hindsight/.venv/Scripts/ruff.exe",
+        "check",
+        "--no-cache",
+        "--select",
+        "E,F,I",
+        "--ignore",
+        "E501",
+        ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-relay-runtime-review-01a180b6/verify-retained.py"
+      ],
+      "result": {
+        "chunk_id": "431080",
+        "wall_time_seconds": 0.377155,
+        "exit_code": 0,
+        "original_token_count": 5,
+        "output": "All checks passed!\n"
+      }
+    },
+    {
+      "argv": [
+        "H:/hindsight/.venv/Scripts/ty.exe",
+        "check",
+        "--output-format",
+        "concise",
+        ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-relay-runtime-review-01a180b6/verify-retained.py"
+      ],
+      "result": {
+        "chunk_id": "fbd2cb",
+        "wall_time_seconds": 0.5126156,
+        "exit_code": 0,
+        "original_token_count": 5,
+        "output": "All checks passed!\n"
+      }
+    }
+  ]
+}

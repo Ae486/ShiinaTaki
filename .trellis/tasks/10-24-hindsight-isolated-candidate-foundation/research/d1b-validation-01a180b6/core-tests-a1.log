@@ -1,0 +1,13 @@
+
+> @taki/core@0.0.0 test H:\TakiAgent\packages\core
+> vitest run "src/memory/hindsight-candidates/hindsight-candidate-domain.test.ts" "--maxWorkers=2"
+
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  18:07:56
+   Duration  5.29s (transform 1.75s, setup 0ms, import 2.42s, tests 2.54s, environment 0ms)
+

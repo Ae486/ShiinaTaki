@@ -1,0 +1,1 @@
+{"verdict": "CONFIGURATION_HOME_PASS", "twoObservers": true, "reconnect": true, "remount": true, "expired": true, "denied": true, "failureClearsMatch": true, "pageErrors": []}

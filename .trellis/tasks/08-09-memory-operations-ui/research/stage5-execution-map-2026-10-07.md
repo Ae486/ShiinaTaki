@@ -1,70 +1,66 @@
-# Stage 5 execution and review map
+# Hindsight delivery and review map
 
-Owner approved the presented Stage 5 plan and delegated implementation/check scheduling on 2026-10-07.
-This map refines engineering order using actual source research; it does not authorize real deployments,
-original-data changes, paid calls, Git publication or manual acceptance.
+Updated 2026-10-29. The owner prioritizes practical use and contraction of unnecessary implementation;
+the existing backup/transition journeys are now an explicit delivery-order row. The
+[current execution plan](../implement.md) supersedes the former global C2b-first and parallel-D1
+schedule. This map routes work; it is not another acceptance ledger.
 
-Latest owner steering (2026-10-15): continue the original task after accepted Stage 5B and C1a/C1b source
-review. The earlier B1 stop is superseded. C1b's eight Linux process cases now pass using the explicitly
-approved G: temporary runtime; owned cleanup is complete. The owner subsequently approved the separate
-`10-14-hindsight-managed-deployment` child and C2a source/fake-test work after design review. C1a's authorized
-Ubuntu preflight found systemd 249 and missing `/usr/bin/systemd-creds`, so AC2/6 await a compatible environment
-without blocking C2 source. C2a's six source criteria now pass with 182 independent tests; Root completed
-source/evidence preservation and owned staging cleanup. After the approved Desktop preflight, the owner
-approved a bounded project-owned Docker experiment preserving unrelated environments. The first actual
-fake-consumer case passed after a task-fixture-only correction; first failure and success evidence are retained.
-Its container/volume/image/process/C: resources and both G: staging trees are cleaned. Root recovered Desktop
-after the later interruption; seven original container IDs remain and two auto-start services are running.
-The broader Docker fault/restart matrix, database, C2b, real model and manual gates remain separate.
+## Delivery order
 
-## Current and next slices
+| Priority | Outcome | Existing owner | Entry and exit |
+| --- | --- | --- | --- |
+| 1 | Usable existing-instance memory through Taki | This B7 parent; reuse Stage 1-4 and Stage 5A/5B producers | Trace actual wiring, fix concrete blockers, then verify setup/activation/retain/recall/sync/reopen and a bounded outage. C2b and D1 do not gate this path. |
+| 2 | Existing backup and transition journeys on isolated data | Existing Stage 3/4 producers; this B7 parent for the journey records | Producers and isolated inputs are available. Exercise capture/backup/verify, healthy switch-back/re-entry and emergency takeover; establish the Stage 3 backup prerequisite for original-data activation. C2b, D1 and upgrades do not gate this scope. |
+| 3 | Fix actual first-use problems and simplify the used path | The module owning each reproduced or source-proven defect | Preserve agreed memory behavior; consolidate unnecessary mechanisms with evidence, not blanket guard removal. |
+| 4 | Usable managed installation and related model application | Existing C2 task and Stage 5C follow-ups | Reassess the minimum producer/setup path; reuse native/package facilities and accepted evidence. Review the complete increment. |
+| 5 | Complete candidate/software/model upgrades | Existing D1 plus C4/D2 owners | Resume for a concrete upgrade need or the lifecycle increment after first-use stabilization. Complete preservation/conversion/publication before enabling an upgrade. |
 
-| Slice | Current state and source ownership | Review boundary |
+[Acceptance](s6-acceptance-plan-2026-10-24.md) now accumulates per usable journey. Existing-instance
+verification starts independently of C2b, and the existing backup/transition journeys start once their
+delivered producers and isolated inputs are confirmed. Managed and upgrade journeys keep their own
+later entry gates. [D94-D96](../../../../docs/deferred-decisions.md) record the unfinished work and
+concrete resume triggers.
+
+## Reuse and remaining work
+
+These are retained checkpoints from the existing records, not new test runs or current installed proof.
+
+| Workstream | Retained evidence | Scheduling consequence |
 | --- | --- | --- |
-| 5A configuration observation | Independent full-slice PASS; R1/R2 closed, final identities verified and all ownership released. Child remains unarchived; original/installed/manual acceptance is separate. | Security/state/compatibility/UI gates passed; see the child's `research/independent-check.md` for exact test scopes and final-source limits. |
-| 5B templates/user overlays | Whole-slice automatic PASS on 2026-10-13; all eleven automatic PRD criteria accepted and source/check ownership released. Child remains unarchived. | See the child's `research/b3-whole-acceptance.md` and source reconciliation. Installed/manual and original-environment/model acceptance remain separate. |
-| 5C managed deployment/model lifecycle | C1 source/process PASS: 24 Native Windows + 20 observer + 8 actual Linux tests; AC2/6 remain open. Sibling `10-14-hindsight-managed-deployment` has C2a SOURCE PASS (six ACs, 182 independent tests, four old C1 ignored) and a passed first actual Docker fake-consumer case. Both attempts are preserved and cleaned; [final runtime-evidence review](../../10-14-hindsight-managed-deployment/research/c2a-docker-runtime-review.md) passes with no new blocker and report ownership released. Both tasks remain `in_progress`. | C1a install/custody; C1b fake-secret process; accepted C2a source and bounded actual startup proof, followed by remaining Docker recovery/database proof; C2b accepted deployment ledger; C3 six-slot apply/readback. |
-| 5D candidate upgrade | Source dependency research delivered. Requires accepted 5B overlay/backup state and C1-C3 deployment/custody/configuration foundations; then D1 -> C4 -> D2. | D1 isolated same-version restore/identity; C4 complete candidate re-embedding; D2 separate forward-migration/final-publication recovery check. |
-| 5E complete Home/admin | Minimal UI accompanies each real producer, followed by cross-flow integration. D88/D90 remain explicit admin outcomes. | Review actual conflict remedy and cleanup ownership/reference preservation before effects; final cross-flow operation/reconnect gate. |
+| Stages 1-4 | Durable operations, Local onboarding, activation, Bank lifecycle, paired backup and repeated/emergency transitions have scoped accepted source evidence. | Verify their actual connected first-use behavior; do not rebuild them from historical missing-feature lists. |
+| 5A / 5B | Configuration observation and templates/user overlays have scoped automatic acceptance. | Reuse them; preserve actual desired/effective configuration and user overrides. |
+| C2a / C2b | Bounded Docker/PG persistence, relay diagnostic, dependency comparison and application/tokenizer artifact evidence exist. Actual API/PG and installed managed setup remain incomplete. | Do not rerun unchanged prerequisites or let them block existing-instance delivery. |
+| C2b known defect | The combined review identifies observation-publication failure bypassing API/PG cleanup. | Fix and verify before using that producer; it is a real defect, not optional hardening. |
+| D1 | D1-A source acceptance and D1-B source/integration review are retained; actual candidate restore/inspection and complete upgrades remain open. | Preserve source, migration 060 and evidence; stop parallel expansion ahead of first use and record the uncommitted D1-B integration in the first-use measured baseline. |
 
-## Avoid a model-change/upgrade dependency cycle
+The prior root/session, Docker presence, free space and staging tokens are historical observations.
+A future run verifies only the current environment facts it actually needs. No runtime is started by
+this map and no historical token is replayed.
 
-Current-source research shows populated embedding changes are a migration, including equal-dimensional model
-changes. Therefore 5C's initial configuration milestone must not claim the complete active-data model lifecycle.
-Build C1-C3 first, then the isolated-candidate preparation needed by 5D; use that verified path to complete C4
-populated model changes and the full candidate-upgrade outcome. These remain Stage 5 scope, not a silent deferral
-to Stage 6. Their exact shared code is chosen only after real producer contracts exist.
+## Implementation and review contraction
 
-A refused unsupported active-model change is a correct intermediate behavior, not full lifecycle acceptance.
-Preserve original source, user/template overlays, Native schema lineage and current authority during candidate
-preparation. A committed candidate recovers by its actual identity; no blind downgrade or pointer replacement.
+- Prefer official/native capabilities, current package tooling and the existing supported service path.
+- Do not expand the custom dependency inventory/comparison system or network-none relay without a
+  concrete need that the simpler path cannot meet. Existing packets remain historical evidence.
+- Keep authentication, secret-safe handling, resource ownership and data integrity. Their required
+  behavior does not prescribe every detail of the previous experimental mechanism.
+- One independent challenge precedes a material architecture/persistence/security change; one
+  consolidated review follows a complete increment. Do not review every ordinary intermediate packet.
+- Use targeted checks and one real connected journey. Reuse unchanged accepted results and keep
+  failed/not-run/unknown outcomes distinct from success.
+- Shared protocols, runtime composition and recorded migrations retain one integration owner.
+  Avoid concurrent workstreams that compete with the first usable path.
 
-The delivered D study sharpens this to **C1-C3 -> D1 candidate foundation -> C4 populated re-embedding -> D2
-complete upgrade/promotion**. D1 reuses the strict original-version restore gate and adds actual physical storage/
-deployment isolation. D2 adds a separate migration proof; do not weaken Stage 3's source metadata equality.
-Portable Bank export/import is not a complete clone: it drops operational/evidence data, changes fact identities
-and does not establish complete mental-model re-embedding. Reuse conversion components only behind an explicit
-preservation/mapping contract. Same-dimensional model changes still require semantic compatibility or conversion.
+## Source and evidence links
 
-Restored Pending jobs remain fenced; resetting processing jobs to pending is not cancellation or isolation.
-Final candidate publication needs a fresh source/custody boundary, exact model/deployment/template proof and live
-lease guards. Do not overwrite current Core with the old backup copy or recover a committed candidate by reverting
-the pointer. These are future implementation gates, not research-proven runtime behavior.
-
-## Resource policy
-
-Use explicit file ownership rather than one agent per function. Shared schemas/registries/migrations and authority
-publication have one writer. Read-only design research can overlap implementation. Home can run in parallel only
-after interface handoff. One heavy test/generation/build at a time; focused tests are bounded and do not repeat a
-passing full gate without changed code or a new concern. Independent checker starts after source release.
-
-## Source evidence
-
+- [Current requirements](../prd.md) and [design priorities](../design.md).
+- [Overall discussion and administration boundary](../../09-14-hindsight-integration-completeness-audit/research/overall-grill-2026-09-19.md).
 - [5A execution](../../10-07-hindsight-configuration-observation/implement.md).
-- [5B design](../../10-07-hindsight-template-lifecycle/design.md) and its retained source research.
-- [5C Host/model research](../../10-07-hindsight-configuration-observation/research/stage5c-host-boundary-research.md).
-- [5D candidate dependencies](../../10-07-hindsight-template-lifecycle/research/stage5d-candidate-dependencies.md).
-- [Original residual Stage 5 map](../../09-29-hindsight-transitions-emergency/research/stage5-readiness-2026-10-07.md).
+- [5B execution](../../10-07-hindsight-template-lifecycle/implement.md).
+- [C2 work and historical evidence](../../10-14-hindsight-managed-deployment/implement.md).
+- [C2b combined review and cleanup finding](../../10-14-hindsight-managed-deployment/research/combined-d1b-api-artifact-review-01a180b6.md).
+- [D1 retained slices](../../10-24-hindsight-isolated-candidate-foundation/implement.md).
+- [Stage 6 cases and owner observations](s6-acceptance-plan-2026-10-24.md).
 
-Stage 6 continues to own supported installation/package/environment and owner/manual acceptance. Existing
-W9 automated evidence remains accepted within its documented limits. D23 and D79-D83 stay separately scoped.
+D23 and D79-D83 keep their separate scope. First-use acceptance does not close managed installation,
+full model upgrades, unverified platforms, original-data operations or owner acceptance.

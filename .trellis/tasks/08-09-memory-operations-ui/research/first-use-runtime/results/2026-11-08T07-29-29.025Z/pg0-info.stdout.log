@@ -1,0 +1,9 @@
+{
+  "name": "taki-smoke-3f8346f5580d",
+  "running": false,
+  "port": 13656,
+  "version": "18.1.0",
+  "username": "taki_smoke",
+  "database": "taki_smoke",
+  "data_dir": "G:\\taki-first-use-jx0akW\\pg-data"
+}

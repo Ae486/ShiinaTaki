@@ -1,4 +1,20 @@
-# C2a implementation and verification
+# Managed deployment execution routing
+
+## Current owner direction (2026-10-28)
+
+Plan update only. The [parent execution plan](../08-09-memory-operations-ui/implement.md) is authoritative:
+first make existing-instance memory usable, then exercise the existing backup/transition journeys on
+isolated data; resume managed installation as the following concrete increment under D94. Do not
+dispatch the old inventory/relay/API packets automatically or block existing-instance or transition
+acceptance on this task. Preserve accepted C2a evidence and all inherited source.
+
+Before using the C2b producer, fix the real marker-publication cleanup defect in the
+[combined review](research/combined-d1b-api-artifact-review-01a180b6.md). Reassess the simplest
+native/package/deployment path, then review the complete connected increment once. No new dependency
+audit, private transport or exhaustive fault matrix is a default first-use prerequisite.
+No source, runtime, task activation or acceptance is performed by this plan update.
+
+## Historical C2a implementation and verification
 
 The owner authorized this source/fake-data checkpoint on 2026-10-14. Complete the design review before
 `task.py start`; routine implementation does not require another owner approval. The PRD's Docker and

@@ -1,0 +1,65 @@
+[
+  {
+    "argv": [
+      "G:/Roaming/Python/Python312/Scripts/ruff.exe",
+      "check",
+      "--select",
+      "E,F,I",
+      "--line-length",
+      "120",
+      "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-application-artifact"
+    ],
+    "returncode": 0,
+    "stdout": "All checks passed!\n",
+    "stderr": "",
+    "stdoutSha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "argv": [
+      "H:/hindsight/.venv/Scripts/ty.exe",
+      "check",
+      "--python-platform",
+      "linux",
+      "--python-version",
+      "3.11",
+      "--extra-search-path",
+      "H:/hindsight/.venv/Lib/site-packages",
+      "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-application-artifact"
+    ],
+    "returncode": 0,
+    "stdout": "All checks passed!\n",
+    "stderr": "",
+    "stdoutSha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "argv": [
+      "G:/anaconda3/python.exe",
+      "-I",
+      "-B",
+      "-S",
+      "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-application-artifact\\test_artifact.py"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "......\r\n----------------------------------------------------------------------\r\nRan 6 tests in 0.048s\r\n\r\nOK\r\n",
+    "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSha256": "b607bc210443228406b92d0ad2a84a69ff6b8918a2283bdfe10c7cbaea541a8e"
+  },
+  {
+    "argv": [
+      "G:/anaconda3/python.exe",
+      "-I",
+      "-B",
+      "-S",
+      "-c",
+      "import ast,pathlib; root=pathlib.Path('H:\\\\TakiAgent\\\\.trellis\\\\tasks\\\\10-14-hindsight-managed-deployment\\\\research\\\\docker-application-artifact'); files=sorted(root.glob('*.py')); [ast.parse(p.read_bytes(),filename=str(p)) for p in files]; print(str(len(files))+' Python source files parsed')"
+    ],
+    "returncode": 0,
+    "stdout": "5 Python source files parsed\r\n",
+    "stderr": "",
+    "stdoutSha256": "cd5c0ac40460fb9d65862b4c12b4e6627e0629ff522f108eecad723cc6e3d18a",
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

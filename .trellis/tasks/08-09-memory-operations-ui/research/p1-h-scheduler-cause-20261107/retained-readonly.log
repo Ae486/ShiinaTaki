@@ -1,0 +1,124 @@
+{
+  "step5": {
+    "status": "failed",
+    "error": {
+      "message": "pending writes did not drain",
+      "detail": null
+    },
+    "retainedBefore": {
+      "requestId": "2cd911ed-e52a-46dd-a4a2-c518f4d42c20",
+      "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+      "nativeOperationId": "2cd911ed-e52a-46dd-a4a2-c518f4d42c20",
+      "parentState": "pending",
+      "childPhase": "submitted",
+      "documentId": "pending-01303d4155e20d8608da087e76b26154007875154c360489fdb345b1c54d32aa"
+    },
+    "automaticLatest": {
+      "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+      "scope": "global",
+      "characterId": null,
+      "automatic": true,
+      "autoIntervalMs": 21600000,
+      "fullReconciliationIntervalMs": 604800000,
+      "mode": "failed",
+      "run": null,
+      "fullReconciliationState": "idle",
+      "nextDueAt": "2026-11-07T02:15:04.979Z",
+      "nextFullDueAt": "2026-11-13T20:15:00.003Z",
+      "retryAttempt": 2,
+      "retryKind": "incremental",
+      "retryDueAt": "2026-11-06T20:21:08.164Z",
+      "pendingManualKind": null,
+      "catchUpRequested": false,
+      "lastAttemptAt": "2026-11-06T20:16:08.160Z",
+      "lastSuccessAt": "2026-11-06T20:15:04.979Z",
+      "lastFullReconciliationAt": null,
+      "lastObservedCursor": 14,
+      "lastObservedLineageId": "323763b2-393c-4cf4-91b4-ee1ffc5a6f1f",
+      "lastObservedBankGeneration": "38d1d57b-1569-4516-a200-a51780643a06",
+      "consecutiveFailures": 1,
+      "errorCode": "HINDSIGHT_REPLICA_SYNC_FAILED",
+      "nextAction": "automatic_retry_scheduled",
+      "createdAt": "2026-11-06T20:15:00.003Z",
+      "updatedAt": "2026-11-06T20:16:08.164Z"
+    }
+  }
+}
+{"name":"packages/core/src/memory/hindsight/hindsight-runtime-bank-service.ts","recorded":"5a01626c0b046bd5f212ff6af2008f09d36ab2f4a3fb19c864cec56d63481706","current":"5a01626c0b046bd5f212ff6af2008f09d36ab2f4a3fb19c864cec56d63481706","matches":true}
+{"name":"packages/core/src/memory/canonical-local-write-fence.ts","recorded":null,"current":"939f351174a3e5a62ad93b805a21e5633eccc9f9d70d0d1381badabece6c935f","matches":false}
+[
+  {
+    "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+    "state": {
+      "autoIntervalMs": 21600000,
+      "automatic": true,
+      "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+      "catchUpRequested": false,
+      "characterId": null,
+      "consecutiveFailures": 1,
+      "createdAt": "2026-11-06T20:15:00.003Z",
+      "errorCode": "HINDSIGHT_REPLICA_SYNC_FAILED",
+      "fullReconciliationIntervalMs": 604800000,
+      "fullReconciliationState": "idle",
+      "lastAttemptAt": "2026-11-06T20:16:08.160Z",
+      "lastFullReconciliationAt": null,
+      "lastObservedBankGeneration": "38d1d57b-1569-4516-a200-a51780643a06",
+      "lastObservedCursor": 14,
+      "lastObservedLineageId": "323763b2-393c-4cf4-91b4-ee1ffc5a6f1f",
+      "lastSuccessAt": "2026-11-06T20:15:04.979Z",
+      "mode": "failed",
+      "nextAction": "automatic_retry_scheduled",
+      "nextDueAt": "2026-11-07T02:15:04.979Z",
+      "nextFullDueAt": "2026-11-13T20:15:00.003Z",
+      "pendingManualKind": null,
+      "retryAttempt": 2,
+      "retryDueAt": "2026-11-06T20:21:08.164Z",
+      "retryKind": "incremental",
+      "run": null,
+      "scope": "global",
+      "updatedAt": "2026-11-06T20:16:08.164Z"
+    }
+  },
+  {
+    "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+    "state": {
+      "autoIntervalMs": 21600000,
+      "automatic": true,
+      "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+      "catchUpRequested": false,
+      "characterId": "taki",
+      "consecutiveFailures": 0,
+      "createdAt": "2026-11-06T20:15:00.007Z",
+      "errorCode": null,
+      "fullReconciliationIntervalMs": 604800000,
+      "fullReconciliationState": "idle",
+      "lastAttemptAt": "2026-11-06T20:15:04.997Z",
+      "lastFullReconciliationAt": null,
+      "lastObservedBankGeneration": "cb704d43-f95f-4cc3-8bb2-338cffb3cf0a",
+      "lastObservedCursor": 7,
+      "lastObservedLineageId": "323763b2-393c-4cf4-91b4-ee1ffc5a6f1f",
+      "lastSuccessAt": "2026-11-06T20:15:05.114Z",
+      "mode": "idle",
+      "nextAction": null,
+      "nextDueAt": "2026-11-07T02:15:05.114Z",
+      "nextFullDueAt": "2026-11-13T20:15:00.007Z",
+      "pendingManualKind": null,
+      "retryAttempt": 0,
+      "retryDueAt": null,
+      "retryKind": null,
+      "run": null,
+      "scope": "character",
+      "updatedAt": "2026-11-06T20:15:05.114Z"
+    }
+  }
+]
+[
+  {
+    "phase": "submitted",
+    "operationId": "2cd911ed-e52a-46dd-a4a2-c518f4d42c20",
+    "nextRetryAt": "2026-11-06T20:16:08.143Z",
+    "lastAttemptAt": "2026-11-06T20:15:07.698Z",
+    "attempts": 1,
+    "diagnosticCode": "HINDSIGHT_PENDING_REMAINS"
+  }
+]

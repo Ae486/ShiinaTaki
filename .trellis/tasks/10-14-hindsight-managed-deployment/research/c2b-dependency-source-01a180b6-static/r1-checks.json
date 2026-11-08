@@ -1,0 +1,55 @@
+[
+  {
+    "argv": [
+      "H:/hindsight/.venv/Scripts/ruff.exe",
+      "check",
+      "--no-cache",
+      "--select",
+      "E,F,I",
+      "--ignore",
+      "E501",
+      "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-dependency-inventory"
+    ],
+    "exitCode": 0,
+    "stdout": "All checks passed!\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "H:/hindsight/.venv/Scripts/ty.exe",
+      "check",
+      "--python-platform",
+      "linux",
+      "--output-format",
+      "concise",
+      "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-dependency-inventory\\collect.py"
+    ],
+    "exitCode": 0,
+    "stdout": "All checks passed!\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "H:/hindsight/.venv/Scripts/ty.exe",
+      "check",
+      "--output-format",
+      "concise",
+      "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-dependency-inventory\\compare.py"
+    ],
+    "exitCode": 0,
+    "stdout": "All checks passed!\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "G:/anaconda3/python.exe",
+      "-I",
+      "-B",
+      "-S",
+      ".trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\c2b-dependency-source-01a180b6-static\\test-metadata.py"
+    ],
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.215s\n\nOK\n"
+  }
+]

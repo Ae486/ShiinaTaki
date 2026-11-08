@@ -1,0 +1,116 @@
+{
+ "samples": 73,
+ "spanSeconds": 431,
+ "system": {
+  "totalMB": 16011,
+  "freeAtStartMB": 6707,
+  "minFreeMB": 3531,
+  "maxCommitMB": 21335
+ },
+ "components": {
+  "harness": {
+   "samples": 71,
+   "maxProcesses": 1,
+   "wsMB": {
+    "p50": 392,
+    "p95": 410,
+    "max": 456
+   },
+   "privateMB": {
+    "p50": 1189,
+    "max": 1335
+   },
+   "largestProcessWsMB": 456,
+   "cpuSeconds": 21
+  },
+  "pg": {
+   "samples": 71,
+   "maxProcesses": 34,
+   "wsMB": {
+    "p50": 493,
+    "p95": 929,
+    "max": 934
+   },
+   "privateMB": {
+    "p50": 153,
+    "max": 289
+   },
+   "largestProcessWsMB": 42,
+   "cpuSeconds": 36
+  },
+  "native": {
+   "samples": 69,
+   "maxProcesses": 2,
+   "wsMB": {
+    "p50": 1011,
+    "p95": 1978,
+    "max": 2011
+   },
+   "privateMB": {
+    "p50": 2183,
+    "max": 4305
+   },
+   "largestProcessWsMB": 2006,
+   "cpuSeconds": 596
+  },
+  "core": {
+   "samples": 61,
+   "maxProcesses": 1,
+   "wsMB": {
+    "p50": 378,
+    "p95": 598,
+    "max": 640
+   },
+   "privateMB": {
+    "p50": 403,
+    "max": 673
+   },
+   "largestProcessWsMB": 640,
+   "cpuSeconds": 108
+  },
+  "home-driver": {
+   "samples": 5,
+   "maxProcesses": 1,
+   "wsMB": {
+    "p50": 33,
+    "p95": 34,
+    "max": 34
+   },
+   "privateMB": {
+    "p50": 23,
+    "max": 25
+   },
+   "largestProcessWsMB": 34,
+   "cpuSeconds": 2
+  },
+  "home-browser": {
+   "samples": 4,
+   "maxProcesses": 5,
+   "wsMB": {
+    "p50": 500,
+    "p95": 647,
+    "max": 647
+   },
+   "privateMB": {
+    "p50": 271,
+    "max": 405
+   },
+   "largestProcessWsMB": 287,
+   "cpuSeconds": 15
+  }
+ },
+ "steps": [],
+ "disk": {
+  "last": {
+   "root": "G:\\taki-first-use-EkQ9wa",
+   "pg-data": 71,
+   "core-data": 10,
+   "native-backups": 0
+  },
+  "maxMB": {
+   "pg-data": 71,
+   "core-data": 10,
+   "native-backups": 0
+  }
+ }
+}

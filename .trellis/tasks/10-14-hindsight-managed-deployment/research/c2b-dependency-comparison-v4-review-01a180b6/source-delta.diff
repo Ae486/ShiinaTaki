@@ -1,0 +1,72 @@
+--- v3/compare.py
++++ v4/compare.py
+@@ -65,6 +65,7 @@
+     if env["sys_platform"] != "linux" or env["python_version"] != "3.11":
+         raise ValueError("unsupported_target_environment")
+     installed = {}
++    metadata_warnings = []
+     for item in inventory["distributions"]:
+         if item["metadataVersion"] not in SUPPORTED_METADATA:
+             raise ValueError("metadata_version_unsupported")
+@@ -80,11 +81,23 @@
+         extras = [
+             canonicalize_name(value, validate=True) for value in item["providesExtra"]
+         ]
+-        if (
+-            item["metadataVersion"] in {"2.3", "2.4", "2.5"}
+-            and extras != item["providesExtra"]
+-        ):
+-            raise ValueError("noncanonical_distribution_extra")
++        if item["metadataVersion"] in {"2.3", "2.4", "2.5"}:
++            for raw_extra, normalized in zip(
++                item["providesExtra"], extras, strict=True
++            ):
++                if raw_extra != normalized:
++                    metadata_warnings.append(
++                        {
++                            "kind": "noncanonical_declared_extra",
++                            "package": name,
++                            "version": item["version"],
++                            "metadataVersion": item["metadataVersion"],
++                            "file": item.get("file"),
++                            "sha256": item.get("sha256"),
++                            "rawExtra": raw_extra,
++                            "normalizedExtra": normalized,
++                        }
++                    )
+         if len(extras) != len(set(extras)):
+             raise ValueError("duplicate_distribution_extra")
+         for value in item["requiresDist"]:
+@@ -177,11 +190,20 @@
+                 (target, canonicalize_name(value, validate=True))
+                 for value in req.extras
+             )
++    # The reviewed exception covers unrequested aliases only; it cannot enable new optional code paths.
++    if any(
++        (warning["package"], warning["normalizedExtra"]) in seen
++        for warning in metadata_warnings
++    ):
++        raise ValueError("noncanonical_requested_extra")
+     unique = {json.dumps(value, sort_keys=True): value for value in issues}
+     return {
+-        "schema": "c2b-dependency-comparison-v1",
++        "schema": "c2b-dependency-comparison-v2",
+         "comparisonComplete": True,
+-        "metadataCompatible": not unique,
++        "dependencyConstraintsSatisfied": not unique,
++        "metadataConformant": not metadata_warnings,
++        "metadataConformanceScope": "Captured dependency fields only; not a full distribution or import audit",
++        "metadataWarnings": metadata_warnings,
+         "deploymentReady": False,
+         "scope": "Current application mandatory plus embedded-db dependency closure; metadata only, no import/startup proof",
+         "selectedSourceExtras": ["embedded-db"],
+@@ -232,7 +254,8 @@
+     except Exception as error:
+         answer = {
+             "comparisonComplete": False,
+-            "metadataCompatible": False,
++            "dependencyConstraintsSatisfied": False,
++            "metadataConformant": None,
+             "deploymentReady": False,
+             "failure": str(error)
+             if isinstance(error, ValueError) and str(error).replace("_", "").isalnum()

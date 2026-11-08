@@ -1,0 +1,64 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+stdout | src/memory/hindsight/hindsight-memory-subsystem.test.ts > Hindsight subsystem memory-unavailable degrade path > settles a foreground Pending write from the real scheduler timer after its provider owner has finished
+[DEBUG-p1h] Error: MEMORY_AUTHORITY_FENCED
+    at inherited (H:/TakiAgent/packages/core/src/memory/canonical-local-write-fence.ts:33:50)
+    at enter (H:/TakiAgent/packages/core/src/memory/canonical-local-write-fence.ts:30:30)
+    at Object.admit (H:/TakiAgent/packages/core/src/memory/canonical-local-write-fence.ts:42:7)
+    at own (H:/TakiAgent/packages/core/src/memory/hindsight/hindsight-runtime-bank-service.ts:42:50)
+    at track (H:/TakiAgent/packages/core/src/memory/hindsight/hindsight-runtime-bank-service.ts:46:54)
+    at scheduled (H:/TakiAgent/packages/core/src/memory/hindsight/hindsight-runtime-bank-service.ts:54:74)
+    at run (H:/TakiAgent/packages/core/src/memory/hindsight/hindsight-runtime-bank-service.ts:67:57)
+    at Object.<anonymous> (H:/TakiAgent/packages/core/src/memory/hindsight/hindsight-memory-subsystem.test.ts:47:26)
+    at Object.run (file:///H:/TakiAgent/node_modules/.pnpm/@vitest+spy@4.1.10/node_modules/@vitest/spy/dist/index.js:332:34)
+    at perform (H:/TakiAgent/packages/core/src/memory/hindsight/hindsight-replica-run-execution.ts:48:35)
+
+stdout | src/memory/hindsight/hindsight-memory-subsystem.test.ts > Hindsight subsystem memory-unavailable degrade path > settles a foreground Pending write from the real scheduler timer after its provider owner has finished
+[DEBUG-p1h] {
+  writable: true,
+  callsBefore: 17,
+  callsAfter: 17,
+  pending: '2026-11-06T20:28:41.268Z',
+  originalAttempt: '2026-11-06T20:28:41.268Z'
+}
+
+ ❯ src/memory/hindsight/hindsight-memory-subsystem.test.ts (8 tests | 1 failed | 7 skipped) 903ms
+     × settles a foreground Pending write from the real scheduler timer after its provider owner has finished 901ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/memory/hindsight/hindsight-memory-subsystem.test.ts > Hindsight subsystem memory-unavailable degrade path > settles a foreground Pending write from the real scheduler timer after its provider owner has finished
+AssertionError: expected { …(2) } to deeply equal { failures: [], mode: 'idle' }
+
+- Expected
++ Received
+
+  {
+-   "failures": [],
+-   "mode": "idle",
++   "failures": [
++     "MEMORY_AUTHORITY_FENCED",
++   ],
++   "mode": "failed",
+  }
+
+ ❯ src/memory/hindsight/hindsight-memory-subsystem.test.ts:64:78
+     62|       pending: state.pending.get({ ...key, operationId: original.inten…
+     63|       originalAttempt: original.lastAttemptAt });
+     64|     expect({ failures, mode: scheduler.status(bank.scope.bankId)[0]?.m…
+       |                                                                              ^
+     65|     expect(f.remote.calls.length).toBeGreaterThan(callsBefore);
+     66|     expect(journal.get(parent.identity.key)).toMatchObject({ identity:…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 skipped (8)
+   Start at  04:28:36
+   Duration  6.17s (transform 3.74s, setup 0ms, import 4.99s, tests 903ms, environment 0ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/hindsight/hindsight-memory-subsystem.test.ts --testNamePattern real scheduler timer --maxWorkers=2 --pool=threads

@@ -1,0 +1,92 @@
+{
+  "verdict": "PASS_SOURCE_DELTA",
+  "releaseSha256": "09cecd8d80419224d6b562c179ffee6044551c6ae00523b961bf16b435b1e789",
+  "runtimeExecuted": false,
+  "generatedEnvironmentOnly": true,
+  "unchangedFiles": [
+    "compare.py",
+    "docker-commands.mjs",
+    "evidence-store.mjs",
+    "source-pyproject.toml"
+  ],
+  "launcherOnlyTokenChanged": true,
+  "originalPacketAndFailurePreserved": true,
+  "stageAndArchiveAbsent": true,
+  "generatedInventory": {
+    "schema": "c2b-installed-dependencies-v1",
+    "token": "e309a1b4-7047-44bb-a4af-cdd65b1a994a",
+    "complete": true,
+    "deploymentReady": false,
+    "scope": "Metadata collection only; no application import or compatibility claim",
+    "distributions": [
+      {
+        "file": "a-demo.dist-info/METADATA",
+        "bytes": 47,
+        "sha256": "2feb74bd077b97326283df4a92d3bb28e6931c8b4e9fe7593682a5520409c625",
+        "name": "demo",
+        "version": "1.0",
+        "metadataVersion": "2.4",
+        "metadataVersionSupported": true,
+        "requiresPython": null,
+        "requiresDist": [],
+        "providesExtra": []
+      },
+      {
+        "file": "m-unknown.dist-info/METADATA",
+        "bytes": 51,
+        "sha256": "717f3f7aa0b7e3d457dab670395db0604e8b7108ae505387c80fd7fc04a4f2a8",
+        "name": "unknown",
+        "version": "1.0",
+        "metadataVersion": "99.0",
+        "metadataVersionSupported": false,
+        "requiresPython": null,
+        "requiresDist": [],
+        "providesExtra": []
+      },
+      {
+        "file": "z-later.dist-info/METADATA",
+        "bytes": 48,
+        "sha256": "5f4ab72917ff695ed01a4da80aa7b68271eb2fe7dbbe33455984889c3b135db9",
+        "name": "later",
+        "version": "1.0",
+        "metadataVersion": "2.4",
+        "metadataVersionSupported": true,
+        "requiresPython": null,
+        "requiresDist": [],
+        "providesExtra": []
+      }
+    ],
+    "failure": null,
+    "environment": {
+      "implementation_name": "cpython",
+      "implementation_version": "3.11.16",
+      "python_full_version": "3.11.16",
+      "sys_platform": "linux",
+      "platform_release": "generated-review-fixture",
+      "platform_machine": "x86_64",
+      "platform_system": "Linux",
+      "python_version": "3.11",
+      "platform_version": "generated-review-fixture",
+      "os_name": "posix",
+      "platform_python_implementation": "CPython"
+    },
+    "pythonExecutable": "generated-fixture",
+    "purelib": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\c2b-dependency-v2-independent-review-01a180b6\\generated-purelib",
+    "unsupportedMetadata": [
+      {
+        "file": "m-unknown.dist-info/METADATA",
+        "metadataVersion": "99.0"
+      }
+    ],
+    "metadataBytes": 146,
+    "elapsedMs": 31
+  },
+  "unknownComparison": "metadata_version_unsupported",
+  "supported2_4Comparison": "compatible",
+  "sourceChecks": {
+    "checks.json": "9cdaec83a369b644c410c4a61bd8147ac22b7010c95fad245269f4a841671648",
+    "after-javascript.json": "e9a10dfc4585b090267935fd879baace2dea10122211943a0c43d502b9fb8fc1",
+    "test-metadata.py": "4907cd5df614643dbec1303a1b111a5b67b9c0862249d381999cb849a5260362"
+  },
+  "deploymentReady": false
+}

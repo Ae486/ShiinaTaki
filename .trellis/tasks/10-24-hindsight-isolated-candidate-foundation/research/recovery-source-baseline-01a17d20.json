@@ -1,0 +1,326 @@
+{
+  "session": "01a17d20-f141-7f31-b9f8-c161431c935d",
+  "head": "e260ff4b0bf663b5faa0187bc6ec701fd2f007cd",
+  "files": [
+    {
+      "path": ".trellis/tasks/08-09-memory-operations-ui/design.md",
+      "bytes": 17039,
+      "sha256": "97dde3ccf834e2df2b0a94cafb02b6a47d1ab7fb90828bbe2c34ca7f75b1bcab"
+    },
+    {
+      "path": ".trellis/tasks/08-09-memory-operations-ui/implement.md",
+      "bytes": 10063,
+      "sha256": "d760cb7f06d554daea39fb6f5bdb3e3c7c3345efb282b022f93f9a8b81eac954"
+    },
+    {
+      "path": ".trellis/tasks/08-09-memory-operations-ui/prd.md",
+      "bytes": 9101,
+      "sha256": "aac8ce97ef219a46bbac82fb9d09d7c86532ffde3c95270f01a3afdaa05c6d2f"
+    },
+    {
+      "path": ".trellis/tasks/08-09-memory-operations-ui/research/development-start-2026-10-24.md",
+      "bytes": 1650,
+      "sha256": "8c847489e454a2365342b6510f32879a27b3491653b977653385c34114dfb0ad"
+    },
+    {
+      "path": ".trellis/tasks/08-09-memory-operations-ui/research/preparation-advisor-2026-10-24.md",
+      "bytes": 30177,
+      "sha256": "38335b1f0cbafb786e3b4be8bf5cbaf1152ee4e6d2ad81658b99475afdec5427"
+    },
+    {
+      "path": ".trellis/tasks/08-09-memory-operations-ui/research/s6-acceptance-plan-2026-10-24.md",
+      "bytes": 15066,
+      "sha256": "4af5c4eb5b0b890dde38b80baae8ce361c59abca9a9ddd6487418075db15bd49"
+    },
+    {
+      "path": ".trellis/tasks/08-09-memory-operations-ui/research/stage5-execution-map-2026-10-07.md",
+      "bytes": 9910,
+      "sha256": "2e58716ff11bb185399da9cc8dbf625494e7cb465ed1d250e627d4a227053886"
+    },
+    {
+      "path": ".trellis/tasks/08-09-memory-operations-ui/task.json",
+      "bytes": 4909,
+      "sha256": "7ac994bfea8fe7dbbb42d6e359df5793c59870dd84c972bc185fe8cae3a39cd4"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/check.jsonl",
+      "bytes": 5999,
+      "sha256": "cd1fd62a67fc656675109f1257f8d4e3882e02ee41be9694299b638132880893"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/implement.jsonl",
+      "bytes": 5981,
+      "sha256": "68ec9a2df71cb375453b62271284af11d6c0e8653319b7b3cd564ccdb9ed6bb3"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-preflight-2026-10-24.md",
+      "bytes": 28258,
+      "sha256": "96ab9a6ec67fdc36e7df43a4fe20f9345a2f848e84d29531eec9840c63202db2"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-slice1-run-cb3b3ca9-5a01-4bc4-a734-8b48d7868489/.c2b-image-owner",
+      "bytes": 36,
+      "sha256": "ea9513218e1b015b21fb7dee87728d638f3feca521ae0404559ae38cd07f955e"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-slice1-run-cb3b3ca9-5a01-4bc4-a734-8b48d7868489/archive.json",
+      "bytes": 299,
+      "sha256": "00c9ab7460be0b1f83f747245dfd7dda1ccd88c6c65f9e5cbe842c6fafd6b4cd"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-slice1-run-cb3b3ca9-5a01-4bc4-a734-8b48d7868489/result.json",
+      "bytes": 90035,
+      "sha256": "14f0fdfcb1e486694163b6b8f42662726cc23697bfe6295593d2e941ebe8ed93"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-topology-delta-review-2026-10-27.md",
+      "bytes": 8000,
+      "sha256": "a16acd75b0e4201eed045967fca74944fc2431978536866706cb486c12d281c5"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-loopback-relay/docker-commands.mjs",
+      "bytes": 5531,
+      "sha256": "b267f65e936e97fcd96b9669b21ea34b0c3ef866ad1d11dd038cb3fd5f970ea0"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-loopback-relay/evidence-store.mjs",
+      "bytes": 5925,
+      "sha256": "4dac3048140fcb948832da76462134262e1c95798956b2e0d4a7540be1e03d8e"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-loopback-relay/fixture-server.py",
+      "bytes": 8588,
+      "sha256": "2bf517ac5b42e6074173eb7a3285eaf9da55cc3851a627387d5a5201ee6e183b"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-loopback-relay/host-transport.mjs",
+      "bytes": 9449,
+      "sha256": "1556a4d07ef66398ce11bc6ee25a44b774c3edf2351525678496cf525a6864de"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-loopback-relay/launch.mjs",
+      "bytes": 2184,
+      "sha256": "c46ae59ae927450e85ad29f4a582c48ebdcc29b7837e8673c5585f4dec72f20d"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-loopback-relay/observe-reaping.py",
+      "bytes": 4188,
+      "sha256": "0304b4c2970bcb583a2e1c90fe9320d381f9e5c9a3f0a28277de2a9db079413c"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-loopback-relay/run-relay.mjs",
+      "bytes": 20132,
+      "sha256": "599b408e962bf0eab06bf85d83635ccdd30b6aa1784d3705f9ad416b83b5f25f"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-loopback-relay/stream-relay.py",
+      "bytes": 4550,
+      "sha256": "cb6a235b82c1baccb66066c48916d3cd65a9472a1838079c71dda59057da298f"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/README.md",
+      "bytes": 9827,
+      "sha256": "28233008b0a319d78d2ff3e561a63003780d33691d41c97950a6addf8da2f929"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/run-slice1.ts",
+      "bytes": 23290,
+      "sha256": "7277034bfd972db1ddd1a77a09889b648d0160aada854e3093b07c7487890ada"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/topology-probe.py",
+      "bytes": 2950,
+      "sha256": "045b1f4434794713a2bd2fc60501714509090238438175f1d78357c6a677f9b9"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/leader-now.md",
+      "bytes": 21570,
+      "sha256": "dc56296bd43e23cd00902de3d0478c2c828e3d4644386a286b70f3c68565cec1"
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/task.json",
+      "bytes": 1868,
+      "sha256": "b813b792206599c47f9253f414c2db87e399c77ee8aa98764392e5bef397f186"
+    },
+    {
+      "path": ".trellis/tasks/10-24-hindsight-isolated-candidate-foundation/check.jsonl",
+      "bytes": 2125,
+      "sha256": "72ff4c96b0b3763b4ca21c63e9ff99c7cf0e37c199f52f25752fbe46af9f90df"
+    },
+    {
+      "path": ".trellis/tasks/10-24-hindsight-isolated-candidate-foundation/design.md",
+      "bytes": 16601,
+      "sha256": "f066e6d130dccb28f8e4592f357d268c604954bf857f22525c3966d7325c0c9e"
+    },
+    {
+      "path": ".trellis/tasks/10-24-hindsight-isolated-candidate-foundation/implement.jsonl",
+      "bytes": 2121,
+      "sha256": "cc2002e214c16d2eb4738edb079c9bed77103e14031d65dd3b37ab26d0dfd8aa"
+    },
+    {
+      "path": ".trellis/tasks/10-24-hindsight-isolated-candidate-foundation/implement.md",
+      "bytes": 11540,
+      "sha256": "c63b03de17c3b0af8d40b236a7c1936ad1fd0d3f383d3af566f78cf44109c06b"
+    },
+    {
+      "path": ".trellis/tasks/10-24-hindsight-isolated-candidate-foundation/prd.md",
+      "bytes": 5886,
+      "sha256": "a28edd19502b9626146c300964acf6aefcc585b1150445a38232fae30320f9bb"
+    },
+    {
+      "path": ".trellis/tasks/10-24-hindsight-isolated-candidate-foundation/research/README.md",
+      "bytes": 1700,
+      "sha256": "09833ae2fd916904b6d6481d665e001b8b3763f4f5009b620bbc2bcd1ecff296"
+    },
+    {
+      "path": ".trellis/tasks/10-24-hindsight-isolated-candidate-foundation/research/continuation-2026-10-27-01a17d20.md",
+      "bytes": 3053,
+      "sha256": "d2eb7745570d89692fdce13de1d08a2017657f01330186f455928eb1bf248a58"
+    },
+    {
+      "path": ".trellis/tasks/10-24-hindsight-isolated-candidate-foundation/research/continuation-source-baseline-2026-10-27.json",
+      "bytes": 7420,
+      "sha256": "e4eb926696401e5353ad2afd2a9f1db085e693a4b17376bc7b82c655477e044b"
+    },
+    {
+      "path": ".trellis/tasks/10-24-hindsight-isolated-candidate-foundation/research/d1a-inherited-lint-2026-10-27.md",
+      "bytes": 592,
+      "sha256": "44413f50797fe871ea5f984ffa62befd47d93c687a3648d5e4ed113ec2986e74"
+    },
+    {
+      "path": ".trellis/tasks/10-24-hindsight-isolated-candidate-foundation/research/leader-now.md",
+      "bytes": 2502,
+      "sha256": "1666c1bade92254b50f353b8e9a7600772dbd1efe15960127dbfb0d526d16deb"
+    },
+    {
+      "path": ".trellis/tasks/10-24-hindsight-isolated-candidate-foundation/research/source-readiness-2026-10-24.md",
+      "bytes": 40777,
+      "sha256": "a6dd31e674b6563e4aa29b642d9c6ec78b58a24fb22d25835ddc5954a337ada3"
+    },
+    {
+      "path": ".trellis/tasks/10-24-hindsight-isolated-candidate-foundation/task.json",
+      "bytes": 1793,
+      "sha256": "0b9b4f17df5c99f8f866f201107b4c4e4bb83b8d2041f824359626aea8aacf94"
+    },
+    {
+      "path": "docs/HANDOFF.md",
+      "bytes": 75855,
+      "sha256": "69e0b581ca2ee2791a028547e445423ec2aedce636ed4b1366eee8d780efcbfa"
+    },
+    {
+      "path": "docs/deferred-decisions.md",
+      "bytes": 88004,
+      "sha256": "5b8640fa526b56136438595b06aa6b630d21ee11662339de861c442d416edee2"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-candidates/hindsight-candidate-admission.test.ts",
+      "bytes": 9214,
+      "sha256": "c655a94863a7aa79f13f5bc6640474ea47dd14f07dfa97878c8b1d85c707d361"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-candidates/hindsight-candidate-admission.ts",
+      "bytes": 2959,
+      "sha256": "c6808f503c63b092aae261a279d9649188afe72530f36086bcdc854eb7d1fca3"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-candidates/hindsight-candidate-archive.ts",
+      "bytes": 6754,
+      "sha256": "ddfc6064b91a8cf4bfd324822e101a0bcb6e98ed022203823c3562aa3cf3cfeb"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-candidates/hindsight-candidate-copy-stream.test.ts",
+      "bytes": 3161,
+      "sha256": "ac32fe5c1450dabd9ecfe8f28bd743844e34eb4727b152c1882f6617552062f3"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-candidates/hindsight-candidate-copy-stream.ts",
+      "bytes": 4720,
+      "sha256": "8d5cc4fdd30e27bf5d0955d1e27ddcf5a9ecec9e29fcfd4b8cce73853f265771"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-candidates/hindsight-candidate-core.ts",
+      "bytes": 5048,
+      "sha256": "23bcc08ac1e7498eca511fbb2d1ef242c72766d0253dd650fa80d6aaf5dcf88b"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-candidates/hindsight-candidate-files.test.ts",
+      "bytes": 1398,
+      "sha256": "ae00cac1b6a2b9e737e94c6a0c48b2d5a8d654b97d27719dd082f74914640a02"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-candidates/hindsight-candidate-files.ts",
+      "bytes": 2275,
+      "sha256": "927ec43b4572f38a2d7763edbccbdd28e394d55ff8e41402f17d333508e70f30"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-candidates/hindsight-candidate-fixtures.ts",
+      "bytes": 9437,
+      "sha256": "1ccc0d6fdb46e1d32a735b366ff3acaca9fa13b80d995a8d7af2046717f76e6d"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-candidates/hindsight-candidate-identity.test.ts",
+      "bytes": 2028,
+      "sha256": "9061f65cee549447d5bb9075494e9cb7579298f720c3e29a61a64336da5ccb53"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-candidates/hindsight-candidate-identity.ts",
+      "bytes": 3078,
+      "sha256": "7bcf644e6654ddb7278d7bbeeeee9173dd198a19b3fcf53b2b40be3ac633a8a0"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-candidates/hindsight-candidate-profile.ts",
+      "bytes": 3438,
+      "sha256": "95f2e5c54a7621c5a6f76a79ef71d749b89cb6b91ab613ed552dbcc9c7d8ca33"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-candidates/hindsight-candidate-refusal.ts",
+      "bytes": 2934,
+      "sha256": "ef23fc538dc5ffc674d17237d239f22912436d43f43fd106e2e45955ae660b6c"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-candidates/hindsight-candidate-schema-admission.ts",
+      "bytes": 4305,
+      "sha256": "7611854563b55fb6085fcb43cdd1013a09b1250a63dff7152d3d4c16f828b8fb"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-candidates/hindsight-candidate-verifier.test.ts",
+      "bytes": 8732,
+      "sha256": "458e0f3247b12252a865503265a8c61b9fcb496d808ee54f06615e9dfb61cdb2"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-candidates/hindsight-candidate-verifier.ts",
+      "bytes": 8835,
+      "sha256": "3f2b57e7cfc091fd9445ea42d927c1c9097df5dc5bfb359c801629c6bfe606f0"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-candidates/index.md",
+      "bytes": 1452,
+      "sha256": "18aee1a1993636b4736a21c06375790fd433fd81e31a1b6da6060a3c6f93bea6"
+    },
+    {
+      "path": "packages/core/src/memory/index.md",
+      "bytes": 14287,
+      "sha256": "66e3279dc6e3880806ce0afbda54dc48a2d6c609d4beeb26359209578c62851c"
+    },
+    {
+      "path": "packages/shared/src/hindsight-candidate-schema.test.ts",
+      "bytes": 2073,
+      "sha256": "f86a61bc7a80682c8db5f88f8b460a285768e10109aa21730516d27ec24e5f50"
+    },
+    {
+      "path": "packages/shared/src/hindsight-candidate-schema.ts",
+      "bytes": 11040,
+      "sha256": "27e739489e330f8b3bfadbdfaa563b7263931b1b5d30aaf4295bd600a61f64f1"
+    },
+    {
+      "path": "packages/shared/src/index.md",
+      "bytes": 17659,
+      "sha256": "6402cbb03ff1b1a1354d242ff40d5116f73ef11f26832e01f29b312bd3c61806"
+    },
+    {
+      "path": "packages/shared/src/index.ts",
+      "bytes": 61791,
+      "sha256": "dd8d65986ed1fa108188bf83ba32f4b14f6a6cb07b050e4dacc2974d04a909d1"
+    }
+  ]
+}

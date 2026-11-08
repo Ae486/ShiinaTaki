@@ -1,0 +1,540 @@
+{
+  "token": "ad8bf8b8-9577-4420-9fd9-212574bd4568",
+  "startedAt": "2026-10-28T09:48:08.0436293Z",
+  "stage": "G:/TakiAgent-c2b-native-api/application-root-ad8bf8b8-9577-4420-9fd9-212574bd4568",
+  "commands": [
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\application-root-ad8bf8b8-9577-4420-9fd9-212574bd4568\\client-config",
+        "info",
+        "--format",
+        "{{.ID}}"
+      ],
+      "dispatchedAt": "2026-10-28T09:48:08.2472791Z",
+      "exitCode": 0,
+      "closed": true,
+      "pid": 60172,
+      "stdout": "93e8319e-24b7-4a7d-88f1-60923ad681e0\n",
+      "stderr": "",
+      "stdoutSha256": "e2f857e1f6b4f94ed623057ede61faf7e5debbfc3cb463beb2ea80724f47fa38",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\application-root-ad8bf8b8-9577-4420-9fd9-212574bd4568\\client-config",
+        "image",
+        "inspect",
+        "taki-c2b-application:ad8bf8b8-9577-4420-9fd9-212574bd4568",
+        "--format",
+        "{{.Id}}"
+      ],
+      "dispatchedAt": "2026-10-28T09:48:08.5743785Z",
+      "exitCode": 0,
+      "closed": true,
+      "pid": 59576,
+      "stdout": "sha256:c57385ec5ad1243659db1e1159f65218c1a48dd0481e94f468cbc0ada376b11e\n",
+      "stderr": "",
+      "stdoutSha256": "1502441076cdca779c476ef6e41116b2f13a6c8dc09dfd7ec8275db86b512d9b",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\application-root-ad8bf8b8-9577-4420-9fd9-212574bd4568\\client-config",
+        "container",
+        "inspect",
+        "taki-c2b-application-check-ad8bf8b8-9577-4420-9fd9-212574bd4568",
+        "--format",
+        "{{.Id}}"
+      ],
+      "dispatchedAt": "2026-10-28T09:48:08.8713853Z",
+      "exitCode": 1,
+      "closed": true,
+      "pid": 48156,
+      "stdout": "\n",
+      "stderr": "Error response from daemon: No such container: taki-c2b-application-check-ad8bf8b8-9577-4420-9fd9-212574bd4568\n",
+      "stdoutSha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "stderrSha256": "2e4efb87e2d6dfaf1c4092e4f0d1adcdaf0539bf22565c1de757428b2e4239fb"
+    },
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\application-root-ad8bf8b8-9577-4420-9fd9-212574bd4568\\client-config",
+        "create",
+        "--name",
+        "taki-c2b-application-check-ad8bf8b8-9577-4420-9fd9-212574bd4568",
+        "--label",
+        "taki.c2b.application=ad8bf8b8-9577-4420-9fd9-212574bd4568",
+        "--label",
+        "taki.c2b.role=application-source-cache-check",
+        "--pull=never",
+        "--network=none",
+        "--read-only",
+        "--user=1000:1000",
+        "--log-driver=none",
+        "--memory=256m",
+        "--cpus=1",
+        "--pids-limit=16",
+        "--cap-drop=ALL",
+        "--security-opt=no-new-privileges=true",
+        "--restart=no",
+        "--entrypoint=/app/api/.venv/bin/python",
+        "sha256:c57385ec5ad1243659db1e1159f65218c1a48dd0481e94f468cbc0ada376b11e",
+        "-I",
+        "-B",
+        "-S",
+        "/opt/taki-c2b-application/artifact-check.py"
+      ],
+      "dispatchedAt": "2026-10-28T09:48:09.1298102Z",
+      "exitCode": 0,
+      "closed": true,
+      "pid": 54156,
+      "stdout": "dce0c98d30c3de7986da38f51fa379afd27881c0c0d04a15f8f9a44af8117b1b\n",
+      "stderr": "",
+      "stdoutSha256": "d5f919b7592dc8d895558dc15c36a032cfb7bd6a26cf77b10cc1447a1c40a45f",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\application-root-ad8bf8b8-9577-4420-9fd9-212574bd4568\\client-config",
+        "info",
+        "--format",
+        "{{.ID}}"
+      ],
+      "dispatchedAt": "2026-10-28T09:48:09.4717352Z",
+      "exitCode": 0,
+      "closed": true,
+      "pid": 59592,
+      "stdout": "93e8319e-24b7-4a7d-88f1-60923ad681e0\n",
+      "stderr": "",
+      "stdoutSha256": "e2f857e1f6b4f94ed623057ede61faf7e5debbfc3cb463beb2ea80724f47fa38",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\application-root-ad8bf8b8-9577-4420-9fd9-212574bd4568\\client-config",
+        "container",
+        "inspect",
+        "dce0c98d30c3de7986da38f51fa379afd27881c0c0d04a15f8f9a44af8117b1b",
+        "--format",
+        "{\"id\":{{json .Id}},\"name\":{{json .Name}},\"image\":{{json .Image}},\"path\":{{json .Path}},\"args\":{{json .Args}},\"user\":{{json .Config.User}},\"labels\":{{json .Config.Labels}},\"tty\":{{json .Config.Tty}},\"stdin\":{{json .Config.OpenStdin}},\"network\":{{json .HostConfig.NetworkMode}},\"readonly\":{{json .HostConfig.ReadonlyRootfs}},\"mounts\":{{json .Mounts}},\"bindings\":{{json .HostConfig.PortBindings}},\"privileged\":{{json .HostConfig.Privileged}},\"capAdd\":{{json .HostConfig.CapAdd}},\"capDrop\":{{json .HostConfig.CapDrop}},\"security\":{{json .HostConfig.SecurityOpt}},\"memory\":{{json .HostConfig.Memory}},\"cpus\":{{json .HostConfig.NanoCpus}},\"pids\":{{json .HostConfig.PidsLimit}},\"log\":{{json .HostConfig.LogConfig.Type}},\"restart\":{{json .HostConfig.RestartPolicy.Name}},\"running\":{{json .State.Running}},\"status\":{{json .State.Status}},\"exitCode\":{{json .State.ExitCode}},\"startedAt\":{{json .State.StartedAt}},\"oom\":{{json .State.OOMKilled}}}"
+      ],
+      "dispatchedAt": "2026-10-28T09:48:09.7170386Z",
+      "exitCode": 0,
+      "closed": true,
+      "pid": 54408,
+      "stdout": "{\"id\":\"dce0c98d30c3de7986da38f51fa379afd27881c0c0d04a15f8f9a44af8117b1b\",\"name\":\"/taki-c2b-application-check-ad8bf8b8-9577-4420-9fd9-212574bd4568\",\"image\":\"sha256:c57385ec5ad1243659db1e1159f65218c1a48dd0481e94f468cbc0ada376b11e\",\"path\":\"/app/api/.venv/bin/python\",\"args\":[\"-I\",\"-B\",\"-S\",\"/opt/taki-c2b-application/artifact-check.py\"],\"user\":\"1000:1000\",\"labels\":{\"taki.c2b.application\":\"ad8bf8b8-9577-4420-9fd9-212574bd4568\",\"taki.c2b.role\":\"application-source-cache-check\"},\"tty\":false,\"stdin\":false,\"network\":\"none\",\"readonly\":true,\"mounts\":[],\"bindings\":{},\"privileged\":false,\"capAdd\":null,\"capDrop\":[\"ALL\"],\"security\":[\"no-new-privileges=true\"],\"memory\":268435456,\"cpus\":1000000000,\"pids\":16,\"log\":\"none\",\"restart\":\"no\",\"running\":false,\"status\":\"created\",\"exitCode\":0,\"startedAt\":\"0001-01-01T00:00:00Z\",\"oom\":false}\n",
+      "stderr": "",
+      "stdoutSha256": "c34a4b4b5058e394bff19a807099b6ba102cfd5c723ffc11e57f3fd940f668a7",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\application-root-ad8bf8b8-9577-4420-9fd9-212574bd4568\\client-config",
+        "start",
+        "--attach",
+        "dce0c98d30c3de7986da38f51fa379afd27881c0c0d04a15f8f9a44af8117b1b"
+      ],
+      "dispatchedAt": "2026-10-28T09:48:10.0133735Z",
+      "exitCode": 0,
+      "closed": true,
+      "pid": 58764,
+      "stdout": "{\"schema\":\"c2b-application-artifact-check-v1\",\"token\":\"ad8bf8b8-9577-4420-9fd9-212574bd4568\",\"deploymentReady\":false,\"scope\":\"Application-source/cache prerequisite; no managed API producer or lifecycle acceptance\",\"fileGatePassed\":true,\"refusalCasesPassed\":true,\"tokenizerLoadPassed\":true,\"complete\":true,\"files\":{\"trees\":{\"hindsight_api\":{\"entries\":424,\"bytes\":6463555,\"sha256\":\"6593c547caf50ea87a5fb269b6dd75116bb885d5ad4bb5fb8fe62665febe1ca9\"},\"managed_bootstrap\":{\"entries\":12,\"bytes\":66616,\"sha256\":\"3dea0c37320c3415520015cdaf2e5fb403bbaa76a957ce68a7dde5602ffbcc86\"}},\"metadata\":{\"count\":221,\"sha256\":\"37c7cf56cf72317fb8b0d4b6553ccb11545261b5466d9434b49b0c3e95a12f2d\"},\"protected\":{\"virtualenv\":{\"entries\":49049,\"bytes\":1906210751,\"sha256\":\"0489f49cfb17180303d25f165e72091bb33ed4a5fd602ce8236edb08a158e537\"},\"python\":{\"bytes\":14472,\"sha256\":\"92d7e40ec50be176cb1b790c7568b7e08cd862137b5aa69f1413ba1967886b79\"}},\"build\":\"taki-memory-hindsight-0.9.0-template-backup-v1\",\"cache\":{\"bytes\":1681126,\"sha256\":\"223921b76ee99bde995b7ff738513eef100fb51d18c93597a113bcffe865b2a7\"}},\"negativeCases\":[{\"case\":\"wrong_build\",\"refused\":true,\"beforeThirdPartyImport\":true},{\"case\":\"cache_missing\",\"refused\":true,\"beforeThirdPartyImport\":true},{\"case\":\"cache_corrupt\",\"refused\":true,\"beforeThirdPartyImport\":true}],\"tokenizer\":{\"loaded\":true,\"version\":\"0.12.0\",\"encoding\":\"cl100k_base\",\"roundtrip\":true,\"tokenCount\":12,\"postLoadCacheRechecked\":true,\"cacheReads\":1,\"forbiddenEffects\":0},\"elapsedMs\":19548,\"python\":\"3.11.16\",\"uid\":1000,\"gid\":1000}\n",
+      "stderr": "",
+      "stdoutSha256": "6a1708052a2cf825d6cd15c75708ca464b4e2e7f422eaf9005e38e900c004cf7",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\application-root-ad8bf8b8-9577-4420-9fd9-212574bd4568\\client-config",
+        "info",
+        "--format",
+        "{{.ID}}"
+      ],
+      "dispatchedAt": "2026-10-28T09:48:32.1644784Z",
+      "exitCode": 0,
+      "closed": true,
+      "pid": 60328,
+      "stdout": "93e8319e-24b7-4a7d-88f1-60923ad681e0\n",
+      "stderr": "",
+      "stdoutSha256": "e2f857e1f6b4f94ed623057ede61faf7e5debbfc3cb463beb2ea80724f47fa38",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\application-root-ad8bf8b8-9577-4420-9fd9-212574bd4568\\client-config",
+        "container",
+        "inspect",
+        "dce0c98d30c3de7986da38f51fa379afd27881c0c0d04a15f8f9a44af8117b1b",
+        "--format",
+        "{\"id\":{{json .Id}},\"name\":{{json .Name}},\"image\":{{json .Image}},\"path\":{{json .Path}},\"args\":{{json .Args}},\"user\":{{json .Config.User}},\"labels\":{{json .Config.Labels}},\"tty\":{{json .Config.Tty}},\"stdin\":{{json .Config.OpenStdin}},\"network\":{{json .HostConfig.NetworkMode}},\"readonly\":{{json .HostConfig.ReadonlyRootfs}},\"mounts\":{{json .Mounts}},\"bindings\":{{json .HostConfig.PortBindings}},\"privileged\":{{json .HostConfig.Privileged}},\"capAdd\":{{json .HostConfig.CapAdd}},\"capDrop\":{{json .HostConfig.CapDrop}},\"security\":{{json .HostConfig.SecurityOpt}},\"memory\":{{json .HostConfig.Memory}},\"cpus\":{{json .HostConfig.NanoCpus}},\"pids\":{{json .HostConfig.PidsLimit}},\"log\":{{json .HostConfig.LogConfig.Type}},\"restart\":{{json .HostConfig.RestartPolicy.Name}},\"running\":{{json .State.Running}},\"status\":{{json .State.Status}},\"exitCode\":{{json .State.ExitCode}},\"startedAt\":{{json .State.StartedAt}},\"oom\":{{json .State.OOMKilled}}}"
+      ],
+      "dispatchedAt": "2026-10-28T09:48:32.5227100Z",
+      "exitCode": 0,
+      "closed": true,
+      "pid": 59956,
+      "stdout": "{\"id\":\"dce0c98d30c3de7986da38f51fa379afd27881c0c0d04a15f8f9a44af8117b1b\",\"name\":\"/taki-c2b-application-check-ad8bf8b8-9577-4420-9fd9-212574bd4568\",\"image\":\"sha256:c57385ec5ad1243659db1e1159f65218c1a48dd0481e94f468cbc0ada376b11e\",\"path\":\"/app/api/.venv/bin/python\",\"args\":[\"-I\",\"-B\",\"-S\",\"/opt/taki-c2b-application/artifact-check.py\"],\"user\":\"1000:1000\",\"labels\":{\"taki.c2b.application\":\"ad8bf8b8-9577-4420-9fd9-212574bd4568\",\"taki.c2b.role\":\"application-source-cache-check\"},\"tty\":false,\"stdin\":false,\"network\":\"none\",\"readonly\":true,\"mounts\":[],\"bindings\":{},\"privileged\":false,\"capAdd\":null,\"capDrop\":[\"ALL\"],\"security\":[\"no-new-privileges=true\"],\"memory\":268435456,\"cpus\":1000000000,\"pids\":16,\"log\":\"none\",\"restart\":\"no\",\"running\":false,\"status\":\"exited\",\"exitCode\":0,\"startedAt\":\"2026-10-28T09:48:12.222591729Z\",\"oom\":false}\n",
+      "stderr": "",
+      "stdoutSha256": "4b6781e2e60d3abd03c13a9c25ec0025363ff15ef27c8f1b5d628607fad34c8e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\application-root-ad8bf8b8-9577-4420-9fd9-212574bd4568\\client-config",
+        "info",
+        "--format",
+        "{{.ID}}"
+      ],
+      "dispatchedAt": "2026-10-28T09:48:32.8980720Z",
+      "exitCode": 0,
+      "closed": true,
+      "pid": 59756,
+      "stdout": "93e8319e-24b7-4a7d-88f1-60923ad681e0\n",
+      "stderr": "",
+      "stdoutSha256": "e2f857e1f6b4f94ed623057ede61faf7e5debbfc3cb463beb2ea80724f47fa38",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\application-root-ad8bf8b8-9577-4420-9fd9-212574bd4568\\client-config",
+        "container",
+        "inspect",
+        "dce0c98d30c3de7986da38f51fa379afd27881c0c0d04a15f8f9a44af8117b1b",
+        "--format",
+        "{\"id\":{{json .Id}},\"name\":{{json .Name}},\"image\":{{json .Image}},\"path\":{{json .Path}},\"args\":{{json .Args}},\"user\":{{json .Config.User}},\"labels\":{{json .Config.Labels}},\"tty\":{{json .Config.Tty}},\"stdin\":{{json .Config.OpenStdin}},\"network\":{{json .HostConfig.NetworkMode}},\"readonly\":{{json .HostConfig.ReadonlyRootfs}},\"mounts\":{{json .Mounts}},\"bindings\":{{json .HostConfig.PortBindings}},\"privileged\":{{json .HostConfig.Privileged}},\"capAdd\":{{json .HostConfig.CapAdd}},\"capDrop\":{{json .HostConfig.CapDrop}},\"security\":{{json .HostConfig.SecurityOpt}},\"memory\":{{json .HostConfig.Memory}},\"cpus\":{{json .HostConfig.NanoCpus}},\"pids\":{{json .HostConfig.PidsLimit}},\"log\":{{json .HostConfig.LogConfig.Type}},\"restart\":{{json .HostConfig.RestartPolicy.Name}},\"running\":{{json .State.Running}},\"status\":{{json .State.Status}},\"exitCode\":{{json .State.ExitCode}},\"startedAt\":{{json .State.StartedAt}},\"oom\":{{json .State.OOMKilled}}}"
+      ],
+      "dispatchedAt": "2026-10-28T09:48:33.2682252Z",
+      "exitCode": 0,
+      "closed": true,
+      "pid": 58336,
+      "stdout": "{\"id\":\"dce0c98d30c3de7986da38f51fa379afd27881c0c0d04a15f8f9a44af8117b1b\",\"name\":\"/taki-c2b-application-check-ad8bf8b8-9577-4420-9fd9-212574bd4568\",\"image\":\"sha256:c57385ec5ad1243659db1e1159f65218c1a48dd0481e94f468cbc0ada376b11e\",\"path\":\"/app/api/.venv/bin/python\",\"args\":[\"-I\",\"-B\",\"-S\",\"/opt/taki-c2b-application/artifact-check.py\"],\"user\":\"1000:1000\",\"labels\":{\"taki.c2b.application\":\"ad8bf8b8-9577-4420-9fd9-212574bd4568\",\"taki.c2b.role\":\"application-source-cache-check\"},\"tty\":false,\"stdin\":false,\"network\":\"none\",\"readonly\":true,\"mounts\":[],\"bindings\":{},\"privileged\":false,\"capAdd\":null,\"capDrop\":[\"ALL\"],\"security\":[\"no-new-privileges=true\"],\"memory\":268435456,\"cpus\":1000000000,\"pids\":16,\"log\":\"none\",\"restart\":\"no\",\"running\":false,\"status\":\"exited\",\"exitCode\":0,\"startedAt\":\"2026-10-28T09:48:12.222591729Z\",\"oom\":false}\n",
+      "stderr": "",
+      "stdoutSha256": "4b6781e2e60d3abd03c13a9c25ec0025363ff15ef27c8f1b5d628607fad34c8e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\application-root-ad8bf8b8-9577-4420-9fd9-212574bd4568\\client-config",
+        "rm",
+        "dce0c98d30c3de7986da38f51fa379afd27881c0c0d04a15f8f9a44af8117b1b"
+      ],
+      "dispatchedAt": "2026-10-28T09:48:33.6589674Z",
+      "exitCode": 0,
+      "closed": true,
+      "pid": 59320,
+      "stdout": "dce0c98d30c3de7986da38f51fa379afd27881c0c0d04a15f8f9a44af8117b1b\n",
+      "stderr": "",
+      "stdoutSha256": "d5f919b7592dc8d895558dc15c36a032cfb7bd6a26cf77b10cc1447a1c40a45f",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\application-root-ad8bf8b8-9577-4420-9fd9-212574bd4568\\client-config",
+        "container",
+        "inspect",
+        "dce0c98d30c3de7986da38f51fa379afd27881c0c0d04a15f8f9a44af8117b1b",
+        "--format",
+        "{{.Id}}"
+      ],
+      "dispatchedAt": "2026-10-28T09:48:34.1129199Z",
+      "exitCode": 1,
+      "closed": true,
+      "pid": 60284,
+      "stdout": "\n",
+      "stderr": "Error response from daemon: No such container: dce0c98d30c3de7986da38f51fa379afd27881c0c0d04a15f8f9a44af8117b1b\n",
+      "stdoutSha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "stderrSha256": "503897c51910439cdbe9927223b587ab721ef52b92f4c50a3f197d6bf76473fb"
+    },
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\application-root-ad8bf8b8-9577-4420-9fd9-212574bd4568\\client-config",
+        "container",
+        "inspect",
+        "taki-c2b-application-check-ad8bf8b8-9577-4420-9fd9-212574bd4568",
+        "--format",
+        "{{.Id}}"
+      ],
+      "dispatchedAt": "2026-10-28T09:48:34.4712230Z",
+      "exitCode": 1,
+      "closed": true,
+      "pid": 59352,
+      "stdout": "\n",
+      "stderr": "Error response from daemon: No such container: taki-c2b-application-check-ad8bf8b8-9577-4420-9fd9-212574bd4568\n",
+      "stdoutSha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "stderrSha256": "2e4efb87e2d6dfaf1c4092e4f0d1adcdaf0539bf22565c1de757428b2e4239fb"
+    }
+  ],
+  "complete": true,
+  "deploymentReady": false,
+  "imageId": "sha256:c57385ec5ad1243659db1e1159f65218c1a48dd0481e94f468cbc0ada376b11e",
+  "dockerSha256": "0a4d8fe2ab107ceae44ee5f5fc1e1c155790042b7e3d3163826660da882b389d",
+  "createAttempted": true,
+  "cleanupProven": true,
+  "resourceDisposition": "original-container-stopped-removed-and-absent",
+  "inspections": [
+    {
+      "id": "dce0c98d30c3de7986da38f51fa379afd27881c0c0d04a15f8f9a44af8117b1b",
+      "name": "/taki-c2b-application-check-ad8bf8b8-9577-4420-9fd9-212574bd4568",
+      "image": "sha256:c57385ec5ad1243659db1e1159f65218c1a48dd0481e94f468cbc0ada376b11e",
+      "path": "/app/api/.venv/bin/python",
+      "args": [
+        "-I",
+        "-B",
+        "-S",
+        "/opt/taki-c2b-application/artifact-check.py"
+      ],
+      "user": "1000:1000",
+      "labels": {
+        "taki.c2b.application": "ad8bf8b8-9577-4420-9fd9-212574bd4568",
+        "taki.c2b.role": "application-source-cache-check"
+      },
+      "tty": false,
+      "stdin": false,
+      "network": "none",
+      "readonly": true,
+      "mounts": [],
+      "bindings": {},
+      "privileged": false,
+      "capAdd": null,
+      "capDrop": [
+        "ALL"
+      ],
+      "security": [
+        "no-new-privileges=true"
+      ],
+      "memory": 268435456,
+      "cpus": 1000000000,
+      "pids": 16,
+      "log": "none",
+      "restart": "no",
+      "running": false,
+      "status": "created",
+      "exitCode": 0,
+      "startedAt": "0001-01-01T00:00:00Z",
+      "oom": false
+    },
+    {
+      "id": "dce0c98d30c3de7986da38f51fa379afd27881c0c0d04a15f8f9a44af8117b1b",
+      "name": "/taki-c2b-application-check-ad8bf8b8-9577-4420-9fd9-212574bd4568",
+      "image": "sha256:c57385ec5ad1243659db1e1159f65218c1a48dd0481e94f468cbc0ada376b11e",
+      "path": "/app/api/.venv/bin/python",
+      "args": [
+        "-I",
+        "-B",
+        "-S",
+        "/opt/taki-c2b-application/artifact-check.py"
+      ],
+      "user": "1000:1000",
+      "labels": {
+        "taki.c2b.application": "ad8bf8b8-9577-4420-9fd9-212574bd4568",
+        "taki.c2b.role": "application-source-cache-check"
+      },
+      "tty": false,
+      "stdin": false,
+      "network": "none",
+      "readonly": true,
+      "mounts": [],
+      "bindings": {},
+      "privileged": false,
+      "capAdd": null,
+      "capDrop": [
+        "ALL"
+      ],
+      "security": [
+        "no-new-privileges=true"
+      ],
+      "memory": 268435456,
+      "cpus": 1000000000,
+      "pids": 16,
+      "log": "none",
+      "restart": "no",
+      "running": false,
+      "status": "exited",
+      "exitCode": 0,
+      "startedAt": "2026-10-28T09:48:12.222591729Z",
+      "oom": false
+    },
+    {
+      "id": "dce0c98d30c3de7986da38f51fa379afd27881c0c0d04a15f8f9a44af8117b1b",
+      "name": "/taki-c2b-application-check-ad8bf8b8-9577-4420-9fd9-212574bd4568",
+      "image": "sha256:c57385ec5ad1243659db1e1159f65218c1a48dd0481e94f468cbc0ada376b11e",
+      "path": "/app/api/.venv/bin/python",
+      "args": [
+        "-I",
+        "-B",
+        "-S",
+        "/opt/taki-c2b-application/artifact-check.py"
+      ],
+      "user": "1000:1000",
+      "labels": {
+        "taki.c2b.application": "ad8bf8b8-9577-4420-9fd9-212574bd4568",
+        "taki.c2b.role": "application-source-cache-check"
+      },
+      "tty": false,
+      "stdin": false,
+      "network": "none",
+      "readonly": true,
+      "mounts": [],
+      "bindings": {},
+      "privileged": false,
+      "capAdd": null,
+      "capDrop": [
+        "ALL"
+      ],
+      "security": [
+        "no-new-privileges=true"
+      ],
+      "memory": 268435456,
+      "cpus": 1000000000,
+      "pids": 16,
+      "log": "none",
+      "restart": "no",
+      "running": false,
+      "status": "exited",
+      "exitCode": 0,
+      "startedAt": "2026-10-28T09:48:12.222591729Z",
+      "oom": false
+    }
+  ],
+  "driverHashes": {
+    "docker-command.ps1": "fc4021448ee6ec10ed3b75badb2272a8a134192c706e606d04490c6de5020d46",
+    "build.ps1": "0d2ddd606685741885b327e626b959a516ad54292a53b654b7a0b1dd3af49902",
+    "preflight.ps1": "27412076d00ad4bd95a137d9fbb3203c5a1bac4b90e47a2bf0a890f474e41169",
+    "inspect-build.ps1": "dde92723c2affdd799bef272480a8022f878d1ef5cd841be4ddcf730f29d3a3e",
+    "check.ps1": "8a50ac445e411779586911eab8550c0f123e8c99e9b5232cac0c6eaeb799151d"
+  },
+  "containerId": "dce0c98d30c3de7986da38f51fa379afd27881c0c0d04a15f8f9a44af8117b1b",
+  "checker": {
+    "schema": "c2b-application-artifact-check-v1",
+    "token": "ad8bf8b8-9577-4420-9fd9-212574bd4568",
+    "deploymentReady": false,
+    "scope": "Application-source/cache prerequisite; no managed API producer or lifecycle acceptance",
+    "fileGatePassed": true,
+    "refusalCasesPassed": true,
+    "tokenizerLoadPassed": true,
+    "complete": true,
+    "files": {
+      "trees": {
+        "hindsight_api": {
+          "entries": 424,
+          "bytes": 6463555,
+          "sha256": "6593c547caf50ea87a5fb269b6dd75116bb885d5ad4bb5fb8fe62665febe1ca9"
+        },
+        "managed_bootstrap": {
+          "entries": 12,
+          "bytes": 66616,
+          "sha256": "3dea0c37320c3415520015cdaf2e5fb403bbaa76a957ce68a7dde5602ffbcc86"
+        }
+      },
+      "metadata": {
+        "count": 221,
+        "sha256": "37c7cf56cf72317fb8b0d4b6553ccb11545261b5466d9434b49b0c3e95a12f2d"
+      },
+      "protected": {
+        "virtualenv": {
+          "entries": 49049,
+          "bytes": 1906210751,
+          "sha256": "0489f49cfb17180303d25f165e72091bb33ed4a5fd602ce8236edb08a158e537"
+        },
+        "python": {
+          "bytes": 14472,
+          "sha256": "92d7e40ec50be176cb1b790c7568b7e08cd862137b5aa69f1413ba1967886b79"
+        }
+      },
+      "build": "taki-memory-hindsight-0.9.0-template-backup-v1",
+      "cache": {
+        "bytes": 1681126,
+        "sha256": "223921b76ee99bde995b7ff738513eef100fb51d18c93597a113bcffe865b2a7"
+      }
+    },
+    "negativeCases": [
+      {
+        "case": "wrong_build",
+        "refused": true,
+        "beforeThirdPartyImport": true
+      },
+      {
+        "case": "cache_missing",
+        "refused": true,
+        "beforeThirdPartyImport": true
+      },
+      {
+        "case": "cache_corrupt",
+        "refused": true,
+        "beforeThirdPartyImport": true
+      }
+    ],
+    "tokenizer": {
+      "loaded": true,
+      "version": "0.12.0",
+      "encoding": "cl100k_base",
+      "roundtrip": true,
+      "tokenCount": 12,
+      "postLoadCacheRechecked": true,
+      "cacheReads": 1,
+      "forbiddenEffects": 0
+    },
+    "elapsedMs": 19548,
+    "python": "3.11.16",
+    "uid": 1000,
+    "gid": 1000
+  },
+  "originalStartedAt": "2026-10-28T09:48:12.222591729Z",
+  "workElapsedMs": 24766,
+  "elapsedMs": 26703,
+  "finishedAt": "2026-10-28T09:48:34.6394584Z"
+}

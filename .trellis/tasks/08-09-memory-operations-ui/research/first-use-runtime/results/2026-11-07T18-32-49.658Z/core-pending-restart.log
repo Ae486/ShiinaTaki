@@ -1,0 +1,36 @@
+{"level":30,"time":1794076813621,"pid":40380,"hostname":"tianxuanji","mod":"db","applied":[],"msg":"schema already up to date"}
+{"level":30,"time":1794076813625,"pid":40380,"hostname":"tianxuanji","msg":"Core Host identity loaded"}
+{"level":30,"time":1794076813637,"pid":40380,"hostname":"tianxuanji","mod":"secrets","mod":"secrets","health":"ok","keySource":"credentials-directory","msg":"secret catalog opened"}
+{"level":30,"time":1794076813675,"pid":40380,"hostname":"tianxuanji","mod":"skills","active":0,"invalidated":0,"seeded":0,"seedRejected":0,"msg":"skill lifecycle ready"}
+{"level":30,"time":1794076813676,"pid":40380,"hostname":"tianxuanji","mod":"mcp","msg":"no legacy mcp-servers.json to seed"}
+{"level":30,"time":1794076813694,"pid":40380,"hostname":"tianxuanji","mod":"mcp","servers":0,"published":0,"failed":0,"msg":"mcp reconcile from desired state complete"}
+{"level":30,"time":1794076813708,"pid":40380,"hostname":"tianxuanji","mod":"server","host":"127.0.0.1","port":10055,"msg":"ws server listening"}
+{"level":30,"time":1794076813774,"pid":40380,"hostname":"tianxuanji","mod":"server","msg":"client connected"}
+{"level":30,"time":1794076813781,"pid":40380,"hostname":"tianxuanji","mod":"pairing","deviceId":"515db951-352f-46ca-8549-69893208af35","deviceName":"native smoke Pending restart","remoteAddress":"127.0.0.1","msg":"loopback operator auto-trusted"}
+{"level":40,"time":1794076814029,"pid":40380,"hostname":"tianxuanji","bankId":"taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633","runId":"77e0d922-5e52-41b6-99a6-506e09ebe32d","code":"HINDSIGHT_UNREACHABLE","msg":"Hindsight scheduled synchronization failed"}
+{"level":30,"time":1794076843697,"pid":40380,"hostname":"tianxuanji","mod":"activity","code":"NO_NODE","msg":"no device provides foreground-window; sampler idle until one connects"}
+{"level":40,"time":1794077114310,"pid":40380,"hostname":"tianxuanji","bankId":"taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633","runId":"e2a8c032-aa14-4794-ad9e-e91018828bdb","code":"HINDSIGHT_PENDING_REMAINS","msg":"Hindsight scheduled synchronization failed"}
+{"level":30,"time":1794077184060,"pid":40380,"hostname":"tianxuanji","mod":"server","msg":"client connected"}
+{"level":30,"time":1794077184069,"pid":40380,"hostname":"tianxuanji","mod":"pairing","deviceId":"227733cb-a5d1-4e5e-b31f-af151ce7d4a7","deviceName":"owned first-use Home","remoteAddress":"127.0.0.1","msg":"loopback operator auto-trusted"}
+{"level":30,"time":1794077194302,"pid":40380,"hostname":"tianxuanji","mod":"server","msg":"client disconnected"}
+{"level":30,"time":1794077219329,"pid":40380,"hostname":"tianxuanji","mod":"server","msg":"client connected"}
+{"level":30,"time":1794077219339,"pid":40380,"hostname":"tianxuanji","mod":"pairing","deviceId":"814f632e-2a6d-4947-ba39-0fd828660463","deviceName":"owned first-use Home","remoteAddress":"127.0.0.1","msg":"loopback operator auto-trusted"}
+{"level":30,"time":1794077225432,"pid":40380,"hostname":"tianxuanji","mod":"server","msg":"client disconnected"}
+{"level":30,"time":1794077227879,"pid":40380,"hostname":"tianxuanji","mod":"server","msg":"client connected"}
+{"level":30,"time":1794077227888,"pid":40380,"hostname":"tianxuanji","mod":"pairing","deviceId":"aacfab12-a44a-43b2-957c-8c4c9c745e92","deviceName":"owned first-use Home","remoteAddress":"127.0.0.1","msg":"loopback operator auto-trusted"}
+{"level":30,"time":1794077607172,"pid":40380,"hostname":"tianxuanji","mod":"server","msg":"client disconnected"}
+{"level":30,"time":1794077607625,"pid":40380,"hostname":"tianxuanji","mod":"memory-tidy","characterId":"taki","defects":{"missingDisclosure":84,"overBudget":0,"stale":0,"nearDuplicate":13,"misfiled":80},"edits":0,"steps":1,"durationMs":74,"msg":"tidy pass completed"}
+{"level":30,"time":1794077609903,"pid":40380,"hostname":"tianxuanji","mod":"server","msg":"client connected"}
+{"level":30,"time":1794077609914,"pid":40380,"hostname":"tianxuanji","mod":"pairing","deviceId":"f10e593e-5bd4-41aa-a36a-c516a36ed422","deviceName":"owned first-use Home","remoteAddress":"127.0.0.1","msg":"loopback operator auto-trusted"}
+{"level":30,"time":1794078110384,"pid":40380,"hostname":"tianxuanji","mod":"server","msg":"client disconnected"}
+{"level":40,"time":1794078120389,"pid":40380,"hostname":"tianxuanji","characterId":"taki","bankId":"taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71","code":"HINDSIGHT_DEADLINE_EXCEEDED","outcome":"deferred","msg":"Hindsight Run admission sync incomplete; the Bank catches up in the background"}
+{"level":30,"time":1794078239433,"pid":40380,"hostname":"tianxuanji","mod":"server","msg":"client connected"}
+{"level":30,"time":1794078239439,"pid":40380,"hostname":"tianxuanji","mod":"pairing","deviceId":"e570acd1-afda-41c8-a0ac-75886d7ff39c","deviceName":"owned first-use Home","remoteAddress":"127.0.0.1","msg":"loopback operator auto-trusted"}
+{"level":30,"time":1794078261113,"pid":40380,"hostname":"tianxuanji","characterId":"taki","status":"failed","assessed":7,"blocks":0,"pending":1,"edits":7,"steps":1,"msg":"Hindsight policy review settled"}
+{"level":30,"time":1794078289504,"pid":40380,"hostname":"tianxuanji","mod":"server","msg":"client disconnected"}
+{"level":30,"time":1794078297837,"pid":40380,"hostname":"tianxuanji","mod":"server","msg":"client connected"}
+{"level":30,"time":1794078297845,"pid":40380,"hostname":"tianxuanji","mod":"pairing","deviceId":"835a285c-54a2-4ffa-8210-08b621647fbc","deviceName":"owned first-use Home","remoteAddress":"127.0.0.1","msg":"loopback operator auto-trusted"}
+{"level":30,"time":1794078379769,"pid":40380,"hostname":"tianxuanji","mod":"server","msg":"client disconnected"}
+{"level":30,"time":1794078379896,"pid":40380,"hostname":"tianxuanji","mod":"server","msg":"client disconnected"}
+{"level":30,"time":1794078379896,"pid":40380,"hostname":"tianxuanji","signal":"SIGINT","msg":"shutting down"}
+{"level":30,"time":1794078379900,"pid":40380,"hostname":"tianxuanji","mod":"mcp","clients":0,"msg":"mcp manager closed"}

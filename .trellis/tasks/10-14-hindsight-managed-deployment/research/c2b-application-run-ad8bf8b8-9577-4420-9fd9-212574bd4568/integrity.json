@@ -1,0 +1,98 @@
+{
+  "acceptance.json": {
+    "bytes": 1419,
+    "sha256": "f1d661565ac4ce0df031cccca0d5b0d50fe4a27db8da074055acab875e18f667"
+  },
+  "build-inspection.json": {
+    "bytes": 10012,
+    "sha256": "82f46eaec281740cceb8ac255b70b579e83597cf75967e5e4f2b1f9cca361ee4"
+  },
+  "build.json": {
+    "bytes": 15034,
+    "sha256": "ddde914bea5aa48764ae2e03c55bb39d19ae1cee69a65e134501f80cdf76071f"
+  },
+  "check.json": {
+    "bytes": 26822,
+    "sha256": "8c7a03efa7636b577b2d3c700bbc81007408e42fdf7c9979c0ae1bd340f05842"
+  },
+  "image-id.txt": {
+    "bytes": 71,
+    "sha256": "9def2bdf0915602ba6ff5ae78bd7e10cf667b4cf439d91c1bb84ab0a02cb21e2"
+  },
+  "packet/artifact-check.py": {
+    "bytes": 6778,
+    "sha256": "493a2a07fff3a9220057706733de2fac2e2e0c9d7564463531ced383b608b8d8"
+  },
+  "packet/artifact_io.py": {
+    "bytes": 6296,
+    "sha256": "60884cb41ef140a001aec3238c84e0bfce6277d268e2bfc5f0786548ace0cb4f"
+  },
+  "packet/base-facts.json": {
+    "bytes": 40830,
+    "sha256": "cb624a7ed2c121c874720ebe8af4f2529922a7739d5e58dc932f7446fa78c13a"
+  },
+  "packet/Dockerfile": {
+    "bytes": 420,
+    "sha256": "a1952954f54b6e5b3aa094739e2a96a63386c2385699dec44232284b40a3390a"
+  },
+  "packet/execution-plan.json": {
+    "bytes": 7406,
+    "sha256": "14c4a1034ebd599f6379b49530e9d394a109a0c70c4be0c1baedad7f21c6d76f"
+  },
+  "packet/install-artifact.py": {
+    "bytes": 3167,
+    "sha256": "5f1987b77312b5b012627af560e6c29bb4231cb5ae36adf0a6c1df2843a8c04f"
+  },
+  "packet/prepare.py": {
+    "bytes": 5451,
+    "sha256": "be8595b5c7e4caec8729d330cabbbf82b6905b68b35b2d482ee624c6c5831670"
+  },
+  "packet/README.md": {
+    "bytes": 8542,
+    "sha256": "591d9f6c77ff971e5a5991c31328e8660ca5f3871d8103c2351725c439560299"
+  },
+  "packet/release.json": {
+    "bytes": 3896,
+    "sha256": "da13c5f1bceb17130c000657b40fad55cdc29de94b1c64a5ca85137e2cbf91d0"
+  },
+  "packet/test_artifact.py": {
+    "bytes": 3946,
+    "sha256": "81dfa1a55423073b364e911c86bc6ed69eaaa7789b30f76c6f2adc0404db7537"
+  },
+  "preflight.json": {
+    "bytes": 14699,
+    "sha256": "dda7466cce949cd106456c17a9b9fbb3f68c81ffe2c74f331600bb8bd4edf91b"
+  },
+  "root-scripts/build.ps1": {
+    "bytes": 7464,
+    "sha256": "0d2ddd606685741885b327e626b959a516ad54292a53b654b7a0b1dd3af49902"
+  },
+  "root-scripts/check.ps1": {
+    "bytes": 9437,
+    "sha256": "8a50ac445e411779586911eab8550c0f123e8c99e9b5232cac0c6eaeb799151d"
+  },
+  "root-scripts/docker-command.ps1": {
+    "bytes": 3218,
+    "sha256": "fc4021448ee6ec10ed3b75badb2272a8a134192c706e606d04490c6de5020d46"
+  },
+  "root-scripts/inspect-build.ps1": {
+    "bytes": 4610,
+    "sha256": "dde92723c2affdd799bef272480a8022f878d1ef5cd841be4ddcf730f29d3a3e"
+  },
+  "root-scripts/preflight.ps1": {
+    "bytes": 4902,
+    "sha256": "27412076d00ad4bd95a137d9fbb3203c5a1bac4b90e47a2bf0a890f474e41169"
+  },
+  "root-source-check.json": {
+    "bytes": 763,
+    "sha256": "5d6696ed6343b843f10beccbaacf9e028391a09c78098734bad37d1a9e469b6e"
+  },
+  "source-snapshot.json": {
+    "bytes": 120858,
+    "sha256": "5cd0422c9c312576e52a14c08ffbe3694e800f1f3fb201fe2542e99c1518e06a"
+  },
+  "workload-readback.json": {
+    "bytes": 8772,
+    "sha256": "c99625c8643a282a05ae23953f8d68ac10e513531d4b0c69eac0b695a397dae2"
+  }
+}

@@ -1,0 +1,65 @@
+[
+  {
+    "argv": [
+      "G:/Roaming/Python/Python312/Scripts/ruff.exe",
+      "check",
+      "--select",
+      "E,F,I",
+      "--line-length",
+      "120",
+      "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-application-artifact"
+    ],
+    "returncode": 1,
+    "stdout": "I001 [*] Import block is un-sorted or un-formatted\n  --> artifact-check.py:11:1\n   |\n10 | sys.path.insert(0, \"/opt/taki-c2b-application\")\n11 | from artifact_io import APP, ARTIFACT, CACHE_KEY, PURELIB, TOKEN, Refused, base_metadata, build_gate, cache_gate, file_fact, plain_path, protected_facts, require, tree\n   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n   |\nhelp: Organize imports\n\nE501 Line too long (167 > 120)\n  --> artifact-check.py:11:121\n   |\n10 | \u2026\n11 | \u2026se_metadata, build_gate, cache_gate, file_fact, plain_path, protected_facts, require, tree\n   |                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n   |\n\nE501 Line too long (122 > 120)\n  --> artifact-check.py:32:121\n   |\n30 |     metadata = base_metadata(base[\"metadata\"])\n31 |     protected = protected_facts()\n32 |     require(protected == json.loads((ARTIFACT / \"protected-baseline.json\").read_bytes()), \"protected_environment_changed\")\n   |                                                                                                                         ^^\n33 |     for fact in base[\"tools\"]:\n34 |         path = Path(fact[\"path\"])\n   |\n\nE501 Line too long (128 > 120)\n  --> artifact-check.py:92:121\n   |\n90 |     text = \"C2b offline tokenizer fixture <|endoftext|>\"\n91 |     tokens = encoding.encode(text, disallowed_special=())\n92 |     require(encoding.name == \"cl100k_base\" and encoding.decode(tokens) == text and 0 < len(tokens) < 128, \"tokenizer_roundtrip\")\n   |                                                                                                                         ^^^^^^^^\n93 |     require(observations[\"cacheReads\"] == 1 and observations[\"forbiddenEffects\"] == 0, \"tokenizer_cache_path\")\n94 |     load_observations = dict(observations)\n   |\n\nE501 Line too long (130 > 120)\n  --> artifact-check.py:96:121\n   |\n94 |     load_observations = dict(observations)\n95 |     cache_gate(Path(cache_path))\n96 |     require(not any(name == \"hindsight_api\" or name.startswith(\"hindsight_api.\") for name in sys.modules), \"application_imported\")\n   |                                                                                                                         ^^^^^^^^^^\n97 |     return {\"loaded\": True, \"version\": tiktoken.__version__, \"encoding\": encoding.name,\n98 |             \"roundtrip\": True, \"tokenCount\": len(tokens), \"postLoadCacheRechecked\": True, **load_observations}\n   |\n\nE402 Module level import not at top of file\n  --> install-artifact.py:11:1\n   |\n 9 | INPUT = Path(\"/opt/taki-c2b-application-input\")\n10 | sys.path.insert(0, str(INPUT))\n11 | from artifact_io import APP, ARTIFACT, CACHE_KEY, TOKEN, base_metadata, build_gate, cache_gate, encoded, plain_path, protected_facts, require, tree\n   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n   |\n\nI001 [*] Import block is un-sorted or un-formatted\n  --> install-artifact.py:11:1\n   |\n 9 | INPUT = Path(\"/opt/taki-c2b-application-input\")\n10 | sys.path.insert(0, str(INPUT))\n11 | from artifact_io import APP, ARTIFACT, CACHE_KEY, TOKEN, base_metadata, build_gate, cache_gate, encoded, plain_path, protected_facts, require, tree\n   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n   |\nhelp: Organize imports\n\nE501 Line too long (147 > 120)\n  --> install-artifact.py:11:121\n   |\n 9 | \u2026\n10 | \u2026\n11 | \u2026ata, build_gate, cache_gate, encoded, plain_path, protected_facts, require, tree\n   |                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n   |\n\nE402 Module level import not at top of file\n  --> prepare.py:10:1\n   |\n 8 | HERE = Path(__file__).resolve().parent\n 9 | sys.path.insert(0, str(HERE))\n10 | from artifact_io import TOKEN, Refused, build_gate, encoded, file_fact, plain_path, require, sha, tree\n   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n11 |\n12 | SOURCE = Path(\"H:/hindsight\")\n   |\n\nE501 Line too long (122 > 120)\n   --> prepare.py:110:121\n    |\n108 |         print(json.dumps({\"snapshotComplete\": True, \"deploymentReady\": False, \"token\": TOKEN,\n109 |                           \"stage\": str(STAGE), \"contextSha256\": value[\"context\"][\"sha256\"],\n110 |                           \"contextBytes\": value[\"context\"][\"bytes\"], \"contextEntries\": len(value[\"context\"][\"entries\"])}))\n    |                                                                                                                         ^^\n111 |     except Exception as error:\n112 |         print(json.dumps({\"snapshotComplete\": False, \"deploymentReady\": False,\n    |\n\nE402 Module level import not at top of file\n  --> test_artifact.py:13:1\n   |\n11 | HERE = Path(__file__).resolve().parent\n12 | sys.path.insert(0, str(HERE))\n13 | import artifact_io as io\n   | ^^^^^^^^^^^^^^^^^^^^^^^^\n14 |\n15 | spec = importlib.util.spec_from_file_location(\"artifact_check\", HERE / \"artifact-check.py\")\n   |\n\nE501 Line too long (123 > 120)\n  --> test_artifact.py:49:121\n   |\n47 |     def test_build_constant_is_static_and_exact(self) -> None:\n48 |         path = self.root / \"build.py\"\n49 |         path.write_text(f'TAKI_MEMORY_COMPATIBILITY_BUILD = {json.dumps(io.BUILD)}\\nraise RuntimeError(\"never execute\")\\n')\n   |                                                                                                                         ^^^\n50 |         self.assertEqual(io.build_gate(path), io.BUILD)\n51 |         path.write_text('TAKI_MEMORY_COMPATIBILITY_BUILD = \"old\"\\n')\n   |\n\nFound 12 errors.\n[*] 2 fixable with the `--fix` option.\n",
+    "stderr": "",
+    "stdoutSha256": "7d999aa995dbb6bf24a3b9e874aae77b5b1d5768d4857e27cdea77b167722a19",
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "argv": [
+      "H:/hindsight/.venv/Scripts/ty.exe",
+      "check",
+      "--python-platform",
+      "linux",
+      "--python-version",
+      "3.11",
+      "--extra-search-path",
+      "H:/hindsight/.venv/Lib/site-packages",
+      "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-application-artifact"
+    ],
+    "returncode": 0,
+    "stdout": "All checks passed!\n",
+    "stderr": "",
+    "stdoutSha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "argv": [
+      "G:/anaconda3/python.exe",
+      "-I",
+      "-B",
+      "-S",
+      "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-application-artifact\\test_artifact.py"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "......\r\n----------------------------------------------------------------------\r\nRan 6 tests in 0.048s\r\n\r\nOK\r\n",
+    "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSha256": "b607bc210443228406b92d0ad2a84a69ff6b8918a2283bdfe10c7cbaea541a8e"
+  },
+  {
+    "argv": [
+      "G:/anaconda3/python.exe",
+      "-I",
+      "-B",
+      "-S",
+      "-c",
+      "import ast,pathlib; root=pathlib.Path('H:\\\\TakiAgent\\\\.trellis\\\\tasks\\\\10-14-hindsight-managed-deployment\\\\research\\\\docker-application-artifact'); files=sorted(root.glob('*.py')); [ast.parse(p.read_bytes(),filename=str(p)) for p in files]; print(str(len(files))+' Python source files parsed')"
+    ],
+    "returncode": 0,
+    "stdout": "5 Python source files parsed\r\n",
+    "stderr": "",
+    "stdoutSha256": "cd5c0ac40460fb9d65862b4c12b4e6627e0629ff522f108eecad723cc6e3d18a",
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

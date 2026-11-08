@@ -1,0 +1,25 @@
+{
+  "verdict": "PASS_ORIGINAL_INPUT_CONSTRAINT_REPORT",
+  "comparisonComplete": true,
+  "dependencyConstraintsSatisfied": true,
+  "metadataConformant": false,
+  "metadataConformanceScope": "Captured dependency fields only; not a full distribution or import audit",
+  "metadataWarnings": [
+    {
+      "kind": "noncanonical_declared_extra",
+      "package": "litellm",
+      "version": "1.93.0",
+      "metadataVersion": "2.4",
+      "file": "litellm-1.93.0.dist-info/METADATA",
+      "sha256": "2079a96229cf0dabfb2c2f87b5109a7b36108818fa790a2a1da86bd0db97a1ce",
+      "rawExtra": "extra_proxy",
+      "normalizedExtra": "extra-proxy"
+    }
+  ],
+  "installedDistributionCount": 221,
+  "reachableDistributionCount": 195,
+  "evaluatedRequirements": 2026,
+  "issues": [],
+  "inputUnchanged": true,
+  "deploymentReady": false
+}

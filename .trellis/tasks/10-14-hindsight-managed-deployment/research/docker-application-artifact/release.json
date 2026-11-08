@@ -1,0 +1,109 @@
+{
+  "schema": "c2b-application-source-release-v1",
+  "token": "ad8bf8b8-9577-4420-9fd9-212574bd4568",
+  "deploymentReady": false,
+  "status": "source-checks-and-snapshot-complete-root-execution-unperformed",
+  "scope": "Application-source and offline-tokenizer-cache prerequisite only; no managed API/PG/Host/receipt readiness",
+  "files": {
+    "Dockerfile": {
+      "bytes": 420,
+      "sha256": "a1952954f54b6e5b3aa094739e2a96a63386c2385699dec44232284b40a3390a"
+    },
+    "README.md": {
+      "bytes": 8542,
+      "sha256": "591d9f6c77ff971e5a5991c31328e8660ca5f3871d8103c2351725c439560299"
+    },
+    "artifact-check.py": {
+      "bytes": 6778,
+      "sha256": "493a2a07fff3a9220057706733de2fac2e2e0c9d7564463531ced383b608b8d8"
+    },
+    "artifact_io.py": {
+      "bytes": 6296,
+      "sha256": "60884cb41ef140a001aec3238c84e0bfce6277d268e2bfc5f0786548ace0cb4f"
+    },
+    "base-facts.json": {
+      "bytes": 40830,
+      "sha256": "cb624a7ed2c121c874720ebe8af4f2529922a7739d5e58dc932f7446fa78c13a"
+    },
+    "execution-plan.json": {
+      "bytes": 7406,
+      "sha256": "14c4a1034ebd599f6379b49530e9d394a109a0c70c4be0c1baedad7f21c6d76f"
+    },
+    "install-artifact.py": {
+      "bytes": 3167,
+      "sha256": "5f1987b77312b5b012627af560e6c29bb4231cb5ae36adf0a6c1df2843a8c04f"
+    },
+    "prepare.py": {
+      "bytes": 5451,
+      "sha256": "be8595b5c7e4caec8729d330cabbbf82b6905b68b35b2d482ee624c6c5831670"
+    },
+    "test_artifact.py": {
+      "bytes": 3946,
+      "sha256": "81dfa1a55423073b364e911c86bc6ed69eaaa7789b30f76c6f2adc0404db7537"
+    }
+  },
+  "snapshot": {
+    "path": "G:\\TakiAgent-c2b-native-api\\application-ad8bf8b8-9577-4420-9fd9-212574bd4568\\snapshot.json",
+    "bytes": 120858,
+    "sha256": "5cd0422c9c312576e52a14c08ffbe3694e800f1f3fb201fe2542e99c1518e06a",
+    "contextSha256": "fd69e163c66b522532bffaa80f6fe3f66d37189190d041843aec9e85388d6200",
+    "contextBytes": 7782003,
+    "contextEntries": 450
+  },
+  "sourceCounts": {
+    "hindsight_api": {
+      "files": 401,
+      "bytes": 6463555
+    },
+    "managed_bootstrap": {
+      "files": 12,
+      "bytes": 66616
+    }
+  },
+  "tools": {
+    "docker": {
+      "path": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "sha256": "0a4d8fe2ab107ceae44ee5f5fc1e1c155790042b7e3d3163826660da882b389d"
+    },
+    "buildx": {
+      "path": "C:/Program Files/Docker/Docker/resources/cli-plugins/docker-buildx.exe",
+      "sha256": "c8d20cd80c940cf866717dd938eca50dbe588e06e0c0ced5a9d97b06b27bf8a7"
+    },
+    "hostPython": {
+      "path": "G:/anaconda3/python.exe",
+      "sha256": "6965927a96b81d1717c1d2186de7feb9b29ebf8775464020ebc2f25de6ef8ee0"
+    }
+  },
+  "engine": {
+    "endpoint": "npipe:////./pipe/dockerDesktopLinuxEngine",
+    "id": "93e8319e-24b7-4a7d-88f1-60923ad681e0",
+    "version": "29.0.1",
+    "os": "linux"
+  },
+  "baseId": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+  "baseReference": "taki-hindsight-api:local",
+  "dependencyV4ReleaseSha256": "38b3529030e7b7273a2f95e67df9f3e54dc75199962472eec96af5828dda3eed",
+  "originalInventoryResultSha256": "51afb014ed47b811813880d0b0c6f8e16beaae9cb8db0aa9cee0cec5dc6bf71e",
+  "evidence": {
+    "checks-initial.json": {
+      "bytes": 8527,
+      "sha256": "57a534e080044a6ff20450e990110a9065a9bf624d850755c5f8c71fdaf25ec4"
+    },
+    "checks-final.json": {
+      "bytes": 2484,
+      "sha256": "9cf457457875db766cf4df1eb02957d91995d27ccf44676345b39233e6abd1e2"
+    },
+    "freeze-execution.json": {
+      "bytes": 1691,
+      "sha256": "f505c66e3ae4dd4de6a4532e4ad6bb62bf14c16566ac56ba8e981a667527c08e"
+    },
+    "source-snapshot.json": {
+      "bytes": 120858,
+      "sha256": "5cd0422c9c312576e52a14c08ffbe3694e800f1f3fb201fe2542e99c1518e06a"
+    },
+    "tokenizer-source-evidence.json": {
+      "bytes": 932,
+      "sha256": "6298ae962c0c632f0d924b757492ecdeddd51b161e6a42def539688679514c83"
+    }
+  }
+}

@@ -33,3 +33,12 @@ codex-session-*.md
 
 # Task evidence debug symbols (regenerable; the reviewed binaries stay tracked)
 .trellis/tasks/**/*.pdb
+
+# Home dev-server dependency caches captured in task evidence (regenerable)
+.trellis/tasks/**/vite-cache/
+
+# Intermediate first-use journey runs stay local; only the final evidence runs are tracked
+.trellis/tasks/08-09-memory-operations-ui/research/first-use-runtime/results/*
+!.trellis/tasks/08-09-memory-operations-ui/research/first-use-runtime/results/2026-11-07T18-32-49.658Z/
+!.trellis/tasks/08-09-memory-operations-ui/research/first-use-runtime/results/2026-11-08T07-29-29.025Z/
+!.trellis/tasks/08-09-memory-operations-ui/research/first-use-runtime/results/2026-11-08T08-48-21.445Z/

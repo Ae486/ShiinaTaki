@@ -1,0 +1,74 @@
+{
+ "samples": 52,
+ "spanSeconds": 315,
+ "system": {
+  "totalMB": 16011,
+  "freeAtStartMB": 5406,
+  "minFreeMB": 3184,
+  "maxCommitMB": 20786
+ },
+ "components": {
+  "harness": {
+   "samples": 51,
+   "maxProcesses": 1,
+   "wsMB": {
+    "p50": 133,
+    "p95": 313,
+    "max": 313
+   },
+   "privateMB": {
+    "p50": 104,
+    "max": 287
+   },
+   "largestProcessWsMB": 313,
+   "cpuSeconds": 5
+  },
+  "pg": {
+   "samples": 51,
+   "maxProcesses": 20,
+   "wsMB": {
+    "p50": 397,
+    "p95": 502,
+    "max": 506
+   },
+   "privateMB": {
+    "p50": 105,
+    "max": 150
+   },
+   "largestProcessWsMB": 40,
+   "cpuSeconds": 15
+  },
+  "native": {
+   "samples": 51,
+   "maxProcesses": 2,
+   "wsMB": {
+    "p50": 1367,
+    "p95": 1408,
+    "max": 1440
+   },
+   "privateMB": {
+    "p50": 2625,
+    "max": 3283
+   },
+   "largestProcessWsMB": 1435,
+   "cpuSeconds": 210
+  },
+  "core": {
+   "samples": 37,
+   "maxProcesses": 1,
+   "wsMB": {
+    "p50": 446,
+    "p95": 538,
+    "max": 545
+   },
+   "privateMB": {
+    "p50": 453,
+    "max": 552
+   },
+   "largestProcessWsMB": 545,
+   "cpuSeconds": 196
+  }
+ },
+ "steps": [],
+ "disk": null
+}

@@ -1,0 +1,214 @@
+{
+  "schema": "d1b-root-source-checkpoint-v1",
+  "status": "validated-pending-combined-review",
+  "runtimeAccepted": false,
+  "files": {
+    "apps/desktop/src/windows/home/pages/operations/memory-authority-state.ts": {
+      "bytes": 6487,
+      "sha256": "81ab780f4e588e795ce0c9204868000eea069e0c1046a582a46d5a30bd7044ca"
+    },
+    "packages/core/src/db/migrations/041-canonical-memory-maintenance.test.ts": {
+      "bytes": 14608,
+      "sha256": "15a249540926815b0f9062671d1aeee20c13373c12e276ceee131f6af6e344cc"
+    },
+    "packages/core/src/db/migrations/059-hindsight-template-execution.test.ts": {
+      "bytes": 6580,
+      "sha256": "16ab889a6ef6116ca7b7ee93827e34a4ae24b9fba7b330cfe937a5fec471a79d"
+    },
+    "packages/core/src/db/migrations/060-hindsight-candidates.test.ts": {
+      "bytes": 3776,
+      "sha256": "28c7bb125903efd05b99eff3bd3854e50ada4928d56238351303e1a86dcc4645"
+    },
+    "packages/core/src/db/migrations/060-hindsight-candidates.ts": {
+      "bytes": 579,
+      "sha256": "68668c4d89aeaa1655ba89d57698c75101f5219debf210b9fb6ed1ffcb52458c"
+    },
+    "packages/core/src/db/migrations/index-list.test.ts": {
+      "bytes": 519,
+      "sha256": "953c793bc8cc6433e95cdfd256b6ef8f068c7ea14d96e5f66bee3091a31be463"
+    },
+    "packages/core/src/db/migrations/index-list.ts": {
+      "bytes": 7383,
+      "sha256": "b5bcde2e95271f7f093cb49af49e88fd8cf8b0154eb32b5d64365ce4ebb6d9e1"
+    },
+    "packages/core/src/db/migrations/lineage-reopen-matrix.test.ts": {
+      "bytes": 24648,
+      "sha256": "ede72e00e931c5ef2184397ea5c0e697bfa9c457e399f25423b2f945273d587a"
+    },
+    "packages/core/src/memory/hindsight/template-lifecycle/template-lifecycle-fixtures.ts": {
+      "bytes": 10477,
+      "sha256": "2ba8c6669e722475ce163139d240d276ba45bf394594633cc10dd16f316d2315"
+    },
+    "packages/core/src/memory/hindsight-candidates/hindsight-candidate-admission.test.ts": {
+      "bytes": 10603,
+      "sha256": "f86f4eb9fbcd98d5bfb80dffe6793f2bff61ec0f5136ecbcbe14b9ae589cd1cf"
+    },
+    "packages/core/src/memory/hindsight-candidates/hindsight-candidate-domain-admission.ts": {
+      "bytes": 4844,
+      "sha256": "faab00d32ccd84eca46bac9772b6a8401374be122616c8d88d4205ff1a7261aa"
+    },
+    "packages/core/src/memory/hindsight-candidates/hindsight-candidate-domain-fixture.ts": {
+      "bytes": 8168,
+      "sha256": "e250eb7b7150966e7a77c6a437188de1beb02ce6f533a59e1acae69571ce36c6"
+    },
+    "packages/core/src/memory/hindsight-candidates/hindsight-candidate-domain-progress.ts": {
+      "bytes": 9880,
+      "sha256": "566c71753ef6522d8a91c421eb1cc218716b21583640d90e291da0ec01eed6bd"
+    },
+    "packages/core/src/memory/hindsight-candidates/hindsight-candidate-domain-read.ts": {
+      "bytes": 4656,
+      "sha256": "6c657a7754462ae2f21d91780051ae23ac7b9a73d12955a8f59443d68df17395"
+    },
+    "packages/core/src/memory/hindsight-candidates/hindsight-candidate-domain-sql.ts": {
+      "bytes": 3153,
+      "sha256": "c8e341ef6306d24d82108545d62b41df02e99758e7a58a250d4afad2c4ce111e"
+    },
+    "packages/core/src/memory/hindsight-candidates/hindsight-candidate-domain.test.ts": {
+      "bytes": 11960,
+      "sha256": "d728888e005b7b18769a3e1d535795bdcbfe8404700869eb77a74fcc701c4747"
+    },
+    "packages/core/src/memory/hindsight-candidates/hindsight-candidate-fixtures.ts": {
+      "bytes": 9538,
+      "sha256": "1f96ac03f09d0460015cdd6e4e861aff20098efdc5581f56fbd37b60af5eed5a"
+    },
+    "packages/core/src/memory/hindsight-candidates/hindsight-candidate-service.ts": {
+      "bytes": 11068,
+      "sha256": "663c37cc8bf5287427fce2a1899255201776d5ebabf385366d8b091046dfb180"
+    },
+    "packages/core/src/memory/operations/memory-operation-contract.ts": {
+      "bytes": 8926,
+      "sha256": "59a3c2b02cdd2ab25fe2b5a8f6cb195d51d623d5407098fde6ab70a9b0595b3f"
+    },
+    "packages/core/src/memory/operations/memory-operation-kind-candidate.test.ts": {
+      "bytes": 3422,
+      "sha256": "1793562b69a522c9a1b93d952c7791fc51bd8c9f278459429048c2df33fc6707"
+    },
+    "packages/core/src/memory/operations/memory-operation-kind-candidate.ts": {
+      "bytes": 2228,
+      "sha256": "6e97318114b549b40a3a793ba937701bc42c573fa1a89f3770cde167bfe2c61c"
+    },
+    "packages/core/src/memory/operations/memory-operation-kinds.ts": {
+      "bytes": 2830,
+      "sha256": "f6ff1b4374265fbdd6319bfb4fd1251fac7821dcf1c7865255326d04473dbb8c"
+    },
+    "packages/core/src/memory/operations/memory-operation-service.ts": {
+      "bytes": 15087,
+      "sha256": "2610f78652e678d56db2b4902d869b9a8f2213c9ec6e976ff3dd16f6bd1bd64f"
+    },
+    "packages/core/src/testing/hindsight-runtime-composition-fixtures.ts": {
+      "bytes": 20150,
+      "sha256": "dbfa54fdfba95f8e077fb6aa75ed7f6a51f4f3a3e86d6d393cf75831dfce6a48"
+    },
+    "packages/core/src/testing/hindsight-template-backup-consumer-fixture.ts": {
+      "bytes": 7485,
+      "sha256": "ec6eab54c870322c14c81de131dba8da30be45e84c71e1248716c60343a6300f"
+    },
+    "packages/core/src/testing/hindsight-template-backup-joint-fixture.ts": {
+      "bytes": 11066,
+      "sha256": "bf793729622eb1eb8816419b09aeabc83d7461a68aa5248863bdbb9dd364844e"
+    },
+    "packages/shared/package.json": {
+      "bytes": 1090,
+      "sha256": "b5ba52ba3d2bf98f9c929121526e6a4150b72d525af06ed1212db840a47d2d8d"
+    },
+    "packages/shared/src/hindsight-candidate-domain-schema.test.ts": {
+      "bytes": 2049,
+      "sha256": "46f9355a13f663455b4a17881f170b5b60375d357fe1c2ae279eb9623f4425a1"
+    },
+    "packages/shared/src/hindsight-candidate-domain-schema.ts": {
+      "bytes": 7649,
+      "sha256": "c32906e24ab413e23f6ff78af08cbd00e68a2cbf86f3f95c686bb93c57e2fe69"
+    },
+    "packages/shared/src/memory-operation-schema.ts": {
+      "bytes": 14343,
+      "sha256": "930ea4a593c78e9a87645d63cc0f42b10b1d8c6824f3feda635b47b114555039"
+    }
+  },
+  "checksIncludingRetainedFailures": {
+    "research\\d1b-root-validation-01a180b6\\core-a1.result.json": {
+      "bytes": 303,
+      "sha256": "15d8ed56b1133c6577c6e2f5961b7eaf55801d64a74b53a06a0633cdb176b575",
+      "exitCode": 2
+    },
+    "research\\d1b-root-validation-01a180b6\\core-a2.result.json": {
+      "bytes": 303,
+      "sha256": "de4d3b688698cf6c7de31451b62ba8e115edbff0108a87965f18dc2515919cb4",
+      "exitCode": 0
+    },
+    "research\\d1b-root-validation-01a180b6\\desktop-a1.result.json": {
+      "bytes": 306,
+      "sha256": "cb9d651ab9714236b8ce3ed5a76face8b2e2f1a53c705bfcc41680f34cf8a492",
+      "exitCode": 0
+    },
+    "research\\d1b-root-validation-01a180b6\\lint-a1.result.json": {
+      "bytes": 1280,
+      "sha256": "2844abfffde073e48d875e052f4c1255792f6cf8d1451db8da9062f85b033571",
+      "exitCode": 0
+    },
+    "research\\d1b-root-validation-01a180b6\\lint-a2.result.json": {
+      "bytes": 1784,
+      "sha256": "09ccb1265113a598404f8f913cc725b6c49b98a6250113445d20a2d9b829e17d",
+      "exitCode": 0
+    },
+    "research\\d1b-root-validation-01a180b6\\migration-a1.result.json": {
+      "bytes": 380,
+      "sha256": "78fad6ce13fcab22ccaaafd85a56c765ee11bb7f1cae8edb50fdd645f1dae90a",
+      "exitCode": 0
+    },
+    "research\\d1b-root-validation-01a180b6\\regressions-a1.result.json": {
+      "bytes": 658,
+      "sha256": "a4895b24d8d14382eac3127f2b739727fdac2415af32349eb672ba3acaf6c27b",
+      "exitCode": 0
+    },
+    "research\\d1b-root-validation-01a180b6\\shared-a1.result.json": {
+      "bytes": 305,
+      "sha256": "e83de5d5055121abd37f35b30e88e89a5784573b88714f0315f820642bc17408",
+      "exitCode": 0
+    },
+    "research\\d1b-root-validation-01a180b6\\shared-tests-a1.result.json": {
+      "bytes": 367,
+      "sha256": "364ea2b6594f871ca03b0e6fa77ea2a385b7a16992262b4bdeb65d5c8544a008",
+      "exitCode": 0
+    },
+    "research\\d1b-root-validation-01a180b6\\tests-a1.result.json": {
+      "bytes": 685,
+      "sha256": "e4026467983bbf2f10a69863b24cc7636f44b9fea5a73f46fbf4417dd1737db6",
+      "exitCode": 1
+    },
+    "research\\d1b-validation-01a180b6\\core-tests-a1.result.json": {
+      "bytes": 373,
+      "sha256": "774bbc0d1ade25197774d082623184e853772c4e0b68ba9a253a200fe086678a",
+      "exitCode": 0
+    },
+    "research\\d1b-validation-01a180b6\\core-types-a1.result.json": {
+      "bytes": 296,
+      "sha256": "7f8d8ceeebfbc973ca048f5244f3a772e64c03f93fd7829f6ca3558db70401e7",
+      "exitCode": 0
+    },
+    "research\\d1b-validation-01a180b6\\lint-a1.result.json": {
+      "bytes": 551,
+      "sha256": "d596fb45cdc7ed4297605e90a93ce0b99397ee1eda10a2b9959dc8f69119abe2",
+      "exitCode": 0
+    },
+    "research\\d1b-validation-01a180b6\\shared-tests-a1.result.json": {
+      "bytes": 354,
+      "sha256": "d4a7ebe520b31b7e0e92ea7b54930c74edbb61b10c120f4b8a7a1774ecf31f9f",
+      "exitCode": 0
+    },
+    "research\\d1b-validation-01a180b6\\shared-types-a1.result.json": {
+      "bytes": 298,
+      "sha256": "5bc6b6f8280259e0d9ec775e29679d101c4b6883b89c9129ec2ca2d56d71905c",
+      "exitCode": 0
+    }
+  },
+  "acceptedChecks": [
+    "lint-a2",
+    "shared-a1",
+    "core-a2",
+    "desktop-a1",
+    "shared-tests-a1",
+    "regressions-a1",
+    "migration-a1"
+  ],
+  "scope": "D1-B domain and actual operation-owner wiring; no installed Host, restore or runtime acceptance"
+}

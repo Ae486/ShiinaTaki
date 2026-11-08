@@ -1,0 +1,90 @@
+{
+  "date": "2026-11-06",
+  "workspace": "H:/TakiAgent",
+  "configurationSource": "H:/TakiAgent-worktrees/t4/.env.local",
+  "credentialsRecorded": false,
+  "applicationTransport": "installed ai SDK and @ai-sdk/openai-compatible",
+  "probes": [
+    {
+      "role": "main",
+      "transport": "Python urllib preliminary probe",
+      "model": "deepseek-v4.1-flash",
+      "status": "refused",
+      "httpStatus": 403,
+      "errorCode": "1010",
+      "seconds": 1.69
+    },
+    {
+      "role": "main",
+      "transport": "installed SDK generateText",
+      "model": "deepseek-v4.1-flash",
+      "responseModel": "deepseek-flash",
+      "status": "passed",
+      "reply": "OK",
+      "finishReason": "stop",
+      "seconds": 3.42,
+      "reportedTotalTokens": 47
+    },
+    {
+      "role": "vision",
+      "transport": "installed SDK text-only connectivity probe",
+      "model": "gemini-2.5-pro-1m",
+      "status": "failed",
+      "httpStatus": 503,
+      "errorCode": "model_not_found",
+      "reason": "No available channel for this model under the account group",
+      "seconds": 0.67,
+      "imageCapabilityExercised": false
+    },
+    {
+      "role": "main-tool-roundtrip",
+      "transport": "installed SDK generateText",
+      "model": "deepseek-v4.1-flash",
+      "status": "failed",
+      "reason": "TLS connection disconnected before establishment",
+      "toolExecutions": 0,
+      "seconds": 5.24
+    },
+    {
+      "role": "main-tool-roundtrip",
+      "transport": "installed SDK generateText; one exact retry",
+      "model": "deepseek-v4.1-flash",
+      "responseModel": "deepseek-flash",
+      "status": "passed",
+      "toolExecutions": 1,
+      "modelSteps": 2,
+      "returnedMarkerMatched": true,
+      "finishReason": "stop",
+      "seconds": 22.51,
+      "reportedTotalTokens": 820
+    },
+    {
+      "role": "main-stream",
+      "transport": "installed SDK streamText; complete stream consumed",
+      "model": "deepseek-v4.1-flash",
+      "status": "passed",
+      "reply": "OK",
+      "textChunks": 1,
+      "finishReason": "stop",
+      "seconds": 17.69,
+      "reportedTotalTokens": 43
+    },
+    {
+      "role": "native-structured-output",
+      "transport": "actual Hindsight OpenAICompatibleLLM; openai provider; Pydantic response validation",
+      "model": "deepseek-v4.1-flash",
+      "status": "passed",
+      "validatedMarkerMatched": true,
+      "retries": 0,
+      "seconds": 30.17,
+      "reportedUsage": {
+        "inputTokens": 142,
+        "outputTokens": 7,
+        "totalTokens": 149,
+        "cachedTokens": 0,
+        "thoughtsTokens": 26
+      }
+    }
+  ],
+  "scope": "Minimal text, streaming, one pure local tool roundtrip and Native structured-output compatibility; not Core memory, Native extraction/consolidation, vision quality or service reliability acceptance"
+}

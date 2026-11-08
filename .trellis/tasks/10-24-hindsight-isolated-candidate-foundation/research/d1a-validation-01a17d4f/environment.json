@@ -1,0 +1,22 @@
+{
+  "pnpm": "10.22.0",
+  "head": "e260ff4b0bf663b5faa0187bc6ec701fd2f007cd",
+  "createdAt": "2026-10-27T12:42:33.7638639Z",
+  "maxWorkers": 2,
+  "workspace": "H:/TakiAgent",
+  "staging": "G:/TakiAgent-staging/d1a-01a17d4f-d38ec30d-c917-4dd0-af43-80cf77a82550",
+  "freeSpace": [
+    {
+      "freeBytes": 230502285312,
+      "name": "G"
+    },
+    {
+      "freeBytes": 4996333568,
+      "name": "H"
+    }
+  ],
+  "owner": "/root/d1a_finish",
+  "node": "24.18.0",
+  "evidence": "H:/TakiAgent/.trellis/tasks/10-24-hindsight-isolated-candidate-foundation/research/d1a-validation-01a17d4f",
+  "rootSession": "01a17d4f-80ca-7f53-8d2e-cefb89cd4908"
+}

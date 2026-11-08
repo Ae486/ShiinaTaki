@@ -1,0 +1,36 @@
+{
+  "schema": "c2b-application-root-acceptance-v1",
+  "token": "ad8bf8b8-9577-4420-9fd9-212574bd4568",
+  "applicationArtifactAccepted": true,
+  "deploymentReady": false,
+  "imageId": "sha256:c57385ec5ad1243659db1e1159f65218c1a48dd0481e94f468cbc0ada376b11e",
+  "imageTag": "taki-c2b-application:ad8bf8b8-9577-4420-9fd9-212574bd4568",
+  "oneBuildProven": true,
+  "originalBuildReportFailurePreserved": "docker_command_failed",
+  "recoveredByReadOnlyOriginalImageInspection": true,
+  "protectedEnvironmentMatchesInstallAndRuntime": true,
+  "installedDistributions": 221,
+  "tokenizer": {
+    "loaded": true,
+    "version": "0.12.0",
+    "encoding": "cl100k_base",
+    "roundtrip": true,
+    "tokenCount": 12,
+    "postLoadCacheRechecked": true,
+    "cacheReads": 1,
+    "forbiddenEffects": 0
+  },
+  "runtimeElapsedMs": 26703,
+  "containerId": "dce0c98d30c3de7986da38f51fa379afd27881c0c0d04a15f8f9a44af8117b1b",
+  "containerCleanupProven": true,
+  "originalEightWorkloadsUnchanged": true,
+  "retainedSourceStage": "G:/TakiAgent-c2b-native-api/application-ad8bf8b8-9577-4420-9fd9-212574bd4568",
+  "retainedRootStage": "G:\\TakiAgent-c2b-native-api\\application-root-ad8bf8b8-9577-4420-9fd9-212574bd4568",
+  "remaining": [
+    "raw PostgreSQL tools/extensions",
+    "real API/PG lifecycle",
+    "installed Host receipts and managed setup",
+    "D1-B/C/D",
+    "C3/C4/D2 and Stage 6"
+  ]
+}

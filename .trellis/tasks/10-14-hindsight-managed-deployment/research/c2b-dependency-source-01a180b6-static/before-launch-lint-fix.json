@@ -1,0 +1,70 @@
+[
+  {
+    "argv": [
+      "H:/hindsight/.venv/Scripts/ruff.exe",
+      "check",
+      "--no-cache",
+      "--select",
+      "E,F,I",
+      "--ignore",
+      "E501",
+      "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-dependency-inventory"
+    ],
+    "startedAt": "2026-10-28T07:37:40.037298+00:00",
+    "exitCode": 0,
+    "stdout": "All checks passed!\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "H:/hindsight/.venv/Scripts/ty.exe",
+      "check",
+      "--python-platform",
+      "linux",
+      "--output-format",
+      "concise",
+      "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-dependency-inventory\\collect.py"
+    ],
+    "startedAt": "2026-10-28T07:37:40.156087+00:00",
+    "exitCode": 0,
+    "stdout": "All checks passed!\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "H:/hindsight/.venv/Scripts/ty.exe",
+      "check",
+      "--output-format",
+      "concise",
+      "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-dependency-inventory\\compare.py"
+    ],
+    "startedAt": "2026-10-28T07:37:40.381556+00:00",
+    "exitCode": 0,
+    "stdout": "All checks passed!\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "G:/anaconda3/python.exe",
+      "-I",
+      "-B",
+      "-S",
+      "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\c2b-dependency-source-01a180b6-static\\test-metadata.py"
+    ],
+    "startedAt": "2026-10-28T07:37:40.603540+00:00",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "........\n----------------------------------------------------------------------\nRan 8 tests in 0.234s\n\nOK\n"
+  },
+  {
+    "argv": [
+      "C:/Program Files/nodejs/node.exe",
+      "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\c2b-dependency-source-01a180b6-static\\check-javascript.mjs",
+      "after"
+    ],
+    "startedAt": "2026-10-28T07:37:41.168675+00:00",
+    "exitCode": 1,
+    "stdout": "{\n  \"mode\": \"after\",\n  \"runtimeExecuted\": false,\n  \"packetModulesEvaluated\": false,\n  \"node\": \"v24.18.0\",\n  \"eslint\": \"10.6.0\",\n  \"ruleSet\": \"@eslint/js recommended with Node globals; isolated task diagnostic\",\n  \"pass\": false,\n  \"records\": [\n    {\n      \"name\": \"launch.mjs\",\n      \"sha256\": \"afe5c21bc2582b6ded16996d0a8be7ce4bb4442739f9ed6d3a5ece339a91fd6a\",\n      \"syntax\": {\n        \"code\": 0,\n        \"stdout\": \"\",\n        \"stderr\": \"\",\n        \"error\": null\n      },\n      \"lint\": {\n        \"errors\": 1,\n        \"warnings\": 0,\n        \"messages\": [\n          {\n            \"ruleId\": \"no-unsafe-finally\",\n            \"severity\": 2,\n            \"message\": \"Unsafe usage of ThrowStatement.\",\n            \"line\": 115,\n            \"column\": 9,\n            \"messageId\": \"unsafeUsage\",\n            \"endLine\": 115,\n            \"endColumn\": 46\n          }\n        ]\n      }\n    },\n    {\n      \"name\": \"docker-commands.mjs\",\n      \"sha256\": \"9e602b34f79adfe5c0cf2050846e8a72e263291cd647de2bbc92240ebabc3a73\",\n      \"syntax\": {\n        \"code\": 0,\n        \"stdout\": \"\",\n        \"stderr\": \"\",\n        \"error\": null\n      },\n      \"lint\": {\n        \"errors\": 0,\n        \"warnings\": 0,\n        \"messages\": []\n      }\n    },\n    {\n      \"name\": \"evidence-store.mjs\",\n      \"sha256\": \"6bc6bfc2fe8040feac627bfe31c9e50cee7978bf4637de536e71cb2cad9f55a2\",\n      \"syntax\": {\n        \"code\": 0,\n        \"stdout\": \"\",\n        \"stderr\": \"\",\n        \"error\": null\n      },\n      \"lint\": {\n        \"errors\": 0,\n        \"warnings\": 0,\n        \"messages\": []\n      }\n    }\n  ]\n}\n",
+    "stderr": ""
+  }
+]

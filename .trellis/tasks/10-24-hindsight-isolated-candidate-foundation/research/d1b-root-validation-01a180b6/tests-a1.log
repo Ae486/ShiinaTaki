@@ -1,0 +1,446 @@
+
+> @taki/core@0.0.0 test H:\TakiAgent\packages\core
+> vitest run "src/memory/operations" "src/memory/hindsight-candidates" "src/db/migrations/060-hindsight-candidates.test.ts" "src/db/migrations/index-list.test.ts" "src/db/migrations/041-canonical-memory-maintenance.test.ts" "src/db/migrations/059-hindsight-template-execution.test.ts" "src/db/migrations/lineage-reopen-matrix.test.ts" "--maxWorkers=2"
+
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ ❯ src/memory/hindsight-candidates/hindsight-candidate-verifier.test.ts (6 tests | 6 failed) 25088ms
+     × keeps offline and provenance-missing work explicitly unverified and never contacts a client 4028ms
+     × computes restored equality from every COPY stream before fresh v2 observation and rejects subsequent drift 5384ms
+     × refuses mismatched provenance, selected context drift, unavailable observation and foreign endpoints 3374ms
+     × requires an independent restored snapshot and binds historical source evidence to the original capture 4189ms
+     × refuses archive mutation during selected-template observation 4249ms
+     × refuses sidecar mutation during selected-template observation 3862ms
+ ❯ src/memory/hindsight-candidates/hindsight-candidate-admission.test.ts (6 tests | 4 failed) 27941ms
+     × reads nonempty selected template and Pending copies with no writer or source effects 4008ms
+     × reads nonempty removed template and Pending copies with no writer or source effects 5365ms
+     × refuses live WAL, changed whole-file bytes and a copy missing a body while preserving failed evidence 4105ms
+     × binds direct admission to its original paths and schema across asynchronous archive reads 4428ms
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts (10 tests | 8 failed) 1933ms
+     × converges the historical T4 17/18 MCP-Skill lineage through 024 190ms
+     × applies the committed main 021-023 tail to the pre-main database 191ms
+     × upgrades a version-31 database with an existing summary and reopens as a no-op 186ms
+     × adds the current tail without rewriting an existing replica, checkpoint, or usable lease 212ms
+     × preserves the 034 history and data through all B4 storage and reopen 198ms
+     × preserves the main history and data through all B4 storage and reopen 182ms
+     × preserves the t4 history and data through all B4 storage and reopen 181ms
+     × preserves the both history and data through all B4 storage and reopen 192ms
+ ❯ src/db/migrations/041-canonical-memory-maintenance.test.ts (10 tests | 1 failed) 1104ms
+     × upgrades a real 040 Local/B2 history byte-for-byte, replays after deletion, and reopens without another migration 249ms
+ ❯ src/db/migrations/060-hindsight-candidates.test.ts (2 tests | 1 failed) 375ms
+     × rolls candidate DDL back when its migration receipt cannot commit 134ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 20 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/db/migrations/041-canonical-memory-maintenance.test.ts > 041 canonical maintenance history and ingestion schema > upgrades a real 040 Local/B2 history byte-for-byte, replays after deletion, and reopens without another migration
+AssertionError: expected [ [ 41, 42, 43, 44, 45, 46, …(14) ] ] to deeply equal [ [ 41, 42, 43, 44, 45, 46, …(13) ] ]
+
+- Expected
++ Received
+
+@@ -17,7 +17,8 @@
+      55,
+      56,
+      57,
+      58,
+      59,
++     60,
+    ],
+  ]
+
+ ❯ src/db/migrations/041-canonical-memory-maintenance.test.ts:94:21
+     92|     const before = { history: historyBytes(old), current: currentRows(…
+     93|     const applied: number[][] = []; const upgraded = open(file, MIGRAT…
+     94|     expect(applied).toEqual([[41, 42, 43, 44, 45, 46, 47, 48, 49, 50, …
+       |                     ^
+     95|     expect(historyBytes(upgraded)).toEqual(before.history);
+     96|     expect(currentRows(upgraded)).toEqual({ ...before.current,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/20]⎯
+
+ FAIL  src/db/migrations/060-hindsight-candidates.test.ts > 060 controlling-Core candidate lineage > rolls candidate DDL back when its migration receipt cannot commit
+AssertionError: expected [Function] to throw error including 'candidate receipt fixture' but got 'migration 60 failed'
+
+Expected: "candidate receipt fixture"
+Received: "migration 60 failed"
+
+ ❯ src/db/migrations/060-hindsight-candidates.test.ts:52:74
+     50|       const receipts = db.prepare("SELECT * FROM migrations ORDER BY v…
+     51|       db.exec("CREATE TRIGGER fail_060 BEFORE INSERT ON migrations WHE…
+     52|       expect(() => runMigrations(db, [hindsightCandidatesMigration060]…
+       |                                                                          ^
+     53|       expect(db.prepare("SELECT name FROM sqlite_schema WHERE name LIK…
+     54|       expect(db.prepare("SELECT * FROM migrations ORDER BY version").a…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/20]⎯
+
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > converges the historical T4 17/18 MCP-Skill lineage through 024
+AssertionError: expected 59 to be 60 // Object.is equality
+
+- Expected
++ Received
+
+- 60
++ 59
+
+ ❯ expectFinalSchema src/db/migrations/lineage-reopen-matrix.test.ts:87:87
+     85|
+     86| function expectFinalSchema(db: Database): void {
+     87|   expect(db.prepare("SELECT max(version) AS version FROM migrations").…
+       |                                                                                       ^
+     88|   const tables = db.prepare("SELECT name FROM sqlite_master WHERE type…
+     89|   expect(tables).toEqual(expect.arrayContaining([
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts:276:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/20]⎯
+
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > applies the committed main 021-023 tail to the pre-main database
+AssertionError: expected [ [ 21, 22, 23, 24, 25, 26, …(34) ] ] to deeply equal [ [ 21, 22, 23, 24, 25, 26, …(33) ] ]
+
+- Expected
++ Received
+
+@@ -37,7 +37,8 @@
+      55,
+      56,
+      57,
+      58,
+      59,
++     60,
+    ],
+  ]
+
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts:291:25
+    289|     const tailApplied: number[][] = [];
+    290|     const reopened = open(path, MIGRATIONS, (applied) => tailApplied.p…
+    291|     expect(tailApplied).toEqual([[21, 22, 23, 24, 25, 26, 27, 28, 29, …
+       |                         ^
+    292|     expectFinalSchema(reopened);
+    293|     expect(reopened.prepare("SELECT mode FROM memory_authority_selecti…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/20]⎯
+
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > upgrades a version-31 database with an existing summary and reopens as a no-op
+AssertionError: expected [ [ 32, 33, 34, 35, 36, 37, …(23) ] ] to deeply equal [ [ 32, 33, 34, 35, 36, 37, …(22) ] ]
+
+- Expected
++ Received
+
+@@ -26,7 +26,8 @@
+      55,
+      56,
+      57,
+      58,
+      59,
++     60,
+    ],
+  ]
+
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts:308:21
+    306|     const applied: number[][] = [];
+    307|     const upgraded = open(path, MIGRATIONS, (versions) => applied.push…
+    308|     expect(applied).toEqual([[32, 33, 34, 35, 36, 37, 38, 39, 40, 41, …
+       |                     ^
+    309|     expect(upgraded.prepare(`SELECT through_seq,text,revision,last_ope…
+    310|       source_digest,captured_tail_seq FROM conversation_summary WHERE …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/20]⎯
+
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > adds the current tail without rewriting an existing replica, checkpoint, or usable lease
+AssertionError: expected [ [ 34, 35, 36, 37, 38, 39, …(21) ] ] to deeply equal [ [ 34, 35, 36, 37, 38, 39, …(20) ] ]
+
+- Expected
++ Received
+
+@@ -24,7 +24,8 @@
+      55,
+      56,
+      57,
+      58,
+      59,
++     60,
+    ],
+  ]
+
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts:372:21
+    370|     close(first); const applied: number[][] = [];
+    371|     const upgraded = open(path, MIGRATIONS, (versions) => applied.push…
+    372|     expect(applied).toEqual([[34, 35, 36, 37, 38, 39, 40, 41, 42, 43, …
+       |                     ^
+    373|     expectFinalSchema(upgraded);
+    374|     expect(upgraded.prepare("SELECT * FROM hindsight_replica_sync_reco…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/20]⎯
+
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > preserves the 034 history and data through all B4 storage and reopen
+AssertionError: expected [ [ 35, 36, 37, 38, 39, 40, …(20) ] ] to deeply equal [ [ 35, 36, 37, 38, 39, 40, …(19) ] ]
+
+- Expected
++ Received
+
+@@ -23,7 +23,8 @@
+      55,
+      56,
+      57,
+      58,
+      59,
++     60,
+    ],
+  ]
+
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts:403:21
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/20]⎯
+
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > preserves the main history and data through all B4 storage and reopen
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > preserves the t4 history and data through all B4 storage and reopen
+ FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > preserves the both history and data through all B4 storage and reopen
+AssertionError: expected [ [ 36, 37, 38, 39, 40, 41, …(19) ] ] to deeply equal [ [ 36, 37, 38, 39, 40, 41, …(18) ] ]
+
+- Expected
++ Received
+
+@@ -22,7 +22,8 @@
+      55,
+      56,
+      57,
+      58,
+      59,
++     60,
+    ],
+  ]
+
+ ❯ src/db/migrations/lineage-reopen-matrix.test.ts:403:21
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/20]⎯
+
+ FAIL  src/memory/hindsight-candidates/hindsight-candidate-admission.test.ts > D1-A complete historical inventory > reads nonempty selected template and Pending copies with no writer or source effects
+ FAIL  src/memory/hindsight-candidates/hindsight-candidate-admission.test.ts > D1-A complete historical inventory > reads nonempty removed template and Pending copies with no writer or source effects
+HindsightCandidateRefused: HINDSIGHT_CANDIDATE_UNSUPPORTED
+ ❯ refuse src/memory/hindsight-candidates/hindsight-candidate-refusal.ts:20:9
+     18| export function refuse(reason: HindsightCandidateRefusalReason, subjec…
+     19|   detail: { name?: string; code?: MemoryBackupErrorCode } = {}): never…
+     20|   throw new HindsightCandidateRefused({ reason, subject, name: detail.…
+       |         ^
+     21| }
+     22|
+ ❯ readCandidateCore src/memory/hindsight-candidates/hindsight-candidate-core.ts:23:96
+ ❯ admitHindsightCandidateArchive src/memory/hindsight-candidates/hindsight-candidate-admission.ts:28:22
+ ❯ src/memory/hindsight-candidates/hindsight-candidate-admission.test.ts:24:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/20]⎯
+
+ FAIL  src/memory/hindsight-candidates/hindsight-candidate-admission.test.ts > D1-A complete historical inventory > refuses live WAL, changed whole-file bytes and a copy missing a body while preserving failed evidence
+AssertionError: expected HindsightCandidateRefused: HINDSIGHT_CAND… { refusal: { …(4) } } to match object { refusal: { …(3) } }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+- {
++ HindsightCandidateRefused {
+    "refusal": {
+-     "name": "live_sidecar",
++     "name": null,
+      "reason": "unsupported",
+      "subject": "core",
+    },
+  }
+
+ ❯ src/memory/hindsight-candidates/hindsight-candidate-admission.test.ts:103:105
+    101|     const f = await candidateFixture();
+    102|     try {
+    103|       await expect(readCandidateCore(join(f.h.joint.fixture.base.dataD…
+       |                                                                                                         ^
+    104|         .rejects.toMatchObject({ refusal: { reason: "unsupported", sub…
+    105|       const changed = join(f.directory, "changed.sqlite"); copyFileSyn…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/20]⎯
+
+ FAIL  src/memory/hindsight-candidates/hindsight-candidate-admission.test.ts > D1-A complete historical inventory > binds direct admission to its original paths and schema across asynchronous archive reads
+HindsightCandidateRefused: HINDSIGHT_CANDIDATE_UNSUPPORTED
+ ❯ refuse src/memory/hindsight-candidates/hindsight-candidate-refusal.ts:20:9
+     18| export function refuse(reason: HindsightCandidateRefusalReason, subjec…
+     19|   detail: { name?: string; code?: MemoryBackupErrorCode } = {}): never…
+     20|   throw new HindsightCandidateRefused({ reason, subject, name: detail.…
+       |         ^
+     21| }
+     22|
+ ❯ readCandidateCore src/memory/hindsight-candidates/hindsight-candidate-core.ts:23:96
+ ❯ admitHindsightCandidateArchive src/memory/hindsight-candidates/hindsight-candidate-admission.ts:28:22
+ ❯ src/memory/hindsight-candidates/hindsight-candidate-admission.test.ts:130:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/20]⎯
+
+ FAIL  src/memory/hindsight-candidates/hindsight-candidate-verifier.test.ts > candidate verification evidence gates (deterministic producer substitutes) > keeps offline and provenance-missing work explicitly unverified and never contacts a client
+AssertionError: expected { version: 1, stage: 'refused', …(2) } to match object { stage: 'unverified', …(2) }
+(7 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "identityHash": null,
+-   "missing": [
+-     "physical_identity",
+-     "restored_equality",
+-     "fresh_template_observation",
+-     "environment_provenance",
+-   ],
+-   "stage": "unverified",
++   "stage": "refused",
+  }
+
+ ❯ src/memory/hindsight-candidates/hindsight-candidate-verifier.test.ts:14:53
+     12|       const identities = candidateIdentities();
+     13|       const input = { ...f, ownership: identities.ownership, missingCr…
+     14|       expect(await verifyHindsightCandidate(input)).toMatchObject({ st…
+       |                                                     ^
+     15|         missing: ["physical_identity", "restored_equality", "fresh_tem…
+     16|       const client = vi.fn(() => f.client);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/20]⎯
+
+ FAIL  src/memory/hindsight-candidates/hindsight-candidate-verifier.test.ts > candidate verification evidence gates (deterministic producer substitutes) > computes restored equality from every COPY stream before fresh v2 observation and rejects subsequent drift
+AssertionError: expected { version: 1, stage: 'refused', …(2) } to match object { stage: 'baseline_verified', …(2) }
+(6 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "candidateId": "70da3444-76ed-40c9-9ba8-d67a22c79325",
+-   "observedTemplates": 2,
+-   "stage": "baseline_verified",
++   "stage": "refused",
+  }
+
+ ❯ src/memory/hindsight-candidates/hindsight-candidate-verifier.test.ts:43:22
+     41|       const input = { ...f, ownership: identities.ownership, observer,…
+     42|       const result = await verifyHindsightCandidate(input);
+     43|       expect(result).toMatchObject({ stage: "baseline_verified", candi…
+       |                      ^
+     44|       expect(result).not.toHaveProperty("deploymentReady"); expect(rea…
+     45|       expect(client).toHaveBeenCalledWith("http://127.0.0.1:18489");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/20]⎯
+
+ FAIL  src/memory/hindsight-candidates/hindsight-candidate-verifier.test.ts > candidate verification evidence gates (deterministic producer substitutes) > refuses mismatched provenance, selected context drift, unavailable observation and foreign endpoints
+AssertionError: expected { version: 1, stage: 'refused', …(2) } to match object { stage: 'refused', refusal: { …(2) } }
+(4 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "refusal": {
+-     "reason": "foreign",
+-     "subject": "identity",
++     "reason": "unsupported",
++     "subject": "core",
+    },
+    "stage": "refused",
+  }
+
+ ❯ src/memory/hindsight-candidates/hindsight-candidate-verifier.test.ts:82:53
+     80|       const input = { ...f, ownership: identities.ownership, observer,…
+     81|       observed.provenance.sourceCapture.backupId = identities.ownershi…
+     82|       expect(await verifyHindsightCandidate(input)).toMatchObject({ st…
+       |                                                     ^
+     83|       observed.provenance.sourceCapture.backupId = f.manifest.backupId;
+     84|       observed.provenance.candidate.schemaObjectsHash = "8".repeat(64);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/20]⎯
+
+ FAIL  src/memory/hindsight-candidates/hindsight-candidate-verifier.test.ts > candidate verification evidence gates (deterministic producer substitutes) > requires an independent restored snapshot and binds historical source evidence to the original capture
+AssertionError: expected { version: 1, stage: 'refused', …(2) } to match object { stage: 'unverified', …(1) }
+(7 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "missing": [
+-     "restored_equality",
+-     "fresh_template_observation",
+-   ],
+-   "stage": "unverified",
++   "stage": "refused",
+  }
+
+ ❯ src/memory/hindsight-candidates/hindsight-candidate-verifier.test.ts:107:53
+    105|       const observer: CandidateObserver = { observe: async () => obser…
+    106|       const input = { ...f, ownership: observed.ownership, observer, m…
+    107|       expect(await verifyHindsightCandidate(input)).toMatchObject({ st…
+       |                                                     ^
+    108|         missing: ["restored_equality", "fresh_template_observation"] }…
+    109|       expect(client).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/20]⎯
+
+ FAIL  src/memory/hindsight-candidates/hindsight-candidate-verifier.test.ts > candidate verification evidence gates (deterministic producer substitutes) > refuses archive mutation during selected-template observation
+AssertionError: expected { version: 1, stage: 'refused', …(2) } to match object { stage: 'refused', refusal: { …(2) } }
+(4 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "refusal": {
+-     "reason": "tampered",
+-     "subject": "archive",
++     "reason": "unsupported",
++     "subject": "core",
+    },
+    "stage": "refused",
+  }
+
+ ❯ src/memory/hindsight-candidates/hindsight-candidate-verifier.test.ts:141:10
+    139|         openInventory: async () => ({ ...copySnapshot(f), close: close…
+    140|       expect(await verifyHindsightCandidate({ ...f, ownership: observe…
+    141|         .toMatchObject({ stage: "refused", refusal: mutation === "arch…
+       |          ^
+    142|           : { reason: "unsupported", subject: "core", name: "live_side…
+    143|       expect(closed).toHaveBeenCalledTimes(2);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/20]⎯
+
+ FAIL  src/memory/hindsight-candidates/hindsight-candidate-verifier.test.ts > candidate verification evidence gates (deterministic producer substitutes) > refuses sidecar mutation during selected-template observation
+AssertionError: expected { version: 1, stage: 'refused', …(2) } to match object { stage: 'refused', refusal: { …(3) } }
+(3 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "refusal": {
+-     "name": "live_sidecar",
++     "name": null,
+      "reason": "unsupported",
+      "subject": "core",
+    },
+    "stage": "refused",
+  }
+
+ ❯ src/memory/hindsight-candidates/hindsight-candidate-verifier.test.ts:141:10
+    139|         openInventory: async () => ({ ...copySnapshot(f), close: close…
+    140|       expect(await verifyHindsightCandidate({ ...f, ownership: observe…
+    141|         .toMatchObject({ stage: "refused", refusal: mutation === "arch…
+       |          ^
+    142|           : { reason: "unsupported", subject: "core", name: "live_side…
+    143|       expect(closed).toHaveBeenCalledTimes(2);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/20]⎯
+
+
+ Test Files  5 failed | 18 passed (23)
+      Tests  20 failed | 117 passed (137)
+   Start at  18:14:11
+   Duration  70.89s (transform 16.47s, setup 0ms, import 42.21s, tests 90.93s, environment 3ms)
+
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/core@0.0.0 test: `vitest run "src/memory/operations" "src/memory/hindsight-candidates" "src/db/migrations/060-hindsight-candidates.test.ts" "src/db/migrations/index-list.test.ts" "src/db/migrations/041-canonical-memory-maintenance.test.ts" "src/db/migrations/059-hindsight-template-execution.test.ts" "src/db/migrations/lineage-reopen-matrix.test.ts" "--maxWorkers=2"`
+Exit status 1

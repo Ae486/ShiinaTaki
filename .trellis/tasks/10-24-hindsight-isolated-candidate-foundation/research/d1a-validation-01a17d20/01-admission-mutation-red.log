@@ -1,0 +1,38 @@
+
+> @taki/core@0.0.0 test H:\TakiAgent\packages\core
+> vitest run "src/memory/hindsight-candidates/hindsight-candidate-admission.test.ts" "--maxWorkers=2" "-t" "binds direct admission"
+
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ ❯ src/memory/hindsight-candidates/hindsight-candidate-admission.test.ts (6 tests | 1 failed | 5 skipped) 7347ms
+     × binds direct admission to its original paths and schema across asynchronous archive reads 7344ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/memory/hindsight-candidates/hindsight-candidate-admission.test.ts > D1-A complete historical inventory > binds direct admission to its original paths and schema across asynchronous archive reads
+HindsightCandidateRefused: HINDSIGHT_CANDIDATE_OMITTED_REQUIRED_DATA
+ ❯ refuse src/memory/hindsight-candidates/hindsight-candidate-refusal.ts:20:9
+     18| export function refuse(reason: HindsightCandidateRefusalReason, subjec…
+     19|   detail: { name?: string; code?: MemoryBackupErrorCode } = {}): never…
+     20|   throw new HindsightCandidateRefused({ reason, subject, name: detail.…
+       |         ^
+     21| }
+     22|
+ ❯ admitCandidateSchema src/memory/hindsight-candidates/hindsight-candidate-schema-admission.ts:36:84
+ ❯ inspectArchive src/memory/hindsight-candidates/hindsight-candidate-archive.ts:38:20
+ ❯ readCandidateArchive src/memory/hindsight-candidates/hindsight-candidate-archive.ts:21:22
+ ❯ admitHindsightCandidateArchive src/memory/hindsight-candidates/hindsight-candidate-admission.ts:24:19
+ ❯ src/memory/hindsight-candidates/hindsight-candidate-admission.test.ts:130:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 skipped (6)
+   Start at  20:01:29
+   Duration  21.11s (transform 10.86s, setup 0ms, import 13.35s, tests 7.35s, environment 0ms)
+
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/core@0.0.0 test: `vitest run "src/memory/hindsight-candidates/hindsight-candidate-admission.test.ts" "--maxWorkers=2" "-t" "binds direct admission"`
+Exit status 1

@@ -1,0 +1,15 @@
+{
+  "releaseSha256": "09cecd8d80419224d6b562c179ffee6044551c6ae00523b961bf16b435b1e789",
+  "runtimeExecuted": false,
+  "allChecksPassed": true,
+  "files": {
+    "collect.py": "5ba65a660129d0a79dddd9a141cd95be39bcdd56b7371d20a3047140ae5eb3a0",
+    "compare.py": "ad0df247e44c194380eae62ad191d927a90fb9aca103abb6b841ac61688ba2a7",
+    "docker-commands.mjs": "9e602b34f79adfe5c0cf2050846e8a72e263291cd647de2bbc92240ebabc3a73",
+    "evidence-store.mjs": "6bc6bfc2fe8040feac627bfe31c9e50cee7978bf4637de536e71cb2cad9f55a2",
+    "launch.mjs": "2a79626a63a5e6b934e86ebe9dd66540eec9456523267c8f8773b0b64cd085d0",
+    "README.md": "9dace57633ccdfc0958c2627e73cd5339c3ae09849459da0476e3e5efe2e6f5c",
+    "release.json": "09cecd8d80419224d6b562c179ffee6044551c6ae00523b961bf16b435b1e789",
+    "source-pyproject.toml": "6a1735ecb0d5e5f86662cb2138af8c616f36ec1ce071067f190887b4864f59b5"
+  }
+}

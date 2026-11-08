@@ -1,0 +1,13 @@
+
+> @taki/core@0.0.0 test H:\TakiAgent\packages\core
+> vitest run "src/db/migrations/060-hindsight-candidates.test.ts" "--maxWorkers=2"
+
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  18:35:37
+   Duration  3.24s (transform 1.77s, setup 0ms, import 2.46s, tests 423ms, environment 0ms)
+

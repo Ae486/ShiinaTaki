@@ -1,0 +1,13 @@
+
+> @taki/core@0.0.0 test H:\TakiAgent\packages\core
+> vitest run "src/memory/hindsight-candidates" "src/memory/hindsight-backup/hindsight-backup-pair.test.ts" "src/memory/hindsight-backup/hindsight-template-backup-consumers.test.ts" "--maxWorkers=2"
+
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+
+ Test Files  7 passed (7)
+      Tests  39 passed (39)
+   Start at  12:33:06
+   Duration  94.79s (transform 12.95s, setup 0ms, import 20.88s, tests 139.58s, environment 1ms)
+

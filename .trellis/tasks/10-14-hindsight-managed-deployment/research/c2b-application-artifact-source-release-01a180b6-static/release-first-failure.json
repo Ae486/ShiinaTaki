@@ -1,0 +1,7 @@
+{
+  "step": "finalize-release closed packet membership",
+  "outcome": "refused before release.json publication",
+  "reason": "Ruff created .ruff_cache in its packet working directory during static validation.",
+  "disposition": "Move only this identified generated cache to matching static evidence. Existing snapshot, execution plan and tokenizer evidence are compared byte-for-byte on finalization resume; no source freeze is repeated.",
+  "deploymentReady": false
+}

@@ -1,0 +1,142 @@
+# Baseline freeze — 2026-10-29 (before driving the first-use journey)
+
+HEAD: e260ff4b0bf663b5faa0187bc6ec701fd2f007cd
+
+## git diff --stat (tracked changes, tail)
+ packages/shared/package.json                       |   1 +
+ packages/shared/src/index.md                       |   2 +
+ packages/shared/src/index.ts                       |  10 +
+ packages/shared/src/memory-operation-schema.ts     |  13 ++
+ 41 files changed, 633 insertions(+), 211 deletions(-)
+
+## git status --porcelain (full)
+ M .trellis/spec/backend/hindsight-managed-deployment.md
+ M .trellis/spec/backend/index.md
+ M .trellis/tasks/08-09-memory-operations-ui/check.jsonl
+ M .trellis/tasks/08-09-memory-operations-ui/design.md
+ M .trellis/tasks/08-09-memory-operations-ui/implement.jsonl
+ M .trellis/tasks/08-09-memory-operations-ui/implement.md
+ M .trellis/tasks/08-09-memory-operations-ui/prd.md
+ M .trellis/tasks/08-09-memory-operations-ui/research/stage5-execution-map-2026-10-07.md
+ M .trellis/tasks/08-09-memory-operations-ui/task.json
+ M .trellis/tasks/09-29-hindsight-transitions-emergency/implement.md
+ M .trellis/tasks/10-14-hindsight-managed-deployment/check.jsonl
+ M .trellis/tasks/10-14-hindsight-managed-deployment/implement.jsonl
+ M .trellis/tasks/10-14-hindsight-managed-deployment/implement.md
+ M .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/README.md
+ M .trellis/tasks/10-14-hindsight-managed-deployment/research/leader-now.md
+ M .trellis/tasks/10-14-hindsight-managed-deployment/task.json
+ M apps/desktop/src/windows/home/pages/operations/index.md
+ M apps/desktop/src/windows/home/pages/operations/memory-authority-state.ts
+ M docs/HANDOFF.md
+ M docs/deferred-decisions.md
+ M packages/core/src/db/migrations/041-canonical-memory-maintenance.test.ts
+ M packages/core/src/db/migrations/059-hindsight-template-execution.test.ts
+ M packages/core/src/db/migrations/index-list.test.ts
+ M packages/core/src/db/migrations/index-list.ts
+ M packages/core/src/db/migrations/index.md
+ M packages/core/src/db/migrations/lineage-reopen-matrix.test.ts
+ M packages/core/src/memory/hindsight/template-lifecycle/index.md
+ M packages/core/src/memory/hindsight/template-lifecycle/template-lifecycle-fixtures.ts
+ M packages/core/src/memory/index.md
+ M packages/core/src/memory/operations/index.md
+ M packages/core/src/memory/operations/memory-operation-contract.ts
+ M packages/core/src/memory/operations/memory-operation-kinds.ts
+ M packages/core/src/memory/operations/memory-operation-service.ts
+ M packages/core/src/testing/hindsight-runtime-composition-fixtures.ts
+ M packages/core/src/testing/hindsight-template-backup-consumer-fixture.ts
+ M packages/core/src/testing/hindsight-template-backup-joint-fixture.ts
+ M packages/core/src/testing/index.md
+ M packages/shared/package.json
+ M packages/shared/src/index.md
+ M packages/shared/src/index.ts
+ M packages/shared/src/memory-operation-schema.ts
+?? .trellis/spec/backend/hindsight-isolated-candidates.md
+?? .trellis/tasks/08-09-memory-operations-ui/research/baseline-freeze-2026-10-29.md
+?? .trellis/tasks/08-09-memory-operations-ui/research/codex-dispatch-log-2026-10-29.md
+?? .trellis/tasks/08-09-memory-operations-ui/research/development-start-2026-10-24.md
+?? .trellis/tasks/08-09-memory-operations-ui/research/first-use-pre-report-leader-verification-2026-10-29.md
+?? .trellis/tasks/08-09-memory-operations-ui/research/preparation-advisor-2026-10-24.md
+?? .trellis/tasks/08-09-memory-operations-ui/research/s6-acceptance-plan-2026-10-24.md
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-api-producer-root-preflight-01a180b6.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-api-producer-runtime-release-01a180b6.md
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-api-producer-source-01a180b6-validation/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-api-producer-source-01a180b6.md
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-application-artifact-acceptance-01a180b6.md
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-application-artifact-source-release-01a180b6-static/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-application-artifact-source-release-01a180b6.md
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-application-root-build-01a180b6.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-application-root-build-inspection-01a180b6.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-application-root-check-01a180b6.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-application-root-preflight-01a180b6.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-application-root-source-check-01a180b6.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-application-run-ad8bf8b8-9577-4420-9fd9-212574bd4568/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-artifact-input-audit-01a180b6.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-artifact-next-01a180b6.md
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-core-metadata-official-01a180b6.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependencies-preflight-01a180b6.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependencies-preflight-launch-01a180b6.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependencies-root-execution-01a180b6.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependencies-root-readback-01a180b6.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependencies-run-0ab89a2a-ccac-4350-a4ea-ed90ed7a3e6d/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependencies-run-e309a1b4-7047-44bb-a4af-cdd65b1a994a/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependencies-v2-comparison-original-01a180b6.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependencies-v2-preflight-01a180b6.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependencies-v2-root-execution-01a180b6.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependencies-v2-root-readback-01a180b6.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependency-comparison-v3-review-01a180b6.md
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependency-comparison-v3-review-01a180b6/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependency-comparison-v3-static/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependency-comparison-v4-review-01a180b6.md
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependency-comparison-v4-review-01a180b6/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependency-comparison-v4-static/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependency-gate-01a180b6.md
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependency-independent-review-01a180b6.md
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependency-independent-review-01a180b6/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependency-source-01a180b6-static/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependency-source-release-01a180b6.md
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependency-v2-independent-review-01a180b6.md
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependency-v2-independent-review-01a180b6/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependency-v2-source-01a180b6-static/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependency-v2-source-release-01a180b6.md
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-preflight-2026-10-24.md
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-preflight-stage-disposition-01a180b6.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-relay-independent-review-01a17d4f-static/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-relay-independent-review-01a17d4f.md
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-relay-root-execution-01a180b6.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-relay-root-field-preflight-01a17d4f.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-relay-root-preflight-01a17d20.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-relay-root-preflight-01a17d4f-02.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-relay-root-preflight-01a17d4f.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-relay-root-preflight-01a180b6-02.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-relay-root-preflight-01a180b6.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-relay-root-readback-01a180b6.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-relay-run-9a276b18-7fa2-4421-869c-88f0d89aec01/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-relay-runtime-review-01a180b6.md
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-relay-runtime-review-01a180b6/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-relay-source-release-01a17d20-static.json
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-relay-source-release-01a17d20.md
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-slice1-run-cb3b3ca9-5a01-4bc4-a734-8b48d7868489/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-topology-delta-review-2026-10-27.md
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/combined-d1b-api-artifact-review-01a180b6.md
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/dependency-comparison-v3/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/dependency-comparison-v4/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-api-producer-execution/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-api-producer/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-application-artifact/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-application-execution/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-dependency-inventory-v2/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-dependency-inventory/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-loopback-relay/
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/run-slice1.ts
+?? .trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/topology-probe.py
+?? .trellis/tasks/10-24-hindsight-isolated-candidate-foundation/
+?? packages/core/src/db/migrations/060-hindsight-candidates.test.ts
+?? packages/core/src/db/migrations/060-hindsight-candidates.ts
+?? packages/core/src/memory/hindsight-candidates/
+?? packages/core/src/memory/operations/memory-operation-kind-candidate.test.ts
+?? packages/core/src/memory/operations/memory-operation-kind-candidate.ts
+?? packages/shared/src/hindsight-candidate-domain-schema.test.ts
+?? packages/shared/src/hindsight-candidate-domain-schema.ts
+?? packages/shared/src/hindsight-candidate-schema.test.ts
+?? packages/shared/src/hindsight-candidate-schema.ts

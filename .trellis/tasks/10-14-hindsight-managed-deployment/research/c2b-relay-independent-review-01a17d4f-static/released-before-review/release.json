@@ -1,0 +1,78 @@
+{
+  "schema": "c2b-loopback-relay-release-v1",
+  "token": "9a276b18-7fa2-4421-869c-88f0d89aec01",
+  "status": "source-release-runtime-unexecuted",
+  "deploymentReady": false,
+  "scope": "Transport diagnostic only; independent source review and actual Root execution remain required",
+  "acceptedPlanSha256": "0e4bdf03c903d6bbdca4d0bbfc187de14bb6c9fd8119b816bbfa7e69db0cd803",
+  "topologyReviewSha256": "a16acd75b0e4201eed045967fca74944fc2431978536866706cb486c12d281c5",
+  "tools": {
+    "node": {
+      "path": "C:/Program Files/nodejs/node.exe",
+      "version": "v24.18.0",
+      "sha256": "9a4eb5f1c29c6a2e93852ead46b999e284a6a5ca8bab4d4e241d587d025a52de"
+    },
+    "docker": {
+      "path": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+      "sha256": "0a4d8fe2ab107ceae44ee5f5fc1e1c155790042b7e3d3163826660da882b389d"
+    },
+    "engine": {
+      "endpoint": "npipe:////./pipe/dockerDesktopLinuxEngine",
+      "id": "93e8319e-24b7-4a7d-88f1-60923ad681e0",
+      "version": "29.0.1",
+      "os": "linux"
+    },
+    "imagePython": "/app/api/.venv/bin/python"
+  },
+  "resource": {
+    "imageId": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+    "containerName": "taki-c2b-relay-9a276b18-7fa2-4421-869c-88f0d89aec01",
+    "network": "none",
+    "hostListener": "127.0.0.1:58118",
+    "target": "127.0.0.1:8000",
+    "user": "1000:1000",
+    "readOnlyRoot": true,
+    "memoryBytes": 268435456,
+    "cpus": 1,
+    "pidsLimit": 16,
+    "mounts": [],
+    "dockerPublication": [],
+    "capDrop": [
+      "ALL"
+    ],
+    "securityOpt": [
+      "no-new-privileges=true"
+    ],
+    "logDriver": "none",
+    "marker": "taki-c2b-relay:9a276b18-7fa2-4421-869c-88f0d89aec01"
+  },
+  "limits": {
+    "overallMs": 60000,
+    "runtimeMs": 40000,
+    "cleanupReserveMs": 20000,
+    "readinessMs": 10000,
+    "relayChildren": 2,
+    "observerExecutions": 1,
+    "directionBytes": 65536,
+    "commandRecords": 48,
+    "evidenceJsonBytes": 2097152,
+    "stageBytes": 4194304
+  },
+  "evidence": {
+    "stageRoot": "G:/TakiAgent-c2b-native-api",
+    "stage": "G:/TakiAgent-c2b-native-api/relay-9a276b18-7fa2-4421-869c-88f0d89aec01",
+    "ownerFile": ".c2b-relay-owner",
+    "archive": "H:/TakiAgent/.trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-relay-run-9a276b18-7fa2-4421-869c-88f0d89aec01",
+    "retainStageWhenCleanupUnproven": true
+  },
+  "files": {
+    "launch.mjs": "3f37cf4acfc285a19721b206edc6ce11786a54e860b55d12cb0724b18e19ab63",
+    "run-relay.mjs": "b67e13af7b764663144596fde895c39ddfe8ebd8f617989a0a86581c40612745",
+    "docker-commands.mjs": "9e602b34f79adfe5c0cf2050846e8a72e263291cd647de2bbc92240ebabc3a73",
+    "host-transport.mjs": "fd41bc99b6cd26f796412b078dde498aa6e222527d7fa379a5a2b0eae679eaa3",
+    "evidence-store.mjs": "9f259d786721c0b6bbeeda8b6a3383c131a72d9949db60849aef01604f26d6e9",
+    "fixture-server.py": "2bf517ac5b42e6074173eb7a3285eaf9da55cc3851a627387d5a5201ee6e183b",
+    "stream-relay.py": "cb6a235b82c1baccb66066c48916d3cd65a9472a1838079c71dda59057da298f",
+    "observe-reaping.py": "0304b4c2970bcb583a2e1c90fe9320d381f9e5c9a3f0a28277de2a9db079413c"
+  }
+}

@@ -1,6 +1,58 @@
 # Memory Operations and Setup - Design Draft
 
-## Current design gate (2026-10-07)
+## Current design priorities (2026-10-28)
+
+The owner requested practical use first and contraction of unnecessary implementation. Follow
+[implement.md](implement.md); the historical schedule below no longer gates the existing-instance path
+on C2b, D1 or full model upgrades. This update selects delivery priorities, not a new deployment protocol.
+
+Reuse current Native APIs/templates, Core adapters/operations and the existing secret store. First
+verify the actual existing-instance Home-to-Native journey. Preserve Local independence, Taki policy,
+single authority, complete supported data transfer and ordinary write/restart recovery.
+
+For subsequent managed work, compare the smallest existing/native mechanism before extending the
+custom dependency checker, private transport or supervisor. A test's no-real-provider constraint
+does not automatically become a permanent product egress policy. Any change to an existing secret,
+ownership or data-integrity contract needs an explicit justified design delta; this plan does not
+remove production checks or declare a simpler mechanism verified.
+
+Retain Stage 3 backup and completed lifecycle work. D1/C4/D2 resumes for the D95 upgrade trigger,
+without rewriting recorded migrations or weakening preserved-data requirements. Known applicable
+defects must be fixed before use; speculative hardening and the residual broad fault/platform matrix
+follow D96. Use one consolidated increment review rather than independent reviews of each small packet.
+
+## Approved first-use increment (2026-10-29)
+
+The owner approved key entry -> fresh validation fix -> sync settings -> controlled journey.
+One independent Astra design challenge confirmed reuse of current persistence/admission contracts;
+no new scheduler, migration, secret store or durable configuration operation is needed.
+
+- Add a Hindsight-specific write-only password form using `secret.set/clear/presence`. Keep input only
+  in component memory, clear it after submission/retirement, distinguish locked/unknown from absent,
+  and ignore retired-client replies. Stored does not mean the connection has been validated.
+- Allow `setup.validate` from `unconfigured` in Home. Core retains authority/busy/revision/config
+  checks; do not invent a readiness state or change historical migration 022.
+- Expose per-Bank automatic/manual-only, incremental interval and full-reconciliation interval.
+  The immediate operator RPC sends the complete existing `MemoryReplicaScheduleConfig`; it resolves
+  the current runtime per call, requires a started scheduler, and refuses an active transition.
+  Scheduler configuration uses `ensureBank({ bank, config })`, its existing Bank/fence checks and
+  timer rearming; active runs and queued manual requests remain intact. No stop/start cycle.
+- New Banks keep automatic / six-hour incremental / seven-day full defaults. There is no new global
+  default or inheritance mechanism. Existing one-minute to 31/90-day bounds remain unchanged.
+- Current `memory.authority.status` remains the read source. Save outcomes trigger refetch; a thin
+  `memory.replica.changed` invalidation for configuration edits shares the existing operation
+  subscription lifecycle and refreshes other Home clients. Never manufacture an operation event.
+  This does not claim a new push producer for every automatic scheduler run.
+- Explain existing-instance model configuration as externally applied, and the supported v1 setup
+  -> activation -> explicit v2 template/default action. Use the ordinary Native entrypoint on fresh
+  controlled resources; reuse historical corpus/transition results without replaying their data.
+
+Regression scope: fresh validation visibility; secret absence/locked/set/clear and generation
+retirement; operator/Bank/runtime/transition admission, per-Bank configuration persistence and
+rearm with active/manual work; connected Home/RPC/Native usage and bounded outage recovery.
+Real credentials, original data, paid models and installed/manual acceptance remain outside this run.
+
+## Historical design gate (2026-10-07)
 
 The owner approved proceeding with the presented Stage 5 plan. The 5A child independently passed and released
 its Native/Shared/Core/Home implementation. The reviewed 5B child is active at B1, followed by B2/B3 gates.

@@ -1,0 +1,8 @@
+{
+  "completedAt": "2026-10-28T09:54:18.8167893Z",
+  "exitCode": 0,
+  "cwd": "H:/TakiAgent",
+  "temporaryDirectory": "G:/TakiAgent-staging/d1b-01a180b6-86560226-1c8b-4c80-9054-67b64950cf65",
+  "startedAt": "2026-10-28T09:54:06.8999296Z",
+  "command": "pnpm exec eslint packages/core/src/memory/hindsight-candidates/hindsight-candidate-domain*.ts packages/core/src/memory/hindsight-candidates/hindsight-candidate-service.ts packages/shared/src/hindsight-candidate-domain-schema.ts packages/shared/src/hindsight-candidate-domain-schema.test.ts"
+}

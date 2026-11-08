@@ -1,0 +1,360 @@
+{
+  "verdict": "PASS_RETAINED_EVIDENCE",
+  "runtimeExecutedByReviewer": false,
+  "deploymentReady": false,
+  "archiveSha256": {
+    ".c2b-relay-owner": "e138d82d4757a64afd1bb82bfd2be3e71cf0b51759167317f650610b2d9bacdc",
+    "commands.json": "3702362c4771c20d1b26c5d86b7e5d576547242964ceed0b0c4821d2c83b49d2",
+    "disposition.json": "301e687132732e24de30a0e81ed63ff952867668a4433f9fc18513e7643cfb6c",
+    "docker-commands.mjs": "9e602b34f79adfe5c0cf2050846e8a72e263291cd647de2bbc92240ebabc3a73",
+    "evidence-store.mjs": "9f259d786721c0b6bbeeda8b6a3383c131a72d9949db60849aef01604f26d6e9",
+    "fixture-server.py": "779c3eb26d0b0078b41bb9809231516ee173d2b3ff38a163108c440cb6fdc4be",
+    "host-transport.mjs": "fd41bc99b6cd26f796412b078dde498aa6e222527d7fa379a5a2b0eae679eaa3",
+    "launch.mjs": "3f37cf4acfc285a19721b206edc6ce11786a54e860b55d12cb0724b18e19ab63",
+    "observe-reaping.py": "101ffca07459081a4ac85ebadfea63af5d8ae7782706bd02d608d4d1534f82f7",
+    "release.json": "2d3f0c9ad86bcb5e5d956e9d4797edee4e1056b274958ae781b548b4d8cb954f",
+    "result.json": "474a4d60d3f4b7a99757b82850dfa9738ab3ac054ee7beefe7ccd393678250c6",
+    "run-relay.mjs": "72a5a5123840e3e4839fc96c1188802c5d9cf0f0838da073b92a39d9771af1c1",
+    "stream-relay.py": "fe6f865fe38c0656724fdbd7f64b775e926db5635ebfcbd8c0be6e46fb5968b0"
+  },
+  "commandCount": 23,
+  "commandKinds": {
+    "info": 6,
+    "image": 1,
+    "container": 9,
+    "create": 1,
+    "start": 1,
+    "exec": 3,
+    "stop": 1,
+    "rm": 1
+  },
+  "commands": [
+    {
+      "index": 0,
+      "command": "info",
+      "pid": 35880,
+      "exit": 0,
+      "durationMs": 225.0,
+      "stdinBytes": null,
+      "stdoutBytes": 88,
+      "stderrBytes": 0
+    },
+    {
+      "index": 1,
+      "command": "image",
+      "pid": 36164,
+      "exit": 0,
+      "durationMs": 275.0,
+      "stdinBytes": null,
+      "stdoutBytes": 132,
+      "stderrBytes": 0
+    },
+    {
+      "index": 2,
+      "command": "container",
+      "pid": 36292,
+      "exit": 1,
+      "durationMs": 190.0,
+      "stdinBytes": null,
+      "stdoutBytes": 1,
+      "stderrBytes": 99
+    },
+    {
+      "index": 3,
+      "command": "create",
+      "pid": 36416,
+      "exit": 0,
+      "durationMs": 269.0,
+      "stdinBytes": null,
+      "stdoutBytes": 65,
+      "stderrBytes": 0
+    },
+    {
+      "index": 4,
+      "command": "container",
+      "pid": 36508,
+      "exit": 0,
+      "durationMs": 175.0,
+      "stdinBytes": null,
+      "stdoutBytes": 1144,
+      "stderrBytes": 0
+    },
+    {
+      "index": 5,
+      "command": "start",
+      "pid": 36608,
+      "exit": 0,
+      "durationMs": 4536.0,
+      "stdinBytes": 9329,
+      "stdoutBytes": 3978,
+      "stderrBytes": 0
+    },
+    {
+      "index": 6,
+      "command": "info",
+      "pid": 36756,
+      "exit": 0,
+      "durationMs": 164.0,
+      "stdinBytes": null,
+      "stdoutBytes": 88,
+      "stderrBytes": 0
+    },
+    {
+      "index": 7,
+      "command": "container",
+      "pid": 21228,
+      "exit": 0,
+      "durationMs": 224.0,
+      "stdinBytes": null,
+      "stdoutBytes": 1284,
+      "stderrBytes": 0
+    },
+    {
+      "index": 8,
+      "command": "exec",
+      "pid": 36224,
+      "exit": 0,
+      "durationMs": 385.0,
+      "stdinBytes": 32768,
+      "stdoutBytes": 49152,
+      "stderrBytes": 856
+    },
+    {
+      "index": 9,
+      "command": "info",
+      "pid": 13964,
+      "exit": 0,
+      "durationMs": 202.0,
+      "stdinBytes": null,
+      "stdoutBytes": 88,
+      "stderrBytes": 0
+    },
+    {
+      "index": 10,
+      "command": "container",
+      "pid": 36416,
+      "exit": 0,
+      "durationMs": 201.0,
+      "stdinBytes": null,
+      "stdoutBytes": 1284,
+      "stderrBytes": 0
+    },
+    {
+      "index": 11,
+      "command": "exec",
+      "pid": 35704,
+      "exit": 0,
+      "durationMs": 377.0,
+      "stdinBytes": 1024,
+      "stdoutBytes": 512,
+      "stderrBytes": 760
+    },
+    {
+      "index": 12,
+      "command": "info",
+      "pid": 30224,
+      "exit": 0,
+      "durationMs": 240.0,
+      "stdinBytes": null,
+      "stdoutBytes": 88,
+      "stderrBytes": 0
+    },
+    {
+      "index": 13,
+      "command": "container",
+      "pid": 32436,
+      "exit": 0,
+      "durationMs": 236.0,
+      "stdinBytes": null,
+      "stdoutBytes": 1284,
+      "stderrBytes": 0
+    },
+    {
+      "index": 14,
+      "command": "exec",
+      "pid": 36200,
+      "exit": 0,
+      "durationMs": 353.0,
+      "stdinBytes": 115,
+      "stdoutBytes": 677,
+      "stderrBytes": 0
+    },
+    {
+      "index": 15,
+      "command": "info",
+      "pid": 36240,
+      "exit": 0,
+      "durationMs": 206.0,
+      "stdinBytes": null,
+      "stdoutBytes": 88,
+      "stderrBytes": 0
+    },
+    {
+      "index": 16,
+      "command": "container",
+      "pid": 23868,
+      "exit": 0,
+      "durationMs": 174.0,
+      "stdinBytes": null,
+      "stdoutBytes": 1284,
+      "stderrBytes": 0
+    },
+    {
+      "index": 17,
+      "command": "stop",
+      "pid": 36812,
+      "exit": 0,
+      "durationMs": 274.0,
+      "stdinBytes": null,
+      "stdoutBytes": 120,
+      "stderrBytes": 0
+    },
+    {
+      "index": 18,
+      "command": "info",
+      "pid": 36576,
+      "exit": 0,
+      "durationMs": 202.0,
+      "stdinBytes": null,
+      "stdoutBytes": 88,
+      "stderrBytes": 0
+    },
+    {
+      "index": 19,
+      "command": "container",
+      "pid": 36812,
+      "exit": 0,
+      "durationMs": 208.0,
+      "stdinBytes": null,
+      "stdoutBytes": 1217,
+      "stderrBytes": 0
+    },
+    {
+      "index": 20,
+      "command": "rm",
+      "pid": 37132,
+      "exit": 0,
+      "durationMs": 216.0,
+      "stdinBytes": null,
+      "stdoutBytes": 65,
+      "stderrBytes": 0
+    },
+    {
+      "index": 21,
+      "command": "container",
+      "pid": 37216,
+      "exit": 1,
+      "durationMs": 194.0,
+      "stdinBytes": null,
+      "stdoutBytes": 1,
+      "stderrBytes": 112
+    },
+    {
+      "index": 22,
+      "command": "container",
+      "pid": 37288,
+      "exit": 1,
+      "durationMs": 186.0,
+      "stdinBytes": null,
+      "stdoutBytes": 1,
+      "stderrBytes": 99
+    }
+  ],
+  "transfers": [
+    {
+      "commandIndex": 8,
+      "requestBytes": 32768,
+      "requestSha256": "ac469a51336bd2114ff73ecc3815f8b0baecadc8328dd6305b203bf5f8668d34",
+      "responseBytes": 49152,
+      "responseSha256": "96ea0e56ef19e5e30e59ade96a40478a0df79f425f6e57f18073a80467364d3e",
+      "readChunks": {
+        "stdin": [
+          4096,
+          4096,
+          4096,
+          4096,
+          4096,
+          4096,
+          4096,
+          4096
+        ],
+        "target": [
+          4096,
+          4096,
+          4096,
+          4096,
+          4096,
+          4096,
+          4096,
+          4096,
+          4096,
+          4096,
+          4096,
+          4096
+        ]
+      },
+      "backpressure": {
+        "toChild": 1,
+        "toClient": 0
+      }
+    },
+    {
+      "commandIndex": 11,
+      "requestBytes": 1024,
+      "requestSha256": "5bd6f557cf6d45efbe0e88196ee893bc1353186d2369ec40e1f48d95fb3988e5",
+      "responseBytes": 512,
+      "responseSha256": "c3f8be1b87730012febcac6106a26c2eceae900dce00f30b00416fa5b4d19df9",
+      "readChunks": {
+        "stdin": [
+          1024
+        ],
+        "target": [
+          512
+        ]
+      },
+      "backpressure": {
+        "toChild": 0,
+        "toClient": 0
+      }
+    }
+  ],
+  "containerId": "3b39336986d38734b83c1b5b3364295ae1b2678bdc98564ca492ada43deae844",
+  "serverIdentity": {
+    "pid": 1,
+    "startTicks": "14725",
+    "ppid": 0,
+    "pgid": 1,
+    "sid": 1
+  },
+  "relayIdentities": [
+    {
+      "pid": 7,
+      "startTicks": "14824"
+    },
+    {
+      "pid": 13,
+      "startTicks": "14925"
+    }
+  ],
+  "networkRefusals": [
+    "ENETUNREACH",
+    "ENETUNREACH",
+    "ENETUNREACH",
+    "ENETUNREACH"
+  ],
+  "stageBytes": 239280,
+  "stageAbsentAtReview": true,
+  "unchangedWorkloads": 8,
+  "runtimeElapsedMs": 5291.6904,
+  "cleanupElapsedMs": 2515.7416000000003,
+  "beforeArchiveElapsedMs": 7807.449100000001,
+  "overallElapsedMs": 8002.6917,
+  "outerElapsedMs": 8342,
+  "limits": [
+    "No runtime rerun",
+    "Forced kill and pidfd waiting branches unexercised",
+    "No throughput claim",
+    "Host and Docker guest wall clocks are separate domains",
+    "No installed Host, Native API, PG, authentication, receipt or setup acceptance"
+  ]
+}

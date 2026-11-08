@@ -1,0 +1,37 @@
+{
+  "release": {
+    "bytes": 3896,
+    "sha256": "da13c5f1bceb17130c000657b40fad55cdc29de94b1c64a5ca85137e2cbf91d0"
+  },
+  "closedFiles": [
+    "Dockerfile",
+    "README.md",
+    "artifact-check.py",
+    "artifact_io.py",
+    "base-facts.json",
+    "execution-plan.json",
+    "install-artifact.py",
+    "prepare.py",
+    "test_artifact.py",
+    "release.json"
+  ],
+  "snapshot": {
+    "path": "G:\\TakiAgent-c2b-native-api\\application-ad8bf8b8-9577-4420-9fd9-212574bd4568\\snapshot.json",
+    "bytes": 120858,
+    "sha256": "5cd0422c9c312576e52a14c08ffbe3694e800f1f3fb201fe2542e99c1518e06a",
+    "contextSha256": "fd69e163c66b522532bffaa80f6fe3f66d37189190d041843aec9e85388d6200",
+    "contextBytes": 7782003,
+    "contextEntries": 450
+  },
+  "sourceCounts": {
+    "hindsight_api": {
+      "files": 401,
+      "bytes": 6463555
+    },
+    "managed_bootstrap": {
+      "files": 12,
+      "bytes": 66616
+    }
+  },
+  "deploymentReady": false
+}

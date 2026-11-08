@@ -1,0 +1,197 @@
+{
+ "samples": 89,
+ "spanSeconds": 523,
+ "system": {
+  "totalMB": 16011,
+  "freeAtStartMB": 7693,
+  "minFreeMB": 4833,
+  "maxCommitMB": 19802
+ },
+ "components": {
+  "harness": {
+   "samples": 86,
+   "maxProcesses": 1,
+   "wsMB": {
+    "p50": 399,
+    "p95": 497,
+    "max": 532
+   },
+   "privateMB": {
+    "p50": 1180,
+    "max": 1331
+   },
+   "largestProcessWsMB": 532,
+   "cpuSeconds": 19
+  },
+  "pg": {
+   "samples": 83,
+   "maxProcesses": 29,
+   "wsMB": {
+    "p50": 466,
+    "p95": 795,
+    "max": 811
+   },
+   "privateMB": {
+    "p50": 142,
+    "max": 254
+   },
+   "largestProcessWsMB": 42,
+   "cpuSeconds": 34
+  },
+  "native": {
+   "samples": 81,
+   "maxProcesses": 2,
+   "wsMB": {
+    "p50": 1021,
+    "p95": 1930,
+    "max": 1941
+   },
+   "privateMB": {
+    "p50": 2190,
+    "max": 4171
+   },
+   "largestProcessWsMB": 1936,
+   "cpuSeconds": 582
+  },
+  "core": {
+   "samples": 61,
+   "maxProcesses": 1,
+   "wsMB": {
+    "p50": 414,
+    "p95": 588,
+    "max": 591
+   },
+   "privateMB": {
+    "p50": 440,
+    "max": 621
+   },
+   "largestProcessWsMB": 591,
+   "cpuSeconds": 105
+  },
+  "home-driver": {
+   "samples": 6,
+   "maxProcesses": 1,
+   "wsMB": {
+    "p50": 33,
+    "p95": 34,
+    "max": 34
+   },
+   "privateMB": {
+    "p50": 23,
+    "max": 24
+   },
+   "largestProcessWsMB": 34,
+   "cpuSeconds": 2
+  },
+  "home-browser": {
+   "samples": 5,
+   "maxProcesses": 5,
+   "wsMB": {
+    "p50": 449,
+    "p95": 507,
+    "max": 507
+   },
+   "privateMB": {
+    "p50": 265,
+    "max": 291
+   },
+   "largestProcessWsMB": 296,
+   "cpuSeconds": 12
+  }
+ },
+ "steps": [
+  {
+   "id": 1,
+   "status": "passed",
+   "seconds": 0,
+   "coreMB": 0,
+   "nativeMB": 0,
+   "pgMB": 0
+  },
+  {
+   "id": 2,
+   "status": "passed",
+   "seconds": 13.7,
+   "coreMB": 328,
+   "nativeMB": 826,
+   "pgMB": 267
+  },
+  {
+   "id": 3,
+   "status": "passed",
+   "seconds": 9.1,
+   "coreMB": 228,
+   "nativeMB": 919,
+   "pgMB": 280
+  },
+  {
+   "id": 4,
+   "status": "passed",
+   "seconds": 11.8,
+   "coreMB": 278,
+   "nativeMB": 932,
+   "pgMB": 346
+  },
+  {
+   "id": 5,
+   "status": "passed",
+   "seconds": 65.6,
+   "coreMB": 406,
+   "nativeMB": 1021,
+   "pgMB": 465
+  },
+  {
+   "id": "settings",
+   "status": "passed",
+   "seconds": 6.3,
+   "coreMB": 382,
+   "nativeMB": 1021,
+   "pgMB": 465
+  },
+  {
+   "id": "schedule",
+   "status": "passed",
+   "seconds": 124.3,
+   "coreMB": 415,
+   "nativeMB": 1021,
+   "pgMB": 471
+  },
+  {
+   "id": 6,
+   "status": "passed",
+   "seconds": 63.7,
+   "coreMB": 479,
+   "nativeMB": 1152,
+   "pgMB": 773
+  },
+  {
+   "id": "6b",
+   "status": "passed",
+   "seconds": 53.9,
+   "coreMB": 589,
+   "nativeMB": 1941,
+   "pgMB": 799
+  },
+  {
+   "id": "pending",
+   "status": "failed",
+   "seconds": 11.5,
+   "coreMB": 591,
+   "nativeMB": 1941,
+   "pgMB": 811
+  }
+ ],
+ "disk": {
+  "last": {
+   "root": "G:\\taki-first-use-ruLIlA",
+   "pg-data": 72,
+   "core-data": 10,
+   "native-backups": 0
+  },
+  "maxMB": {
+   "pg-data": 72,
+   "core-data": 10,
+   "native-backups": 0
+  }
+ }
+}

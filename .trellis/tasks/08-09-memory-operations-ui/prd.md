@@ -1,6 +1,43 @@
 # Memory Operations and Setup UI
 
-## Current continuation baseline (2026-10-07)
+## Current owner direction (2026-10-28)
+
+Prioritize practical use and reduce unnecessary implementation and defensive programming. First deliver
+the existing-instance setup and ordinary memory journey; then address observed problems and the
+remaining installation/lifecycle capabilities. The [execution plan](implement.md) is the current
+schedule. The older C2b-first, parallel-D1 and all-upgrades-before-first-use rules below are superseded.
+
+This is a scheduling and implementation-scope contraction, not removal of agreed memory capabilities.
+Authentication, secret-safe settings, single authority, complete supported interchange, Taki policy,
+durable writes and ordinary recovery remain required. Managed deployment, backup/restore and complete
+model/software upgrades remain unfinished overall requirements, with D94-D96 in
+[Deferred Decisions](../../../docs/deferred-decisions.md) recording their sequencing and triggers.
+No implementation, service run, task activation or acceptance is performed by this document update.
+
+### First usable delivery acceptance
+
+- [ ] An intended Taki build guides an operator through authenticated existing-instance configuration,
+      Bank/template preparation and activation using the actual registered operations.
+- [ ] Ordinary chat/tools retain and recall the correct Global/Character memory and preserve Taki policy.
+- [ ] Manual/automatic sync and the last successful result are observable without blocking normal use.
+- [ ] Closing/reopening Home and an ordinary restart preserve state; a bounded provider outage retains
+      new writes and recovers without silent loss or duplicate application.
+- [ ] Local remains independently usable, and missing managed/candidate infrastructure does not block
+      the existing-instance path.
+- [ ] A short usable-delivery report states actual build/provider evidence, setup steps and known limits.
+      Controlled-provider tests, real-model quality, owner UI judgment and original-data activation
+      are reported separately. Existing backup/recovery prerequisites precede original-data changes.
+
+Passing these criteria is an incremental delivery, not completion of every parent or C01-C16 criterion.
+The [acceptance plan](research/s6-acceptance-plan-2026-10-24.md) now admits existing-instance journeys
+independently of C2b; later managed/upgrade cases retain their own requirements.
+
+The existing backup and transition journeys (capture/verification and the isolated paired restore,
+healthy switch-back/re-entry and emergency takeover on disposable copies) are the next exercise scope
+after first use; they reuse the delivered Stage 3/4 producers and do not wait on managed installation
+or candidate upgrades. See execution plan section 2.
+
+## Previous continuation baseline (2026-10-07)
 
 This existing B7 task is the parent planning map for the remaining Stage 5 operator scope. On 2026-10-07 the
 owner approved proceeding with the presented Stage 5 plan and delegated implementation/review scheduling.

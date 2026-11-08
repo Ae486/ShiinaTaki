@@ -1,0 +1,168 @@
+{
+  "token": "ad8bf8b8-9577-4420-9fd9-212574bd4568",
+  "complete": true,
+  "deploymentReady": false,
+  "commands": [
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\application-root-ad8bf8b8-9577-4420-9fd9-212574bd4568\\client-config",
+        "info",
+        "--format",
+        "{{.ID}}"
+      ],
+      "dispatchedAt": "2026-10-28T09:47:39.3709645Z",
+      "exitCode": 0,
+      "closed": true,
+      "pid": 43552,
+      "stdout": "93e8319e-24b7-4a7d-88f1-60923ad681e0\n",
+      "stderr": "",
+      "stdoutSha256": "e2f857e1f6b4f94ed623057ede61faf7e5debbfc3cb463beb2ea80724f47fa38",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\application-root-ad8bf8b8-9577-4420-9fd9-212574bd4568\\client-config",
+        "image",
+        "inspect",
+        "sha256:c57385ec5ad1243659db1e1159f65218c1a48dd0481e94f468cbc0ada376b11e",
+        "--format",
+        "{\"id\":{{json .Id}},\"tags\":{{json .RepoTags}},\"os\":{{json .Os}},\"architecture\":{{json .Architecture}},\"user\":{{json .Config.User}},\"entrypoint\":{{json .Config.Entrypoint}},\"cmd\":{{json (index .Config \"Cmd\")}},\"labels\":{{json .Config.Labels}},\"layers\":{{json .RootFS.Layers}},\"volumes\":{{json (index .Config \"Volumes\")}}}"
+      ],
+      "dispatchedAt": "2026-10-28T09:47:39.7021355Z",
+      "exitCode": 0,
+      "closed": true,
+      "pid": 53384,
+      "stdout": "{\"id\":\"sha256:c57385ec5ad1243659db1e1159f65218c1a48dd0481e94f468cbc0ada376b11e\",\"tags\":[\"taki-c2b-application:ad8bf8b8-9577-4420-9fd9-212574bd4568\"],\"os\":\"linux\",\"architecture\":\"amd64\",\"user\":\"1000:1000\",\"entrypoint\":[\"/app/api/.venv/bin/python\",\"-I\",\"-B\",\"-S\",\"/opt/taki-c2b-application/artifact-check.py\"],\"cmd\":null,\"labels\":{\"taki.c2b.application\":\"ad8bf8b8-9577-4420-9fd9-212574bd4568\",\"taki.c2b.role\":\"application-source-cache-prerequisite\"},\"layers\":[\"sha256:6f94328331290cbd81edab450664d42da7b64c191416c9346cd5d28c84f76035\",\"sha256:275f0a9e4758b8a31c628ab748d8184bd103fb27ec8aeff6b588003a3056d082\",\"sha256:3d7dddf62be3a47f3c072a9dc069ac228beea659375d9fff022792deaaf08d61\",\"sha256:1a8800d1b976e9a254659bbce8213f99d55639c12cc4d2ebecafe95a163797c5\",\"sha256:a1a5d0ec92ff09c6a27534c7c47317bb7a01ad7b9f14bf400b52123f8e306e3e\",\"sha256:299d4347e6df9dfa774bdce3b1364ea95f335a04a8c351c150491360ab4f3246\",\"sha256:0116ab376532749d4f3eca68930fbf1060c0ed4296c4f838fdcf534f45d4f44a\",\"sha256:3d54a5a04ca537494f67c5305cc5b7a0c3d96b557091ecd91cf0508a5e317d93\",\"sha256:b1508537837e0f8b4a39b0449fbc1aee8fe380383d76141d185986e6279f2cfb\",\"sha256:e2457e4909c2bfcc3db0727b12916f8ed543003a7db1cf23be0d988a51698aef\",\"sha256:0f590597ee1734f7f7a71d839891d25009e74e4c7ed7e744b75e6d44fb76d222\",\"sha256:9cabf648e5270b41f20913f5580453321d1ba93e6ac483e49d7f7d2255774dde\",\"sha256:042a4c1216faa59e1c15024330c72ab7adf3f4a342de48a2bfd1483575a921ae\",\"sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef\",\"sha256:172abbb300df922427882ebe7409daed5893f3e4bf54bc8b67939167e406dbe5\",\"sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef\",\"sha256:f21c5e676f9921bdea957f5aa1812135cb72885b155db4c93eb2d461cc7ecfd7\",\"sha256:e9303b93d2c3c387aa4be7e0ba62b06f74c0b426157fb99a62e15c7896cf3757\",\"sha256:37f6b792c034c4798abc88776f50ecd0dea6fa035806c49e3f6d44c1c96bbaab\",\"sha256:2fafe57069de58b2c68024d98e83d29a83a85c66e39bd94b5e072cf1d486025a\",\"sha256:b6bc2c48d58190125a7fa2de3572cc0177f343762e074510ade31a66a93a0238\",\"sha256:127f35f54d5889e3adcb2bec1df5f8e71f302168c776adcb38f807519fd384bc\",\"sha256:b5677e5967bd657e57e25b9175d765991663800ebf5fcf10f1eae5f9884d3b81\"],\"volumes\":null}\n",
+      "stderr": "",
+      "stdoutSha256": "da0e9d1db218dde6f64d83c96f35d8860cb603854e7f42a21e870ddd2c521c46",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\application-root-ad8bf8b8-9577-4420-9fd9-212574bd4568\\client-config",
+        "image",
+        "inspect",
+        "taki-c2b-application:ad8bf8b8-9577-4420-9fd9-212574bd4568",
+        "--format",
+        "{{.Id}}"
+      ],
+      "dispatchedAt": "2026-10-28T09:47:40.0131395Z",
+      "exitCode": 0,
+      "closed": true,
+      "pid": 33572,
+      "stdout": "sha256:c57385ec5ad1243659db1e1159f65218c1a48dd0481e94f468cbc0ada376b11e\n",
+      "stderr": "",
+      "stdoutSha256": "1502441076cdca779c476ef6e41116b2f13a6c8dc09dfd7ec8275db86b512d9b",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\application-root-ad8bf8b8-9577-4420-9fd9-212574bd4568\\client-config",
+        "image",
+        "inspect",
+        "sha256:c57385ec5ad1243659db1e1159f65218c1a48dd0481e94f468cbc0ada376b11e",
+        "--format",
+        "{{range .Config.Env}}{{if eq . \"TIKTOKEN_CACHE_DIR=/opt/taki-c2b-application/tokenizer\"}}cache-ok {{end}}{{if eq . \"PYTHON_DOTENV_DISABLED=true\"}}dotenv-ok {{end}}{{end}}"
+      ],
+      "dispatchedAt": "2026-10-28T09:47:40.3365815Z",
+      "exitCode": 0,
+      "closed": true,
+      "pid": 52776,
+      "stdout": "cache-ok dotenv-ok \n",
+      "stderr": "",
+      "stdoutSha256": "0029664c9c027bf33ba13021075c8acf1957ec954ca6f0ef0287bbd6b4d6e0ee",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\application-root-ad8bf8b8-9577-4420-9fd9-212574bd4568\\client-config",
+        "image",
+        "inspect",
+        "taki-hindsight-api:local",
+        "--format",
+        "{{.Id}}"
+      ],
+      "dispatchedAt": "2026-10-28T09:47:40.6472938Z",
+      "exitCode": 0,
+      "closed": true,
+      "pid": 516,
+      "stdout": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db\n",
+      "stderr": "",
+      "stdoutSha256": "faaa631f40a5f340f95c9984b49f0c78c8749f3f1819241f1c10a919b8f91e58",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "dockerSha256": "0a4d8fe2ab107ceae44ee5f5fc1e1c155790042b7e3d3163826660da882b389d",
+  "tag": "taki-c2b-application:ad8bf8b8-9577-4420-9fd9-212574bd4568",
+  "originalBuildRetained": true,
+  "originalBuildSha256": "ddde914bea5aa48764ae2e03c55bb39d19ae1cee69a65e134501f80cdf76071f",
+  "recovery": "read-only original-image inspection after optional Config.Cmd projection failure",
+  "image": {
+    "id": "sha256:c57385ec5ad1243659db1e1159f65218c1a48dd0481e94f468cbc0ada376b11e",
+    "tags": [
+      "taki-c2b-application:ad8bf8b8-9577-4420-9fd9-212574bd4568"
+    ],
+    "os": "linux",
+    "architecture": "amd64",
+    "user": "1000:1000",
+    "entrypoint": [
+      "/app/api/.venv/bin/python",
+      "-I",
+      "-B",
+      "-S",
+      "/opt/taki-c2b-application/artifact-check.py"
+    ],
+    "cmd": null,
+    "labels": {
+      "taki.c2b.application": "ad8bf8b8-9577-4420-9fd9-212574bd4568",
+      "taki.c2b.role": "application-source-cache-prerequisite"
+    },
+    "layers": [
+      "sha256:6f94328331290cbd81edab450664d42da7b64c191416c9346cd5d28c84f76035",
+      "sha256:275f0a9e4758b8a31c628ab748d8184bd103fb27ec8aeff6b588003a3056d082",
+      "sha256:3d7dddf62be3a47f3c072a9dc069ac228beea659375d9fff022792deaaf08d61",
+      "sha256:1a8800d1b976e9a254659bbce8213f99d55639c12cc4d2ebecafe95a163797c5",
+      "sha256:a1a5d0ec92ff09c6a27534c7c47317bb7a01ad7b9f14bf400b52123f8e306e3e",
+      "sha256:299d4347e6df9dfa774bdce3b1364ea95f335a04a8c351c150491360ab4f3246",
+      "sha256:0116ab376532749d4f3eca68930fbf1060c0ed4296c4f838fdcf534f45d4f44a",
+      "sha256:3d54a5a04ca537494f67c5305cc5b7a0c3d96b557091ecd91cf0508a5e317d93",
+      "sha256:b1508537837e0f8b4a39b0449fbc1aee8fe380383d76141d185986e6279f2cfb",
+      "sha256:e2457e4909c2bfcc3db0727b12916f8ed543003a7db1cf23be0d988a51698aef",
+      "sha256:0f590597ee1734f7f7a71d839891d25009e74e4c7ed7e744b75e6d44fb76d222",
+      "sha256:9cabf648e5270b41f20913f5580453321d1ba93e6ac483e49d7f7d2255774dde",
+      "sha256:042a4c1216faa59e1c15024330c72ab7adf3f4a342de48a2bfd1483575a921ae",
+      "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+      "sha256:172abbb300df922427882ebe7409daed5893f3e4bf54bc8b67939167e406dbe5",
+      "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+      "sha256:f21c5e676f9921bdea957f5aa1812135cb72885b155db4c93eb2d461cc7ecfd7",
+      "sha256:e9303b93d2c3c387aa4be7e0ba62b06f74c0b426157fb99a62e15c7896cf3757",
+      "sha256:37f6b792c034c4798abc88776f50ecd0dea6fa035806c49e3f6d44c1c96bbaab",
+      "sha256:2fafe57069de58b2c68024d98e83d29a83a85c66e39bd94b5e072cf1d486025a",
+      "sha256:b6bc2c48d58190125a7fa2de3572cc0177f343762e074510ade31a66a93a0238",
+      "sha256:127f35f54d5889e3adcb2bec1df5f8e71f302168c776adcb38f807519fd384bc",
+      "sha256:b5677e5967bd657e57e25b9175d765991663800ebf5fcf10f1eae5f9884d3b81"
+    ],
+    "volumes": null
+  },
+  "environmentCheck": "cache-ok dotenv-ok"
+}

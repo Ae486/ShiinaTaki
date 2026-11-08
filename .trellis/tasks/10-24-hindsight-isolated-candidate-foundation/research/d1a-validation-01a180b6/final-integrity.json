@@ -1,0 +1,204 @@
+{
+  "session": "01a180b6-1dac-7fc2-b365-15fcb34dd4b4",
+  "recordedAt": "2026-10-28T06:36:31.488734+00:00",
+  "scope": "Root recovered completed checks after live agent handles were lost. Exact inherited D1-A bytes are released for independent review.",
+  "source": [
+    {
+      "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-admission.test.ts",
+      "bytes": 10146,
+      "sha256": "c2bcd0bbbd7a534b825d8cebb9d92bbc8adfe8d3c56652c425716916475a863f",
+      "unchangedSinceValidationStart": true
+    },
+    {
+      "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-admission.ts",
+      "bytes": 2972,
+      "sha256": "18d1897b4bcc57134c9f1b5fbf245e169d54f7ba0662faf85a32e3fc4ae6b16d",
+      "unchangedSinceValidationStart": true
+    },
+    {
+      "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-archive.ts",
+      "bytes": 6909,
+      "sha256": "c241f85cf63ef89924fb449f89cf1767ff1c5626b6b4eae26c6dd71611631af6",
+      "unchangedSinceValidationStart": true
+    },
+    {
+      "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-copy-stream.test.ts",
+      "bytes": 3161,
+      "sha256": "ac32fe5c1450dabd9ecfe8f28bd743844e34eb4727b152c1882f6617552062f3",
+      "unchangedSinceValidationStart": true
+    },
+    {
+      "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-copy-stream.ts",
+      "bytes": 4720,
+      "sha256": "8d5cc4fdd30e27bf5d0955d1e27ddcf5a9ecec9e29fcfd4b8cce73853f265771",
+      "unchangedSinceValidationStart": true
+    },
+    {
+      "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-core.ts",
+      "bytes": 5048,
+      "sha256": "23bcc08ac1e7498eca511fbb2d1ef242c72766d0253dd650fa80d6aaf5dcf88b",
+      "unchangedSinceValidationStart": true
+    },
+    {
+      "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-files.test.ts",
+      "bytes": 1398,
+      "sha256": "ae00cac1b6a2b9e737e94c6a0c48b2d5a8d654b97d27719dd082f74914640a02",
+      "unchangedSinceValidationStart": true
+    },
+    {
+      "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-files.ts",
+      "bytes": 2275,
+      "sha256": "927ec43b4572f38a2d7763edbccbdd28e394d55ff8e41402f17d333508e70f30",
+      "unchangedSinceValidationStart": true
+    },
+    {
+      "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-fixtures.ts",
+      "bytes": 9437,
+      "sha256": "1ccc0d6fdb46e1d32a735b366ff3acaca9fa13b80d995a8d7af2046717f76e6d",
+      "unchangedSinceValidationStart": true
+    },
+    {
+      "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-identity.test.ts",
+      "bytes": 2028,
+      "sha256": "9061f65cee549447d5bb9075494e9cb7579298f720c3e29a61a64336da5ccb53",
+      "unchangedSinceValidationStart": true
+    },
+    {
+      "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-identity.ts",
+      "bytes": 3078,
+      "sha256": "7bcf644e6654ddb7278d7bbeeeee9173dd198a19b3fcf53b2b40be3ac633a8a0",
+      "unchangedSinceValidationStart": true
+    },
+    {
+      "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-profile.ts",
+      "bytes": 3438,
+      "sha256": "95f2e5c54a7621c5a6f76a79ef71d749b89cb6b91ab613ed552dbcc9c7d8ca33",
+      "unchangedSinceValidationStart": true
+    },
+    {
+      "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-refusal.ts",
+      "bytes": 2934,
+      "sha256": "ef23fc538dc5ffc674d17237d239f22912436d43f43fd106e2e45955ae660b6c",
+      "unchangedSinceValidationStart": true
+    },
+    {
+      "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-schema-admission.ts",
+      "bytes": 4305,
+      "sha256": "7611854563b55fb6085fcb43cdd1013a09b1250a63dff7152d3d4c16f828b8fb",
+      "unchangedSinceValidationStart": true
+    },
+    {
+      "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-verifier.test.ts",
+      "bytes": 13198,
+      "sha256": "72ac96aae9a6835c8ad1c90aa2edfa32063213933ba8d2615d6d059db5c46cd2",
+      "unchangedSinceValidationStart": true
+    },
+    {
+      "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/hindsight-candidate-verifier.ts",
+      "bytes": 8835,
+      "sha256": "3f2b57e7cfc091fd9445ea42d927c1c9097df5dc5bfb359c801629c6bfe606f0",
+      "unchangedSinceValidationStart": true
+    },
+    {
+      "path": "H:/TakiAgent/packages/core/src/memory/hindsight-candidates/index.md",
+      "bytes": 1472,
+      "sha256": "15f0bb914db943d12441d8366d52eb6659a84add12ba1e38598a77c74c7a12db",
+      "unchangedSinceValidationStart": true
+    },
+    {
+      "path": "H:/TakiAgent/packages/shared/src/hindsight-candidate-schema.test.ts",
+      "bytes": 2073,
+      "sha256": "f86a61bc7a80682c8db5f88f8b460a285768e10109aa21730516d27ec24e5f50",
+      "unchangedSinceValidationStart": true
+    },
+    {
+      "path": "H:/TakiAgent/packages/shared/src/hindsight-candidate-schema.ts",
+      "bytes": 11040,
+      "sha256": "27e739489e330f8b3bfadbdfaa563b7263931b1b5d30aaf4295bd600a61f64f1",
+      "unchangedSinceValidationStart": true
+    }
+  ],
+  "related": [
+    {
+      "path": "packages/shared/src/index.ts",
+      "sha256": "dd8d65986ed1fa108188bf83ba32f4b14f6a6cb07b050e4dacc2974d04a909d1"
+    },
+    {
+      "path": "packages/shared/src/index.md",
+      "sha256": "6402cbb03ff1b1a1354d242ff40d5116f73ef11f26832e01f29b312bd3c61806"
+    },
+    {
+      "path": "packages/core/src/memory/index.md",
+      "sha256": "66e3279dc6e3880806ce0afbda54dc48a2d6c609d4beeb26359209578c62851c"
+    }
+  ],
+  "checks": [
+    {
+      "startedAt": "2026-10-28T04:20:57.0802997Z",
+      "command": "pnpm --filter @taki/shared typecheck",
+      "cwd": "H:/TakiAgent",
+      "exitCode": 0,
+      "completedAt": "2026-10-28T04:21:09.2645710Z",
+      "temporaryDirectory": "G:/TakiAgent-staging/d1a-01a180b6-7655aa66-05d6-4e4b-854e-1b144d33689d"
+    },
+    {
+      "startedAt": "2026-10-28T04:21:44.5278721Z",
+      "command": "pnpm --filter @taki/core typecheck",
+      "cwd": "H:/TakiAgent",
+      "exitCode": 0,
+      "completedAt": "2026-10-28T04:23:04.1642801Z",
+      "temporaryDirectory": "G:/TakiAgent-staging/d1a-01a180b6-7655aa66-05d6-4e4b-854e-1b144d33689d"
+    },
+    {
+      "startedAt": "2026-10-28T04:23:32.6292899Z",
+      "command": "pnpm exec eslint packages/core/src/memory/hindsight-candidates packages/shared/src/hindsight-candidate-schema.ts packages/shared/src/hindsight-candidate-schema.test.ts packages/shared/src/index.ts",
+      "cwd": "H:/TakiAgent",
+      "exitCode": 0,
+      "completedAt": "2026-10-28T04:23:42.9068641Z",
+      "temporaryDirectory": "G:/TakiAgent-staging/d1a-01a180b6-7655aa66-05d6-4e4b-854e-1b144d33689d"
+    },
+    {
+      "startedAt": "2026-10-28T04:27:31.1321014Z",
+      "command": "pnpm --filter @taki/shared test src/hindsight-candidate-schema.test.ts src/hindsight-backup-schema.test.ts src/hindsight-template-backup-schema.test.ts --maxWorkers=2",
+      "cwd": "H:/TakiAgent",
+      "exitCode": 0,
+      "completedAt": "2026-10-28T04:27:34.7241825Z",
+      "temporaryDirectory": "G:/TakiAgent-staging/d1a-01a180b6-7655aa66-05d6-4e4b-854e-1b144d33689d"
+    },
+    {
+      "startedAt": "2026-10-28T04:33:05.3038663Z",
+      "command": "pnpm --filter @taki/core test src/memory/hindsight-candidates src/memory/hindsight-backup/hindsight-backup-pair.test.ts src/memory/hindsight-backup/hindsight-template-backup-consumers.test.ts --maxWorkers=2",
+      "cwd": "H:/TakiAgent",
+      "exitCode": 0,
+      "completedAt": "2026-10-28T04:34:41.7968025Z",
+      "temporaryDirectory": "G:/TakiAgent-staging/d1a-01a180b6-7655aa66-05d6-4e4b-854e-1b144d33689d"
+    },
+    {
+      "startedAt": "2026-10-28T04:35:07.7773029Z",
+      "command": "git diff --check",
+      "cwd": "H:/TakiAgent",
+      "exitCode": 0,
+      "completedAt": "2026-10-28T04:35:08.1610124Z",
+      "scope": "tracked workspace diff only; candidate untracked files separately checked by ESLint and byte hygiene"
+    }
+  ],
+  "evidence": {
+    "01-shared-typecheck.log": "f9e1326358c4b06cc9030a0db5e834bd737e52677aa159683b70c68a9b6631b2",
+    "01-shared-typecheck.result.json": "23554de831b059805de79abdd58eb57e79442b543c52d2f72fef1c46c58cfb15",
+    "02-core-typecheck.log": "200b048828a3070d7e0970f063d8183336d03cbcf6006207a3c20ec524ac82c4",
+    "02-core-typecheck.result.json": "00088457dada63d626a36d2f12179ccfb20fe54af30507369f69b0ac49d33742",
+    "03-scoped-eslint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "03-scoped-eslint.result.json": "9afcf5b7e68ebb2210079b327f6e0e96165b6cd85972113cbb9f84fdf769bee9",
+    "04-shared-tests.log": "fa26b464f59b0249a40030c76a35deb7b83ac8ce9ba27346aa70b36ecd00b241",
+    "04-shared-tests.result.json": "17d8aaf8b6a8ecb0af0b48cc56cfc08b2afc7c77022f65598b8d6e08be39d672",
+    "05-core-tests.log": "a7a3ba22124a6679394a7d5ebb307ad1295973d2bdf3089ac145c1039446f658",
+    "05-core-tests.result.json": "ba58e07f15f0e69ae31d5f08c93c0394fc4c48e4e3ca55fc2a31ab68bce77436",
+    "06-diff-check.log": "bb84424570c1d71ef6bc934a0e43bf4bec77234011bad3ac5729e788db9ec587",
+    "06-diff-check.result.json": "f49da50c7da7e59753bead76f802dab23e044150123b9c97d1a8d434cb72c917",
+    "environment.json": "de179ec7c5ce1943d46dd78f4f2e15c97bb6b0d246a08730c7c52fbd014992e3",
+    "source-before.json": "6718b123b7c05a7f03786a5758d7a6ce603bdddddd905498704a1f3d29fb91c5"
+  },
+  "productionChangesThisSession": false,
+  "independentReviewPending": true,
+  "runtimeAccepted": false
+}

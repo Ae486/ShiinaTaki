@@ -1,0 +1,15 @@
+{
+  "releaseSha256": "da13c5f1bceb17130c000657b40fad55cdc29de94b1c64a5ca85137e2cbf91d0",
+  "allFileEvidenceToolPinsMatch": true,
+  "argv": [
+    "G:/anaconda3/python.exe",
+    "-I",
+    "-B",
+    "-S",
+    "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\docker-application-artifact\\prepare.py",
+    "--verify"
+  ],
+  "exitCode": 0,
+  "stdout": "{\"snapshotComplete\": true, \"deploymentReady\": false, \"token\": \"ad8bf8b8-9577-4420-9fd9-212574bd4568\", \"stage\": \"G:\\\\TakiAgent-c2b-native-api\\\\application-ad8bf8b8-9577-4420-9fd9-212574bd4568\", \"contextSha256\": \"fd69e163c66b522532bffaa80f6fe3f66d37189190d041843aec9e85388d6200\", \"contextBytes\": 7782003, \"contextEntries\": 450}\r\n",
+  "stderr": ""
+}

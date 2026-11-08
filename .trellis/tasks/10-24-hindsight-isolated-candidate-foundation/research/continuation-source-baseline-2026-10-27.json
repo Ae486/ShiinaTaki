@@ -1,0 +1,182 @@
+{
+  "head": "e260ff4b0bf663b5faa0187bc6ec701fd2f007cd",
+  "session": "01a17caa-61c4-7010-a505-6061c49e1330",
+  "capturedAt": "2026-10-27T09:32:50.7873421Z",
+  "files": [
+    {
+      "path": ".trellis/tasks/08-09-memory-operations-ui/research/development-start-2026-10-24.md",
+      "sha256": "8c847489e454a2365342b6510f32879a27b3491653b977653385c34114dfb0ad",
+      "bytes": 1650
+    },
+    {
+      "path": ".trellis/tasks/08-09-memory-operations-ui/research/preparation-advisor-2026-10-24.md",
+      "sha256": "38335b1f0cbafb786e3b4be8bf5cbaf1152ee4e6d2ad81658b99475afdec5427",
+      "bytes": 30177
+    },
+    {
+      "path": ".trellis/tasks/08-09-memory-operations-ui/research/s6-acceptance-plan-2026-10-24.md",
+      "sha256": "4af5c4eb5b0b890dde38b80baae8ce361c59abca9a9ddd6487418075db15bd49",
+      "bytes": 15066
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-preflight-2026-10-24.md",
+      "sha256": "96ab9a6ec67fdc36e7df43a4fe20f9345a2f848e84d29531eec9840c63202db2",
+      "bytes": 28258
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-slice1-run-cb3b3ca9-5a01-4bc4-a734-8b48d7868489/.c2b-image-owner",
+      "sha256": "ea9513218e1b015b21fb7dee87728d638f3feca521ae0404559ae38cd07f955e",
+      "bytes": 36
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-slice1-run-cb3b3ca9-5a01-4bc4-a734-8b48d7868489/archive.json",
+      "sha256": "00c9ab7460be0b1f83f747245dfd7dda1ccd88c6c65f9e5cbe842c6fafd6b4cd",
+      "bytes": 299
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-slice1-run-cb3b3ca9-5a01-4bc4-a734-8b48d7868489/result.json",
+      "sha256": "14f0fdfcb1e486694163b6b8f42662726cc23697bfe6295593d2e941ebe8ed93",
+      "bytes": 90035
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/run-slice1.ts",
+      "sha256": "7277034bfd972db1ddd1a77a09889b648d0160aada854e3093b07c7487890ada",
+      "bytes": 23290
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/topology-probe.py",
+      "sha256": "045b1f4434794713a2bd2fc60501714509090238438175f1d78357c6a677f9b9",
+      "bytes": 2950
+    },
+    {
+      "path": ".trellis/tasks/10-24-hindsight-isolated-candidate-foundation/check.jsonl",
+      "sha256": "72ff4c96b0b3763b4ca21c63e9ff99c7cf0e37c199f52f25752fbe46af9f90df",
+      "bytes": 2125
+    },
+    {
+      "path": ".trellis/tasks/10-24-hindsight-isolated-candidate-foundation/design.md",
+      "sha256": "15095bd928b17ea95f4acf58919dc47c3f73a149c0643ea8daeb0a2a954d19bb",
+      "bytes": 16467
+    },
+    {
+      "path": ".trellis/tasks/10-24-hindsight-isolated-candidate-foundation/implement.jsonl",
+      "sha256": "cc2002e214c16d2eb4738edb079c9bed77103e14031d65dd3b37ab26d0dfd8aa",
+      "bytes": 2121
+    },
+    {
+      "path": ".trellis/tasks/10-24-hindsight-isolated-candidate-foundation/implement.md",
+      "sha256": "c63b03de17c3b0af8d40b236a7c1936ad1fd0d3f383d3af566f78cf44109c06b",
+      "bytes": 11540
+    },
+    {
+      "path": ".trellis/tasks/10-24-hindsight-isolated-candidate-foundation/prd.md",
+      "sha256": "a28edd19502b9626146c300964acf6aefcc585b1150445a38232fae30320f9bb",
+      "bytes": 5886
+    },
+    {
+      "path": ".trellis/tasks/10-24-hindsight-isolated-candidate-foundation/research/README.md",
+      "sha256": "09833ae2fd916904b6d6481d665e001b8b3763f4f5009b620bbc2bcd1ecff296",
+      "bytes": 1700
+    },
+    {
+      "path": ".trellis/tasks/10-24-hindsight-isolated-candidate-foundation/research/source-readiness-2026-10-24.md",
+      "sha256": "a6dd31e674b6563e4aa29b642d9c6ec78b58a24fb22d25835ddc5954a337ada3",
+      "bytes": 40777
+    },
+    {
+      "path": ".trellis/tasks/10-24-hindsight-isolated-candidate-foundation/task.json",
+      "sha256": "0b9b4f17df5c99f8f866f201107b4c4e4bb83b8d2041f824359626aea8aacf94",
+      "bytes": 1793
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-candidates/hindsight-candidate-copy-stream.ts",
+      "sha256": "5d3a824eaec1f870c5f47fe00dcecf11f0f63ceb30b3d1e62be3d53239297120",
+      "bytes": 4071
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-candidates/hindsight-candidate-profile.ts",
+      "sha256": "0bee1e57bf4fec3f0db0ad5a889454b4d5d090be3af30d5d6b515f0267867b70",
+      "bytes": 3242
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-candidates/hindsight-candidate-refusal.ts",
+      "sha256": "ef23fc538dc5ffc674d17237d239f22912436d43f43fd106e2e45955ae660b6c",
+      "bytes": 2934
+    },
+    {
+      "path": "packages/shared/src/hindsight-candidate-schema.ts",
+      "sha256": "ca6b0eb28ce128418ef290e07184cb52a36b7f490d3c34f90cab22581336d619",
+      "bytes": 8924
+    },
+    {
+      "path": ".trellis/tasks/08-09-memory-operations-ui/design.md",
+      "sha256": "97dde3ccf834e2df2b0a94cafb02b6a47d1ab7fb90828bbe2c34ca7f75b1bcab",
+      "bytes": 17039
+    },
+    {
+      "path": ".trellis/tasks/08-09-memory-operations-ui/implement.md",
+      "sha256": "d760cb7f06d554daea39fb6f5bdb3e3c7c3345efb282b022f93f9a8b81eac954",
+      "bytes": 10063
+    },
+    {
+      "path": ".trellis/tasks/08-09-memory-operations-ui/prd.md",
+      "sha256": "aac8ce97ef219a46bbac82fb9d09d7c86532ffde3c95270f01a3afdaa05c6d2f",
+      "bytes": 9101
+    },
+    {
+      "path": ".trellis/tasks/08-09-memory-operations-ui/research/stage5-execution-map-2026-10-07.md",
+      "sha256": "ec7a92150042c41e49d65eadec4f0ae6342cf8aaaf9bbf5255024f7404ceef2e",
+      "bytes": 9242
+    },
+    {
+      "path": ".trellis/tasks/08-09-memory-operations-ui/task.json",
+      "sha256": "7ac994bfea8fe7dbbb42d6e359df5793c59870dd84c972bc185fe8cae3a39cd4",
+      "bytes": 4909
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/check.jsonl",
+      "sha256": "61a14cce7934731213f4c4cc56bd3f368b2ce64bc20679c13d8064c86a8fb54b",
+      "bytes": 5737
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/implement.jsonl",
+      "sha256": "0b3485d69c4e83adc8230fd9a69301bdf8bc4bcf03d62505fd61b1dcd0550c75",
+      "bytes": 5727
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/docker-native-api/README.md",
+      "sha256": "28233008b0a319d78d2ff3e561a63003780d33691d41c97950a6addf8da2f929",
+      "bytes": 9827
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/research/leader-now.md",
+      "sha256": "22330b369224db5e2e25ffa9e6af8bc3f6efd3565dc00c026c6826edff89a402",
+      "bytes": 19816
+    },
+    {
+      "path": ".trellis/tasks/10-14-hindsight-managed-deployment/task.json",
+      "sha256": "b813b792206599c47f9253f414c2db87e399c77ee8aa98764392e5bef397f186",
+      "bytes": 1868
+    },
+    {
+      "path": "docs/HANDOFF.md",
+      "sha256": "541b052d7fe8b7aedf230554e424c223d09c890dbc22ab19d08717fb14fb408a",
+      "bytes": 75001
+    },
+    {
+      "path": "docs/deferred-decisions.md",
+      "sha256": "5b8640fa526b56136438595b06aa6b630d21ee11662339de861c442d416edee2",
+      "bytes": 88004
+    },
+    {
+      "path": "packages/shared/src/index.md",
+      "sha256": "9c6f8cae9e3de0a4a20f0c6e334b9a0529f2992c497ee395cf3a750cd6098d31",
+      "bytes": 17653
+    },
+    {
+      "path": "packages/shared/src/index.ts",
+      "sha256": "85f01ce210294d662e1457f6056cd53be40453c7f12ae543c36f01c9a8ea24ce",
+      "bytes": 61645
+    }
+  ]
+}

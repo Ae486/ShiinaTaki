@@ -1,0 +1,7 @@
+{
+  "scope": "Initial source-only checks before correction; no runtime",
+  "ruff": {"status": "FAIL", "finding": "compare.py I001 import block unsorted"},
+  "tyCollector": {"status": "FAIL", "findings": ["collect.py len on heterogeneous fields dictionary values", "collect.py optional iterable fields value", "collect.py append on heterogeneous result dictionary value"]},
+  "tyComparator": {"status": "PASS"},
+  "correction": "Use named list locals and explicit dynamic JSON result mapping; sort imports. No suppression or limit reduction."
+}

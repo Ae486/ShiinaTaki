@@ -1,0 +1,43 @@
+--- original/collect.py
++++ v2/collect.py
+@@ -11,7 +11,7 @@
+ from email.parser import BytesParser
+ from pathlib import Path
+ 
+-TOKEN = "0ab89a2a-ccac-4350-a4ea-ed90ed7a3e6d"
++TOKEN = "e309a1b4-7047-44bb-a4af-cdd65b1a994a"
+ PURELIB = Path("/app/api/.venv/lib/python3.11/site-packages")
+ STARTED = time.monotonic()
+ MAX_OUTPUT = 1024 * 1024
+@@ -86,10 +86,6 @@
+     for key in ["Name", "Version", "Metadata-Version"]:
+         require(len(parsed.get_all(key, [])) == 1, "metadata_required_header")
+     require(
+-        str(parsed["Metadata-Version"]) in SUPPORTED_METADATA,
+-        "metadata_version_unsupported",
+-    )
+-    require(
+         len(parsed.get_all("Requires-Python", [])) <= 1, "metadata_duplicate_python"
+     )
+     requires_dist = [str(value) for value in parsed.get_all("Requires-Dist", [])]
+@@ -104,6 +100,8 @@
+         "name": str(parsed["Name"]),
+         "version": str(parsed["Version"]),
+         "metadataVersion": str(parsed["Metadata-Version"]),
++        "metadataVersionSupported": str(parsed["Metadata-Version"])
++        in SUPPORTED_METADATA,
+         "requiresPython": str(parsed["Requires-Python"])
+         if parsed["Requires-Python"]
+         else None,
+@@ -166,6 +164,11 @@
+             total += value["bytes"]
+             require(total <= 32 * 1024 * 1024, "metadata_total_bound")
+             distributions.append(value)
++        result["unsupportedMetadata"] = [
++            {"file": value["file"], "metadataVersion": value["metadataVersion"]}
++            for value in distributions
++            if not value["metadataVersionSupported"]
++        ]
+         result["metadataBytes"] = total
+         result["complete"] = True
+     except InventoryRefused as error:

@@ -1,0 +1,39 @@
+{
+  "session": "01a180b6-1dac-7fc2-b365-15fcb34dd4b4",
+  "observedAt": "2026-10-28T04:16:33.868909+00:00",
+  "scope": "Read-only relay source and tool verification; bounded Engine probe. No runtime stage or archive created.",
+  "releaseSha256": "2d3f0c9ad86bcb5e5d956e9d4797edee4e1056b274958ae781b548b4d8cb954f",
+  "sourcePins": {
+    "launch.mjs": true,
+    "run-relay.mjs": true,
+    "docker-commands.mjs": true,
+    "host-transport.mjs": true,
+    "evidence-store.mjs": true,
+    "fixture-server.py": true,
+    "stream-relay.py": true,
+    "observe-reaping.py": true
+  },
+  "toolPins": {
+    "node": true,
+    "docker": true
+  },
+  "runtimeStageExists": false,
+  "runtimeArchiveExists": false,
+  "engineProbe": {
+    "args": [
+      "--host",
+      "npipe:////./pipe/dockerDesktopLinuxEngine",
+      "--config",
+      "G:\\TakiAgent-staging\\c2b-preflight-01a180b6\\client-config",
+      "info",
+      "--format",
+      "{\"id\":{{json .ID}},\"version\":{{json .ServerVersion}},\"os\":{{json .OSType}}}"
+    ],
+    "exitCode": 0,
+    "stdout": "{\"id\":\"93e8319e-24b7-4a7d-88f1-60923ad681e0\",\"version\":\"29.0.1\",\"os\":\"linux\"}\n",
+    "stderr": ""
+  },
+  "preflightStage": "G:\\TakiAgent-staging\\c2b-preflight-01a180b6",
+  "readyForRuntime": false,
+  "runtimeAttempted": false
+}

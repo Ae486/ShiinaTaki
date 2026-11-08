@@ -1,0 +1,1611 @@
+{
+  "schema": "c2b-slice1-run-v1",
+  "token": "cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+  "port": 58117,
+  "deploymentReady": false,
+  "scope": "Cached-base static inventory plus masquerade-off bridge topology probe; no API, producer, receipt or setup",
+  "childEnvironmentKeys": [
+    "SystemRoot"
+  ],
+  "phaseA": {
+    "verdict": "FAIL",
+    "containerId": "57eebed8e900d735fdc83827925ad1ba29da3f15cc4bc31e86954acf9667b800",
+    "beforeStart": {
+      "Id": "57eebed8e900d735fdc83827925ad1ba29da3f15cc4bc31e86954acf9667b800",
+      "Name": "/taki-c2b-image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+      "Image": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+      "Path": "/app/api/.venv/bin/python",
+      "Args": [
+        "-I",
+        "-B",
+        "-"
+      ],
+      "User": "1000:1000",
+      "Token": "cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+      "Role": "native-image-inventory",
+      "NetworkMode": "none",
+      "ReadonlyRootfs": true,
+      "Mounts": [],
+      "Memory": 268435456,
+      "NanoCpus": 1000000000,
+      "PidsLimit": 16,
+      "Privileged": false,
+      "CapDrop": [
+        "ALL"
+      ],
+      "SecurityOpt": [
+        "no-new-privileges=true"
+      ],
+      "LogDriver": "none",
+      "Running": false,
+      "ExitCode": 0,
+      "OOMKilled": false
+    },
+    "settingMismatches": [],
+    "exitCode": 2,
+    "timedOut": false,
+    "overflow": false,
+    "afterExit": {
+      "Id": "57eebed8e900d735fdc83827925ad1ba29da3f15cc4bc31e86954acf9667b800",
+      "Name": "/taki-c2b-image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+      "Image": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+      "Path": "/app/api/.venv/bin/python",
+      "Args": [
+        "-I",
+        "-B",
+        "-"
+      ],
+      "User": "1000:1000",
+      "Token": "cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+      "Role": "native-image-inventory",
+      "NetworkMode": "none",
+      "ReadonlyRootfs": true,
+      "Mounts": [],
+      "Memory": 268435456,
+      "NanoCpus": 1000000000,
+      "PidsLimit": 16,
+      "Privileged": false,
+      "CapDrop": [
+        "ALL"
+      ],
+      "SecurityOpt": [
+        "no-new-privileges=true"
+      ],
+      "LogDriver": "none",
+      "Running": false,
+      "ExitCode": 2,
+      "OOMKilled": false
+    },
+    "output": {
+      "schema": "c2b-cached-image-inventory-v1",
+      "scope": "cached-base-static-inventory",
+      "expected_image_input": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+      "deploymentReady": false,
+      "inventory_complete": true,
+      "unresolved": [
+        "module_missing:hindsight_api.api.taki_template_lifecycle",
+        "module_missing:hindsight_api.engine.template_apply",
+        "module_missing:hindsight_api.engine.template_initialization",
+        "module_missing:hindsight_api.engine.template_snapshot",
+        "module_missing:hindsight_api.engine.template_mutations",
+        "cached_build_differs_or_is_unconfirmed"
+      ],
+      "runtime": {
+        "python": "3.11.16",
+        "executable": "/app/api/.venv/bin/python",
+        "resolved_executable": "/usr/local/bin/python3.11",
+        "uid": 1000,
+        "gid": 1000,
+        "purelib": "/app/api/.venv/lib/python3.11/site-packages",
+        "import_search_paths": [
+          "/usr/local/lib/python311.zip",
+          "/usr/local/lib/python3.11",
+          "/usr/local/lib/python3.11/lib-dynload",
+          "/app/api/.venv/lib/python3.11/site-packages",
+          "/app/api"
+        ],
+        "resolution": "PathFinder only; no loader execution"
+      },
+      "packages": [
+        {
+          "name": "hindsight-api-slim",
+          "version": "0.9.0",
+          "root": "/app/api/.venv/lib/python3.11/site-packages",
+          "metadata": [
+            {
+              "path": "/app/api/.venv/lib/python3.11/site-packages/hindsight_api_slim-0.9.0.dist-info/METADATA",
+              "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/hindsight_api_slim-0.9.0.dist-info/METADATA",
+              "state": "read",
+              "bytes": 8570,
+              "mode": "0o644",
+              "uid": 1000,
+              "gid": 1000,
+              "readable": true,
+              "sha256": "fa5441d2c3a24d8ca7e88eccae2f76531ce22d6a6d174bc4fd96ccaf41e71414"
+            },
+            {
+              "path": "/app/api/.venv/lib/python3.11/site-packages/hindsight_api_slim-0.9.0.dist-info/WHEEL",
+              "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/hindsight_api_slim-0.9.0.dist-info/WHEEL",
+              "state": "read",
+              "bytes": 87,
+              "mode": "0o644",
+              "uid": 1000,
+              "gid": 1000,
+              "readable": true,
+              "sha256": "ccec20e2307acd7da453dd7437e70c6b08e2bc3ead3bc3445af135da37b56d59"
+            }
+          ]
+        },
+        {
+          "name": "tiktoken",
+          "version": "0.12.0",
+          "root": "/app/api/.venv/lib/python3.11/site-packages",
+          "metadata": [
+            {
+              "path": "/app/api/.venv/lib/python3.11/site-packages/tiktoken-0.12.0.dist-info/METADATA",
+              "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/tiktoken-0.12.0.dist-info/METADATA",
+              "state": "read",
+              "bytes": 6688,
+              "mode": "0o644",
+              "uid": 1000,
+              "gid": 1000,
+              "readable": true,
+              "sha256": "d3b28e6ec8f09c47cb4d0fa8443d2f86b137670fa834c26a4e505b11e271b59f"
+            },
+            {
+              "path": "/app/api/.venv/lib/python3.11/site-packages/tiktoken-0.12.0.dist-info/WHEEL",
+              "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/tiktoken-0.12.0.dist-info/WHEEL",
+              "state": "read",
+              "bytes": 113,
+              "mode": "0o644",
+              "uid": 1000,
+              "gid": 1000,
+              "readable": true,
+              "sha256": "ea8543cd1ddbe4432aa233e1c4a685d6031f7608eed61aa8df5ce930b63a2c56"
+            }
+          ]
+        },
+        {
+          "name": "openai",
+          "version": "2.24.0",
+          "root": "/app/api/.venv/lib/python3.11/site-packages",
+          "metadata": [
+            {
+              "path": "/app/api/.venv/lib/python3.11/site-packages/openai-2.24.0.dist-info/METADATA",
+              "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/openai-2.24.0.dist-info/METADATA",
+              "state": "read",
+              "bytes": 29167,
+              "mode": "0o644",
+              "uid": 1000,
+              "gid": 1000,
+              "readable": true,
+              "sha256": "8ffd865c529a230b50a81b41e9338d8248d182111e7cacf2102730bedea5583f"
+            },
+            {
+              "path": "/app/api/.venv/lib/python3.11/site-packages/openai-2.24.0.dist-info/WHEEL",
+              "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/openai-2.24.0.dist-info/WHEEL",
+              "state": "read",
+              "bytes": 87,
+              "mode": "0o644",
+              "uid": 1000,
+              "gid": 1000,
+              "readable": true,
+              "sha256": "0b615483066088b6f39d1fa4d1bff9937022ff568048e5c3b2cde5cc252c52e8"
+            }
+          ]
+        },
+        {
+          "name": "uvicorn",
+          "version": "0.38.0",
+          "root": "/app/api/.venv/lib/python3.11/site-packages",
+          "metadata": [
+            {
+              "path": "/app/api/.venv/lib/python3.11/site-packages/uvicorn-0.38.0.dist-info/METADATA",
+              "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/uvicorn-0.38.0.dist-info/METADATA",
+              "state": "read",
+              "bytes": 6787,
+              "mode": "0o644",
+              "uid": 1000,
+              "gid": 1000,
+              "readable": true,
+              "sha256": "1a630c962c86a27eab8541cce9062dc33398b61a5a392c40521073c9191250b4"
+            },
+            {
+              "path": "/app/api/.venv/lib/python3.11/site-packages/uvicorn-0.38.0.dist-info/WHEEL",
+              "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/uvicorn-0.38.0.dist-info/WHEEL",
+              "state": "read",
+              "bytes": 87,
+              "mode": "0o644",
+              "uid": 1000,
+              "gid": 1000,
+              "readable": true,
+              "sha256": "aad0b0a12256807936d52d4a6f88a1773236ae527564a688bab4e3fe780e8724"
+            }
+          ]
+        },
+        {
+          "name": "fastapi",
+          "version": "0.136.3",
+          "root": "/app/api/.venv/lib/python3.11/site-packages",
+          "metadata": [
+            {
+              "path": "/app/api/.venv/lib/python3.11/site-packages/fastapi-0.136.3.dist-info/METADATA",
+              "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/fastapi-0.136.3.dist-info/METADATA",
+              "state": "read",
+              "bytes": 27647,
+              "mode": "0o644",
+              "uid": 1000,
+              "gid": 1000,
+              "readable": true,
+              "sha256": "0370bef57a44ef18814313fac9ffa7b7c7f9d2112fa4d6e49134cc2f859f69b4"
+            },
+            {
+              "path": "/app/api/.venv/lib/python3.11/site-packages/fastapi-0.136.3.dist-info/WHEEL",
+              "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/fastapi-0.136.3.dist-info/WHEEL",
+              "state": "read",
+              "bytes": 90,
+              "mode": "0o644",
+              "uid": 1000,
+              "gid": 1000,
+              "readable": true,
+              "sha256": "677e9e4d7ea51b73c84d195e49de610191c2733e76ca0ddcd09415c4a05b2d6d"
+            }
+          ]
+        },
+        {
+          "name": "asyncpg",
+          "version": "0.30.0",
+          "root": "/app/api/.venv/lib/python3.11/site-packages",
+          "metadata": [
+            {
+              "path": "/app/api/.venv/lib/python3.11/site-packages/asyncpg-0.30.0.dist-info/METADATA",
+              "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/asyncpg-0.30.0.dist-info/METADATA",
+              "state": "read",
+              "bytes": 5010,
+              "mode": "0o644",
+              "uid": 1000,
+              "gid": 1000,
+              "readable": true,
+              "sha256": "eb430dd2d5c3bdc3edc5a8540b5bf148ff3e752e61603b62aff6086d8d8d0a44"
+            },
+            {
+              "path": "/app/api/.venv/lib/python3.11/site-packages/asyncpg-0.30.0.dist-info/WHEEL",
+              "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/asyncpg-0.30.0.dist-info/WHEEL",
+              "state": "read",
+              "bytes": 151,
+              "mode": "0o644",
+              "uid": 1000,
+              "gid": 1000,
+              "readable": true,
+              "sha256": "3a16ae7509357f7602bb4b903b9bfabbe8b4d573e85fbd1cd11dd3fd763e8cea"
+            }
+          ]
+        },
+        {
+          "name": "psycopg2-binary",
+          "version": "2.9.11",
+          "root": "/app/api/.venv/lib/python3.11/site-packages",
+          "metadata": [
+            {
+              "path": "/app/api/.venv/lib/python3.11/site-packages/psycopg2_binary-2.9.11.dist-info/METADATA",
+              "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/psycopg2_binary-2.9.11.dist-info/METADATA",
+              "state": "read",
+              "bytes": 4936,
+              "mode": "0o644",
+              "uid": 1000,
+              "gid": 1000,
+              "readable": true,
+              "sha256": "d6d77144bb22e40a1ac922198fa34783421bdb8990eeebc6fbae10a71341ddfc"
+            },
+            {
+              "path": "/app/api/.venv/lib/python3.11/site-packages/psycopg2_binary-2.9.11.dist-info/WHEEL",
+              "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/psycopg2_binary-2.9.11.dist-info/WHEEL",
+              "state": "read",
+              "bytes": 151,
+              "mode": "0o644",
+              "uid": 1000,
+              "gid": 1000,
+              "readable": true,
+              "sha256": "fc216f202603999940607b7c2fb667de7f8118b8fc76464b40fa76d8f8b2e491"
+            }
+          ]
+        },
+        {
+          "name": "pg0-embedded",
+          "version": "0.15.0",
+          "root": "/app/api/.venv/lib/python3.11/site-packages",
+          "metadata": [
+            {
+              "path": "/app/api/.venv/lib/python3.11/site-packages/pg0_embedded-0.15.0.dist-info/METADATA",
+              "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/pg0_embedded-0.15.0.dist-info/METADATA",
+              "state": "read",
+              "bytes": 3259,
+              "mode": "0o644",
+              "uid": 1000,
+              "gid": 1000,
+              "readable": true,
+              "sha256": "813986d2d9e5c08b47a8761b1573ad58d50bfd83263da17b574fcb7bec52443f"
+            },
+            {
+              "path": "/app/api/.venv/lib/python3.11/site-packages/pg0_embedded-0.15.0.dist-info/WHEEL",
+              "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/pg0_embedded-0.15.0.dist-info/WHEEL",
+              "state": "read",
+              "bytes": 87,
+              "mode": "0o644",
+              "uid": 1000,
+              "gid": 1000,
+              "readable": true,
+              "sha256": "942926c567d0b1273d09f20295879abd37507845f6b683eab9f87d808df91100"
+            }
+          ]
+        },
+        {
+          "name": "python-dotenv",
+          "version": "1.2.2",
+          "root": "/app/api/.venv/lib/python3.11/site-packages",
+          "metadata": [
+            {
+              "path": "/app/api/.venv/lib/python3.11/site-packages/python_dotenv-1.2.2.dist-info/METADATA",
+              "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/python_dotenv-1.2.2.dist-info/METADATA",
+              "state": "read",
+              "bytes": 27524,
+              "mode": "0o644",
+              "uid": 1000,
+              "gid": 1000,
+              "readable": true,
+              "sha256": "59430a9dee8f8118dbf693e41c4a3e5150626d19901f4727503da9499f5a64a1"
+            },
+            {
+              "path": "/app/api/.venv/lib/python3.11/site-packages/python_dotenv-1.2.2.dist-info/WHEEL",
+              "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/python_dotenv-1.2.2.dist-info/WHEEL",
+              "state": "read",
+              "bytes": 91,
+              "mode": "0o644",
+              "uid": 1000,
+              "gid": 1000,
+              "readable": true,
+              "sha256": "6027f0606398322e49870d9f538c8d83012bc9b6f6217e4f13004a57865b741a"
+            }
+          ]
+        }
+      ],
+      "modules": [
+        {
+          "name": "hindsight_api",
+          "path": "/app/api/hindsight_api/__init__.py",
+          "resolved_path": "/app/api/hindsight_api/__init__.py",
+          "state": "read",
+          "bytes": 1550,
+          "mode": "0o755",
+          "uid": 1000,
+          "gid": 1000,
+          "readable": true,
+          "sha256": "fb42a70a97bfcd2044b52aeef6ff5f4bf0e88d91320be3785ec4fef798789d5a"
+        },
+        {
+          "name": "hindsight_api.server",
+          "path": "/app/api/hindsight_api/server.py",
+          "resolved_path": "/app/api/hindsight_api/server.py",
+          "state": "read",
+          "bytes": 3009,
+          "mode": "0o755",
+          "uid": 1000,
+          "gid": 1000,
+          "readable": true,
+          "sha256": "aa3a3dccba49dad28ed122fd4c80fc434a57913c1db954c35d443331d1939c36"
+        },
+        {
+          "name": "hindsight_api.engine.memory_engine",
+          "path": "/app/api/hindsight_api/engine/memory_engine.py",
+          "resolved_path": "/app/api/hindsight_api/engine/memory_engine.py",
+          "state": "read",
+          "bytes": 826436,
+          "mode": "0o755",
+          "uid": 1000,
+          "gid": 1000,
+          "readable": true,
+          "sha256": "3b141780dd07496314a231b5758a81b08dc386b24a695ff1fb24c44aaec6f047"
+        },
+        {
+          "name": "hindsight_api.engine.token_encoding",
+          "path": "/app/api/hindsight_api/engine/token_encoding.py",
+          "resolved_path": "/app/api/hindsight_api/engine/token_encoding.py",
+          "state": "read",
+          "bytes": 2898,
+          "mode": "0o755",
+          "uid": 1000,
+          "gid": 1000,
+          "readable": true,
+          "sha256": "b6b0c2e0ec86810a838c3f69936ef943e3f0cd9fa7f49f07adede4cb69a48941"
+        },
+        {
+          "name": "hindsight_api.engine.taki_compatibility",
+          "path": "/app/api/hindsight_api/engine/taki_compatibility.py",
+          "resolved_path": "/app/api/hindsight_api/engine/taki_compatibility.py",
+          "state": "read",
+          "bytes": 11699,
+          "mode": "0o755",
+          "uid": 1000,
+          "gid": 1000,
+          "readable": true,
+          "sha256": "570385b78f0042203d8ccfd3dec7a1892ab678d803e5e83d3f99812467ddedb6"
+        },
+        {
+          "name": "hindsight_api.extensions.builtin.tenant",
+          "path": "/app/api/hindsight_api/extensions/builtin/tenant.py",
+          "resolved_path": "/app/api/hindsight_api/extensions/builtin/tenant.py",
+          "state": "read",
+          "bytes": 4447,
+          "mode": "0o755",
+          "uid": 1000,
+          "gid": 1000,
+          "readable": true,
+          "sha256": "ac61acd64e3ca8d1014e2304d6f6d0dcdfe252dbd0c80cf02b8ee559451699ba"
+        },
+        {
+          "name": "hindsight_api.extensions.builtin.taki_memory",
+          "path": "/app/api/hindsight_api/extensions/builtin/taki_memory.py",
+          "resolved_path": "/app/api/hindsight_api/extensions/builtin/taki_memory.py",
+          "state": "read",
+          "bytes": 9649,
+          "mode": "0o755",
+          "uid": 1000,
+          "gid": 1000,
+          "readable": true,
+          "sha256": "10ecc8db65eca353c60b5d8826316572d6aa8c1718a3739ff8130505262c59e1"
+        },
+        {
+          "name": "hindsight_api.api.taki_template_lifecycle",
+          "state": "missing"
+        },
+        {
+          "name": "hindsight_api.engine.template_apply",
+          "state": "missing"
+        },
+        {
+          "name": "hindsight_api.engine.template_initialization",
+          "state": "missing"
+        },
+        {
+          "name": "hindsight_api.engine.template_snapshot",
+          "state": "missing"
+        },
+        {
+          "name": "hindsight_api.engine.template_mutations",
+          "state": "missing"
+        },
+        {
+          "name": "tiktoken.load",
+          "path": "/app/api/.venv/lib/python3.11/site-packages/tiktoken/load.py",
+          "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/tiktoken/load.py",
+          "state": "read",
+          "bytes": 5919,
+          "mode": "0o644",
+          "uid": 1000,
+          "gid": 1000,
+          "readable": true,
+          "sha256": "7614ce8952089db86243fce6b4e643b212afa922b35f234e24958f989d12f515"
+        },
+        {
+          "name": "tiktoken.registry",
+          "path": "/app/api/.venv/lib/python3.11/site-packages/tiktoken/registry.py",
+          "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/tiktoken/registry.py",
+          "state": "read",
+          "bytes": 3256,
+          "mode": "0o644",
+          "uid": 1000,
+          "gid": 1000,
+          "readable": true,
+          "sha256": "edf92d65b27529c9bcb15c968047c8cbe6717d4bdc5eea4b50d5ca3df486c105"
+        },
+        {
+          "name": "tiktoken_ext.openai_public",
+          "path": "/app/api/.venv/lib/python3.11/site-packages/tiktoken_ext/openai_public.py",
+          "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/tiktoken_ext/openai_public.py",
+          "state": "read",
+          "bytes": 5613,
+          "mode": "0o644",
+          "uid": 1000,
+          "gid": 1000,
+          "readable": true,
+          "sha256": "954392738e60d0fb6dca1dad80872efc47c8e2733babecbbf0a23970ed66c2cb"
+        },
+        {
+          "name": "tiktoken._tiktoken",
+          "path": "/app/api/.venv/lib/python3.11/site-packages/tiktoken/_tiktoken.cpython-311-x86_64-linux-gnu.so",
+          "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/tiktoken/_tiktoken.cpython-311-x86_64-linux-gnu.so",
+          "state": "read",
+          "bytes": 3526784,
+          "mode": "0o755",
+          "uid": 1000,
+          "gid": 1000,
+          "readable": true,
+          "sha256": "7f923bc920741af4f92ad82ce04873a037c9f086df849d25c3b33a51acff69e5"
+        },
+        {
+          "name": "openai",
+          "path": "/app/api/.venv/lib/python3.11/site-packages/openai/__init__.py",
+          "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/openai/__init__.py",
+          "state": "read",
+          "bytes": 11218,
+          "mode": "0o644",
+          "uid": 1000,
+          "gid": 1000,
+          "readable": true,
+          "sha256": "7fcfeb79b49b8b9604bc0d2337e8a313a9158e89103feebe488b2bfeb0286bb2"
+        },
+        {
+          "name": "uvicorn",
+          "path": "/app/api/.venv/lib/python3.11/site-packages/uvicorn/__init__.py",
+          "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/uvicorn/__init__.py",
+          "state": "read",
+          "bytes": 147,
+          "mode": "0o644",
+          "uid": 1000,
+          "gid": 1000,
+          "readable": true,
+          "sha256": "e98f296a80312cec8a2153bb412b8bc5279029165686f03d30d03f3f7243d726"
+        },
+        {
+          "name": "fastapi",
+          "path": "/app/api/.venv/lib/python3.11/site-packages/fastapi/__init__.py",
+          "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/fastapi/__init__.py",
+          "state": "read",
+          "bytes": 1081,
+          "mode": "0o644",
+          "uid": 1000,
+          "gid": 1000,
+          "readable": true,
+          "sha256": "7a99ae4d55fabb84b29838d8783c26ce5081441f062a35ce8e423474b56bde2c"
+        },
+        {
+          "name": "asyncpg",
+          "path": "/app/api/.venv/lib/python3.11/site-packages/asyncpg/__init__.py",
+          "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/asyncpg/__init__.py",
+          "state": "read",
+          "bytes": 647,
+          "mode": "0o644",
+          "uid": 1000,
+          "gid": 1000,
+          "readable": true,
+          "sha256": "6f30f7d5a31e91b291f7068c5ee03121815b9ab43e4b532db639abbbfb128e8f"
+        },
+        {
+          "name": "psycopg2",
+          "path": "/app/api/.venv/lib/python3.11/site-packages/psycopg2/__init__.py",
+          "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/psycopg2/__init__.py",
+          "state": "read",
+          "bytes": 4768,
+          "mode": "0o644",
+          "uid": 1000,
+          "gid": 1000,
+          "readable": true,
+          "sha256": "f66a3941dd2e587884071d82768806a2cda436ab6534d1b36ed625182d21592f"
+        },
+        {
+          "name": "pg0",
+          "path": "/app/api/.venv/lib/python3.11/site-packages/pg0/__init__.py",
+          "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/pg0/__init__.py",
+          "state": "read",
+          "bytes": 13837,
+          "mode": "0o644",
+          "uid": 1000,
+          "gid": 1000,
+          "readable": true,
+          "sha256": "ac3f14beaff4b1cdfc0fdf674df2d2c322131bc4852de09b58f0ed7bc4288dc1"
+        },
+        {
+          "name": "dotenv",
+          "path": "/app/api/.venv/lib/python3.11/site-packages/dotenv/__init__.py",
+          "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/dotenv/__init__.py",
+          "state": "read",
+          "bytes": 1230,
+          "mode": "0o644",
+          "uid": 1000,
+          "gid": 1000,
+          "readable": true,
+          "sha256": "6e163e88aeb0c0765a996208e9e482b820165d435d9f64d016610eb97494ed23"
+        }
+      ],
+      "tokenizer": {
+        "reader_ast_bindings": {
+          "explicit_cache_directory": true,
+          "url_sha1_key": true,
+          "cache_path_join": true,
+          "content_sha256": true,
+          "encoding_uses_reader": true
+        },
+        "definition_line": 76,
+        "url": "https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken",
+        "expected_sha256": "223921b76ee99bde995b7ff738513eef100fb51d18c93597a113bcffe865b2a7",
+        "url_derived_cache_key": "9b5ad71b2ce5302211f9c61530b329a4922fc6a4",
+        "cache_files": [
+          {
+            "path": "/tmp/data-gym-cache/9b5ad71b2ce5302211f9c61530b329a4922fc6a4",
+            "resolved_path": "/tmp/data-gym-cache/9b5ad71b2ce5302211f9c61530b329a4922fc6a4",
+            "state": "read",
+            "bytes": 1681126,
+            "mode": "0o644",
+            "uid": 1000,
+            "gid": 1000,
+            "readable": true,
+            "sha256": "223921b76ee99bde995b7ff738513eef100fb51d18c93597a113bcffe865b2a7",
+            "matches_encoding_hash": true
+          },
+          {
+            "path": "/var/tmp/data-gym-cache/9b5ad71b2ce5302211f9c61530b329a4922fc6a4",
+            "resolved_path": "/var/tmp/data-gym-cache/9b5ad71b2ce5302211f9c61530b329a4922fc6a4",
+            "state": "missing",
+            "matches_encoding_hash": false
+          },
+          {
+            "path": "/usr/tmp/data-gym-cache/9b5ad71b2ce5302211f9c61530b329a4922fc6a4",
+            "resolved_path": "/usr/tmp/data-gym-cache/9b5ad71b2ce5302211f9c61530b329a4922fc6a4",
+            "state": "missing",
+            "matches_encoding_hash": false
+          },
+          {
+            "path": "/home/hindsight/.pg0/data-gym-cache/9b5ad71b2ce5302211f9c61530b329a4922fc6a4",
+            "resolved_path": "/home/hindsight/.pg0/data-gym-cache/9b5ad71b2ce5302211f9c61530b329a4922fc6a4",
+            "state": "missing",
+            "matches_encoding_hash": false
+          }
+        ],
+        "verified_pin_candidates": [
+          "/tmp/data-gym-cache"
+        ],
+        "ambient_cache_variables_present": {
+          "TIKTOKEN_CACHE_DIR": false,
+          "DATA_GYM_CACHE_DIR": false
+        },
+        "managed_home": "/home/hindsight/.pg0",
+        "ambient_temp_directory_evaluated": false,
+        "encoding_load_executed": false,
+        "interpretation": "Explicit cache pin required; ambient lookup was not evaluated."
+      },
+      "native": {
+        "observed_source_constants": {
+          "TAKI_MEMORY_COMPATIBILITY_VERSION": "1.0.0",
+          "TAKI_MEMORY_CONTRACT_VERSION": "1.0.0",
+          "TAKI_MEMORY_UPSTREAM_COMMIT": "4b2041eb3de5c4235f4a3dd5619fc47cce782e29",
+          "TAKI_MEMORY_COMPATIBILITY_BUILD": "taki-memory-hindsight-0.9.0-batch0-v2"
+        },
+        "reviewed_source_build_target": "taki-memory-hindsight-0.9.0-template-backup-v1",
+        "tokenizer_call_sites": [
+          {
+            "module": "hindsight_api.engine.memory_engine",
+            "line": 856,
+            "call": "get_token_encoding"
+          },
+          {
+            "module": "hindsight_api.engine.token_encoding",
+            "line": 67,
+            "call": "get_token_encoding"
+          },
+          {
+            "module": "hindsight_api.engine.token_encoding",
+            "line": 42,
+            "call": "get_encoding"
+          },
+          {
+            "module": "hindsight_api.engine.token_encoding",
+            "line": 47,
+            "call": "get_token_encoding"
+          }
+        ],
+        "module_presence_is_not_runtime_validation": true
+      },
+      "database_prerequisite": {
+        "bundled_pg0": {
+          "path": "/app/api/.venv/lib/python3.11/site-packages/pg0/bin/pg0",
+          "resolved_path": "/app/api/.venv/lib/python3.11/site-packages/pg0/bin/pg0",
+          "state": "read",
+          "bytes": 34205672,
+          "mode": "0o755",
+          "uid": 1000,
+          "gid": 1000,
+          "readable": true,
+          "sha256": "20c65441992d3f1d433c7d5d33a14aba0030c77913beed9c9571e3816ea7f8fb",
+          "matches_prior_cached_probe_hash": true
+        },
+        "raw_tools_and_extensions": "Not inspected or executed by this packet.",
+        "boundary": "Bundled CLI hash is not raw PG/extension availability."
+      },
+      "elapsed_seconds": 0.467,
+      "read_bytes": 40441518,
+      "files_observed": 38,
+      "status": "prerequisite_unresolved"
+    },
+    "cleanup": {
+      "stopped": {
+        "Id": "57eebed8e900d735fdc83827925ad1ba29da3f15cc4bc31e86954acf9667b800",
+        "Name": "/taki-c2b-image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+        "Image": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+        "Path": "/app/api/.venv/bin/python",
+        "Args": [
+          "-I",
+          "-B",
+          "-"
+        ],
+        "User": "1000:1000",
+        "Token": "cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+        "Role": "native-image-inventory",
+        "NetworkMode": "none",
+        "ReadonlyRootfs": true,
+        "Mounts": [],
+        "Memory": 268435456,
+        "NanoCpus": 1000000000,
+        "PidsLimit": 16,
+        "Privileged": false,
+        "CapDrop": [
+          "ALL"
+        ],
+        "SecurityOpt": [
+          "no-new-privileges=true"
+        ],
+        "LogDriver": "none",
+        "Running": false,
+        "ExitCode": 2,
+        "OOMKilled": false
+      },
+      "outcome": "removed-and-absent"
+    }
+  },
+  "phaseB": {
+    "verdict": "FAIL",
+    "portBeforeCreate": "free",
+    "containerId": "645655a223b17d5caa39028b9a1bb3d56615f34d0bfb5c1dac7917f5b1e8800e",
+    "beforeStart": {
+      "Id": "645655a223b17d5caa39028b9a1bb3d56615f34d0bfb5c1dac7917f5b1e8800e",
+      "Name": "/taki-c2b-topology-cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+      "Image": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+      "Path": "/app/api/.venv/bin/python",
+      "Args": [
+        "-I",
+        "-B",
+        "-"
+      ],
+      "User": "1000:1000",
+      "Token": "cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+      "Role": "topology-probe",
+      "NetworkMode": "taki-c2b-net-cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+      "ReadonlyRootfs": true,
+      "Mounts": [],
+      "Memory": 268435456,
+      "NanoCpus": 1000000000,
+      "PidsLimit": 16,
+      "Privileged": false,
+      "CapDrop": [
+        "ALL"
+      ],
+      "SecurityOpt": [
+        "no-new-privileges=true"
+      ],
+      "LogDriver": "none",
+      "Running": false,
+      "ExitCode": 0,
+      "OOMKilled": false,
+      "PortBindings": {
+        "8000/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "58117"
+          }
+        ]
+      }
+    },
+    "settingMismatches": [],
+    "exitCode": 0,
+    "timedOut": false,
+    "overflow": false,
+    "afterExit": {
+      "Id": "645655a223b17d5caa39028b9a1bb3d56615f34d0bfb5c1dac7917f5b1e8800e",
+      "Name": "/taki-c2b-topology-cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+      "Image": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+      "Path": "/app/api/.venv/bin/python",
+      "Args": [
+        "-I",
+        "-B",
+        "-"
+      ],
+      "User": "1000:1000",
+      "Token": "cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+      "Role": "topology-probe",
+      "NetworkMode": "taki-c2b-net-cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+      "ReadonlyRootfs": true,
+      "Mounts": [],
+      "Memory": 268435456,
+      "NanoCpus": 1000000000,
+      "PidsLimit": 16,
+      "Privileged": false,
+      "CapDrop": [
+        "ALL"
+      ],
+      "SecurityOpt": [
+        "no-new-privileges=true"
+      ],
+      "LogDriver": "none",
+      "Running": false,
+      "ExitCode": 0,
+      "OOMKilled": false,
+      "PortBindings": {
+        "8000/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "58117"
+          }
+        ]
+      }
+    },
+    "facts": {
+      "loopbackTokenReceived": false,
+      "externalConnectsFailed": false,
+      "loopback": {
+        "outcome": "error:ECONNREFUSED",
+        "received": "",
+        "elapsedMs": 4
+      },
+      "outbound": [
+        {
+          "target": "1.1.1.1:443",
+          "result": "connected",
+          "elapsed_seconds": 0.002
+        },
+        {
+          "target": "8.8.8.8:53",
+          "result": "connected",
+          "elapsed_seconds": 0.003
+        }
+      ],
+      "probeResult": {
+        "schema": "c2b-topology-probe-v1",
+        "event": "result",
+        "token_connections": 0,
+        "token_send_errors": 0,
+        "outbound": [
+          {
+            "target": "1.1.1.1:443",
+            "result": "connected",
+            "elapsed_seconds": 0.002
+          },
+          {
+            "target": "8.8.8.8:53",
+            "result": "connected",
+            "elapsed_seconds": 0.003
+          }
+        ],
+        "elapsed_seconds": 20.021
+      }
+    },
+    "cleanup": {
+      "stopped": {
+        "Id": "645655a223b17d5caa39028b9a1bb3d56615f34d0bfb5c1dac7917f5b1e8800e",
+        "Name": "/taki-c2b-topology-cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+        "Image": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+        "Path": "/app/api/.venv/bin/python",
+        "Args": [
+          "-I",
+          "-B",
+          "-"
+        ],
+        "User": "1000:1000",
+        "Token": "cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+        "Role": "topology-probe",
+        "NetworkMode": "taki-c2b-net-cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+        "ReadonlyRootfs": true,
+        "Mounts": [],
+        "Memory": 268435456,
+        "NanoCpus": 1000000000,
+        "PidsLimit": 16,
+        "Privileged": false,
+        "CapDrop": [
+          "ALL"
+        ],
+        "SecurityOpt": [
+          "no-new-privileges=true"
+        ],
+        "LogDriver": "none",
+        "Running": false,
+        "ExitCode": 0,
+        "OOMKilled": false,
+        "PortBindings": {
+          "8000/tcp": [
+            {
+              "HostIp": "127.0.0.1",
+              "HostPort": "58117"
+            }
+          ]
+        }
+      },
+      "outcome": "removed-and-absent"
+    }
+  },
+  "network": {
+    "networkId": "462a43c219a355eaf3dbacaf9cf69db797e30da0af1677aad7e60448319fc435",
+    "afterCreate": {
+      "Id": "462a43c219a355eaf3dbacaf9cf69db797e30da0af1677aad7e60448319fc435",
+      "Name": "taki-c2b-net-cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+      "Driver": "bridge",
+      "Scope": "local",
+      "Internal": false,
+      "EnableIPv6": true,
+      "Options": {
+        "com.docker.network.bridge.enable_ip_masquerade": "false",
+        "com.docker.network.enable_ipv4": "true",
+        "com.docker.network.enable_ipv6": "true"
+      },
+      "Labels": {
+        "taki.c2b.image-prerequisite": "cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+        "taki.c2b.role": "topology-probe"
+      },
+      "Containers": {}
+    },
+    "cleanup": {
+      "beforeRemove": {
+        "Id": "462a43c219a355eaf3dbacaf9cf69db797e30da0af1677aad7e60448319fc435",
+        "Name": "taki-c2b-net-cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+        "Driver": "bridge",
+        "Scope": "local",
+        "Internal": false,
+        "EnableIPv6": true,
+        "Options": {
+          "com.docker.network.bridge.enable_ip_masquerade": "false",
+          "com.docker.network.enable_ipv4": "true",
+          "com.docker.network.enable_ipv6": "true"
+        },
+        "Labels": {
+          "taki.c2b.image-prerequisite": "cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+          "taki.c2b.role": "topology-probe"
+        },
+        "Containers": {}
+      },
+      "outcome": "removed-and-absent"
+    }
+  },
+  "commands": [
+    {
+      "stage": "a-preflight",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "info",
+        "--format",
+        "{{.ID}}"
+      ],
+      "stdinSha256": null,
+      "code": 0,
+      "stdout": "93e8319e-24b7-4a7d-88f1-60923ad681e0\n",
+      "stderr": "",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 172
+    },
+    {
+      "stage": "a-preflight",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "info",
+        "--format",
+        "{{.SystemTime}}"
+      ],
+      "stdinSha256": null,
+      "code": 0,
+      "stdout": "2026-10-27T07:10:59.181392148Z\n",
+      "stderr": "",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 156
+    },
+    {
+      "stage": "a-preflight",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "image",
+        "inspect",
+        "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+        "--format",
+        "{\"Id\":{{json .Id}},\"Os\":{{json .Os}},\"Architecture\":{{json .Architecture}},\"Volumes\":{{json (index .Config \"Volumes\")}}}"
+      ],
+      "stdinSha256": null,
+      "code": 0,
+      "stdout": "{\"Id\":\"sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db\",\"Os\":\"linux\",\"Architecture\":\"amd64\",\"Volumes\":null}\n",
+      "stderr": "",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 207
+    },
+    {
+      "stage": "a-create",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "container",
+        "inspect",
+        "taki-c2b-image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+        "--format",
+        "{\"Id\":{{json .Id}},\"Name\":{{json .Name}},\"Image\":{{json .Image}},\"Path\":{{json .Path}},\"Args\":{{json .Args}},\"User\":{{json .Config.User}},\"Token\":{{json (index .Config.Labels \"taki.c2b.image-prerequisite\")}},\"Role\":{{json (index .Config.Labels \"taki.c2b.role\")}},\"NetworkMode\":{{json .HostConfig.NetworkMode}},\"ReadonlyRootfs\":{{json .HostConfig.ReadonlyRootfs}},\"Mounts\":{{json .Mounts}},\"Memory\":{{json .HostConfig.Memory}},\"NanoCpus\":{{json .HostConfig.NanoCpus}},\"PidsLimit\":{{json .HostConfig.PidsLimit}},\"Privileged\":{{json .HostConfig.Privileged}},\"CapDrop\":{{json .HostConfig.CapDrop}},\"SecurityOpt\":{{json .HostConfig.SecurityOpt}},\"LogDriver\":{{json .HostConfig.LogConfig.Type}},\"Running\":{{json .State.Running}},\"ExitCode\":{{json .State.ExitCode}},\"OOMKilled\":{{json .State.OOMKilled}}}"
+      ],
+      "stdinSha256": null,
+      "code": 1,
+      "stdout": "\n",
+      "stderr": "Error response from daemon: No such container: taki-c2b-image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\n",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 133
+    },
+    {
+      "stage": "a-create",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "create",
+        "--name",
+        "taki-c2b-image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+        "--label",
+        "taki.c2b.image-prerequisite=cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+        "--label",
+        "taki.c2b.role=native-image-inventory",
+        "--pull",
+        "never",
+        "--network",
+        "none",
+        "--read-only",
+        "--user",
+        "1000:1000",
+        "--interactive",
+        "--log-driver",
+        "none",
+        "--memory",
+        "256m",
+        "--cpus",
+        "1",
+        "--pids-limit",
+        "16",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges=true",
+        "--entrypoint",
+        "/app/api/.venv/bin/python",
+        "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+        "-I",
+        "-B",
+        "-"
+      ],
+      "stdinSha256": null,
+      "code": 0,
+      "stdout": "57eebed8e900d735fdc83827925ad1ba29da3f15cc4bc31e86954acf9667b800\n",
+      "stderr": "",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 276
+    },
+    {
+      "stage": "a-create",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "container",
+        "inspect",
+        "57eebed8e900d735fdc83827925ad1ba29da3f15cc4bc31e86954acf9667b800",
+        "--format",
+        "{\"Id\":{{json .Id}},\"Name\":{{json .Name}},\"Image\":{{json .Image}},\"Path\":{{json .Path}},\"Args\":{{json .Args}},\"User\":{{json .Config.User}},\"Token\":{{json (index .Config.Labels \"taki.c2b.image-prerequisite\")}},\"Role\":{{json (index .Config.Labels \"taki.c2b.role\")}},\"NetworkMode\":{{json .HostConfig.NetworkMode}},\"ReadonlyRootfs\":{{json .HostConfig.ReadonlyRootfs}},\"Mounts\":{{json .Mounts}},\"Memory\":{{json .HostConfig.Memory}},\"NanoCpus\":{{json .HostConfig.NanoCpus}},\"PidsLimit\":{{json .HostConfig.PidsLimit}},\"Privileged\":{{json .HostConfig.Privileged}},\"CapDrop\":{{json .HostConfig.CapDrop}},\"SecurityOpt\":{{json .HostConfig.SecurityOpt}},\"LogDriver\":{{json .HostConfig.LogConfig.Type}},\"Running\":{{json .State.Running}},\"ExitCode\":{{json .State.ExitCode}},\"OOMKilled\":{{json .State.OOMKilled}}}"
+      ],
+      "stdinSha256": null,
+      "code": 0,
+      "stdout": "{\"Id\":\"57eebed8e900d735fdc83827925ad1ba29da3f15cc4bc31e86954acf9667b800\",\"Name\":\"/taki-c2b-image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\",\"Image\":\"sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db\",\"Path\":\"/app/api/.venv/bin/python\",\"Args\":[\"-I\",\"-B\",\"-\"],\"User\":\"1000:1000\",\"Token\":\"cb3b3ca9-5a01-4bc4-a734-8b48d7868489\",\"Role\":\"native-image-inventory\",\"NetworkMode\":\"none\",\"ReadonlyRootfs\":true,\"Mounts\":[],\"Memory\":268435456,\"NanoCpus\":1000000000,\"PidsLimit\":16,\"Privileged\":false,\"CapDrop\":[\"ALL\"],\"SecurityOpt\":[\"no-new-privileges=true\"],\"LogDriver\":\"none\",\"Running\":false,\"ExitCode\":0,\"OOMKilled\":false}\n",
+      "stderr": "",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 149
+    },
+    {
+      "stage": "a-attach",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "start",
+        "--attach",
+        "--interactive",
+        "57eebed8e900d735fdc83827925ad1ba29da3f15cc4bc31e86954acf9667b800"
+      ],
+      "stdinSha256": "f7e962da88188e1afb6bbcba9acb1101839f75d38296c603d776da25f44e1ae7",
+      "code": 2,
+      "stdout": "{\"schema\":\"c2b-cached-image-inventory-v1\",\"scope\":\"cached-base-static-inventory\",\"expected_image_input\":\"sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db\",\"deploymentReady\":false,\"inventory_complete\":true,\"unresolved\":[\"module_missing:hindsight_api.api.taki_template_lifecycle\",\"module_missing:hindsight_api.engine.template_apply\",\"module_missing:hindsight_api.engine.template_initialization\",\"module_missing:hindsight_api.engine.template_snapshot\",\"module_missing:hindsight_api.engine.template_mutations\",\"cached_build_differs_or_is_unconfirmed\"],\"runtime\":{\"python\":\"3.11.16\",\"executable\":\"/app/api/.venv/bin/python\",\"resolved_executable\":\"/usr/local/bin/python3.11\",\"uid\":1000,\"gid\":1000,\"purelib\":\"/app/api/.venv/lib/python3.11/site-packages\",\"import_search_paths\":[\"/usr/local/lib/python311.zip\",\"/usr/local/lib/python3.11\",\"/usr/local/lib/python3.11/lib-dynload\",\"/app/api/.venv/lib/python3.11/site-packages\",\"/app/api\"],\"resolution\":\"PathFinder only; no loader execution\"},\"packages\":[{\"name\":\"hindsight-api-slim\",\"version\":\"0.9.0\",\"root\":\"/app/api/.venv/lib/python3.11/site-packages\",\"metadata\":[{\"path\":\"/app/api/.venv/lib/python3.11/site-packages/hindsight_api_slim-0.9.0.dist-info/METADATA\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/hindsight_api_slim-0.9.0.dist-info/METADATA\",\"state\":\"read\",\"bytes\":8570,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"fa5441d2c3a24d8ca7e88eccae2f76531ce22d6a6d174bc4fd96ccaf41e71414\"},{\"path\":\"/app/api/.venv/lib/python3.11/site-packages/hindsight_api_slim-0.9.0.dist-info/WHEEL\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/hindsight_api_slim-0.9.0.dist-info/WHEEL\",\"state\":\"read\",\"bytes\":87,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"ccec20e2307acd7da453dd7437e70c6b08e2bc3ead3bc3445af135da37b56d59\"}]},{\"name\":\"tiktoken\",\"version\":\"0.12.0\",\"root\":\"/app/api/.venv/lib/python3.11/site-packages\",\"metadata\":[{\"path\":\"/app/api/.venv/lib/python3.11/site-packages/tiktoken-0.12.0.dist-info/METADATA\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/tiktoken-0.12.0.dist-info/METADATA\",\"state\":\"read\",\"bytes\":6688,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"d3b28e6ec8f09c47cb4d0fa8443d2f86b137670fa834c26a4e505b11e271b59f\"},{\"path\":\"/app/api/.venv/lib/python3.11/site-packages/tiktoken-0.12.0.dist-info/WHEEL\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/tiktoken-0.12.0.dist-info/WHEEL\",\"state\":\"read\",\"bytes\":113,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"ea8543cd1ddbe4432aa233e1c4a685d6031f7608eed61aa8df5ce930b63a2c56\"}]},{\"name\":\"openai\",\"version\":\"2.24.0\",\"root\":\"/app/api/.venv/lib/python3.11/site-packages\",\"metadata\":[{\"path\":\"/app/api/.venv/lib/python3.11/site-packages/openai-2.24.0.dist-info/METADATA\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/openai-2.24.0.dist-info/METADATA\",\"state\":\"read\",\"bytes\":29167,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"8ffd865c529a230b50a81b41e9338d8248d182111e7cacf2102730bedea5583f\"},{\"path\":\"/app/api/.venv/lib/python3.11/site-packages/openai-2.24.0.dist-info/WHEEL\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/openai-2.24.0.dist-info/WHEEL\",\"state\":\"read\",\"bytes\":87,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"0b615483066088b6f39d1fa4d1bff9937022ff568048e5c3b2cde5cc252c52e8\"}]},{\"name\":\"uvicorn\",\"version\":\"0.38.0\",\"root\":\"/app/api/.venv/lib/python3.11/site-packages\",\"metadata\":[{\"path\":\"/app/api/.venv/lib/python3.11/site-packages/uvicorn-0.38.0.dist-info/METADATA\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/uvicorn-0.38.0.dist-info/METADATA\",\"state\":\"read\",\"bytes\":6787,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"1a630c962c86a27eab8541cce9062dc33398b61a5a392c40521073c9191250b4\"},{\"path\":\"/app/api/.venv/lib/python3.11/site-packages/uvicorn-0.38.0.dist-info/WHEEL\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/uvicorn-0.38.0.dist-info/WHEEL\",\"state\":\"read\",\"bytes\":87,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"aad0b0a12256807936d52d4a6f88a1773236ae527564a688bab4e3fe780e8724\"}]},{\"name\":\"fastapi\",\"version\":\"0.136.3\",\"root\":\"/app/api/.venv/lib/python3.11/site-packages\",\"metadata\":[{\"path\":\"/app/api/.venv/lib/python3.11/site-packages/fastapi-0.136.3.dist-info/METADATA\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/fastapi-0.136.3.dist-info/METADATA\",\"state\":\"read\",\"bytes\":27647,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"0370bef57a44ef18814313fac9ffa7b7c7f9d2112fa4d6e49134cc2f859f69b4\"},{\"path\":\"/app/api/.venv/lib/python3.11/site-packages/fastapi-0.136.3.dist-info/WHEEL\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/fastapi-0.136.3.dist-info/WHEEL\",\"state\":\"read\",\"bytes\":90,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"677e9e4d7ea51b73c84d195e49de610191c2733e76ca0ddcd09415c4a05b2d6d\"}]},{\"name\":\"asyncpg\",\"version\":\"0.30.0\",\"root\":\"/app/api/.venv/lib/python3.11/site-packages\",\"metadata\":[{\"path\":\"/app/api/.venv/lib/python3.11/site-packages/asyncpg-0.30.0.dist-info/METADATA\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/asyncpg-0.30.0.dist-info/METADATA\",\"state\":\"read\",\"bytes\":5010,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"eb430dd2d5c3bdc3edc5a8540b5bf148ff3e752e61603b62aff6086d8d8d0a44\"},{\"path\":\"/app/api/.venv/lib/python3.11/site-packages/asyncpg-0.30.0.dist-info/WHEEL\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/asyncpg-0.30.0.dist-info/WHEEL\",\"state\":\"read\",\"bytes\":151,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"3a16ae7509357f7602bb4b903b9bfabbe8b4d573e85fbd1cd11dd3fd763e8cea\"}]},{\"name\":\"psycopg2-binary\",\"version\":\"2.9.11\",\"root\":\"/app/api/.venv/lib/python3.11/site-packages\",\"metadata\":[{\"path\":\"/app/api/.venv/lib/python3.11/site-packages/psycopg2_binary-2.9.11.dist-info/METADATA\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/psycopg2_binary-2.9.11.dist-info/METADATA\",\"state\":\"read\",\"bytes\":4936,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"d6d77144bb22e40a1ac922198fa34783421bdb8990eeebc6fbae10a71341ddfc\"},{\"path\":\"/app/api/.venv/lib/python3.11/site-packages/psycopg2_binary-2.9.11.dist-info/WHEEL\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/psycopg2_binary-2.9.11.dist-info/WHEEL\",\"state\":\"read\",\"bytes\":151,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"fc216f202603999940607b7c2fb667de7f8118b8fc76464b40fa76d8f8b2e491\"}]},{\"name\":\"pg0-embedded\",\"version\":\"0.15.0\",\"root\":\"/app/api/.venv/lib/python3.11/site-packages\",\"metadata\":[{\"path\":\"/app/api/.venv/lib/python3.11/site-packages/pg0_embedded-0.15.0.dist-info/METADATA\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/pg0_embedded-0.15.0.dist-info/METADATA\",\"state\":\"read\",\"bytes\":3259,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"813986d2d9e5c08b47a8761b1573ad58d50bfd83263da17b574fcb7bec52443f\"},{\"path\":\"/app/api/.venv/lib/python3.11/site-packages/pg0_embedded-0.15.0.dist-info/WHEEL\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/pg0_embedded-0.15.0.dist-info/WHEEL\",\"state\":\"read\",\"bytes\":87,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"942926c567d0b1273d09f20295879abd37507845f6b683eab9f87d808df91100\"}]},{\"name\":\"python-dotenv\",\"version\":\"1.2.2\",\"root\":\"/app/api/.venv/lib/python3.11/site-packages\",\"metadata\":[{\"path\":\"/app/api/.venv/lib/python3.11/site-packages/python_dotenv-1.2.2.dist-info/METADATA\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/python_dotenv-1.2.2.dist-info/METADATA\",\"state\":\"read\",\"bytes\":27524,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"59430a9dee8f8118dbf693e41c4a3e5150626d19901f4727503da9499f5a64a1\"},{\"path\":\"/app/api/.venv/lib/python3.11/site-packages/python_dotenv-1.2.2.dist-info/WHEEL\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/python_dotenv-1.2.2.dist-info/WHEEL\",\"state\":\"read\",\"bytes\":91,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"6027f0606398322e49870d9f538c8d83012bc9b6f6217e4f13004a57865b741a\"}]}],\"modules\":[{\"name\":\"hindsight_api\",\"path\":\"/app/api/hindsight_api/__init__.py\",\"resolved_path\":\"/app/api/hindsight_api/__init__.py\",\"state\":\"read\",\"bytes\":1550,\"mode\":\"0o755\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"fb42a70a97bfcd2044b52aeef6ff5f4bf0e88d91320be3785ec4fef798789d5a\"},{\"name\":\"hindsight_api.server\",\"path\":\"/app/api/hindsight_api/server.py\",\"resolved_path\":\"/app/api/hindsight_api/server.py\",\"state\":\"read\",\"bytes\":3009,\"mode\":\"0o755\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"aa3a3dccba49dad28ed122fd4c80fc434a57913c1db954c35d443331d1939c36\"},{\"name\":\"hindsight_api.engine.memory_engine\",\"path\":\"/app/api/hindsight_api/engine/memory_engine.py\",\"resolved_path\":\"/app/api/hindsight_api/engine/memory_engine.py\",\"state\":\"read\",\"bytes\":826436,\"mode\":\"0o755\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"3b141780dd07496314a231b5758a81b08dc386b24a695ff1fb24c44aaec6f047\"},{\"name\":\"hindsight_api.engine.token_encoding\",\"path\":\"/app/api/hindsight_api/engine/token_encoding.py\",\"resolved_path\":\"/app/api/hindsight_api/engine/token_encoding.py\",\"state\":\"read\",\"bytes\":2898,\"mode\":\"0o755\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"b6b0c2e0ec86810a838c3f69936ef943e3f0cd9fa7f49f07adede4cb69a48941\"},{\"name\":\"hindsight_api.engine.taki_compatibility\",\"path\":\"/app/api/hindsight_api/engine/taki_compatibility.py\",\"resolved_path\":\"/app/api/hindsight_api/engine/taki_compatibility.py\",\"state\":\"read\",\"bytes\":11699,\"mode\":\"0o755\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"570385b78f0042203d8ccfd3dec7a1892ab678d803e5e83d3f99812467ddedb6\"},{\"name\":\"hindsight_api.extensions.builtin.tenant\",\"path\":\"/app/api/hindsight_api/extensions/builtin/tenant.py\",\"resolved_path\":\"/app/api/hindsight_api/extensions/builtin/tenant.py\",\"state\":\"read\",\"bytes\":4447,\"mode\":\"0o755\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"ac61acd64e3ca8d1014e2304d6f6d0dcdfe252dbd0c80cf02b8ee559451699ba\"},{\"name\":\"hindsight_api.extensions.builtin.taki_memory\",\"path\":\"/app/api/hindsight_api/extensions/builtin/taki_memory.py\",\"resolved_path\":\"/app/api/hindsight_api/extensions/builtin/taki_memory.py\",\"state\":\"read\",\"bytes\":9649,\"mode\":\"0o755\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"10ecc8db65eca353c60b5d8826316572d6aa8c1718a3739ff8130505262c59e1\"},{\"name\":\"hindsight_api.api.taki_template_lifecycle\",\"state\":\"missing\"},{\"name\":\"hindsight_api.engine.template_apply\",\"state\":\"missing\"},{\"name\":\"hindsight_api.engine.template_initialization\",\"state\":\"missing\"},{\"name\":\"hindsight_api.engine.template_snapshot\",\"state\":\"missing\"},{\"name\":\"hindsight_api.engine.template_mutations\",\"state\":\"missing\"},{\"name\":\"tiktoken.load\",\"path\":\"/app/api/.venv/lib/python3.11/site-packages/tiktoken/load.py\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/tiktoken/load.py\",\"state\":\"read\",\"bytes\":5919,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"7614ce8952089db86243fce6b4e643b212afa922b35f234e24958f989d12f515\"},{\"name\":\"tiktoken.registry\",\"path\":\"/app/api/.venv/lib/python3.11/site-packages/tiktoken/registry.py\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/tiktoken/registry.py\",\"state\":\"read\",\"bytes\":3256,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"edf92d65b27529c9bcb15c968047c8cbe6717d4bdc5eea4b50d5ca3df486c105\"},{\"name\":\"tiktoken_ext.openai_public\",\"path\":\"/app/api/.venv/lib/python3.11/site-packages/tiktoken_ext/openai_public.py\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/tiktoken_ext/openai_public.py\",\"state\":\"read\",\"bytes\":5613,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"954392738e60d0fb6dca1dad80872efc47c8e2733babecbbf0a23970ed66c2cb\"},{\"name\":\"tiktoken._tiktoken\",\"path\":\"/app/api/.venv/lib/python3.11/site-packages/tiktoken/_tiktoken.cpython-311-x86_64-linux-gnu.so\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/tiktoken/_tiktoken.cpython-311-x86_64-linux-gnu.so\",\"state\":\"read\",\"bytes\":3526784,\"mode\":\"0o755\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"7f923bc920741af4f92ad82ce04873a037c9f086df849d25c3b33a51acff69e5\"},{\"name\":\"openai\",\"path\":\"/app/api/.venv/lib/python3.11/site-packages/openai/__init__.py\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/openai/__init__.py\",\"state\":\"read\",\"bytes\":11218,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"7fcfeb79b49b8b9604bc0d2337e8a313a9158e89103feebe488b2bfeb0286bb2\"},{\"name\":\"uvicorn\",\"path\":\"/app/api/.venv/lib/python3.11/site-packages/uvicorn/__init__.py\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/uvicorn/__init__.py\",\"state\":\"read\",\"bytes\":147,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"e98f296a80312cec8a2153bb412b8bc5279029165686f03d30d03f3f7243d726\"},{\"name\":\"fastapi\",\"path\":\"/app/api/.venv/lib/python3.11/site-packages/fastapi/__init__.py\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/fastapi/__init__.py\",\"state\":\"read\",\"bytes\":1081,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"7a99ae4d55fabb84b29838d8783c26ce5081441f062a35ce8e423474b56bde2c\"},{\"name\":\"asyncpg\",\"path\":\"/app/api/.venv/lib/python3.11/site-packages/asyncpg/__init__.py\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/asyncpg/__init__.py\",\"state\":\"read\",\"bytes\":647,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"6f30f7d5a31e91b291f7068c5ee03121815b9ab43e4b532db639abbbfb128e8f\"},{\"name\":\"psycopg2\",\"path\":\"/app/api/.venv/lib/python3.11/site-packages/psycopg2/__init__.py\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/psycopg2/__init__.py\",\"state\":\"read\",\"bytes\":4768,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"f66a3941dd2e587884071d82768806a2cda436ab6534d1b36ed625182d21592f\"},{\"name\":\"pg0\",\"path\":\"/app/api/.venv/lib/python3.11/site-packages/pg0/__init__.py\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/pg0/__init__.py\",\"state\":\"read\",\"bytes\":13837,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"ac3f14beaff4b1cdfc0fdf674df2d2c322131bc4852de09b58f0ed7bc4288dc1\"},{\"name\":\"dotenv\",\"path\":\"/app/api/.venv/lib/python3.11/site-packages/dotenv/__init__.py\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/dotenv/__init__.py\",\"state\":\"read\",\"bytes\":1230,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"6e163e88aeb0c0765a996208e9e482b820165d435d9f64d016610eb97494ed23\"}],\"tokenizer\":{\"reader_ast_bindings\":{\"explicit_cache_directory\":true,\"url_sha1_key\":true,\"cache_path_join\":true,\"content_sha256\":true,\"encoding_uses_reader\":true},\"definition_line\":76,\"url\":\"https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken\",\"expected_sha256\":\"223921b76ee99bde995b7ff738513eef100fb51d18c93597a113bcffe865b2a7\",\"url_derived_cache_key\":\"9b5ad71b2ce5302211f9c61530b329a4922fc6a4\",\"cache_files\":[{\"path\":\"/tmp/data-gym-cache/9b5ad71b2ce5302211f9c61530b329a4922fc6a4\",\"resolved_path\":\"/tmp/data-gym-cache/9b5ad71b2ce5302211f9c61530b329a4922fc6a4\",\"state\":\"read\",\"bytes\":1681126,\"mode\":\"0o644\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"223921b76ee99bde995b7ff738513eef100fb51d18c93597a113bcffe865b2a7\",\"matches_encoding_hash\":true},{\"path\":\"/var/tmp/data-gym-cache/9b5ad71b2ce5302211f9c61530b329a4922fc6a4\",\"resolved_path\":\"/var/tmp/data-gym-cache/9b5ad71b2ce5302211f9c61530b329a4922fc6a4\",\"state\":\"missing\",\"matches_encoding_hash\":false},{\"path\":\"/usr/tmp/data-gym-cache/9b5ad71b2ce5302211f9c61530b329a4922fc6a4\",\"resolved_path\":\"/usr/tmp/data-gym-cache/9b5ad71b2ce5302211f9c61530b329a4922fc6a4\",\"state\":\"missing\",\"matches_encoding_hash\":false},{\"path\":\"/home/hindsight/.pg0/data-gym-cache/9b5ad71b2ce5302211f9c61530b329a4922fc6a4\",\"resolved_path\":\"/home/hindsight/.pg0/data-gym-cache/9b5ad71b2ce5302211f9c61530b329a4922fc6a4\",\"state\":\"missing\",\"matches_encoding_hash\":false}],\"verified_pin_candidates\":[\"/tmp/data-gym-cache\"],\"ambient_cache_variables_present\":{\"TIKTOKEN_CACHE_DIR\":false,\"DATA_GYM_CACHE_DIR\":false},\"managed_home\":\"/home/hindsight/.pg0\",\"ambient_temp_directory_evaluated\":false,\"encoding_load_executed\":false,\"interpretation\":\"Explicit cache pin required; ambient lookup was not evaluated.\"},\"native\":{\"observed_source_constants\":{\"TAKI_MEMORY_COMPATIBILITY_VERSION\":\"1.0.0\",\"TAKI_MEMORY_CONTRACT_VERSION\":\"1.0.0\",\"TAKI_MEMORY_UPSTREAM_COMMIT\":\"4b2041eb3de5c4235f4a3dd5619fc47cce782e29\",\"TAKI_MEMORY_COMPATIBILITY_BUILD\":\"taki-memory-hindsight-0.9.0-batch0-v2\"},\"reviewed_source_build_target\":\"taki-memory-hindsight-0.9.0-template-backup-v1\",\"tokenizer_call_sites\":[{\"module\":\"hindsight_api.engine.memory_engine\",\"line\":856,\"call\":\"get_token_encoding\"},{\"module\":\"hindsight_api.engine.token_encoding\",\"line\":67,\"call\":\"get_token_encoding\"},{\"module\":\"hindsight_api.engine.token_encoding\",\"line\":42,\"call\":\"get_encoding\"},{\"module\":\"hindsight_api.engine.token_encoding\",\"line\":47,\"call\":\"get_token_encoding\"}],\"module_presence_is_not_runtime_validation\":true},\"database_prerequisite\":{\"bundled_pg0\":{\"path\":\"/app/api/.venv/lib/python3.11/site-packages/pg0/bin/pg0\",\"resolved_path\":\"/app/api/.venv/lib/python3.11/site-packages/pg0/bin/pg0\",\"state\":\"read\",\"bytes\":34205672,\"mode\":\"0o755\",\"uid\":1000,\"gid\":1000,\"readable\":true,\"sha256\":\"20c65441992d3f1d433c7d5d33a14aba0030c77913beed9c9571e3816ea7f8fb\",\"matches_prior_cached_probe_hash\":true},\"raw_tools_and_extensions\":\"Not inspected or executed by this packet.\",\"boundary\":\"Bundled CLI hash is not raw PG/extension availability.\"},\"elapsed_seconds\":0.467,\"read_bytes\":40441518,\"files_observed\":38,\"status\":\"prerequisite_unresolved\"}\n",
+      "stderr": "",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 1083
+    },
+    {
+      "stage": "a-attach",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "container",
+        "inspect",
+        "57eebed8e900d735fdc83827925ad1ba29da3f15cc4bc31e86954acf9667b800",
+        "--format",
+        "{\"Id\":{{json .Id}},\"Name\":{{json .Name}},\"Image\":{{json .Image}},\"Path\":{{json .Path}},\"Args\":{{json .Args}},\"User\":{{json .Config.User}},\"Token\":{{json (index .Config.Labels \"taki.c2b.image-prerequisite\")}},\"Role\":{{json (index .Config.Labels \"taki.c2b.role\")}},\"NetworkMode\":{{json .HostConfig.NetworkMode}},\"ReadonlyRootfs\":{{json .HostConfig.ReadonlyRootfs}},\"Mounts\":{{json .Mounts}},\"Memory\":{{json .HostConfig.Memory}},\"NanoCpus\":{{json .HostConfig.NanoCpus}},\"PidsLimit\":{{json .HostConfig.PidsLimit}},\"Privileged\":{{json .HostConfig.Privileged}},\"CapDrop\":{{json .HostConfig.CapDrop}},\"SecurityOpt\":{{json .HostConfig.SecurityOpt}},\"LogDriver\":{{json .HostConfig.LogConfig.Type}},\"Running\":{{json .State.Running}},\"ExitCode\":{{json .State.ExitCode}},\"OOMKilled\":{{json .State.OOMKilled}}}"
+      ],
+      "stdinSha256": null,
+      "code": 0,
+      "stdout": "{\"Id\":\"57eebed8e900d735fdc83827925ad1ba29da3f15cc4bc31e86954acf9667b800\",\"Name\":\"/taki-c2b-image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\",\"Image\":\"sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db\",\"Path\":\"/app/api/.venv/bin/python\",\"Args\":[\"-I\",\"-B\",\"-\"],\"User\":\"1000:1000\",\"Token\":\"cb3b3ca9-5a01-4bc4-a734-8b48d7868489\",\"Role\":\"native-image-inventory\",\"NetworkMode\":\"none\",\"ReadonlyRootfs\":true,\"Mounts\":[],\"Memory\":268435456,\"NanoCpus\":1000000000,\"PidsLimit\":16,\"Privileged\":false,\"CapDrop\":[\"ALL\"],\"SecurityOpt\":[\"no-new-privileges=true\"],\"LogDriver\":\"none\",\"Running\":false,\"ExitCode\":2,\"OOMKilled\":false}\n",
+      "stderr": "",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 169
+    },
+    {
+      "stage": "a-cleanup",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "container",
+        "inspect",
+        "57eebed8e900d735fdc83827925ad1ba29da3f15cc4bc31e86954acf9667b800",
+        "--format",
+        "{\"Id\":{{json .Id}},\"Name\":{{json .Name}},\"Image\":{{json .Image}},\"Path\":{{json .Path}},\"Args\":{{json .Args}},\"User\":{{json .Config.User}},\"Token\":{{json (index .Config.Labels \"taki.c2b.image-prerequisite\")}},\"Role\":{{json (index .Config.Labels \"taki.c2b.role\")}},\"NetworkMode\":{{json .HostConfig.NetworkMode}},\"ReadonlyRootfs\":{{json .HostConfig.ReadonlyRootfs}},\"Mounts\":{{json .Mounts}},\"Memory\":{{json .HostConfig.Memory}},\"NanoCpus\":{{json .HostConfig.NanoCpus}},\"PidsLimit\":{{json .HostConfig.PidsLimit}},\"Privileged\":{{json .HostConfig.Privileged}},\"CapDrop\":{{json .HostConfig.CapDrop}},\"SecurityOpt\":{{json .HostConfig.SecurityOpt}},\"LogDriver\":{{json .HostConfig.LogConfig.Type}},\"Running\":{{json .State.Running}},\"ExitCode\":{{json .State.ExitCode}},\"OOMKilled\":{{json .State.OOMKilled}}}"
+      ],
+      "stdinSha256": null,
+      "code": 0,
+      "stdout": "{\"Id\":\"57eebed8e900d735fdc83827925ad1ba29da3f15cc4bc31e86954acf9667b800\",\"Name\":\"/taki-c2b-image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\",\"Image\":\"sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db\",\"Path\":\"/app/api/.venv/bin/python\",\"Args\":[\"-I\",\"-B\",\"-\"],\"User\":\"1000:1000\",\"Token\":\"cb3b3ca9-5a01-4bc4-a734-8b48d7868489\",\"Role\":\"native-image-inventory\",\"NetworkMode\":\"none\",\"ReadonlyRootfs\":true,\"Mounts\":[],\"Memory\":268435456,\"NanoCpus\":1000000000,\"PidsLimit\":16,\"Privileged\":false,\"CapDrop\":[\"ALL\"],\"SecurityOpt\":[\"no-new-privileges=true\"],\"LogDriver\":\"none\",\"Running\":false,\"ExitCode\":2,\"OOMKilled\":false}\n",
+      "stderr": "",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 140
+    },
+    {
+      "stage": "a-cleanup",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "rm",
+        "57eebed8e900d735fdc83827925ad1ba29da3f15cc4bc31e86954acf9667b800"
+      ],
+      "stdinSha256": null,
+      "code": 0,
+      "stdout": "57eebed8e900d735fdc83827925ad1ba29da3f15cc4bc31e86954acf9667b800\n",
+      "stderr": "",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 163
+    },
+    {
+      "stage": "a-cleanup",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "container",
+        "inspect",
+        "57eebed8e900d735fdc83827925ad1ba29da3f15cc4bc31e86954acf9667b800",
+        "--format",
+        "{\"Id\":{{json .Id}},\"Name\":{{json .Name}},\"Image\":{{json .Image}},\"Path\":{{json .Path}},\"Args\":{{json .Args}},\"User\":{{json .Config.User}},\"Token\":{{json (index .Config.Labels \"taki.c2b.image-prerequisite\")}},\"Role\":{{json (index .Config.Labels \"taki.c2b.role\")}},\"NetworkMode\":{{json .HostConfig.NetworkMode}},\"ReadonlyRootfs\":{{json .HostConfig.ReadonlyRootfs}},\"Mounts\":{{json .Mounts}},\"Memory\":{{json .HostConfig.Memory}},\"NanoCpus\":{{json .HostConfig.NanoCpus}},\"PidsLimit\":{{json .HostConfig.PidsLimit}},\"Privileged\":{{json .HostConfig.Privileged}},\"CapDrop\":{{json .HostConfig.CapDrop}},\"SecurityOpt\":{{json .HostConfig.SecurityOpt}},\"LogDriver\":{{json .HostConfig.LogConfig.Type}},\"Running\":{{json .State.Running}},\"ExitCode\":{{json .State.ExitCode}},\"OOMKilled\":{{json .State.OOMKilled}}}"
+      ],
+      "stdinSha256": null,
+      "code": 1,
+      "stdout": "\n",
+      "stderr": "Error response from daemon: No such container: 57eebed8e900d735fdc83827925ad1ba29da3f15cc4bc31e86954acf9667b800\n",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 138
+    },
+    {
+      "stage": "b-network",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "network",
+        "inspect",
+        "taki-c2b-net-cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+        "--format",
+        "{\"Id\":{{json .Id}},\"Name\":{{json .Name}},\"Driver\":{{json .Driver}},\"Scope\":{{json .Scope}},\"Internal\":{{json .Internal}},\"EnableIPv6\":{{json .EnableIPv6}},\"Options\":{{json .Options}},\"Labels\":{{json .Labels}},\"Containers\":{{json .Containers}}}"
+      ],
+      "stdinSha256": null,
+      "code": 1,
+      "stdout": "\n",
+      "stderr": "Error response from daemon: network taki-c2b-net-cb3b3ca9-5a01-4bc4-a734-8b48d7868489 not found\n",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 162
+    },
+    {
+      "stage": "b-network",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "network",
+        "create",
+        "--driver",
+        "bridge",
+        "--label",
+        "taki.c2b.image-prerequisite=cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+        "--label",
+        "taki.c2b.role=topology-probe",
+        "-o",
+        "com.docker.network.bridge.enable_ip_masquerade=false",
+        "taki-c2b-net-cb3b3ca9-5a01-4bc4-a734-8b48d7868489"
+      ],
+      "stdinSha256": null,
+      "code": 0,
+      "stdout": "462a43c219a355eaf3dbacaf9cf69db797e30da0af1677aad7e60448319fc435\n",
+      "stderr": "",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 224
+    },
+    {
+      "stage": "b-network",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "network",
+        "inspect",
+        "462a43c219a355eaf3dbacaf9cf69db797e30da0af1677aad7e60448319fc435",
+        "--format",
+        "{\"Id\":{{json .Id}},\"Name\":{{json .Name}},\"Driver\":{{json .Driver}},\"Scope\":{{json .Scope}},\"Internal\":{{json .Internal}},\"EnableIPv6\":{{json .EnableIPv6}},\"Options\":{{json .Options}},\"Labels\":{{json .Labels}},\"Containers\":{{json .Containers}}}"
+      ],
+      "stdinSha256": null,
+      "code": 0,
+      "stdout": "{\"Id\":\"462a43c219a355eaf3dbacaf9cf69db797e30da0af1677aad7e60448319fc435\",\"Name\":\"taki-c2b-net-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\",\"Driver\":\"bridge\",\"Scope\":\"local\",\"Internal\":false,\"EnableIPv6\":true,\"Options\":{\"com.docker.network.bridge.enable_ip_masquerade\":\"false\",\"com.docker.network.enable_ipv4\":\"true\",\"com.docker.network.enable_ipv6\":\"true\"},\"Labels\":{\"taki.c2b.image-prerequisite\":\"cb3b3ca9-5a01-4bc4-a734-8b48d7868489\",\"taki.c2b.role\":\"topology-probe\"},\"Containers\":{}}\n",
+      "stderr": "",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 148
+    },
+    {
+      "stage": "b-create",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "container",
+        "inspect",
+        "taki-c2b-topology-cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+        "--format",
+        "{\"Id\":{{json .Id}},\"Name\":{{json .Name}},\"Image\":{{json .Image}},\"Path\":{{json .Path}},\"Args\":{{json .Args}},\"User\":{{json .Config.User}},\"Token\":{{json (index .Config.Labels \"taki.c2b.image-prerequisite\")}},\"Role\":{{json (index .Config.Labels \"taki.c2b.role\")}},\"NetworkMode\":{{json .HostConfig.NetworkMode}},\"ReadonlyRootfs\":{{json .HostConfig.ReadonlyRootfs}},\"Mounts\":{{json .Mounts}},\"Memory\":{{json .HostConfig.Memory}},\"NanoCpus\":{{json .HostConfig.NanoCpus}},\"PidsLimit\":{{json .HostConfig.PidsLimit}},\"Privileged\":{{json .HostConfig.Privileged}},\"CapDrop\":{{json .HostConfig.CapDrop}},\"SecurityOpt\":{{json .HostConfig.SecurityOpt}},\"LogDriver\":{{json .HostConfig.LogConfig.Type}},\"Running\":{{json .State.Running}},\"ExitCode\":{{json .State.ExitCode}},\"OOMKilled\":{{json .State.OOMKilled}},\"PortBindings\":{{json .HostConfig.PortBindings}}}"
+      ],
+      "stdinSha256": null,
+      "code": 1,
+      "stdout": "\n",
+      "stderr": "Error response from daemon: No such container: taki-c2b-topology-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\n",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 157
+    },
+    {
+      "stage": "b-create",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "create",
+        "--name",
+        "taki-c2b-topology-cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+        "--label",
+        "taki.c2b.image-prerequisite=cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+        "--label",
+        "taki.c2b.role=topology-probe",
+        "--pull",
+        "never",
+        "--network",
+        "taki-c2b-net-cb3b3ca9-5a01-4bc4-a734-8b48d7868489",
+        "--publish",
+        "127.0.0.1:58117:8000/tcp",
+        "--read-only",
+        "--user",
+        "1000:1000",
+        "--interactive",
+        "--log-driver",
+        "none",
+        "--memory",
+        "256m",
+        "--cpus",
+        "1",
+        "--pids-limit",
+        "16",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges=true",
+        "--entrypoint",
+        "/app/api/.venv/bin/python",
+        "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+        "-I",
+        "-B",
+        "-"
+      ],
+      "stdinSha256": null,
+      "code": 0,
+      "stdout": "645655a223b17d5caa39028b9a1bb3d56615f34d0bfb5c1dac7917f5b1e8800e\n",
+      "stderr": "",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 233
+    },
+    {
+      "stage": "b-create",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "container",
+        "inspect",
+        "645655a223b17d5caa39028b9a1bb3d56615f34d0bfb5c1dac7917f5b1e8800e",
+        "--format",
+        "{\"Id\":{{json .Id}},\"Name\":{{json .Name}},\"Image\":{{json .Image}},\"Path\":{{json .Path}},\"Args\":{{json .Args}},\"User\":{{json .Config.User}},\"Token\":{{json (index .Config.Labels \"taki.c2b.image-prerequisite\")}},\"Role\":{{json (index .Config.Labels \"taki.c2b.role\")}},\"NetworkMode\":{{json .HostConfig.NetworkMode}},\"ReadonlyRootfs\":{{json .HostConfig.ReadonlyRootfs}},\"Mounts\":{{json .Mounts}},\"Memory\":{{json .HostConfig.Memory}},\"NanoCpus\":{{json .HostConfig.NanoCpus}},\"PidsLimit\":{{json .HostConfig.PidsLimit}},\"Privileged\":{{json .HostConfig.Privileged}},\"CapDrop\":{{json .HostConfig.CapDrop}},\"SecurityOpt\":{{json .HostConfig.SecurityOpt}},\"LogDriver\":{{json .HostConfig.LogConfig.Type}},\"Running\":{{json .State.Running}},\"ExitCode\":{{json .State.ExitCode}},\"OOMKilled\":{{json .State.OOMKilled}},\"PortBindings\":{{json .HostConfig.PortBindings}}}"
+      ],
+      "stdinSha256": null,
+      "code": 0,
+      "stdout": "{\"Id\":\"645655a223b17d5caa39028b9a1bb3d56615f34d0bfb5c1dac7917f5b1e8800e\",\"Name\":\"/taki-c2b-topology-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\",\"Image\":\"sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db\",\"Path\":\"/app/api/.venv/bin/python\",\"Args\":[\"-I\",\"-B\",\"-\"],\"User\":\"1000:1000\",\"Token\":\"cb3b3ca9-5a01-4bc4-a734-8b48d7868489\",\"Role\":\"topology-probe\",\"NetworkMode\":\"taki-c2b-net-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\",\"ReadonlyRootfs\":true,\"Mounts\":[],\"Memory\":268435456,\"NanoCpus\":1000000000,\"PidsLimit\":16,\"Privileged\":false,\"CapDrop\":[\"ALL\"],\"SecurityOpt\":[\"no-new-privileges=true\"],\"LogDriver\":\"none\",\"Running\":false,\"ExitCode\":0,\"OOMKilled\":false,\"PortBindings\":{\"8000/tcp\":[{\"HostIp\":\"127.0.0.1\",\"HostPort\":\"58117\"}]}}\n",
+      "stderr": "",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 161
+    },
+    {
+      "stage": "b-attach",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "start",
+        "--attach",
+        "--interactive",
+        "645655a223b17d5caa39028b9a1bb3d56615f34d0bfb5c1dac7917f5b1e8800e"
+      ],
+      "stdinSha256": "045b1f4434794713a2bd2fc60501714509090238438175f1d78357c6a677f9b9",
+      "code": 0,
+      "stdout": "{\"schema\":\"c2b-topology-probe-v1\",\"event\":\"ready\",\"listen\":\"0.0.0.0:8000\"}\n{\"schema\":\"c2b-topology-probe-v1\",\"event\":\"result\",\"token_connections\":0,\"token_send_errors\":0,\"outbound\":[{\"target\":\"1.1.1.1:443\",\"result\":\"connected\",\"elapsed_seconds\":0.002},{\"target\":\"8.8.8.8:53\",\"result\":\"connected\",\"elapsed_seconds\":0.003}],\"elapsed_seconds\":20.021}\n",
+      "stderr": "",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 22489
+    },
+    {
+      "stage": "b-attach",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "container",
+        "inspect",
+        "645655a223b17d5caa39028b9a1bb3d56615f34d0bfb5c1dac7917f5b1e8800e",
+        "--format",
+        "{\"Id\":{{json .Id}},\"Name\":{{json .Name}},\"Image\":{{json .Image}},\"Path\":{{json .Path}},\"Args\":{{json .Args}},\"User\":{{json .Config.User}},\"Token\":{{json (index .Config.Labels \"taki.c2b.image-prerequisite\")}},\"Role\":{{json (index .Config.Labels \"taki.c2b.role\")}},\"NetworkMode\":{{json .HostConfig.NetworkMode}},\"ReadonlyRootfs\":{{json .HostConfig.ReadonlyRootfs}},\"Mounts\":{{json .Mounts}},\"Memory\":{{json .HostConfig.Memory}},\"NanoCpus\":{{json .HostConfig.NanoCpus}},\"PidsLimit\":{{json .HostConfig.PidsLimit}},\"Privileged\":{{json .HostConfig.Privileged}},\"CapDrop\":{{json .HostConfig.CapDrop}},\"SecurityOpt\":{{json .HostConfig.SecurityOpt}},\"LogDriver\":{{json .HostConfig.LogConfig.Type}},\"Running\":{{json .State.Running}},\"ExitCode\":{{json .State.ExitCode}},\"OOMKilled\":{{json .State.OOMKilled}},\"PortBindings\":{{json .HostConfig.PortBindings}}}"
+      ],
+      "stdinSha256": null,
+      "code": 0,
+      "stdout": "{\"Id\":\"645655a223b17d5caa39028b9a1bb3d56615f34d0bfb5c1dac7917f5b1e8800e\",\"Name\":\"/taki-c2b-topology-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\",\"Image\":\"sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db\",\"Path\":\"/app/api/.venv/bin/python\",\"Args\":[\"-I\",\"-B\",\"-\"],\"User\":\"1000:1000\",\"Token\":\"cb3b3ca9-5a01-4bc4-a734-8b48d7868489\",\"Role\":\"topology-probe\",\"NetworkMode\":\"taki-c2b-net-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\",\"ReadonlyRootfs\":true,\"Mounts\":[],\"Memory\":268435456,\"NanoCpus\":1000000000,\"PidsLimit\":16,\"Privileged\":false,\"CapDrop\":[\"ALL\"],\"SecurityOpt\":[\"no-new-privileges=true\"],\"LogDriver\":\"none\",\"Running\":false,\"ExitCode\":0,\"OOMKilled\":false,\"PortBindings\":{\"8000/tcp\":[{\"HostIp\":\"127.0.0.1\",\"HostPort\":\"58117\"}]}}\n",
+      "stderr": "",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 166
+    },
+    {
+      "stage": "b-cleanup",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "container",
+        "inspect",
+        "645655a223b17d5caa39028b9a1bb3d56615f34d0bfb5c1dac7917f5b1e8800e",
+        "--format",
+        "{\"Id\":{{json .Id}},\"Name\":{{json .Name}},\"Image\":{{json .Image}},\"Path\":{{json .Path}},\"Args\":{{json .Args}},\"User\":{{json .Config.User}},\"Token\":{{json (index .Config.Labels \"taki.c2b.image-prerequisite\")}},\"Role\":{{json (index .Config.Labels \"taki.c2b.role\")}},\"NetworkMode\":{{json .HostConfig.NetworkMode}},\"ReadonlyRootfs\":{{json .HostConfig.ReadonlyRootfs}},\"Mounts\":{{json .Mounts}},\"Memory\":{{json .HostConfig.Memory}},\"NanoCpus\":{{json .HostConfig.NanoCpus}},\"PidsLimit\":{{json .HostConfig.PidsLimit}},\"Privileged\":{{json .HostConfig.Privileged}},\"CapDrop\":{{json .HostConfig.CapDrop}},\"SecurityOpt\":{{json .HostConfig.SecurityOpt}},\"LogDriver\":{{json .HostConfig.LogConfig.Type}},\"Running\":{{json .State.Running}},\"ExitCode\":{{json .State.ExitCode}},\"OOMKilled\":{{json .State.OOMKilled}},\"PortBindings\":{{json .HostConfig.PortBindings}}}"
+      ],
+      "stdinSha256": null,
+      "code": 0,
+      "stdout": "{\"Id\":\"645655a223b17d5caa39028b9a1bb3d56615f34d0bfb5c1dac7917f5b1e8800e\",\"Name\":\"/taki-c2b-topology-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\",\"Image\":\"sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db\",\"Path\":\"/app/api/.venv/bin/python\",\"Args\":[\"-I\",\"-B\",\"-\"],\"User\":\"1000:1000\",\"Token\":\"cb3b3ca9-5a01-4bc4-a734-8b48d7868489\",\"Role\":\"topology-probe\",\"NetworkMode\":\"taki-c2b-net-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\",\"ReadonlyRootfs\":true,\"Mounts\":[],\"Memory\":268435456,\"NanoCpus\":1000000000,\"PidsLimit\":16,\"Privileged\":false,\"CapDrop\":[\"ALL\"],\"SecurityOpt\":[\"no-new-privileges=true\"],\"LogDriver\":\"none\",\"Running\":false,\"ExitCode\":0,\"OOMKilled\":false,\"PortBindings\":{\"8000/tcp\":[{\"HostIp\":\"127.0.0.1\",\"HostPort\":\"58117\"}]}}\n",
+      "stderr": "",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 152
+    },
+    {
+      "stage": "b-cleanup",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "rm",
+        "645655a223b17d5caa39028b9a1bb3d56615f34d0bfb5c1dac7917f5b1e8800e"
+      ],
+      "stdinSha256": null,
+      "code": 0,
+      "stdout": "645655a223b17d5caa39028b9a1bb3d56615f34d0bfb5c1dac7917f5b1e8800e\n",
+      "stderr": "",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 165
+    },
+    {
+      "stage": "b-cleanup",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "container",
+        "inspect",
+        "645655a223b17d5caa39028b9a1bb3d56615f34d0bfb5c1dac7917f5b1e8800e",
+        "--format",
+        "{\"Id\":{{json .Id}},\"Name\":{{json .Name}},\"Image\":{{json .Image}},\"Path\":{{json .Path}},\"Args\":{{json .Args}},\"User\":{{json .Config.User}},\"Token\":{{json (index .Config.Labels \"taki.c2b.image-prerequisite\")}},\"Role\":{{json (index .Config.Labels \"taki.c2b.role\")}},\"NetworkMode\":{{json .HostConfig.NetworkMode}},\"ReadonlyRootfs\":{{json .HostConfig.ReadonlyRootfs}},\"Mounts\":{{json .Mounts}},\"Memory\":{{json .HostConfig.Memory}},\"NanoCpus\":{{json .HostConfig.NanoCpus}},\"PidsLimit\":{{json .HostConfig.PidsLimit}},\"Privileged\":{{json .HostConfig.Privileged}},\"CapDrop\":{{json .HostConfig.CapDrop}},\"SecurityOpt\":{{json .HostConfig.SecurityOpt}},\"LogDriver\":{{json .HostConfig.LogConfig.Type}},\"Running\":{{json .State.Running}},\"ExitCode\":{{json .State.ExitCode}},\"OOMKilled\":{{json .State.OOMKilled}},\"PortBindings\":{{json .HostConfig.PortBindings}}}"
+      ],
+      "stdinSha256": null,
+      "code": 1,
+      "stdout": "\n",
+      "stderr": "Error response from daemon: No such container: 645655a223b17d5caa39028b9a1bb3d56615f34d0bfb5c1dac7917f5b1e8800e\n",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 167
+    },
+    {
+      "stage": "b-cleanup",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "network",
+        "inspect",
+        "462a43c219a355eaf3dbacaf9cf69db797e30da0af1677aad7e60448319fc435",
+        "--format",
+        "{\"Id\":{{json .Id}},\"Name\":{{json .Name}},\"Driver\":{{json .Driver}},\"Scope\":{{json .Scope}},\"Internal\":{{json .Internal}},\"EnableIPv6\":{{json .EnableIPv6}},\"Options\":{{json .Options}},\"Labels\":{{json .Labels}},\"Containers\":{{json .Containers}}}"
+      ],
+      "stdinSha256": null,
+      "code": 0,
+      "stdout": "{\"Id\":\"462a43c219a355eaf3dbacaf9cf69db797e30da0af1677aad7e60448319fc435\",\"Name\":\"taki-c2b-net-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\",\"Driver\":\"bridge\",\"Scope\":\"local\",\"Internal\":false,\"EnableIPv6\":true,\"Options\":{\"com.docker.network.bridge.enable_ip_masquerade\":\"false\",\"com.docker.network.enable_ipv4\":\"true\",\"com.docker.network.enable_ipv6\":\"true\"},\"Labels\":{\"taki.c2b.image-prerequisite\":\"cb3b3ca9-5a01-4bc4-a734-8b48d7868489\",\"taki.c2b.role\":\"topology-probe\"},\"Containers\":{}}\n",
+      "stderr": "",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 155
+    },
+    {
+      "stage": "b-cleanup",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "network",
+        "rm",
+        "462a43c219a355eaf3dbacaf9cf69db797e30da0af1677aad7e60448319fc435"
+      ],
+      "stdinSha256": null,
+      "code": 0,
+      "stdout": "462a43c219a355eaf3dbacaf9cf69db797e30da0af1677aad7e60448319fc435\n",
+      "stderr": "",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 484
+    },
+    {
+      "stage": "b-cleanup",
+      "argv": [
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "--host",
+        "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "--config",
+        "G:\\TakiAgent-c2b-native-api\\image-cb3b3ca9-5a01-4bc4-a734-8b48d7868489\\client-config",
+        "network",
+        "inspect",
+        "462a43c219a355eaf3dbacaf9cf69db797e30da0af1677aad7e60448319fc435",
+        "--format",
+        "{\"Id\":{{json .Id}},\"Name\":{{json .Name}},\"Driver\":{{json .Driver}},\"Scope\":{{json .Scope}},\"Internal\":{{json .Internal}},\"EnableIPv6\":{{json .EnableIPv6}},\"Options\":{{json .Options}},\"Labels\":{{json .Labels}},\"Containers\":{{json .Containers}}}"
+      ],
+      "stdinSha256": null,
+      "code": 1,
+      "stdout": "\n",
+      "stderr": "Error response from daemon: network 462a43c219a355eaf3dbacaf9cf69db797e30da0af1677aad7e60448319fc435 not found\n",
+      "timedOut": false,
+      "overflow": false,
+      "spawnError": null,
+      "elapsedMs": 150
+    }
+  ],
+  "inputs": {
+    "runnerSha256": "7277034bfd972db1ddd1a77a09889b648d0160aada854e3093b07c7487890ada",
+    "dockerSha256": "0a4d8fe2ab107ceae44ee5f5fc1e1c155790042b7e3d3163826660da882b389d",
+    "inventorySha256": "f7e962da88188e1afb6bbcba9acb1101839f75d38296c603d776da25f44e1ae7",
+    "topologySha256": "045b1f4434794713a2bd2fc60501714509090238438175f1d78357c6a677f9b9",
+    "node": "v24.18.0"
+  },
+  "engine": {
+    "id": "93e8319e-24b7-4a7d-88f1-60923ad681e0",
+    "systemTime": "2026-10-27T07:10:59.181392148Z"
+  },
+  "image": {
+    "Id": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+    "Os": "linux",
+    "Architecture": "amd64",
+    "Volumes": null
+  },
+  "cleanupProven": true,
+  "elapsedMs": 27965
+}

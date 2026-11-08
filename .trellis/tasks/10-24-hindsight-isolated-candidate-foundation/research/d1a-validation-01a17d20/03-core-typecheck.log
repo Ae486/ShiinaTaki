@@ -1,0 +1,11 @@
+
+> @taki/core@0.0.0 typecheck H:\TakiAgent\packages\core
+> tsc --noEmit
+
+src/memory/hindsight-candidates/hindsight-candidate-verifier.test.ts(130,87): error TS2344: Type '((input: { request: { version: 2; nonce: string; request: { nativeBankIds: string[]; operationIds: string[]; version: 2; backupId: string; createdAt: string; providerLineageId: string; requestHash: string; templates: { ...; }[]; }; }; context: HindsightCallContext; }) => Promise<...>) | undefined' does not satisfy the constraint '(...args: any) => any'.
+  Type 'undefined' is not assignable to type '(...args: any) => any'.
+src/memory/hindsight-candidates/hindsight-candidate-verifier.test.ts(131,29): error TS2722: Cannot invoke an object which is possibly 'undefined'.
+src/memory/hindsight-candidates/hindsight-candidate-verifier.test.ts(131,29): error TS18048: 'f.client.observeTemplateBackup' is possibly 'undefined'.
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/core@0.0.0 typecheck: `tsc --noEmit`
+Exit status 2

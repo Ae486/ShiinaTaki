@@ -1,0 +1,79 @@
+--- before/collect.py
++++ after/collect.py
+@@ -15,6 +15,8 @@
+ PURELIB = Path("/app/api/.venv/lib/python3.11/site-packages")
+ STARTED = time.monotonic()
+ MAX_OUTPUT = 1024 * 1024
++# These versions use the captured modern dependency fields. Legacy Requires is not silently ignored.
++SUPPORTED_METADATA = {"1.2", "2.1", "2.2", "2.3", "2.4"}
+ 
+ 
+ class InventoryRefused(Exception):
+@@ -83,6 +85,10 @@
+     require(not parsed.defects, "metadata_parse_defect")
+     for key in ["Name", "Version", "Metadata-Version"]:
+         require(len(parsed.get_all(key, [])) == 1, "metadata_required_header")
++    require(
++        str(parsed["Metadata-Version"]) in SUPPORTED_METADATA,
++        "metadata_version_unsupported",
++    )
+     require(
+         len(parsed.get_all("Requires-Python", [])) <= 1, "metadata_duplicate_python"
+     )
+--- before/compare.py
++++ after/compare.py
+@@ -9,6 +9,7 @@
+ import tomllib
+ 
+ HERE = Path(__file__).resolve().parent
++SUPPORTED_METADATA = {"1.2", "2.1", "2.2", "2.3", "2.4"}
+ ENVIRONMENT_KEYS = {
+     "implementation_name",
+     "implementation_version",
+@@ -65,11 +66,22 @@
+         raise ValueError("unsupported_target_environment")
+     installed = {}
+     for item in inventory["distributions"]:
++        if item["metadataVersion"] not in SUPPORTED_METADATA:
++            raise ValueError("metadata_version_unsupported")
+         name = canonicalize_name(item["name"], validate=True)
+         if name in installed:
+             raise ValueError("duplicate_distribution_name")
+         Version(item["version"])
+         SpecifierSet(item["requiresPython"] or "")
++        if not isinstance(item["providesExtra"], list) or not isinstance(
++            item["requiresDist"], list
++        ):
++            raise ValueError("metadata_field_shape")
++        extras = [
++            canonicalize_name(value, validate=True) for value in item["providesExtra"]
++        ]
++        if len(extras) != len(set(extras)):
++            raise ValueError("duplicate_distribution_extra")
+         for value in item["requiresDist"]:
+             Requirement(value)
+         installed[name] = item
+--- before/README.md
++++ after/README.md
+@@ -29,6 +29,12 @@
+ Requires-Python, every Requires-Dist/Provides-Extra, original hash/size and the actual target marker
+ environment. Metadata descriptions are hashed but not copied into logs. Legacy egg metadata,
+ missing/malformed/changed/nonregular files and bounds produce explicit incomplete collection.
++
++Supported dependency metadata versions are 1.2, 2.1, 2.2, 2.3 and 2.4. Older legacy `Requires`
++formats and unknown versions refuse. The Host validates every distribution's dependency fields
++and declared extras, including distributions outside the selected closure; malformed unvisited
++metadata cannot be reported as compatible. Packaging 24.1 still handles requirement/version/marker
++semantics, while the explicit header-version contract admits valid 2.4 fields used by this packet.
+ 
+ Bounds: 20-second collector alarm; 8,192 purelib entries, 1,024 distributions, 512 KiB per metadata
+ file, 32 MiB total metadata reads, 512 requirements/128 extras per distribution, 8 KiB per requirement,
+@@ -68,7 +74,7 @@
+ readback and exact marked ancestor/file/size checks precede deletion of only the owned stage. The
+ archive and frozen source are retained. On interruption, inspect the original run instead of replaying.
+ 
+-Static source evidence lives in sibling `c2b-dependency-source-01a180b6-static/`. Eight generated
++Static source evidence lives in sibling `c2b-dependency-source-01a180b6-static/`. Nine generated
+ fixtures cover marker environment, transitive extras, changed source requirements, missing/version/
+ Python/URL/duplicate/malformed metadata and raw header parsing. No fixture executes the collector
+ entrypoint, Docker, Hindsight or a model. Source-only limits remain pending actual inventory execution.

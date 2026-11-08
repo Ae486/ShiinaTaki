@@ -1,0 +1,102 @@
+{
+  "session": "01a17d20-f141-7f31-b9f8-c161431c935d",
+  "observedAt": "2026-10-27T11:50:50.6139601Z",
+  "scope": "Read-only preflight; no Docker startup or mutations in resumed session",
+  "engine": {
+    "id": "93e8319e-24b7-4a7d-88f1-60923ad681e0",
+    "version": "29.0.1",
+    "systemTime": "2026-10-27T11:50:51.893910036Z"
+  },
+  "cliSha256": "0a4d8fe2ab107ceae44ee5f5fc1e1c155790042b7e3d3163826660da882b389d",
+  "freeGiB": [
+    {
+      "Name": "C",
+      "free": 30.51
+    },
+    {
+      "Name": "G",
+      "free": 214.69
+    },
+    {
+      "Name": "H",
+      "free": 4.65
+    }
+  ],
+  "stageExists": false,
+  "archiveExists": false,
+  "portConnections": [],
+  "containers": [
+    {
+      "id": "1e389e0a2f95121ca804c186c20916196e9e46f67a7691c3d184404a7292deb8",
+      "name": "/taki-openbili-backend",
+      "image": "sha256:f24e8519df02cee288cada771654064d8f133894ab2648fb0da1513d1238a7e6",
+      "status": "running",
+      "running": true,
+      "startedAt": "2026-10-27T10:47:34.198567984Z",
+      "finishedAt": "2026-10-27T07:36:57.591882317Z"
+    },
+    {
+      "id": "c07d86d32382757d292dd4ebf318e6c44260c817d95f35187663d4d33a26b865",
+      "name": "/taki-hindsight-api-retest",
+      "image": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+      "status": "exited",
+      "running": false,
+      "startedAt": "2026-08-18T16:47:39.697781196Z",
+      "finishedAt": "2026-10-14T14:27:17.510076459Z"
+    },
+    {
+      "id": "a38b49e64f74ee4fa4f5cf5531e467d74dda2b64dc7e28e78a9bdadd37272519",
+      "name": "/taki-hindsight-api",
+      "image": "sha256:02f4b13387a3dde494e1edb414519e0ee4f1d13f14503f2e15050549818a0ef5",
+      "status": "exited",
+      "running": false,
+      "startedAt": "2026-08-18T14:11:54.085514229Z",
+      "finishedAt": "2026-08-18T16:31:05.802894207Z"
+    },
+    {
+      "id": "8f5e4468c3a7c0100330e012fdca3da843abfcc732361b71308f06d6eeada5c2",
+      "name": "/redis",
+      "image": "sha256:c6a3c149aae23f911f2f4dbd9d144718f802046b6f1706d4abf4ff84cc2792aa",
+      "status": "running",
+      "running": true,
+      "startedAt": "2026-10-27T10:47:34.197068713Z",
+      "finishedAt": "2026-10-27T07:36:56.683587521Z"
+    },
+    {
+      "id": "7992fb2bba71e13dc290e305941ded32b9046c1ec4b67a3697863ff79079cf8b",
+      "name": "/my_pgvector",
+      "image": "sha256:494dff7e67e7bc2c826b94c331364978d145ebb86fd338154138b084223b7f67",
+      "status": "exited",
+      "running": false,
+      "startedAt": "2026-04-11T08:18:53.87731237Z",
+      "finishedAt": "2026-07-13T16:08:02.340463365Z"
+    },
+    {
+      "id": "ba11af042db0879902996426522611b267f38eab7d21f05e21036929c415cc24",
+      "name": "/rustfs_loacl",
+      "image": "sha256:0725587f6fcca83c1898f321424327d6e6da5e01ea20382905dd258ed5af3be4",
+      "status": "exited",
+      "running": false,
+      "startedAt": "2026-04-11T08:18:55.176936785Z",
+      "finishedAt": "2026-07-13T16:08:02.340598508Z"
+    },
+    {
+      "id": "9d4fc8fb7a4869ac422d9e78a924b49e698e61a562de3af7576dfd18ef81cd98",
+      "name": "/rpa-redis",
+      "image": "sha256:976ab0f0939b78c06d802bcd3bea44c5142ea9a756a57b861e08819817f768c8",
+      "status": "exited",
+      "running": false,
+      "startedAt": "2026-02-20T17:46:12.832921192Z",
+      "finishedAt": "2026-02-22T09:08:37.904271714Z"
+    },
+    {
+      "id": "697330c3cd8966e02d97fa228c5233a0805531bff00275107630e34fadda0b1a",
+      "name": "/arboris-app",
+      "image": "sha256:862344867ee7582178ddb83d278a5c682f6a919b3e8bd4dbb2f6a7c37c362343",
+      "status": "running",
+      "running": true,
+      "startedAt": "2026-10-27T10:47:34.20417227Z",
+      "finishedAt": "2026-10-27T07:36:58.053850571Z"
+    }
+  ]
+}

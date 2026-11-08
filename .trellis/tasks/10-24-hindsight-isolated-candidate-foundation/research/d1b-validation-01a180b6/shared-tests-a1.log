@@ -1,0 +1,13 @@
+
+> @taki/shared@0.0.0 test H:\TakiAgent\packages\shared
+> vitest run "src/hindsight-candidate-domain-schema.test.ts" "--maxWorkers=2"
+
+
+ RUN  v4.1.10 H:/TakiAgent/packages/shared
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  18:07:43
+   Duration  1.28s (transform 547ms, setup 0ms, import 894ms, tests 11ms, environment 0ms)
+

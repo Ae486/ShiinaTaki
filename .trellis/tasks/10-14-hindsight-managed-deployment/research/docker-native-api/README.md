@@ -104,3 +104,37 @@ The final producer image still needs its own installed build/module and consumed
 an explicit verified cache pin and fail-before-import cache check, then ordinary API migrations,
 authentication/listener binding and checked API+PG stop/same-volume restart. This packet neither
 implements that producer nor substitutes its results with earlier DB-only evidence.
+
+## Slice 1 runner
+
+`run-slice1.ts` (`node run-slice1.ts`, no arguments) embeds T = cb3b3ca9-5a01-4bc4-a734-8b48d7868489
+and host port P = 58117. It hash-checks D, inspect-image.py and topology-probe.py, then runs Phase A
+exactly as above. Phase B runs after Phase A cleanup is proven, whatever the inventory verdict, and is
+skipped only when the engine/image preflight failed or Phase A cleanup is unproven. It records the
+masquerade-off topology delta from leader-now.md:
+
+~~~text
+D --host E --config C network create --driver bridge --label taki.c2b.image-prerequisite=T
+  --label taki.c2b.role=topology-probe -o com.docker.network.bridge.enable_ip_masquerade=false taki-c2b-net-T
+D --host E --config C network inspect NID --format NETWORK
+D --host E --config C create --name taki-c2b-topology-T (labels, role topology-probe, Phase A hardening)
+  --network taki-c2b-net-T --publish 127.0.0.1:P:8000/tcp --entrypoint /app/api/.venv/bin/python I -I -B -
+D --host E --config C start --attach --interactive CID   (stdin = topology-probe.py)
+D --host E --config C stop --time 2 CID (only if running) / rm CID / network rm NID, each followed by inspect
+~~~
+
+Before network create the name must be absent. The network must be a non-internal bridge with exactly
+the two labels, masquerade option "false" and no endpoints. Before container create, binding and
+closing 127.0.0.1:P from Node must succeed; an occupied port refuses and no other port is tried. The
+container is inspected for every Phase A setting, with empty Mounts and a single 127.0.0.1:P binding.
+topology-probe.py listens on 0.0.0.0:8000 and prints a readiness line. For 20 seconds it answers at
+most two connections with a fixed T token, while separately attempting TCP to 1.1.1.1:443 and
+8.8.8.8:53 (3 seconds each). It then prints one result line. Phase B PASS requires the exact token over
+Windows loopback, both external attempts to end other than `connected`, exit 0 and no OOM. Both facts
+are reported separately. Phase B has its own 60-second budget and its own 60-second cleanup budget.
+
+result.json in S keeps hashes, engine facts, every argv (no environment values), exit codes, bounded
+output, projections, both verdicts and cleanup proof. After stage growth (<=1 MiB) is checked, S's
+files except client-config go to `../c2b-slice1-run-T/` and are read back. S is then removed only if
+its marker matches T. The process exits 0 only when both phases PASS, cleanup is proven and the
+archive is complete.

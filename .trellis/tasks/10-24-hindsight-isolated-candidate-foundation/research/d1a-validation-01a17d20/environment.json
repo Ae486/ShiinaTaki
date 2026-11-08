@@ -1,0 +1,10 @@
+{
+  "physicalHostOrNativeExecution": false,
+  "maxVitestWorkers": 2,
+  "branch": "main",
+  "head": "e260ff4",
+  "node": "24.18.0",
+  "workspace": "H:/TakiAgent",
+  "temporaryRoot": "G:/TakiAgent-staging/d1a-01a17d20-b4ccc92f-d174-4910-b481-c54048907cdd",
+  "pnpm": "10.22.0"
+}

@@ -1,0 +1,28 @@
+[
+  {
+    "command": "& 'H:/hindsight/.venv/Scripts/ruff.exe' check --no-cache --select E,F,I --ignore E501 .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependency-comparison-v3-review-01a180b6",
+    "result": {
+      "status": "fulfilled",
+      "value": {
+        "chunk_id": "b17eaa",
+        "wall_time_seconds": 0.3584135,
+        "exit_code": 0,
+        "original_token_count": 5,
+        "output": "All checks passed!\n"
+      }
+    }
+  },
+  {
+    "command": "& 'H:/hindsight/.venv/Scripts/ty.exe' check --output-format concise .trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-dependency-comparison-v3-review-01a180b6",
+    "result": {
+      "status": "fulfilled",
+      "value": {
+        "chunk_id": "a7bfff",
+        "wall_time_seconds": 0.4578563,
+        "exit_code": 0,
+        "original_token_count": 5,
+        "output": "All checks passed!\n"
+      }
+    }
+  }
+]

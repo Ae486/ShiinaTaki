@@ -1,0 +1,52 @@
+[
+  {
+    "file": "docker-commands.mjs",
+    "bytes": 5594,
+    "sha256": "9e602b34f79adfe5c0cf2050846e8a72e263291cd647de2bbc92240ebabc3a73"
+  },
+  {
+    "file": "evidence-store.mjs",
+    "bytes": 6939,
+    "sha256": "9f259d786721c0b6bbeeda8b6a3383c131a72d9949db60849aef01604f26d6e9"
+  },
+  {
+    "file": "fixture-server.py",
+    "bytes": 8588,
+    "sha256": "2bf517ac5b42e6074173eb7a3285eaf9da55cc3851a627387d5a5201ee6e183b"
+  },
+  {
+    "file": "host-transport.mjs",
+    "bytes": 10031,
+    "sha256": "fd41bc99b6cd26f796412b078dde498aa6e222527d7fa379a5a2b0eae679eaa3"
+  },
+  {
+    "file": "launch.mjs",
+    "bytes": 2969,
+    "sha256": "3f37cf4acfc285a19721b206edc6ce11786a54e860b55d12cb0724b18e19ab63"
+  },
+  {
+    "file": "observe-reaping.py",
+    "bytes": 4188,
+    "sha256": "0304b4c2970bcb583a2e1c90fe9320d381f9e5c9a3f0a28277de2a9db079413c"
+  },
+  {
+    "file": "README.md",
+    "bytes": 11173,
+    "sha256": "11cb309f7fec09a0d2c1bdd3aef9cd01cb4ff92132de4f80cf7307104a3e9c06"
+  },
+  {
+    "file": "release.json",
+    "bytes": 3216,
+    "sha256": "8b47311d6518ce9941cfce148d806826ea375466da24cf568acb51f5447703c4"
+  },
+  {
+    "file": "run-relay.mjs",
+    "bytes": 21280,
+    "sha256": "b67e13af7b764663144596fde895c39ddfe8ebd8f617989a0a86581c40612745"
+  },
+  {
+    "file": "stream-relay.py",
+    "bytes": 4550,
+    "sha256": "cb6a235b82c1baccb66066c48916d3cd65a9472a1838079c71dda59057da298f"
+  }
+]

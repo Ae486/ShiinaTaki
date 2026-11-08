@@ -1,0 +1,9 @@
+{
+  "name": "taki-smoke-e409b546353e",
+  "running": false,
+  "port": 10056,
+  "version": "18.1.0",
+  "username": "taki_smoke",
+  "database": "taki_smoke",
+  "data_dir": "G:\\taki-first-use-XW38s1\\pg-data"
+}

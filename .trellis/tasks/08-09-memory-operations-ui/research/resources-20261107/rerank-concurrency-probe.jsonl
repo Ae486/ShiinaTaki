@@ -1,0 +1,13 @@
+{"at": "loaded", "wsMB": 419, "peakWsMB": 421, "privateMB": 1712}
+{"at": "concurrent", "workers": 1, "round": 0, "seconds": 1.37, "wsMB": 680, "peakWsMB": 690, "privateMB": 2009}
+{"at": "concurrent", "workers": 1, "round": 1, "seconds": 1.35, "wsMB": 685, "peakWsMB": 699, "privateMB": 2015}
+{"at": "concurrent", "workers": 1, "round": 2, "seconds": 1.37, "wsMB": 687, "peakWsMB": 701, "privateMB": 2017}
+{"at": "concurrent", "workers": 2, "round": 0, "seconds": 2.44, "wsMB": 899, "peakWsMB": 923, "privateMB": 2315}
+{"at": "concurrent", "workers": 2, "round": 1, "seconds": 2.3, "wsMB": 920, "peakWsMB": 955, "privateMB": 2335}
+{"at": "concurrent", "workers": 2, "round": 2, "seconds": 2.27, "wsMB": 938, "peakWsMB": 967, "privateMB": 2350}
+{"at": "concurrent", "workers": 3, "round": 0, "seconds": 3.78, "wsMB": 957, "peakWsMB": 1060, "privateMB": 2489}
+{"at": "concurrent", "workers": 3, "round": 1, "seconds": 2.78, "wsMB": 1007, "peakWsMB": 1107, "privateMB": 2527}
+{"at": "concurrent", "workers": 3, "round": 2, "seconds": 3.07, "wsMB": 1037, "peakWsMB": 1108, "privateMB": 2541}
+{"at": "concurrent", "workers": 4, "round": 0, "seconds": 4.36, "wsMB": 1103, "peakWsMB": 1244, "privateMB": 2720}
+{"at": "concurrent", "workers": 4, "round": 1, "seconds": 4.25, "wsMB": 1191, "peakWsMB": 1263, "privateMB": 2809}
+{"at": "concurrent", "workers": 4, "round": 2, "seconds": 4.41, "wsMB": 1179, "peakWsMB": 1273, "privateMB": 2777}

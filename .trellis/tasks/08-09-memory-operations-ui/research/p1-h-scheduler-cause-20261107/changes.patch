@@ -1,0 +1,234 @@
+--- baseline/packages/core/src/memory/hindsight/hindsight-replica-scheduler.ts
++++ packages/core/src/memory/hindsight/hindsight-replica-scheduler.ts
+@@ -1,9 +1,10 @@
+ /**
+  * INPUT:  configured Banks, foreground retry requests, durable schedule/checkpoints, and the bounded replica data-plane runner
+- * OUTPUT: asynchronous single-flight execution, bounded retries, preserved manual outcomes and live persisted per-Bank configuration/status
++ * OUTPUT: scheduler-owned async wakes, bounded retries/diagnostics, preserved manual outcomes and persisted per-Bank status
+  * POS:    core/memory/hindsight — deterministic B5 scheduling; no chat, Heartbeat policy, Pending replay, or authority wiring
+  */
+ import { z } from "zod";
++import { AsyncResource } from "node:async_hooks";
+ import {
+   MemoryReplicaBankSchema, MemoryReplicaSyncStatusSchema, REPLICA_RETRY_DELAYS_MS,
+   type MemoryReplicaBank, type MemoryReplicaErrorCode, type MemoryReplicaRunKind,
+@@ -11,6 +12,7 @@
+   type MemoryReplicaScheduleConfig,
+ } from "@taki/shared";
+ import type { HindsightReplicaSchedulerRepo } from "../../db/hindsight-replica-scheduler-repo.ts";
++import type { Logger } from "../../logging/logger.ts";
+ import type { HindsightReplicaSyncRepo } from "../../db/hindsight-replica-sync-repo.ts";
+ import { replicaNextWake } from "../../db/hindsight-replica-schedule-state.ts";
+ import { executeHindsightReplicaRun } from "./hindsight-replica-run-execution.ts";
+@@ -43,6 +45,7 @@
+   banks: MemoryReplicaBank[] | (() => MemoryReplicaBank[]);
+   runner: HindsightReplicaSchedulerRunner;
+   ownerId: string;
++  logger?: Logger;
+   runTimeoutMs?: number;
+   leaseDurationMs?: number;
+   setTimer?: (callback: () => void, delayMs: number) => ReturnType<typeof setTimeout>;
+@@ -67,6 +70,11 @@
+   private cancel: (() => void) | undefined;
+   private error: MemoryReplicaErrorCode | null = null;
+   private readonly supervisorRetries = new Map<string, number>();
++  // A wake belongs to this scheduler, never to the foreground fence owner that happened to rearm it.
++  private readonly wake = AsyncResource.bind(() => {
++    this.timer = undefined;
++    void this.tick().catch((error: unknown) => { this.error = replicaErrorCode(error); });
++  }, "HindsightReplicaScheduler");
+ 
+   constructor(input: SchedulerInput) {
+     this.input = { ...input, ownerId: z.string().min(1).max(256).parse(input.ownerId) };
+@@ -231,7 +239,7 @@
+     const remaining = Date.parse(run.lease.expiresAt) - Date.parse(this.input.repo.now()) - 1;
+     if (remaining <= 0) { this.input.repo.recover(bank.bankId); return; }
+     const execution = executeHindsightReplicaRun({ bank, run, repo: this.input.repo, runner: this.input.runner,
+-      leases: this.input.replica.leases, timeoutMs: Math.min(remaining, this.runTimeoutMs) });
++      leases: this.input.replica.leases, timeoutMs: Math.min(remaining, this.runTimeoutMs), logger: this.input.logger });
+     this.cancel = execution.cancel;
+     try { await execution.completion; }
+     finally { this.cancel = undefined; }
+@@ -258,10 +266,7 @@
+     if (due.length === 0) return;
+     const delay = Math.max(0, Math.min(60 * 60_000, Math.min(...due.map(Date.parse)) - Date.parse(now)));
+     const setTimer = this.input.setTimer ?? ((callback, ms) => setTimeout(callback, ms));
+-    this.timer = setTimer(() => {
+-      this.timer = undefined;
+-      void this.tick().catch((error: unknown) => { this.error = replicaErrorCode(error); });
+-    }, delay);
++    this.timer = setTimer(this.wake, delay);
+     this.timer.unref?.();
+   }
+ 
+--- baseline/packages/core/src/memory/hindsight/hindsight-replica-run-execution.ts
++++ packages/core/src/memory/hindsight/hindsight-replica-run-execution.ts
+@@ -1,11 +1,13 @@
+ /**
+  * INPUT:  one durable scheduler claim, a replica runner, and a bounded cancellation budget
+- * OUTPUT: one absolute run/reset deadline, fenced settlement, and immediate lease revocation on stop or timeout
++ * OUTPUT: one absolute run/reset deadline, fenced settlement, bounded failure diagnostics and immediate lease revocation
+  * POS:    core/memory/hindsight — execution lifetime; late/uncooperative adapters cannot publish after cancellation
+  */
+ import type { MemoryReplicaBank, MemoryReplicaErrorCode, MemoryReplicaRunResult, MemoryReplicaScheduledRun } from "@taki/shared";
+ import type { HindsightReplicaSchedulerRepo } from "../../db/hindsight-replica-scheduler-repo.ts";
+ import type { HindsightReplicaLeaseRepo } from "../../db/hindsight-replica-lease-repo.ts";
++import type { Logger } from "../../logging/logger.ts";
++import { isCanonicalLocalFenced } from "../canonical-local-write-fence.ts";
+ import type { HindsightReplicaSchedulerRunner } from "./hindsight-replica-sync-runner.ts";
+ import { replicaErrorCode, replicaOwnershipLost, replicaResetRequired } from "./hindsight-replica-errors.ts";
+ 
+@@ -16,6 +18,7 @@
+ interface ExecutionInput {
+   bank: MemoryReplicaBank; run: MemoryReplicaScheduledRun; repo: HindsightReplicaSchedulerRepo;
+   leases: HindsightReplicaLeaseRepo; runner: HindsightReplicaSchedulerRunner; timeoutMs: number;
++  logger?: Logger;
+ }
+ interface ExecutionState {
+   input: ExecutionInput; run: MemoryReplicaScheduledRun; controller: AbortController;
+@@ -62,6 +65,11 @@
+       state.settled = true;
+     }
+   } catch (error) {
++    try {
++      state.input.logger?.warn({ bankId: state.input.bank.bankId, runId: state.run.lease.runId,
++        code: replicaErrorCode(error), cause: isCanonicalLocalFenced(error) ? "MEMORY_AUTHORITY_FENCED" : undefined },
++      "Hindsight scheduled synchronization failed");
++    } catch { /* Diagnostics cannot replace the original run failure or prevent durable settlement. */ }
+     if (!state.cancelled && !replicaOwnershipLost(error)) {
+       try { failRun(state, replicaErrorCode(error)); }
+       catch (cause) { failure = cause; }
+--- baseline/packages/core/src/memory/hindsight/hindsight-memory-subsystem.ts
++++ packages/core/src/memory/hindsight/hindsight-memory-subsystem.ts
+@@ -70,7 +70,7 @@
+     config: () => ({ memory: input.config, policy: loadHindsightPolicyConfig(input.source.env()) }) });
+   const scheduleRepo = createHindsightReplicaSchedulerRepo(input.db, input.now);
+   const scheduler = createHindsightReplicaScheduler({ repo: scheduleRepo, replica: state.nativeReplica,
+-    banks: runtime.banks, runner: state.service.runner, ownerId: `hindsight:${input.epochId}` });
++    banks: runtime.banks, runner: state.service.runner, ownerId: `hindsight:${input.epochId}`, logger: input.logger });
+   state.writes.setRetryScheduler(scheduler);
+   const tidy = createTidyAdapter({ state, curator, view: foreground.tidy, logger: input.logger });
+   const maintenance: AutoMemoryMaintenance = { run: async (characterId, origin) => {
+--- baseline/packages/core/src/memory/hindsight/hindsight-memory-subsystem.test.ts
++++ packages/core/src/memory/hindsight/hindsight-memory-subsystem.test.ts
+@@ -1,4 +1,4 @@
+-import { afterEach, describe, expect, it } from "vitest";
++import { afterEach, describe, expect, it, vi } from "vitest";
+ import { failingGenerateModel, scriptedGenerateModel } from "../../testing/mock-language-model.ts";
+ import { hindsightRuntimeFixture, type HindsightRuntimeFixture } from "../../testing/hindsight-runtime-composition-fixtures.ts";
+ import { memoryChatTurn } from "../../testing/memory-chat-turn-fixture.ts";
+@@ -6,9 +6,12 @@
+ import { EPISODIC_EVERY_N } from "../auto-memory.ts";
+ import { hindsightBankBindings } from "./hindsight-bank-identity.ts";
+ import { MEMORY_UNAVAILABLE_SYSTEM_PROMPT } from "./hindsight-unavailable-run.ts";
++import { writeNativeFixture } from "./hindsight-memory-write-native-fixtures.ts";
++import { writeTestRetain } from "./hindsight-memory-write-fixtures.ts";
++import { createHindsightMemoryWriteRepo } from "../../db/hindsight-memory-write-repo.ts";
+ 
+ const cleanup: Array<() => Promise<void>> = [];
+-afterEach(async () => { for (const close of cleanup.splice(0).reverse()) await close(); });
++afterEach(async () => { for (const close of cleanup.splice(0).reverse()) await close(); vi.restoreAllMocks(); vi.useRealTimers(); });
+ function fixture(input: Parameters<typeof hindsightRuntimeFixture>[0] = {}) { const f = hindsightRuntimeFixture(input); cleanup.push(f.close); return f; }
+ function expectUnavailable(run: CapturedMemoryRun) {
+   expect(run.snapshot).toMatchObject({ providerId: "hindsight", authorityEpochId: "epoch", capabilities: { recall: false, retain: false } });
+@@ -18,6 +21,67 @@
+ function degradedCodes(f: HindsightRuntimeFixture) {
+   return f.logs.filter((entry) => entry.msg === "Hindsight Run admitted without memory").map(logCode);
+ }
++
++describe("Hindsight subsystem scheduled recovery", () => {
++  it("settles a foreground Pending write from the real scheduler timer after its provider owner has finished", async () => {
++    // Keep native timers: a fake callback queue loses the AsyncLocalStorage context inherited at registration.
++    vi.useFakeTimers({ toFake: ["Date"] });
++    const f = fixture(); const subsystem = f.subsystem(); const { state, scheduler } = subsystem;
++    const bank = f.banks[0]!; const native = writeNativeFixture(bank, state.pending); let ready = false;
++    Object.assign(f.remote.client, native.client);
++    f.remote.client.trackedNativeWrite = async (input) => {
++      const response = await native.client.trackedNativeWrite(input);
++      if ("error" in response) throw new Error("fixture Native dispatch failed");
++      return { ...response, status: "processing", result: null };
++    };
++    f.remote.client.nativeResult = async (input) => {
++      const response = await native.client.nativeResult(input);
++      return ready ? response : { ...response, status: "processing", result: null };
++    };
++    subsystem.start(); await scheduler.tick();
++    const requestRetry = scheduler.requestRetry.bind(scheduler);
++    // Shorten only the observation wait; the persisted Pending row retains its real retry eligibility.
++    vi.spyOn(scheduler, "requestRetry").mockImplementation((bankId) => requestRetry(bankId, new Date().toISOString()));
++    const failures: string[] = []; const run = state.service.runner.run;
++    const scheduled = vi.spyOn(state.service.runner, "run").mockImplementation(async (input) => {
++      try { return await run(input); }
++      catch (error) { failures.push(error instanceof Error ? error.message : String(error)); throw error; }
++    });
++    const call = { requestId: "scheduled-original", authorityEpochId: "epoch", actor: "foreground-agent" as const };
++    const result = await state.provider.retain(call, writeTestRetain(bank.scope.bankId));
++    expect(result).toMatchObject({ ok: true, data: { status: "pending" } });
++    const key = { authorityEpochId: "epoch", bankId: bank.scope.bankId };
++    const journal = createHindsightMemoryWriteRepo({ db: f.db, assertActive: state.assertActive });
++    const parent = journal.get({ ...key, requestId: call.requestId })!;
++    const original = state.pending.list({ authorityEpochId: "epoch", bankId: bank.scope.bankId })[0]!;
++    expect(original.phase).toBe("submitted"); const callsBefore = f.remote.calls.length;
++    ready = true; vi.setSystemTime(new Date(original.nextRetryAt!));
++    await vi.waitFor(() => expect(scheduled).toHaveBeenCalledTimes(1), { timeout: 2000, interval: 10 });
++    await scheduler.tick();
++    expect(subsystem.workFence.writable()).toBe(true);
++    expect({ failures, mode: scheduler.status(bank.scope.bankId)[0]?.mode }).toEqual({ failures: [], mode: "idle" });
++    expect(f.remote.calls.length).toBeGreaterThan(callsBefore);
++    expect(journal.get(parent.identity.key)).toMatchObject({ identity: parent.identity, preparedAt: parent.preparedAt, terminal: { kind: "retain" } });
++    expect(state.pending.get({ ...key, operationId: original.intent.operationId })).toMatchObject({ phase: "completed",
++      remoteOperationId: original.remoteOperationId, intent: original.intent });
++    expect(await state.provider.retain(call, writeTestRetain(bank.scope.bankId))).toMatchObject({ ok: true, data: { status: "completed" } });
++    expect(native.calls.filter((entry) => entry.startsWith("dispatch:"))).toHaveLength(1);
++  });
++
++  it.each([false, true])("retains a real fence failure and its bounded Core diagnostic when loggerThrows=%s", async (loggerThrows) => {
++    const f = fixture(); const subsystem = f.subsystem(); subsystem.start(); await subsystem.scheduler.tick();
++    await subsystem.workFence.quiesce({ timeoutMs: 1000 });
++    const warn = vi.spyOn(f.logger, "warn");
++    if (loggerThrows) warn.mockImplementation(() => { throw new Error("fixture log sink unavailable"); });
++    const before = f.remote.calls.length;
++    subsystem.scheduler.requestManual("bank-a"); await subsystem.scheduler.tick();
++    const status = subsystem.scheduler.status("bank-a")[0]!;
++    expect(status).toMatchObject({ mode: "failed", errorCode: "HINDSIGHT_REPLICA_SYNC_FAILED", consecutiveFailures: 1 });
++    expect(warn).toHaveBeenCalledWith({ bankId: "bank-a", runId: expect.any(String), code: "HINDSIGHT_REPLICA_SYNC_FAILED",
++      cause: "MEMORY_AUTHORITY_FENCED" }, "Hindsight scheduled synchronization failed");
++    expect(f.remote.calls).toHaveLength(before);
++  });
++});
+ 
+ describe("Hindsight subsystem memory-unavailable degrade path", () => {
+   it("admits a new Character without a verified Bank as a memory-unavailable chat turn that still replies", async () => {
+--- baseline/.trellis/spec/backend/memory-replica-sync.md
++++ .trellis/spec/backend/memory-replica-sync.md
+@@ -129,6 +129,8 @@
+   advances the full-reconciliation interval. Manual mode schedules no background due or retry wake.
+ - One asynchronous worker serves all configured Banks. A failure in one Bank does not discard another Bank's progress.
+   Restart/reconnection performs one eligible catch-up; it does not replay every missed interval.
++  Timer callbacks use the scheduler's construction async context, so foreground rearming cannot inherit a settled
++  write owner; each new run still passes the current work fence and lease checks.
+ - Migration 051 stores exact manual request/claim/outcome evidence separately from latest Bank diagnostics. The
+   operation owner supplies a pre-persisted request ID; queue admission, claim, cancel and settlement update that
+   evidence in the existing schedule transaction. Terminal request records cannot be updated or deleted. A queued
+@@ -178,6 +180,8 @@
+   and failures. Known lag requires matching observed lineage/generation and a valid cursor difference; otherwise it is
+   null. Pending Memory has no producer in Wave 2 and its count must not be invented. Diagnostics use the closed
+   `MemoryReplicaErrorCodeSchema`; raw exceptions, provider payloads, and credentials never enter status.
++  The existing Core logger additionally records Bank/run identity and the known `MEMORY_AUTHORITY_FENCED` cause
++  for refused scheduled work; logging failure cannot change the original run outcome.
+ 
+ ### 4. Validation & Error Matrix
+ 
+--- baseline/packages/core/src/memory/hindsight/index.md
++++ packages/core/src/memory/hindsight/index.md
+@@ -53,8 +53,8 @@
+ - hindsight-current-orchestrator.ts — current-state import, ACK-loss recovery, finite verification, known-native-drift persistence and raw replica publication
+ - hindsight-journal-contracts.ts — authenticated changes endpoint wire normalization with complete transaction bounds
+ - hindsight-incremental-sync.ts — one admitted Bank journal page pulled, projected, and transactionally applied under captured Authority/Bank binding, lease, and deadline; a same-identity `cursor_ahead` surfaces as a rollback, never a reset
+-- hindsight-replica-scheduler.ts — all-Bank single-flight scheduler with foreground Pending retry wake handoff, persisted configuration and original work ownership; read-only status shares ordering and live checkpoint reads
+-- hindsight-replica-run-execution.ts — captured absolute run/reset deadline, bounded cancellation, reset escalation, and lease-fenced completion
++- hindsight-replica-scheduler.ts — all-Bank single-flight scheduler with scheduler-owned async wakes, foreground Pending retry handoff and persisted configuration; read-only status shares ordering and live checkpoint reads
++- hindsight-replica-run-execution.ts — absolute run/reset deadline, bounded cancellation and failure diagnostics, reset escalation, and lease-fenced completion
+ - hindsight-replica-sync-runner.ts — admitted B5 catch-up and reconciliation/reset with fixed deadlines; shared internal run contract also carries process-local foreground lease ownership
+ - hindsight-replica-snapshot-loader.ts — verified one-record snapshot transfer with current-manifest cache reuse and bounded requests
+ - hindsight-replica-errors.ts — closed replica diagnostics and lease/reset classification without provider exception text

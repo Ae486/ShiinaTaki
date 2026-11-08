@@ -1,0 +1,54 @@
+[
+  {
+    "file": "packages/core/src/memory/hindsight/hindsight-replica-scheduler.ts",
+    "sha256": "02c83046456fa31f5b8bbd95fa4f5edce85f17ed26e183f514148856e5fbdd78",
+    "hunks": [
+      "@@ -1,9 +1,10 @@",
+      "@@ -11,6 +12,7 @@",
+      "@@ -43,6 +45,7 @@",
+      "@@ -67,6 +70,11 @@",
+      "@@ -231,7 +239,7 @@",
+      "@@ -258,10 +266,7 @@"
+    ]
+  },
+  {
+    "file": "packages/core/src/memory/hindsight/hindsight-replica-run-execution.ts",
+    "sha256": "250ddf8e6834a0d5b155dce742e7bc7fa6b29647e4a3c7c66e7410061a3373f4",
+    "hunks": [
+      "@@ -1,11 +1,13 @@",
+      "@@ -16,6 +18,7 @@",
+      "@@ -62,6 +65,11 @@"
+    ]
+  },
+  {
+    "file": "packages/core/src/memory/hindsight/hindsight-memory-subsystem.ts",
+    "sha256": "2a6132da77110950bb2582b116fb349c9b0dda5884c8a09d9fb1b3b064015d56",
+    "hunks": [
+      "@@ -70,7 +70,7 @@"
+    ]
+  },
+  {
+    "file": "packages/core/src/memory/hindsight/hindsight-memory-subsystem.test.ts",
+    "sha256": "d1e96a9ac6592f5741c0e5a795699d7bc9b7f11e30b4623d3f582fa7aacc6dce",
+    "hunks": [
+      "@@ -1,4 +1,4 @@",
+      "@@ -6,9 +6,12 @@",
+      "@@ -18,6 +21,67 @@"
+    ]
+  },
+  {
+    "file": ".trellis/spec/backend/memory-replica-sync.md",
+    "sha256": "6e498c4f86187a25ab830c36cedf4632739a703ce015cdb55c58a825b21e4880",
+    "hunks": [
+      "@@ -129,6 +129,8 @@",
+      "@@ -178,6 +180,8 @@"
+    ]
+  },
+  {
+    "file": "packages/core/src/memory/hindsight/index.md",
+    "sha256": "80d8ce2b54a0ddbb83cd843cb139f11469bc25c7a1b29af808c38cc469660f08",
+    "hunks": [
+      "@@ -53,8 +53,8 @@"
+    ]
+  }
+]

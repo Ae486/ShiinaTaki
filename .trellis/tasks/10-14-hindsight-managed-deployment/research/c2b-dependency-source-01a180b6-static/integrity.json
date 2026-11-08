@@ -1,0 +1,23 @@
+{
+  "releaseSha256": "b83d9284e23ded4dbd18157a7ba3e1791661c867d8f11a0084051096d8c43a59",
+  "packetFiles": {
+    "collect.py": "0d5a48f1d0580092c808a13ba4f92cc972c8dea89c47a48eb53c09b51bd843c1",
+    "compare.py": "295019f820a34073070ef7d8e21102a0f8644f6cb33db4ac40afa3309ac39f87",
+    "docker-commands.mjs": "9e602b34f79adfe5c0cf2050846e8a72e263291cd647de2bbc92240ebabc3a73",
+    "evidence-store.mjs": "6bc6bfc2fe8040feac627bfe31c9e50cee7978bf4637de536e71cb2cad9f55a2",
+    "launch.mjs": "273f085262025c6377f91a63686e7328cb465734caea32b0b725322497855035",
+    "README.md": "f609e88e6307fc3b8496333b53676b539c17c3f804c3824ed7b72e58660fb8fc",
+    "release.json": "b83d9284e23ded4dbd18157a7ba3e1791661c867d8f11a0084051096d8c43a59",
+    "source-pyproject.toml": "6a1735ecb0d5e5f86662cb2138af8c616f36ec1ce071067f190887b4864f59b5"
+  },
+  "checks": {
+    "after-javascript.json": "d41c0359f5dd82f52bd9dc7288042559afac3006fa3c36ee6a5aec0d6b70250d",
+    "before-launch-lint-fix.json": "2e71e1a586d4fe90dc7212958504ba08a13e8fc29f8fdf665fd2209f31b3fd1e",
+    "check-javascript.mjs": "f26201b247adbfd045fed715b4300933e0272a8c09257c27b095ed418f64ade6",
+    "initial-checks.json": "d03bbe1e5f1ad48a9039492939daea36cc96e3481aa59a3ec3778c08d7fb7c40",
+    "source-checks.json": "f1f0e102ac1ac31e1dcab65f4f83ec30e58aeb1df23708e13f300d1970fe161e",
+    "test-metadata.py": "95081952ee676af9972c9f78c7273bdf44b23445697c692091bda65051e2ec32"
+  },
+  "runtimeExecuted": false,
+  "allChecksPassed": true
+}

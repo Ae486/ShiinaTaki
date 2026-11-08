@@ -1,0 +1,26 @@
+{
+  "schema": "c2b-dependency-disposition-v1",
+  "token": "0ab89a2a-ccac-4350-a4ea-ed90ed7a3e6d",
+  "verdict": "FAIL",
+  "deploymentReady": false,
+  "scope": "Complete metadata collection only; compatibility, application image and API remain unaccepted",
+  "stage": "G:\\TakiAgent-c2b-native-api\\dependencies-0ab89a2a-ccac-4350-a4ea-ed90ed7a3e6d",
+  "stagingRemoved": true,
+  "archive": "H:\\TakiAgent\\.trellis\\tasks\\10-14-hindsight-managed-deployment\\research\\c2b-dependencies-run-0ab89a2a-ccac-4350-a4ea-ed90ed7a3e6d",
+  "archiveReadback": true,
+  "stageBytes": 129691,
+  "hashes": {
+    ".c2b-dependencies-owner": "fe4b7a80462fa938dfbce982075ae36839ed74a252f33c34f4112bf6b54380c7",
+    "collect.py": "ff6202e46397e0754a9d104d4ac06948940134c77fbf9f6b72f347788d6028bb",
+    "commands.json": "f1f1781ed0b8dc35b22fae563c4947be1235dda287fe6a13ac50d7b89e390d51",
+    "compare.py": "ad0df247e44c194380eae62ad191d927a90fb9aca103abb6b841ac61688ba2a7",
+    "docker-commands.mjs": "9e602b34f79adfe5c0cf2050846e8a72e263291cd647de2bbc92240ebabc3a73",
+    "evidence-store.mjs": "6bc6bfc2fe8040feac627bfe31c9e50cee7978bf4637de536e71cb2cad9f55a2",
+    "launch.mjs": "273f085262025c6377f91a63686e7328cb465734caea32b0b725322497855035",
+    "release.json": "5fd19647e62dc6791066eb5a216d3ee9eb7fe911a5e0c49d10a97374c61a77a1",
+    "result.json": "54c5998b118e9f35ab42a12863fe7e3f5830296b1d549b639c2a4a32c3703c6b",
+    "source-pyproject.toml": "6a1735ecb0d5e5f86662cb2138af8c616f36ec1ce071067f190887b4864f59b5"
+  },
+  "overallElapsedMs": 3200.0874,
+  "containerDisposition": "original-stopped-removed-and-absent"
+}

@@ -1,0 +1,91 @@
+{
+  "sourcePinsMatch": true,
+  "commandHelperByteIdentical": true,
+  "evidenceDeltaExact": true,
+  "frozenCurrentPyprojectMatches": true,
+  "runtimeExecuted": false,
+  "cases": [
+    {
+      "case": "unknown-metadata-version",
+      "collectorAccepted": true,
+      "comparison": {
+        "schema": "c2b-dependency-comparison-v1",
+        "comparisonComplete": true,
+        "metadataCompatible": true,
+        "deploymentReady": false,
+        "scope": "Current application mandatory plus embedded-db dependency closure; metadata only, no import/startup proof",
+        "selectedSourceExtras": [
+          "embedded-db"
+        ],
+        "targetEnvironment": {
+          "platform_python_implementation": "CPython",
+          "python_version": "3.11",
+          "platform_system": "Linux",
+          "implementation_name": "cpython",
+          "python_full_version": "3.11.16",
+          "implementation_version": "3.11.16",
+          "platform_version": "review",
+          "sys_platform": "linux",
+          "platform_release": "review",
+          "os_name": "posix",
+          "platform_machine": "x86_64"
+        },
+        "installedDistributionCount": 1,
+        "reachableDistributionCount": 1,
+        "evaluatedRequirements": 0,
+        "markerExcludedRequirements": 0,
+        "baseApplicationMetadata": {
+          "file": "unknown-metadata-version.METADATA",
+          "bytes": 48,
+          "sha256": "f1e27c6fb0da44ca7f9c29d81f295f65774132257fef1a6882ee57d9e0e870a2",
+          "name": "demo",
+          "version": "1.0",
+          "metadataVersion": "99.0",
+          "requiresPython": null,
+          "requiresDist": [],
+          "providesExtra": []
+        },
+        "issues": []
+      }
+    },
+    {
+      "case": "invalid-unused-extra",
+      "collectorAccepted": true,
+      "comparison": {
+        "schema": "c2b-dependency-comparison-v1",
+        "comparisonComplete": true,
+        "metadataCompatible": true,
+        "deploymentReady": false,
+        "scope": "Current application mandatory plus embedded-db dependency closure; metadata only, no import/startup proof",
+        "selectedSourceExtras": [
+          "embedded-db"
+        ],
+        "targetEnvironment": {
+          "platform_python_implementation": "CPython",
+          "python_version": "3.11",
+          "platform_system": "Linux",
+          "implementation_name": "cpython",
+          "python_full_version": "3.11.16",
+          "implementation_version": "3.11.16",
+          "platform_version": "review",
+          "sys_platform": "linux",
+          "platform_release": "review",
+          "os_name": "posix",
+          "platform_machine": "x86_64"
+        },
+        "installedDistributionCount": 2,
+        "reachableDistributionCount": 1,
+        "evaluatedRequirements": 0,
+        "markerExcludedRequirements": 0,
+        "baseApplicationMetadata": {
+          "name": "demo",
+          "version": "1.0",
+          "requiresPython": null,
+          "requiresDist": [],
+          "providesExtra": []
+        },
+        "issues": []
+      }
+    }
+  ]
+}

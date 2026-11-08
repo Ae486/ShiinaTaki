@@ -1,0 +1,13 @@
+{"file":".trellis/spec/backend/index.md","reason":"Applicable backend ownership and pre-development requirements."}
+{"file":".trellis/spec/backend/hindsight-isolated-candidates.md","reason":"Accepted D1-A consumer contracts and required actual producer/persistence/runtime obligations for later slices."}
+{"file":".trellis/spec/backend/memory-hindsight-backup.md","reason":"Reuse exact paired capture, admission and original-version restore; do not weaken Stage 3."}
+{"file":".trellis/spec/backend/hindsight-template-lifecycle.md","reason":"Preserve 5B versions, user overlays, receipts, holds and authenticated v2 restore evidence."}
+{"file":".trellis/spec/backend/hindsight-host-custody.md","reason":"Installed Host and private credential ownership; source and platform evidence remain separate."}
+{"file":".trellis/spec/backend/hindsight-managed-deployment.md","reason":"Use the existing protected resource owner and actual Run/Effect provenance without invented readiness."}
+{"file":".trellis/spec/backend/memory-operations.md","reason":"Reuse durable operation admission, original-result recovery and read-only boot classification."}
+{"file":".trellis/spec/backend/sqlite-migration-lineage.md","reason":"Serialize additive Core migration allocation and preserve immutable applied history."}
+{"file":".trellis/spec/guides/source-grounding-guide.md","reason":"Resolve missing implementation details from actual named source rather than invent interfaces."}
+{"file":".trellis/tasks/10-24-hindsight-isolated-candidate-foundation/research/README.md","reason":"Mandatory direct full-read route for the source study above the injection cap; do not implement from a truncated study or this index alone."}
+{"file":".trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-preflight-2026-10-24.md","reason":"Current real API prerequisites and the exact shared Host/wire/boot/migration handoff with C2b."}
+{"file":".trellis/tasks/08-09-memory-operations-ui/research/preparation-advisor-2026-10-24.md","reason":"Independent dependency and preservation challenge; check the final consolidated review status."}
+{"file":".trellis/tasks/08-09-memory-operations-ui/research/s6-acceptance-plan-2026-10-24.md","reason":"Retain complete model-upgrade machine journeys and the precise D89 manual boundary."}

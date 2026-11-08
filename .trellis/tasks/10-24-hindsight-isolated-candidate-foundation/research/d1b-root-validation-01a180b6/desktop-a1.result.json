@@ -1,0 +1,12 @@
+{
+  "startedAt": "2026-10-28T10:34:07.5624255Z",
+  "exitCode": 0,
+  "completedAt": "2026-10-28T10:34:56.5665249Z",
+  "temporaryDirectory": "G:/TakiAgent-staging/d1b-01a180b6-86560226-1c8b-4c80-9054-67b64950cf65",
+  "argv": [
+    "pnpm",
+    "--filter",
+    "@taki/desktop",
+    "typecheck"
+  ]
+}

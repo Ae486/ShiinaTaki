@@ -1,0 +1,54 @@
+{
+  "session": "01a17d4f-80ca-7f53-8d2e-cefb89cd4908",
+  "observedAt": "2026-10-27T12:35:47.939779+00:00",
+  "scope": "Read-only Docker preflight; own empty CLI config directory only",
+  "preflightStage": "G:\\TakiAgent-staging\\c2b-preflight-01a17d4f",
+  "tools": {
+    "node": {
+      "sha256": "9a4eb5f1c29c6a2e93852ead46b999e284a6a5ca8bab4d4e241d587d025a52de",
+      "matches": true
+    },
+    "docker": {
+      "sha256": "0a4d8fe2ab107ceae44ee5f5fc1e1c155790042b7e3d3163826660da882b389d",
+      "matches": true
+    }
+  },
+  "freeBytes": {
+    "C": 32808374272,
+    "G": 230502285312,
+    "H": 4996493312
+  },
+  "stageExists": false,
+  "archiveExists": false,
+  "commands": [
+    {
+      "args": [
+        "info",
+        "--format",
+        "{\"id\":{{json .ID}},\"version\":{{json .ServerVersion}},\"os\":{{json .OSType}}}"
+      ],
+      "code": 0,
+      "stdout": "{\"id\":\"93e8319e-24b7-4a7d-88f1-60923ad681e0\",\"version\":\"29.0.1\",\"os\":\"linux\"}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "image",
+        "inspect",
+        "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+        "--format",
+        "{\"id\":{{json .Id}},\"os\":{{json .Os}},\"architecture\":{{json .Architecture}},\"volumes\":{{json .Config.Volumes}}}"
+      ],
+      "code": 1,
+      "stdout": "\n",
+      "stderr": "template parsing error: template: :1:99: executing \"\" at <.Config.Volumes>: map has no entry for key \"Volumes\"\n"
+    }
+  ],
+  "engine": {
+    "id": "93e8319e-24b7-4a7d-88f1-60923ad681e0",
+    "version": "29.0.1",
+    "os": "linux"
+  },
+  "complete": false,
+  "error": "RuntimeError"
+}

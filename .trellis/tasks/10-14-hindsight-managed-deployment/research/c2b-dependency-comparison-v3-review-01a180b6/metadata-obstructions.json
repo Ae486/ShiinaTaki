@@ -1,0 +1,19 @@
+{
+  "comparisonExecuted": false,
+  "compatibilityOverrideApplied": false,
+  "findings": [
+    {
+      "file": "litellm-1.93.0.dist-info/METADATA",
+      "name": "litellm",
+      "version": "1.93.0",
+      "metadataVersion": "2.4",
+      "metadataSha256": "2079a96229cf0dabfb2c2f87b5109a7b36108818fa790a2a1da86bd0db97a1ce",
+      "noncanonicalExtras": [
+        {
+          "observed": "extra_proxy",
+          "normalized": "extra-proxy"
+        }
+      ]
+    }
+  ]
+}

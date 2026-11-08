@@ -1,0 +1,37 @@
+{
+  "verdict": "PASS_R1_DELTA",
+  "releaseSha256": "5fd19647e62dc6791066eb5a216d3ee9eb7fe911a5e0c49d10a97374c61a77a1",
+  "originalFalseSuccessEvidenceSha256": "fcef89545069de4ea47345b6d28bea7d0522f3663dcd7b829a056819b715f456",
+  "oldPacketPreserved": true,
+  "unchangedRuntimeFiles": [
+    "launch.mjs",
+    "docker-commands.mjs",
+    "evidence-store.mjs",
+    "source-pyproject.toml"
+  ],
+  "cases": [
+    {
+      "case": "raw_unknown_metadata",
+      "result": "REFUSED",
+      "code": "metadata_version_unsupported"
+    },
+    {
+      "case": "comparison_unknown_metadata",
+      "result": "REFUSED",
+      "code": "metadata_version_unsupported"
+    },
+    {
+      "case": "invalid_extra_outside_closure",
+      "result": "REFUSED",
+      "errorType": "InvalidName"
+    },
+    {
+      "case": "valid_2.4",
+      "result": "COMPATIBLE",
+      "comparisonComplete": true
+    }
+  ],
+  "runtimeExecuted": false,
+  "stageAndArchiveAbsent": true,
+  "deploymentReady": false
+}

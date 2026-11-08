@@ -1,0 +1,45 @@
+--- v2/compare.py
++++ v3/compare.py
+@@ -9,7 +9,7 @@
+ import tomllib
+ 
+ HERE = Path(__file__).resolve().parent
+-SUPPORTED_METADATA = {"1.2", "2.1", "2.2", "2.3", "2.4"}
++SUPPORTED_METADATA = {"1.2", "2.1", "2.2", "2.3", "2.4", "2.5"}
+ ENVIRONMENT_KEYS = {
+     "implementation_name",
+     "implementation_version",
+@@ -80,6 +80,11 @@
+         extras = [
+             canonicalize_name(value, validate=True) for value in item["providesExtra"]
+         ]
++        if (
++            item["metadataVersion"] in {"2.3", "2.4", "2.5"}
++            and extras != item["providesExtra"]
++        ):
++            raise ValueError("noncanonical_distribution_extra")
+         if len(extras) != len(set(extras)):
+             raise ValueError("duplicate_distribution_extra")
+         for value in item["requiresDist"]:
+@@ -205,6 +210,8 @@
+         archive = Path(release["archive"])
+         disposition = json.loads((archive / "disposition.json").read_text())
+         raw = (archive / "result.json").read_bytes()
++        if hashlib.sha256(raw).hexdigest() != release["inventoryResultSha256"]:
++            raise ValueError("frozen_inventory_result_hash")
+         if hashlib.sha256(raw).hexdigest() != disposition["hashes"]["result.json"]:
+             raise ValueError("inventory_result_hash")
+         result = json.loads(raw)
+@@ -216,6 +223,12 @@
+         answer["sourceMetadataSha256"] = hashlib.sha256(source).hexdigest()
+         answer["inventoryResultSha256"] = hashlib.sha256(raw).hexdigest()
+         answer["token"] = release["token"]
++        answer["comparatorSha256"] = hashlib.sha256(
++            Path(__file__).read_bytes()
++        ).hexdigest()
++        answer["metadataSpecification"] = (
++            "https://packaging.python.org/en/latest/specifications/core-metadata/"
++        )
+     except Exception as error:
+         answer = {
+             "comparisonComplete": False,

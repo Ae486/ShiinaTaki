@@ -1,0 +1,15 @@
+{
+  "session": "01a180b6-1dac-7fc2-b365-15fcb34dd4b4",
+  "token": "9a276b18-7fa2-4421-869c-88f0d89aec01",
+  "releaseSha256": "2d3f0c9ad86bcb5e5d956e9d4797edee4e1056b274958ae781b548b4d8cb954f",
+  "dispatchRecordedAt": "2026-10-28T04:18:31.9732492Z",
+  "status": "closed-inspect-original-evidence",
+  "outerWatchdogMs": 65000,
+  "deploymentReady": false,
+  "pid": 31884,
+  "completedAt": "2026-10-28T04:18:40.5016152Z",
+  "exitCode": 0,
+  "outerElapsedMs": 8342,
+  "stdout": "{\"schema\":\"c2b-relay-disposition-v1\",\"token\":\"9a276b18-7fa2-4421-869c-88f0d89aec01\",\"verdict\":\"PASS\",\"deploymentReady\":false,\"scope\":\"Transport diagnostic only; no API, PostgreSQL, authentication, receipt, setup, model, or installed-deployment acceptance\",\"stage\":\"G:\\\\TakiAgent-c2b-native-api\\\\relay-9a276b18-7fa2-4421-869c-88f0d89aec01\",\"stagingRemoved\":true,\"archive\":\"H:\\\\TakiAgent\\\\.trellis\\\\tasks\\\\10-14-hindsight-managed-deployment\\\\research\\\\c2b-relay-run-9a276b18-7fa2-4421-869c-88f0d89aec01\",\"archiveReadback\":true,\"stageBytes\":239280,\"hashes\":{\".c2b-relay-owner\":\"e138d82d4757a64afd1bb82bfd2be3e71cf0b51759167317f650610b2d9bacdc\",\"commands.json\":\"3702362c4771c20d1b26c5d86b7e5d576547242964ceed0b0c4821d2c83b49d2\",\"docker-commands.mjs\":\"9e602b34f79adfe5c0cf2050846e8a72e263291cd647de2bbc92240ebabc3a73\",\"evidence-store.mjs\":\"9f259d786721c0b6bbeeda8b6a3383c131a72d9949db60849aef01604f26d6e9\",\"fixture-server.py\":\"779c3eb26d0b0078b41bb9809231516ee173d2b3ff38a163108c440cb6fdc4be\",\"host-transport.mjs\":\"fd41bc99b6cd26f796412b078dde498aa6e222527d7fa379a5a2b0eae679eaa3\",\"launch.mjs\":\"3f37cf4acfc285a19721b206edc6ce11786a54e860b55d12cb0724b18e19ab63\",\"observe-reaping.py\":\"101ffca07459081a4ac85ebadfea63af5d8ae7782706bd02d608d4d1534f82f7\",\"release.json\":\"2d3f0c9ad86bcb5e5d956e9d4797edee4e1056b274958ae781b548b4d8cb954f\",\"result.json\":\"474a4d60d3f4b7a99757b82850dfa9738ab3ac054ee7beefe7ccd393678250c6\",\"run-relay.mjs\":\"72a5a5123840e3e4839fc96c1188802c5d9cf0f0838da073b92a39d9771af1c1\",\"stream-relay.py\":\"fe6f865fe38c0656724fdbd7f64b775e926db5635ebfcbd8c0be6e46fb5968b0\"},\"overallElapsedMs\":8002.6917,\"containerDisposition\":\"original-stopped-removed-and-absent\",\"hostPort\":{\"free\":true}}\n",
+  "stderr": ""
+}

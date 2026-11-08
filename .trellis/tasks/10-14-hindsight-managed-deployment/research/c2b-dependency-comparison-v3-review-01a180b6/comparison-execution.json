@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "G:/anaconda3/python.exe",
+    "-I",
+    "-B",
+    "-S",
+    "H:/TakiAgent/.trellis/tasks/10-14-hindsight-managed-deployment/research/dependency-comparison-v3/compare.py"
+  ],
+  "startedAt": "2026-10-28T08:30:41.4083975Z",
+  "completedAt": "2026-10-28T08:30:41.7685667Z",
+  "exitCode": 2,
+  "stdout": "{\r\n  \"comparisonComplete\": false,\r\n  \"metadataCompatible\": false,\r\n  \"deploymentReady\": false,\r\n  \"failure\": \"noncanonical_distribution_extra\"\r\n}\r\n",
+  "stderr": ""
+}

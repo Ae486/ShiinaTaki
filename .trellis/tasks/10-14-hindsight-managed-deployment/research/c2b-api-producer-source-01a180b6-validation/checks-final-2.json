@@ -1,0 +1,96 @@
+{
+  "files": {
+    "api_profile.py": "a603e77ae2e95881b7ac681a60c6ce2a45269451e35fd864919fbe0142d1721a",
+    "api_artifact.py": "38fcee7286c25897a4bd4067a0e942e701c2ae04307d88f26c75fc98f4f7a232",
+    "api_state.py": "2e0cee933e3f9e86dd2a7c8af29411faafbd1a44522005587eafb2b55e6ccf1a",
+    "api_consumer.py": "bb66a3cdca87bb6cc94b97ad6bbdbf16bf8a1c7fde9b9178dbd0d74f82cf39f2",
+    "api_database.py": "79a82255eea4dfdc36ce21fa88389f26e8a853956eb03a173b8d8aa8cd998d8a",
+    "api_server.py": "4f33aac52e5f6d233d592e4c288502e0591776f4fade257189247e76de2d2daf",
+    "api_child.py": "8acda336acff93d98f28dfd7c52957cb3e2877d1b8b7db6a773d6c3f02d1fc1a",
+    "test_api_producer.py": "e66052d2a33018869188b33d549571cb529efa3389bf2dceece9f0c14ddb94ae"
+  },
+  "checks": [
+    {
+      "argv": [
+        "H:/hindsight/.venv/Scripts/ruff.exe",
+        "check",
+        "--no-cache",
+        "--select",
+        "E,F,I",
+        "--line-length",
+        "120",
+        "H:\\hindsight\\docker\\standalone\\managed_bootstrap\\api_profile.py",
+        "H:\\hindsight\\docker\\standalone\\managed_bootstrap\\api_artifact.py",
+        "H:\\hindsight\\docker\\standalone\\managed_bootstrap\\api_state.py",
+        "H:\\hindsight\\docker\\standalone\\managed_bootstrap\\api_consumer.py",
+        "H:\\hindsight\\docker\\standalone\\managed_bootstrap\\api_database.py",
+        "H:\\hindsight\\docker\\standalone\\managed_bootstrap\\api_server.py",
+        "H:\\hindsight\\docker\\standalone\\managed_bootstrap\\api_child.py",
+        "H:\\hindsight\\docker\\standalone\\managed_bootstrap\\test_api_producer.py"
+      ],
+      "exitCode": 0,
+      "stdout": "All checks passed!\n",
+      "stderr": "",
+      "stdoutSha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "H:/hindsight/.venv/Scripts/ty.exe",
+        "check",
+        "--python-platform",
+        "linux",
+        "--python-version",
+        "3.11",
+        "--extra-search-path",
+        "H:/hindsight/.venv/Lib/site-packages",
+        "--extra-search-path",
+        "H:/hindsight/docker/standalone",
+        "--extra-search-path",
+        "H:/hindsight/hindsight-api-slim",
+        "H:\\hindsight\\docker\\standalone\\managed_bootstrap\\api_profile.py",
+        "H:\\hindsight\\docker\\standalone\\managed_bootstrap\\api_artifact.py",
+        "H:\\hindsight\\docker\\standalone\\managed_bootstrap\\api_state.py",
+        "H:\\hindsight\\docker\\standalone\\managed_bootstrap\\api_consumer.py",
+        "H:\\hindsight\\docker\\standalone\\managed_bootstrap\\api_database.py",
+        "H:\\hindsight\\docker\\standalone\\managed_bootstrap\\api_server.py",
+        "H:\\hindsight\\docker\\standalone\\managed_bootstrap\\api_child.py",
+        "H:\\hindsight\\docker\\standalone\\managed_bootstrap\\test_api_producer.py"
+      ],
+      "exitCode": 0,
+      "stdout": "All checks passed!\n",
+      "stderr": "",
+      "stdoutSha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "G:/anaconda3/python.exe",
+        "-I",
+        "-B",
+        "-S",
+        "H:\\hindsight\\docker\\standalone\\managed_bootstrap\\test_api_producer.py"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ".........\r\n----------------------------------------------------------------------\r\nRan 9 tests in 0.034s\r\n\r\nOK\r\n",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "00fcb389ed51d683aa474291dd9b0988d97ecd1c1f379ef40ad72fb53ea08199"
+    },
+    {
+      "argv": [
+        "G:/anaconda3/python.exe",
+        "-I",
+        "-B",
+        "-S",
+        "-c",
+        "import ast,pathlib; names=['H:\\\\hindsight\\\\docker\\\\standalone\\\\managed_bootstrap\\\\api_profile.py', 'H:\\\\hindsight\\\\docker\\\\standalone\\\\managed_bootstrap\\\\api_artifact.py', 'H:\\\\hindsight\\\\docker\\\\standalone\\\\managed_bootstrap\\\\api_state.py', 'H:\\\\hindsight\\\\docker\\\\standalone\\\\managed_bootstrap\\\\api_consumer.py', 'H:\\\\hindsight\\\\docker\\\\standalone\\\\managed_bootstrap\\\\api_database.py', 'H:\\\\hindsight\\\\docker\\\\standalone\\\\managed_bootstrap\\\\api_server.py', 'H:\\\\hindsight\\\\docker\\\\standalone\\\\managed_bootstrap\\\\api_child.py', 'H:\\\\hindsight\\\\docker\\\\standalone\\\\managed_bootstrap\\\\test_api_producer.py']; [ast.parse(pathlib.Path(p).read_bytes(),filename=p) for p in names]; print('8 Python files parsed')"
+      ],
+      "exitCode": 0,
+      "stdout": "8 Python files parsed\r\n",
+      "stderr": "",
+      "stdoutSha256": "c4d71e3ccf9159304c707f6276142ba0df1ac1a5eb62f4a0092c95d9c750cc7a",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

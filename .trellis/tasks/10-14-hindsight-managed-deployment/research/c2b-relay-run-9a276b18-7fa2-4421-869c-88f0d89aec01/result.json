@@ -1,0 +1,1246 @@
+{
+  "schema": "c2b-relay-run-v1",
+  "token": "9a276b18-7fa2-4421-869c-88f0d89aec01",
+  "deploymentReady": false,
+  "scope": "Transport diagnostic only; no API, PostgreSQL, authentication, receipt, setup, model, or installed-deployment acceptance",
+  "release": {
+    "schema": "c2b-loopback-relay-release-v1",
+    "token": "9a276b18-7fa2-4421-869c-88f0d89aec01",
+    "status": "independent-source-pass-runtime-unexecuted",
+    "deploymentReady": false,
+    "scope": "Transport diagnostic only; independent source review passed, actual Root execution remains required",
+    "acceptedPlanSha256": "0e4bdf03c903d6bbdca4d0bbfc187de14bb6c9fd8119b816bbfa7e69db0cd803",
+    "topologyReviewSha256": "a16acd75b0e4201eed045967fca74944fc2431978536866706cb486c12d281c5",
+    "tools": {
+      "node": {
+        "path": "C:/Program Files/nodejs/node.exe",
+        "version": "v24.18.0",
+        "sha256": "9a4eb5f1c29c6a2e93852ead46b999e284a6a5ca8bab4d4e241d587d025a52de"
+      },
+      "docker": {
+        "path": "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        "sha256": "0a4d8fe2ab107ceae44ee5f5fc1e1c155790042b7e3d3163826660da882b389d"
+      },
+      "engine": {
+        "endpoint": "npipe:////./pipe/dockerDesktopLinuxEngine",
+        "id": "93e8319e-24b7-4a7d-88f1-60923ad681e0",
+        "version": "29.0.1",
+        "os": "linux"
+      },
+      "imagePython": "/app/api/.venv/bin/python"
+    },
+    "resource": {
+      "imageId": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+      "containerName": "taki-c2b-relay-9a276b18-7fa2-4421-869c-88f0d89aec01",
+      "network": "none",
+      "hostListener": "127.0.0.1:58118",
+      "target": "127.0.0.1:8000",
+      "user": "1000:1000",
+      "readOnlyRoot": true,
+      "memoryBytes": 268435456,
+      "cpus": 1,
+      "pidsLimit": 16,
+      "mounts": [],
+      "dockerPublication": [],
+      "capDrop": [
+        "ALL"
+      ],
+      "securityOpt": [
+        "no-new-privileges=true"
+      ],
+      "logDriver": "none",
+      "marker": "taki-c2b-relay:9a276b18-7fa2-4421-869c-88f0d89aec01"
+    },
+    "limits": {
+      "overallMs": 60000,
+      "runtimeMs": 40000,
+      "cleanupReserveMs": 20000,
+      "readinessMs": 10000,
+      "relayChildren": 2,
+      "observerExecutions": 1,
+      "directionBytes": 65536,
+      "commandRecords": 48,
+      "evidenceJsonBytes": 2097152,
+      "stageBytes": 4194304
+    },
+    "evidence": {
+      "stageRoot": "G:/TakiAgent-c2b-native-api",
+      "stage": "G:/TakiAgent-c2b-native-api/relay-9a276b18-7fa2-4421-869c-88f0d89aec01",
+      "ownerFile": ".c2b-relay-owner",
+      "archive": "H:/TakiAgent/.trellis/tasks/10-14-hindsight-managed-deployment/research/c2b-relay-run-9a276b18-7fa2-4421-869c-88f0d89aec01",
+      "retainStageWhenCleanupUnproven": true
+    },
+    "files": {
+      "launch.mjs": "3f37cf4acfc285a19721b206edc6ce11786a54e860b55d12cb0724b18e19ab63",
+      "run-relay.mjs": "72a5a5123840e3e4839fc96c1188802c5d9cf0f0838da073b92a39d9771af1c1",
+      "docker-commands.mjs": "9e602b34f79adfe5c0cf2050846e8a72e263291cd647de2bbc92240ebabc3a73",
+      "host-transport.mjs": "fd41bc99b6cd26f796412b078dde498aa6e222527d7fa379a5a2b0eae679eaa3",
+      "evidence-store.mjs": "9f259d786721c0b6bbeeda8b6a3383c131a72d9949db60849aef01604f26d6e9",
+      "fixture-server.py": "779c3eb26d0b0078b41bb9809231516ee173d2b3ff38a163108c440cb6fdc4be",
+      "stream-relay.py": "fe6f865fe38c0656724fdbd7f64b775e926db5635ebfcbd8c0be6e46fb5968b0",
+      "observe-reaping.py": "101ffca07459081a4ac85ebadfea63af5d8ae7782706bd02d608d4d1534f82f7"
+    },
+    "independentReview": {
+      "report": "../c2b-relay-independent-review-01a17d4f.md",
+      "originalReleaseSha256": "8b47311d6518ce9941cfce148d806826ea375466da24cf568acb51f5447703c4",
+      "baseline": "../c2b-relay-independent-review-01a17d4f-static/released-before-review"
+    }
+  },
+  "node": "v24.18.0",
+  "nodeExecutable": "C:\\Program Files\\nodejs\\node.exe",
+  "hostPid": 31884,
+  "transportPassed": true,
+  "failure": null,
+  "inputs": {
+    "release.json": "2d3f0c9ad86bcb5e5d956e9d4797edee4e1056b274958ae781b548b4d8cb954f",
+    "launch.mjs": "3f37cf4acfc285a19721b206edc6ce11786a54e860b55d12cb0724b18e19ab63",
+    "run-relay.mjs": "72a5a5123840e3e4839fc96c1188802c5d9cf0f0838da073b92a39d9771af1c1",
+    "docker-commands.mjs": "9e602b34f79adfe5c0cf2050846e8a72e263291cd647de2bbc92240ebabc3a73",
+    "host-transport.mjs": "fd41bc99b6cd26f796412b078dde498aa6e222527d7fa379a5a2b0eae679eaa3",
+    "evidence-store.mjs": "9f259d786721c0b6bbeeda8b6a3383c131a72d9949db60849aef01604f26d6e9",
+    "fixture-server.py": "779c3eb26d0b0078b41bb9809231516ee173d2b3ff38a163108c440cb6fdc4be",
+    "stream-relay.py": "fe6f865fe38c0656724fdbd7f64b775e926db5635ebfcbd8c0be6e46fb5968b0",
+    "observe-reaping.py": "101ffca07459081a4ac85ebadfea63af5d8ae7782706bd02d608d4d1534f82f7"
+  },
+  "first": {
+    "requestBytes": 32768,
+    "requestSha256": "ac469a51336bd2114ff73ecc3815f8b0baecadc8328dd6305b203bf5f8668d34",
+    "writes": [
+      1,
+      7,
+      127,
+      1025,
+      4095,
+      8193,
+      19320
+    ],
+    "receivedBytes": 49152,
+    "receivedSha256": "96ea0e56ef19e5e30e59ade96a40478a0df79f425f6e57f18073a80467364d3e",
+    "connected": true,
+    "endObserved": true,
+    "closeObserved": true,
+    "abortIssued": false,
+    "requestHalfClosed": true,
+    "errors": [],
+    "valid": true
+  },
+  "second": {
+    "requestBytes": 1024,
+    "requestSha256": "5bd6f557cf6d45efbe0e88196ee893bc1353186d2369ec40e1f48d95fb3988e5",
+    "writes": [
+      1,
+      7,
+      127,
+      889
+    ],
+    "receivedBytes": 512,
+    "receivedSha256": "c3f8be1b87730012febcac6106a26c2eceae900dce00f30b00416fa5b4d19df9",
+    "connected": true,
+    "endObserved": false,
+    "closeObserved": true,
+    "abortIssued": true,
+    "requestHalfClosed": false,
+    "errors": [],
+    "valid": true
+  },
+  "ready": {
+    "schema": "c2b-relay-fixture-v1",
+    "event": "ready",
+    "token": "9a276b18-7fa2-4421-869c-88f0d89aec01",
+    "process": {
+      "identity": {
+        "pid": 1,
+        "startTicks": "14725",
+        "ppid": 0,
+        "pgid": 1,
+        "sid": 1
+      },
+      "executable": "/usr/local/bin/python3.11",
+      "uid": [
+        1000,
+        1000,
+        1000,
+        1000
+      ],
+      "gid": [
+        1000,
+        1000,
+        1000,
+        1000
+      ],
+      "capabilities": {
+        "CapInh": "0000000000000000",
+        "CapPrm": "0000000000000000",
+        "CapEff": "0000000000000000",
+        "CapBnd": "0000000000000000",
+        "CapAmb": "0000000000000000"
+      },
+      "noNewPrivileges": "1",
+      "socketInode": "socket:[15809]",
+      "listenerRows": [
+        [
+          "0:",
+          "0100007F:1F40",
+          "00000000:0000",
+          "0A",
+          "00000000:00000000",
+          "00:00000000",
+          "00000000",
+          "1000",
+          "0",
+          "15809",
+          "1",
+          "0000000000000000",
+          "100",
+          "0",
+          "0",
+          "10",
+          "0"
+        ]
+      ],
+      "bound": [
+        "127.0.0.1",
+        8000
+      ],
+      "valid": true
+    },
+    "network": {
+      "interfaces": [
+        [
+          1,
+          "lo"
+        ]
+      ],
+      "ipv4": "127.0.0.1",
+      "ipv6Addresses": "00000000000000000000000000000001 01 80 10 80       lo\n",
+      "ipv4Routes": "Iface\tDestination\tGateway \tFlags\tRefCnt\tUse\tMetric\tMask\t\tMTU\tWindow\tIRTT                                                       \n",
+      "ipv6Routes": "00000000000000000000000000000000 00 00000000000000000000000000000000 00 00000000000000000000000000000000 ffffffff 00000001 00000000 00200200       lo\n00000000000000000000000000000001 80 00000000000000000000000000000000 00 00000000000000000000000000000000 00000000 00000002 00000000 80200001       lo\n00000000000000000000000000000000 00 00000000000000000000000000000000 00 00000000000000000000000000000000 ffffffff 00000001 00000000 00200200       lo\n",
+      "onlyLoopback": true
+    },
+    "probes": [
+      {
+        "family": 2,
+        "target": [
+          "1.1.1.1",
+          443
+        ],
+        "phase": "connect",
+        "outcome": "error",
+        "code": "ENETUNREACH",
+        "expectedRefusal": true,
+        "elapsedMs": 0
+      },
+      {
+        "family": 2,
+        "target": [
+          "169.254.1.1",
+          80
+        ],
+        "phase": "connect",
+        "outcome": "error",
+        "code": "ENETUNREACH",
+        "expectedRefusal": true,
+        "elapsedMs": 0
+      },
+      {
+        "family": 10,
+        "target": [
+          "2606:4700:4700::1111",
+          443,
+          0,
+          0
+        ],
+        "phase": "connect",
+        "outcome": "error",
+        "code": "ENETUNREACH",
+        "expectedRefusal": true,
+        "elapsedMs": 0
+      },
+      {
+        "family": 10,
+        "target": [
+          "fe80::1",
+          80,
+          0,
+          1
+        ],
+        "phase": "connect",
+        "outcome": "error",
+        "code": "ENETUNREACH",
+        "expectedRefusal": true,
+        "elapsedMs": 0
+      }
+    ]
+  },
+  "fixtureEvents": [
+    {
+      "schema": "c2b-relay-fixture-v1",
+      "event": "ready",
+      "token": "9a276b18-7fa2-4421-869c-88f0d89aec01",
+      "process": {
+        "identity": {
+          "pid": 1,
+          "startTicks": "14725",
+          "ppid": 0,
+          "pgid": 1,
+          "sid": 1
+        },
+        "executable": "/usr/local/bin/python3.11",
+        "uid": [
+          1000,
+          1000,
+          1000,
+          1000
+        ],
+        "gid": [
+          1000,
+          1000,
+          1000,
+          1000
+        ],
+        "capabilities": {
+          "CapInh": "0000000000000000",
+          "CapPrm": "0000000000000000",
+          "CapEff": "0000000000000000",
+          "CapBnd": "0000000000000000",
+          "CapAmb": "0000000000000000"
+        },
+        "noNewPrivileges": "1",
+        "socketInode": "socket:[15809]",
+        "listenerRows": [
+          [
+            "0:",
+            "0100007F:1F40",
+            "00000000:0000",
+            "0A",
+            "00000000:00000000",
+            "00:00000000",
+            "00000000",
+            "1000",
+            "0",
+            "15809",
+            "1",
+            "0000000000000000",
+            "100",
+            "0",
+            "0",
+            "10",
+            "0"
+          ]
+        ],
+        "bound": [
+          "127.0.0.1",
+          8000
+        ],
+        "valid": true
+      },
+      "network": {
+        "interfaces": [
+          [
+            1,
+            "lo"
+          ]
+        ],
+        "ipv4": "127.0.0.1",
+        "ipv6Addresses": "00000000000000000000000000000001 01 80 10 80       lo\n",
+        "ipv4Routes": "Iface\tDestination\tGateway \tFlags\tRefCnt\tUse\tMetric\tMask\t\tMTU\tWindow\tIRTT                                                       \n",
+        "ipv6Routes": "00000000000000000000000000000000 00 00000000000000000000000000000000 00 00000000000000000000000000000000 ffffffff 00000001 00000000 00200200       lo\n00000000000000000000000000000001 80 00000000000000000000000000000000 00 00000000000000000000000000000000 00000000 00000002 00000000 80200001       lo\n00000000000000000000000000000000 00 00000000000000000000000000000000 00 00000000000000000000000000000000 ffffffff 00000001 00000000 00200200       lo\n",
+        "onlyLoopback": true
+      },
+      "probes": [
+        {
+          "family": 2,
+          "target": [
+            "1.1.1.1",
+            443
+          ],
+          "phase": "connect",
+          "outcome": "error",
+          "code": "ENETUNREACH",
+          "expectedRefusal": true,
+          "elapsedMs": 0
+        },
+        {
+          "family": 2,
+          "target": [
+            "169.254.1.1",
+            80
+          ],
+          "phase": "connect",
+          "outcome": "error",
+          "code": "ENETUNREACH",
+          "expectedRefusal": true,
+          "elapsedMs": 0
+        },
+        {
+          "family": 10,
+          "target": [
+            "2606:4700:4700::1111",
+            443,
+            0,
+            0
+          ],
+          "phase": "connect",
+          "outcome": "error",
+          "code": "ENETUNREACH",
+          "expectedRefusal": true,
+          "elapsedMs": 0
+        },
+        {
+          "family": 10,
+          "target": [
+            "fe80::1",
+            80,
+            0,
+            1
+          ],
+          "phase": "connect",
+          "outcome": "error",
+          "code": "ENETUNREACH",
+          "expectedRefusal": true,
+          "elapsedMs": 0
+        }
+      ]
+    },
+    {
+      "schema": "c2b-relay-fixture-v1",
+      "event": "accepted",
+      "case": "half-close",
+      "peer": [
+        "127.0.0.1",
+        50266
+      ]
+    },
+    {
+      "schema": "c2b-relay-fixture-v1",
+      "event": "request-eof",
+      "length": 32768,
+      "sha256": "ac469a51336bd2114ff73ecc3815f8b0baecadc8328dd6305b203bf5f8668d34",
+      "valid": true
+    },
+    {
+      "schema": "c2b-relay-fixture-v1",
+      "event": "case-complete",
+      "case": "half-close",
+      "requestBytes": 32768,
+      "requestSha256": "ac469a51336bd2114ff73ecc3815f8b0baecadc8328dd6305b203bf5f8668d34",
+      "requestEof": true,
+      "responseBytes": 49152,
+      "responseSha256": "96ea0e56ef19e5e30e59ade96a40478a0df79f425f6e57f18073a80467364d3e",
+      "responseWrites": [
+        1,
+        17,
+        255,
+        4097,
+        8191,
+        16385,
+        20206
+      ],
+      "responseHalfClosed": true
+    },
+    {
+      "schema": "c2b-relay-fixture-v1",
+      "event": "accepted",
+      "case": "client-abort",
+      "peer": [
+        "127.0.0.1",
+        50282
+      ]
+    },
+    {
+      "schema": "c2b-relay-fixture-v1",
+      "event": "abort-armed",
+      "requestBytes": 1024,
+      "ackBytes": 512
+    },
+    {
+      "schema": "c2b-relay-fixture-v1",
+      "event": "case-complete",
+      "case": "client-abort",
+      "requestBytes": 1024,
+      "requestSha256": "5bd6f557cf6d45efbe0e88196ee893bc1353186d2369ec40e1f48d95fb3988e5",
+      "ackBytes": 512,
+      "ackSha256": "c3f8be1b87730012febcac6106a26c2eceae900dce00f30b00416fa5b4d19df9",
+      "cancelled": true,
+      "reason": "eof"
+    },
+    {
+      "schema": "c2b-relay-fixture-v1",
+      "event": "complete",
+      "cases": [
+        {
+          "case": "half-close",
+          "requestBytes": 32768,
+          "requestSha256": "ac469a51336bd2114ff73ecc3815f8b0baecadc8328dd6305b203bf5f8668d34",
+          "requestEof": true,
+          "responseBytes": 49152,
+          "responseSha256": "96ea0e56ef19e5e30e59ade96a40478a0df79f425f6e57f18073a80467364d3e",
+          "responseWrites": [
+            1,
+            17,
+            255,
+            4097,
+            8191,
+            16385,
+            20206
+          ],
+          "responseHalfClosed": true
+        },
+        {
+          "case": "client-abort",
+          "requestBytes": 1024,
+          "requestSha256": "5bd6f557cf6d45efbe0e88196ee893bc1353186d2369ec40e1f48d95fb3988e5",
+          "ackBytes": 512,
+          "ackSha256": "c3f8be1b87730012febcac6106a26c2eceae900dce00f30b00416fa5b4d19df9",
+          "cancelled": true,
+          "reason": "eof"
+        }
+      ],
+      "listenerClosed": true
+    },
+    {
+      "schema": "c2b-relay-fixture-v1",
+      "event": "stopped",
+      "identity": {
+        "pid": 1,
+        "startTicks": "14725",
+        "ppid": 0,
+        "pgid": 1,
+        "sid": 1
+      },
+      "elapsedMs": 3841
+    }
+  ],
+  "streams": [
+    {
+      "index": 1,
+      "toChild": 32768,
+      "toClient": 49152,
+      "clientEnd": true,
+      "clientClosed": true,
+      "aborted": false,
+      "errors": [],
+      "backpressure": {
+        "toChild": 1,
+        "toClient": 0
+      },
+      "events": [
+        {
+          "schema": "c2b-stream-relay-v1",
+          "event": "ready",
+          "identity": {
+            "pid": 7,
+            "startTicks": "14824"
+          },
+          "marker": "taki-c2b-relay:9a276b18-7fa2-4421-869c-88f0d89aec01",
+          "target": [
+            "127.0.0.1",
+            8000
+          ]
+        },
+        {
+          "schema": "c2b-stream-relay-v1",
+          "event": "stdin-eof",
+          "bytes": 32768,
+          "sha256": "ac469a51336bd2114ff73ecc3815f8b0baecadc8328dd6305b203bf5f8668d34"
+        },
+        {
+          "schema": "c2b-stream-relay-v1",
+          "event": "complete",
+          "identity": {
+            "pid": 7,
+            "startTicks": "14824"
+          },
+          "received": {
+            "stdin": 32768,
+            "target": 49152
+          },
+          "sent": {
+            "stdout": 49152,
+            "target": 32768
+          },
+          "stdinEof": true,
+          "targetEof": true,
+          "targetHalfClosed": true,
+          "readChunks": {
+            "stdin": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096
+            ],
+            "target": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096
+            ]
+          },
+          "digests": {
+            "stdin": "ac469a51336bd2114ff73ecc3815f8b0baecadc8328dd6305b203bf5f8668d34",
+            "target": "96ea0e56ef19e5e30e59ade96a40478a0df79f425f6e57f18073a80467364d3e"
+          }
+        }
+      ],
+      "eventError": null,
+      "pendingEventBytes": 0,
+      "commandIndex": 8
+    },
+    {
+      "index": 2,
+      "toChild": 1024,
+      "toClient": 512,
+      "clientEnd": false,
+      "clientClosed": true,
+      "aborted": true,
+      "errors": [
+        "client:ECONNRESET"
+      ],
+      "backpressure": {
+        "toChild": 0,
+        "toClient": 0
+      },
+      "events": [
+        {
+          "schema": "c2b-stream-relay-v1",
+          "event": "ready",
+          "identity": {
+            "pid": 13,
+            "startTicks": "14925"
+          },
+          "marker": "taki-c2b-relay:9a276b18-7fa2-4421-869c-88f0d89aec01",
+          "target": [
+            "127.0.0.1",
+            8000
+          ]
+        },
+        {
+          "schema": "c2b-stream-relay-v1",
+          "event": "stdin-eof",
+          "bytes": 1024,
+          "sha256": "5bd6f557cf6d45efbe0e88196ee893bc1353186d2369ec40e1f48d95fb3988e5"
+        },
+        {
+          "schema": "c2b-stream-relay-v1",
+          "event": "complete",
+          "identity": {
+            "pid": 13,
+            "startTicks": "14925"
+          },
+          "received": {
+            "stdin": 1024,
+            "target": 512
+          },
+          "sent": {
+            "stdout": 512,
+            "target": 1024
+          },
+          "stdinEof": true,
+          "targetEof": true,
+          "targetHalfClosed": true,
+          "readChunks": {
+            "stdin": [
+              1024
+            ],
+            "target": [
+              512
+            ]
+          },
+          "digests": {
+            "stdin": "5bd6f557cf6d45efbe0e88196ee893bc1353186d2369ec40e1f48d95fb3988e5",
+            "target": "c3f8be1b87730012febcac6106a26c2eceae900dce00f30b00416fa5b4d19df9"
+          }
+        }
+      ],
+      "eventError": null,
+      "pendingEventBytes": 0,
+      "commandIndex": 11
+    }
+  ],
+  "inspections": [
+    {
+      "Id": "3b39336986d38734b83c1b5b3364295ae1b2678bdc98564ca492ada43deae844",
+      "Name": "/taki-c2b-relay-9a276b18-7fa2-4421-869c-88f0d89aec01",
+      "Image": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+      "Path": "/app/api/.venv/bin/python",
+      "Args": [
+        "-I",
+        "-B",
+        "-"
+      ],
+      "User": "1000:1000",
+      "Labels": {
+        "taki.c2b.relay": "9a276b18-7fa2-4421-869c-88f0d89aec01",
+        "taki.c2b.role": "loopback-transport-diagnostic"
+      },
+      "Tty": false,
+      "OpenStdin": true,
+      "NetworkMode": "none",
+      "Networks": {
+        "none": {
+          "Aliases": null,
+          "DNSNames": null,
+          "DriverOpts": null,
+          "EndpointID": "",
+          "Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "GwPriority": 0,
+          "IPAMConfig": null,
+          "IPAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "Links": null,
+          "MacAddress": "",
+          "NetworkID": ""
+        }
+      },
+      "PortBindings": {},
+      "Ports": {},
+      "ReadonlyRootfs": true,
+      "Mounts": [],
+      "Memory": 268435456,
+      "NanoCpus": 1000000000,
+      "PidsLimit": 16,
+      "Privileged": false,
+      "CapAdd": null,
+      "CapDrop": [
+        "ALL"
+      ],
+      "SecurityOpt": [
+        "no-new-privileges=true"
+      ],
+      "LogConfig": {
+        "Config": {},
+        "Type": "none"
+      },
+      "RestartPolicy": {
+        "MaximumRetryCount": 0,
+        "Name": "no"
+      },
+      "Running": false,
+      "Status": "created",
+      "Pid": 0,
+      "StartedAt": "0001-01-01T00:00:00Z",
+      "ExitCode": 0,
+      "OOMKilled": false
+    },
+    {
+      "Id": "3b39336986d38734b83c1b5b3364295ae1b2678bdc98564ca492ada43deae844",
+      "Name": "/taki-c2b-relay-9a276b18-7fa2-4421-869c-88f0d89aec01",
+      "Image": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+      "Path": "/app/api/.venv/bin/python",
+      "Args": [
+        "-I",
+        "-B",
+        "-"
+      ],
+      "User": "1000:1000",
+      "Labels": {
+        "taki.c2b.relay": "9a276b18-7fa2-4421-869c-88f0d89aec01",
+        "taki.c2b.role": "loopback-transport-diagnostic"
+      },
+      "Tty": false,
+      "OpenStdin": true,
+      "NetworkMode": "none",
+      "Networks": {
+        "none": {
+          "Aliases": null,
+          "DNSNames": null,
+          "DriverOpts": null,
+          "EndpointID": "89c2ef437b84739a5f2a7ebcfb2345d8d53eb918dbdd5d10a6f77638a0e40d3b",
+          "Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "GwPriority": 0,
+          "IPAMConfig": null,
+          "IPAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "Links": null,
+          "MacAddress": "",
+          "NetworkID": "32c3243c3d6554df3f699ecf7776aa2990d78a69cf5bc9b21b06044b159dd807"
+        }
+      },
+      "PortBindings": {},
+      "Ports": {},
+      "ReadonlyRootfs": true,
+      "Mounts": [],
+      "Memory": 268435456,
+      "NanoCpus": 1000000000,
+      "PidsLimit": 16,
+      "Privileged": false,
+      "CapAdd": null,
+      "CapDrop": [
+        "ALL"
+      ],
+      "SecurityOpt": [
+        "no-new-privileges=true"
+      ],
+      "LogConfig": {
+        "Config": {},
+        "Type": "none"
+      },
+      "RestartPolicy": {
+        "MaximumRetryCount": 0,
+        "Name": "no"
+      },
+      "Running": true,
+      "Status": "running",
+      "Pid": 1077,
+      "StartedAt": "2026-10-28T04:18:36.718075485Z",
+      "ExitCode": 0,
+      "OOMKilled": false
+    },
+    {
+      "Id": "3b39336986d38734b83c1b5b3364295ae1b2678bdc98564ca492ada43deae844",
+      "Name": "/taki-c2b-relay-9a276b18-7fa2-4421-869c-88f0d89aec01",
+      "Image": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+      "Path": "/app/api/.venv/bin/python",
+      "Args": [
+        "-I",
+        "-B",
+        "-"
+      ],
+      "User": "1000:1000",
+      "Labels": {
+        "taki.c2b.relay": "9a276b18-7fa2-4421-869c-88f0d89aec01",
+        "taki.c2b.role": "loopback-transport-diagnostic"
+      },
+      "Tty": false,
+      "OpenStdin": true,
+      "NetworkMode": "none",
+      "Networks": {
+        "none": {
+          "Aliases": null,
+          "DNSNames": null,
+          "DriverOpts": null,
+          "EndpointID": "89c2ef437b84739a5f2a7ebcfb2345d8d53eb918dbdd5d10a6f77638a0e40d3b",
+          "Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "GwPriority": 0,
+          "IPAMConfig": null,
+          "IPAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "Links": null,
+          "MacAddress": "",
+          "NetworkID": "32c3243c3d6554df3f699ecf7776aa2990d78a69cf5bc9b21b06044b159dd807"
+        }
+      },
+      "PortBindings": {},
+      "Ports": {},
+      "ReadonlyRootfs": true,
+      "Mounts": [],
+      "Memory": 268435456,
+      "NanoCpus": 1000000000,
+      "PidsLimit": 16,
+      "Privileged": false,
+      "CapAdd": null,
+      "CapDrop": [
+        "ALL"
+      ],
+      "SecurityOpt": [
+        "no-new-privileges=true"
+      ],
+      "LogConfig": {
+        "Config": {},
+        "Type": "none"
+      },
+      "RestartPolicy": {
+        "MaximumRetryCount": 0,
+        "Name": "no"
+      },
+      "Running": true,
+      "Status": "running",
+      "Pid": 1077,
+      "StartedAt": "2026-10-28T04:18:36.718075485Z",
+      "ExitCode": 0,
+      "OOMKilled": false
+    },
+    {
+      "Id": "3b39336986d38734b83c1b5b3364295ae1b2678bdc98564ca492ada43deae844",
+      "Name": "/taki-c2b-relay-9a276b18-7fa2-4421-869c-88f0d89aec01",
+      "Image": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+      "Path": "/app/api/.venv/bin/python",
+      "Args": [
+        "-I",
+        "-B",
+        "-"
+      ],
+      "User": "1000:1000",
+      "Labels": {
+        "taki.c2b.relay": "9a276b18-7fa2-4421-869c-88f0d89aec01",
+        "taki.c2b.role": "loopback-transport-diagnostic"
+      },
+      "Tty": false,
+      "OpenStdin": true,
+      "NetworkMode": "none",
+      "Networks": {
+        "none": {
+          "Aliases": null,
+          "DNSNames": null,
+          "DriverOpts": null,
+          "EndpointID": "89c2ef437b84739a5f2a7ebcfb2345d8d53eb918dbdd5d10a6f77638a0e40d3b",
+          "Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "GwPriority": 0,
+          "IPAMConfig": null,
+          "IPAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "Links": null,
+          "MacAddress": "",
+          "NetworkID": "32c3243c3d6554df3f699ecf7776aa2990d78a69cf5bc9b21b06044b159dd807"
+        }
+      },
+      "PortBindings": {},
+      "Ports": {},
+      "ReadonlyRootfs": true,
+      "Mounts": [],
+      "Memory": 268435456,
+      "NanoCpus": 1000000000,
+      "PidsLimit": 16,
+      "Privileged": false,
+      "CapAdd": null,
+      "CapDrop": [
+        "ALL"
+      ],
+      "SecurityOpt": [
+        "no-new-privileges=true"
+      ],
+      "LogConfig": {
+        "Config": {},
+        "Type": "none"
+      },
+      "RestartPolicy": {
+        "MaximumRetryCount": 0,
+        "Name": "no"
+      },
+      "Running": true,
+      "Status": "running",
+      "Pid": 1077,
+      "StartedAt": "2026-10-28T04:18:36.718075485Z",
+      "ExitCode": 0,
+      "OOMKilled": false
+    },
+    {
+      "Id": "3b39336986d38734b83c1b5b3364295ae1b2678bdc98564ca492ada43deae844",
+      "Name": "/taki-c2b-relay-9a276b18-7fa2-4421-869c-88f0d89aec01",
+      "Image": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+      "Path": "/app/api/.venv/bin/python",
+      "Args": [
+        "-I",
+        "-B",
+        "-"
+      ],
+      "User": "1000:1000",
+      "Labels": {
+        "taki.c2b.relay": "9a276b18-7fa2-4421-869c-88f0d89aec01",
+        "taki.c2b.role": "loopback-transport-diagnostic"
+      },
+      "Tty": false,
+      "OpenStdin": true,
+      "NetworkMode": "none",
+      "Networks": {
+        "none": {
+          "Aliases": null,
+          "DNSNames": null,
+          "DriverOpts": null,
+          "EndpointID": "89c2ef437b84739a5f2a7ebcfb2345d8d53eb918dbdd5d10a6f77638a0e40d3b",
+          "Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "GwPriority": 0,
+          "IPAMConfig": null,
+          "IPAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "Links": null,
+          "MacAddress": "",
+          "NetworkID": "32c3243c3d6554df3f699ecf7776aa2990d78a69cf5bc9b21b06044b159dd807"
+        }
+      },
+      "PortBindings": {},
+      "Ports": {},
+      "ReadonlyRootfs": true,
+      "Mounts": [],
+      "Memory": 268435456,
+      "NanoCpus": 1000000000,
+      "PidsLimit": 16,
+      "Privileged": false,
+      "CapAdd": null,
+      "CapDrop": [
+        "ALL"
+      ],
+      "SecurityOpt": [
+        "no-new-privileges=true"
+      ],
+      "LogConfig": {
+        "Config": {},
+        "Type": "none"
+      },
+      "RestartPolicy": {
+        "MaximumRetryCount": 0,
+        "Name": "no"
+      },
+      "Running": true,
+      "Status": "running",
+      "Pid": 1077,
+      "StartedAt": "2026-10-28T04:18:36.718075485Z",
+      "ExitCode": 0,
+      "OOMKilled": false
+    },
+    {
+      "Id": "3b39336986d38734b83c1b5b3364295ae1b2678bdc98564ca492ada43deae844",
+      "Name": "/taki-c2b-relay-9a276b18-7fa2-4421-869c-88f0d89aec01",
+      "Image": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+      "Path": "/app/api/.venv/bin/python",
+      "Args": [
+        "-I",
+        "-B",
+        "-"
+      ],
+      "User": "1000:1000",
+      "Labels": {
+        "taki.c2b.relay": "9a276b18-7fa2-4421-869c-88f0d89aec01",
+        "taki.c2b.role": "loopback-transport-diagnostic"
+      },
+      "Tty": false,
+      "OpenStdin": true,
+      "NetworkMode": "none",
+      "Networks": {
+        "none": {
+          "Aliases": null,
+          "DNSNames": null,
+          "DriverOpts": null,
+          "EndpointID": "",
+          "Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "GwPriority": 0,
+          "IPAMConfig": null,
+          "IPAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "Links": null,
+          "MacAddress": "",
+          "NetworkID": "32c3243c3d6554df3f699ecf7776aa2990d78a69cf5bc9b21b06044b159dd807"
+        }
+      },
+      "PortBindings": {},
+      "Ports": {},
+      "ReadonlyRootfs": true,
+      "Mounts": [],
+      "Memory": 268435456,
+      "NanoCpus": 1000000000,
+      "PidsLimit": 16,
+      "Privileged": false,
+      "CapAdd": null,
+      "CapDrop": [
+        "ALL"
+      ],
+      "SecurityOpt": [
+        "no-new-privileges=true"
+      ],
+      "LogConfig": {
+        "Config": {},
+        "Type": "none"
+      },
+      "RestartPolicy": {
+        "MaximumRetryCount": 0,
+        "Name": "no"
+      },
+      "Running": false,
+      "Status": "exited",
+      "Pid": 0,
+      "StartedAt": "2026-10-28T04:18:36.718075485Z",
+      "ExitCode": 0,
+      "OOMKilled": false
+    }
+  ],
+  "cleanup": {
+    "proven": true,
+    "failures": [],
+    "container": "original-stopped-removed-and-absent",
+    "port": {
+      "free": true
+    },
+    "cliChildrenClosed": true
+  },
+  "timing": {
+    "overallBoundMs": 60000,
+    "runtimeBoundMs": 40000,
+    "readinessBoundMs": 10000,
+    "cleanupReserveMs": 20000,
+    "startedAt": "2026-10-28T04:18:32.448Z",
+    "runtimeElapsedMs": 5291.6904,
+    "cleanupElapsedMs": 2515.7416000000003,
+    "beforeArchiveElapsedMs": 7807.449100000001
+  },
+  "hostListener": {
+    "address": "127.0.0.1",
+    "family": "IPv4",
+    "port": 58118
+  },
+  "listenerExclusivity": {
+    "refused": true,
+    "code": "EADDRINUSE"
+  },
+  "engine": {
+    "Id": "93e8319e-24b7-4a7d-88f1-60923ad681e0",
+    "ServerVersion": "29.0.1",
+    "OSType": "linux"
+  },
+  "image": {
+    "Id": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+    "Os": "linux",
+    "Architecture": "amd64",
+    "Volumes": null
+  },
+  "containerId": "3b39336986d38734b83c1b5b3364295ae1b2678bdc98564ca492ada43deae844",
+  "reaping": {
+    "schema": "c2b-relay-reaping-v1",
+    "event": "collected",
+    "before": {
+      "original": [
+        {
+          "expected": {
+            "pid": 7,
+            "startTicks": "14824"
+          },
+          "current": null
+        },
+        {
+          "expected": {
+            "pid": 13,
+            "startTicks": "14925"
+          },
+          "current": null
+        }
+      ],
+      "markerMatches": [],
+      "absent": true,
+      "observedProcessCount": 2,
+      "excludedObserverPid": 20
+    },
+    "after": {
+      "original": [
+        {
+          "expected": {
+            "pid": 7,
+            "startTicks": "14824"
+          },
+          "current": null
+        },
+        {
+          "expected": {
+            "pid": 13,
+            "startTicks": "14925"
+          },
+          "current": null
+        }
+      ],
+      "markerMatches": [],
+      "absent": true,
+      "observedProcessCount": 2,
+      "excludedObserverPid": 20
+    },
+    "originalServer": {
+      "pid": 1,
+      "startTicks": "14725",
+      "state": "S"
+    },
+    "serverAfter": {
+      "pid": 1,
+      "startTicks": "14725",
+      "state": "S"
+    },
+    "originalServerUnchanged": true,
+    "deploymentReady": false
+  },
+  "stoppedState": {
+    "Id": "3b39336986d38734b83c1b5b3364295ae1b2678bdc98564ca492ada43deae844",
+    "Name": "/taki-c2b-relay-9a276b18-7fa2-4421-869c-88f0d89aec01",
+    "Image": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+    "Path": "/app/api/.venv/bin/python",
+    "Args": [
+      "-I",
+      "-B",
+      "-"
+    ],
+    "User": "1000:1000",
+    "Labels": {
+      "taki.c2b.relay": "9a276b18-7fa2-4421-869c-88f0d89aec01",
+      "taki.c2b.role": "loopback-transport-diagnostic"
+    },
+    "Tty": false,
+    "OpenStdin": true,
+    "NetworkMode": "none",
+    "Networks": {
+      "none": {
+        "Aliases": null,
+        "DNSNames": null,
+        "DriverOpts": null,
+        "EndpointID": "",
+        "Gateway": "",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "GwPriority": 0,
+        "IPAMConfig": null,
+        "IPAddress": "",
+        "IPPrefixLen": 0,
+        "IPv6Gateway": "",
+        "Links": null,
+        "MacAddress": "",
+        "NetworkID": "32c3243c3d6554df3f699ecf7776aa2990d78a69cf5bc9b21b06044b159dd807"
+      }
+    },
+    "PortBindings": {},
+    "Ports": {},
+    "ReadonlyRootfs": true,
+    "Mounts": [],
+    "Memory": 268435456,
+    "NanoCpus": 1000000000,
+    "PidsLimit": 16,
+    "Privileged": false,
+    "CapAdd": null,
+    "CapDrop": [
+      "ALL"
+    ],
+    "SecurityOpt": [
+      "no-new-privileges=true"
+    ],
+    "LogConfig": {
+      "Config": {},
+      "Type": "none"
+    },
+    "RestartPolicy": {
+      "MaximumRetryCount": 0,
+      "Name": "no"
+    },
+    "Running": false,
+    "Status": "exited",
+    "Pid": 0,
+    "StartedAt": "2026-10-28T04:18:36.718075485Z",
+    "ExitCode": 0,
+    "OOMKilled": false
+  },
+  "hostFailures": [],
+  "acceptedConnections": 2,
+  "observerExecutions": 1
+}

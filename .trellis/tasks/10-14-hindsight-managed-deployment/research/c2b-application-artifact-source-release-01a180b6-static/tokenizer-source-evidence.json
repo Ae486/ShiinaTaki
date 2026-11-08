@@ -1,0 +1,23 @@
+[
+  {
+    "path": "H:\\hindsight\\.venv\\Lib\\site-packages\\tiktoken\\load.py",
+    "bytes": 6091,
+    "sha256": "2ca82f19747fbaf832cb512a230454771cd163538d982f39f78bd5a344a04244",
+    "lfSha256": "7614ce8952089db86243fce6b4e643b212afa922b35f234e24958f989d12f515",
+    "matchesInstalledSource": true
+  },
+  {
+    "path": "H:\\hindsight\\.venv\\Lib\\site-packages\\tiktoken\\registry.py",
+    "bytes": 3352,
+    "sha256": "7b941fceffd6c3a76b54a93e7bcf8a37a7181e8d6f1bf6f9420e77821ff5a60d",
+    "lfSha256": "edf92d65b27529c9bcb15c968047c8cbe6717d4bdc5eea4b50d5ca3df486c105",
+    "matchesInstalledSource": true
+  },
+  {
+    "path": "H:\\hindsight\\.venv\\Lib\\site-packages\\tiktoken_ext\\openai_public.py",
+    "bytes": 5775,
+    "sha256": "c1e4c453c2fcf8102342c2fc3771aa647f22012ce05cb9751d2bc55830738088",
+    "lfSha256": "954392738e60d0fb6dca1dad80872efc47c8e2733babecbbf0a23970ed66c2cb",
+    "matchesInstalledSource": true
+  }
+]

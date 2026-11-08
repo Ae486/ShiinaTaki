@@ -1,0 +1,1150 @@
+{
+  "schema": "c2b-application-base-facts-v1",
+  "imageId": "sha256:ba5161f9e70f2811c17a90e40921b17240ae275d51a7a4001fcb75fcb61c10db",
+  "inventoryResultSha256": "51afb014ed47b811813880d0b0c6f8e16beaae9cb8db0aa9cee0cec5dc6bf71e",
+  "dependencyV4ReleaseSha256": "38b3529030e7b7273a2f95e67df9f3e54dc75199962472eec96af5828dda3eed",
+  "metadata": [
+    {
+      "file": "FlashRank-0.2.10.dist-info/METADATA",
+      "bytes": 14771,
+      "sha256": "d149454884474a1bf0e1fcf243895ec18f801f3527817d3e5a6cd284760e091e"
+    },
+    {
+      "file": "aiofile-3.9.0.dist-info/METADATA",
+      "bytes": 14046,
+      "sha256": "ce5ae6768911f93bcf31a313786be9f6bb69aaaa1290c206efa40fa9f079d252"
+    },
+    {
+      "file": "aiohappyeyeballs-2.6.1.dist-info/METADATA",
+      "bytes": 5915,
+      "sha256": "3525e5849c007e2dfcd1e123028ec14383ff4d56a5f718b4aa4c995a26ccb153"
+    },
+    {
+      "file": "aiohttp-3.14.1.dist-info/METADATA",
+      "bytes": 8262,
+      "sha256": "952aede2d0ed99def28680d24c4ab434da14f1c4838df0c902e38208758a8a5d"
+    },
+    {
+      "file": "aiosignal-1.4.0.dist-info/METADATA",
+      "bytes": 3662,
+      "sha256": "09247ef1da8bc696728d47130e702e4307f6f7d101d6c485bff9f3a71ce7008d"
+    },
+    {
+      "file": "alembic-1.17.1.dist-info/METADATA",
+      "bytes": 7216,
+      "sha256": "f941558e7e279908c0e3726860f5a20bad8f8fe6164f7b27b8f622420cc032eb"
+    },
+    {
+      "file": "annotated_doc-0.0.4.dist-info/METADATA",
+      "bytes": 6566,
+      "sha256": "22b9b9289b9adf7758daa28a02327e3a129a5415487f01467a3fdd49edd9d535"
+    },
+    {
+      "file": "annotated_types-0.7.0.dist-info/METADATA",
+      "bytes": 15046,
+      "sha256": "ee5b6ac64b09274c026051813484025939564067801f485115d9cadc207cf791"
+    },
+    {
+      "file": "anthropic-0.75.0.dist-info/METADATA",
+      "bytes": 28514,
+      "sha256": "a60c854fa87a309fd6485eebd977bab1ac11f403c80c2eacce0977322bdb38ca"
+    },
+    {
+      "file": "anyio-4.11.0.dist-info/METADATA",
+      "bytes": 4091,
+      "sha256": "cab41c4ad137ce03f81be673fbba956b0f7da9bf834ccda01e0c0fff5a4006ee"
+    },
+    {
+      "file": "asgiref-3.11.0.dist-info/METADATA",
+      "bytes": 9287,
+      "sha256": "815e08af2b4f7f30978270e1bffacce4606851477f4f3f90bea65214a126546b"
+    },
+    {
+      "file": "asyncpg-0.30.0.dist-info/METADATA",
+      "bytes": 5010,
+      "sha256": "eb430dd2d5c3bdc3edc5a8540b5bf148ff3e752e61603b62aff6086d8d8d0a44"
+    },
+    {
+      "file": "attrs-25.4.0.dist-info/METADATA",
+      "bytes": 10473,
+      "sha256": "d917abc63eda81c311c62c1d92dea50b682ea870269062821f5de75962bb6684"
+    },
+    {
+      "file": "authlib-1.6.12.dist-info/METADATA",
+      "bytes": 9846,
+      "sha256": "78a85c7ffcca0a47eb465c20a8c00757293d90beeecf7fa7594be9fe967b39bd"
+    },
+    {
+      "file": "backports.tarfile-1.2.0.dist-info/METADATA",
+      "bytes": 2020,
+      "sha256": "8215c54ead77d9dc5a108a25c6bdc72b5999aa6f62c9499a440359412afa5a51"
+    },
+    {
+      "file": "beartype-0.22.5.dist-info/METADATA",
+      "bytes": 36897,
+      "sha256": "149af25eb214b280b2af9a9af2c131af6b8feb807ce490fa99f031ff5fda18ea"
+    },
+    {
+      "file": "beautifulsoup4-4.14.2.dist-info/METADATA",
+      "bytes": 3809,
+      "sha256": "f684e4e2662841f201e20d74731560f7bcc22328eaeb2f7c2461f4dcfb0d9717"
+    },
+    {
+      "file": "boto3-1.42.74.dist-info/METADATA",
+      "bytes": 6748,
+      "sha256": "39a209a19543aac7ecce6ae6bca930ee308218991f173613584c2a6743cf0508"
+    },
+    {
+      "file": "botocore-1.42.74.dist-info/METADATA",
+      "bytes": 5854,
+      "sha256": "2e8f533a1b3ed4a1ad215188314f12858cb3fd6a935f4ab094459eb8c84ffce5"
+    },
+    {
+      "file": "cachetools-6.2.1.dist-info/METADATA",
+      "bytes": 5494,
+      "sha256": "e759e64eb0fd6508aa0845e3e049c253a620b7d6ef9cc27108c60cfe80b62276"
+    },
+    {
+      "file": "caio-0.9.25.dist-info/METADATA",
+      "bytes": 3290,
+      "sha256": "3759f4084aa558c85b4f3616150ca35eba9d388dc6b103629d5f7580ee2cc672"
+    },
+    {
+      "file": "certifi-2025.10.5.dist-info/METADATA",
+      "bytes": 2474,
+      "sha256": "473c91e2c4fac51375a4d372db820754e959b83261d4135f68c6b4e3311a76d9"
+    },
+    {
+      "file": "cffi-2.0.0.dist-info/METADATA",
+      "bytes": 2559,
+      "sha256": "b98ce7e3417af089bc12d5c73412d9b3b1683ccf8ec73c986c35ac8c9be1ba39"
+    },
+    {
+      "file": "charset_normalizer-3.4.4.dist-info/METADATA",
+      "bytes": 37303,
+      "sha256": "8d5b94141b62f1d6afd7d60bbd68acb138a155d176a33518e0a28cc3b8dd9014"
+    },
+    {
+      "file": "claude_agent_sdk-0.2.87.dist-info/METADATA",
+      "bytes": 13657,
+      "sha256": "1dd8c55ea6881aaf4ffedba972e151184982c740a737a85810d0e9ec11a1e41c"
+    },
+    {
+      "file": "click-8.1.8.dist-info/METADATA",
+      "bytes": 2263,
+      "sha256": "589b50eae192db26cb7ef504e2f0b45c884806be32146c23acc051d9f88243e4"
+    },
+    {
+      "file": "cobble-0.1.4.dist-info/METADATA",
+      "bytes": 2698,
+      "sha256": "6eb2cf88cfb39b884adde1eff7d8f89f80b256572eb0c6c164d6f99943dbd49f"
+    },
+    {
+      "file": "cohere-5.20.1.dist-info/METADATA",
+      "bytes": 3465,
+      "sha256": "e5e2a9cdf59f682453585931eb799eec7aeaa16d0a3141f5e6443f2b6d010617"
+    },
+    {
+      "file": "coloredlogs-15.0.1.dist-info/METADATA",
+      "bytes": 12387,
+      "sha256": "1663baba746f35eefb249d945345d88566cc4f3643863eb31a91258c3cac674c"
+    },
+    {
+      "file": "croniter-6.2.2.dist-info/METADATA",
+      "bytes": 22532,
+      "sha256": "650b46d29a788110f04fdadacd8e106227f597e54f7ee962ce9ba3258e5e04f1"
+    },
+    {
+      "file": "cryptography-49.0.0.dist-info/METADATA",
+      "bytes": 4343,
+      "sha256": "1fc839d24efc355f0e5c507aa807822bca4371e732603b6d3e92b24038deded2"
+    },
+    {
+      "file": "cyclopts-4.2.2.dist-info/METADATA",
+      "bytes": 12125,
+      "sha256": "2a63cf8ed00219a8d0eee69aa0b5b8f30af421bc64a0b7eef62fc901f0c45800"
+    },
+    {
+      "file": "dateparser-1.2.2.dist-info/METADATA",
+      "bytes": 29635,
+      "sha256": "262e8b33e4e412b3a18ca7efe4c7d8b9ac85bfc0be241b0e6b405f8d1bf44e4b"
+    },
+    {
+      "file": "defusedxml-0.7.1.dist-info/METADATA",
+      "bytes": 32518,
+      "sha256": "369d3cef64870daf849fba711cb8d05a7efe3c8d9ab0f763adc34079fe378bb1"
+    },
+    {
+      "file": "distro-1.9.0.dist-info/METADATA",
+      "bytes": 6791,
+      "sha256": "31632ab2de5591131091b3397bdcdf797718579d85a75186f06839dd0c09e81d"
+    },
+    {
+      "file": "dnspython-2.8.0.dist-info/METADATA",
+      "bytes": 5680,
+      "sha256": "74f759539b89e299151b2d697c612307345b766dbb7e9435cf863a06981fd385"
+    },
+    {
+      "file": "docker-7.1.0.dist-info/METADATA",
+      "bytes": 3785,
+      "sha256": "aa509131354c84bd49b5293e3246f89615e5233994714dc949b464cfae246d0b"
+    },
+    {
+      "file": "docstring_parser-0.17.0.dist-info/METADATA",
+      "bytes": 3499,
+      "sha256": "81b219f3c9c43eb0fbc52809bc93e0636070c3b482946d88ba768d75b8cf80fd"
+    },
+    {
+      "file": "docutils-0.22.3.dist-info/METADATA",
+      "bytes": 15952,
+      "sha256": "949d6af06ace42d08c627dd7b3e8c436e4f25755b2bb8a3d6c98af5d08dcc76d"
+    },
+    {
+      "file": "einops-0.8.2.dist-info/METADATA",
+      "bytes": 13724,
+      "sha256": "0bd65db043688a44f4a29608c1cba521c932f7ff76f238bbd869441e15012653"
+    },
+    {
+      "file": "email_validator-2.3.0.dist-info/METADATA",
+      "bytes": 26006,
+      "sha256": "2a97b81eefcd856bc80b0346f47fa2d800b9a438bf8f9231ae00fe931d5c9fbc"
+    },
+    {
+      "file": "et_xmlfile-2.0.0.dist-info/METADATA",
+      "bytes": 2711,
+      "sha256": "0e97d7ea909ed0fbe03d88bc8b6f58677cee1b07bd3353ce361cd2405915204e"
+    },
+    {
+      "file": "exceptiongroup-1.3.0.dist-info/METADATA",
+      "bytes": 6725,
+      "sha256": "a2202afa5957a8e695d01ddd24ddf5e928ed0a9b6142fb908e656e54e6db69e4"
+    },
+    {
+      "file": "execnet-2.1.2.dist-info/METADATA",
+      "bytes": 2905,
+      "sha256": "7343015d62b2eaa1841ec06a7c7c132aeb482921f73ab6e0fd18331495684c61"
+    },
+    {
+      "file": "fastapi-0.136.3.dist-info/METADATA",
+      "bytes": 27647,
+      "sha256": "0370bef57a44ef18814313fac9ffa7b7c7f9d2112fa4d6e49134cc2f859f69b4"
+    },
+    {
+      "file": "fastapi_cli-0.0.16.dist-info/METADATA",
+      "bytes": 6429,
+      "sha256": "e6345e6b65d8a03c90c5a706ee805755838c412c7da78f75f32f34567aa7236a"
+    },
+    {
+      "file": "fastapi_cloud_cli-0.3.1.dist-info/METADATA",
+      "bytes": 3227,
+      "sha256": "00fdd4459ca30992f5ef7089309dee8913523e9b9b7a4c73b4ce18fcfd2be969"
+    },
+    {
+      "file": "fastar-0.11.0.dist-info/METADATA",
+      "bytes": 4002,
+      "sha256": "40b14a2c1873c4fb3d5b3013748e3bf9c0d6abecfaf8d8873a234bfed4dafc23"
+    },
+    {
+      "file": "fastavro-1.12.1.dist-info/METADATA",
+      "bytes": 5754,
+      "sha256": "01a8f460bbf05a22bc8e3e402c51fd328c3f0a256670542c9430e5dbd48157c8"
+    },
+    {
+      "file": "fastmcp-3.2.0.dist-info/METADATA",
+      "bytes": 8105,
+      "sha256": "dcb54e9ad7949961c0c98fefffcd808488c92fc6d0f9681e42db84937729b2d9"
+    },
+    {
+      "file": "fastuuid-0.14.0.dist-info/METADATA",
+      "bytes": 1094,
+      "sha256": "bb27f5891154881aef7f1a192f91d49f7d466be564fe0b2865b5e759342fb0b4"
+    },
+    {
+      "file": "filelock-3.20.3.dist-info/METADATA",
+      "bytes": 2110,
+      "sha256": "24b30a81be1addb87b7a2480b6e65e37ae024ac31919b60c4f9039d1f79449ce"
+    },
+    {
+      "file": "flatbuffers-25.12.19.dist-info/METADATA",
+      "bytes": 1004,
+      "sha256": "9f38239f96faa21522a6aadab6912e1e560708bbe9c9f696a0679c9403fa089e"
+    },
+    {
+      "file": "frozenlist-1.8.0.dist-info/METADATA",
+      "bytes": 20333,
+      "sha256": "946c22dc9f7e2c76f2d698f00a4306dbe49a820e2b3f1a0e22fe5286cbec35f1"
+    },
+    {
+      "file": "fsspec-2025.10.0.dist-info/METADATA",
+      "bytes": 10398,
+      "sha256": "33de743cbf8933868fff5cc246279b43e94e694ab2f7fe24adad3e76a03cb422"
+    },
+    {
+      "file": "google_auth-2.43.0.dist-info/METADATA",
+      "bytes": 6585,
+      "sha256": "253bc5eb68ce4a8aed80163e0bdb290ced15fac998fb68fe1ccf98a5b69f5e5d"
+    },
+    {
+      "file": "google_genai-1.53.0.dist-info/METADATA",
+      "bytes": 47712,
+      "sha256": "92121f8e6732f23141ed3c9f69e9463367919e59a2ee1a72f373b940f8197ffc"
+    },
+    {
+      "file": "googleapis_common_protos-1.75.0.dist-info/METADATA",
+      "bytes": 8559,
+      "sha256": "b137b6a2d3b8a620041ae60f00e756422e6a7a0ac9b0d30c3a6367e651f88f7f"
+    },
+    {
+      "file": "greenlet-3.2.4.dist-info/METADATA",
+      "bytes": 4120,
+      "sha256": "670ba20f63c447f288ac14aeb907543ed2be5422cab5f63946e79819085e5faa"
+    },
+    {
+      "file": "h11-0.16.0.dist-info/METADATA",
+      "bytes": 8348,
+      "sha256": "28f326098ac09fcba79b8f180f96087c841fe2456215cb7b872a9c7d5cd19d64"
+    },
+    {
+      "file": "hf_xet-1.3.2.dist-info/METADATA",
+      "bytes": 4882,
+      "sha256": "55d064be4c8cb164ba0b9d578a911a8be89918f22df72754a84ea245e1507552"
+    },
+    {
+      "file": "hindsight_api_slim-0.9.0.dist-info/METADATA",
+      "bytes": 8570,
+      "sha256": "fa5441d2c3a24d8ca7e88eccae2f76531ce22d6a6d174bc4fd96ccaf41e71414"
+    },
+    {
+      "file": "httpcore-1.0.9.dist-info/METADATA",
+      "bytes": 21529,
+      "sha256": "fe2d4fda6199128978779e0cf27f3c045c531863fcdd987eacc74f3a18d41c21"
+    },
+    {
+      "file": "httptools-0.7.1.dist-info/METADATA",
+      "bytes": 3472,
+      "sha256": "28203e137533b97c1ac002b264ebe2834c055a18af76e91fba0a5907a8ff3c21"
+    },
+    {
+      "file": "httpx-0.28.1.dist-info/METADATA",
+      "bytes": 7052,
+      "sha256": "febb9b0f8f3e80d57c8199c304f35c4336e8581d1d18d7983c92766b82793b25"
+    },
+    {
+      "file": "httpx_sse-0.4.3.dist-info/METADATA",
+      "bytes": 9671,
+      "sha256": "d4c6d804ee5ac46e9b3b6595c27ab8ae2ba7cfb5f692c78b16ff463e4bd1a81e"
+    },
+    {
+      "file": "huggingface_hub-1.6.0.dist-info/METADATA",
+      "bytes": 13951,
+      "sha256": "4352a2df28b1b0f0cf11391c24d0b22accb0d6d59e3ca409833e382b062959f8"
+    },
+    {
+      "file": "humanfriendly-10.0.dist-info/METADATA",
+      "bytes": 9201,
+      "sha256": "68bb349388cdfeca602acc3455b83a7b2fe3cbe84025e27493bcbe76f3ab6c82"
+    },
+    {
+      "file": "idna-3.15.dist-info/METADATA",
+      "bytes": 7699,
+      "sha256": "cb8ac245bf249c9e2346427bc54bbf79971c96b7bf6b46862e4335fa76001827"
+    },
+    {
+      "file": "importlib_metadata-8.5.0.dist-info/METADATA",
+      "bytes": 4775,
+      "sha256": "1d78a40e966eb78ad8d83e19ba10315e72d40dbf9ffd73ff0b2a7d898985e06d"
+    },
+    {
+      "file": "iniconfig-2.3.0.dist-info/METADATA",
+      "bytes": 2526,
+      "sha256": "40d773f84e4e112f495bbf4f1be9cbd2d456c0aeb6ef5311f75d1bf322f2165b"
+    },
+    {
+      "file": "jaraco.classes-3.4.0.dist-info/METADATA",
+      "bytes": 2623,
+      "sha256": "2e6b102232edd45ae1bb8a6b4091fd40cf3201a6bb6fd4bc97c5e8cd765a44b8"
+    },
+    {
+      "file": "jaraco.context-6.0.1.dist-info/METADATA",
+      "bytes": 4063,
+      "sha256": "1233abf7b9a5addcb7373cd591ff58e8f7362428be30be4c09210b4ca3e59248"
+    },
+    {
+      "file": "jaraco_functools-4.3.0.dist-info/METADATA",
+      "bytes": 2866,
+      "sha256": "b223d99b026af30a5bac16de199ef094553bf40c78ba2f81284e44067aac3cfc"
+    },
+    {
+      "file": "jeepney-0.9.0.dist-info/METADATA",
+      "bytes": 1230,
+      "sha256": "b8e6c353e9aaed0ed0144029556417fda23b64f344e718331907054ba05b8c62"
+    },
+    {
+      "file": "jinja2-3.1.6.dist-info/METADATA",
+      "bytes": 2871,
+      "sha256": "68c5548fb67c4132a13898d9b31ec50c6bea2abdd915d921f214355c3a6499c8"
+    },
+    {
+      "file": "jiter-0.12.0.dist-info/METADATA",
+      "bytes": 5236,
+      "sha256": "d7467fb05913f174a0104858565a6e29283e51c495b8ec7f05e2e2ec2aa16960"
+    },
+    {
+      "file": "jmespath-1.1.0.dist-info/METADATA",
+      "bytes": 7610,
+      "sha256": "81181e9a312f1b87e5be7c8376c57b0e8c962ba524a25a313d43dc2e2d3984f3"
+    },
+    {
+      "file": "joblib-1.5.2.dist-info/METADATA",
+      "bytes": 5582,
+      "sha256": "cf385b71bfce1aa630dedb3b3749e841826a5cb8ee15c5e75e06dadfacc44a3d"
+    },
+    {
+      "file": "json_repair-0.61.7.dist-info/METADATA",
+      "bytes": 20075,
+      "sha256": "8f2e17836aba70a178c2d3bf2720ae9b0e4bb45829a24270bfdfd05291223529"
+    },
+    {
+      "file": "jsonpatch-1.33.dist-info/METADATA",
+      "bytes": 2980,
+      "sha256": "06f32bbb4669267d84a82bdaf5fc0dd4d861d0da006b2af5ef598259a66f7a29"
+    },
+    {
+      "file": "jsonpointer-3.0.0.dist-info/METADATA",
+      "bytes": 2251,
+      "sha256": "9bc135c616e4a8076fb1930123abf2d3ad702d5e30a9c99b4ba8abc8509680b2"
+    },
+    {
+      "file": "jsonref-1.1.0.dist-info/METADATA",
+      "bytes": 2722,
+      "sha256": "f98db3890394fba23912faab86ad8f70ed564fc8c885298b636b270f28453e43"
+    },
+    {
+      "file": "jsonschema-4.23.0.dist-info/METADATA",
+      "bytes": 7906,
+      "sha256": "1ddf7a8007dd3b4bf946915e4f6e6a8f2a3b3ef8404b2e7a178270dc55144e5a"
+    },
+    {
+      "file": "jsonschema_path-0.3.4.dist-info/METADATA",
+      "bytes": 4308,
+      "sha256": "46dede8762c5750226731bcfd69c8e3a18d654d65f984ed9d6279301722f43e9"
+    },
+    {
+      "file": "jsonschema_specifications-2025.9.1.dist-info/METADATA",
+      "bytes": 2907,
+      "sha256": "35abd41757f32b4ea24756920ded47b70173d77cbc052a5a6d3ab583b2e8d89d"
+    },
+    {
+      "file": "keyring-25.6.0.dist-info/METADATA",
+      "bytes": 20689,
+      "sha256": "ad2db15d24ed36e8c9212afcf11aa50612384f45afc78c96c902d3486499dad3"
+    },
+    {
+      "file": "langchain_core-1.4.0.dist-info/METADATA",
+      "bytes": 4450,
+      "sha256": "a8421171a0d2c2aeb091b131e864964e83d1230779e5e4165f743e9fd11c4ec2"
+    },
+    {
+      "file": "langchain_protocol-0.0.15.dist-info/METADATA",
+      "bytes": 2405,
+      "sha256": "e6b4189e08203adcbcb22fc50e46c1b3185151bf9b1dec185ef6d0d7fdf72294"
+    },
+    {
+      "file": "langchain_text_splitters-1.1.2.dist-info/METADATA",
+      "bytes": 3326,
+      "sha256": "05e4abc7baec2e1d96e6076b4fc483b0b6d3f97684cc62cb1169391e02c034c6"
+    },
+    {
+      "file": "langsmith-0.9.1.dist-info/METADATA",
+      "bytes": 21493,
+      "sha256": "a887c2a7877156cd57755769f554d9233cabc24bb25d04ed25dd4d35adc3f626"
+    },
+    {
+      "file": "litellm-1.93.0.dist-info/METADATA",
+      "bytes": 40936,
+      "sha256": "2079a96229cf0dabfb2c2f87b5109a7b36108818fa790a2a1da86bd0db97a1ce"
+    },
+    {
+      "file": "lxml-6.1.0.dist-info/METADATA",
+      "bytes": 3953,
+      "sha256": "0b6da8e49ddbfa9445aafb0327c059219812859b216f2338743fd64e15f5e455"
+    },
+    {
+      "file": "magika-0.6.3.dist-info/METADATA",
+      "bytes": 10626,
+      "sha256": "052ef6c3221375b3bbdef606bb5ebbfadd82fb03c0706891345f68615c7833a0"
+    },
+    {
+      "file": "mako-1.3.12.dist-info/METADATA",
+      "bytes": 2919,
+      "sha256": "a995943060e020563a46d7d3065aeeee144d189741c351d20abb5ce87d349759"
+    },
+    {
+      "file": "mammoth-1.11.0.dist-info/METADATA",
+      "bytes": 26050,
+      "sha256": "2d8df8645264b14efcaae3a5800c4c86ee0fdfaea9769882a324bac2caaa54f9"
+    },
+    {
+      "file": "markdown_it_py-4.0.0.dist-info/METADATA",
+      "bytes": 7288,
+      "sha256": "e9fcaa1e2daf3f96d840a09fbaaa394feaadf37a36d88a7b6b6b672487c65bfb"
+    },
+    {
+      "file": "markdownify-1.2.2.dist-info/METADATA",
+      "bytes": 9922,
+      "sha256": "e1a95ab11776623a6dde69d3384646be4012d9aa8e990e84f54b028a524f83ac"
+    },
+    {
+      "file": "markitdown-0.1.5b1.dist-info/METADATA",
+      "bytes": 4157,
+      "sha256": "b788cd807dcf51b7e400507df1512d2371f41d57ae4b616730685279b78aed25"
+    },
+    {
+      "file": "markupsafe-3.0.3.dist-info/METADATA",
+      "bytes": 2690,
+      "sha256": "12b4cc61a7fa288cf7667ee3f213786d9619db57fb33ff6f934afbcb5c12ec81"
+    },
+    {
+      "file": "mcp-1.28.1.dist-info/METADATA",
+      "bytes": 9448,
+      "sha256": "d418a04b73eb6520d801fe6383b501283b66e21fc2f36bfda8dec6e42e3a877c"
+    },
+    {
+      "file": "mdurl-0.1.2.dist-info/METADATA",
+      "bytes": 1638,
+      "sha256": "b53b29d48f499367053fda3c81e7ce27d2558380ebbf83e66023b02eb7ddd25d"
+    },
+    {
+      "file": "mlx-0.31.0.dist-info/METADATA",
+      "bytes": 5860,
+      "sha256": "7cd547d184dc5dc8ada2c360f9017910a7239bcf4c372ce93e7ac9d60409e130"
+    },
+    {
+      "file": "mlx_lm-0.31.1.dist-info/METADATA",
+      "bytes": 9483,
+      "sha256": "4ffec76681833222bae449c22b2fd94e2ea9de20cde85f1e837e762f4a0e1347"
+    },
+    {
+      "file": "more_itertools-10.8.0.dist-info/METADATA",
+      "bytes": 39413,
+      "sha256": "6ab3515145abe58b067f087c867631cf4cf5d653fed81b9642ee12086c3904b8"
+    },
+    {
+      "file": "mpmath-1.3.0.dist-info/METADATA",
+      "bytes": 8630,
+      "sha256": "44b66ea444b9c0d19ae94815d356bf047ae6b680c19268b5c265687cd6a81406"
+    },
+    {
+      "file": "multidict-6.7.0.dist-info/METADATA",
+      "bytes": 5321,
+      "sha256": "abfccee732c3a4b5462c7a63c3c04705184d5fbcae07afd195e8433993d8ad94"
+    },
+    {
+      "file": "networkx-3.5.dist-info/METADATA",
+      "bytes": 6336,
+      "sha256": "18b28258a7a706532cc5e97549a0f1beb39ba7b299c085904367c4930d4f8b94"
+    },
+    {
+      "file": "numpy-2.3.4.dist-info/METADATA",
+      "bytes": 62117,
+      "sha256": "02d05671e1cb75fe80fda9cfd9e7210872ba35b5d54be6e295493ef22a8080a8"
+    },
+    {
+      "file": "obstore-0.8.2.dist-info/METADATA",
+      "bytes": 840,
+      "sha256": "3e693586bd403a3671f4e445586fe042270ae98650312477b93c3d67b5f1c763"
+    },
+    {
+      "file": "onnxruntime-1.20.1.dist-info/METADATA",
+      "bytes": 4530,
+      "sha256": "91139a5f630fb0b6991946a39764b5dd6beb4d6af9324bf5198df0d147777c2d"
+    },
+    {
+      "file": "openai-2.24.0.dist-info/METADATA",
+      "bytes": 29167,
+      "sha256": "8ffd865c529a230b50a81b41e9338d8248d182111e7cacf2102730bedea5583f"
+    },
+    {
+      "file": "openapi_pydantic-0.5.1.dist-info/METADATA",
+      "bytes": 10769,
+      "sha256": "bcedf7b4284cdc0faa512382fbb5064b2380c3af80b35f0e8626435653a253c5"
+    },
+    {
+      "file": "openpyxl-3.1.5.dist-info/METADATA",
+      "bytes": 2510,
+      "sha256": "23f80ca9830dd89435da1710f26deda8f81e5409287e74540210c72627a4ad96"
+    },
+    {
+      "file": "opentelemetry_api-1.44.0.dist-info/METADATA",
+      "bytes": 1411,
+      "sha256": "42aabbbacd266627b5c3839a515150ca90c18f80c9d85ca6f6fa10d440a7eeaa"
+    },
+    {
+      "file": "opentelemetry_exporter_otlp_proto_common-1.44.0.dist-info/METADATA",
+      "bytes": 1824,
+      "sha256": "fa4a20e2a52c82aa56ebabccdd4877da74ab47c9eaef10fea83bec2666560ebc"
+    },
+    {
+      "file": "opentelemetry_exporter_otlp_proto_http-1.44.0.dist-info/METADATA",
+      "bytes": 2414,
+      "sha256": "dc21bafee23969fdf1b58052ca505eabf29705482af6b6a7634430bf96e7d3ec"
+    },
+    {
+      "file": "opentelemetry_exporter_prometheus-0.65b0.dist-info/METADATA",
+      "bytes": 2068,
+      "sha256": "bc7fffa501abbcc25cf93630685364fc439089f3bd25c7e9cb7c03a87b887276"
+    },
+    {
+      "file": "opentelemetry_instrumentation-0.65b0.dist-info/METADATA",
+      "bytes": 7171,
+      "sha256": "e5b5f647033d91bfba1e2e88e4619984fa1f60a69ae7ce4080ede325db5fb334"
+    },
+    {
+      "file": "opentelemetry_instrumentation_asgi-0.65b0.dist-info/METADATA",
+      "bytes": 2049,
+      "sha256": "8cb0bfb45e19c9cb03ce9cc576d3f2f262757d0bf73575c0998ef005e750b754"
+    },
+    {
+      "file": "opentelemetry_instrumentation_fastapi-0.65b0.dist-info/METADATA",
+      "bytes": 2180,
+      "sha256": "f3dfa360e3ca088e582840b754f9faef805db1fc58333f6c0e71fd8a38cd5b99"
+    },
+    {
+      "file": "opentelemetry_proto-1.44.0.dist-info/METADATA",
+      "bytes": 2319,
+      "sha256": "e239e361c2025a7e981dd99432160ba1186e9abe351290067a31fd12dc1ecce5"
+    },
+    {
+      "file": "opentelemetry_sdk-1.44.0.dist-info/METADATA",
+      "bytes": 1627,
+      "sha256": "12cf968ea4d637e6adaa8a9b767f34c70a527e092fc7c7f0eb3e93d06148e7e0"
+    },
+    {
+      "file": "opentelemetry_semantic_conventions-0.65b0.dist-info/METADATA",
+      "bytes": 2408,
+      "sha256": "93f167ca7673cbc0ed24ba8e052fb8c3936b260dff53b7106c574f515ec1deab"
+    },
+    {
+      "file": "opentelemetry_util_http-0.65b0.dist-info/METADATA",
+      "bytes": 2578,
+      "sha256": "21371dba7bae652874000c003376ba62140f03bfc47d8c866cd4ef48d3ba2ce6"
+    },
+    {
+      "file": "orjson-3.11.7.dist-info/METADATA",
+      "bytes": 41968,
+      "sha256": "a1b560ab2f454a46704483fd8c61fedacb005bebb65c855466a0cd60ed499a09"
+    },
+    {
+      "file": "packaging-25.0.dist-info/METADATA",
+      "bytes": 3281,
+      "sha256": "5b611a609c38fefc3d616bf45d20aec98fb7d53f245daca9e2c30fc85c7ac282"
+    },
+    {
+      "file": "pandas-2.3.3.dist-info/METADATA",
+      "bytes": 91215,
+      "sha256": "40ee953dc7ca155840b639a1881ff84578075187fce0ac20eeda55a7fa0d9a90"
+    },
+    {
+      "file": "pathable-0.4.4.dist-info/METADATA",
+      "bytes": 1788,
+      "sha256": "17a2a1f0e42eb9030176a0c1424777819b8e043c500d57cdd772e7a0ed2be0d1"
+    },
+    {
+      "file": "pdfminer_six-20251230.dist-info/METADATA",
+      "bytes": 4289,
+      "sha256": "77a7aa49c45244383288e8b98cb567f19a9083ad0d74716e3011c831df801d44"
+    },
+    {
+      "file": "pdfplumber-0.11.9.dist-info/METADATA",
+      "bytes": 43599,
+      "sha256": "24f9118940ac3810a6bf0dd1970094e29cc659c71c334a6fc2e65d7120a74b62"
+    },
+    {
+      "file": "pg0_embedded-0.15.0.dist-info/METADATA",
+      "bytes": 3259,
+      "sha256": "813986d2d9e5c08b47a8761b1573ad58d50bfd83263da17b574fcb7bec52443f"
+    },
+    {
+      "file": "pgvector-0.4.1.dist-info/METADATA",
+      "bytes": 18128,
+      "sha256": "0901e8f55fc76dbed5d571bff39032a021c375f6391648c86710fe512da8c15f"
+    },
+    {
+      "file": "pillow-12.3.0.dist-info/METADATA",
+      "bytes": 9093,
+      "sha256": "8fc07146cab33ef7582361dab6eac596d340b03ec648f18217da7894f73838c8"
+    },
+    {
+      "file": "platformdirs-4.5.0.dist-info/METADATA",
+      "bytes": 12804,
+      "sha256": "985c5997a43e7ceda709d5960894f858eaf8a7b535da3657e25936e8ca86cb5a"
+    },
+    {
+      "file": "pluggy-1.6.0.dist-info/METADATA",
+      "bytes": 4811,
+      "sha256": "7438c35ee25a095eb7416f84b461c2d74425c5e734ad54c3912453c65244e01c"
+    },
+    {
+      "file": "prometheus_client-0.23.1.dist-info/METADATA",
+      "bytes": 1907,
+      "sha256": "22c3a8dba8da39b7dd5adab472c120af773c27c2ce0f697e64915f1e4ed3368e"
+    },
+    {
+      "file": "propcache-0.4.1.dist-info/METADATA",
+      "bytes": 13745,
+      "sha256": "fc23f3c52b336d5335cd053f47d91ff6316949e65ad1f1e3dfccd5284f4d6ece"
+    },
+    {
+      "file": "protobuf-7.35.1.dist-info/METADATA",
+      "bytes": 595,
+      "sha256": "1c58cfd7acd805c087ceb1f14c27cdba3c52d074e1d7b05dacf31fdf413c0a8c"
+    },
+    {
+      "file": "psycopg2_binary-2.9.11.dist-info/METADATA",
+      "bytes": 4936,
+      "sha256": "d6d77144bb22e40a1ac922198fa34783421bdb8990eeebc6fbae10a71341ddfc"
+    },
+    {
+      "file": "py_key_value_aio-0.4.4.dist-info/METADATA",
+      "bytes": 15601,
+      "sha256": "ab8504ea7884d20192e1a995c2e4fa96f2e3bb4a3d0790ea662e3d6ef6137ced"
+    },
+    {
+      "file": "pyasn1-0.6.4.dist-info/METADATA",
+      "bytes": 8411,
+      "sha256": "a092d99fad1e3744d6aa26eef2598e8ee2343ea403137ca73d06dccef19d70e2"
+    },
+    {
+      "file": "pyasn1_modules-0.4.2.dist-info/METADATA",
+      "bytes": 3484,
+      "sha256": "162666d75297dfcdd0116cbeab134d78fab808b8a66bfa5c1d74832d9b754771"
+    },
+    {
+      "file": "pycparser-2.23.dist-info/METADATA",
+      "bytes": 993,
+      "sha256": "a2c9a11ccc5ade7e6c3f0bf959e529cb23e79bbe9ea215d8199c8a1a659b3c57"
+    },
+    {
+      "file": "pydantic-2.12.5.dist-info/METADATA",
+      "bytes": 90587,
+      "sha256": "a3ba23e895191fed69b8323cbcbcdc82984ca0b6a3cdc62c48a2341886a9c08d"
+    },
+    {
+      "file": "pydantic_core-2.41.5.dist-info/METADATA",
+      "bytes": 7277,
+      "sha256": "09f83baa3202ec3da98a284a56afdf1ba69976e4af7172488887e5b2b20591a9"
+    },
+    {
+      "file": "pydantic_extra_types-2.11.1.dist-info/METADATA",
+      "bytes": 4183,
+      "sha256": "50031a8ca40aaf2c0155b132e2d376e03c5c50745a8dc46471c2eaba9f514447"
+    },
+    {
+      "file": "pydantic_settings-2.14.2.dist-info/METADATA",
+      "bytes": 3395,
+      "sha256": "c0f50f045d2f48268cd6c467bef348b5da6184f354c1f03e5fc9bdf78b4cbc32"
+    },
+    {
+      "file": "pygments-2.20.0.dist-info/METADATA",
+      "bytes": 2476,
+      "sha256": "e0528f51b30427fae94723662ba622f8d8db2a4d8d3f1365698d67a52450a845"
+    },
+    {
+      "file": "pyjwt-2.13.0.dist-info/METADATA",
+      "bytes": 3449,
+      "sha256": "0d1b1321a5a688caacd763e006fbbe11f60110e9fe27ff8d23a679863d01a63c"
+    },
+    {
+      "file": "pypdfium2-5.4.0.dist-info/METADATA",
+      "bytes": 67900,
+      "sha256": "52671eb72fe68a1e2a8bb1c7f4a19f0a126468824fa431a13b4b5ad310137e79"
+    },
+    {
+      "file": "pyperclip-1.11.0.dist-info/METADATA",
+      "bytes": 2445,
+      "sha256": "2493839e0751761f27d39aa6d5c5dfd1df839c45da8f328aba4ae4102868b825"
+    },
+    {
+      "file": "pytest-9.0.3.dist-info/METADATA",
+      "bytes": 7556,
+      "sha256": "c3966f28791686477bae35e518736d4cbea5b626d3a79011215854e2bc670207"
+    },
+    {
+      "file": "pytest_asyncio-1.3.0.dist-info/METADATA",
+      "bytes": 4088,
+      "sha256": "68d7250fb7d8f0cde8b57ed6797c4eb9de74325d80c362fccfe55e57966981b9"
+    },
+    {
+      "file": "pytest_rerunfailures-16.1.dist-info/METADATA",
+      "bytes": 21815,
+      "sha256": "d35cfa846769c9c2b85822febe571093e86690cb3b3c805b1d847d4f198cd677"
+    },
+    {
+      "file": "pytest_timeout-2.4.0.dist-info/METADATA",
+      "bytes": 20313,
+      "sha256": "8b79be0dfb1db4a0166b9d997ad95553e7a7e61445bcfc0ddbfbd409bae421ff"
+    },
+    {
+      "file": "pytest_xdist-3.8.0.dist-info/METADATA",
+      "bytes": 2988,
+      "sha256": "298f16af52794d340c358fc2eb20b054a29db2922f22fea90a35b459ecbcc18f"
+    },
+    {
+      "file": "python_dateutil-2.9.0.post0.dist-info/METADATA",
+      "bytes": 8354,
+      "sha256": "a9d436da322be808332f98d88325998e87cb693a678a9969feb4cfad729a6e93"
+    },
+    {
+      "file": "python_dotenv-1.2.2.dist-info/METADATA",
+      "bytes": 27524,
+      "sha256": "59430a9dee8f8118dbf693e41c4a3e5150626d19901f4727503da9499f5a64a1"
+    },
+    {
+      "file": "python_multipart-0.0.32.dist-info/METADATA",
+      "bytes": 2131,
+      "sha256": "e9d399d7dea5eddf0e4d24b5c24687a82e7e50bf2c2b30f8f8a06a64d887dd86"
+    },
+    {
+      "file": "python_pptx-1.0.2.dist-info/METADATA",
+      "bytes": 2503,
+      "sha256": "d38c6af5f1817cc528706264d8343cd1c95dbdec5672f29b944f54f79134a3a2"
+    },
+    {
+      "file": "pytz-2025.2.dist-info/METADATA",
+      "bytes": 22374,
+      "sha256": "e620e4e1f9f1c8019619388d4da496eb02119a13f35aaad55f022694a3c81f6c"
+    },
+    {
+      "file": "pyyaml-6.0.3.dist-info/METADATA",
+      "bytes": 2351,
+      "sha256": "03c3b415ed38d09faedc49360e930769b40c58f68585e6de00e2e4916a858d34"
+    },
+    {
+      "file": "referencing-0.36.2.dist-info/METADATA",
+      "bytes": 2843,
+      "sha256": "f1ec8cf77a53d149e03e4370d19c5281753c77f24abc3468d27c614b05bd7206"
+    },
+    {
+      "file": "regex-2025.11.3.dist-info/METADATA",
+      "bytes": 40467,
+      "sha256": "6dc4ce167b96806110d9e6fffaec07dda0e5bc9469acdaeec3b038f14c419dca"
+    },
+    {
+      "file": "requests-2.34.2.dist-info/METADATA",
+      "bytes": 4806,
+      "sha256": "8c384ba3e979480faae2859d3c5e6c1276dd2c3616e322e124d52c8cfc556f27"
+    },
+    {
+      "file": "requests_toolbelt-1.0.0.dist-info/METADATA",
+      "bytes": 14638,
+      "sha256": "fa52f26237cc8d148d25c5746fdca499a56d0e765e69095cc3564a07cce23967"
+    },
+    {
+      "file": "rich-14.2.0.dist-info/METADATA",
+      "bytes": 18257,
+      "sha256": "222fe35ac48d4a6c59c49a59ca471bb9f7111bcf88f33897190bac074fd5c35f"
+    },
+    {
+      "file": "rich_rst-1.3.2.dist-info/METADATA",
+      "bytes": 6091,
+      "sha256": "1dff5eeee11ee82cad5a0de68ad514ee8da695184b5b1130cca450ad870f09aa"
+    },
+    {
+      "file": "rich_toolkit-0.15.1.dist-info/METADATA",
+      "bytes": 1033,
+      "sha256": "24a3b246ec98c36d45a18d71070578504f8c451f7d3b42415ae537ed0113c98a"
+    },
+    {
+      "file": "rignore-0.7.6.dist-info/METADATA",
+      "bytes": 4172,
+      "sha256": "7e73609deb7a451f3ab9d712998bcf03ce02e1cb74c102cd2bd48b1469f46408"
+    },
+    {
+      "file": "rpds_py-0.28.0.dist-info/METADATA",
+      "bytes": 4145,
+      "sha256": "76e47a0b9f9651267eda03729663563948108b9d76df2755ff8e9f4426da6423"
+    },
+    {
+      "file": "rsa-4.9.1.dist-info/METADATA",
+      "bytes": 5590,
+      "sha256": "76535f48720f61b729ad435a5cb748fe1db6d0c946ed66b99336e33e3aa97789"
+    },
+    {
+      "file": "ruff-0.14.9.dist-info/METADATA",
+      "bytes": 25998,
+      "sha256": "4221689c7f50d031ceb76c39121c8e0014cf8ca90d6a21519acd1c49d260a778"
+    },
+    {
+      "file": "s3transfer-0.16.0.dist-info/METADATA",
+      "bytes": 1740,
+      "sha256": "fcb7138327c0baf97cc401d6ad0e0259daac6b4574c74451f182728b7dcffcd6"
+    },
+    {
+      "file": "safetensors-0.6.2.dist-info/METADATA",
+      "bytes": 4081,
+      "sha256": "8768f97439fd846ac9bec48a5e4cba450b268142529db527ce4681d29833a736"
+    },
+    {
+      "file": "scikit_learn-1.7.2.dist-info/METADATA",
+      "bytes": 11784,
+      "sha256": "a301770d816e5ef5e2a262886115f1e6002637324f3bfe73f92378897dea8c63"
+    },
+    {
+      "file": "scipy-1.16.3.dist-info/METADATA",
+      "bytes": 62003,
+      "sha256": "a54602d0aa61fb25ac030b1d7b0faf0c8cfec508290d4d824198d6b43647ec1b"
+    },
+    {
+      "file": "secretstorage-3.4.1.dist-info/METADATA",
+      "bytes": 3974,
+      "sha256": "2496e00fa672cdf808ed05581556713aa7730384156c5ac3ea2d7e47755fc205"
+    },
+    {
+      "file": "sentence_transformers-5.2.0.dist-info/METADATA",
+      "bytes": 16579,
+      "sha256": "276c8dfa0a5c5631cba4f33cbd8e68e2d647af80f32238c50f5f06b2c977bead"
+    },
+    {
+      "file": "sentencepiece-0.2.1.dist-info/METADATA",
+      "bytes": 10003,
+      "sha256": "ce0a2e9c599cd060a7bc3dffb18be5cfc3d5f293533e3ee4e870eaef0a5500fd"
+    },
+    {
+      "file": "sentry_sdk-2.44.0.dist-info/METADATA",
+      "bytes": 10692,
+      "sha256": "aa5798d73f4fa23d5200b5b6bef7e850476a44b0bf35476827ea639d0dfb0f69"
+    },
+    {
+      "file": "shellingham-1.5.4.dist-info/METADATA",
+      "bytes": 3461,
+      "sha256": "183d80220a37493262795739dd357cc5bb3f49bd390cc9198d5180e5451a07fa"
+    },
+    {
+      "file": "six-1.17.0.dist-info/METADATA",
+      "bytes": 1658,
+      "sha256": "562042078c2752549f6d8a7c86dbc5dd708088a7be6d80672ec7b07100b72468"
+    },
+    {
+      "file": "sniffio-1.3.1.dist-info/METADATA",
+      "bytes": 3875,
+      "sha256": "0b318b57098edeccf585e60a889a6b6a7b5c4086f3a9aa62eff76a1d3cee12d9"
+    },
+    {
+      "file": "soupsieve-2.8.4.dist-info/METADATA",
+      "bytes": 4635,
+      "sha256": "4f8f5d855dabd8b3c10706cbc01d7517bd5f027cc47b59183b604a2080e6b626"
+    },
+    {
+      "file": "sqlalchemy-2.0.44.dist-info/METADATA",
+      "bytes": 9547,
+      "sha256": "e62d15c34f193ce3aeef1ac6fc6e2e48ceb616049e9da895dc9027d49dbf951f"
+    },
+    {
+      "file": "sse_starlette-3.0.3.dist-info/METADATA",
+      "bytes": 12261,
+      "sha256": "d4ac74f1a3fe485fc2c1f3d2f00f749a2fee87aa2a67a8f62af25ef72b848dfd"
+    },
+    {
+      "file": "starlette-1.3.1.dist-info/METADATA",
+      "bytes": 6370,
+      "sha256": "d83ccd9665eb05d1f9393c75e209cb353990731a6215a609a0f1c5c0a6286c9a"
+    },
+    {
+      "file": "sympy-1.14.0.dist-info/METADATA",
+      "bytes": 12816,
+      "sha256": "b756c2fbfd5be05ac5bdb0ebca61f55618f30f633ed92d88a5687429313a7595"
+    },
+    {
+      "file": "tenacity-9.1.2.dist-info/METADATA",
+      "bytes": 1172,
+      "sha256": "d6f3caf72fc1ee40caf9135adf7b5d44a45100115b4ea92b80f19ed183b157a5"
+    },
+    {
+      "file": "testcontainers-4.14.1.dist-info/METADATA",
+      "bytes": 8437,
+      "sha256": "378f45f92a56e48ea226881602cd074d25c62289f58b756cde65da61b0f30320"
+    },
+    {
+      "file": "threadpoolctl-3.6.0.dist-info/METADATA",
+      "bytes": 13843,
+      "sha256": "a45df8d07ea1883d772183a501d7d526076aa70dfcfddb276a2cbdc04def5341"
+    },
+    {
+      "file": "tiktoken-0.12.0.dist-info/METADATA",
+      "bytes": 6688,
+      "sha256": "d3b28e6ec8f09c47cb4d0fa8443d2f86b137670fa834c26a4e505b11e271b59f"
+    },
+    {
+      "file": "tokenizers-0.22.2.dist-info/METADATA",
+      "bytes": 7254,
+      "sha256": "15a5ddaf489f592b77e0a934c0eeb46b51130a94064ca129232afdb0a3868efc"
+    },
+    {
+      "file": "torch-2.10.0+cpu.dist-info/METADATA",
+      "bytes": 29321,
+      "sha256": "d6031f9f56089c835e78a75875c1be87a34bcfdf5a79ef9f069084ed9244a5d4"
+    },
+    {
+      "file": "tornado-6.5.7.dist-info/METADATA",
+      "bytes": 2770,
+      "sha256": "11c3534b6c65830b7b07cd746e8960ec4e56744ac90727a5ff7dec24fb3fbda0"
+    },
+    {
+      "file": "tqdm-4.67.1.dist-info/METADATA",
+      "bytes": 57675,
+      "sha256": "688a1632df525a198fec52dcfefb1246d31eacee9c035aacac2d7eaf8d8ff669"
+    },
+    {
+      "file": "transformers-5.12.1.dist-info/METADATA",
+      "bytes": 33140,
+      "sha256": "944617c29bd61ef723abff2384b541bcf122edeb1a2d42a26bf878912c077747"
+    },
+    {
+      "file": "ty-0.0.8.dist-info/METADATA",
+      "bytes": 6199,
+      "sha256": "f999dcef080562ce345e1d6954ba5557a9c39d716161ea8ffa8bda859bb32398"
+    },
+    {
+      "file": "typer-0.20.0.dist-info/METADATA",
+      "bytes": 16081,
+      "sha256": "338bbea20e04077e1d7ef2c3c8817d82eda95baa49177c69d6cf1d8b6a7b333e"
+    },
+    {
+      "file": "types_requests-2.32.4.20260107.dist-info/METADATA",
+      "bytes": 1989,
+      "sha256": "842904bc124ebae3f346e5e5600107b8690a2547e05f4d5c7c6a863121ad8b60"
+    },
+    {
+      "file": "typing_extensions-4.15.0.dist-info/METADATA",
+      "bytes": 3259,
+      "sha256": "c138378fe8f18934ac99de060535c53ec6c13aeed65e94c32641da7ee3192a72"
+    },
+    {
+      "file": "typing_inspection-0.4.2.dist-info/METADATA",
+      "bytes": 2552,
+      "sha256": "61096cd0bfe3c7040b6f98c22b02d190fe01936d0ff7616c5134fed02891953a"
+    },
+    {
+      "file": "tzdata-2025.2.dist-info/METADATA",
+      "bytes": 1415,
+      "sha256": "c2cc876ee200b84d1b8bee22290bc673ae4cf8e8be1a85cd2909a2715215794b"
+    },
+    {
+      "file": "tzlocal-5.3.1.dist-info/METADATA",
+      "bytes": 7589,
+      "sha256": "f5f4ab9aead7e5759697bcfdfe812d3a5892f4d3cbafdd319438d3bfc91959e4"
+    },
+    {
+      "file": "uncalled_for-0.2.0.dist-info/METADATA",
+      "bytes": 2911,
+      "sha256": "bbe9d9d7befa171e73db4128bfd7631b2773f0a2df17c81484d75f7378c1c149"
+    },
+    {
+      "file": "urllib3-2.7.0.dist-info/METADATA",
+      "bytes": 6852,
+      "sha256": "66147856d30bbb6bed01c6ce3326d0f48d84ed5f286ac177633a1486b82eace5"
+    },
+    {
+      "file": "uuid_utils-0.13.0.dist-info/METADATA",
+      "bytes": 5416,
+      "sha256": "1964c32d95c64ce0be301ba1747a27174b392e78c519e15d61f69cb7b2d12a5e"
+    },
+    {
+      "file": "uvicorn-0.38.0.dist-info/METADATA",
+      "bytes": 6787,
+      "sha256": "1a630c962c86a27eab8541cce9062dc33398b61a5a392c40521073c9191250b4"
+    },
+    {
+      "file": "uvloop-0.22.1.dist-info/METADATA",
+      "bytes": 4922,
+      "sha256": "7106328da9670776c358802971b7dc41c0b86ed3673bf9cc4c0d5e11ff2f3583"
+    },
+    {
+      "file": "watchfiles-1.1.1.dist-info/METADATA",
+      "bytes": 4874,
+      "sha256": "877e3062d4327b3698127f4641683ccf877d24256214b4f8be629dfe2a7a585f"
+    },
+    {
+      "file": "websockets-15.0.1.dist-info/METADATA",
+      "bytes": 6817,
+      "sha256": "551e4ae9e806fcfa49dbe190e21c9df8293581e22544c2d0a6f841e6a7e71254"
+    },
+    {
+      "file": "wrapt-1.17.3.dist-info/METADATA",
+      "bytes": 6373,
+      "sha256": "40db244fa00f49f0f1ab8f0c66ccdac11db164c7ba4d7c468299f0dff575f4f4"
+    },
+    {
+      "file": "wsproto-1.3.2.dist-info/METADATA",
+      "bytes": 5241,
+      "sha256": "c758e97f876f6c7cd2fd9517b50ab34110f36b733299fc0d43d1aeb1ec154dc9"
+    },
+    {
+      "file": "xlrd-2.0.2.dist-info/METADATA",
+      "bytes": 3513,
+      "sha256": "ae263dba4d616210bb2d709cd091ba453984314f79f8f50f44af864352656dec"
+    },
+    {
+      "file": "xlsxwriter-3.2.9.dist-info/METADATA",
+      "bytes": 2712,
+      "sha256": "10d504f188e087f07a06b9038ed0535f37ac072c232e60c075ddb0aedb7b7d78"
+    },
+    {
+      "file": "xxhash-3.6.0.dist-info/METADATA",
+      "bytes": 13171,
+      "sha256": "9dcdbae3ea685db00dc0691d6f90ec6c1d74349658f97e5a4f55f9bdf183db21"
+    },
+    {
+      "file": "yarl-1.22.0.dist-info/METADATA",
+      "bytes": 75118,
+      "sha256": "8004c398c5d50b9ded9c4143c0570e775b242b914cf2424d6d8f061640910cb8"
+    },
+    {
+      "file": "zipp-3.23.0.dist-info/METADATA",
+      "bytes": 3563,
+      "sha256": "bdd67d4d16cf0bf3b893e7d18cd3d2d774adb82f37ed985bc7770c607226b35b"
+    },
+    {
+      "file": "zstandard-0.25.0.dist-info/METADATA",
+      "bytes": 3275,
+      "sha256": "03d37736b26b9ae48451dd17026d93dffbd252fb708c1a2a9ae1be0c0966de92"
+    }
+  ],
+  "tools": [
+    {
+      "path": "/app/api/.venv/lib/python3.11/site-packages/tiktoken/load.py",
+      "bytes": 5919,
+      "sha256": "7614ce8952089db86243fce6b4e643b212afa922b35f234e24958f989d12f515"
+    },
+    {
+      "path": "/app/api/.venv/lib/python3.11/site-packages/tiktoken/registry.py",
+      "bytes": 3256,
+      "sha256": "edf92d65b27529c9bcb15c968047c8cbe6717d4bdc5eea4b50d5ca3df486c105"
+    },
+    {
+      "path": "/app/api/.venv/lib/python3.11/site-packages/tiktoken_ext/openai_public.py",
+      "bytes": 5613,
+      "sha256": "954392738e60d0fb6dca1dad80872efc47c8e2733babecbbf0a23970ed66c2cb"
+    },
+    {
+      "path": "/app/api/.venv/lib/python3.11/site-packages/tiktoken/_tiktoken.cpython-311-x86_64-linux-gnu.so",
+      "bytes": 3526784,
+      "sha256": "7f923bc920741af4f92ad82ce04873a037c9f086df849d25c3b33a51acff69e5"
+    },
+    {
+      "path": "/app/api/.venv/lib/python3.11/site-packages/psycopg2/__init__.py",
+      "bytes": 4768,
+      "sha256": "f66a3941dd2e587884071d82768806a2cda436ab6534d1b36ed625182d21592f"
+    },
+    {
+      "path": "/app/api/.venv/lib/python3.11/site-packages/pg0/__init__.py",
+      "bytes": 13837,
+      "sha256": "ac3f14beaff4b1cdfc0fdf674df2d2c322131bc4852de09b58f0ed7bc4288dc1"
+    },
+    {
+      "path": "/app/api/.venv/lib/python3.11/site-packages/pg0/bin/pg0",
+      "bytes": 34205672,
+      "sha256": "20c65441992d3f1d433c7d5d33a14aba0030c77913beed9c9571e3816ea7f8fb"
+    }
+  ]
+}

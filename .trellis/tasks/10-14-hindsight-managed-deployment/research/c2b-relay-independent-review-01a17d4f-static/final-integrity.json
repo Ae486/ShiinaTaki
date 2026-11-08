@@ -1,0 +1,69 @@
+{
+  "schema": "c2b-relay-independent-static-v1",
+  "verdict": "PASS_SOURCE_ONLY",
+  "runtimeExecuted": false,
+  "packetModulesEvaluated": false,
+  "deploymentReady": false,
+  "releaseSha256": "2d3f0c9ad86bcb5e5d956e9d4797edee4e1056b274958ae781b548b4d8cb954f",
+  "files": {
+    "docker-commands.mjs": {
+      "bytes": 5594,
+      "sha256": "9e602b34f79adfe5c0cf2050846e8a72e263291cd647de2bbc92240ebabc3a73"
+    },
+    "evidence-store.mjs": {
+      "bytes": 6939,
+      "sha256": "9f259d786721c0b6bbeeda8b6a3383c131a72d9949db60849aef01604f26d6e9"
+    },
+    "fixture-server.py": {
+      "bytes": 9329,
+      "sha256": "779c3eb26d0b0078b41bb9809231516ee173d2b3ff38a163108c440cb6fdc4be"
+    },
+    "host-transport.mjs": {
+      "bytes": 10031,
+      "sha256": "fd41bc99b6cd26f796412b078dde498aa6e222527d7fa379a5a2b0eae679eaa3"
+    },
+    "launch.mjs": {
+      "bytes": 2969,
+      "sha256": "3f37cf4acfc285a19721b206edc6ce11786a54e860b55d12cb0724b18e19ab63"
+    },
+    "observe-reaping.py": {
+      "bytes": 4658,
+      "sha256": "101ffca07459081a4ac85ebadfea63af5d8ae7782706bd02d608d4d1534f82f7"
+    },
+    "README.md": {
+      "bytes": 12168,
+      "sha256": "42937a1d68cdd5e3009d59b2aa430ef2ef15fd26550e04010bc45ec487ee810a"
+    },
+    "release.json": {
+      "bytes": 3511,
+      "sha256": "2d3f0c9ad86bcb5e5d956e9d4797edee4e1056b274958ae781b548b4d8cb954f"
+    },
+    "run-relay.mjs": {
+      "bytes": 21506,
+      "sha256": "72a5a5123840e3e4839fc96c1188802c5d9cf0f0838da073b92a39d9771af1c1"
+    },
+    "stream-relay.py": {
+      "bytes": 4915,
+      "sha256": "fe6f865fe38c0656724fdbd7f64b775e926db5635ebfcbd8c0be6e46fb5968b0"
+    }
+  },
+  "originalReleaseSha256": "8b47311d6518ce9941cfce148d806826ea375466da24cf568acb51f5447703c4",
+  "rootReadOnlyEvidence": {
+    "c2b-relay-root-preflight-01a17d4f.json": "7739ff8adf0f6e64dfdf1ca674b67c86659f8b800596c5591f636068047a3e89",
+    "c2b-relay-root-preflight-01a17d4f-02.json": "bfa5b07876d3716cea20346fea9c414f9b2176e8b37c226e159c26536bea5ea5",
+    "c2b-relay-root-field-preflight-01a17d4f.json": "f6fab94914e3b59c224ea4573e67becae52f032b0f49be385bb5c72df6bad86f"
+  },
+  "checks": {
+    "closedSourceSet": true,
+    "sourcePins": true,
+    "originalBytesPreserved": true,
+    "utf8NoBomAndWhitespace": true,
+    "sourceBounds": true,
+    "totalBudget": true,
+    "toolPinsReadWithoutDockerInvocation": true,
+    "tokenStageAbsent": true,
+    "tokenArchiveAbsent": true,
+    "pycacheAbsent": true
+  },
+  "priorFailedSliceSha256": "14f0fdfcb1e486694163b6b8f42662726cc23697bfe6295593d2e941ebe8ed93"
+}

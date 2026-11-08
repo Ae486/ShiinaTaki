@@ -1,0 +1,13 @@
+
+> @taki/shared@0.0.0 test H:\TakiAgent\packages\shared
+> vitest run "src/hindsight-candidate-schema.test.ts" "src/hindsight-backup-schema.test.ts" "src/hindsight-template-backup-schema.test.ts" "--maxWorkers=2"
+
+
+ RUN  v4.1.10 H:/TakiAgent/packages/shared
+
+
+ Test Files  3 passed (3)
+      Tests  24 passed (24)
+   Start at  12:27:32
+   Duration  2.02s (transform 1.12s, setup 0ms, import 2.14s, tests 172ms, environment 0ms)
+

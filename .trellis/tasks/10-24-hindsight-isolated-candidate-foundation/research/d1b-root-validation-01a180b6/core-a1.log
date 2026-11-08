@@ -1,0 +1,8 @@
+
+> @taki/core@0.0.0 typecheck H:\TakiAgent\packages\core
+> tsc --noEmit
+
+src/db/migrations/060-hindsight-candidates.test.ts(21,66): error TS2345: Argument of type '{ text: string; values: number[]; }' is not assignable to parameter of type 'string | number | boolean'.
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/core@0.0.0 typecheck: `tsc --noEmit`
+Exit status 2

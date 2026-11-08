@@ -1,0 +1,152 @@
+{
+  "verdict": "PASS_RETAINED_RAW_COLLECTION",
+  "archiveHashes": {
+    ".c2b-dependencies-owner": "2da68efd2711b8fd4031f393e4c3db719e6712a9294027ff261fdacdb765d273",
+    "collect.py": "5ba65a660129d0a79dddd9a141cd95be39bcdd56b7371d20a3047140ae5eb3a0",
+    "commands.json": "9cb1b740e631e9b34a27bfedcbf2e951a1ade40c3fafeb0123aa60c7ee89d0fd",
+    "compare.py": "ad0df247e44c194380eae62ad191d927a90fb9aca103abb6b841ac61688ba2a7",
+    "disposition.json": "8372a153b8f7f807b083e65cce9206201bec60d68b574a2df4ecfaec493fb567",
+    "docker-commands.mjs": "9e602b34f79adfe5c0cf2050846e8a72e263291cd647de2bbc92240ebabc3a73",
+    "evidence-store.mjs": "6bc6bfc2fe8040feac627bfe31c9e50cee7978bf4637de536e71cb2cad9f55a2",
+    "launch.mjs": "2a79626a63a5e6b934e86ebe9dd66540eec9456523267c8f8773b0b64cd085d0",
+    "release.json": "09cecd8d80419224d6b562c179ffee6044551c6ae00523b961bf16b435b1e789",
+    "result.json": "51afb014ed47b811813880d0b0c6f8e16beaae9cb8db0aa9cee0cec5dc6bf71e",
+    "source-pyproject.toml": "6a1735ecb0d5e5f86662cb2138af8c616f36ec1ce071067f190887b4864f59b5"
+  },
+  "commandRows": [
+    {
+      "index": 0,
+      "kind": "info",
+      "pid": 51928,
+      "exit": 0,
+      "durationMs": 172.0,
+      "stdoutBytes": 78,
+      "stderrBytes": 0
+    },
+    {
+      "index": 1,
+      "kind": "image",
+      "pid": 31296,
+      "exit": 0,
+      "durationMs": 203.0,
+      "stdoutBytes": 132,
+      "stderrBytes": 0
+    },
+    {
+      "index": 2,
+      "kind": "container",
+      "pid": 53036,
+      "exit": 1,
+      "durationMs": 142.0,
+      "stdoutBytes": 1,
+      "stderrBytes": 106
+    },
+    {
+      "index": 3,
+      "kind": "create",
+      "pid": 40028,
+      "exit": 0,
+      "durationMs": 250.0,
+      "stdoutBytes": 65,
+      "stderrBytes": 0
+    },
+    {
+      "index": 4,
+      "kind": "container",
+      "pid": 22572,
+      "exit": 0,
+      "durationMs": 138.0,
+      "stdoutBytes": 1146,
+      "stderrBytes": 0
+    },
+    {
+      "index": 5,
+      "kind": "start",
+      "pid": 33616,
+      "exit": 0,
+      "durationMs": 912.0,
+      "stdoutBytes": 154109,
+      "stderrBytes": 0
+    },
+    {
+      "index": 6,
+      "kind": "info",
+      "pid": 49476,
+      "exit": 0,
+      "durationMs": 197.0,
+      "stdoutBytes": 78,
+      "stderrBytes": 0
+    },
+    {
+      "index": 7,
+      "kind": "container",
+      "pid": 51736,
+      "exit": 0,
+      "durationMs": 162.0,
+      "stdoutBytes": 1219,
+      "stderrBytes": 0
+    },
+    {
+      "index": 8,
+      "kind": "info",
+      "pid": 30564,
+      "exit": 0,
+      "durationMs": 177.0,
+      "stdoutBytes": 78,
+      "stderrBytes": 0
+    },
+    {
+      "index": 9,
+      "kind": "container",
+      "pid": 45844,
+      "exit": 0,
+      "durationMs": 170.0,
+      "stdoutBytes": 1219,
+      "stderrBytes": 0
+    },
+    {
+      "index": 10,
+      "kind": "rm",
+      "pid": 21028,
+      "exit": 0,
+      "durationMs": 196.0,
+      "stdoutBytes": 65,
+      "stderrBytes": 0
+    },
+    {
+      "index": 11,
+      "kind": "container",
+      "pid": 52688,
+      "exit": 1,
+      "durationMs": 160.0,
+      "stdoutBytes": 1,
+      "stderrBytes": 112
+    },
+    {
+      "index": 12,
+      "kind": "container",
+      "pid": 43124,
+      "exit": 1,
+      "durationMs": 200.0,
+      "stdoutBytes": 1,
+      "stderrBytes": 106
+    }
+  ],
+  "containerId": "86c1fb0ff30b6f23a5456da5715c4c98d9c389a43745ce85ee9839cd635aae56",
+  "distributionCount": 221,
+  "metadataBytes": 2433618,
+  "collectorStdoutBytes": 154109,
+  "collectorElapsedMs": 404,
+  "unsupportedMetadata": [
+    {
+      "file": "hindsight_api_slim-0.9.0.dist-info/METADATA",
+      "metadataVersion": "2.5"
+    }
+  ],
+  "stageBytes": 476936,
+  "unchangedWorkloads": 8,
+  "overallElapsedMs": 4247.9329,
+  "runtimeExecutedByReviewer": false,
+  "v3SourcePinsVerified": true,
+  "deploymentReady": false
+}

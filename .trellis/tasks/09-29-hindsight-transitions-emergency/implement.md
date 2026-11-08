@@ -21,8 +21,13 @@ Follow [PRD](prd.md), [design](design.md), [source mapping](research/stage-4-pre
 
 2026-10-07 current next step: W9 implementation and [independent review](research/w9-independent-check.md) are complete
 and accepted. The [W9 amendment](research/stage4-w9-lease-plan-2026-10-07.md) records the correction and accurately
-disclosed complete-Core/scoped-timeout-recovery gate. Lease duration is unchanged. Continue the existing B7 Stage 5
-planning with its current-source report, then review concrete first-slice artifacts before activation/dispatch.
+disclosed complete-Core/scoped-timeout-recovery gate. Lease duration is unchanged. The former B7 Stage 5 planning
+continuation is superseded by the 2026-10-29 routing note below.
+
+2026-10-29 routing note: the parent [execution plan](../08-09-memory-operations-ui/implement.md) now schedules the
+connected exercise of these delivered producers on isolated data as its section 2, after the first usable path and
+before managed installation; the delivery map carries the same row. That journey exercise is where this task's
+delivered W0-W9 scope next gets used. No new source, runtime or acceptance work is authorized by this note.
 W0-W8 below remain historical completed work; original/manual acceptance and Git/lifecycle boundaries remain.
 
 - [x] Restore source-session direction, current workspace/HEAD, task identity and planning-only scope.

@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "pnpm",
+    "--filter",
+    "@taki/shared",
+    "typecheck"
+  ],
+  "completedAt": "2026-10-28T10:28:24.7958533Z",
+  "exitCode": 0,
+  "startedAt": "2026-10-28T10:28:12.9925248Z",
+  "temporaryDirectory": "G:/TakiAgent-staging/d1b-01a180b6-86560226-1c8b-4c80-9054-67b64950cf65"
+}

@@ -1,0 +1,10 @@
+{"at": "interpreter", "wsMB": 15, "peakWsMB": 15, "privateMB": 8}
+{"at": "native-modules-no-models", "wsMB": 300, "peakWsMB": 300, "privateMB": 761, "seconds": 14.3, "torch": false, "transformers": false, "sentence_transformers": false, "onnxruntime": false}
+{"at": "torch-and-sentence-transformers", "wsMB": 642, "peakWsMB": 642, "privateMB": 1558, "seconds": 17.8}
+{"at": "embedding-model-loaded", "wsMB": 666, "peakWsMB": 670, "privateMB": 1738, "seconds": 2.2}
+{"at": "reranker-loaded", "wsMB": 672, "peakWsMB": 676, "privateMB": 1829, "seconds": 0.2}
+{"at": "timing", "wsMB": 1043, "peakWsMB": 1057, "privateMB": 2246, "threads": 14, "queryEmbed_minMed": [0.017, 0.019], "embed32docs_minMed": [0.366, 0.367], "rerank22x300chars_minMed": [0.173, 0.174], "rerank46x300chars_minMed": [0.354, 0.359], "rerank46x1500chars_minMed": [1.44, 1.453]}
+{"at": "timing", "wsMB": 1043, "peakWsMB": 1069, "privateMB": 2248, "threads": 4, "queryEmbed_minMed": [0.029, 0.035], "embed32docs_minMed": [0.828, 0.9], "rerank22x300chars_minMed": [0.429, 0.434], "rerank46x300chars_minMed": [0.763, 0.786], "rerank46x1500chars_minMed": [2.869, 2.977]}
+{"at": "timing", "wsMB": 1013, "peakWsMB": 1070, "privateMB": 2223, "threads": 2, "queryEmbed_minMed": [0.023, 0.032], "embed32docs_minMed": [1.077, 1.374], "rerank22x300chars_minMed": [0.602, 0.632], "rerank46x300chars_minMed": [0.88, 0.963], "rerank46x1500chars_minMed": [4.005, 4.197]}
+{"at": "timing", "wsMB": 1039, "peakWsMB": 1070, "privateMB": 2260, "threads": 1, "queryEmbed_minMed": [0.031, 0.038], "embed32docs_minMed": [1.708, 1.709], "rerank22x300chars_minMed": [0.825, 0.84], "rerank46x300chars_minMed": [1.577, 1.618], "rerank46x1500chars_minMed": [6.413, 6.754]}
+{"at": "final", "wsMB": 1039, "peakWsMB": 1070, "privateMB": 2260}

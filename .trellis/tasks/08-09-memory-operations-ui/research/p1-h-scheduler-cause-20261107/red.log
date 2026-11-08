@@ -1,0 +1,42 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ ❯ src/memory/hindsight/hindsight-memory-subsystem.test.ts (8 tests | 1 failed | 7 skipped) 867ms
+     × settles a foreground Pending write from the real scheduler timer after its provider owner has finished 865ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/memory/hindsight/hindsight-memory-subsystem.test.ts > Hindsight subsystem memory-unavailable degrade path > settles a foreground Pending write from the real scheduler timer after its provider owner has finished
+AssertionError: expected { …(2) } to deeply equal { failures: [], mode: 'idle' }
+
+- Expected
++ Received
+
+  {
+-   "failures": [],
+-   "mode": "idle",
++   "failures": [
++     "MEMORY_AUTHORITY_FENCED",
++   ],
++   "mode": "failed",
+  }
+
+ ❯ src/memory/hindsight/hindsight-memory-subsystem.test.ts:59:78
+     57|     await vi.waitFor(() => expect(scheduled).toHaveBeenCalledTimes(1),…
+     58|     await scheduler.tick();
+     59|     expect({ failures, mode: scheduler.status(bank.scope.bankId)[0]?.m…
+       |                                                                              ^
+     60|     expect(f.remote.calls.length).toBeGreaterThan(callsBefore);
+     61|     expect(state.pending.get({ ...key, operationId: original.intent.op…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 skipped (8)
+   Start at  04:26:27
+   Duration  5.97s (transform 3.65s, setup 0ms, import 4.81s, tests 867ms, environment 0ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/hindsight/hindsight-memory-subsystem.test.ts --testNamePattern real scheduler timer --maxWorkers=2 --pool=threads

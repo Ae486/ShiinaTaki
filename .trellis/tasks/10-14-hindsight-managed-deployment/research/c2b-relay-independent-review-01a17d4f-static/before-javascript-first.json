@@ -1,0 +1,124 @@
+{
+  "mode": "before",
+  "runtimeExecuted": false,
+  "packetModulesEvaluated": false,
+  "node": "v24.18.0",
+  "eslint": "10.6.0",
+  "ruleSet": "@eslint/js recommended with Node globals; isolated task diagnostic",
+  "pass": false,
+  "records": [
+    {
+      "name": "launch.mjs",
+      "sha256": "3f37cf4acfc285a19721b206edc6ce11786a54e860b55d12cb0724b18e19ab63",
+      "syntax": {
+        "code": 0,
+        "stdout": "",
+        "stderr": "",
+        "error": null
+      },
+      "lint": {
+        "errors": 1,
+        "warnings": 0,
+        "messages": [
+          {
+            "ruleId": "no-undef",
+            "severity": 2,
+            "message": "'URL' is not defined.",
+            "line": 7,
+            "column": 32,
+            "messageId": "undef",
+            "endLine": 7,
+            "endColumn": 35
+          }
+        ]
+      }
+    },
+    {
+      "name": "run-relay.mjs",
+      "sha256": "b67e13af7b764663144596fde895c39ddfe8ebd8f617989a0a86581c40612745",
+      "syntax": {
+        "code": 0,
+        "stdout": "",
+        "stderr": "",
+        "error": null
+      },
+      "lint": {
+        "errors": 1,
+        "warnings": 0,
+        "messages": [
+          {
+            "ruleId": "no-unused-vars",
+            "severity": 2,
+            "message": "'closed' is defined but never used.",
+            "line": 290,
+            "column": 75,
+            "messageId": "unusedVar",
+            "endLine": 290,
+            "endColumn": 81,
+            "suggestions": [
+              {
+                "messageId": "removeVar",
+                "data": {
+                  "varName": "closed"
+                },
+                "fix": {
+                  "range": [
+                    19956,
+                    19964
+                  ],
+                  "text": ""
+                },
+                "desc": "Remove unused variable 'closed'."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "docker-commands.mjs",
+      "sha256": "9e602b34f79adfe5c0cf2050846e8a72e263291cd647de2bbc92240ebabc3a73",
+      "syntax": {
+        "code": 0,
+        "stdout": "",
+        "stderr": "",
+        "error": null
+      },
+      "lint": {
+        "errors": 0,
+        "warnings": 0,
+        "messages": []
+      }
+    },
+    {
+      "name": "host-transport.mjs",
+      "sha256": "fd41bc99b6cd26f796412b078dde498aa6e222527d7fa379a5a2b0eae679eaa3",
+      "syntax": {
+        "code": 0,
+        "stdout": "",
+        "stderr": "",
+        "error": null
+      },
+      "lint": {
+        "errors": 0,
+        "warnings": 0,
+        "messages": []
+      }
+    },
+    {
+      "name": "evidence-store.mjs",
+      "sha256": "9f259d786721c0b6bbeeda8b6a3383c131a72d9949db60849aef01604f26d6e9",
+      "syntax": {
+        "code": 0,
+        "stdout": "",
+        "stderr": "",
+        "error": null
+      },
+      "lint": {
+        "errors": 0,
+        "warnings": 0,
+        "messages": []
+      }
+    }
+  ]
+}

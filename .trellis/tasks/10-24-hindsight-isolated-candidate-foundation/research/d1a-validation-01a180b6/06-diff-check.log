@@ -1,0 +1,5 @@
+warning: in the working copy of '.trellis/tasks/08-09-memory-operations-ui/task.json', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of '.trellis/tasks/10-14-hindsight-managed-deployment/check.jsonl', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of '.trellis/tasks/10-14-hindsight-managed-deployment/implement.jsonl', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/deferred-decisions.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'packages/shared/src/index.md', CRLF will be replaced by LF the next time Git touches it
