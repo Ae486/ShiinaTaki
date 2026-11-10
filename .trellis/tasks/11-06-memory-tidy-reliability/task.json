@@ -1,0 +1,34 @@
+{
+  "id": "memory-tidy-reliability",
+  "name": "memory-tidy-reliability",
+  "title": "Memory tidy reliability and recovery",
+  "description": "Repair memory tidy correctness and backlog processing, retain durable recovery, and expose tidy/compaction in independent Run Monitor records without contaminating normal metrics.",
+  "status": "in_progress",
+  "dev_type": "fullstack",
+  "scope": "memory",
+  "package": null,
+  "priority": "P2",
+  "creator": "pleia",
+  "assignee": "pleia",
+  "createdAt": "2026-11-06",
+  "completedAt": null,
+  "branch": "task/t4-skills-mcp-productization",
+  "base_branch": "main",
+  "worktree_path": "H:/TakiAgent-worktrees/t4",
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "2026-11-10 owner freeze: remaining valid work is checkpointed; execution is paused pending the main worktree stage and later integration. See docs/T4-FREEZE-HANDOFF.md for backups, verification, unfinished acceptance and migration/governance gates. This supersedes older continue/restart and uncommitted-state notes. No merge, push, archive or real-data migration.",
+  "meta": {
+    "worktree_freeze": {
+      "date": "2026-11-10",
+      "state": "frozen_waiting_for_main_stage",
+      "handoff": "docs/T4-FREEZE-HANDOFF.md",
+      "integration_authorized": false,
+      "manual_acceptance_complete": false
+    }
+  }
+}

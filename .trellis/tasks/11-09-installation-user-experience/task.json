@@ -31,6 +31,14 @@
     "docs/UIUX-OPTIMIZATION.md",
     "docs/deferred-decisions.md"
   ],
-  "notes": "Owner-authorized implementation and packaged acceptance continued in T4 on 2026-11-10. Local no-code entry, model profiles, optional-policy startup, ordinary live consumers, Local/Legacy index and listener replacement implemented; initial evidence in research/delivery-20261110.md. Follow-through in research/desktop-acceptance-20261110.md covers packaged model UI, imported-avatar root/freshness/current-state repairs, native focus seeding and bounded lifecycle/resource observations. Hindsight internal changes selectively withdrawn and reserved for dedicated owner; five inherited adapters/shared effects documented. The owner explicitly approved two scoped stage commits, including the documented maintenance/migration prerequisites, on 2026-11-10; see research/stage-commit-plan-20261110.md. Owner acceptance and explicit quality limitations remain open. No paid-provider calls, push/archive or real-profile mutation authorized.",
-  "meta": {}
+  "notes": "Owner-authorized implementation and packaged acceptance continued in T4 on 2026-11-10. Local no-code entry, model profiles, optional-policy startup, ordinary live consumers, Local/Legacy index and listener replacement implemented; initial evidence in research/delivery-20261110.md. Follow-through in research/desktop-acceptance-20261110.md covers packaged model UI, imported-avatar root/freshness/current-state repairs, native focus seeding and bounded lifecycle/resource observations. Hindsight internal changes selectively withdrawn and reserved for dedicated owner; five inherited adapters/shared effects documented. The owner explicitly approved two scoped stage commits, including the documented maintenance/migration prerequisites, on 2026-11-10; see research/stage-commit-plan-20261110.md. Owner acceptance and explicit quality limitations remain open. No paid-provider calls, push/archive or real-profile mutation authorized.\n\n2026-11-10 owner freeze: remaining valid work is checkpointed; execution is paused pending the main worktree stage and later integration. See docs/T4-FREEZE-HANDOFF.md for backups, verification, unfinished acceptance and migration/governance gates. This supersedes older continue/restart and uncommitted-state notes. No merge, push, archive or real-data migration.",
+  "meta": {
+    "worktree_freeze": {
+      "date": "2026-11-10",
+      "state": "frozen_waiting_for_main_stage",
+      "handoff": "docs/T4-FREEZE-HANDOFF.md",
+      "integration_authorized": false,
+      "manual_acceptance_complete": false
+    }
+  }
 }

@@ -1,5 +1,11 @@
 # TakiAgent T4 Leader Handoff — Skills/MCP First
 
+> **2026-11-10 owner freeze:** T4 is paused while main completes its current stage.
+> Read [T4-FREEZE-HANDOFF.md](T4-FREEZE-HANDOFF.md) first for the checkpoint, verified
+> backups, unfinished acceptance and integration gates. This ruling supersedes the
+> historical continuation instructions below. Do not resume T4 implementation or
+> open the real profile with T4.
+
 > D78 commit checkpoint and pre-B7 continuation (2026-09-10): the owner authorized committing the completed work and
 > continuing clear requirements before B7. Reuse existing decisions; apply `grill-with-docs` to unresolved product
 > choices, and complete an explicit grill before any B7 implementation. No push or production authority switch is

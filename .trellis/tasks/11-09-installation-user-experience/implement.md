@@ -1,5 +1,9 @@
 # Execution plan: simpler flows and live configuration
 
+> Frozen by the owner on 2026-11-10 pending main-stage completion and later integration.
+> Follow [the freeze handoff](../../../docs/T4-FREEZE-HANDOFF.md) before resuming;
+> unchecked acceptance remains open and earlier restart instructions are historical.
+
 Status: implementation and integration checks recorded on 2026-11-10. S0-S4 and the Local/Legacy index/listener
 part of S5 are implemented. S6 has deterministic, real-Core and native UI evidence; owner acceptance and the
 reserved Hindsight work remain open. See `research/delivery-20261110.md` for current results and quality limitations.
