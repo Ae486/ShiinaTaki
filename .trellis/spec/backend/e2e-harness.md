@@ -22,6 +22,10 @@ independent cleanup and non-size lint rules. The fixture exposes capability-agno
 - **A single-turn empty-DB L2 CANNOT catch hallucination.** Empty history = nothing for the model to imitate, so the agent invokes the tool and the test is green whether the bug exists or not. Hallucination regression needs a multi-turn or polluted-timeline scenario (see `docs/deferred-decisions.md` D1). Do not treat a green single-turn L2 as proof the hallucination is gone.
 - **`capability.trigger` is dev-only and must stay so**: registered only under `TAKI_DEV_TRIGGER=1`, operator-only, and it is NOT a governance bypass — it drives the same `tool.execute` the agent does, so every call still crosses Core policy and, for Host-owned actions, the Host's sealed projection/classification/final-enforcement path. Never register it in production; its schema never enters `@taki/shared`.
 - The fixture must ALWAYS tear down (process tree + temp dirs) even on a boot failure — keep boot inside the try/finally.
+- Upgrade fixtures must build their historical schema with a bounded migration list before seeding old-state defects.
+  Deleting migration receipts from a current database leaves later tables behind and creates a false upgrade failure.
+  `seedCanonicalLocal` accepts a migration ceiling; `ScenarioInput.seedThroughMigration` forwards it for isolated
+  agent scenarios. Ordinary fixtures retain the complete current registry.
 - A focused Core lifecycle scenario may compose the existing process/RPC primitives directly when it requires a
   local scripted provider or graceful signal delivery absent from `withStack`. Keep any IPC preload test-only,
   release its own handle, isolate data/provider configuration and retain bounded failure cleanup. See

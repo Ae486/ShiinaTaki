@@ -1,5 +1,57 @@
 # Implementation checkpoint
 
+## Current continuation — remaining acceptance, 2026-11-04
+
+- Owner approved long-task/eight-agent completion and actual-model validation after commit `cd3cd91`,
+  with limited concurrency. Existing session/task/worktree verified; unrelated `exec-tool` and context
+  attribution changes remain outside this work. No new commit/push/archive authorization is inferred.
+- Use one test worker and at most one implementation/advisor subagent; run suites/scenarios serially.
+  The first real long run used 48 physical HTTP attempts, completed 25 task steps, 8 summaries and
+  3 check-ins, then failed without a validated final. Source/cleanup parity passed; this is not a
+  timeout or full acceptance. Evidence: `artifacts/delegation-completion-20261104/real-long/`.
+  The campaign ceiling is 320; 105 requests have been used (first long48, eight12, pilots3, corrected
+  long42). The eight-agent
+  run passed all assertions with eight validated reports, eight exactly-once actions and correct
+  public synthesis; evidence is `real-eight/goals-full-eight-inbox-pE7EfN`. The corrected long run
+  `real-long-corrected/goals-long-audit-checkin-wyUNuq` was explicitly resource-interrupted when system
+  free RAM fell to 0.423 GiB: 18 completed steps, ten summaries, two check-ins, one size correction.
+  Only its verified Core39156 and test process tree were stopped. All are now gone; no run remains
+  active. Original DB/WAL, transport and resource-final-snapshot.json are retained; no normal teardown
+  or full acceptance is claimed. Wait for memory headroom before heavy checks or more paid runs.
+  Three summary pilots retained fresh candidate output: first passed; second reproduced projected
+  non-shrink (8,112 versus 8,100 tokens); measured feedback yielded 6,041 tokens passing all guards.
+  Historical rejected output remains unavailable. Exact read-only replay uses the original source
+  digest and preserves DB/WAL; see `diagnosis/replay-pilot-2.json` and `replay-pilot-3.json`.
+- Current-source read-only replay of the latest long failure `yWfwCu` reproduces
+  `SUBAGENT_CONTEXT_ROUND_UNFIT`: budget 9,240, summary head 7,555, newest complete history round 2,216,
+  total 9,771, no older rows to retire and no pending inputs. DB/WAL hashes stayed unchanged.
+- Historical calibration was stable since 15:33:16 UTC. Utility request 66 at 15:42:44 requested a 5,123
+  token summary; revision 12 committed at 15:43:13 with 7,502 estimated tokens. Existing shrink validation
+  accepted an unusable candidate, then no-retiring logic could not rewrite the persisted summary.
+- Independent Astra review supports protected-envelope capacity checks before commit and a narrow
+  same-coverage rewrite using exact previous-summary identity and existing owner/source/revision CAS.
+  Preserve progressive retirement of optional older rounds and every exact history page.
+- Initial Core repair passed 50 tests, scoped lint and Core typecheck. E2E typecheck/lint also passed.
+  Closed failure-reason diagnostics then passed 57 tests and lint, without changing behavior.
+  Following measured pilot evidence and advisor review, `interface_implement` now owns the bounded
+  size-only corrective extension: same two-generation ceiling and unchanged final quality/shrink/fit
+  conditions. Unknown/blank/truncated/forbidden/provider/authority failures get no correction. Preimages
+  and checks are in `artifacts/delegation-completion-20261104/size-correction/`: 67 tests/lint passed,
+  source frozen, independently reviewed without proven blocker. Latest Core tsc was not started
+  because 2.488 GiB free failed the 2.75 GiB checker guard. Root still owns final full/native gates
+  and full long completion. Existing unrelated processes remain untouched. The current consolidated
+  status and manual UI checklist are in `research/completion-acceptance-20261104.md`.
+- Durable diagnostic script/output: `target/delegation-completion-20261104/diagnosis/replay.mjs` and
+  `replay.json`. Next: repair, serial deterministic checks, fresh bounded real campaign, then UI gate.
+- Root's existing timing relay now has optional FIFO `maxConcurrentRequests=1`, applied only to the
+  long/eight scenarios. Explicitly held requests do not consume the slot; queued cancellation removes
+  the pending request without forwarding it. Actual peak/queue counters are retained in transport.json.
+  Red regression observed all three requests forwarded; after the fix all five relay tests passed with
+  one worker and 768 MiB Node heap. Real long-run peak upstream concurrency was exactly one.
+- The scenario ready checkpoint records the actual owned Core PID for resource observation. Node's
+  768 MiB heap cap is inherited by the fixture Core through childEnv; it is not a hard total-RSS bound.
+  OS free memory is sampled between stages; latest reading was 3.78 GiB. Do not kill unrelated processes.
+
 ## Current continuation — parent interface simplification, 2026-11-04
 
 - Session `01a1a607-29a8-7c12-8a34-c6d90f0eb1aa` resumed the existing task after the owner authorized

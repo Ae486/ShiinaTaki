@@ -1,6 +1,6 @@
 /**
  * INPUT: immutable private rounds, retained-image reader, pending inputs and worker summary checkpoint port
- * OUTPUT: pressure-priced task context with exact raw input IDs and separately witnessed summaries
+ * OUTPUT: capacity-checked context, bounded summary repair, closed failure reasons and exact input/summary witnesses
  * POS: core/agents — private replay preparation; no input is consumed while projecting or summarizing
  */
 import type { ModelMessage } from "ai";
@@ -8,13 +8,13 @@ import type { RunMessage, SubagentContextSummary, SubagentContextSummaryWitness,
 import type { RunMessageRepo } from "../db/run-message-repo.ts";
 import type { SubagentInputRepo } from "../db/subagent-input-repo.ts";
 import type { SubagentExecutionRepo } from "../db/subagent-execution-repo.ts";
-import type { SubagentContextSummaryRepo } from "../db/subagent-context-summary-repo.ts";
+import type { PrivateSummaryRange, SubagentContextSummaryRepo } from "../db/subagent-context-summary-repo.ts";
 import { estimateMessagesTokens, estimateTokens } from "../memory/token-estimator.ts";
 import { toModelMessage } from "./turn-mapping.ts";
 import { nativeReplayMessages, replayImageSnapshot, type ImageReplayReader } from "./native-image-replay.ts";
 import { reduceMessages, sanitizeCompactionText } from "./context-reduction.ts";
-import { validateSummary } from "./summary-quality.ts";
-import type { PrivateTaskSummarizer } from "./private-task-summarizer.ts";
+import { validateSummary, type SummaryQualityCode } from "./summary-quality.ts";
+import type { PrivateTaskSummarizer, PrivateTaskSummaryRequest } from "./private-task-summarizer.ts";
 import type { PreparedWorkStep, WorkStepInput } from "./work-context.ts";
 import { withToolMaterialReferences } from "../harness/subagent-tool-materials.ts";
 import { contextText, copyContentOrigin, retainContextText } from "./context-attribution.ts";
@@ -29,6 +29,39 @@ export interface PrivateTaskContextInput {
   renderInput(input: SubagentInput): ModelMessage; assertCurrent(token: SubagentWorkToken): void;
 }
 interface ContextSnapshot { rows: RunMessage[]; more: boolean; rounds: RunMessage[][] }
+interface CompactionState {
+  rows: RunMessage[]; retained: RunMessage[]; protectedRows: RunMessage[]; pending: SubagentInput[]; budget: number;
+  summary: SubagentContextSummary | null; token: SubagentWorkToken; step: WorkStepInput;
+}
+
+const SUMMARY_QUALITY_FAILURE_CODES = {
+  accepted: "SUBAGENT_SUMMARY_QUALITY_FAILED",
+  blank: "SUBAGENT_SUMMARY_QUALITY_BLANK",
+  truncated: "SUBAGENT_SUMMARY_QUALITY_TRUNCATED",
+  non_shrinking: "SUBAGENT_SUMMARY_QUALITY_NON_SHRINKING",
+  forbidden_content: "SUBAGENT_SUMMARY_QUALITY_FORBIDDEN_CONTENT",
+  protected_content: "SUBAGENT_SUMMARY_QUALITY_PROTECTED_CONTENT",
+} as const satisfies Record<SummaryQualityCode, string>;
+type SummaryRejectionCode = typeof SUMMARY_QUALITY_FAILURE_CODES[SummaryQualityCode]
+  | "SUBAGENT_SUMMARY_UNAVAILABLE" | "SUBAGENT_SUMMARY_NON_SHRINKING" | "SUBAGENT_SUMMARY_CAPACITY_UNFIT";
+class PrivateSummaryRejection extends Error {
+  readonly code: SummaryRejectionCode;
+  constructor(code: SummaryRejectionCode) { super(code); this.code = code; }
+}
+
+const SUMMARY_COMMIT_FAILURE_CODES = ["SUBAGENT_SUMMARY_CONFLICT", "SUBAGENT_SUMMARY_SOURCE_STALE",
+  "SUBAGENT_SUMMARY_OWNER_STALE", "SUBAGENT_SUMMARY_INCOMPLETE_RANGE", "SUBAGENT_SUMMARY_EMPTY_RANGE"] as const;
+
+function summaryFailureCode(error: unknown, phase: "replacement" | "commit") {
+  if (error instanceof PrivateSummaryRejection) return error.code;
+  // Repository guards still use Error. Match only their closed codes at the commit boundary;
+  // provider text, arbitrary SQL details and candidate bodies must never become durable diagnostics.
+  if (phase === "commit" && error instanceof Error) {
+    const code = SUMMARY_COMMIT_FAILURE_CODES.find((known) => known === error.message);
+    if (code) return code;
+  }
+  return phase === "commit" ? "SUBAGENT_SUMMARY_COMMIT_FAILED" : "SUBAGENT_SUMMARY_REPLACEMENT_FAILED";
+}
 
 export async function preparePrivateTaskContext(deps: PrivateTaskContextInput, step: WorkStepInput): Promise<PreparedWorkStep> {
   const input = { ...deps, attachments: replayImageSnapshot(deps.attachments) };
@@ -48,11 +81,14 @@ export async function preparePrivateTaskContext(deps: PrivateTaskContextInput, s
     const pressure = snapshot.more || cost >= budget * 0.8;
     if (!pressure) return prepared(step, { selected, token, summary });
     const retiring = retiringRounds(input, { rounds: snapshot.rounds, pending, summary, budget });
-    if (retiring.length === 0) {
+    const rewrite = retiring.length === 0 && summary && !snapshot.more && cost >= budget
+      && estimateMessagesTokens(project(input, { rows: snapshot.rows, pending, summary: null }).messages) < budget;
+    if (retiring.length === 0 && !rewrite) {
       if (snapshot.more || cost >= budget) throw new Error("SUBAGENT_CONTEXT_ROUND_UNFIT");
       return prepared(step, { selected, token, summary });
     }
     const next = await compact(input, { rows: retiring, retained: snapshot.rows.slice(retiring.length), pending,
+      protectedRows: rewrite ? snapshot.rows : snapshot.rounds.at(-1) ?? [],
       budget, summary, token, step });
     if (next) { summary = next; continue; }
     const fallback = { ...selected, messages: [...selected.messages, { role: "user" as const, content:
@@ -144,37 +180,60 @@ function retiringRounds(input: PrivateTaskContextInput, selection: {
   return retiring.flat();
 }
 
-async function compact(input: PrivateTaskContextInput, state: {
-  rows: RunMessage[]; retained: RunMessage[]; pending: SubagentInput[]; budget: number;
-  summary: SubagentContextSummary | null; token: SubagentWorkToken; step: WorkStepInput;
-}): Promise<SubagentContextSummary | undefined> {
+async function compact(input: PrivateTaskContextInput, state: CompactionState): Promise<SubagentContextSummary | undefined> {
+  if (!input.summaries) return;
   const throughSeq = state.rows.at(-1)?.seq;
-  if (!throughSeq || !input.summaries) return;
-  const range = input.summaries.capture({ subagentId: input.subagentId, workInputId: input.workInputId, throughSeq });
-  if (input.summaries.failed(range)) return;
-  const transcript = state.rows.map((row) => privateTranscriptRow(input, row)).join("\n");
-  const nonSummaryCost = estimateMessagesTokens(project(input, { rows: state.retained, pending: state.pending,
-    summary: { text: "", revision: range.expectedRevision + 1, throughSeq: range.throughSeq } }).messages);
-  // This is guidance for the replacement, not a hard output limit; the next loop still remeasures the full request.
-  const pressureTarget = Math.floor(state.budget * 0.8 - nonSummaryCost);
-  const targetSummaryTokens = Math.max(1, pressureTarget > 0 ? pressureTarget : Math.floor(state.budget - nonSummaryCost));
+  const identity = { subagentId: input.subagentId, workInputId: input.workInputId };
+  const range = throughSeq ? input.summaries.capture({ ...identity, throughSeq })
+    : state.summary ? input.summaries.captureRewrite(identity) : undefined;
+  if (!range || input.summaries.failed(range)) return;
+  let phase: "replacement" | "commit" = "replacement";
   try {
-    const summarize = input.summarize?.capture?.() ?? input.summarize;
-    const generated = await summarize?.({ previous: state.summary?.text ?? null, transcript,
-      targetSummaryTokens, signal: state.step.envelope?.signal });
-    if (!generated) throw new Error("SUBAGENT_SUMMARY_UNAVAILABLE");
-    const quality = validateSummary({ text: generated.text, finishReason: generated.finishReason,
-      sourceText: [state.summary?.text, transcript].filter(Boolean).join("\n") });
-    if (!quality.accepted) throw new Error("SUBAGENT_SUMMARY_QUALITY_FAILED");
-    const retiredTokens = estimateMessagesTokens(state.rows.flatMap((row) => row.inputId
-      ? [input.renderInput(input.inputs.get(row.inputId))] : privateHistoryMessages(input, row))) + estimateTokens(state.summary?.text ?? "");
-    if (quality.summaryTokens >= retiredTokens) throw new Error("SUBAGENT_SUMMARY_NON_SHRINKING");
-    return input.summaries.commit({ range, text: quality.text, runId: input.runId, attemptId: state.step.attemptId,
-      token: state.token, validateCurrent: () => input.assertCurrent(state.token) });
-  } catch {
-    input.summaries.recordFailure(range, "SUBAGENT_SUMMARY_FAILED");
+    const text = await replacementSummary(input, state, range);
+    phase = "commit";
+    return input.summaries.commit({ range, text, runId: input.runId, attemptId: state.step.attemptId,
+      token: state.token, validateCurrent: () => {
+        state.step.envelope?.signal?.throwIfAborted(); input.assertCurrent(state.token);
+      } });
+  } catch (error) {
+    input.summaries.recordFailure(range, summaryFailureCode(error, phase));
     return undefined;
   }
+}
+
+async function replacementSummary(input: PrivateTaskContextInput, state: CompactionState, range: PrivateSummaryRange): Promise<string> {
+  const summarize = input.summarize?.capture?.() ?? input.summarize;
+  const transcript = state.rows.map((row) => privateTranscriptRow(input, row)).join("\n");
+  const previous = range.kind === "rewrite" ? range.previous.text : state.summary?.text ?? null;
+  const replacement = { text: "", revision: range.expectedRevision + 1, throughSeq: range.throughSeq };
+  const nonSummaryCost = estimateMessagesTokens(project(input, { rows: state.retained, pending: state.pending,
+    summary: replacement }).messages);
+  const pressureTarget = Math.floor(state.budget * 0.8 - nonSummaryCost);
+  const targetSummaryTokens = Math.max(1, pressureTarget > 0 ? pressureTarget : Math.floor(state.budget - nonSummaryCost));
+  const retiredTokens = estimateMessagesTokens(state.rows.flatMap((row) => row.inputId
+    ? [input.renderInput(input.inputs.get(row.inputId))] : privateHistoryMessages(input, row))) + estimateTokens(previous ?? "");
+  let sizeFeedback: PrivateTaskSummaryRequest["sizeFeedback"];
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    state.step.envelope?.signal?.throwIfAborted(); input.assertCurrent(state.token);
+    const generated = await summarize?.({ previous, transcript, targetSummaryTokens, sizeFeedback, signal: state.step.envelope?.signal });
+    if (!generated) throw new PrivateSummaryRejection("SUBAGENT_SUMMARY_UNAVAILABLE");
+    const quality = validateSummary({ text: generated.text, finishReason: generated.finishReason,
+      sourceText: [previous, transcript].filter(Boolean).join("\n") });
+    if (!quality.accepted && quality.code !== "non_shrinking") throw new PrivateSummaryRejection(SUMMARY_QUALITY_FAILURE_CODES[quality.code]);
+    if (!quality.accepted || quality.summaryTokens >= retiredTokens) {
+      if (attempt === 1) throw new PrivateSummaryRejection(!quality.accepted
+        ? SUMMARY_QUALITY_FAILURE_CODES[quality.code] : "SUBAGENT_SUMMARY_NON_SHRINKING");
+      sizeFeedback = { kind: "non_shrinking", candidateTokens: quality.summaryTokens,
+        maxSummaryTokens: quality.sourceTokens > 0 ? Math.min(quality.sourceTokens, retiredTokens) : retiredTokens };
+      continue;
+    }
+    // Optional older rounds can retire in the next loop; this candidate must fit the indivisible protected tail now.
+    const projectedTokens = estimateMessagesTokens(project(input, { rows: state.protectedRows, pending: state.pending,
+      summary: { ...replacement, text: quality.text } }).messages);
+    if (projectedTokens < state.budget) return quality.text;
+    sizeFeedback = { kind: "capacity", candidateTokens: quality.summaryTokens, projectedTokens, maxInputTokens: state.budget };
+  }
+  throw new PrivateSummaryRejection("SUBAGENT_SUMMARY_CAPACITY_UNFIT");
 }
 
 function privateTranscriptRow(input: PrivateTaskContextInput, row: RunMessage): string {

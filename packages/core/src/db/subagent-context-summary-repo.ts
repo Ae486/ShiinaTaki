@@ -1,5 +1,5 @@
 /**
- * INPUT: current private worker ownership, complete canonical ranges and actual model Effects
+ * INPUT: current private worker ownership, complete canonical ranges or exact prior-summary rewrites
  * OUTPUT: atomic append-only summary revisions, bounded failure identities and separate summary-intent witnesses
  * POS: core/db — projection checkpoints only; raw private history and first-consumption receipts remain unchanged
  */
@@ -10,10 +10,13 @@ import { digestRunValue } from "./run-row-mappers.ts";
 import { readRunById } from "./run-readers.ts";
 import { readSubagent, readSubagentExecution } from "./subagent-readers.ts";
 
-export interface PrivateSummaryRange {
+interface PrivateSummarySource {
   subagentId: string; workInputId: string; expectedRevision: number; sourceFromSeq: number;
-  throughSeq: number; sourceDigest: string;
+  throughSeq: number;
 }
+type PreviousSummarySource = Pick<SubagentContextSummary, "revision" | "throughSeq" | "sourceDigest" | "text">;
+type PrivateSummaryCapture = PrivateSummarySource & ({ kind: "advance" } | { kind: "rewrite"; previous: PreviousSummarySource });
+export type PrivateSummaryRange = PrivateSummaryCapture & { sourceDigest: string };
 
 export function createSubagentContextSummaryRepo(db: Database) {
   const latest = (workInputId: string): SubagentContextSummary | null => {
@@ -23,12 +26,19 @@ export function createSubagentContextSummaryRepo(db: Database) {
   };
   const capture = (input: { subagentId: string; workInputId: string; throughSeq: number }): PrivateSummaryRange => {
     const previous = latest(input.workInputId);
-    const range = { ...input, expectedRevision: previous?.revision ?? 0, sourceFromSeq: (previous?.throughSeq ?? 0) + 1 };
+    const range = { ...input, kind: "advance" as const, expectedRevision: previous?.revision ?? 0, sourceFromSeq: (previous?.throughSeq ?? 0) + 1 };
     if (range.throughSeq < range.sourceFromSeq) throw new Error("SUBAGENT_SUMMARY_EMPTY_RANGE");
     return { ...range, sourceDigest: sourceDigest(db, range, previous) };
   };
   return {
     latest, capture,
+    captureRewrite(input: { subagentId: string; workInputId: string }): PrivateSummaryRange {
+      const previous = latest(input.workInputId);
+      if (!previous) throw new Error("SUBAGENT_SUMMARY_REWRITE_UNAVAILABLE");
+      const range = { ...input, kind: "rewrite" as const, expectedRevision: previous.revision,
+        sourceFromSeq: previous.throughSeq + 1, throughSeq: previous.throughSeq, previous: previousSource(previous) };
+      return { ...range, sourceDigest: sourceDigest(db, range, previous) };
+    },
     failed(range: PrivateSummaryRange): boolean {
       return Boolean(db.prepare(`SELECT code FROM subagent_context_summary_failures
         WHERE work_input_id=:work AND revision=:revision AND source_digest=:digest`)
@@ -63,8 +73,9 @@ interface SummaryCommitInput {
 }
 function commitSummary(owner: { db: Database; latest(workInputId: string): SubagentContextSummary | null }, input: SummaryCommitInput): SubagentContextSummary {
   const { db, latest } = owner;
-  const { expectedRevision, ...range } = input.range;
-  const summary = SubagentContextSummarySchema.parse({ ...range, revision: expectedRevision + 1,
+  const range = input.range;
+  const summary = SubagentContextSummarySchema.parse({ workInputId: range.workInputId, subagentId: range.subagentId,
+    sourceFromSeq: range.sourceFromSeq, throughSeq: range.throughSeq, sourceDigest: range.sourceDigest, revision: range.expectedRevision + 1,
     text: input.text, runId: input.runId, attemptId: input.attemptId, createdAt: new Date().toISOString(),
   });
   db.transaction(() => {
@@ -81,7 +92,15 @@ function commitSummary(owner: { db: Database; latest(workInputId: string): Subag
   return summary;
 }
 
-function sourceDigest(db: Database, range: Omit<PrivateSummaryRange, "sourceDigest">, previous: SubagentContextSummary | null): string {
+function sourceDigest(db: Database, range: PrivateSummaryCapture, previous: SubagentContextSummary | null): string {
+  if (range.kind === "rewrite") {
+    if (!previous || previous.subagentId !== range.subagentId || previous.workInputId !== range.workInputId
+      || range.expectedRevision !== previous.revision || range.throughSeq !== previous.throughSeq
+      || range.sourceFromSeq !== previous.throughSeq + 1
+      || digestRunValue(range.previous) !== digestRunValue(previousSource(previous))) throw new Error("SUBAGENT_SUMMARY_SOURCE_STALE");
+    return digestRunValue({ kind: "private-summary-rewrite", subagentId: range.subagentId, workInputId: range.workInputId, previous: range.previous });
+  }
+  if (range.throughSeq < range.sourceFromSeq) throw new Error("SUBAGENT_SUMMARY_EMPTY_RANGE");
   const rows = db.prepare(`SELECT m.*,e.result_json AS execution_result_json,i.request_digest,i.consumed_effect_id,i.sender_kind,i.sender_run_id,
     i.sender_owner_ref,i.direction_text,i.materials_json FROM run_messages m JOIN subagent_executions e ON e.run_id=m.run_id
     LEFT JOIN subagent_inputs i ON i.input_id=m.input_id
@@ -98,6 +117,10 @@ function sourceDigest(db: Database, range: Omit<PrivateSummaryRange, "sourceDige
     .get({ run: last.run_id ?? null, attempt: last.attempt_id ?? null, step: last.step_number ?? null, through: range.throughSeq });
   if (outside) throw new Error("SUBAGENT_SUMMARY_INCOMPLETE_RANGE");
   return digestRunValue({ previous: previous ? { revision: previous.revision, sourceDigest: previous.sourceDigest, text: previous.text } : null, rows });
+}
+
+function previousSource(summary: SubagentContextSummary): PreviousSummarySource {
+  return { revision: summary.revision, throughSeq: summary.throughSeq, sourceDigest: summary.sourceDigest, text: summary.text };
 }
 
 function assertOwner(db: Database, input: { runId: string; attemptId: string; token: SubagentWorkToken; range: PrivateSummaryRange }): void {

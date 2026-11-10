@@ -1,11 +1,69 @@
 # Interactive delegation execution plan
 
+> Frozen by the owner on 2026-11-10 pending main-stage completion and later integration.
+> Follow [the freeze handoff](../../../docs/T4-FREEZE-HANDOFF.md) before resuming;
+> unchecked acceptance remains open and earlier restart instructions are historical.
+
 Status: implementation authorized, 2026-10-25; S0-S6 delivered; S7 continues through the
 [2026-10-30 follow-up order](#follow-up-order-owner-approved-2026-10-30). [Design](design.md)
 is the implementation contract; [PRD](prd.md) owns requirements and current authorization. Activate with `task.py start`.
 Existing October 23 tests are historical evidence, not this follow-up's acceptance.
 
-## Current slice — parent interface simplification, 2026-11-04
+## Real-database compatibility repair — 2026-11-06
+
+- [x] Owner authorized implementation, tests, and actual database upgrade after verification.
+- [x] Confirm missing six tables/five triggers against a consistent actual-data copy; existing 59
+  delegation objects match the current canonical structure. Preserve original applied 058/060 history.
+- [x] Pause the verified Core watcher before registering untested migrations. Original start command:
+  `node --watch --env-file-if-exists=../../.env.local src/main.ts` from `packages/core`.
+- [x] Save `target/delegation-upgrade-20261106/real-before.sqlite` (version 68, integrity/FK checks clean)
+  and content-free row/schema fingerprints. Actual-data artifacts remain ignored by Git.
+- [x] Append guarded migration 069 after the existing 068, preserving all old rows and receipts.
+  Independently review known early/current schema combinations and truthful historical event frontiers.
+- [x] Verify fresh/current/early upgrades, refusal and rollback; prove complete old-row/schema
+  preservation on the actual copy before testing normal recovery separately.
+- [x] Verify zero-dispatch boot recovery: two orphan user-stopped children settle and release pointers;
+  preserve user Stop and unknown primary model outcomes. Exercise new delegation, Continue and Stop
+  through production Core/SDK with isolated scripted data and bounded optional real-model validation.
+- [x] Complete relevant quality checks, make a fresh quiescent production backup, verify input parity,
+  apply only the reviewed new migration, then restart Core and verify actual storage/RPC/controls.
+
+User-data reset, automatic effect replay, Git delivery and unrelated database imports remain excluded.
+Use one test worker and serial heavy checks; a 1536 MiB checker requires at least 2.75 GiB free RAM.
+
+Completed at 2026-11-06 14:28 +08:00: actual database 68 -> 69, full old-data preservation,
+Core restored, and live RPC confirms both cancelled children retain user Stop with released pointers.
+See [compatibility repair evidence](research/database-compatibility-upgrade-20261106.md) for backup,
+deterministic E2E, integrated checks and the three intentionally unreconciled historical primary Runs.
+
+## Completion follow-up — 2026-11-04
+
+- [x] Owner authorized remaining acceptance work and real-model verification after `cd3cd91`.
+- [x] Reproduce the latest failed long snapshot with current code, read-only and without model calls.
+  `target/delegation-completion-20261104/diagnosis/replay.json` proves a 9,771-token projected request
+  against 9,240 tokens: summary head 7,555 plus protected history round 2,216.
+- [x] Independently challenge candidate capacity validation and same-coverage summary rewrite.
+- [x] Implement the bounded summary repair with unchanged latest rounds, source/owner/CAS, raw evidence
+  and actual task-step/input semantics; verify regressions with one test worker.
+- [x] Limit actual model-request concurrency in the existing test transport and record memory/request
+  bounds before fresh real calls. Keep scenarios and test suites serial; one implementation subagent.
+- [x] Preserve closed failure reasons and add measured size-only correction after an actual same-input
+  non-shrink reproduction. Final 67 regressions/lint passed; independent review found no proven blocker.
+- [ ] Verify the full long audit on frozen source. The first repaired run retained a failure at 25 steps,
+  8 summaries and 3 check-ins; specific rejected-output cause is unavailable. Add closed failure reasons
+  before further diagnosis. Retain failures, usage and sources; no automatic full-scenario retries.
+  The corrected run was interrupted for critical system memory at 18 steps/10 summaries/2 check-ins;
+  it is not a pass. See [current acceptance record](research/completion-acceptance-20261104.md).
+- [x] Verify the complete eight-event handling/public-synthesis scenario: all eight validated reports,
+  one handling action per event and a correct final public comparison; 12 serial real HTTP attempts,
+  source and cleanup parity. Evidence: `artifacts/delegation-completion-20261104/real-eight/`.
+- [ ] Refresh relevant integrated/native checks, reconcile the acceptance matrix and prepare owner UI
+  checks. Do not mark human acceptance passed without owner confirmation.
+
+The completed interface slice below remains its historical delivery record. The current repair owns
+private task summary selection/persistence and focused test infrastructure, not unrelated active work.
+
+## Completed slice — parent interface simplification, 2026-11-04
 
 See the current section in [design](design.md#parent-interface-simplification--2026-11-04) and PRD
 requirements 15-18. Preserve the extensive unrelated changes on the T4 worktree.

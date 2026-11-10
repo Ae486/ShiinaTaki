@@ -59,6 +59,8 @@ export interface ScenarioInput {
   name: string;
   maxUpstreamRequests: number;
   blocks?: { globalUserCard?: string; characterIndex?: string };
+  /** Historical schema for upgrade fixtures; the production Core still boots with its current migrations. */
+  seedThroughMigration?: number;
   seed?(dataDir: string): void;
   sessionDeadlineMs?: number;
   turnDeadlineMs?: number;
@@ -136,7 +138,7 @@ async function runScenario(input: ScenarioInput & { provider: Record<string, str
       endpointHost: new URL(provider.TAKI_PROVIDER_BASE_URL!).hostname,
       contextTokens: settings.TAKI_PROVIDER_CONTEXT_TOKENS ?? null,
       evidenceKind: input.evidenceKind });
-    seedCanonicalLocal(dataDir, input.blocks);
+    seedCanonicalLocal(dataDir, input.blocks, input.seedThroughMigration);
     input.seed?.(dataDir);
     transport = await input.transport?.(provider.TAKI_PROVIDER_BASE_URL!, evidenceDir);
     relay = await observeRealProvider({ baseUrl: transport?.baseUrl ?? provider.TAKI_PROVIDER_BASE_URL!, apiKey: provider.TAKI_PROVIDER_API_KEY!,
@@ -172,7 +174,7 @@ async function runScenario(input: ScenarioInput & { provider: Record<string, str
         || entry.key === "TAKI_COMPACT_KEEP_MESSAGES" || entry.key === "TAKI_PROVIDER_INCLUDE_USAGE")) };
     };
     write("effective-settings.json", await effectiveSettings());
-    checkpoint("ready");
+    checkpoint("ready", { corePid: core.core.child.pid });
     await exercise({ dataDir, evidenceDir, wsUrl: core.wsUrl, requestedModel: provider.TAKI_PROVIDER_MODEL!, providerBaseUrl: relay.baseUrl,
       requests, socket: connection, rpc, checkpoint, effectiveSettings,
       ...(nativeHost ? { nativeHost } : {}),

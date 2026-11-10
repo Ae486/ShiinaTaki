@@ -1,6 +1,6 @@
 /**
- * INPUT:  an isolated Core data directory before boot
- * OUTPUT: seedCanonicalLocal(dataDir) — migrated DB with an active empty canonical Local authority and two banks
+ * INPUT:  an isolated Core data directory, optional Blocks and historical migration ceiling before boot
+ * OUTPUT: seedCanonicalLocal(dataDir) — selected-schema DB with an active empty canonical Local authority and two banks
  * POS:    e2e/fixture — shared pre-boot canonical-memory baseline; runs sequentially before the Core writer starts
  */
 import { execFileSync } from "node:child_process";
@@ -8,7 +8,8 @@ import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { CORE_DIR } from "./paths.ts";
 
-export function seedCanonicalLocal(dataDir: string, blocks: { globalUserCard?: string; characterIndex?: string } = {}): void {
+export function seedCanonicalLocal(dataDir: string, blocks: { globalUserCard?: string; characterIndex?: string } = {},
+  throughMigration: number = Number.MAX_SAFE_INTEGER): void {
   const sqliteUrl = pathToFileURL(join(CORE_DIR, "src", "db", "sqlite.ts")).href;
   const migrationsUrl = pathToFileURL(join(CORE_DIR, "src", "db", "migrations", "index-list.ts")).href;
   const authorityUrl = pathToFileURL(join(CORE_DIR, "src", "db", "canonical-memory-authority-repo.ts")).href;
@@ -18,7 +19,8 @@ export function seedCanonicalLocal(dataDir: string, blocks: { globalUserCard?: s
     const { MIGRATIONS } = await import(${JSON.stringify(migrationsUrl)});
     const { createCanonicalMemoryAuthorityRepo } = await import(${JSON.stringify(authorityUrl)});
     const { createStructuredMemoryBlockRepo } = await import(${JSON.stringify(blocksUrl)});
-    const db = openDatabase({ path: process.argv[1], migrations: MIGRATIONS });
+    const migrations = MIGRATIONS.filter((migration) => migration.version <= Number(process.argv[3]));
+    const db = openDatabase({ path: process.argv[1], migrations });
     const now = "2026-08-25T00:00:00.000Z";
     const authority = createCanonicalMemoryAuthorityRepo(db);
     const epoch = authority.initializeLocalAuthority(now);
@@ -31,7 +33,7 @@ export function seedCanonicalLocal(dataDir: string, blocks: { globalUserCard?: s
     if (blocks.characterIndex) store.replace({ blockId: "memory-index", scope: { kind: "character", characterId: "taki" }, actor: "background", content: blocks.characterIndex });
     db.close();
   `;
-  execFileSync(process.execPath, ["--input-type=module", "-e", script, join(dataDir, "taki.db"), JSON.stringify(blocks)], {
+  execFileSync(process.execPath, ["--input-type=module", "-e", script, join(dataDir, "taki.db"), JSON.stringify(blocks), String(throughMigration)], {
     cwd: join(CORE_DIR, "..", ".."),
     stdio: "pipe",
   });

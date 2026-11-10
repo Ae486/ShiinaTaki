@@ -9,6 +9,7 @@ import { createSubagentExecutionRepo } from "../db/subagent-execution-repo.ts";
 import { createSubagentContextSummaryRepo } from "../db/subagent-context-summary-repo.ts";
 import { estimateMessagesTokens, IMAGE_TOKENS } from "../memory/token-estimator.ts";
 import { toModelMessage } from "./turn-mapping.ts";
+import { validateSummary } from "./summary-quality.ts";
 import { renderSubagentInput } from "./run-message-store.ts";
 import type { PrivateTaskSummarizer } from "./private-task-summarizer.ts";
 import { preparePrivateTaskContext, type PrivateTaskContextInput } from "./private-task-context.ts";
@@ -26,8 +27,14 @@ function fixture(options: { rows: RunMessage[]; budget: number; summaryText?: st
     text: options.summaryText, runId: "run", attemptId: "attempt", createdAt: "2026-10-30T00:00:00Z",
   } : null;
   const summaries = { ...createSubagentContextSummaryRepo(base.db), latest: () => summary,
-    capture: vi.fn(({ throughSeq }: { throughSeq: number }) => ({ subagentId, workInputId, throughSeq,
+    capture: vi.fn(({ throughSeq }: { throughSeq: number }) => ({ kind: "advance" as const, subagentId, workInputId, throughSeq,
       expectedRevision: summary?.revision ?? 0, sourceFromSeq: (summary?.throughSeq ?? 0) + 1, sourceDigest: "b".repeat(64) })),
+    captureRewrite: vi.fn(() => {
+      if (!summary) throw new Error("SUBAGENT_SUMMARY_REWRITE_UNAVAILABLE");
+      return { kind: "rewrite" as const, subagentId, workInputId, throughSeq: summary.throughSeq,
+        expectedRevision: summary.revision, sourceFromSeq: summary.throughSeq + 1, sourceDigest: "c".repeat(64),
+        previous: { revision: summary.revision, throughSeq: summary.throughSeq, sourceDigest: summary.sourceDigest, text: summary.text } };
+    }),
     failed: vi.fn(() => false), recordFailure: vi.fn(),
     commit: vi.fn((value: Parameters<ReturnType<typeof createSubagentContextSummaryRepo>["commit"]>[0]) => {
       value.validateCurrent();
@@ -270,6 +277,191 @@ describe("private task projected tail selection", () => {
     expect(f.summaries.recordFailure).not.toHaveBeenCalled();
     expect(estimateMessagesTokens(prepared.messages)).toBeLessThan(2000);
     expect(JSON.stringify(prepared.messages)).toContain(rows[2]!.content);
+  });
+
+  it("corrects a shrinking but capacity-unfit candidate before committing any revision", async () => {
+    const f = fixture({ rows: [round(1, "old ".repeat(5500)), round(2, "latest ".repeat(350))], budget: 2000 });
+    const oversized = "summary ".repeat(850);
+    const fitting = "Keep distinct sources and pending work.";
+    f.summarize.mockResolvedValueOnce({ text: oversized, finishReason: "stop" })
+      .mockResolvedValueOnce({ text: fitting, finishReason: "stop" });
+    const prepared = await f.prepare();
+    expect(f.summarize).toHaveBeenCalledTimes(2);
+    expect(f.summaries.commit).toHaveBeenCalledOnce();
+    expect(f.summaries.commit.mock.calls[0]![0].text).toBe(fitting);
+    expect(f.summarize.mock.calls[1]![0]).toMatchObject({ previous: f.summarize.mock.calls[0]![0].previous,
+      transcript: f.summarize.mock.calls[0]![0].transcript, sizeFeedback: { kind: "capacity", maxInputTokens: 2000 } });
+    expect(estimateMessagesTokens(prepared.messages)).toBeLessThan(2000);
+  });
+
+  it("bounds capacity correction to two calls and suppresses the failed original source identity", async () => {
+    const f = fixture({ rows: [round(2, "old ".repeat(5500)), round(3, "latest ".repeat(350))],
+      budget: 2000, summaryText: "Previous trusted task record.", replacement: "summary ".repeat(850) });
+    const previous = f.summaries.latest();
+    f.summaries.failed.mockImplementation(() => f.summaries.recordFailure.mock.calls.length > 0);
+    await expect(f.prepare()).rejects.toThrow("SUBAGENT_CONTEXT_SUMMARY_UNAVAILABLE");
+    expect(f.summarize).toHaveBeenCalledTimes(2);
+    expect(f.summaries.commit).not.toHaveBeenCalled();
+    expect(f.summaries.latest()).toEqual(previous);
+    expect(f.summaries.recordFailure).toHaveBeenCalledOnce();
+    expect(f.summaries.recordFailure).toHaveBeenCalledWith(f.summaries.capture.mock.results[0]!.value,
+      "SUBAGENT_SUMMARY_CAPACITY_UNFIT");
+    await expect(f.prepare()).rejects.toThrow("SUBAGENT_CONTEXT_SUMMARY_UNAVAILABLE");
+    expect(f.summarize).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([
+    { text: "   ", finishReason: "stop", code: "SUBAGENT_SUMMARY_QUALITY_BLANK" },
+    { text: "Unfinished record ".repeat(4000), finishReason: "length", code: "SUBAGENT_SUMMARY_QUALITY_TRUNCATED" },
+    { text: "authorization: retained-sensitive-marker " + "oversized ".repeat(4000), finishReason: "stop", code: "SUBAGENT_SUMMARY_QUALITY_FORBIDDEN_CONTENT" },
+  ])("records $code without retrying or retaining rejected text", async ({ text, finishReason, code }) => {
+    const f = fixture({ rows: [round(2, "old ".repeat(5500)), round(3, "latest ".repeat(350))],
+      budget: 2000, summaryText: "Previous trusted task record." });
+    const previous = f.summaries.latest();
+    f.summarize.mockResolvedValue({ text, finishReason });
+    f.summaries.failed.mockImplementation(() => f.summaries.recordFailure.mock.calls.length > 0);
+    await expect(f.prepare()).rejects.toThrow("SUBAGENT_CONTEXT_SUMMARY_UNAVAILABLE");
+    expect(f.summaries.recordFailure).toHaveBeenCalledExactlyOnceWith(f.summaries.capture.mock.results[0]!.value, code);
+    expect(f.summaries.commit).not.toHaveBeenCalled();
+    expect(f.summaries.latest()).toEqual(previous);
+    await expect(f.prepare()).rejects.toThrow("SUBAGENT_CONTEXT_SUMMARY_UNAVAILABLE");
+    expect(f.summarize).toHaveBeenCalledOnce();
+  });
+
+  it("distinguishes actual retired-projection non-shrink from source-text non-shrink", async () => {
+    const rows = [round(1, "source ".repeat(350)), round(2, "latest evidence")];
+    const replacement = "x".repeat(estimateMessagesTokens([toModelMessage(rows[0]!)!]) * 4);
+    const f = fixture({ rows, budget: 600, replacement });
+    f.summaries.failed.mockImplementation(() => f.summaries.recordFailure.mock.calls.length > 0);
+    await expect(f.prepare()).rejects.toThrow("SUBAGENT_CONTEXT_SUMMARY_UNAVAILABLE");
+    expect(validateSummary({ text: replacement, sourceText: f.summarize.mock.calls[0]![0].transcript }).accepted).toBe(true);
+    expect(f.summaries.recordFailure).toHaveBeenCalledExactlyOnceWith(f.summaries.capture.mock.results[0]!.value,
+      "SUBAGENT_SUMMARY_NON_SHRINKING");
+    expect(f.summarize).toHaveBeenCalledTimes(2);
+    expect(f.summaries.commit).not.toHaveBeenCalled();
+    await expect(f.prepare()).rejects.toThrow("SUBAGENT_CONTEXT_SUMMARY_UNAVAILABLE");
+    expect(f.summarize).toHaveBeenCalledTimes(2);
+  });
+
+  it.each(["source", "retired_projection"])("corrects %s non-shrink from identical sources without accepting the first candidate", async (kind) => {
+    const rows = [round(1, "source ".repeat(350)), round(2, "latest evidence")];
+    const retiredTokens = estimateMessagesTokens([toModelMessage(rows[0]!)!]);
+    const oversized = kind === "source" ? "oversized ".repeat(4000) : "x".repeat(retiredTokens * 4);
+    const fitting = "Keep the source distinction and continue the unfinished work.";
+    const f = fixture({ rows, budget: 600 });
+    f.summarize.mockResolvedValueOnce({ text: oversized, finishReason: "stop" })
+      .mockResolvedValueOnce({ text: fitting, finishReason: "stop" });
+    const prepared = await f.prepare();
+    const firstRequest = f.summarize.mock.calls[0]![0];
+    const quality = validateSummary({ text: oversized, sourceText: firstRequest.transcript });
+    expect(quality.accepted).toBe(kind === "retired_projection");
+    expect(f.summarize).toHaveBeenCalledTimes(2);
+    expect(f.summarize.mock.calls[1]![0]).toEqual({ ...firstRequest, sizeFeedback: { kind: "non_shrinking",
+      candidateTokens: quality.summaryTokens, maxSummaryTokens: Math.min(quality.sourceTokens, retiredTokens) } });
+    expect(f.summaries.commit).toHaveBeenCalledOnce();
+    expect(f.summaries.commit.mock.calls[0]![0].text).toBe(fitting);
+    expect(f.summaries.recordFailure).not.toHaveBeenCalled();
+    expect(estimateMessagesTokens(prepared.messages)).toBeLessThan(600);
+  });
+
+  it.each([
+    { first: "non_shrinking", second: "non_shrinking", code: "SUBAGENT_SUMMARY_QUALITY_NON_SHRINKING" },
+    { first: "non_shrinking", second: "capacity", code: "SUBAGENT_SUMMARY_CAPACITY_UNFIT" },
+    { first: "capacity", second: "non_shrinking", code: "SUBAGENT_SUMMARY_QUALITY_NON_SHRINKING" },
+    { first: "non_shrinking", second: "blank", code: "SUBAGENT_SUMMARY_QUALITY_BLANK" },
+    { first: "non_shrinking", second: "truncated", code: "SUBAGENT_SUMMARY_QUALITY_TRUNCATED" },
+    { first: "non_shrinking", second: "provider", code: "SUBAGENT_SUMMARY_REPLACEMENT_FAILED" },
+  ])("stops after $first then $second and records the final $code", async ({ first, second, code }) => {
+    const candidate = (kind: string) => ({ text: kind === "blank" ? "" : kind === "capacity" ? "summary ".repeat(850)
+      : "oversized ".repeat(4000), finishReason: kind === "truncated" ? "length" : "stop" });
+    const f = fixture({ rows: [round(2, "old ".repeat(5500)), round(3, "latest ".repeat(350))],
+      budget: 2000, summaryText: "Previous trusted task record." });
+    const previous = f.summaries.latest();
+    f.summarize.mockResolvedValueOnce(candidate(first));
+    if (second === "provider") f.summarize.mockRejectedValueOnce(new Error("Private provider details"));
+    else f.summarize.mockResolvedValueOnce(candidate(second));
+    f.summaries.failed.mockImplementation(() => f.summaries.recordFailure.mock.calls.length > 0);
+    await expect(f.prepare()).rejects.toThrow("SUBAGENT_CONTEXT_SUMMARY_UNAVAILABLE");
+    expect(f.summaries.recordFailure).toHaveBeenCalledExactlyOnceWith(f.summaries.capture.mock.results[0]!.value, code);
+    expect(f.summaries.latest()).toEqual(previous);
+    expect(f.summaries.commit).not.toHaveBeenCalled();
+    expect(f.summarize).toHaveBeenCalledTimes(2);
+    await expect(f.prepare()).rejects.toThrow("SUBAGENT_CONTEXT_SUMMARY_UNAVAILABLE");
+    expect(f.summarize).toHaveBeenCalledTimes(2);
+  });
+
+  it.each(["stop", "stale_owner"])("refuses a corrective generation after %s", async (kind) => {
+    const f = fixture({ rows: [round(1, "source ".repeat(350)), round(2, "latest evidence")], budget: 600 });
+    const controller = new AbortController();
+    let current = true;
+    f.input.assertCurrent = () => { if (!current) throw new Error("Current owner unavailable"); };
+    f.summarize.mockImplementationOnce(async () => {
+      if (kind === "stop") controller.abort();
+      else current = false;
+      return { text: "oversized ".repeat(4000), finishReason: "stop" };
+    });
+    await expect(preparePrivateTaskContext(f.input, { attemptId: "attempt", stepNumber: 4, messages: [],
+      envelope: { maxInputTokens: 600, instructions: "", toolSchemaTokens: 0, signal: controller.signal } }))
+      .rejects.toThrow("SUBAGENT_CONTEXT_SUMMARY_UNAVAILABLE");
+    expect(f.summarize).toHaveBeenCalledOnce();
+    expect(f.summaries.commit).not.toHaveBeenCalled();
+  });
+
+  it("records an unavailable summarizer without committing a candidate", async () => {
+    const f = fixture({ rows: [round(1, "old ".repeat(5500)), round(2, "latest ".repeat(350))], budget: 2000 });
+    f.summarize.mockResolvedValue(undefined);
+    await expect(f.prepare()).rejects.toThrow("SUBAGENT_CONTEXT_SUMMARY_UNAVAILABLE");
+    expect(f.summaries.recordFailure).toHaveBeenCalledExactlyOnceWith(f.summaries.capture.mock.results[0]!.value,
+      "SUBAGENT_SUMMARY_UNAVAILABLE");
+    expect(f.summarize).toHaveBeenCalledOnce();
+    expect(f.summaries.commit).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    { phase: "replacement", message: "provider failure with private text", code: "SUBAGENT_SUMMARY_REPLACEMENT_FAILED" },
+    { phase: "replacement", message: "SUBAGENT_SUMMARY_CONFLICT", code: "SUBAGENT_SUMMARY_REPLACEMENT_FAILED" },
+    { phase: "commit", message: "SUBAGENT_SUMMARY_CONFLICT", code: "SUBAGENT_SUMMARY_CONFLICT" },
+    { phase: "commit", message: "SUBAGENT_SUMMARY_SOURCE_STALE", code: "SUBAGENT_SUMMARY_SOURCE_STALE" },
+    { phase: "commit", message: "SUBAGENT_SUMMARY_OWNER_STALE", code: "SUBAGENT_SUMMARY_OWNER_STALE" },
+    { phase: "commit", message: "SUBAGENT_SUMMARY_INCOMPLETE_RANGE", code: "SUBAGENT_SUMMARY_INCOMPLETE_RANGE" },
+    { phase: "commit", message: "SQL failure with private text", code: "SUBAGENT_SUMMARY_COMMIT_FAILED" },
+  ])("records only $code for a $phase exception", async ({ phase, message, code }) => {
+    const f = fixture({ rows: [round(2, "old ".repeat(5500)), round(3, "latest ".repeat(350))],
+      budget: 2000, summaryText: "Previous trusted task record." });
+    const previous = f.summaries.latest();
+    if (phase === "replacement") f.summarize.mockRejectedValue(new Error(message));
+    else f.summaries.commit.mockImplementation(() => { throw new Error(message); });
+    await expect(f.prepare()).rejects.toThrow("SUBAGENT_CONTEXT_SUMMARY_UNAVAILABLE");
+    expect(f.summaries.recordFailure).toHaveBeenCalledExactlyOnceWith(f.summaries.capture.mock.results[0]!.value, code);
+    expect(f.summaries.latest()).toEqual(previous);
+    expect(f.summarize).toHaveBeenCalledOnce();
+  });
+
+  it.each([false, true])("rewrites an oversized persisted summary with both exact newest history pages intact (budget shrank=%s)", async (shrunk) => {
+    const results = [0, 1].map((page) => ({ type: "tool-result" as const, toolCallId: `page-${page}`, toolName: "read_self_history",
+      output: { type: "json" as const, value: { status: "available", records: [{ body: `Exact page ${page}. `.repeat(220), offset: page * 3000, complete: false }],
+        hasMore: true, nextCursor: `exact-next-page-${page}` } } }));
+    const rows = [{ ...round(2, ""), stepNumber: 2, parts: results.map((part) => ({ type: "tool-call" as const, toolCallId: part.toolCallId, toolName: part.toolName })) },
+      { ...round(3, ""), stepNumber: 2, role: "tool" as const, parts: results }];
+    const raw = structuredClone(rows);
+    const f = fixture({ rows, budget: 4000, summaryText: "summary ".repeat(1500) });
+    const previous = f.summaries.latest();
+    if (shrunk) {
+      f.input.historyBudget = () => 10_000;
+      expect((await f.prepare()).summary?.revision).toBe(1);
+      expect(f.summarize).not.toHaveBeenCalled();
+      f.input.historyBudget = () => 4000;
+    }
+    const prepared = await f.prepare();
+    expect(f.summaries.capture).not.toHaveBeenCalled();
+    expect(f.summaries.captureRewrite).toHaveBeenCalledOnce();
+    expect(f.summarize.mock.calls[0]![0]).toMatchObject({ previous: previous!.text, transcript: "" });
+    expect(prepared.summary).toMatchObject({ revision: 2, throughSeq: 1 });
+    expect(prepared.inputIds).toEqual([]);
+    const output = prepared.messages.find((message) => message.role === "tool");
+    expect(output).toMatchObject({ content: results });
+    expect(estimateMessagesTokens(prepared.messages)).toBeLessThan(4000);
+    expect(rows).toEqual(raw);
   });
 
   it("keeps a live partial protected and refuses an actually unfit newest round", async () => {

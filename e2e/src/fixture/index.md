@@ -9,7 +9,7 @@
 - agent-context-scenario.ts — opted-in synthetic real-model or scripted production Core; bounded requests/session/turn deadlines, exact body hashes/evidence, optional exec-only native Host with a no-model preflight and native source/binary hashes, policy/context tuning and complete private runtime/Memory evidence
 - agent-context-native-host.ts — existing Node process/pairing composition, public accepted exec catalog, real allowlisted hostname with exec=deny and required audit/process/temp cleanup evidence
 - agent-interface-evidence.ts — unique actual main SDK/native invocations, explicit missing-input provenance and receipt-derived intents, unassessed execution/inspection gates, wait-command/repeated-inspection observations and separate producer counts
-- agent-context-timing-relay.ts — explicit request hold/release timing with unchanged bodies/streams and separate physical-forward/cancellation evidence
+- agent-context-timing-relay.ts — explicit hold/release timing and optional FIFO upstream concurrency bound, unchanged bodies/streams, queued cancellation and measured peak evidence
 - agent-context-r2.ts — Shared-validated original-parent cancellation, independent exact child controls, durable user latch and canonical event handling/separate publication acceptance
 - agent-context-inbox.ts — actual model-request inbox/accepted-target acknowledgement parsing, intrinsic tool decisions and canonical Effect/action receipt assertions
 - initiative-process.ts — isolated real Core process with correlated IPC arrangement and bounded lifecycle cleanup
@@ -21,7 +21,7 @@
 - operator-drivers.ts — negotiated and explicit legacy operator pairing, L1 capability/Approval drivers, L2 chat and typed operator reads
 - seed-timeline.ts — pre-boot timeline pollution (character "taki") via core's seed-timeline-cli; hallucination L2 setup
 - seed-memory.ts — pre-boot memory entry files into the workspace memory tree (startup reconcile indexes them); name-recall L2 setup
-- seed-canonical-memory.ts — pre-boot migrated canonical Local authority, global/Character banks and optional structured Block fixtures for isolated production-shaped tests
+- seed-canonical-memory.ts — pre-boot canonical Local authority, banks and optional Blocks; supports a historical migration ceiling so upgrade fixtures never keep later tables after removing receipts
 - initiative-interview-seed.ts — pre-boot canonical Source/Unit/Policy/receipt seeding of an explicitly unresolved synthetic interview, with a Memory-only probe for actual recall and withdrawal tests
 - stack-support.ts — JSON log/audit parsing, node seed data, and bounded multi-process teardown for withStack
 - with-stack.ts — THE fixture: boots an isolated Core with bounded test env plus one Node by default or an optional second isolated Node, pairs Nodes sequentially by distinct debug names, exposes independent process/relay/audit kill+restart state plus Stack helpers (l1/agentSay/timeline), seeds node/core state, and guarantees process/temp-dir teardown

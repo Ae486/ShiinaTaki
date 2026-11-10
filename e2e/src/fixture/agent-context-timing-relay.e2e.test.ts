@@ -1,5 +1,5 @@
 import { mkdirSync, mkdtempSync, unlinkSync, writeFileSync } from "node:fs";
-import { createServer, Server } from "node:http";
+import { createServer, Server, type ServerResponse } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
@@ -13,6 +13,76 @@ function evidenceDir() {
 }
 
 describe("agent context timing relay evidence and transparent transport", () => {
+  it("limits upstream concurrency and cancels queued requests without forwarding or blocking their successor", async () => {
+    const received: string[] = [];
+    const responses = new Map<string, ServerResponse>();
+    const upstream = createServer(async (request, response) => {
+      const chunks: Buffer[] = [];
+      for await (const chunk of request) chunks.push(Buffer.from(chunk));
+      const body = Buffer.concat(chunks).toString("utf8");
+      received.push(body); responses.set(body, response);
+    });
+    const port = await listenLoopbackHttp(upstream);
+    const relay = await startAgentContextTimingRelay({ baseUrl: `http://127.0.0.1:${port}/v1`,
+      evidenceDir: evidenceDir(), gate: () => undefined, maxConcurrentRequests: 1 });
+    const send = (body: string, signal?: AbortSignal) => fetch(`${relay.baseUrl}/chat/completions`,
+      { method: "POST", body, signal }).then((response) => response.text(), () => "cancelled");
+    const first = send('{"request":1}');
+    const cancelledController = new AbortController();
+    try {
+      await expect.poll(() => received.length).toBe(1);
+      const cancelled = send('{"request":2}', cancelledController.signal);
+      await expect.poll(() => relay.requests.length).toBe(2);
+      const third = send('{"request":3}');
+      await expect.poll(() => relay.requests.length).toBe(3);
+      expect(received).toEqual(['{"request":1}']);
+      expect(relay.requests[1]?.forwardedAt).toBeNull();
+      cancelledController.abort(); expect(await cancelled).toBe("cancelled");
+      await expect.poll(() => relay.requests[1]?.finishedAt).toBeTruthy();
+      responses.get('{"request":1}')!.end("first unchanged");
+      expect(await first).toBe("first unchanged");
+      await expect.poll(() => received.length).toBe(2);
+      expect(received[1]).toBe('{"request":3}');
+      responses.get('{"request":3}')!.end("third unchanged");
+      expect(await third).toBe("third unchanged");
+      expect(relay.requests[1]).toMatchObject({ forwardedAt: null, aborted: "client-closed" });
+      expect(relay.concurrency()).toMatchObject({ limit: 1, peak: 1, queued: 0 });
+    } finally {
+      cancelledController.abort();
+      await relay.close();
+      upstream.closeAllConnections();
+      await new Promise<void>((resolve) => upstream.close(() => resolve()));
+      await first;
+    }
+  });
+
+  it("does not let an explicitly held request consume the sole upstream slot", async () => {
+    const received: string[] = [];
+    const upstream = createServer(async (request, response) => {
+      const chunks: Buffer[] = [];
+      for await (const chunk of request) chunks.push(Buffer.from(chunk));
+      const body = Buffer.concat(chunks).toString("utf8"); received.push(body); response.end(body);
+    });
+    const port = await listenLoopbackHttp(upstream);
+    const relay = await startAgentContextTimingRelay({ baseUrl: `http://127.0.0.1:${port}/v1`,
+      evidenceDir: evidenceDir(), gate: (body) => body.held ? "held" : undefined, maxConcurrentRequests: 1 });
+    const held = fetch(`${relay.baseUrl}/chat/completions`, { method: "POST", body: '{"held":true}' })
+      .then((response) => response.text(), () => "cancelled");
+    try {
+      await expect.poll(() => relay.requests[0]?.heldAt).toBeTruthy();
+      const free = await fetch(`${relay.baseUrl}/chat/completions`, { method: "POST", body: '{"free":true}' });
+      expect(await free.text()).toBe('{"free":true}');
+      expect(received).toEqual(['{"free":true}']);
+      relay.release("held");
+      expect(await held).toBe('{"held":true}');
+      expect(relay.concurrency().peak).toBe(1);
+    } finally {
+      await relay.close(); upstream.closeAllConnections();
+      await new Promise<void>((resolve) => upstream.close(() => resolve()));
+      await held;
+    }
+  });
+
   it("holds actual HTTP before forwarding, preserves successful bytes and cancels a held request without an upstream attempt", async () => {
     const bodies: string[] = [];
     const payload = 'data: {"choices":[{"delta":{"content":"真实 unchanged"}}]}\n\ndata: [DONE]\n\n';

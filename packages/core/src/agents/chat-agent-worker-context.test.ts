@@ -201,10 +201,12 @@ describe("actual shared ChatAgent worker context", () => {
     const accepted = await delegate(f); const execution = await finished(f, accepted);
     expect(execution.result?.outcome).toBe("failed");
     expect(createSubagentContextSummaryRepo(f.db).latest(accepted.input!.workInputId)).toBeNull();
-    const failures = f.db.prepare("SELECT source_digest FROM subagent_context_summary_failures WHERE work_input_id=:work").all({ work: accepted.input!.workInputId });
+    const failures = f.db.prepare("SELECT source_digest,code FROM subagent_context_summary_failures WHERE work_input_id=:work").all({ work: accepted.input!.workInputId });
     expect(failures.length).toBeGreaterThan(0);
+    const expectedCode = kind === "provider_failure" ? "SUBAGENT_SUMMARY_REPLACEMENT_FAILED" : `SUBAGENT_SUMMARY_QUALITY_${kind.toUpperCase()}`;
+    expect(failures.every((row) => row.code === expectedCode)).toBe(true);
     expect(new Set(failures.map((row) => row.source_digest)).size).toBe(failures.length);
-    expect(summary.slot.run).toHaveBeenCalledTimes(failures.length);
+    expect(summary.slot.run).toHaveBeenCalledTimes(failures.length * (kind === "non_shrinking" ? 2 : 1));
     expect(f.messages.history({ subagentId: accepted.conversation.subagentId }).some((row) => JSON.stringify(row.parts ?? []).includes("Retained task evidence"))).toBe(true);
     expect(model.doStreamCalls.some((call) => JSON.stringify(call.prompt).includes("current summary checkpoint is unavailable"))).toBe(true);
     expect(f.executions.list({ subagentId: accepted.conversation.subagentId })).toHaveLength(1);

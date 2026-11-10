@@ -69,9 +69,9 @@
 - native-tool-projection.ts — idempotent next-step image siblings paired with their completed tool call/result and Attempt cleanup
 - native-tool-image-output.ts — read-only native normalization of historical declared SDK image/file content; byte-free tool feedback preserves non-image content and original durable rows
 - worker-sdk-segment.ts — complete local success/error frontier safety including matched SDK validation errors, provider/deferred/approval refusal and full instruction/schema envelope pricing for private SDK segments
-- private-task-context.ts — native-image-priced summary/tail fit, complete pending-input watermark and per-result reduction preserving exact history pages beside ordinary tool peers
+- private-task-context.ts — native-image-priced protected-tail capacity, bounded size-only replacement/same-coverage summary repair, closed failure diagnostics, exact pending-input witnesses and unchanged history pages
 - private-tool-images.ts — exact Attempt/step/pair bridge for temporary native evidence across private DB reconstruction; summary retirement drops its sidecars
-- private-task-summarizer.ts — governed Utility replacement summaries with dynamic prompt-only space guidance, isolated from task-input consumption and relationship Memory
+- private-task-summarizer.ts — governed Utility summaries with dynamic space guidance and measured correction feedback, isolated from task-input consumption and relationship Memory
 - subagent-self-history-tool.ts — mandatory self-scoped category/body pagination with captured history watermarks
 
 - subagent-interact-tool.ts — completed-result witnessed asynchronous messages and exclusive input-wait proposals, distinct from whole-job completion

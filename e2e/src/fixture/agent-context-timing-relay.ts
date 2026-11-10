@@ -1,6 +1,6 @@
 /**
- * INPUT: approved upstream endpoint, explicit request gates and an isolated evidence directory
- * OUTPUT: unchanged HTTP bodies/streams with recorded hold, release, forward and abort facts
+ * INPUT: approved upstream endpoint, explicit gates, optional concurrency bound and isolated evidence
+ * OUTPUT: unchanged HTTP bodies/streams with recorded waiting, forwarding, concurrency and abort facts
  * POS: e2e/fixture — deterministic timing only; no fabricated successful response or Core lifecycle mutation
  */
 import { createHash } from "node:crypto";
@@ -16,6 +16,7 @@ export interface TimingRequest {
   gate: string | null;
   heldAt: string | null;
   releasedAt: string | null;
+  queuedAt: string | null;
   forwardedAt: string | null;
   finishedAt: string | null;
   status: number | null;
@@ -27,7 +28,17 @@ export async function startAgentContextTimingRelay(input: {
   baseUrl: string;
   evidenceDir: string;
   gate(body: Record<string, unknown>): string | undefined;
+  maxConcurrentRequests?: number;
 }) {
+  if (input.maxConcurrentRequests !== undefined
+    && (!Number.isSafeInteger(input.maxConcurrentRequests) || input.maxConcurrentRequests < 1)) {
+    throw new Error("timing relay concurrency must be a positive safe integer");
+  }
+  const limit = input.maxConcurrentRequests ?? Number.POSITIVE_INFINITY;
+  const slotWaiters: Array<() => void> = [];
+  let inFlight = 0;
+  let peak = 0;
+  const concurrency = () => ({ limit: input.maxConcurrentRequests ?? null, inFlight, peak, queued: slotWaiters.length });
   const requests: TimingRequest[] = [];
   const released = new Set<string>();
   const active = new Map<AbortController, () => void>();
@@ -40,6 +51,7 @@ export async function startAgentContextTimingRelay(input: {
       writeFileSync(join(input.evidenceDir, "transport.json"), `${JSON.stringify({
         kind: "transparent-request-hold-relay", requests,
         physicalUpstreamAttempts: requests.filter((item) => item.forwardedAt !== null).length,
+        concurrency: concurrency(),
         active: active.size, closed: closing !== undefined,
       }, null, 2)}\n`, "utf8");
     } catch {
@@ -57,6 +69,7 @@ export async function startAgentContextTimingRelay(input: {
       response.writeHead(404); response.end(); return;
     }
     const controller = new AbortController();
+    let ownsSlot = false;
     let observed: TimingRequest | undefined;
     const abort = (reason: NonNullable<TimingRequest["aborted"]>) => {
       if (controller.signal.aborted) return;
@@ -75,7 +88,7 @@ export async function startAgentContextTimingRelay(input: {
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("invalid timing request");
       const gate = input.gate(parsed as Record<string, unknown>);
       observed = { requestNumber: requests.length + 1, bodySha256: createHash("sha256").update(body).digest("hex"),
-        gate: gate ?? null, heldAt: null, releasedAt: null, forwardedAt: null, finishedAt: null,
+        gate: gate ?? null, heldAt: null, releasedAt: null, queuedAt: null, forwardedAt: null, finishedAt: null,
         status: null, aborted: null, failure: null };
       requests.push(observed);
       if (gate && !released.has(gate)) {
@@ -83,6 +96,9 @@ export async function startAgentContextTimingRelay(input: {
         await waitForRelease(gate, controller.signal);
         observed.releasedAt = new Date().toISOString();
       }
+      // Explicitly held requests must not occupy the slot needed by the work that releases their gate.
+      await acquireSlot(controller.signal, observed);
+      ownsSlot = true;
       controller.signal.throwIfAborted();
       save();
       observed.forwardedAt = new Date().toISOString();
@@ -101,9 +117,32 @@ export async function startAgentContextTimingRelay(input: {
       if (!response.destroyed) response.destroy();
     } finally {
       clearTimeout(timer); response.off("close", onClose); active.delete(controller);
+      if (ownsSlot) {
+        inFlight -= 1;
+        while (slotWaiters.length > 0 && inFlight < limit) slotWaiters.shift()?.();
+      }
       if (observed) observed.finishedAt = new Date().toISOString();
       save();
     }
+  }
+  async function acquireSlot(signal: AbortSignal, observed: TimingRequest): Promise<void> {
+    signal.throwIfAborted();
+    if (inFlight < limit) { inFlight += 1; peak = Math.max(peak, inFlight); return; }
+    observed.queuedAt = new Date().toISOString(); save();
+    await new Promise<void>((resolve, reject) => {
+      const start = () => {
+        signal.removeEventListener("abort", onAbort);
+        if (signal.aborted) { reject(new Error("queued request aborted")); return; }
+        inFlight += 1; peak = Math.max(peak, inFlight); resolve();
+      };
+      const onAbort = () => {
+        const index = slotWaiters.indexOf(start);
+        if (index >= 0) slotWaiters.splice(index, 1);
+        reject(new Error("queued request aborted"));
+      };
+      slotWaiters.push(start);
+      signal.addEventListener("abort", onAbort, { once: true });
+    });
   }
   async function waitForRelease(gate: string, signal: AbortSignal): Promise<void> {
     signal.throwIfAborted();
@@ -119,7 +158,7 @@ export async function startAgentContextTimingRelay(input: {
   save();
   const port = await listenLoopbackHttp(server);
   return {
-    baseUrl: `http://127.0.0.1:${port}/v1`, requests,
+    baseUrl: `http://127.0.0.1:${port}/v1`, requests, concurrency,
     release(gate: string) {
       released.add(gate);
       for (const resolve of pending.get(gate) ?? []) resolve();

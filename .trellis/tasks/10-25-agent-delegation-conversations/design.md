@@ -4,6 +4,36 @@ Status: implementation authorized, 2026-10-25. The [PRD](prd.md) owns requiremen
 [context recovery](research/context-recovery.md) owns the recovered authorization and baseline boundaries.
 Current production specs continue describing the delivered baseline until this follow-up is implemented.
 
+## Applied-schema convergence — 2026-11-06
+
+The actual T4 database records old 058/060 receipts but lacks six later-defined tables and five
+triggers. Its other 59 delegation objects match canonical definitions. New and resumed children fail
+before model intent; terminal event acceptance also fails, rolling back pointer release. Migration
+receipts and existing data are historical truth and must not be reset or replayed.
+
+Append one higher migration (069 after the current 068) using existing `schemaBranches`. Treat the
+five-table 058 addition group and the 060 event-frontier group independently: each is exactly complete
+or exactly absent. Four explicit known combinations cover old databases as well as early058 databases
+that apply current060 during the same upgrade. Partial or incompatible group definitions refuse
+atomically. Recognize relevant canonical T4 parents/attached objects; do not introduce a new runner.
+
+Only create missing objects. Do not replay old migrations' table reconstruction, validity updates or
+legacy event insertion. Backfill newly created event frontiers only from proved terminal/interaction
+evidence; unknown keys (including unproved check-in boundaries) remain nullable. Do not parse an
+arbitrary producer key into step zero. Existing current groups and business rows are unchanged.
+
+Migration and runtime recovery are separate validation boundaries. Prove byte-equivalent old rows,
+old schema and old migration receipts after migration on a consistent real-data copy. Then invoke the
+existing recovery owner on a separate copy: two zero-effect user-stopped children can settle cancelled
+and release active pointers, while Stop remains set and no model is available. The three preexisting
+primary Runs with unfinished model intents retain their unknown/reconciliation boundary. Do not
+hand-edit Run outcomes or invent completion to clear the UI.
+
+After focused/source/integration gates, make a fresh actual-data backup and verify quiescent input
+parity. Apply the reviewed migration, restart the original Core and inspect real storage and RPC state.
+The owner explicitly authorized this actual-database upgrade. Keep user data and backups outside
+tracked artifacts; no unrelated database import, model-effect replay or Git delivery is authorized.
+
 ## Parent interface simplification — 2026-11-04
 
 Owner-authorized continuation in session `01a1a607-29a8-7c12-8a34-c6d90f0eb1aa`, following the

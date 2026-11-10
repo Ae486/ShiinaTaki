@@ -1,5 +1,5 @@
 /**
- * INPUT: a Utility slot, current worker authority and an already durable private transcript range
+ * INPUT: a Utility slot, worker authority, captured private sources and optional measured size feedback
  * OUTPUT: a separately governed summary model request with usage; never task-input consumption
  * POS: core/agents — private task continuity only, with no relationship Memory or Timeline callbacks
  */
@@ -10,6 +10,8 @@ import { createModelEffectMiddleware } from "./model-effect-middleware.ts";
 
 export interface PrivateTaskSummaryRequest {
   previous: string | null; transcript: string; targetSummaryTokens?: number; signal?: AbortSignal;
+  sizeFeedback?: { kind: "non_shrinking"; candidateTokens: number; maxSummaryTokens: number }
+    | { kind: "capacity"; candidateTokens: number; projectedTokens: number; maxInputTokens: number };
 }
 export interface PrivateTaskSummaryOutput { text: string; finishReason?: string }
 export type PrivateTaskSummarizer = ((input: PrivateTaskSummaryRequest) => Promise<PrivateTaskSummaryOutput | undefined>) & {
@@ -30,7 +32,14 @@ export function createPrivateTaskSummarizer(input: {
     const budgetGuidance = request.targetSummaryTokens === undefined ? "" :
       `\nTarget approximately ${request.targetSummaryTokens} estimated tokens for the replacement summary. `
       + "This target reserves space for the current task context; preserve distinct facts and essential references.";
-    return generateText({ model, system: PRIVATE_TASK_SUMMARY_INSTRUCTIONS + budgetGuidance,
+    const correction = request.sizeFeedback;
+    const sizeGuidance = correction ? (correction.kind === "non_shrinking"
+      ? `\nThe previous replacement did not reduce the task context: ${correction.candidateTokens} estimated summary tokens. `
+        + `The replacement must stay strictly below ${correction.maxSummaryTokens} estimated summary tokens. `
+      : `\nThe previous replacement was valid but too large: ${correction.candidateTokens} estimated summary tokens `
+        + `made the protected task context ${correction.projectedTokens} tokens; it must stay below ${correction.maxInputTokens}. `)
+      + "Generate a more concise replacement from the same original sources below. Preserve distinct facts; remove repetition and incidental chronology." : "";
+    return generateText({ model, system: PRIVATE_TASK_SUMMARY_INSTRUCTIONS + budgetGuidance + sizeGuidance,
       prompt: `Previous task summary:\n${request.previous ?? "(none)"}\n\nCompleted private action rounds:\n${request.transcript}`,
       abortSignal: AbortSignal.any(signals), maxRetries: 0 });
   });

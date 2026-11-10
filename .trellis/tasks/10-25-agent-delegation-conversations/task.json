@@ -21,11 +21,18 @@
   "children": [],
   "parent": null,
   "relatedFiles": [],
-  "notes": "",
+  "notes": "2026-11-10 owner freeze: remaining valid work is checkpointed; execution is paused pending the main worktree stage and later integration. See docs/T4-FREEZE-HANDOFF.md for backups, verification, unfinished acceptance and migration/governance gates. This supersedes older continue/restart and uncommitted-state notes. No merge, push, archive or real-data migration.",
   "meta": {
     "scope": "implementation_authorized",
     "owner_authorization": "01a16d1d-191d-7070-a7e5-3181605428e8",
     "baseline_task": "10-21-agent-delegation-source-context",
-    "implementation_authorization": "01a17186-8409-7073-b737-845377a5e84f"
+    "implementation_authorization": "01a17186-8409-7073-b737-845377a5e84f",
+    "worktree_freeze": {
+      "date": "2026-11-10",
+      "state": "frozen_waiting_for_main_stage",
+      "handoff": "docs/T4-FREEZE-HANDOFF.md",
+      "integration_authorized": false,
+      "manual_acceptance_complete": false
+    }
   }
 }

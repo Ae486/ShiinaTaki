@@ -11,7 +11,7 @@ Headless end-to-end scenarios (PRD 07-11-e2e-test-harness layer B). Run with `pn
 - fixture/ — the reusable withStack harness (see fixture/index.md)
 - prompt-tool-optimization-real.e2e.test.ts — explicit paid opt-in on isolated production Core; bounded Memory/delegation/scheduler and scripted Avatar outcomes, plus separately opted-in delayed-worker foreground/idle delivery
 - agent-delegation-checkin.e2e.test.ts — deterministic production-Core/SDK N50/K3 defaults: below-threshold and N-th-step final completion, same-Attempt compaction, exact user check-in continuation to a new Run, complete usage and preserved private/public boundaries
-- agent-delegation-goals-real.e2e.test.ts — separately opted-in real route: natural delegation/follow-up, main-model clarification including non-final interim reports, actual eight-event batch, long compaction/check-in audit and a scoped real Co-Watching plan-child observation
+- agent-delegation-goals-real.e2e.test.ts — separately opted-in real route: natural delegation/follow-up and clarification, serial-upstream eight-event and long compaction/check-in acceptance, plus a scoped real Co-Watching plan-child observation
 - co-watching-context-fixture.e2e.test.ts — actual SDK/SQLite Co-Watching preparation through repeated 8000-token pressure boundaries with the production main-model Utility fallback, preserved task steps and private output
 - initiative-runtime.e2e.test.ts — scripted local provider and real Core composition exercise thin requests, structural decisions, same-Attempt held delivery, persisted model budgets, output/busy expiry, operator timezone invalidation, primary priority and Monitor replay
 - initiative-pattern.e2e.test.ts — unmodified Core startup, real primary proposal/confirmation, automatic finite wake conditions, explicit Skill setup, no-replay and zero-call policy refusals
@@ -50,6 +50,8 @@ Headless end-to-end scenarios (PRD 07-11-e2e-test-harness layer B). Run with `pn
 - hallucination-l2.e2e.test.ts — D1 multi-turn hallucination reproduction: seeded verbal-success pollution; the next turn must really invoke the tool AND persist tool rows (red pre-fix, green post agent-harness-improve)
 - name-recall-l2.e2e.test.ts — T5 batch 5 flagship: the user's name exists ONLY in the seeded memory store (never in the timeline); the agent must memory_search and answer it (retention proof — green pre- AND post-5b overhaul, guards the post-R6 recall path)
 - prompt-prefix-cache.e2e.test.ts — key-gated isolated real-provider acceptance over stable long history; proves one names-only Core tool path, per-request normalized usage arithmetic, positive post-cold cache reads, and the >=50% follow-up prefix-reuse gate without logging content or ids
+
+- agent-delegation-upgrade.e2e.test.ts — early applied 058/060 schema built through 068, then upgraded by production Core with zero-dispatch boot, exact Stop/Continue and new-child public delivery using a local scripted provider
 
 L2 dual-track (real-LLM, key-gated via it.skipIf; MAY red until agent-tool-timeline — the red catches the H2/tool-call
 hallucination, do not weaken). Each asserts the agent really invoked the tool (core log) AND the end-to-end result is

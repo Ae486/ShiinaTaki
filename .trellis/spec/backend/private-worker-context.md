@@ -46,6 +46,10 @@ type WorkSegmentCheckpoint = { kind: "continue" } | {
 - `SubagentContextSummaryWitness` is Shared-defined: `workInputId`, `revision`, `throughSeq`, `sourceDigest`.
 - Summary repository `capture({ subagentId, workInputId, throughSeq })` binds previous revision and canonical source
   digest. `commit({ range, text, runId, attemptId, token, validateCurrent })` performs the transactional owner/source CAS.
+- `captureRewrite({ subagentId, workInputId })` binds the exact previous summary revision, coverage, digest and text.
+  Its internal `kind: "rewrite"` capture appends a revision at the same `throughSeq`; `sourceFromSeq = throughSeq + 1`
+  means zero newly covered raw rows. A separate digest domain preserves historical advancing-capture identities.
+  Capture tags and previous-source snapshots stay internal; ordinary `capture` still rejects empty raw ranges.
 - `subagent_context_summaries` stores immutable text/coverage/revisions; `subagent_context_summary_intents` links actual
   task model Effects to a summary witness; `subagent_context_summary_failures` suppresses a repeated unchanged range.
 - `subagent_tool_results` keys full raw output by Run/Attempt/global step/tool-call ID. SDK `toModelOutput` may compact
@@ -80,8 +84,11 @@ type WorkSegmentCheckpoint = { kind: "continue" } | {
 - Price retained rounds through the same projection as the request, including summary wrapper, initial snapshot and
   pending inputs. The 40% recent-history target is soft: always protect the newest round, but do not add an optional
   older round if that complete suffix would exceed the budget. Retire eligible older prefixes and remeasure after each
-  replacement summary. A shrinking summary is not a guarantee of fit; if no further prefix can retire, an actually
-  unfit protected envelope still fails explicitly without truncating evidence or dispatching an oversized request.
+  replacement summary. Before committing, require the candidate to fit with fixed/pending context and the newest
+  protected round. Optional older rounds can still retire in later operations; do not require an intermediate candidate
+  to fit all of them. If no safe prefix can retire and the protected context fits without the persisted summary, capture
+  a same-coverage rewrite. An intrinsically unfit protected envelope still fails without truncating evidence or dispatching
+  an oversized request.
 - A terminal prior Run's partial or input-only tail may be summarized as immutable historical evidence together with its
   actual `outcome`/`outputKind`; it must not permanently block later conversation compaction. Raw replay labels historical
   partial output as incomplete. The summary source digest includes the canonical execution outcome. A current Run's
@@ -96,9 +103,25 @@ type WorkSegmentCheckpoint = { kind: "continue" } | {
   and tool chronology while retaining distinct facts and sources. This is neither a new product cap nor `maxOutputTokens`.
   Exceeding the prompt target alone does not reject a summary or bypass quality/CAS/full-request remeasurement.
 - Commit text, coverage and revision atomically only after raw source persistence, current Run/Attempt/control/source checks,
-  quality validation and actual shrinking of the retired model projection. Stop, stale owner/source/revision or SQL failure
-  preserves the prior checkpoint. Failed ranges are not retried immediately; raw replay may continue only while it fits,
-  with an explicit summary-unavailable notice.
+  quality validation, actual shrinking of the retired model projection and candidate capacity validation. A candidate rejected
+  only for source-text non-shrink, retired-projection non-shrink or protected-envelope capacity permits one corrective generation,
+  for at most two Utility calls per captured operation. The internal `sizeFeedback` union distinguishes `non_shrinking`
+  (candidate size and the strict upper bound from both enabled shrink guards) from `capacity` (candidate size, protected
+  projection size and message budget). This is prompt guidance, not a model output-token limit. Both calls use the original
+  sources; rejected output is never source evidence. Final acceptance still requires every original quality/shrink/fit guard;
+  the second rejection keeps its actual failure code even if its reason differs from the first. Blank, truncated, forbidden,
+  protected-content, provider and authority failures get no corrective call. Stop, stale owner/source/revision or SQL failure
+  preserves the prior checkpoint. Record exhausted failure against the original stable capture identity; do not commit
+  an unusable candidate to refresh retry identity. Failed ranges are not retried immediately; raw replay may continue only
+  while it fits, with an explicit summary-unavailable notice.
+- New summary failure rows retain closed reasons: Utility unavailable, each existing quality rejection, actual retired-model
+  non-shrink, exhausted capacity correction, and known repository owner/source/revision/range guards at commit. Source-text
+  non-shrink is `SUBAGENT_SUMMARY_QUALITY_NON_SHRINKING`; retired-projection non-shrink is `SUBAGENT_SUMMARY_NON_SHRINKING`.
+  Unknown exceptions record only `SUBAGENT_SUMMARY_REPLACEMENT_FAILED` or `SUBAGENT_SUMMARY_COMMIT_FAILED`, identifying the
+  failing stage without guessing provider, permission or storage causes. Never persist arbitrary exception messages,
+  stacks, response bodies or rejected candidate text. These diagnostics do not change correction eligibility, acceptance
+  guards, the two-call bound or `(work_input_id, revision, source_digest)` failure identity. Existing immutable generic
+  failure rows stay unchanged and cannot establish their historical rejection cause.
 - A safe local frontier contains complete successful or explicit error pairs. Provider-executed, deferred, preliminary,
   unresolved or approval-pending frontiers cannot authorize rollover. Runtime separately refuses unfinished or unknown
   non-model Effects before another task model dispatch. A settled local exception is not automatically an unknown Effect.
@@ -128,7 +151,9 @@ type WorkSegmentCheckpoint = { kind: "continue" } | {
 | Complete pending batch cannot fit | `SUBAGENT_CONTEXT_PENDING_INPUT_UNFIT`; pending receipts unchanged |
 | Newest protected complete round cannot fit | `SUBAGENT_CONTEXT_ROUND_UNFIT`; raw evidence retained |
 | Summary unavailable/invalid and raw request no longer fits | `SUBAGENT_CONTEXT_SUMMARY_UNAVAILABLE`; truthful unfinished failure |
-| Blank/truncated/non-shrinking summary | Reject; preserve previous coverage; at most one attempt per unchanged range identity |
+| Blank/truncated/forbidden/protected-content summary | Reject without correction; preserve previous coverage and stable failed identity |
+| Candidate fails only a shrink guard or cannot fit the protected envelope | Do not commit; at most one size-feedback correction, then record the actual final failure against the original identity |
+| Persisted summary is unfit but protected context alone fits, with no safe retiring prefix | Same-coverage rewrite; revision advances, raw coverage and input receipts do not |
 | Summary revision/source/owner changed or database insert failed | Atomic rejection; no coverage-only commit |
 | Segment pressure at unsafe SDK frontier | `SUBAGENT_CONTEXT_UNSAFE_FRONTIER`; no reconstructed/replayed tool call |
 | Non-model Effect unfinished or outcome unknown | Runtime `SUBAGENT_CONTEXT_UNRESOLVED_EFFECT`; no new task dispatch |
@@ -146,6 +171,15 @@ type WorkSegmentCheckpoint = { kind: "continue" } | {
 
 ## 6. Tests Required
 
+- `private-task-context.test.ts`: reject unfit candidates, bound correction, rewrite oversized persisted summaries after
+  budget changes, preserve exact history pages, retain progressive retirement of optional older rounds, price initial
+  snapshots and refuse live-partial/protected-round overflow; distinguish closed quality/size/commit failure reasons and
+  sanitize unknown exceptions. Size-only correction tests cover both strict shrink boundaries, mixed first/second rejection
+  reasons, identical sources, unchanged failure suppression and no correction after Stop/owner loss. Repository boundaries are stubbed
+  in this unit suite; `chat-agent-worker-context.test.ts` also verifies persisted reasons through the actual SDK/SQLite path.
+- `subagent-context-summary-repo.test.ts` and `chat-agent-worker-summary-repair.test.ts`: real SDK/SQLite same-coverage
+  revisions after capacity or non-shrinking correction, unchanged raw receipts/task-step counts, distinct rewrite digest,
+  Stop/source/CAS/SQL rejection and rollback.
 - `chat-agent-worker-context.test.ts`: actual ChatAgent/SQLite crosses project and SDK caps, unique global step/material
   keys despite reused provider IDs, one Run/Attempt, exact raw-vs-summary receipts, 205 pending corrections, giant input
   refusal, primary cap preservation, successful loader disclosure, source/CAS/SQL-failure checks, blank/truncated/provider
@@ -156,8 +190,6 @@ type WorkSegmentCheckpoint = { kind: "continue" } | {
   cross 35 later tool rounds, and prove cancellation facts/raw evidence remain unchanged while summaries advance.
   Repository-history fixtures are not claims of thousands of simultaneous admissions.
 - `worker-sdk-segment.test.ts`: complete success/error pairs and provider/approval/preliminary/mismatch refusal matrix.
-- `private-task-context.test.ts`: projected summary/tail fit, oversized optional old rounds, replacement remeasurement,
-  initial-snapshot pricing and live-partial/protected-round refusal; repository boundaries are stubbed in this unit suite.
 - `chat-agent-worker-invalid-frontier.test.ts`: real SDK invalid-argument round, zero invalid executions, durable error,
   pressure rollover and corrected same-Run completion; invalid arguments exactly at N enter a normal check-in.
 - `chat-agent-worker-mixed-history.test.ts`: actual SDK mixed history-page/file results retain exact page and cursor bytes,

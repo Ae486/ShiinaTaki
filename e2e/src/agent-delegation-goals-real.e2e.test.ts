@@ -143,7 +143,7 @@ describe("S12 goal-only real-model delegation on the configured production route
     await withAgentContextScenario({ name: "goals-full-eight-inbox", maxUpstreamRequests: 64,
       sessionDeadlineMs: 600_000, mainMaxSteps: null, seed: seedCases,
       async transport(baseUrl, evidenceDir) {
-        timing = await startAgentContextTimingRelay({ baseUrl, evidenceDir, gate(request) {
+        timing = await startAgentContextTimingRelay({ baseUrl, evidenceDir, maxConcurrentRequests: 1, gate(request) {
           if (toolNames(request).includes("complete_subagent")) return "eight-reviewers";
           if (acknowledgedChildren(request).length >= 8 && deliveredInboxEvents(request).length === 0) return "main-after-eight-delegations";
           return undefined;
@@ -204,14 +204,20 @@ describe("S12 goal-only real-model delegation on the configured production route
       expect((await scenario.list()).entries).toHaveLength(8);
       assertProductionRequests(scenario);
       scenario.checkpoint("actual-eight-member-intent-and-exact-once-actions", { initialEvents,
-        requiredEventIds: [...requiredEvents], finalDeliveredAt: deliveredAt });
+        requiredEventIds: [...requiredEvents], finalDeliveredAt: deliveredAt, concurrency: timing!.concurrency() });
+      expect(timing!.concurrency().peak).toBe(1);
     });
   }, 660_000);
 
   it.skipIf(!ENABLED)("continues one long private audit through actual compaction and a user check-in", async () => {
+    let timing: Awaited<ReturnType<typeof startAgentContextTimingRelay>> | undefined;
     await withAgentContextScenario({ name: "goals-long-audit-checkin", maxUpstreamRequests: 224,
       sessionDeadlineMs: 1_800_000, turnDeadlineMs: 180_000, mainMaxSteps: null, checkInSteps: 8, checkInParentApprovals: 0,
-      contextTokens: 48000, historyRatio: 0.2, seed: seedLongAudit }, async (scenario) => {
+      contextTokens: 48000, historyRatio: 0.2, seed: seedLongAudit,
+      async transport(baseUrl, evidenceDir) {
+        timing = await startAgentContextTimingRelay({ baseUrl, evidenceDir, maxConcurrentRequests: 1, gate: () => undefined });
+        return timing;
+      } }, async (scenario) => {
       await scenario.ask("Assign one independent reviewer to audit the evidence chain starting at audit-manifest.json. Each source identifies the next source; cover the complete chain. "
         + "The sources are separate synthetic stakeholder reports and must stay separate. For each case, compare the original and amended constraints, identify contradictions and preserve negation and exact references. "
         + "Keep a concise per-case audit record, then perform a cross-case consistency pass before the final report. "
@@ -299,6 +305,8 @@ describe("S12 goal-only real-model delegation on the configured production route
       assertProductionRequests(scenario);
       assertChildReadOnly(scenario);
       scenario.checkpoint("same-long-work-finished-with-truthful-usage", completed);
+      expect(timing!.concurrency().peak).toBe(1);
+      scenario.checkpoint("serial-upstream-request-concurrency", timing!.concurrency());
     });
   }, 1_860_000);
 });

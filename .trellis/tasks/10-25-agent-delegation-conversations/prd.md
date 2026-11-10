@@ -21,7 +21,21 @@ results, the owner requested a local commit followed by an inventory of remainin
 This authorizes committing the completed interface slice and its tests/docs. Push, archive, release
 and implementation of additional requirements remain outside this delivery step.
 
+Completion follow-up authorization (2026-11-04, same session): after commit `cd3cd91`, the owner
+approved addressing the remaining long-task and eight-agent acceptance gaps, followed by UI acceptance
+preparation, and explicitly authorized real-model validation with limited concurrency to avoid memory
+exhaustion. Continue this existing task. Human UI acceptance still requires the owner's observation;
+no new Git delivery, release, real-user data mutation or scope expansion is implied.
+
 ## Requirements
+
+November 6 recovery authorization: the owner approved implementing and testing the real-database
+compatibility repair, then upgrading/converging the actual database once verification succeeds.
+The target is the existing `C:/Users/55473/.takiagent/taki.db` used by this T4 application. Preserve
+historical data, migration receipts, user Stop authority and execution truth. Back up the actual
+database and validate a consistent old-database copy before applying any new forward migration.
+This supersedes the earlier no-real-database-write boundary for this repair only; it does not
+authorize Git delivery, unrelated data merging, replaying old effects or resetting the database.
 
 1. The main conversation remains the child's primary reporting counterpart. It can inspect child state deliberately but should not routinely poll or explicitly block waiting for children.
 2. Accept child final reports, interaction/input requests and unexpected interruption/failure durably. Foreground user interaction has priority; accepted events must not be lost, processed repeatedly as fresh work, or stranded indefinitely behind ordinary chat. Receiving an event, handling it, and speaking to the user are distinct.
@@ -62,6 +76,8 @@ and implementation of additional requirements remain outside this delivery step.
 
 ## Research and planning artifacts
 
+- [November 4 remaining acceptance](research/completion-acceptance-20261104.md) — bounded summary
+  repair, eight-agent pass, resource-interrupted long run and remaining workspace/native/owner gates.
 - [November 4 interface acceptance](research/interface-acceptance-20261104.md) — delivered five-intent
   contract, current source checks, bounded real-model evidence and remaining parent-task gates.
 - [Context recovery](research/context-recovery.md) — original user instructions, superseding authorization and current session binding.
