@@ -15,7 +15,7 @@
   "branch": null,
   "base_branch": "main",
   "worktree_path": null,
-  "commit": null,
+  "commit": "d1c7067",
   "pr_url": null,
   "subtasks": [],
   "children": [
@@ -28,8 +28,15 @@
     ".trellis/tasks/11-02-context-attribution-token-efficiency/implement.md",
     ".trellis/tasks/11-02-context-attribution-token-efficiency/research/planning-baseline.md"
   ],
-  "notes": "2026-11-04 owner-approved Monitor identity repair implemented: all147 captured primary requests readable without data rewrite,146 reported response-name differences and1 unknown usage preserved. Actual isolated Monitor19 and Settings16 browser stages pass; models.dev metadata expanded in existing child. Quality gates and full Core4555 pass/17 timeout/6 skipped plus17 passing rechecks recorded in research/model-identity-catalog-delivery.md. Parent remains active for long-command/new-cohort analysis and evidence-selected token reduction. No paid calls, user restart, commit, push or archive.",
+  "notes": "2026-11-04 checkpoint d1c7067 remains baseline; separate delegation work later committed cd3cd91. Exec guidance now implemented/checked with actual Host examples, +188 local estimate units; net savings unmeasured. Avatar historical-observation prototype deferred after offline checks and13 real requests (conditional CNY0.21580276): higher input and no Avatar calls in all4 variant trials, not proven call-correctness improvement. One upstream diagnostic had no tool call, so prior empty-argument origin remains unresolved. See research/pilot-plan-20261104.md and avatar-pilot-report-20261104.md. No production replay/retention change, live-data rewrite, service restart, commit, push or archive in follow-up. Parent active for smaller future-argument-retention review and history/summary quality-cost work; current changes uncommitted.\n\n2026-11-10 owner freeze: remaining valid work is checkpointed; execution is paused pending the main worktree stage and later integration. See docs/T4-FREEZE-HANDOFF.md for backups, verification, unfinished acceptance and migration/governance gates. This supersedes older continue/restart and uncommitted-state notes. No merge, push, archive or real-data migration.",
   "meta": {
-    "baseline_task": ".trellis/tasks/archive/2026-11/11-01-cache-token-cost-diagnosis"
+    "baseline_task": ".trellis/tasks/archive/2026-11/11-01-cache-token-cost-diagnosis",
+    "worktree_freeze": {
+      "date": "2026-11-10",
+      "state": "frozen_waiting_for_main_stage",
+      "handoff": "docs/T4-FREEZE-HANDOFF.md",
+      "integration_authorized": false,
+      "manual_acceptance_complete": false
+    }
   }
 }

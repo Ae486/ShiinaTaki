@@ -1,5 +1,9 @@
 # Context attribution and token efficiency: execution plan
 
+> Frozen by the owner on 2026-11-10 pending main-stage completion and later integration.
+> Follow [the freeze handoff](../../../docs/T4-FREEZE-HANDOFF.md) before resuming;
+> unchecked acceptance remains open and earlier restart instructions are historical.
+
 Status: owner approved production execution of the attribution/Monitor slice on 2026-11-02. Existing independent planning challenge is complete; preserve the verified native migration and unrelated artifacts.
 
 ## Current execution slice
@@ -9,7 +13,7 @@ Status: owner approved production execution of the attribution/Monitor slice on 
 - [x] Persist bounded counts through existing Run Events; join canonical usage and extend cache push.
 - [x] Render cache, latest input/window and mergeable composition with explicit coverage/stale/unavailable states.
 - [x] Verify first/continuation/failed/retry/image/background/order cases plus real isolated Core/WS/browser.
-- [x] Run relevant required gates, update specs and record exact evidence. No commit/archive or live-user restart.
+- [x] Run relevant required gates, update specs and record exact evidence. The later owner-requested checkpoint is `d1c7067` (November 4); no archive or live-user restart.
 
 ## Recorded setup
 
@@ -80,18 +84,26 @@ Planning-only independent challenge on 2026-11-02 found no fundamental sequencin
 
 ## 3. Rank avoidable consumption from evidence
 
-- [ ] Compare old and new cohorts using the same accounting rules. Separate first/continuation calls and ordinary background work from catch-up/manual maintenance.
-- [ ] Attribute large input categories and distinguish tool mistakes, repeated no-new-information calls and useful inspection/verification.
-- [ ] Quantify input, output/reasoning, cache-known coverage, request counts, latency and conditional cost using dated applicable prices.
-- [ ] Select a bounded tool improvement only where benefit exceeds complexity. Keep unavailable commands, quoting and avatar arguments as hypotheses to revalidate, not new generic systems.
+- [x] Compare old and new cohorts using the same accounting rules. Separate first/continuation calls and ordinary background work from catch-up/manual maintenance. Frozen November 4 snapshot and reproduction command are in `research/cohort-analysis-20261104.md`.
+- [x] Attribute large input categories and distinguish tool mistakes, repeated no-new-information calls and useful inspection/verification. Tool interactions dominate; the long command is legitimate multi-step work with six confirmed execution failures, not a large-output case.
+- [x] Quantify input, output/reasoning, cache-known coverage, request counts, latency and conditional cost using dated applicable prices. No equivalent-task causal savings claim is made.
+- [x] Select bounded next work from evidence: truthful historical Avatar replay pilot plus precise exec invocation guidance. Empty validation input and misleading historical replay are proven separately; long-context causation remains unproven. No production change or generic repair framework is authorized merely by this selection.
+
+The owner-added Avatar analysis also confirms worsening same-Run correction outcomes (4/4, 1/5, 2/5 across November 1–3). Motion has only one new successful sample. Detailed evidence and independent privacy/replay challenge accompany the cohort report.
 
 ## 4. Evaluate one reversible reduction pilot
+
+The November 4 owner approval starts the bounded experiment and exec-guidance work recorded in `research/pilot-plan-20261104.md`. Exec guidance is an implementation slice; Avatar representation is first an offline/controlled behavioral experiment, with production adoption decided from its evidence.
+
+- [x] Correct exec invocation guidance and verify its two examples against the actual unchanged Host parser/resolver/executor. Routing tests and independent review passed; description cost is +188 local estimator units, with net savings unproven. See `research/exec-guidance-delivery-20261104.md`.
+- [x] Challenge the Avatar prototype before implementation: pure complete historical groups only, preserved exact outcomes/unknowns/source, unchanged mixed/native/current-turn messages. See `research/replay-pilot-advisor-20261104.md`.
+- [x] Complete the experimental prototype's offline fidelity checks and bounded paired provider comparison. The observation candidate is deferred: all four variant trials made no tool call, actual input increased, and equivalent-quality savings are unproven. Thirteen total real requests cost a conditional CNY 0.21580276; the additional one-request upstream diagnostic had no tool call and could not resolve the emitter/adapter boundary. See the outcome in `research/pilot-plan-20261104.md` and `research/avatar-pilot-report-20261104.md`.
 
 - [ ] Compare unchanged replay with an operation-specific compact projection and, if suitable, simple bounded truncation.
 - [ ] Prove original-result lookup is model-accessible, correctly referenced/paginated and honest about failure/empty results; do not re-execute side effects.
 - [ ] Exercise real follow-up questions needing middle/exact details, source attribution and correction. Count recovery calls and first-change cache loss.
 - [ ] Evaluate same-loop message rewriting separately against D70's call/result and exactly-once requirements before including it.
-- [ ] Adopt, reject or defer the pilot based on net cost, token use and quality. Do not implement every candidate merely because it is listed.
+- [x] Defer the first historical-Avatar observation pilot based on token growth and unproven behavior benefit; production replay is unchanged. Exec's factual guidance correction is adopted, with natural-use savings still unmeasured. Other folding/summary candidates remain future work.
 
 ## 5. Evaluate prompt, summary and background changes
 
@@ -111,4 +123,4 @@ Current root commands are `pnpm typecheck`, `pnpm lint` and `pnpm test`. Observa
 
 The image/capability deliverable is already one linked child. Further token reductions remain candidates in this parent until evidence defines an independently useful scope; do not manufacture more tasks for every checklist item.
 
-**Next resume point:** the observation slice is implemented and automatically verified; see research/execution-progress.md. Run the updated Core/frontend and use naturally occurring requests to rank source/loop/background costs before selecting one reversible reduction pilot. Keep historical unknowns and estimate quality explicit. Do not repeat the completed image/observation implementations or successful broad gates without a new change. Commit/archive and native owner acceptance remain separate.
+**Next resume point:** checkpoint `d1c7067` contains image/observation/catalog delivery; the separate delegation task has since committed `cd3cd91`. Exec guidance and its real Host example verification are complete and uncommitted. The first Avatar observation prototype passed offline checks but is deferred after 13 real requests: it increases input and did not demonstrate better call correctness. Read `research/pilot-plan-20261104.md` and `research/avatar-pilot-report-20261104.md` before further work. Review a smaller future-Avatar argument-retention alternative, then continue evidence-selected history/recovery and summary-cycle work. Preserve live data and honest unknowns; do not infer a proven long-context or streaming root cause. No user service restart, production replay change, commit, push or archive was performed in this follow-up. Successful gates need no repeat without a relevant change.

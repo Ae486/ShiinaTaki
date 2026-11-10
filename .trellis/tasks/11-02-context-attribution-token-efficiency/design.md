@@ -126,3 +126,21 @@ Measure the whole affected horizon: initial cache disruption + later inputs + ou
 - This implementation must verify the settled post-filter dispatch hook, source sidecars through projection, bounded event persistence and latest-request reconnect behavior. Original-result recovery and candidate-specific reduction budgets belong to the later evidence-selected pilot.
 
 See [planning evidence](research/planning-baseline.md) for code and reference locations. No numeric reduction target, token threshold, schema migration, new dependency or model setting is selected by this draft.
+
+## November 4 bounded tool/replay follow-up
+
+The owner approved the scoped work in `research/pilot-plan-20261104.md`. Exec changes only its invocation guidance,
+with examples verified against the current Host. There is no new execution or permission contract.
+
+Avatar begins as an experiment outside production replay. Following the independent challenge in
+`research/replay-pilot-advisor-20261104.md`, transform only complete historical pure-Avatar groups into one explicitly
+labeled Core historical-observation message after the atomic group. Preserve speech, exact tagged outcomes, identity,
+source/origin and unknown arguments; keep mixed/unsupported groups unchanged and report their coverage. Use existing
+untrusted fences and classify the observation as tool interactions. Production durable storage, live SDK steps and
+replay defaults remain the baseline until evidence supports adoption.
+
+Start with eight paired early/late reconstructed-context trials (two boundaries, two representations, two repeats),
+up to three model steps each to allow the existing one correction and a final reply, within 24 physical requests.
+Reconstructed current instructions and Avatar-only tool competition are explicitly different from the uncaptured
+full historical request. Use actual original user inputs by default; named synthetic controls cannot stand in for the
+natural task. Record no-call, other-tool, truncation/limit and missing usage separately from valid-name success.

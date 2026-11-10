@@ -303,10 +303,18 @@ selects a looser descriptor/posture. Standard MCP transport and raw-name executi
 
 - **`exec`'s single opaque `command` param** vs the explicit-named-params guidance (S4/S6): defended by `[A-BEA]`'s own
   format guidance — "Keep the format close to what the model has seen naturally occurring in text … no formatting
-  overhead"; a raw shell command string is the most model-natural encoding. Decomposing `command` would also move the
+  overhead"; an ordinary command string is the most model-natural encoding. Decomposing `command` would also move the
   trusted argument classifier out of the owning Host. `exec`'s output already satisfies R3 (semantic result) + R4
   (`truncated` flag) + D3 (result semantics in the description). Nothing in this standard argues to change `exec` input
   or output — leave it untouched.
+  Its description must match the current Host implementation: one executable plus parsed arguments, with no implicit
+  shell; an approved compound command still needs an explicitly invoked installed interpreter. Quotes group arguments,
+  backslashes remain literal, and each invocation starts with the configured cwd and scrubbed environment rather than
+  inheriting a previous invocation's changes. `ok:true` means an execution result was returned, not that its child exited
+  successfully. Verified examples and failure cases are recorded in
+  `11-02-context-attribution-token-efficiency/research/exec-guidance-delivery-20261104.md`; the source boundaries remain
+  `exec/parser.rs`, `exec/resolve.rs` and `exec/sandbox.rs`. This clarifies D1/D3 and `[A-BEA]`, without adding shell
+  features, changing authority or copying another tool's timeout/background contract.
 - **`shell_open`'s http/https/mailto scheme constraint** stays a description constraint enforced Shell-side, not a schema
   `enum` (S1) — `target` is a full URL/path, not a clean finite set; enforcement is deliberately Shell-side governance,
   same rationale as `exec` (→ T2b).
