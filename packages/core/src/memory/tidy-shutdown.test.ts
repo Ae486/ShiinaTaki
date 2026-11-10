@@ -50,7 +50,7 @@ function heldModel() {
   return { model, started, release, signal: () => signal };
 }
 
-function boot(canonical: boolean) {
+async function boot(canonical: boolean) {
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
   const dataDir = mkdtempSync(join(tmpdir(), "taki-tidy-shutdown-"));
   const held = heldModel();
@@ -67,6 +67,7 @@ function boot(canonical: boolean) {
     timeline: createTimelineRepo(db), summaries: createSummaryRepo(db), windowStart: () => 1,
     estimatedTokens: () => 0, budget: () => 100_000, compact: { triggerRatio: 0.8, keepMessages: 3 }, env: {}, logger });
   item.runtime = runtime;
+  await runtime.captureRun("taki");
   runtime.memory.writeEntry({ characterId: "taki", type: "episodes", content: "Synthetic shutdown observation",
     importance: 4, disclosure: "synthetic trigger", origin: "observed" });
   return { runtime, held };
@@ -74,7 +75,7 @@ function boot(canonical: boolean) {
 
 describe("composed tidy shutdown", () => {
   it.each([false, true])("aborts the active default-budget batch through runtime.stop (canonical=%s)", async (canonical) => {
-    const { runtime, held } = boot(canonical);
+    const { runtime, held } = await boot(canonical);
     const pending = runtime.tidy.runNow("taki");
     await held.started;
     expect(held.signal()?.aborted).toBe(false);

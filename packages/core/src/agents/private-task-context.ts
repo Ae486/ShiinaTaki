@@ -159,7 +159,8 @@ async function compact(input: PrivateTaskContextInput, state: {
   const pressureTarget = Math.floor(state.budget * 0.8 - nonSummaryCost);
   const targetSummaryTokens = Math.max(1, pressureTarget > 0 ? pressureTarget : Math.floor(state.budget - nonSummaryCost));
   try {
-    const generated = await input.summarize?.({ previous: state.summary?.text ?? null, transcript,
+    const summarize = input.summarize?.capture?.() ?? input.summarize;
+    const generated = await summarize?.({ previous: state.summary?.text ?? null, transcript,
       targetSummaryTokens, signal: state.step.envelope?.signal });
     if (!generated) throw new Error("SUBAGENT_SUMMARY_UNAVAILABLE");
     const quality = validateSummary({ text: generated.text, finishReason: generated.finishReason,

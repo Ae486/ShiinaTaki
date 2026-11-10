@@ -2,6 +2,7 @@
 
 Start here. Every design decision has exactly one canonical home; nothing is duplicated.
 
+- [Flow simplification and live configuration](../.trellis/tasks/11-09-installation-user-experience/prd.md) — owner-revised planning scope: local use without connection codes, empty/incomplete configuration startup, application-saved values before environment fallback, and runtime updates; [design](../.trellis/tasks/11-09-installation-user-experience/design.md) and [execution plan](../.trellis/tasks/11-09-installation-user-experience/implement.md). The [earlier assessment](../.trellis/tasks/11-09-installation-user-experience/research/installation-user-experience-assessment.md) retains later installation/distribution and broader UX needs, not this slice's estimate.
 - [Project-wide prompt and tool optimization](PROMPT-AND-TOOL-OPTIMIZATION-2026-11-01.md) — owner-approved requirements, field decisions and role coverage.
 - [Implementation evidence](PROMPT-AND-TOOL-IMPLEMENTATION-2026-11-01.md) — current changes, checks, measured request sizes and validation limits.
 - [Real-model validation](PROMPT-AND-TOOL-REAL-VALIDATION-2026-11-01.md) — bounded paid observations, verified delayed-batch final delivery, unresolved wait-only commands and acceptance limits.

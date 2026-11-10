@@ -15,6 +15,7 @@ import { ActionButton } from "../../action-button.tsx";
 import { useKnobDraft } from "./use-knob-draft.ts";
 import type { ConfigSaveOutcome } from "./config-save-controller.ts";
 import { configHintOf } from "./config-groups.ts";
+import { configApplicationBadge, configApplicationHint, configSourceLabel } from "./config-application-view.ts";
 
 export interface KnobFieldProps {
   entry: ConfigEntry;
@@ -26,11 +27,12 @@ export interface KnobFieldProps {
 
 function badgesFor(entry: ConfigEntry): Array<{ label: string; tone: BadgeTone }> {
   const badges: Array<{ label: string; tone: BadgeTone }> = [];
-  if (entry.envLocked) badges.push({ label: "env 锁定", tone: "neutral" });
-  if (entry.apply === "restart") badges.push({ label: "重启生效", tone: "warn" });
+  const application = configApplicationBadge(entry);
+  if (application) badges.push(application);
   if (entry.apply === "env-only") badges.push({ label: "仅环境变量", tone: "neutral" });
   if (entry.secret) badges.push({ label: "密钥", tone: "neutral" });
-  if (entry.stored) badges.push({ label: "已自定义", tone: "ok" });
+  const source = configSourceLabel(entry);
+  if (source) badges.push({ label: source, tone: "neutral" });
   return badges;
 }
 
@@ -62,6 +64,7 @@ export function KnobField({ entry, chineseLabel, connectionReady, onSave }: Knob
         </span>
       </div>
       <p className="text-xs leading-snug text-text-secondary">{entry.description}</p>
+      {configApplicationHint(entry) && <p className="text-xs leading-snug text-text-secondary">{configApplicationHint(entry)}</p>}
       {configHintOf(entry.key) && <p className="text-xs leading-snug text-text-secondary">{configHintOf(entry.key)}</p>}
       <KnobInput entry={entry} editor={availableEditor} draft={draft.state.draft} events={draft.events} />
       {editor.disabledReason && <p className="text-xs text-text-secondary">{editor.disabledReason}</p>}

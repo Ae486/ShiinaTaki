@@ -29,7 +29,8 @@ export function configSetMethod(deps: ConfigSetDeps): MethodDefinition<ConfigSet
         throw appException(ErrorCodeSchema.enum.CONFIG_REFUSED, outcome.message, { reason: outcome.reason });
       }
       log.info({ key: outcome.key, reset: outcome.value === null, apply: outcome.apply }, "config stored");
-      return { status: "ok", key: outcome.key, value: outcome.value, apply: outcome.apply };
+      return { status: "ok", key: outcome.key, value: outcome.value, apply: outcome.apply,
+        effectiveValue: outcome.effectiveValue, origin: outcome.origin, application: outcome.application };
     },
   };
 }

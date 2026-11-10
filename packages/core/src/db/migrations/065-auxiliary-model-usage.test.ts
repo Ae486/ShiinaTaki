@@ -30,7 +30,7 @@ it("reopens migration 064 data without modifying existing values or receipts", (
   upgraded.close();
 
   const reopened = open(path);
-  expect(reopened.prepare("SELECT max(version) AS version FROM migrations").get()?.version).toBe(69);
+  expect(reopened.prepare("SELECT max(version) AS version FROM migrations").get()?.version).toBe(72);
   expect(reopened.prepare("SELECT * FROM auxiliary_model_calls").all()).toEqual([]);
 });
 

@@ -32,6 +32,8 @@ import { createHindsightReplicaScheduler } from "./hindsight-replica-scheduler.t
 import { captureHindsightIngestionBinding } from "./hindsight-recall-evidence.ts";
 
 interface Input {
+  captureConfig?: () => MemoryConfig;
+  currentPromptDir?: () => string;
   db: Database; epochId: string; config: MemoryConfig; source: ConfigSource; secrets: SecretCatalogService;
   timeline: TimelineRepo; utility: UtilitySlot; logger: Logger; promptDir?: string; now?: () => string; client?: HindsightClient;
   primarySources?: PrimaryConversationSourceRepo;
@@ -40,7 +42,8 @@ interface Input {
 export function createHindsightMemorySubsystem(input: Input) {
   const runtime = createHindsightRuntimeConnection({ ...input, config: input.source });
   const state = createHindsightRuntimeState({ db: input.db, runtime, config: input.config, now: input.now });
-  const foreground = createHindsightMemoryRuntime({ state, promptDir: input.promptDir });
+  const foreground = createHindsightMemoryRuntime({ state, promptDir: input.promptDir, currentPromptDir: input.currentPromptDir,
+    captureConfig: input.captureConfig });
   const journal = createHindsightIngestionRepo({ db: input.db, pending: state.pending,
     captureBinding: captureHindsightIngestionBinding(state.replica, input.db),
     readVerifiedBank: (bankId) => state.replica.bankBinding(bankId)?.bank });
@@ -52,7 +55,7 @@ export function createHindsightMemorySubsystem(input: Input) {
   const curator = createHindsightPolicyCurator({ authority: runtime.authority, replica: state.replica, work, writer: state.writer,
     slot: input.utility, resolveBanks: runtime.resolveBanks, readBlock: state.blocks.read, now: input.now,
     refreshBank: (bankId, context) => state.service.synchronize({ bankId, context }),
-    config: () => ({ memory: input.config, policy: loadHindsightPolicyConfig(input.source.env()) }) });
+    config: () => ({ memory: input.captureConfig?.() ?? input.config, policy: loadHindsightPolicyConfig(input.source.env()) }) });
   const scheduleRepo = createHindsightReplicaSchedulerRepo(input.db, input.now);
   const scheduler = createHindsightReplicaScheduler({ repo: scheduleRepo, replica: state.nativeReplica,
     banks: runtime.banks, runner: state.service.runner, ownerId: `hindsight:${input.epochId}` });

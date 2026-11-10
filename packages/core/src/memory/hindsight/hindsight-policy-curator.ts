@@ -4,6 +4,7 @@
  * POS:    core/memory/hindsight — dedicated curator; no generic native maintenance or independent scheduler
  */
 import { z } from "zod";
+import { captureUtilitySlot } from "../utility-slot.ts";
 import { MemoryReplicaBankSchema } from "@taki/shared";
 import { policyWorkClaim } from "../../db/hindsight-policy-work-repo.ts";
 import type { HindsightPolicyWorkRecord } from "../../db/hindsight-policy-work-contract.ts";
@@ -31,13 +32,16 @@ export function createHindsightPolicyCurator(deps: HindsightPolicyCuratorDeps): 
   const runNow = (characterId: string): Promise<HindsightPolicyCuratorOutcome> => {
     if (controller.signal.aborted) return Promise.reject(new Error("MEMORY_OPERATION_CANCELLED"));
     z.string().min(1).max(256).parse(characterId);
+    const configured = deps.config();
+    const policy = { memory: { ...configured.memory }, policy: { ...configured.policy } };
+    const captured = { ...deps, slot: captureUtilitySlot(deps.slot), config: () => policy };
     const task = (chains.get(characterId) ?? Promise.resolve()).catch(() => undefined)
-      .then(() => execute({ deps, characterId, epochId: epoch.epochId, lineage: epoch.providerLineageId, owner: controller.signal }));
+      .then(() => execute({ deps: captured, characterId, epochId: epoch.epochId, lineage: epoch.providerLineageId, owner: controller.signal }));
     active.add(task); chains.set(characterId, task);
     const release = () => { active.delete(task); if (chains.get(characterId) === task) chains.delete(characterId); };
     void task.then(release, release); return task;
   };
-  return { runNow, maybeRun: async (characterId) => { await runNow(characterId); }, settle,
+  return { runNow, maybeRun: async (characterId) => { if (deps.slot.available?.() !== false) await runNow(characterId); }, settle,
     stop: () => { controller.abort(); return settle(); } };
 }
 

@@ -1,5 +1,13 @@
 # UI/UX Optimization Task List (Desktop Operator Surfaces)
 
+The owner-revised 2026-11-09 [planning PRD](../.trellis/tasks/11-09-installation-user-experience/prd.md)
+prioritizes simpler local flows, empty/incomplete configuration startup, and live
+configuration with application-saved values before environment fallback. Its
+[design](../.trellis/tasks/11-09-installation-user-experience/design.md) and
+[execution plan](../.trellis/tasks/11-09-installation-user-experience/implement.md)
+do not require integrated installation. The [earlier whole-product assessment](../.trellis/tasks/11-09-installation-user-experience/research/installation-user-experience-assessment.md)
+retains later distribution and broader UX needs alongside the historical audit below.
+
 > Created 2026-08-30 from a code-level audit of `apps/desktop/src` plus owner direction.
 > Sources: three code audits (accessibility, visual consistency, performance), DSH trajectory UI study
 > (`H:/TakiAgent/references/deepseek-harness-master/packages/client/ui-trajectory`), BANDORI-PET-REV

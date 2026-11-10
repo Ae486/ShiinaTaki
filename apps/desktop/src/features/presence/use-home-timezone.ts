@@ -5,14 +5,16 @@
  */
 import { useLayoutEffect, useState } from "react";
 import type { WsClient } from "@/lib/ws-client.js";
-import { loadOrCreateIdentity } from "@/lib/device-identity.js";
+import { authenticatedOperatorDeviceId } from "@/lib/operator-auth.js";
 import { createUserTimezoneController, type UserTimezoneController } from "./user-timezone-controller.ts";
 
 export function useHomeTimezone(client: WsClient | null) {
   const [binding, setBinding] = useState<{ client: WsClient; controller: UserTimezoneController } | null>(null);
   useLayoutEffect(() => {
     if (!client) return;
-    const controller = createUserTimezoneController({ client, deviceId: loadOrCreateIdentity(localStorage).deviceId,
+    const deviceId = authenticatedOperatorDeviceId(client);
+    if (!deviceId) return;
+    const controller = createUserTimezoneController({ client, deviceId,
       timezone: () => Intl.DateTimeFormat().resolvedOptions().timeZone });
     setBinding({ client, controller });
     const refresh = () => { if (!document.hidden) void controller.refresh(); };

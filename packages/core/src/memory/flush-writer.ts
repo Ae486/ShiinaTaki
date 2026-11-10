@@ -37,7 +37,7 @@ const MAX_STEPS = 8;
 const WRITE_TOOL_NAME = "memory_write";
 
 export function createFlushWriter(deps: {
-  model: LanguageModel;
+  model: LanguageModel | (() => LanguageModel);
   createTools: (characterId: string) => ToolSet;
   /** Optional process-wide queue; production injects the shared Utility Slot used by all background model calls. */
   slot?: UtilitySlot;
@@ -46,7 +46,7 @@ export function createFlushWriter(deps: {
     async run({ characterId, segment }) {
       const execute = async () => {
         const agent = new ToolLoopAgent({
-          model: deps.model,
+          model: typeof deps.model === "function" ? deps.model() : deps.model,
           instructions: FLUSH_PROMPT,
           tools: deps.createTools(characterId),
           stopWhen: isStepCount(MAX_STEPS),

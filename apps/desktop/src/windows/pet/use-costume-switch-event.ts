@@ -40,7 +40,7 @@ function report(result: CostumeResultPayload): void {
 // A refused command must ANSWER: the switch path returns silently on each of its guards, which is what left the home
 // page highlighting a costume nothing wore. Accepted commands say nothing here — their phases ride the state transitions.
 function commandSwitch(bridge: CostumeBridge, costumeId: string): void {
-  const refusal = refusalFor(costumeId, bridge.view);
+  const refusal = refusalFor(bridge.view);
   if (refusal === null) {
     void bridge.switchTo(costumeId);
     return;
@@ -58,9 +58,9 @@ function commandCancel(bridge: CostumeBridge, costumeId: string): void {
 }
 
 export function useCostumeSwitchEvent(scene: PetScene | null): void {
-  const { switchTo, cancelSwitch, switchingId, error, current, costumes, availability } = useCostumeSwitch(scene);
+  const { switchTo, cancelSwitch, switchingId, error, current } = useCostumeSwitch(scene);
   const connected = useConnectionStore((state) => state.status.kind === "connected");
-  const view: CostumeCommandView = { switchingId, costumes, availability, ready: scene !== null && connected };
+  const view: CostumeCommandView = { switchingId, ready: scene !== null && connected };
   // Listener callbacks outlive the render that registered them, so they reach the hook through a ref, never a closure.
   const bridge = useRef<CostumeBridge>({ view, switchTo, cancelSwitch });
   const observed = useRef<CostumeObservation>(IDLE_OBSERVATION);

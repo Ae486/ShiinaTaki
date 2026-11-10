@@ -56,10 +56,10 @@ const SummarySchema = z.object({
 });
 const SummariesSchema = z.array(SummarySchema);
 
-export function createEpisodicWriter(deps: { model: LanguageModel; writeMemory: MemoryWriteOp }): EpisodicWriter {
+export function createEpisodicWriter(deps: { model: LanguageModel | (() => LanguageModel); writeMemory: MemoryWriteOp }): EpisodicWriter {
   return {
     async summarize({ characterId, segment }) {
-      const agent = new ToolLoopAgent({ model: deps.model, instructions: EPISODIC_PROMPT });
+      const agent = new ToolLoopAgent({ model: typeof deps.model === "function" ? deps.model() : deps.model, instructions: EPISODIC_PROMPT });
       const result = await agent.generate({ prompt: renderTranscript(segment) });
       const summaries = SummariesSchema.parse(parseJsonPayload(result.text)).slice(0, MAX_SUMMARIES);
       // The segment's last seq identifies the turn this pass judged — carried onto any R9 reinforce event it causes.

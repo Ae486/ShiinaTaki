@@ -23,8 +23,15 @@ export interface MemoryOperationsRuntime {
 export interface MemoryOperationContext {
   live(): MemoryOperationsRuntime | null;
   tidy?: () => MemoryTidyRuntime | null;
+  searchIndex?: () => MemorySearchIndexRuntime | null;
   setup: HindsightSetupService;
   now(): string;
+}
+
+export interface MemorySearchIndexRuntime {
+  authorityEpochId: string | null;
+  desiredStoplist(): boolean;
+  rebuild(stoplist: boolean): Promise<{ indexed: number }>;
 }
 
 /** Selected producer only; the operation owner never executes the model or selects candidates itself. */

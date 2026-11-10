@@ -123,6 +123,17 @@ export function createMemoryStore(deps: { root: string }): MemoryStore {
   };
 }
 
+/** Streaming maintenance traversal; one caller-controlled batch at a time, with malformed truth reported. */
+export async function* scanMemoryEntries(root: string): AsyncGenerator<StoredEntry> {
+  for (const rel of listRelativeEntryFiles(root)) {
+    const filePath = resolveWithin(root, rel);
+    let text: string;
+    try { text = readFileSync(filePath, "utf8"); }
+    catch (error) { if ((error as NodeJS.ErrnoException).code === "ENOENT") continue; throw error; }
+    yield toStored(root, filePath, text);
+  }
+}
+
 function createEntryFile(root: string, input: MemoryWriteInput): StoredEntry {
   const layer = requireLayer(input.layer);
   const { segments, characterId } = placement(layer, input.characterId);

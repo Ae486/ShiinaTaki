@@ -18,6 +18,13 @@ Use this contract when changing any of the following:
 Passive detection of an otherwise silent half-open socket is not part of this contract. D59 bounds active work and
 recovers after an observed close/failure; heartbeat and sleep/resume detection remain T4 work.
 
+Native Desktop resolves the selected Core profile endpoint on every fresh generation, then performs begin/proof on
+that same socket. The native proof command validates the actual Home/Pet origin and profile-owned operator ID before
+returning a one-use proof. Bootstrap keys stay native. A saved reconnect token is sent only after server verification.
+Temporary discovery/helper failures use bounded generation recovery without erasing identity; explicit local auth
+failure stays visible and never silently enrolls again. Legacy browser pairing remains separate. Home timezone
+reporting reads the accepted physical client's device ID, not an unrelated legacy localStorage identity.
+
 ## 2. Signatures
 
 ```typescript

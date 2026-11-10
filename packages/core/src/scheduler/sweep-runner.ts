@@ -28,7 +28,7 @@ export interface SweeperSpec {
   enabled?: () => boolean;
 }
 
-export function startSweeper(spec: SweeperSpec): { stop(): void } {
+export function startSweeper(spec: SweeperSpec): { stop(): void; runNow(): void } {
   const log = spec.logger.child({ mod: spec.name });
   let running = false;
   let stopped = false;
@@ -58,5 +58,5 @@ export function startSweeper(spec: SweeperSpec): { stop(): void } {
   run(); // the boot sweep covers what expired while the process was down
   const timer = setInterval(run, spec.intervalMs ?? SWEEP_INTERVAL_MS);
   timer.unref();
-  return { stop: () => { stopped = true; clearInterval(timer); } };
+  return { stop: () => { stopped = true; clearInterval(timer); }, runNow: run };
 }

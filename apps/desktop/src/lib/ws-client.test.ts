@@ -13,6 +13,7 @@ import {
   CHARACTER_METHODS,
   CHAT_METHODS,
   CONFIG_METHODS,
+  MODEL_PROFILE_METHODS,
   CONNECT_METHOD,
   JSON_RPC_APP_ERROR,
   MEDIA_METHODS,
@@ -866,5 +867,36 @@ describe("createWsClient config methods", () => {
     expect(JSON.parse(h.sent[h.sent.length - 1]!)).toMatchObject({ method: MEMORY_OPERATION_METHODS.submit, params: { request: { kind: "replica.sync", bankId: "global", syncKind: "full" } } });
     h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { operation } });
     expect(await submitted).toEqual(operation);
+  });
+});
+
+
+describe("model profile protocol boundary", () => {
+  it("parses profile snapshots and writes credentials only with explicit save/test requests", async () => {
+    const h = harness(); const client = createWsClient({ transport: h.transport }); h.open();
+    const read = client.modelProfiles();
+    expect(JSON.parse(h.sent.at(-1)!)).toMatchObject({ method: MODEL_PROFILE_METHODS.list, params: {} });
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { profiles: [] } });
+    expect(await read).toEqual({ profiles: [] });
+    const profile = { mode: "configured" as const, baseUrl: "http://localhost/v1", model: "custom", auth: "api-key" as const, apiKey: "write-only" };
+    const save = client.modelProfileSave({ slot: "main", expectedRevision: 0, action: "draft", profile });
+    expect(JSON.parse(h.sent.at(-1)!)).toMatchObject({ method: MODEL_PROFILE_METHODS.save, params: { profile } });
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { profiles: [] } }); await save;
+    expect(h.sent.filter((frame) => JSON.parse(frame).method === MODEL_PROFILE_METHODS.test)).toHaveLength(0);
+    const test = client.modelProfileTest({ slot: "main", expectedRevision: 1, profile });
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { ok: false, code: "MODEL_TEST_FAILED", message: "failed" } });
+    expect(await test).toMatchObject({ ok: false }); client.close();
+  });
+
+  it("shares subscription setup and retires profile notifications with the physical connection", async () => {
+    const h = harness(); const client = createWsClient({ transport: h.transport }); h.open();
+    const changes = vi.fn(); client.onModelProfilesChanged(changes);
+    const first = client.subscribeModelProfiles(); const second = client.subscribeModelProfiles();
+    expect(h.sent).toHaveLength(1);
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { status: "ok" } }); await Promise.all([first, second]);
+    h.deliver({ jsonrpc: "2.0", method: MODEL_PROFILE_METHODS.changed, params: { slots: ["main", "utility"] } });
+    expect(changes).toHaveBeenCalledWith({ slots: ["main", "utility"] });
+    client.close(); h.deliver({ jsonrpc: "2.0", method: MODEL_PROFILE_METHODS.changed, params: { slots: ["main"] } });
+    expect(changes).toHaveBeenCalledTimes(1);
   });
 });

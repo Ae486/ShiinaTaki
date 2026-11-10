@@ -1,5 +1,5 @@
 /**
- * INPUT:  provider-neutral coordinator, trusted Character routes, and admission-bound prompt projection
+ * INPUT:  provider-neutral coordinator, trusted routes, and admission-bound prompt/optional retention policy
  * OUTPUT: one immutable executable memory bundle plus independently selected initiative Block/Persona assembly
  * POS:    core/memory — shared Local/Hindsight run binding; contains no storage, activation, or provider fallback
  */
@@ -32,14 +32,16 @@ export async function createCanonicalMemoryRun(input: {
   captureRecallEvidence?: CaptureRecallEvidence;
   initiativeCurrent?: () => boolean;
   recallConfig?: Partial<AutomaticMemoryRecallConfig>;
+  intentionsDefaultDays?: number;
   onRecallDiagnostic?: (diagnostic: AutomaticMemoryRecallDiagnostic) => void;
 }): Promise<CapturedMemoryRun> {
   // Freeze routes before the asynchronous capability read; a later selection change cannot redirect this Run.
   const global = input.router.globalBankId(); const character = input.router.characterBankId(); const characterId = input.router.characterId();
   const router = Object.freeze({ globalBankId: () => global, characterBankId: () => character, characterId: () => characterId });
+  const intentionsDefaultDays = input.intentionsDefaultDays;
   const captured = await input.coordinator.captureRun();
   const tools = createCanonicalMemoryToolsWithCapabilities({ coordinator: captured.coordinator,
-    router, authority: captured.authority }, captured.snapshot.capabilities);
+    router, authority: captured.authority, intentionsDefaultDays }, captured.snapshot.capabilities);
   const isCurrent = () => captured.isCurrent?.() !== false && input.initiativeCurrent?.() !== false;
   return Object.freeze({ snapshot: captured.snapshot, isCurrent, tools, prompt: input.prompt, assemble: input.assemble,
     captureRecallEvidence: input.captureRecallEvidence,

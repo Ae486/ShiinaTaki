@@ -94,7 +94,7 @@ export interface ConversationStore {
   /** Estimator-unit size of the current replay view (summary head + kept rows) — the compaction trigger's input. */
   estimatedTokens(characterId: string): number;
   /** One immutable Replay View result for request construction and pressure/summary measurement. */
-  project(characterId: string): ReplayProjection;
+  project(characterId: string, budget?: number): ReplayProjection;
 }
 
 export interface ConversationStoreDeps {
@@ -146,9 +146,9 @@ export function createConversationStore(deps: ConversationStoreDeps): Conversati
     onSourceBackstopHit(hit);
   };
   // history(), windowStart(), pressure measurement and request construction all derive from this one projection.
-  const project = (characterId: string): ReplayProjection => {
+  const project = (characterId: string, budget?: number): ReplayProjection => {
     const attachments = replayImageSnapshot(deps.attachments);
-    const view = selectView({ repo, window, summaries, reportWallHit, reportSourceBackstopHit, source, attachments }, characterId);
+    const view = selectView({ repo, window: budget === undefined ? window : { budget: () => budget }, summaries, reportWallHit, reportSourceBackstopHit, source, attachments }, characterId);
     const messages = view.entries.flatMap((entry) => nativeReplayMessages(entry, attachments));
     return { messages: view.head === null ? messages : [view.head, ...messages], windowStartSeq: view.windowStartSeq, measurement: view.measurement };
   };

@@ -9,6 +9,7 @@ import { JSONRPCErrorException, type JSONRPCParams, type JSONRPCServerAndClient 
 import { initiativeMethods } from "./ws-client-initiative.ts";
 import { cacheUsageMethods } from "./ws-client-cache-usage.ts";
 import { maintenanceMonitorMethods } from "./ws-client-maintenance-monitor.ts";
+import { modelProfileMethods } from "./ws-client-model-profiles.ts";
 import { coWatchingMethods } from "./ws-client-co-watching.ts";
 import { subagentMethods } from "./ws-client-subagents.ts";
 import {
@@ -30,6 +31,7 @@ import {
   ChatCancelResultSchema,
   ChatActivityReadResultSchema,
   ConnectResultSchema,
+  LocalAuthChallengeSchema,
   ErrorCodeSchema,
   EXTENSION_METHODS,
   ExtensionConvergenceResultSchema,
@@ -78,6 +80,7 @@ import {
   type CharacterImportParams,
   type ConnectParams,
   type ConnectResult,
+  type LocalAuthChallenge,
   type ErrorCode,
   type McpAddParams,
   type McpEditParams,
@@ -167,7 +170,7 @@ function skillMethods(request: <T>(method: string, params: JSONRPCParams) => Pro
 /** The handshake outcome: authenticated, or refused with the app ErrorCode (PAIRING_REQUIRED / AUTH_FAILED / ...). */
 export type ConnectOutcome =
   | ({ ok: true } & Pick<ConnectResult, "token" | "approvalCommandDisclosureRevision">)
-  | { ok: false; code: ErrorCode | null; message: string };
+  | { ok: false; code: ErrorCode | null; message: string; challenge?: LocalAuthChallenge };
 
 function appErrorCode(data: unknown): ErrorCode | null {
   if (typeof data !== "object" || data === null || !("code" in data)) return null;
@@ -189,7 +192,10 @@ export async function handshake(
     return { ok: true, token: result.token, approvalCommandDisclosureRevision: result.approvalCommandDisclosureRevision };
   } catch (error) {
     if (error instanceof JSONRPCErrorException) {
-      return { ok: false, code: appErrorCode(error.data), message: error.message };
+      const code = appErrorCode(error.data);
+      const challenge = code === "LOCAL_AUTH_REQUIRED" && typeof error.data === "object" && error.data !== null
+        && "challenge" in error.data ? LocalAuthChallengeSchema.parse(error.data.challenge) : undefined;
+      return { ok: false, code, message: error.message, ...(challenge ? { challenge } : {}) };
     }
     throw error;
   }
@@ -208,6 +214,20 @@ function avatarMethods(request: <T>(method: string, params: JSONRPCParams) => Pr
   };
 }
 
+function characterMethods(request: <T>(method: string, params: JSONRPCParams) => Promise<T>) {
+  return {
+    importCharacter: async (params: CharacterImportParams) =>
+      CharacterImportResultSchema.parse(await request(CHARACTER_METHODS.import, params)),
+    listCharacters: async () => CharacterListResultSchema.parse(await request(CHARACTER_METHODS.list, {})),
+    characterCostumes: async (characterId: string) =>
+      CharacterCostumesResultSchema.parse(await request(CHARACTER_METHODS.costumes, { characterId })),
+    costumeResolution: async (characterId: string, costume: string) =>
+      CharacterCostumeResolutionResultSchema.parse(
+        await request(CHARACTER_METHODS.costumeResolution, { characterId, costume }),
+      ),
+  };
+}
+
 export function requestMethods(rpc: JSONRPCServerAndClient, timing: () => TimingPolicy) {
   const request = <T>(method: string, params: JSONRPCParams): Promise<T> => requestWithDeadline({ rpc, timing, method, params });
   return {
@@ -220,16 +240,9 @@ export function requestMethods(rpc: JSONRPCServerAndClient, timing: () => Timing
       TimelineHistoryResultSchema.parse(await request(TIMELINE_METHODS.history, params)),
     subscribeTimeline: async (characterId: string) => void (await request(TIMELINE_METHODS.subscribe, { characterId })),
     mediaGet: async (ref: string) => MediaGetResultSchema.parse(await request(MEDIA_METHODS.get, { ref })),
-    importCharacter: async (params: CharacterImportParams) =>
-      CharacterImportResultSchema.parse(await request(CHARACTER_METHODS.import, params)),
-    listCharacters: async () => CharacterListResultSchema.parse(await request(CHARACTER_METHODS.list, {})),
-    characterCostumes: async (characterId: string) =>
-      CharacterCostumesResultSchema.parse(await request(CHARACTER_METHODS.costumes, { characterId })),
-    costumeResolution: async (characterId: string, costume: string) =>
-      CharacterCostumeResolutionResultSchema.parse(
-        await request(CHARACTER_METHODS.costumeResolution, { characterId, costume }),
-      ),
+    ...characterMethods(request),
     ...configMethods(request),
+    ...modelProfileMethods(request),
     ...readSubscriptionMethods(request),
     memoryTidy: async (characterId: string) =>
       MemoryTidyResultSchema.parse(await request(MEMORY_METHODS.tidy, { characterId })),

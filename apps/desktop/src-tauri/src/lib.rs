@@ -1,7 +1,6 @@
-//! INPUT:  Tauri app lifecycle (setup hook) + the submit_pairing_code / get_status commands from the Pet UI
-//! OUTPUT: run() — inits tracing, boots the app, selects the approver, calls node::build_node, spawns the WS task
-//! POS:    shell — the Tauri composition root (the ONLY place besides the dialog impl that touches Tauri); main.rs
-//!         is a shim; the tauri-free assembly lives in node.rs (shared with bin/taki-node)
+//! INPUT: Tauri lifecycle, selected native profile and finite operator commands.
+//! OUTPUT: Home-first application with independent retryable Node startup and native local admission.
+//! POS: shell composition root; execution assembly stays tauri-free in node.rs and main.rs remains a shim.
 
 // audit/gate/node/secrets/status/ws_client are pub: the headless taki-node bin (a separate crate root) composes
 // the same node from them; capability handlers and the wire protocol stay crate-internal.
@@ -10,16 +9,20 @@ mod browser_attachment;
 mod browser_attachment_commands;
 mod browser_playback_protocol;
 mod capabilities_impl;
+mod character_assets;
 mod exec_command_disclosure;
 pub mod gate;
 mod host_session;
 pub mod node;
+mod local_auth;
+mod local_auth_commands;
 mod protocol;
 // Public so the isolated native fixture can exercise the production adapter without booting the Node.
 pub mod qqmm;
 pub mod secrets;
 pub mod status;
 pub mod ws_client;
+mod ws_local_auth;
 
 use std::sync::{Arc, Mutex};
 
@@ -28,7 +31,7 @@ use tauri::{Emitter, Manager, State};
 use tokio::sync::mpsc;
 
 use gate::approver::{Approver, TwoStepDialogApprover};
-use secrets::{KeyringStore, SecretStore};
+use secrets::SecretStore;
 use status::StatusEmitter;
 use ws_client::WsClient;
 
@@ -95,22 +98,43 @@ pub fn run() {
         )
         .setup(|app| {
             let handle = app.handle().clone();
+            app.manage(character_assets::CharacterAssets::capture());
             let (tx, rx) = mpsc::channel::<String>(8);
             app.manage(PairingState { tx });
 
             let status = StatusHandle(Arc::new(Mutex::new("connecting".to_string())));
             app.manage(status.clone());
 
-            let client = build_client(handle.clone(), status)?;
-            app.manage(browser_attachment_commands::BrowserAttachmentHandle(client.browser_attachment.clone()));
-            // The long-lived node client runs on Tauri's tokio runtime; closing the Pet UI never stops it (invariant 4).
-            tauri::async_runtime::spawn(async move { client.run(rx).await });
+            app.manage(browser_attachment_commands::BrowserAttachmentHandle(Mutex::new(crate::browser_attachment::BrowserAttachment::disabled())));
+            // Home already exists. Retry only failed assembly; a live Node owns its own reconnect loop.
+            tauri::async_runtime::spawn(async move {
+                loop {
+                    match build_client(handle.clone(), status.clone()).map_err(|error| error.to_string()) {
+                        Ok(client) => {
+                            if let Ok(mut browser) = handle.state::<browser_attachment_commands::BrowserAttachmentHandle>().0.lock() {
+                                *browser = client.browser_attachment.clone();
+                            }
+                            client.run(rx).await;
+                            break;
+                        }
+                        Err(_) => {
+                            tracing::warn!(code = "NODE_INITIALIZATION_UNAVAILABLE", "Shell execution connection unavailable; Home remains usable");
+                            if let Ok(mut current) = status.0.lock() { *current = "unavailable".into(); }
+                        }
+                    }
+                    tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+                }
+            });
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             ping,
             submit_pairing_code,
             get_status,
+            local_auth_commands::local_core_endpoint,
+            local_auth_commands::local_operator_identity,
+            local_auth_commands::local_operator_proof,
+            character_assets::local_characters_root,
             browser_attachment_commands::browser_attachment_setup,
             browser_attachment_commands::browser_attachment_pair,
             qqmm::qqmm_open,
@@ -141,6 +165,15 @@ impl StatusEmitter for TauriStatusEmitter {
             *current = state.to_string();
         }
         let _ = self.app.emit(STATUS_EVENT, StatusPayload { state });
+        if state == "pairing-required" { show_explicit_remote_pairing(&self.app); }
+    }
+}
+
+fn show_explicit_remote_pairing(app: &tauri::AppHandle) {
+    if app.get_webview_window("main").is_some() { return; }
+    if tauri::WebviewWindowBuilder::new(app, "main", tauri::WebviewUrl::App("index.html".into()))
+        .title("TakiAgent remote connection").inner_size(480.0, 640.0).build().is_err() {
+        tracing::warn!(code = "REMOTE_PAIRING_WINDOW_UNAVAILABLE", "Remote pairing window unavailable");
     }
 }
 
@@ -150,26 +183,26 @@ fn build_client(
     status: StatusHandle,
 ) -> Result<WsClient, Box<dyn std::error::Error>> {
     let data_dir = browser_attachment_commands::data_dir(&handle)?; // Explicit isolated profile or Shell-owned default (D7).
-    let secrets = if std::env::var_os("TAKI_SHELL_DATA_DIR").is_some() {
-        use sha2::{Digest, Sha256};
-        let suffix = format!("{:x}", Sha256::digest(data_dir.to_string_lossy().as_bytes()));
-        KeyringStore::with_service(format!("TakiAgent-{}", &suffix[..24]))
-    } else { KeyringStore::new() };
+    let secrets = secrets::shell_store(&data_dir);
+    let url = std::env::var("TAKI_WS_URL").unwrap_or_else(|_| node::DEFAULT_WS_URL.to_string());
+    let local_admission = local_auth::is_local_endpoint(&url);
     let exec_cwd = resolve_exec_cwd(&handle, &data_dir);
     let emitter: Arc<dyn StatusEmitter> = Arc::new(TauriStatusEmitter {
         app: handle.clone(),
         status: status.0,
     });
-    node::build_node(node::NodeConfig {
+    let mut client = node::build_node(node::NodeConfig {
         data_dir,
         exec_cwd,
-        url: std::env::var("TAKI_WS_URL").unwrap_or_else(|_| node::DEFAULT_WS_URL.to_string()),
+        url,
         device_name: DEVICE_NAME.to_string(),
         capabilities: node::default_capabilities(),
         approver: select_approver(handle),
         secrets: Arc::new(secrets) as Arc<dyn SecretStore>,
         status: emitter,
-    })
+    })?;
+    client.local_auth = local_admission;
+    Ok(client)
 }
 
 // The approver seam (R1): the scripted approver is a permission-gate BYPASS, so it exists only in debug builds

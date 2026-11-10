@@ -26,7 +26,7 @@ const ops: OperationsView = {
   clear: { phase: "idle", error: null, onEvent: () => undefined }, refresh: read,
 };
 const costume: CostumePageView = {
-  view: { rows: [], missingPacks: [], current: null }, hasSnapshot: false, connectionReady: true,
+  view: { rows: [], missingPacks: [] }, hasSnapshot: false, connectionReady: true,
   listError: null, loading: false, refreshing: false, error: null, selected: null, pending: null,
   select: read, cancel: () => undefined, refresh: read, invalidate: read,
 };

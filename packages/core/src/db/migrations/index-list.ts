@@ -1,3 +1,6 @@
+import { modelProfilesMigration070 } from "./070-model-profiles.ts";
+import { modelProfileSecretsMigration071 } from "./071-model-profile-secrets.ts";
+import { searchProjectionPolicyMigration072 } from "./072-search-projection-policy.ts";
 /**
  * INPUT:  the numbered migration modules
  * OUTPUT: MIGRATIONS — the explicit, ordered list handed to openDatabase (no fs/glob discovery)
@@ -144,4 +147,7 @@ export const MIGRATIONS: Migration[] = [
   memoryTidyReviewsMigration067,
   maintenanceMonitorMigration068,
   delegationSchemaConvergenceMigration069,
+  modelProfilesMigration070,
+  modelProfileSecretsMigration071,
+  searchProjectionPolicyMigration072,
 ];

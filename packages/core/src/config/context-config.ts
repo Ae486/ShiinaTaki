@@ -47,7 +47,7 @@ function parseBooleanFlag(value: unknown): unknown {
 }
 
 // Env-var names ARE the schema keys so a fatal boot error names the variable the operator mistyped.
-export const ContextConfigSchema = z
+export const ContextConfigEnvironmentSchema = z
   .object({
     TAKI_PROVIDER_CONTEXT_TOKENS: windowKnob(),
     TAKI_UTILITY_CONTEXT_TOKENS: windowKnob(),
@@ -57,8 +57,9 @@ export const ContextConfigSchema = z
     TAKI_PROVIDER_INCLUDE_USAGE: z.preprocess(parseBooleanFlag, z.boolean().default(false)),
     TAKI_COMPACT_TRIGGER_RATIO: ratioKnob(DEFAULT_COMPACT_TRIGGER_RATIO),
     TAKI_COMPACT_KEEP_MESSAGES: z.coerce.number().int().positive().default(DEFAULT_COMPACT_KEEP_MESSAGES),
-  })
-  .transform((env) => ({
+  });
+
+export const ContextConfigSchema = ContextConfigEnvironmentSchema.transform((env) => ({
     contextTokens: {
       main: env.TAKI_PROVIDER_CONTEXT_TOKENS,
       utility: env.TAKI_UTILITY_CONTEXT_TOKENS,

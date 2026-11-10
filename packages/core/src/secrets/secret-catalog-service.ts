@@ -98,12 +98,14 @@ function loadInitialState(state: CatalogState): void {
   const { deps } = state;
   const catalogExists = existsSync(deps.filePath);
   if (deps.keySource === null) return; // stays locked
-  state.key = deps.keySource.read();
-  if (state.key === null && deps.keySource.canCreate && !catalogExists) {
-    // First boot only: create-only provisioning (never over an existing catalog — that stays locked).
-    state.key = generateCatalogKey();
-    deps.keySource.create(state.key);
-  }
+  try {
+    state.key = deps.keySource.read();
+    if (state.key === null && deps.keySource.canCreate && !catalogExists) {
+      // Another native creator may win. Only the durable read-back key can open this Host's catalog.
+      try { deps.keySource.create(generateCatalogKey()); } catch { /* Re-read a concurrent create-only winner. */ }
+      state.key = deps.keySource.read();
+    }
+  } catch { state.key = null; }
   if (state.key === null) return; // absent key + existing catalog = LOCKED, not a fresh store (never mint-over)
   if (!catalogExists) {
     // Fresh store: in-memory empty catalog; the file appears only on the first durable write.
@@ -152,6 +154,7 @@ function publish(state: CatalogState, next: SecretCatalogPlain, mode: "create-on
 
 function setSecret(state: CatalogState, secretRef: string, value: string): { present: true; provenance: SecretProvenance } {
   SecretRefSchema.parse(secretRef); // ref charset enforced at the service boundary too
+  if (state.health === "locked") loadInitialState(state);
   const current = requireOk(state);
   const updatedAt = new Date().toISOString();
   const next: SecretCatalogPlain = { ...current, entries: { ...current.entries, [secretRef]: { value, updatedAt } } };
@@ -161,6 +164,7 @@ function setSecret(state: CatalogState, secretRef: string, value: string): { pre
 }
 
 function clearSecret(state: CatalogState, secretRef: string): { present: false } {
+  if (state.health === "locked") loadInitialState(state);
   const current = requireOk(state);
   if (current.entries[secretRef] === undefined) return { present: false };
   const next: SecretCatalogPlain = { ...current, entries: { ...current.entries } };

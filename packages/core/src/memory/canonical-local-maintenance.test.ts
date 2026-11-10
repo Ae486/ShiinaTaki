@@ -93,6 +93,29 @@ function expectUnfinished(run: ReturnType<typeof makePass>) {
 }
 
 describe("Canonical Local tidy correction and truthful completion", () => {
+  it("captured refile and supersede use the chosen retention policy and keep existing explicit expiry", async () => {
+    const f = fresh(); const first = await f.seed({ content: "refile candidate" });
+    const second = await f.seed({ content: "replacement candidate" });
+    const existing = await f.seed({ layer: "intentions", content: "explicit deadline" });
+    const options = { intentionsDefaultDays: 6 };
+    const review = f.engine.tidy.captureReview!("taki", options);
+    options.intentionsDefaultDays = 30;
+    for (const [record, name, args] of [
+      [first, "memory_refile", { layer: "intentions" }],
+      [second, "memory_archive_supersede", { replacement: { layer: "intentions", content: "corrected intention", importance: 5 } }],
+    ] as const) {
+      const result = await invoke(review, name, { id: canonicalMemoryRow(record, "taki").id, ...args });
+      expect(result.ok).toBe(true);
+      const updated = f.records.record(f.epoch.epochId, result.bankId!, result.memoryId!)!;
+      expect(updated.policy.retention.kind === "expiring" &&
+        Date.parse(updated.policy.retention.expiresAt) - Date.parse(updated.policy.updatedAt)).toBe(6 * 86_400_000);
+    }
+    const kept = await call(review, { name: "memory_refile", callId: "preserve-expiry",
+      args: { id: canonicalMemoryRow(existing, "taki").id, layer: "intentions" } });
+    expect(kept.ok).toBe(true);
+    expect(f.records.record(f.epoch.epochId, existing.unit.bankId, existing.unit.memoryId)!.policy.retention).toEqual(existing.policy.retention);
+  });
+
   it("completes the four-step self-stale reproduction after the exact action succeeds with its returned reference", async () => {
     const fixture = fresh();
     const original = await fixture.seed();

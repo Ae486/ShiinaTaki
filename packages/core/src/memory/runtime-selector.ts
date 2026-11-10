@@ -73,7 +73,14 @@ function delegatingEngine(current: () => MemoryEngine): MemoryEngine {
     return forwardRenderedContextText(assemble, engine.assemble, engine.assemble(input));
   };
   return {
+    searchStatus: () => current().searchStatus?.() ?? { ready: true, stoplist: null },
+    reconfigureRanking: (weights) => { current().reconfigureRanking?.(weights); },
     reconcile: () => current().reconcile(),
+    reconfigureSearch: (config, signal) => {
+      const rebuild = current().reconfigureSearch;
+      if (!rebuild) throw new Error("MEMORY_CAPABILITY_UNSUPPORTED");
+      return rebuild(config, signal);
+    },
     assemble,
     createTools: (characterId, seq) => current().createTools(characterId, seq),
     createBackgroundTools: (characterId, seq) => current().createBackgroundTools(characterId, seq),

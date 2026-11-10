@@ -28,7 +28,7 @@ export interface MemoryRetentionOps {
 export interface RetentionSweeperDeps {
   ops: MemoryRetentionOps;
   /** How long an `intentions` row with no explicit `expires` may sit before it ages out (config, R13). */
-  intentionsDefaultDays: number;
+  intentionsDefaultDays: number | (() => number);
   logger: Logger;
   /** Injected epoch-ms clock (defaults to Date.now); tests pass a synthetic one. */
   now?: () => number;
@@ -36,7 +36,7 @@ export interface RetentionSweeperDeps {
   enabled?: () => boolean;
 }
 
-export function startRetentionSweeper(deps: RetentionSweeperDeps): { stop(): void } {
+export function startRetentionSweeper(deps: RetentionSweeperDeps): { stop(): void; runNow(): void } {
   const now = deps.now ?? Date.now;
   return startSweeper({
     name: "memory-retention",
@@ -48,12 +48,13 @@ export function startRetentionSweeper(deps: RetentionSweeperDeps): { stop(): voi
 }
 
 function sweepOnce(deps: RetentionSweeperDeps, at: number): SweepCounts | undefined {
+  const intentionsDefaultDays = typeof deps.intentionsDefaultDays === "function" ? deps.intentionsDefaultDays() : deps.intentionsDefaultDays;
   let archived = 0;
   let deleted = 0;
   for (const layer of V1_MEMORY_LAYERS) {
     if (layer.retention === "permanent") continue; // a permanent layer is never even listed
     for (const row of deps.ops.listActive(layer.id)) {
-      const verdict = memoryRetentionVerdict(layer.retention, row, { at, intentionsDefaultDays: deps.intentionsDefaultDays });
+      const verdict = memoryRetentionVerdict(layer.retention, row, { at, intentionsDefaultDays });
       if (verdict === "archive") {
         deps.ops.archive(row.path);
         archived += 1;

@@ -65,7 +65,7 @@ function helperSource(helperPath: string, account: string): MasterKeySource {
     kind: "key-helper",
     canCreate: true,
     read() {
-      const result = spawnSync(helperPath, ["get", "--account", account], { timeout: HELPER_TIMEOUT_MS, maxBuffer: 4096 });
+      const result = spawnSync(helperPath, ["get", "--account", account], { timeout: HELPER_TIMEOUT_MS, maxBuffer: 4096, windowsHide: true });
       if (result.error !== undefined || result.status !== 0) return null; // exit 3 (missing) and any failure lock
       const key = decodeFramedKey(result.stdout);
       return key !== null && isSecretCatalogKey(key) ? key : null;
@@ -75,6 +75,7 @@ function helperSource(helperPath: string, account: string): MasterKeySource {
         input: Buffer.from(frameKey(key)),
         timeout: HELPER_TIMEOUT_MS,
         maxBuffer: 4096,
+        windowsHide: true,
       });
       if (result.error !== undefined) {
         throw new Error(`secret key helper failed to launch (${(result.error as NodeJS.ErrnoException).code ?? "unknown"})`);

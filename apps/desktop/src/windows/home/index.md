@@ -16,6 +16,8 @@ in pages.ts. Holds no state of record (invariant 4); Core pages use the window's
 - use-home-connection.ts — independent settings-family connection, source-bound Home presence and designated User Timezone reporter, plus the last-good timing accessor
 - use-monitor-availability.ts — generation-safe typed Monitor availability, retained across transient null clients; config changes supersede stale reads and only confirmed disable redirects a requested Monitor route
 - home-client-context.ts — React context exposing the client, status, and window-owned timing accessor to settings pages (chat keeps its own socket)
+- model-profiles-controller.ts — presence-only retained model snapshots with handler-before-subscribe reads, bounded invalidation, freshness and physical-client retirement
+- use-model-profiles.ts — shared Chat/Settings React adapter; page visibility gates disposable profile reads without persisting credentials or authority
 - page-chrome.tsx — shared page frame: stable title/hint with delayed non-displacing pending indication, keyboard-scrollable content and persistent actionable errors
 - page-card.tsx — shared card/label-value chrome with optional internal row identity independent of changing display labels
 - badge.tsx — the one status-chip look, in four tones (warn / ok / neutral / muted)

@@ -17,7 +17,7 @@ import type { TimelineRepo } from "../db/timeline-repo.ts";
 import type { AutoMemoryCompact } from "../memory/auto-memory.ts";
 import type { MemoryFlushOutcome, MemoryFlushPort } from "../memory/memory-flush-port.ts";
 import { renderSafeTranscript, sanitizeCompactionText } from "./context-reduction.ts";
-import type { UtilitySlot } from "../memory/utility-slot.ts";
+import { captureUtilitySlot, type UtilitySlot } from "../memory/utility-slot.ts";
 import { COMPACTION_RETAIN_RATIO, selectRetirementRange } from "./retirement-selector.ts";
 import { loadReplaySource } from "./replay-source-loader.ts";
 import type { RequestMeasurement } from "./request-measurement.ts";
@@ -42,6 +42,7 @@ export interface CompactionLogger {
 }
 
 export interface CompactionCoordinatorDeps {
+  captureConfig?: () => CompactionCoordinatorDeps["config"];
   view: CompactionView;
   timeline: TimelineRepo;
   summaries: SummaryRepo;
@@ -109,15 +110,17 @@ export function createCompactionCoordinator(deps: CompactionCoordinatorDeps): Co
   async function maybeRun(characterId: string, correlation: CompactionCorrelation = {}): Promise<void> {
     let lease: CompactionLease | null = null;
     try {
-      const captured = capture({ deps, characterId });
+      if (deps.slot.available?.() === false) return;
+      const operation = { ...deps, config: { ...(deps.captureConfig?.() ?? deps.config) }, slot: captureUtilitySlot(deps.slot) };
+      const captured = capture({ deps: operation, characterId });
       if (!captured) return;
       const operationId = operationIdOf(captured);
       deps.operations.reconcileExpired(now().toISOString());
       const attemptAt = now();
-      if (!attemptAllowed({ deps, characterId, operationId, at: attemptAt })) return;
+      if (!attemptAllowed({ deps: operation, characterId, operationId, at: attemptAt })) return;
       const legacyFlush = deps.legacyFlush?.();
       const startedAt = now();
-      const route = modelRoute(deps.slot.model);
+      const route = modelRoute(operation.slot.model);
       const begun = deps.operations.begin({
         operationId, characterId, ...correlation, reason: "pressure",
         selectedFromSeq: captured.oldThrough + 1, selectedThroughSeq: captured.newThrough,
@@ -130,7 +133,7 @@ export function createCompactionCoordinator(deps: CompactionCoordinatorDeps): Co
       lease = begun.lease;
       const controller = new AbortController();
       controllers.set(characterId, { operationId, fence: lease.fence, controller });
-      await execute({ deps, captured, lease, controller, now, leaseMs, legacyFlush });
+      await execute({ deps: operation, captured, lease, controller, now, leaseMs, legacyFlush });
     } catch {
       if (lease) deps.operations.fail({ lease, code: "COMPACTION_INTERNAL_ERROR", now: now().toISOString() });
       deps.logger.warn({ characterId, code: "COMPACTION_INTERNAL_ERROR" }, "compaction pass failed; will retry");

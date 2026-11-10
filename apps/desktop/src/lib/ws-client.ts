@@ -10,6 +10,8 @@ import type { SubagentActivity, SubagentChanged } from "@taki/shared";
 import type { SubagentMethods } from "./ws-client-subagents.ts";
 import type { CacheUsageMethods } from "./ws-client-cache-usage.ts";
 import type { MaintenanceMonitorMethods } from "./ws-client-maintenance-monitor.ts";
+import type { ModelProfileMethods } from "./ws-client-model-profiles.ts";
+import type { ModelProfilesChanged } from "@taki/shared";
 import type { MaintenanceMonitorUpdate } from "@taki/shared";
 import type { CacheUsageUpdate } from "@taki/shared";
 import { addSubagentChangedHandler, addSubagentActivityHandler } from "./ws-client-routes.ts";
@@ -125,7 +127,8 @@ import { sendChatTurn, type ChatHandlers } from "./ws-chat-turn.ts";
 
 export type { ChatHandlers, ConnectOutcome };
 
-export interface WsClient extends MemoryOperationMethods, UserTimezoneMethods, PresenceMethods, InitiativeMethods, CoWatchingMethods, SubagentMethods, CacheUsageMethods, MaintenanceMonitorMethods {
+export interface WsClient extends MemoryOperationMethods, UserTimezoneMethods, PresenceMethods, InitiativeMethods, CoWatchingMethods, SubagentMethods, CacheUsageMethods, MaintenanceMonitorMethods, ModelProfileMethods {
+  onModelProfilesChanged(handler: (change: ModelProfilesChanged) => void): () => void;
   onMaintenanceMonitorChanged(handler: (update: MaintenanceMonitorUpdate) => void): () => void;
   onCacheUsageChanged(handler: (update: CacheUsageUpdate) => void): () => void;
   onSubagentChanged(handler: (change: SubagentChanged) => void): () => void;
@@ -338,6 +341,10 @@ export function createWsClient(deps: WsClientDeps): WsClient {
 
 function pushRegistrations(state: ReturnType<typeof createRoutes>) {
   return {
+    onModelProfilesChanged: (handler: (change: ModelProfilesChanged) => void) => {
+      state.push.modelProfiles.add(handler);
+      return () => { state.push.modelProfiles.delete(handler); };
+    },
     onMaintenanceMonitorChanged: (handler: (update: MaintenanceMonitorUpdate) => void) => {
       state.push.maintenanceMonitor.add(handler);
       return () => { state.push.maintenanceMonitor.delete(handler); };

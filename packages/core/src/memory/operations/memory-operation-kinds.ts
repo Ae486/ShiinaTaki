@@ -8,6 +8,7 @@ import type { MemoryOperationKindHandler } from "./memory-operation-contract.ts"
 import { replicaSyncKind } from "./memory-operation-kind-replica.ts";
 import { setupApplyKind, setupValidateKind } from "./memory-operation-kind-setup.ts";
 import { tidyKind } from "./memory-operation-kind-tidy.ts";
+import { indexRebuildKind } from "./memory-operation-kind-index.ts";
 
 export type MemoryOperationKindRegistry = {
   [K in MemoryOperationKind]: MemoryOperationKindHandler<Extract<MemoryOperationRequest, { kind: K }>>;
@@ -18,6 +19,7 @@ export const MEMORY_OPERATION_KINDS: MemoryOperationKindRegistry = {
   "setup.apply": setupApplyKind,
   "replica.sync": replicaSyncKind,
   tidy: tidyKind,
+  "index.rebuild": indexRebuildKind,
 };
 
 /** Erases the per-kind request narrowing at the dispatch boundary; the service only ever passes a request of the matching kind. */

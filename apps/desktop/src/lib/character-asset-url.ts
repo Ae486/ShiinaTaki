@@ -7,15 +7,14 @@
  *         of renderer/ (framework-free). A null resolve = the caller STRIPS the ref: `..` never reaches convertFileSrc.
  */
 
-import { convertFileSrc } from "@tauri-apps/api/core";
-import { homeDir, join } from "@tauri-apps/api/path";
+import { convertFileSrc, invoke } from "@tauri-apps/api/core";
+import { join } from "@tauri-apps/api/path";
 import type { CharacterCostumesResult } from "@taki/shared";
 
-// The Workspace characters/ layout written by Phase A's character-store:
-// <home>/.takiagent/workspace/characters/<characterId>/<costume>/<settingsFile>. The asset-protocol scope in
-// tauri.conf.json ($HOME/.takiagent/workspace/characters/**/*) MUST stay in step with these segments.
+// Native code selects the profile and grants its exact characters subtree. These segments stay relative to it;
+// neither a remote Core nor a renderer-provided path can choose another filesystem scope.
 export function costumeSettingsSegments(characterId: string, costume: string, settingsFile: string): string[] {
-  return [".takiagent", "workspace", "characters", characterId, costume, settingsFile];
+  return [characterId, costume, settingsFile];
 }
 
 // The manifest filename per costume comes from the Core (never guessed); an unknown costume resolves to null.
@@ -70,7 +69,7 @@ export async function costumeAssetResolver(deps: {
   settingsFile: string;
   resolution: Record<string, string | null>; // from character.costumeResolution ({} for a self-contained costume)
 }): Promise<CostumeAssetResolver> {
-  const charactersDir = await join(await homeDir(), ".takiagent", "workspace", "characters");
+  const charactersDir = await invoke<string>("local_characters_root");
   const costumeDir = await join(charactersDir, deps.characterId, deps.costume);
   const settingsUrl = convertFileSrc(await join(costumeDir, deps.settingsFile));
   const resolve = (relPath: string): string | null => {
@@ -90,6 +89,7 @@ function joinResolved(root: string, segments: string[]): string {
 
 /** Composes the absolute Workspace path for a costume's settings file, then a webview-loadable asset URL. */
 export async function characterCostumeUrl(characterId: string, costume: string, settingsFile: string): Promise<string> {
-  const absolute = await join(await homeDir(), ...costumeSettingsSegments(characterId, costume, settingsFile));
+  const root = await invoke<string>("local_characters_root");
+  const absolute = await join(root, ...costumeSettingsSegments(characterId, costume, settingsFile));
   return convertFileSrc(absolute);
 }

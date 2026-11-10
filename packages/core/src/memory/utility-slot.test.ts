@@ -19,6 +19,27 @@ function slot(config?: UtilityConfig | null) {
 }
 
 describe("utility slot model resolution (T5-R11)", () => {
+  it("starts unavailable, refuses without usage, and preserves admitted bindings through queue wait and disable", async () => {
+    let model: LanguageModel | undefined;
+    const { logger } = createCaptureLogger();
+    const utility = createUtilitySlot({ resolveModel: () => model, logger });
+    const task = vi.fn(async () => true);
+    await expect(utility.run("unavailable", task)).rejects.toThrow("MODEL_UNAVAILABLE");
+    expect(task).not.toHaveBeenCalled(); expect(utility.usage().calls).toBe(0);
+    model = generatingModel("old"); const old = model;
+    const admitted = utility.capture!();
+    let release!: () => void;
+    const blocker = utility.run("hold", () => new Promise<void>((done) => { release = done; }));
+    const queued = admitted.run("queued", async () => utility.model);
+    await vi.waitFor(() => expect(release).toBeTypeOf("function"));
+    model = generatingModel("new"); const fresh = utility.capture!();
+    model = undefined;
+    release(); await blocker;
+    expect(await queued).toBe(old);
+    expect(await fresh.run("new", async () => utility.model)).not.toBe(old);
+    expect(utility.available?.()).toBe(false);
+    await utility.stop();
+  });
   it("falls back to the MAIN model when no utility slot is configured", () => {
     const h = slot();
     expect(h.slot.model).toBe(h.mainModel);

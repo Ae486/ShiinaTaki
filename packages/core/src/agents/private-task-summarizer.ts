@@ -4,7 +4,7 @@
  * POS: core/agents — private task continuity only, with no relationship Memory or Timeline callbacks
  */
 import { generateText, wrapLanguageModel } from "ai";
-import type { UtilitySlot } from "../memory/utility-slot.ts";
+import { captureUtilitySlot, type UtilitySlot } from "../memory/utility-slot.ts";
 import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 import { createModelEffectMiddleware } from "./model-effect-middleware.ts";
 
@@ -12,13 +12,15 @@ export interface PrivateTaskSummaryRequest {
   previous: string | null; transcript: string; targetSummaryTokens?: number; signal?: AbortSignal;
 }
 export interface PrivateTaskSummaryOutput { text: string; finishReason?: string }
-export type PrivateTaskSummarizer = (input: PrivateTaskSummaryRequest) => Promise<PrivateTaskSummaryOutput | undefined>;
+export type PrivateTaskSummarizer = ((input: PrivateTaskSummaryRequest) => Promise<PrivateTaskSummaryOutput | undefined>) & {
+  capture?(): PrivateTaskSummarizer;
+};
 
 export function createPrivateTaskSummarizer(input: {
   utility: UtilitySlot; lifecycle: EffectLifecycleService; runId: string; attemptId(): string;
   assertCurrent(): void; signal?: AbortSignal;
 }): PrivateTaskSummarizer {
-  return (request) => input.utility.run("private-task-summary", async () => {
+  const summarize: PrivateTaskSummarizer = (request) => input.utility.run("private-task-summary", async () => {
     input.assertCurrent();
     if (typeof input.utility.model === "string") throw new Error("SUBAGENT_SUMMARY_MODEL_UNRESOLVED");
     const model = wrapLanguageModel({ model: input.utility.model, middleware: createModelEffectMiddleware({
@@ -32,6 +34,8 @@ export function createPrivateTaskSummarizer(input: {
       prompt: `Previous task summary:\n${request.previous ?? "(none)"}\n\nCompleted private action rounds:\n${request.transcript}`,
       abortSignal: AbortSignal.any(signals), maxRetries: 0 });
   });
+  summarize.capture = () => createPrivateTaskSummarizer({ ...input, utility: captureUtilitySlot(input.utility) });
+  return summarize;
 }
 
 export const PRIVATE_TASK_SUMMARY_INSTRUCTIONS = `Summarize completed private task work for the same delegated worker.

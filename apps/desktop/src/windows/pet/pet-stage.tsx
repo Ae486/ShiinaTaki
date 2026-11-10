@@ -26,6 +26,7 @@ import { useRenderGovernor } from "./use-render-governor.ts";
 import { useClickThrough } from "./use-click-through.ts";
 import { useInitialCostume } from "./use-initial-costume.ts";
 import { useCostumeSwitchEvent } from "./use-costume-switch-event.ts";
+import { useCostumeSceneObserver } from "./use-costume-scene-observer.ts";
 import { useSurfacePresence } from "@/features/presence/use-surface-presence.js";
 import { CommittedExposureContext } from "@/features/presence/committed-exposure-context.js";
 
@@ -46,6 +47,7 @@ export function PetStage() {
   useCoreConnection(scene);
   useInitialCostume(scene);
   useCostumeSwitchEvent(scene);
+  useCostumeSceneObserver(scene);
   const approvalDialog = useApprovalDialog(client);
   const presence = useSurfacePresence(client, "pet");
 

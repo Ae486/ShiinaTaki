@@ -29,6 +29,24 @@ nullable progress/usage contracts. Per-call usage must disclose missing coverage
 - Writes do not take the push path as their source of truth: a `config.set` applies its own server echo
   (`applyStored`), a `perception.pauseSet` returns the resulting server state — pushes only keep the
   list honest between writes.
+- Scalar configuration echoes use `effectiveValue`, `origin` and `application` when present. A reset cannot infer
+  the environment fallback from the built-in default; older-Core reset acknowledgements require a covering read.
+  `config.changed` also covers application completion, so a visible observer reconciles the full projection with
+  the existing one-flight/trailing-read coordinator. A delayed save echo must not regress a newer application observation.
+
+### Model configuration and dependency-scoped Chat
+
+- Main/Utility use the Shared `config.modelProfiles*` family, separate from scalar fields. Register invalidation
+  handlers before subscription acknowledgement and list reads. Retain last-confirmed presence-only data across
+  disconnects and read failures; only a current covering read or accepted current save echo is fresh.
+- The editor retains local input across reconnect, visibility changes and competing revisions. Saved incomplete
+  drafts are Core-owned and survive reopen; plaintext key input is never a read result or persisted browser cache.
+- One Save action selects draft for incomplete configured input and apply for complete/disabled/inherited input.
+  Optional Test sends the current unsaved form only on explicit cost-labelled action; saving never calls the model.
+- Serialize saves/tests per editor, use expected revisions, and retain input on conflict. Unknown acknowledgements
+  block resubmission until a fresh read reconciles the state; reconnect does not repeat a write or a test.
+- Main readiness affects new Chat messages. History, navigation and configuration remain mounted and useful;
+  active-model availability, saved-draft/application failure and actual test outcomes are distinct UI facts.
 
 ## (b) Each resource has an entry, change, demand and recovery policy
 

@@ -10,7 +10,7 @@ import { z } from "zod";
 export const UtilityConfigSchema = z
   .object({
     TAKI_UTILITY_BASE_URL: z.string().min(1),
-    TAKI_UTILITY_API_KEY: z.string().min(1),
+    TAKI_UTILITY_API_KEY: z.string().min(1).optional(),
     TAKI_UTILITY_MODEL: z.string().min(1),
   })
   .transform((env) => ({

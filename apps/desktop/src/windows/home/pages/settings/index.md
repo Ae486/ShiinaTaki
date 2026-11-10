@@ -1,4 +1,11 @@
 # windows/home/pages/settings/
+- model-profiles-section.tsx — grouped Main/Utility profiles at the Settings entry, using actual Home connection and demand reads
+- model-profile-card.tsx — coherent saved/active model status, retained inputs, one Save action and explicit cost-labelled test/reset actions
+- model-profile-fields.tsx — labelled endpoint/model/authentication fields and distinct Utility inherit/configured/disabled choices
+- model-profile-form.ts — draft projection, completeness/endpoint-bound secret presence and concise application feedback
+- model-profile-editor-controller.ts — local draft/focus/composition ownership, CAS save/test and read-first unknown acknowledgement recovery without replay
+- use-model-profile-editor.ts — React editor lifetime binding; secret input stays ephemeral and successful current submissions clean only matching edits
+- config-application-view.ts — Core-reported scalar source/application badges, boundary copy and retained active values on failures
 - model-capabilities-section.tsx — accessible configured MAIN model information, declared source/activation guidance and distinct connection-native versus application-tool search availability
 - model-catalog-summary.tsx — catalog display/provider names with the original configured model ID, brand icon and concise tool/image/reasoning/modality declarations
 - model-catalog-details.tsx — collapsed provider/canonical identity and token limits, explicitly separate from effective runtime settings
@@ -7,7 +14,7 @@
 - user-timezone-section.tsx — fixed/follow-this-device User Timezone controls, retained draft and current confirmation/refusal truth
 The Settings page: Core-owned permission governance appears before generic config knobs. Permission state is fresh per
 authenticated Home client generation and window-memory-only; config remains the guarded cached metadata surface.
-- settings-page.tsx — page root: permission governance, durable Approval management, then the knob list regrouped client-side (U7) into fixed Chinese sections with a key/label/description search box; Core order inside a group is preserved and no knob is removed or hidden
+- settings-page.tsx — page root: grouped model profiles, permission governance, durable Approval management and searchable scalar sections; six legacy connection fields are represented by profiles instead of duplicated controls
 - config-groups.ts — Chinese labels and grouping for primary/utility model, perception and runtime settings; no separate vision model controls
 - approval-decisions-section.tsx — fresh Core durable-allow list, current-client revoke readiness, retry, and no-cache presentation
 - approval-decision-row.tsx — safe operation/target names with Shared fallbacks, creation time, Core-owned usability and exact decision-id revoke binding
@@ -23,7 +30,7 @@ authenticated Home client generation and window-memory-only; config remains the 
 - knob-field.tsx — stable knob row with reserved pending, check-in application guidance, one retained field-error path and observed conflict/unsaved-draft controls
 - knob-input.tsx — the editor itself: checkbox / select / text / number per input.kind, or a secret's set-not-set readout; controls carry the tokenized control class and the knob key as accessible name
 - knob-editor.ts — pure metadata→editor mapping (kind, disabled + reason, bounds, secret set/not-set) + input parsing
-- config-observer.ts — handler-before-subscription/read observation, hidden gap coverage and per-field observed change epochs
+- config-observer.ts — handler-before-subscription/read observation, hidden gap coverage and bounded covering reads for source/application changes
 - config-save-controller.ts — per-key write serialization, explicit outcomes and suppression of retired or superseded echoes
 - knob-draft-controller.ts — local draft/focus/composition ownership, deliberate conflict resolution and matching-save clean transitions
 - use-knob-draft.ts — React adapter for field-local editing and explicit save actions

@@ -26,7 +26,10 @@ import {
 import { createFallbackPersonaProvider, type PersonaProvider } from "./persona-provider.ts";
 import type { MemoryRetentionOps } from "./retention-sweeper.ts";
 import type { Retriever } from "./retriever.ts";
-import { createIntlSegmenterTokenizer, type SearchTokenizer } from "./search-tokenizer.ts";
+import type { SearchTokenizer } from "./search-tokenizer.ts";
+import { createLiveSearchTokenizer } from "./live-search-tokenizer.ts";
+import { legacySearchProjection } from "./legacy-search-projection.ts";
+import { rebuildSearchProjection } from "./search-projection-rebuild.ts";
 import { createMemoryStore, type MemoryStore } from "./store.ts";
 import { createTidyTools, type TidyToolOps } from "./tidy-tools.ts";
 import type { ToolSet } from "ai";
@@ -53,6 +56,7 @@ export interface TidyReviewOutcome {
 export interface TidyReviewOptions {
   onEdits?: (edits: number) => void;
   modelReferences?: boolean;
+  intentionsDefaultDays?: number;
 }
 
 /** The tidy pass's engine surface (batch 4b): deterministic report reads + the maintenance toolset. */
@@ -80,10 +84,14 @@ export interface TidyEngineView {
 }
 
 export interface MemoryEngine {
+  searchStatus?(): { ready: boolean; stoplist: boolean | null };
+  reconfigureRanking?(weights: MemoryConfig["bm25Weights"]): void;
+  reconfigureSearch?(config: Pick<MemoryConfig, "stoplist" | "bm25Weights">, signal?: AbortSignal): Promise<{ indexed: number }>;
   /** Startup reconciliation: rebuild the derived index from the files (files are truth). */
   reconcile(): ReconcileStats;
   /** The per-turn assembled context string (persona + emotion + blocks + pinned + intention) — deterministic push only. */
   assemble(params: AssembleParams): string;
+  captureAssembly?(characterId: string): (currentMessage: string) => string;
   /** Optional compatibility seam: freeze Persona and explicit scope Blocks without primary recall/pinned/intention logic. */
   captureInitiative?(characterId: string): InitiativeMemoryAssembler;
   /** characterId-bound memory tools for one chat stream; `seq` overrides the engine's timeline for the event log. */
@@ -106,6 +114,9 @@ export interface MemoryEngineDeps {
   blocks?: BlockStore;
   /** The memory subsystem's tunable numbers (T5-R13): pinned budget, bm25 weights, stoplist. Absent = defaults. */
   config?: MemoryConfig;
+  captureConfig?: () => MemoryConfig;
+  captureAssemblyConfig?: () => MemoryConfig;
+  searchPolicy?: SearchPolicyBinding;
   /** Turn context for the memory event log — a NARROW structural type (zero coupling to the timeline module). It is
    *  the DEFAULT seq source because the chat path builds its tools inside the D1-frozen turn, which passes no getter. */
   timeline?: { latestSeq(characterId: string): number };
@@ -113,11 +124,18 @@ export interface MemoryEngineDeps {
   tokenizer?: SearchTokenizer;
 }
 
+/** Production composition supplies the committed policy; standalone engines may inject their own tokenizer. */
+export interface SearchPolicyBinding {
+  appliedStoplist: boolean | null;
+  commit(stoplist: boolean): void;
+}
+
 export function createMemoryEngine(deps: MemoryEngineDeps): MemoryEngine {
   const store = createMemoryStore({ root: deps.memoryRoot });
   const repo = createMemoryRepo(deps.db, deps.config?.bm25Weights);
   // ONE tokenizer instance for the whole subsystem: the index side and the query side must segment identically.
-  const tokenizer = deps.tokenizer ?? createIntlSegmenterTokenizer({ stoplist: deps.config?.stoplist ?? true });
+  const search = createLiveSearchTokenizer(deps.searchPolicy ? deps.searchPolicy.appliedStoplist : deps.config?.stoplist ?? true, deps.tokenizer);
+  const { tokenizer } = search;
   const index: IndexDeps = { repo, tokenizer };
   // Created here rather than injected: the engine already owns the db, so the write path can never ship unwired.
   const events = createMemoryEventsRepo(deps.db);
@@ -128,22 +146,35 @@ export function createMemoryEngine(deps: MemoryEngineDeps): MemoryEngine {
     repo,
     persona: deps.persona ?? createFallbackPersonaProvider(),
     blocks: deps.blocks,
-    pinnedBudget: deps.config?.pinnedBudget ?? DEFAULT_PINNED_BUDGET,
+    pinnedBudget: () => (deps.captureAssemblyConfig ?? deps.captureConfig)?.().pinnedBudget ?? deps.config?.pinnedBudget ?? DEFAULT_PINNED_BUDGET,
   });
   const turnSeq = (characterId: string): TurnSeqGetter => () => deps.timeline?.latestSeq(characterId);
 
   // The write path is file-first, then index (a crash between the two heals at the next startup reconcile).
   const ops = buildToolOps({ store, index, events, repo, retriever });
   const tidy = createTidyView({ repo, store, index, ops, blocks: deps.blocks });
+  const assertSearch = () => { if (!search.ready()) throw new Error("MEMORY_SEARCH_INDEX_UNAVAILABLE"); };
 
   return {
-    reconcile: () => reconcile({ repo, tokenizer, store }),
+    searchStatus: () => ({ ready: search.ready(), stoplist: search.appliedStoplist() }),
+    reconfigureRanking: (weights) => repo.reconfigureWeights?.(weights),
+    reconfigureSearch: async (config, signal) => {
+      const result = await search.reconfigure(config.stoplist, (candidate, publish) => rebuildSearchProjection({
+        db: deps.db, source: legacySearchProjection({ db: deps.db, store, repo, tokenizer: search.ready() ? tokenizer : candidate }), tokenizer: candidate,
+        assertCurrent: () => { signal?.throwIfAborted(); }, publish, signal,
+        commitPolicy: () => deps.searchPolicy?.commit(config.stoplist),
+      }));
+      return result;
+    },
+    reconcile: () => { assertSearch(); return reconcile({ repo, tokenizer, store }); },
     assemble: assembler.assemble,
+    captureAssembly: assembler.capture,
     captureInitiative: assembler.captureInitiative,
-    createTools: (characterId, seq) => createMemoryTools(ops, characterId, seq ?? turnSeq(characterId)),
-    createBackgroundTools: (characterId, seq) =>
-      createBackgroundMemoryTools(ops, characterId, seq ?? turnSeq(characterId)),
-    writeEntry: (input) => ops.writeEntry(input),
+    createTools: (characterId, seq) => { assertSearch(); return createMemoryTools(ops, characterId, seq ?? turnSeq(characterId)); },
+    createBackgroundTools: (characterId, seq) => {
+      assertSearch(); return createBackgroundMemoryTools(ops, characterId, seq ?? turnSeq(characterId));
+    },
+    writeEntry: (input) => { assertSearch(); return ops.writeEntry(input); },
     // Same file-first-then-index discipline as every other write path; the POLICY lives in retention-sweeper.ts.
     retention: {
       listActive: (layer) => repo.listActiveInLayer(layer),

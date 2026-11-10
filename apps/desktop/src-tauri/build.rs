@@ -9,6 +9,10 @@ fn main() {
         tauri_build::AppManifest::new().commands(&[
             "ping",
             "get_status",
+            "local_core_endpoint",
+            "local_operator_identity",
+            "local_operator_proof",
+            "local_characters_root",
             "browser_attachment_setup",
             "browser_attachment_pair",
             "submit_pairing_code",

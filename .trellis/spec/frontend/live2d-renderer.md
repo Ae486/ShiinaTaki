@@ -117,7 +117,18 @@ those events; a deferred read (microtask/timeout) after `beforeModelUpdate` sees
 
 - The governor OWNS the ticker: create the PixiJS app with `autoStart:false` and let the governor call `ticker.start()/stop()` + set `maxFPS`. Never let a Live2D model update on an unstarted `Ticker.shared` while the app runs a different ticker — that was the spike's "blink doesn't run" bug. Bind the model explicitly to the governed ticker.
 - Tiers: full fps while active/interacting; throttle on window blur (`getCurrentWindow().onFocusChanged`); STOP on `visibilitychange` hidden (minimize) — provable via a frame-count assertion (0 frames while hidden, resumes on unhide). "Paused when covered by another window" is NOT achievable (no verified Tauri/DOM occlusion API) — scope it out, don't fake it.
-- Gate the whole thing on a `renderThrottling` flag (default true); off ⇒ always full-rate, never paused. The flag's real config wiring is deferred (D19 → M5 #24); #14-era code reads a local default.
+- Bind native focus events before reading `getCurrentWindow().isFocused()` on each governor lifetime. A Pet that
+  starts/reloads unfocused must enter the existing blur tier without waiting for another focus event. Events after
+  the read starts supersede that seed; disposed reads/callbacks cannot update the governor, and a registration
+  resolving after disposal must immediately unlisten exactly once. A failed native read leaves a breadcrumb and
+  uses current DOM focus only if no newer native event exists. Add no focus polling or duplicate observers.
+- Renderable content is an independent prerequisite: construct a model-less Pet governor with `renderable=false`
+  before its first apply. No focus/activity/visibility/throttling change may start that empty ticker. Successful
+  attachment refreshes the alpha mask before `setRenderable(true)`; disposal pauses it again. Loading a replacement
+  preserves the old attached model and its renderability until the new one succeeds.
+- Gate loaded-model tiers on `renderThrottling` (default true); off keeps attached content full-rate, including
+  hidden/asleep states, but never starts an empty scene. The flag's real config wiring is deferred
+  (D19 → M5 #24); #14-era code reads a local default.
 
 ## Window geometry persistence (decided #14)
 

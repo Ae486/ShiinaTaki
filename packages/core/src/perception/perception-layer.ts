@@ -8,7 +8,7 @@ import type { NativeImageContext } from "../agents/native-image-context.ts";
 import { createActivityLayer, ACTIVITY_POLL_MS, type ActivityLayer } from "../activity/activity-layer.ts";
 import { renderActivityContext } from "../activity/render-activity.ts";
 import type { RouteResult } from "../capabilities/route-capability.ts";
-import type { AmbientScreenshotConfig } from "../config/ambient-screenshot-config.ts";
+import type { AmbientRetention, AmbientScreenshotConfig } from "../config/ambient-screenshot-config.ts";
 import type { Logger } from "../logging/logger.ts";
 import {
   createAmbientScreenshotSampler,
@@ -64,6 +64,10 @@ export interface PerceptionLayer {
   evidence: PerceptionEvidence;
   /** Start every ambient sampler + the retention sweeper (one call from the composition root). */
   start(): void;
+  /** Apply the ambient feature's own policy while retaining other Sampling producers. */
+  reconfigureAmbient(config: AmbientScreenshotConfig): void;
+  ambientEnabled(): boolean;
+  ambientGeneration(): number;
   /** Retire projection interest/deadlines and stop sampler schedules at Core shutdown. */
   dispose(): void;
   /** The fenced ambient prompt sections (activity + screen), joined; "" when nothing is reportable. */
@@ -164,20 +168,43 @@ export function createPerceptionLayer(deps: PerceptionLayerDeps): PerceptionLaye
 
 type PerceptionParts = Pick<PerceptionLayer, "pause" | "isSensitive" | "activity" | "screen" | "ambient" | "changes" | "evidence">;
 
+function sameRetention(left: AmbientRetention, right: AmbientRetention): boolean {
+  if (left.mode !== right.mode) return false;
+  return left.mode !== "delete-after-days" || (right.mode === "delete-after-days" && left.ttlMs === right.ttlMs);
+}
+
 function completeLayer(parts: PerceptionParts, deps: PerceptionLayerDeps, store: AmbientShotStore): PerceptionLayer {
   const { activity, ambient, screen, evidence } = parts;
   const cardDeps = cardDepsOf(parts);
+  let config = { ...deps.ambient, retention: { ...deps.ambient.retention } };
+  let started = false;
+  let disposed = false;
+  let gc: { stop(): void } | undefined;
   return {
     ...parts,
     start() {
+      if (started || disposed) return;
+      started = true;
       // Sweep crash leftovers before any capture can become pending/in-use native evidence.
-      startAmbientShotGc({ store, retention: deps.ambient.retention, logger: deps.logger });
+      gc = startAmbientShotGc({ store, retention: config.retention, logger: deps.logger });
       activity.sampler.start();
       ambient.start();
       // Retention runs regardless of the enable flag: frames captured before ambient sensing was switched off must
       // still expire. `keep` schedules nothing at all.
     },
-    dispose: () => disposePerception(parts),
+    reconfigureAmbient(next) {
+      if (disposed) return;
+      const retentionChanged = !sameRetention(next.retention, config.retention);
+      config = { ...next, retention: { ...next.retention } };
+      ambient.reconfigure(ambientConfigOf(next));
+      if (started && retentionChanged) {
+        gc?.stop();
+        gc = startAmbientShotGc({ store, retention: next.retention, logger: deps.logger });
+      }
+    },
+    ambientEnabled: () => config.enabled,
+    ambientGeneration: () => ambient.generation(),
+    dispose: () => { if (disposed) return; disposed = true; gc?.stop(); disposePerception(parts); },
     acquireScreenInput() { evidence.generation(); return screen.acquire(); },
     renderContext: (now) => {
       evidence.generation();

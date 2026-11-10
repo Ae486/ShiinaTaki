@@ -94,6 +94,7 @@ export type { TurnUsageReport } from "./turn-usage-report.ts";
 
 /** Immutable-by-contract resources captured once before a Run's first model attempt and shared by every retry. */
 export interface AgentRunContext {
+  readonly runtime?: import("./agent-runtime-binding.ts").AgentRuntimeBinding;
   readonly toolDisclosure?: ToolDisclosureSnapshot;
   readonly selectedContext?: InitiativeSelectedContext;
   readonly tools?: ToolSet;
@@ -112,7 +113,8 @@ export interface AgentRunContext {
 
 /** model + store + memory are injected so tests supply a MockLanguageModelV4 and a tmp-workspace engine (no network/disk deps). */
 export interface ChatAgentDeps {
-  model: LanguageModel;
+  model?: LanguageModel;
+  historyBudget?: () => number;
   store: ConversationStore;
   memory: MemoryEngine;
   /** Authority-selected memory procedure prompt; canonical Local must not advertise retired Markdown tool names. */
@@ -217,6 +219,9 @@ interface AttemptState {
 }
 
 async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: TurnContext): AsyncIterable<string> {
+  const capturedContext = turn?.runContext ?? deps.runContext?.(turn);
+  if (capturedContext?.runtime) deps = { ...deps, ...capturedContext.runtime };
+  if (!deps.model) throw new Error("MODEL_UNAVAILABLE");
   const { store, approval } = deps;
   const { characterId, message } = params;
   const attachments = params.attachments ?? [];
@@ -226,7 +231,7 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
   const images = primary && imageStore
     ? attachments.map((a) => ({ mediaType: a.mediaType, ref: imageStore.save(a.dataBase64, a.mediaType).ref }))
     : [];
-  const runContext = turn?.runContext ?? deps.runContext?.(turn);
+  const runContext = capturedContext;
   const ownsRunContext = turn?.runContext === undefined;
   try {
     // Admission identity is captured before the atomic initial write and remains unchanged across retries.

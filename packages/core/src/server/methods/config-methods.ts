@@ -19,11 +19,12 @@ export interface ConfigMethodDeps {
   writer: ConfigWriter;
   subscriptions: ConfigSubscriptions;
   logger: Logger;
+  activeModel?: () => { baseUrl: string; modelId: string } | undefined;
 }
 
 export function registerConfigMethods(registry: MethodRegistry, deps: ConfigMethodDeps): void {
   registry.register(configListMethod(deps.source));
-  registry.register(configModelCapabilitiesMethod(deps.source));
+  registry.register(configModelCapabilitiesMethod(deps.source, deps.activeModel));
   registry.register(configSetMethod({ writer: deps.writer, logger: deps.logger }));
   registry.register(configSubscribeMethod(deps.subscriptions));
 }

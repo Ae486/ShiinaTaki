@@ -12,7 +12,7 @@ export type EditorKind = "boolean" | "int" | "number" | "string" | "enum" | "sec
 
 export interface KnobEditor {
   kind: EditorKind;
-  /** env-locked and secret knobs are read-only on this surface (the server refuses them anyway — fail closed twice). */
+  /** Only bootstrap and secret settings are read-only; ordinary environment values are editable fallbacks. */
   disabled: boolean;
   /** Why the editor is disabled, or null when it is editable. */
   disabledReason: string | null;
@@ -27,11 +27,9 @@ export function editorFor(entry: ConfigEntry): KnobEditor {
   const kind: EditorKind = entry.secret ? "secret" : entry.input.kind;
   const disabledReason = entry.secret
     ? "密钥存于系统凭据管理器"
-    : entry.envLocked
-      ? "环境变量锁定"
-      : entry.apply === "env-only"
+    : entry.apply === "env-only"
         ? "启动前读取，仅环境变量"
-        : null;
+      : null;
   return {
     kind,
     disabled: disabledReason !== null,

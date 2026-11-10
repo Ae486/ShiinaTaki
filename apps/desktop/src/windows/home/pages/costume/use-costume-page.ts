@@ -13,7 +13,6 @@ import {
   requestCostumeCancel,
   requestCostumeSwitch,
 } from "@/lib/costume-switch-event.js";
-import { loadLastCostume } from "@/lib/last-costume.js";
 import { useCachedFetch } from "@/lib/use-cached-fetch.js";
 import { useTauriEvent } from "@/lib/use-tauri-event.js";
 import { useHomeClient } from "../../home-client-context.ts";
@@ -21,8 +20,9 @@ import { usePageActive } from "../../page-visibility-store.ts";
 import { costumeListView, type CostumeListView } from "./costume-view.ts";
 import { IDLE, reduceCostumeSelect, type CostumeSelectAction } from "./costume-select-state.ts";
 import { startCostumeResultDeadline } from "./costume-result-deadline.ts";
+import { useCostumeSceneObservation } from "./use-costume-scene-observation.ts";
 
-const EMPTY: CostumeListView = { rows: [], missingPacks: [], current: null };
+const EMPTY: CostumeListView = { rows: [], missingPacks: [] };
 
 export interface CostumePageView {
   view: CostumeListView;
@@ -58,9 +58,15 @@ function useResultDeadline(
   }, [pending, dispatch, currentTimingPolicy]);
 }
 
-function applyCostumeResult(payload: unknown, actions: { dispatch: Dispatch<CostumeSelectAction>; invalidate(): Promise<void> }): void {
+function applyCostumeResult(payload: unknown, actions: {
+  dispatch: Dispatch<CostumeSelectAction>; invalidate(): Promise<void>; observe(): void;
+}): void {
   handleCostumeResult(payload, {
-    apply: (result) => { actions.dispatch({ kind: "result", result }); void actions.invalidate(); },
+    apply: (result) => {
+      actions.dispatch({ kind: "result", result });
+      if (result.phase === "succeeded") actions.observe();
+      void actions.invalidate();
+    },
     warn: (message, dropped) => console.warn(message, dropped),
   });
 }
@@ -73,13 +79,16 @@ export function useCostumePage(): CostumePageView {
   const costumes = useCachedFetch("costume-list", load, { schema: CharacterCostumesResultSchema, persist: true, enabled: visible });
   const [state, dispatch] = useReducer(reduceCostumeSelect, IDLE);
   const { pending } = state;
+  const observation = useCostumeSceneObservation({ visible, dispatch, currentTimingPolicy });
 
   const view = useMemo(
-    () => (costumes.data ? costumeListView(costumes.data, loadLastCostume(ACTIVE_CHARACTER_ID, localStorage)) : EMPTY),
+    () => (costumes.data ? costumeListView(costumes.data) : EMPTY),
     [costumes.data],
   );
 
-  useTauriEvent(COSTUME_RESULT_EVENT, (payload) => applyCostumeResult(payload, { dispatch, invalidate: costumes.invalidate }));
+  useTauriEvent(COSTUME_RESULT_EVENT, (payload) => applyCostumeResult(payload, {
+    dispatch, invalidate: costumes.invalidate, observe: observation.refresh,
+  }));
 
   useResultDeadline(pending, dispatch, currentTimingPolicy);
 
@@ -110,12 +119,12 @@ export function useCostumePage(): CostumePageView {
     listError: costumes.error,
     loading: costumes.loading,
     refreshing: costumes.refreshing,
-    error: state.error,
-    selected: state.selected ?? view.current,
+    error: state.error ?? observation.error,
+    selected: state.selected,
     pending,
     select,
     cancel,
-    refresh: costumes.refresh,
+    refresh: async () => { observation.refresh(); await costumes.refresh(); },
     invalidate: costumes.invalidate,
   };
 }

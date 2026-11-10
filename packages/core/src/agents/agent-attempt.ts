@@ -72,7 +72,7 @@ async function* executeAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, contex
   // without replacing the original selected instructions, source manifest or immutable context binding.
   const controlMessage = selected ? [selected.controlInput, turn?.controlInput].filter(Boolean).join("\n\n")
     : turn?.controlInput ?? message;
-  const replay = work ? work.project(turn!.attemptId!) : selected ? initiativeReplay() : store.project(characterId); const history = replay.messages;
+  const replay = work ? work.project(turn!.attemptId!) : selected ? initiativeReplay() : store.project(characterId, deps.historyBudget?.()); const history = replay.messages;
   const toolAttribution = createToolContentAttribution();
   toolAttribution.prime(history);
   // Capture the clock and user zone together: awaited recall must not split the day/time lines across settings.
@@ -106,7 +106,7 @@ async function* executeAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, contex
         toolSchemaTokens: estimatePreparedToolSchemaTokens(request.preparedTools), envelopeReserveTokens: deps.requestEnvelopeReserve?.() ?? 0 }));
     } });
   const { model, observability } = createRunObservabilityModel({
-    model: native.model(deps.model), lifecycle: deps.effectLifecycle, runId: turn?.runId, attemptId: turn?.attemptId,
+    model: native.model(requiredModel(deps)), lifecycle: deps.effectLifecycle, runId: turn?.runId, attemptId: turn?.attemptId,
     onCommitModelIntent: (effect) => {
       assertStepRecorded();
       stepModelEffectId = effect.effectId;
@@ -348,4 +348,9 @@ function composeInstructions(
 
 function resolveMemoryPrompt(prompt: ChatAgentDeps["memoryPrompt"]): string {
   return typeof prompt === "function" ? prompt() : prompt ?? BASE_SYSTEM_PROMPT;
+}
+
+function requiredModel(deps: ChatAgentDeps) {
+  if (!deps.model) throw new Error("MODEL_UNAVAILABLE");
+  return deps.model;
 }

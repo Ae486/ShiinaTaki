@@ -110,7 +110,7 @@ describe("knob draft ownership", () => {
   it("rechecks field lock and connection at the commit boundary", async () => {
     const f = fixture();
     f.controller.change("draft");
-    f.update({ ...ENTRY, envLocked: true });
+    f.update({ ...ENTRY, apply: "env-only" });
     await f.controller.save(true);
     expect(f.save).not.toHaveBeenCalled();
     f.update(ENTRY, false);

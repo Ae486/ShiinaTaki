@@ -4,6 +4,7 @@ import { createConfigRepo, type ConfigRepo } from "../db/config-repo.ts";
 import { MIGRATIONS } from "../db/migrations/index-list.ts";
 import { openDatabase, type Database } from "../db/sqlite.ts";
 import { createConfigWriter, type ConfigWriter } from "./config-writer.ts";
+import { createConfigSource } from "./config-source.ts";
 
 const dbs: Database[] = [];
 afterEach(() => {
@@ -30,7 +31,9 @@ describe("createConfigWriter", () => {
       ok: true,
       key: "TAKI_MAX_STEPS",
       value: 22,
-      apply: "restart",
+      apply: "live",
+      effectiveValue: 22,
+      origin: "stored",
     });
     expect(repo.get("TAKI_MAX_STEPS")).toBe(22);
     expect(changes).toEqual([{ key: "TAKI_MAX_STEPS", value: 22 }]);
@@ -50,7 +53,6 @@ describe("createConfigWriter", () => {
     ["invalid-value", {}, { key: "TAKI_WS_PORT", value: 0 }],
     ["secret", {}, { key: "TAKI_PROVIDER_API_KEY", value: "sk-x" }],
     ["env-only", {}, { key: "TAKI_DATA_DIR", value: "C:/x" }],
-    ["env-locked", { TAKI_MAX_STEPS: "7" }, { key: "TAKI_MAX_STEPS", value: 22 }],
   ] as const)("refuses with reason %s and leaves the store untouched", (reason, env, input) => {
     const { repo, writer, changes } = build(env);
 
@@ -77,6 +79,62 @@ describe("createConfigWriter", () => {
   it("an empty env var does not lock the knob", () => {
     const { writer } = build({ TAKI_MAX_STEPS: "" });
     expect(writer.set({ key: "TAKI_MAX_STEPS", value: 22 }).ok).toBe(true);
+  });
+
+  it("overrides environment configuration and reset deliberately restores it", () => {
+    const env = { TAKI_MAX_STEPS: "7" };
+    const { repo, writer, changes } = build(env);
+    const source = createConfigSource({ env, repo });
+    expect(writer.set({ key: "TAKI_MAX_STEPS", value: 22 })).toMatchObject({ ok: true, value: 22 });
+    expect(source.resolve("TAKI_MAX_STEPS")).toEqual({ value: 22, origin: "stored" });
+    expect(writer.set({ key: "TAKI_MAX_STEPS", value: null })).toMatchObject({ ok: true, value: null });
+    expect(source.resolve("TAKI_MAX_STEPS")).toEqual({ value: 7, origin: "env" });
+    expect(changes).toEqual([{ key: "TAKI_MAX_STEPS", value: 22 }, { key: "TAKI_MAX_STEPS", value: null }]);
+  });
+
+  it("refuses reset to invalid environment input without removing the working override", () => {
+    const { repo, writer, changes } = build({ TAKI_MAX_STEPS: "invalid-env-value" });
+    expect(writer.set({ key: "TAKI_MAX_STEPS", value: 22 }).ok).toBe(true);
+    changes.length = 0;
+    expect(writer.set({ key: "TAKI_MAX_STEPS", value: null })).toMatchObject({ ok: false, reason: "invalid-value" });
+    expect(repo.get("TAKI_MAX_STEPS")).toBe(22);
+    expect(changes).toEqual([]);
+  });
+
+  it.each(["TAKI_AMBIENT_SCREENSHOT", "TAKI_TRUST_LOOPBACK_OPERATOR"])("does not turn invalid boolean reset input into false for %s", (key) => {
+    const { repo, writer, changes } = build({ [key]: "off" });
+    expect(writer.set({ key, value: true }).ok).toBe(true);
+    changes.length = 0;
+    expect(writer.set({ key, value: null })).toMatchObject({ ok: false, reason: "invalid-value" });
+    expect(repo.get(key)).toBe(true);
+    expect(changes).toEqual([]);
+  });
+
+  it("validates timing reset against the actual environment fallback rather than the default", () => {
+    const { repo, writer, changes } = build({ TAKI_RECONNECT_BASE_MS: "2000" });
+    expect(writer.set({ key: "TAKI_RECONNECT_BASE_MS", value: 200 }).ok).toBe(true);
+    expect(writer.set({ key: "TAKI_RECONNECT_CAP_MS", value: 1000 }).ok).toBe(true);
+    changes.length = 0;
+    expect(writer.set({ key: "TAKI_RECONNECT_BASE_MS", value: null })).toMatchObject({ ok: false, reason: "invalid-value" });
+    expect(repo.get("TAKI_RECONNECT_BASE_MS")).toBe(200);
+    expect(changes).toEqual([]);
+  });
+
+  it("accepts an environment reset that is valid even when the registry default would be invalid", () => {
+    const { repo, writer } = build({ TAKI_RECONNECT_BASE_MS: "200" });
+    expect(writer.set({ key: "TAKI_RECONNECT_BASE_MS", value: 100 }).ok).toBe(true);
+    expect(writer.set({ key: "TAKI_RECONNECT_CAP_MS", value: 300 }).ok).toBe(true);
+    expect(writer.set({ key: "TAKI_RECONNECT_BASE_MS", value: null })).toMatchObject({ ok: true, value: null });
+    expect(repo.get("TAKI_RECONNECT_BASE_MS")).toBeNull();
+  });
+
+  it("retains aggregate initiative constraints when reset reveals an environment limit", () => {
+    const { repo, writer, changes } = build({ TAKI_INITIATIVE_UTTERANCE_HOUR_LIMIT: "9" });
+    expect(writer.set({ key: "TAKI_INITIATIVE_UTTERANCE_HOUR_LIMIT", value: 3 }).ok).toBe(true);
+    changes.length = 0;
+    expect(writer.set({ key: "TAKI_INITIATIVE_UTTERANCE_HOUR_LIMIT", value: null })).toMatchObject({ ok: false, reason: "invalid-value" });
+    expect(repo.get("TAKI_INITIATIVE_UTTERANCE_HOUR_LIMIT")).toBe(3);
+    expect(changes).toEqual([]);
   });
 
   it("refuses cross-field-invalid timing changes without mutation or push", () => {

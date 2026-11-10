@@ -27,6 +27,7 @@ function fixture(options: { projected?: boolean } = {}) {
     title: "Video", duration_seconds: 400, access: { kind: "video_range", byte_length: 1024, checked_at: Date.now() } };
   probe.mockResolvedValue(proof);
   let enabled = true; let current = true; let sensitive = false; let pixelsCurrent = true;
+  let generation = 0; let dropRaw = true;
   const nativeRelease = vi.fn(); const returned: unknown[] = [];
   const identity = (name: string) => ({ extensionId: name, kind: "capability" as const, ownerHostId: id,
     subjectId: name, subjectRevision: "1", connectionGeneration: 1, catalogGeneration: 1 });
@@ -45,9 +46,9 @@ function fixture(options: { projected?: boolean } = {}) {
   const discard = vi.fn();
   const prepare = createViewingInvitationEvidence({ ownerHostId: id, nativeTarget: () => ({ serverId: "native", isCurrent: () => current }),
     enabled: () => enabled, perception: { pause: { isPaused: () => false }, isSensitive: () => sensitive,
-      evidence: { generation: () => 1, isCurrent: () => current } },
+      evidence: { generation: () => 1, isCurrent: () => current }, ambientGeneration: () => generation },
     store: { save: () => ({ name: "frame", bytes: 3 }), discard, sweepOlderThan: () => ({ removedCount: 0, freedBytes: 0 }) },
-    dropRawAfterConsumption: true,
+    dropRawAfterConsumption: () => dropRaw,
   });
   const input = { source, expiresAt: Date.now() + 120_000, isCurrent: () => current };
   const turn = { runId: id, attemptId: id, runContext: { tools: {
@@ -57,10 +58,32 @@ function fixture(options: { projected?: boolean } = {}) {
   } } };
   return { prepare: () => prepare(input, turn), proof, invoke, discard, nativeRelease, returned,
     retirePixels: () => { pixelsCurrent = false; },
+    reenable: () => { generation += 2; enabled = true; },
+    keepRaw: () => { dropRaw = false; },
     disable: () => { enabled = false; }, retire: () => { current = false; }, sensitive: () => { sensitive = true; } };
 }
 
 describe("admitted viewing evidence", () => {
+  it("rejects a capture from before an ambient disable/re-enable transition", async () => {
+    const f = fixture({ projected: true }); const original = f.invoke.getMockImplementation()!;
+    f.invoke.mockImplementation(async (input) => {
+      const output = await original(input);
+      if (input.extensionId === "screenshot-ambient") f.reenable();
+      return output;
+    });
+    expect(await f.prepare()).toBeUndefined();
+    expect(f.nativeRelease).toHaveBeenCalledOnce();
+  });
+  it("captures retention at admission while a later preparation sees the new policy", async () => {
+    const f = fixture(); const original = f.invoke.getMockImplementation()!;
+    f.invoke.mockImplementation(async (input) => { f.keepRaw(); return original(input); });
+    const first = await f.prepare();
+    first?.nativeImageContext.release();
+    expect(f.discard).toHaveBeenCalledOnce();
+    const next = await f.prepare();
+    next?.nativeImageContext.release();
+    expect(f.discard).toHaveBeenCalledOnce();
+  });
   it("requires native access plus screened real capture and returns scrubbed fenced evidence", async () => {
     const f = fixture(); const result = await f.prepare();
     expect(result?.title).toBe("Video");

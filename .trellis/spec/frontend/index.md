@@ -21,7 +21,7 @@
 | [Foreground Chat Feedback](./foreground-chat-feedback.md) | Shared ordered activity, complete Timeline handoff, segmented Pet tools/text, reading anchors and CSS geometry continuity |
 | [User Presence and Presentation Feedback](./user-presence-feedback.md) | Socket-bound Home/Chat/Pet sources, trusted input age, actual committed-text exposure and designated Home User Timezone reporting |
 | [Interaction Pattern Authoring and Review](./interaction-patterns.md) | Exact immutable review, preserved CAS drafts/history, explicit Skill/example setup, same-Monitor policy/backoff controls and semantic follow-up tool results |
-| [Reactive Read-Models](./reactive-read-models.md) | Event/demand policy, coherent target commits, stable reading/editing, non-displacing pending feedback, once-consumed Toasts and truthful recovery |
+| [Reactive Read-Models](./reactive-read-models.md) | Event/demand policy, coherent target commits, grouped model drafts/application, dependency-scoped Chat, stable editing and truthful recovery |
 | [Type Safety](./type-safety.md) | zod boundaries, no-any policy |
 | [Quality Guidelines](./quality-guidelines.md) | Size/responsibility guard, perf rules (this window is always-on), tests |
 | [Operator Connection Recovery & Request Deadlines](./operator-connection-recovery.md) | Independent Pet/Home/Chat generations, native JSON-RPC deadlines, restoration ordering, timing policy, and honest reconnect UX |

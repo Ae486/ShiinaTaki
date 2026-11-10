@@ -1,6 +1,6 @@
 /**
  * INPUT:  ConnectParams from a dispatched pre-auth connect request + injected registries, code/audit sinks, the loopback-trust flag
- * OUTPUT: connectMethod(deps) — authenticates token/pairing/loopback sockets and echoes offered operator display support
+ * OUTPUT: connectMethod(deps) — authenticates native proof/token/pairing/explicit legacy sockets and operator display support
  * POS:    core/server/methods — the ONLY pre-auth method; thin delegation to device-registry + connection-registry
  */
 import {
@@ -15,6 +15,7 @@ import {
   type Role,
 } from "@taki/shared";
 import { PairingError, type DeviceRegistry } from "../../devices/device-registry.ts";
+import type { LocalConnectionAuth } from "../../devices/local-connection-auth.ts";
 import { appException } from "../app-error.ts";
 import type { ConnectionRegistry } from "../connection-registry.ts";
 import type { MethodContext, MethodDefinition } from "../method-registry.ts";
@@ -40,10 +41,10 @@ export interface ConnectMethodDeps {
   /** Audit sink: fired on every auto-trust issuance (never receives the token itself). */
   onAutoTrust: (info: AutoTrustInfo) => void;
   /**
-   * When true, a loopback OPERATOR presenting no credential is auto-trusted without pairing (P3): on a local
-   * Core the machine boundary IS the trust boundary. A public/VPS Core sets this false to force pairing.
+   * Explicit legacy operator auto-trust only; native profile authentication remains independent.
    */
-  trustLoopbackOperator: boolean;
+  trustLoopbackOperator: boolean | (() => boolean);
+  localAuth?: LocalConnectionAuth;
 }
 
 // Peer addresses that count as loopback. `::ffff:127.0.0.1` is the IPv4-mapped form seen when the server
@@ -64,7 +65,7 @@ export function connectMethod(deps: ConnectMethodDeps): MethodDefinition<Connect
   };
 }
 
-function handleConnect(deps: ConnectMethodDeps, params: ConnectParams, ctx: MethodContext): ConnectResult {
+function handleConnect(deps: ConnectMethodDeps, params: ConnectParams, ctx: MethodContext): ConnectResult | Promise<ConnectResult> {
   const { deviceRegistry, connectionRegistry, onPairingCode, onAutoTrust, trustLoopbackOperator } = deps;
   const { deviceId, deviceName, role, token, pairingCode } = params;
 
@@ -77,6 +78,8 @@ function handleConnect(deps: ConnectMethodDeps, params: ConnectParams, ctx: Meth
   // Host compatibility is validated before pairing can mint durable credentials. A protocol mismatch is not
   // allowed to leave a newly trusted device record behind and then fail later during connection registration.
   const identity = authenticatedIdentity(params);
+
+  if (params.localAuth) return localConnect(deps, params, ctx);
 
   if (token !== undefined) {
     if (!deviceRegistry.verifyToken(deviceId, token, role)) {
@@ -95,7 +98,8 @@ function handleConnect(deps: ConnectMethodDeps, params: ConnectParams, ctx: Meth
   // Operator-only (nodes carry capabilities → Permission Gate → must still pair) and fail-closed on a
   // non-loopback/unknown peer. A token is still issued so reconnects work even if the flag is later turned off.
   const { remoteAddress } = ctx.connection;
-  if (trustLoopbackOperator && role === RoleSchema.enum.operator && isLoopback(remoteAddress)) {
+  const legacyTrust = typeof trustLoopbackOperator === "function" ? trustLoopbackOperator() : trustLoopbackOperator;
+  if (legacyTrust && role === RoleSchema.enum.operator && isLoopback(remoteAddress)) {
     const issued = deviceRegistry.trustDevice(deviceId, { deviceName, role });
     const host = connectionRegistry.authenticate(ctx.connection, identity);
     onAutoTrust({ deviceId, deviceName, remoteAddress });
@@ -105,6 +109,36 @@ function handleConnect(deps: ConnectMethodDeps, params: ConnectParams, ctx: Meth
   const code = deviceRegistry.beginPairing(deviceId);
   onPairingCode({ deviceId, deviceName, code });
   throw appException(ErrorCodeSchema.enum.PAIRING_REQUIRED, "pairing required");
+}
+
+async function localConnect(deps: ConnectMethodDeps, params: ConnectParams, ctx: MethodContext): Promise<ConnectResult> {
+  const { localAuth, deviceRegistry, connectionRegistry } = deps;
+  if (!localAuth || !isLoopback(ctx.connection.remoteAddress)) {
+    throw appException(ErrorCodeSchema.enum.LOCAL_AUTH_UNAVAILABLE, "Local connection identity is unavailable");
+  }
+  if (params.localAuth?.kind === "begin") {
+    const challenge = await localAuth.begin(ctx.connection, params);
+    if (ctx.connection.state.status === "authenticated") {
+      throw appException(ErrorCodeSchema.enum.ALREADY_CONNECTED, "already connected: re-handshake is not allowed");
+    }
+    if (!challenge) throw appException(ErrorCodeSchema.enum.LOCAL_AUTH_UNAVAILABLE, "Local connection identity is unavailable");
+    throw appException(ErrorCodeSchema.enum.LOCAL_AUTH_REQUIRED, "Local connection proof required", { challenge });
+  }
+  if (!localAuth.verify(ctx.connection, params)
+    || (params.token !== undefined && !deviceRegistry.verifyToken(params.deviceId, params.token, params.role))) {
+    ctx.close();
+    throw appException(ErrorCodeSchema.enum.LOCAL_AUTH_FAILED, "Local connection identity could not be verified");
+  }
+  let issued: string | undefined;
+  try { issued = deviceRegistry.trustLocalDevice(params.deviceId, { deviceName: params.deviceName, role: params.role }); }
+  catch (error) {
+    if (!(error instanceof PairingError)) throw error;
+    ctx.close();
+    throw appException(ErrorCodeSchema.enum.LOCAL_AUTH_FAILED, "Local device role could not be verified");
+  }
+  const host = connectionRegistry.authenticate(ctx.connection, authenticatedIdentity(params));
+  if (issued) deps.onAutoTrust({ deviceId: params.deviceId, deviceName: params.deviceName, remoteAddress: ctx.connection.remoteAddress });
+  return connectedResult(params, host, issued);
 }
 
 function authenticatedIdentity(params: ConnectParams) {

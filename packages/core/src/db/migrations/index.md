@@ -74,3 +74,4 @@
 - 068-maintenance-monitor.ts — optional operation-call association and conservative regular-call cache baseline convergence
 - 069-delegation-schema-convergence.ts — exact early/current 058/060 compatibility branches and conservative event-frontier backfill
 - 069-delegation-schema.ts — frozen canonical delegation signatures and CREATE-only definitions for migration 069
+- 072-search-projection-policy.ts — additive Local/Legacy derived tokenizer policy records without guessing existing index state

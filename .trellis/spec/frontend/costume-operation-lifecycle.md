@@ -53,8 +53,14 @@ interface CostumeResultPayload {
 
 - `startCostumeSwitchAttempt` captures `petCostumeTotalMs` and `rendererLoadMs` exactly once from the initiating
   client's current timing policy. Reconnect or config changes do not restart or lengthen an existing attempt.
-- One attempt gate spans Core costume resolution, Tauri asset/path composition, renderer load, attachment commit, and
+- One attempt gate spans a fresh `character.costumes` read, Core costume resolution, Tauri asset/path composition, renderer load, attachment commit, and
   bounded report synchronization. Every awaited pre-render stage checks the stop token before the next stage starts.
+- Pet does not refuse a manual selection using a mount-time metadata list. Each attempt selects the manifest and
+  classifies unknown/unrenderable from its own successful metadata read. A failed read is neither empty nor unknown.
+  This lets an already-mounted empty Pet use a newly imported/reimported costume without reload or an import bus.
+- Native `local_characters_root` selects the asset root and its exact scope. Frontend composition keeps every settings
+  and resource path under that root; it never derives a daily-profile root from `homeDir`, reads frontend env, or uses
+  a remote Core's absolute path as a native scope grant. Native scope/startup details are in `packaged-build.md`.
 - The renderer timeout is `min(rendererLoadMs, remaining total budget)`. Cancel/deadline/supersession during a live
   renderer load calls `PetScene.abortSwitch()` exactly once so a late model self-discards through its switch ticket.
 - Cancel is accepted only before attachment. After commit there is no rollback API, so the report stage completes as
@@ -73,13 +79,26 @@ interface CostumeResultPayload {
 
 ### Result-bearing Home boundary
 
-- Home selection follows `pet:costume-result`, never the click. Only the commanded row is pending.
+- Only the commanded row is pending. Home settles its command from `pet:costume-result`; current selection comes from
+  an actual `PetScene.reportSnapshot()` observation. Marker default and `last-costume` select initial load intent only.
+  They never prove a costume attached in the currently running scene.
 - The Home result timer captures `homeResultMs` once when that pending attempt begins. A Home client generation change
   must not restart the timer.
 - The invariant is `rendererLoadMs < petCostumeTotalMs < homeResultMs`; Core rejects timing changes that violate it.
 - Cancel releases Home first, then emits the cancel command. A dead Pet cannot wedge the page.
-- A late `succeeded` result remains authoritative: Home follows the costume Pet is visibly wearing and clears a stale
-  deadline error.
+- A late `succeeded` clears stale command errors and triggers a fresh scene read. Its payload can predate a scene
+  replacement, so it does not directly mark that costume current.
+- Visible Home registers snapshot/change listeners before `pet:costume-scene-request {requestId}`. Pet replies with
+  `pet:costume-scene-snapshot {requestId, costumeId:string|null}`. `pet:costume-scene-changed` carries no data and
+  requests reconciliation after listener readiness, scene replacement/reload, or a real attachment.
+- Request correlation retires any prior reply after change/success/hide/disposal. One captured `interactiveRpcMs`
+  deadline bounds a missing reply; explicit refresh or a real event may retry, never a polling loop. Unknown/loading
+  has no current highlight. Home observes the existing scene even when Core is disconnected.
+- Observation retirement and entry clear the prior current claim. A failed listener registration disposes all
+  successful registrations, rejects late registrations and leaves current unknown; an old hidden-page costume
+  cannot regain a highlight merely because re-entry failed before the new read started.
+- A `tauri://destroyed` listener targeted to the Pet native window retires current observation without depending on
+  React cleanup during window destruction. Ready notification permits a subsequent live Pet read.
 
 ### Recovery and last-good behavior
 
@@ -87,8 +106,8 @@ interface CostumeResultPayload {
   snapshot and can move the latest report ticket to synchronized.
 - Initial imported-costume promotion has `idle | running | committed` scene-lifetime state. Pre-commit interruption
   returns to idle for retry; an attached scene is latched and ordinary reconnect does not reload it.
-- `character.costumes` refresh failure retains last-good metadata. The current protocol cannot distinguish an
-  unimported character from a transient read failure, so this path stays silent and retries on a later client.
+- Home metadata read failure retains last-good resource rows, while a manual switch's fresh read failure is surfaced.
+  Initial promotion may remain idle when metadata is absent and retry on a later connection generation.
 - The single-flight guard is released at attachment, not delayed until report acknowledgement. A later switch may begin
   while the prior committed report is still pending.
 
@@ -97,7 +116,7 @@ interface CostumeResultPayload {
 | Condition | Required behavior |
 |-----------|-------------------|
 | Unknown/unrenderable costume or Pet not ready | Emit named `failed` refusal; Home releases pending |
-| Cancel/deadline during Core resolution or path composition | Stop before renderer/report side effects |
+| Cancel/deadline during metadata, Core resolution or path composition | Stop before renderer/report side effects |
 | Cancel/deadline during renderer load | Call `abortSwitch`; late model self-discards; keep old identity |
 | Renderer load rejects before attachment | Emit `failed`; preserve old scene/selection/last-costume |
 | Renderer resolves at the deadline boundary first | Attachment commits; later timer cannot relabel it failed |
@@ -105,7 +124,9 @@ interface CostumeResultPayload {
 | Report fails/times out after attachment | Keep visible success; mark recovery-needed; re-report on reconnect |
 | `last-costume` write fails after attachment | Warn; keep committed in-memory truth and Home success |
 | Home never receives a result | Its captured deadline releases pending and shows retryable error |
-| Late success arrives after Home timeout | Move selection to the actual worn costume and clear stale error |
+| Late success arrives after Home timeout | Clear stale error and request the actual current scene |
+| Default/remembered costume exists but scene is empty | No current highlight |
+| Old snapshot arrives after success/reset/hide | Ignore the retired request ID |
 | Initial promotion is interrupted pre-commit | Return to idle and retry on a later authenticated generation |
 
 ## 5. Good / Base / Bad Cases
@@ -128,11 +149,11 @@ interface CostumeResultPayload {
   recovery.
 - `pet-scene.test.ts` and renderer switch tests: late stale model self-discard, load-before-teardown, snapshot costume
   identity, and model-less first attach.
-- `use-costume-switch.test.ts`: guard release at commit, later report independence, supersession, last-good metadata,
+- `use-costume-switch.test.ts`: guard release at commit, later report independence, supersession, fresh metadata,
   and no stale UI updates.
 - `initial-costume-promotion.test.ts`: pre-commit retry, committed latch, fallback attempt, and reconnect non-reload.
-- Home reducer/deadline tests: result-only selection, Cancel-first release, client replacement not restarting the timer,
-  late success authority, and locked refusal vocabulary.
+- Home reducer/deadline/scene-observer tests: actual-scene selection, empty/reopened/reset scene, stale snapshots after
+  success, hide/dispose cleanup, finite missing-Pet deadline, Cancel-first release and locked refusal vocabulary.
 - Manual: repeat #74/#75 on the D59/D61 build, real renderer timeout/late load, Pet restart with `last-costume`, and
   packaged Pet path/ACL resolution.
 
@@ -150,7 +171,6 @@ const attempt = startCostumeSwitchAttempt({
   client,
   scene,
   costume,
-  settingsFile,
   onCommit: ({ costumeId }) => {
     saveLastCostume(costumeId);
     publish({ costumeId, phase: "succeeded" });

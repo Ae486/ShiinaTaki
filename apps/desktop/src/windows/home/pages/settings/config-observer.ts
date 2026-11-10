@@ -61,8 +61,12 @@ class ConfigObserver {
       if (!this.started || this.binding !== binding) return;
       this.revision += 1;
       this.fieldVersions.set(change.key, this.revision);
-      if (this.input.visible()) this.input.apply(change);
-      else this.needsRead = true;
+      this.needsRead = true;
+      if (this.input.visible()) {
+        this.input.apply(change);
+        this.input.gap(true);
+        void this.input.demand();
+      }
     });
     return () => {
       if (this.binding !== binding) return;

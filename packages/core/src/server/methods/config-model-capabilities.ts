@@ -8,7 +8,8 @@ import { createModelCapabilitiesReader } from "../../config/model-capabilities.t
 import type { ConfigSource } from "../../config/config-source.ts";
 import type { MethodDefinition } from "../method-registry.ts";
 
-export function configModelCapabilitiesMethod(source: ConfigSource): MethodDefinition<ModelCapabilitiesParams> {
-  const read = createModelCapabilitiesReader(source);
+export function configModelCapabilitiesMethod(source: ConfigSource,
+  active?: () => { baseUrl: string; modelId: string } | undefined): MethodDefinition<ModelCapabilitiesParams> {
+  const read = createModelCapabilitiesReader(source, undefined, active);
   return { method: MODEL_CAPABILITIES_METHOD, roles: ["operator"], paramsSchema: ModelCapabilitiesParamsSchema, handler: read };
 }

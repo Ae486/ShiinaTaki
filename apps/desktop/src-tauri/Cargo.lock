@@ -4263,6 +4263,7 @@ version = "0.0.0"
 dependencies = [
  "arboard",
  "futures-util",
+ "hmac",
  "keyring",
  "keyring-core",
  "qqmm-management-native",

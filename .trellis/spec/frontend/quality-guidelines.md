@@ -18,6 +18,9 @@ to obtain an exemption.
 ## Performance rules (this window is ALWAYS ON — perf is a feature, not an optimization)
 
 - Frame-rate governor in `renderer/stage.ts` is mandatory path for all rendering: full fps only while animating/interacting; drop to low fps when idle; pause rendering entirely under Privacy Pause "sleeping" and when the model is off-screen.
+- A Pet scene with no attached model pauses its governed ticker independently of focus, visibility, activity and
+  the render-throttling toggle. Successful attachment refreshes the click-through mask before resuming the current
+  loaded-model tier; failed replacement keeps the existing model. Empty stages must not repeatedly render/read pixels.
 - No polling loops in React (`setInterval` for data is forbidden — data arrives via WS push).
 - Re-render hygiene: narrow store selectors, `memo` only where a profile shows need, stable callback identities for renderer-bridge props.
 - Assets: Live2D textures load through the Tauri asset protocol lazily per character; never import model assets into the JS bundle.

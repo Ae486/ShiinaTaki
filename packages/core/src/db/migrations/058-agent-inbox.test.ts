@@ -42,7 +42,7 @@ describe("forward inbox migration with legacy private evidence", () => {
     const { db, tables } = await legacy();
     const before = new Map(tables.map((table) => [table, db.prepare(`SELECT * FROM ${table}`).all()]));
     const receipts = db.prepare("SELECT * FROM migrations ORDER BY version").all();
-    expect(runMigrations(db, MIGRATIONS)).toEqual([58, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69]);
+    expect(runMigrations(db, MIGRATIONS)).toEqual([58, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72]);
     for (const table of tables) {
       const old = before.get(table)!;
       const columns = Object.keys(old[0] ?? {});

@@ -6,6 +6,46 @@ use tokio_tungstenite::tungstenite::{Message, client::IntoClientRequest};
 use std::time::Duration;
 
 const TOKEN: &str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+
+#[tokio::test]
+async fn malformed_optional_configuration_recovers_without_replacing_node_or_duplicating_listener() {
+    let root = tempfile::tempdir().unwrap();
+    let path = root.path().join("browser-attachment.json");
+    std::fs::write(&path, b"{malformed fixture").unwrap();
+    let store = Arc::new(crate::secrets::InMemoryStore::default());
+    let attachment = BrowserAttachment::load_recoverable(root.path(), store);
+    assert!(attachment.is_unavailable());
+    assert_eq!(std::fs::read_to_string(&path).unwrap(), "{malformed fixture");
+    let guard = attachment.spawn();
+    let mut changes = attachment.configuration_changes();
+    let reservation = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let port = reservation.local_addr().unwrap().port();
+    drop(reservation);
+    std::fs::write(&path, json!({ "enabled": true, "port": port }).to_string()).unwrap();
+    // Let the task attach its reload receiver before exercising the explicit setup command signal.
+    tokio::task::yield_now().await;
+    attachment.reload_configuration();
+    tokio::time::timeout(Duration::from_secs(2), changes.changed()).await.unwrap().unwrap();
+    assert!(!attachment.is_unavailable());
+    assert!(attachment.configured());
+    tokio::task::yield_now().await;
+    assert!(tokio::net::TcpStream::connect((std::net::Ipv4Addr::LOCALHOST, port)).await.is_ok());
+    for _ in 0..3 {
+        std::fs::write(&path, json!({ "enabled": false, "port": port }).to_string()).unwrap();
+        attachment.reload_configuration();
+        tokio::time::timeout(Duration::from_secs(2), changes.changed()).await.unwrap().unwrap();
+        assert!(!attachment.configured());
+        let reservation = tokio::net::TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, port)).await.unwrap();
+        drop(reservation);
+        std::fs::write(&path, json!({ "enabled": true, "port": port }).to_string()).unwrap();
+        attachment.reload_configuration();
+        tokio::time::timeout(Duration::from_secs(2), changes.changed()).await.unwrap().unwrap();
+        assert!(attachment.configured());
+    }
+    drop(guard);
+    tokio::task::yield_now().await;
+    assert!(tokio::net::TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, port)).await.is_ok());
+}
 #[test]
 fn shared_local_wire_fixtures_match_shell_validation() {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../packages/shared/fixtures/browser-playback");

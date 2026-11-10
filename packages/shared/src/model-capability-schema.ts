@@ -33,7 +33,7 @@ const CatalogDeclarationSchema = z.object({
 
 export const ModelCapabilitiesResultSchema = z.object({
   configured: z.object({ model: z.string().nullable(), identity: z.string().regex(/^[a-f0-9]{64}$/) }),
-  apply: z.literal("restart"),
+  apply: z.enum(["restart", "live"]),
   adapter: z.object({
     kind: z.literal("openai-compatible"),
     toolCalling: z.literal(true),

@@ -45,4 +45,24 @@ describe("config local save outcomes", () => {
     expect(await done).toEqual({ kind: "saved", display: "saved", current: false });
     expect(f.apply).not.toHaveBeenCalled();
   });
+  it("keeps newer application observations when a delayed echo has the same saved value", async () => {
+    const f = fixture(); const pending = deferred<ConfigSetResult>();
+    f.controller.replace({ configSet: () => pending.promise });
+    const done = f.controller.save(ENTRY.key, "saved");
+    f.change("saved");
+    pending.resolve({ ...RESULT, application: { state: "applying", boundary: "component", activeValue: "old" } });
+    expect(await done).toMatchObject({ kind: "saved", current: true });
+    expect(f.apply).not.toHaveBeenCalled();
+  });
+
+  it("uses a reset's effective environment value and reconciles older Core reset replies with a read", async () => {
+    const f = fixture(); const configList = vi.fn(async () => ({ entries: [{ ...ENTRY, value: "environment", stored: false }] }));
+    const configSet = vi.fn(async (): Promise<ConfigSetResult> => ({ ...RESULT, value: null }));
+    f.controller.replace({ configSet, configList });
+    expect(await f.controller.save(ENTRY.key, null)).toMatchObject({ kind: "saved", display: "environment", current: true });
+    expect(configList).toHaveBeenCalledTimes(1);
+    configSet.mockResolvedValueOnce({ ...RESULT, value: null, effectiveValue: "current-environment", origin: "env" });
+    expect(await f.controller.save(ENTRY.key, null)).toMatchObject({ kind: "saved", display: "current-environment" });
+    expect(configList).toHaveBeenCalledTimes(1);
+  });
 });

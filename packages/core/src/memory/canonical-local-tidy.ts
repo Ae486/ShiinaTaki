@@ -1,5 +1,5 @@
 /**
- * INPUT:  Local canonical repositories, active authority, Character scope and structured blocks
+ * INPUT:  Local canonical repositories, active authority, Character scope, blocks and captured retention policy
  * OUTPUT: revision-frozen T5 report view and private canonical maintenance tools
  * POS:    core/memory — Local tidy adapter; all mutations remain authority/CAS fenced and transactional
  */
@@ -12,7 +12,7 @@ import { stableRequestHash } from "../db/canonical-memory-repo.ts";
 import { V1_BLOCKS } from "./block-registry.ts";
 import { canonicalMemoryRow } from "./canonical-memory-view.ts";
 import { getLayer, WRITABLE_LAYER_IDS } from "./layer-registry.ts";
-import { projectRetention } from "./local-memory-provider.ts";
+import { canonicalLayerRetention } from "./canonical-layer-policy.ts";
 import type { TidyEngineView, TidyReviewOptions } from "./memory-engine.ts";
 import { createTidyIssueLedger, TidyFinishSchema } from "./tidy-issues.ts";
 import { guardedTidy as guarded, tidyTarget as target, tidyBlockScope as blockScope, tidyReviewOutcome,
@@ -43,6 +43,7 @@ export function createCanonicalLocalTidyView(input: TidyInput): TidyEngineView {
 }
 
 function captureReview(input: TidyInput, characterId: string, options: TidyReviewOptions = {}): TidyEngineView {
+  options = { ...options };
   input.authority.activeEpoch(input.epochId);
   const banks = input.authority.listBanks(input.epochId).filter((bank) => bank.scope.kind === "global" || bank.scope.characterId === characterId);
   const scopes = new Map(banks.map((bank) => [bank.bankId, bank.scope.characterId]));
@@ -129,7 +130,8 @@ function refile(review: Review, input: { id: string; layer: string; requestId: s
   const current = review.input.repo.record(common);
   if (!current) throw new Error("MEMORY_NOT_FOUND");
   const policy = { layerId: to.layer.id, visibility: to.layer.recallPolicy,
-    retention: projectRetention(to.layer, current.policy.retention, review.at) };
+    retention: canonicalLayerRetention({ layer: to.layer, previous: current.policy.retention, at: review.at,
+      intentionsDefaultDays: review.options.intentionsDefaultDays }) };
   const changed = common.bankId === to.bankId
     ? review.input.repo.policyEdit({ ...common, patch: policy })
     : review.input.repo.copyToBank({ ...common, destinationBankId: to.bankId, policy });
@@ -145,7 +147,8 @@ function supersede(review: Review, input: { id: string; replacement?: Replacemen
     const current = review.input.repo.record(common);
     if (!current) throw new Error("MEMORY_NOT_FOUND");
     const copied = review.input.repo.copyToBank({ ...common, destinationBankId: to.bankId,
-      policy: { layerId: to.layer.id, visibility: to.layer.recallPolicy, retention: projectRetention(to.layer, current.policy.retention, review.at) } });
+      policy: { layerId: to.layer.id, visibility: to.layer.recallPolicy, retention: canonicalLayerRetention({ layer: to.layer,
+        previous: current.policy.retention, at: review.at, intentionsDefaultDays: review.options.intentionsDefaultDays }) } });
     const patch = { text: replacement.content };
     const edited = review.input.records.edit({ epochId: common.epochId, bankId: to.bankId,
       memoryId: copied.record.unit.memoryId, expectedRevision: copied.record.unit.revision, requestId: `${input.requestId}:text`,

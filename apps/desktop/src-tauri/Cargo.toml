@@ -30,7 +30,7 @@ tauri-build = { version = "2.6", features = [] }
 [dependencies]
 qqmm-management-native = { path = "../../../../../QQMessageMonitor/packages/management-native" }
 # protocol-asset: serves the Workspace characters/ subtree to the pet webview via the asset: protocol (#18); the
-# scope + CSP live in tauri.conf.json (app.security.assetProtocol). The build script requires this feature when
+# CSP lives in tauri.conf.json; character_assets lazily grants only the selected profile's subtree. The build script requires this feature when
 # assetProtocol is enabled — a mismatch fails `cargo check` (not at runtime), which is why it is pinned here.
 tauri = { version = "2.11", features = ["protocol-asset", "devtools"] }
 tauri-plugin-dialog = "2"
@@ -41,6 +41,7 @@ tauri-plugin-window-state = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.10"
+hmac = "0.12"
 time = { version = "0.3", features = ["parsing"] }
 uuid = { version = "1", features = ["v4"] }
 # rt-multi-thread: the headless taki-node bin runs its own #[tokio::main] runtime (the app uses Tauri's).

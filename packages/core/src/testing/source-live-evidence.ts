@@ -36,6 +36,7 @@ export async function openSourceLiveEvidence(input: { maxRequests: number; paths
   const environment = ports.environment();
   if (!environment) throw new Error("SOURCE_PROVIDER_CONFIGURATION_MISSING");
   const config = loadProviderConfig(environment);
+  if (!config.apiKey) throw new Error("SOURCE_PROVIDER_CREDENTIAL_REQUIRED");
   const output = resolve(process.env.TAKI_E2E_SOURCE_EVIDENCE_DIR ?? "");
   const allowed = resolve(ROOT, ".trellis/tasks/10-21-agent-source-context/research");
   if (!output.startsWith(allowed + sep)) throw new Error("SOURCE_EVIDENCE_PATH_REQUIRED");

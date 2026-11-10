@@ -1,10 +1,10 @@
 /**
- * INPUT:  Core permission/Approval projections and the config read/draft/save owners.
+ * INPUT:  Core model profiles, permission/Approval projections and scalar config read/draft/save owners.
  * OUTPUT: grouped searchable settings with distinct read phases, observation gaps and stable field identities.
  * POS:    Home Settings composition — Core order and existing group/key identities preserve active editing.
  */
 
-import { Fragment, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState } from "react";
 import { PageAlert, PageBody, PageHeader } from "../../page-chrome.tsx";
 import { Field, FIELD_CONTROL } from "@/components/ui/field.js";
 import { EmptyState } from "@/components/ui/empty-state.js";
@@ -16,17 +16,21 @@ import { PermissionSection } from "./permission-section.tsx";
 import { ApprovalDecisionsSection } from "./approval-decisions-section.tsx";
 import { configLabelOf, filterConfigEntries, groupConfigEntries } from "./config-groups.ts";
 import { UserTimezoneSection } from "./user-timezone-section.tsx";
-import { ModelCapabilitiesSection } from "./model-capabilities-section.tsx";
+import { ModelProfilesSection } from "./model-profiles-section.tsx";
+
+const PROFILE_KEYS = new Set(["TAKI_PROVIDER_BASE_URL", "TAKI_PROVIDER_MODEL", "TAKI_PROVIDER_API_KEY",
+  "TAKI_UTILITY_BASE_URL", "TAKI_UTILITY_MODEL", "TAKI_UTILITY_API_KEY"]);
 
 export function SettingsPage() {
   const { entries, hasSnapshot, connectionReady, loading, error, refreshing, observationGap, save, refresh } = useConfig();
   const [query, setQuery] = useState("");
-  const groups = useMemo(() => groupConfigEntries(filterConfigEntries(entries, query)), [entries, query]);
+  const groups = useMemo(() => groupConfigEntries(filterConfigEntries(entries.filter((entry) => !PROFILE_KEYS.has(entry.key)), query)), [entries, query]);
 
   return (
     <>
-      <PageHeader title="设置" hint="值优先级：环境变量 > 面板存储 > 内置默认；每项都注明生效方式。" busy={refreshing} />
+      <PageHeader title="设置" hint="应用中保存的配置优先；未设置时使用环境配置，再使用默认值。" busy={refreshing} />
       <PageBody>
+        <ModelProfilesSection />
         <UserTimezoneSection />
         <PermissionSection />
         <ApprovalDecisionsSection />
@@ -53,9 +57,7 @@ export function SettingsPage() {
                 groupEntries={groupEntries}
                 connectionReady={connectionReady}
                 onSave={save}
-              >
-                {group.id === "model-context" && <ModelCapabilitiesSection entries={entries} />}
-              </KnobGroup>
+              />
             ))}
             {groups.length === 0 && <EmptyState title="没有匹配的配置项" hint="换一个关键词，或清空搜索框查看全部配置。" />}
           </>
@@ -66,7 +68,6 @@ export function SettingsPage() {
 }
 
 interface KnobGroupProps {
-  children?: ReactNode;
   label: string;
   hint: string;
   groupEntries: ReturnType<typeof groupConfigEntries>[number]["entries"];
@@ -75,7 +76,7 @@ interface KnobGroupProps {
 }
 
 /** One group header (Chinese + one-line explanation) and its card of knob rows in server order. */
-function KnobGroup({ label, hint, groupEntries, connectionReady, onSave, children }: KnobGroupProps) {
+function KnobGroup({ label, hint, groupEntries, connectionReady, onSave }: KnobGroupProps) {
   return (
     <section className="flex flex-col gap-2">
       <div>
@@ -84,15 +85,13 @@ function KnobGroup({ label, hint, groupEntries, connectionReady, onSave, childre
       </div>
       <div className="divide-y divide-border-subtle overflow-hidden rounded-xl border border-border bg-surface shadow-card">
         {groupEntries.map((entry) => (
-          <Fragment key={entry.key}>
-            <KnobField
-              entry={entry}
-              chineseLabel={configLabelOf(entry.key) ?? undefined}
-              connectionReady={connectionReady}
-              onSave={onSave}
-            />
-            {entry.key === "TAKI_PROVIDER_MODEL" && children}
-          </Fragment>
+          <KnobField
+            key={entry.key}
+            entry={entry}
+            chineseLabel={configLabelOf(entry.key) ?? undefined}
+            connectionReady={connectionReady}
+            onSave={onSave}
+          />
         ))}
       </div>
     </section>

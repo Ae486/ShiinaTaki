@@ -1,6 +1,6 @@
 # desktop/src-tauri/src/
 - main.rs — thin shim (windows_subsystem + mobile entry) calling taki_desktop_lib::run(); untouched
-- lib.rs — Tauri composition root: dirs/legacy-approver/status-sink resolution, TauriStatusEmitter, node::build_node call, commands; the retained approver is not consulted by the Slice-3 production WS execution path
+- lib.rs — Home-first composition root; retryable Node assembly, native operator admission and independent optional-adapter lifecycle; existing Host governance remains unchanged
 - qqmm.rs — Home-only finite management commands, source-WebView-bound Channel delivery and helper-only teardown using the shared QQMM runtime; independent from the Node/Core path
 - node.rs — tauri-FREE node assembly: NodeConfig + build_node, create-only stable device identity with winner adoption, tracing, and WsClient; shared by lib.rs and bin/taki-node
 - status.rs — StatusEmitter trait (status sink seam) + TracingStatusEmitter (headless log-only impl)
@@ -23,3 +23,7 @@
 - browser_attachment/ — authenticated local transport, monotonic forwarding and source/cleanup regression tests
 - browser_playback_protocol.rs — strict selected-player/control serde mirrors preserving opaque Chromium document tokens and the Shared wire contract
 - browser_attachment_commands.rs — Home-only local setup/pairing commands and explicit isolated Shell data root
+- local_auth.rs — selected-profile descriptor validation, cached native bootstrap key and domain-separated server/client HMAC proofs
+- local_auth_commands.rs — actual-window/origin/operator-identity checks for finite local admission commands
+- character_assets.rs — captured selected-profile Character root, lazy confined asset grant and fixed-purpose Home/Pet command; missing resources never block Home startup
+- ws_local_auth.rs — native Node same-socket challenge/proof, server verification before durable token transmission and bounded authentication

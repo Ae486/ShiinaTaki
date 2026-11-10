@@ -90,9 +90,10 @@ export function createModelCatalogCache(fetchCatalog: typeof fetch = fetch, now:
 
 const readSharedCatalog = createModelCatalogCache();
 
-function configuredIdentity(source: ConfigSource) {
-  const base = source.resolve("TAKI_PROVIDER_BASE_URL")?.value;
-  const model = source.resolve("TAKI_PROVIDER_MODEL")?.value;
+function configuredIdentity(source: ConfigSource, active?: () => { baseUrl: string; modelId: string } | undefined) {
+  const binding = active?.();
+  const base = active ? binding?.baseUrl : source.resolve("TAKI_PROVIDER_BASE_URL")?.value;
+  const model = active ? binding?.modelId : source.resolve("TAKI_PROVIDER_MODEL")?.value;
   const baseURL = typeof base === "string" ? base : "";
   const modelId = typeof model === "string" && model.length > 0 ? model : null;
   return {
@@ -131,12 +132,13 @@ function declaredCapabilities(read: NonNullable<CatalogRead>, target: ReturnType
   };
 }
 
-export function createModelCapabilitiesReader(source: ConfigSource, readCatalog = readSharedCatalog) {
+export function createModelCapabilitiesReader(source: ConfigSource, readCatalog = readSharedCatalog,
+  active?: () => { baseUrl: string; modelId: string } | undefined) {
   return async (): Promise<ModelCapabilitiesResult> => {
-    const target = configuredIdentity(source);
+    const target = configuredIdentity(source, active);
     const read = target.configured.model && target.baseURL ? await readCatalog() : null;
     return {
-      configured: target.configured, apply: "restart",
+      configured: target.configured, apply: active ? "live" : "restart",
       adapter: { kind: "openai-compatible", toolCalling: true, imageInput: true, nativeWebSearch: false },
       catalog: !target.configured.model || !target.baseURL
         ? { status: "unknown", reason: "unconfigured" }

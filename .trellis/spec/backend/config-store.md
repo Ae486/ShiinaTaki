@@ -7,8 +7,8 @@
 ## 1. Scope / Trigger
 
 Use this contract when adding an operator-visible Core knob, changing how a stored setting reaches a subsystem, or
-adding a `config.*` consumer. The load order and provenance are part of the product contract: an explicit process
-environment value wins, an operator value applies when the environment is silent, and the built-in default is last.
+adding a `config.*` consumer. The load order and provenance are part of the product contract: an application-saved
+value wins, the process environment supplements missing application values, and the built-in default is last.
 
 The D59/D61 timing family is the first fully live cross-layer consumer: Shared owns its complete schema, Core validates
 both individual values and policy relationships, and every desktop connection owner keeps only an in-memory last-good
@@ -75,25 +75,37 @@ All config request methods are operator-only and Core-local. There is no Rust mi
 participate.
 
 `config.modelCapabilities {}` is an independent read, defined in `model-capability-schema.ts`. Its result includes
-the configured MAIN model and a SHA-256 identity of `JSON.stringify([effectiveBaseURL, modelOrNull])`, `apply: "restart"`,
-separate installed compatible-adapter support and a `declared | unknown | unavailable` catalog projection. It does not
-describe the model currently running before a restart.
+the active Main binding and a SHA-256 identity of `JSON.stringify([effectiveBaseURL, modelOrNull])`, `apply: "live"`,
+separate installed compatible-adapter support and a `declared | unknown | unavailable` catalog projection.
+The standalone compatibility reader without an active-binding port retains its conservative restart label.
 
 ## 3. Contracts
 
 - `knob-registry.ts` is the single vocabulary for environment keys, stored keys, validation, defaults, input hints,
   apply class, descriptions, and secret classification. Adding a visible knob means adding one registry row.
-- Effective precedence is `explicit non-empty env > stored row > built-in default`. The table stays sparse: never
-  seed defaults or environment values into it.
+- Ordinary scalar precedence is `stored row > explicit non-empty env > built-in default`. Presence is explicit:
+  stored `false`, schema-valid `0`, and valid empty strings win. Invalid stored primitives remain visible rather than
+  silently taking an environment fallback. The table stays sparse: never seed defaults or environment values into it.
 - `ConfigSource.env()` overlays eligible stored values into the environment view consumed by boot loaders. It must
-  never override an explicit environment value, an `env-only` knob, or a secret.
+  override ordinary environment fallbacks, but never an `env-only` knob or a secret. `resolve()` also ignores stray
+  stored bootstrap/secret rows; ordinary config storage cannot become authoritative for those values.
 - `config.list` returns every registry row with its effective value and provenance (`stored`, `envLocked`, `default`,
   `apply`). Secret rows always expose `value: null`, `default: null`, and presence through `secretSet` only.
+  Ordinary settings remain editable even when their current source is the environment. `envLocked` stays in the wire
+  shape for compatibility and is true only for an explicitly environment-set bootstrap knob. One list uses one
+  `ConfigRepo.all()` snapshot without per-row database reads.
 - `config.set { value: null }` deletes the stored row. It is a reset to environment/default, not a stored JSON null.
+  Validate the actual exposed fallback before mutation, including scalar and cross-field checks; do not substitute
+  the registry default when the environment supplies a value. `resolveConfigFallback` shares this rule with loaders.
+  An invalid reset preserves the previous row and publishes nothing; a successful reset still publishes `value:null`.
+  Boolean environment input accepts only true/1/false/0 (case-insensitive, surrounding whitespace ignored); blank
+  means unset, matching the existing privacy/trust loaders. Unknown text remains invalid rather than becoming false.
 - A successful set or reset publishes one `config.changed` notification. A refused write publishes nothing. Socket
   close removes the subscriber through `ctx.onClose`.
-- `apply` is truthful operator guidance. `restart` means the row is durable now and loaders consume it on the next
-  Core boot. Mark a knob `live` only after its production consumption site re-reads per use.
+- `apply` identifies a supported runtime consumer; `application` reports its actual boundary and outcome.
+  The 83 ordinary rows are live; data root remains bootstrap-only. New Run/operation capture, component replacement
+  and maintenance are distinct from immediate application. Backend inapplicability and selected-Hindsight reservations
+  override the generic label. See [Live Configuration](./live-configuration.md).
 - The ten D59/D61 timing rows come from `TIMING_CONFIG_KEYS` and `TIMING_POLICY_DEVELOPMENT_DEFAULTS` in
   `@taki/shared`; Core and Desktop must not hand-declare duplicate keys/defaults. They are `live` because authenticated
   desktop clients observe `config.changed`, reread the full effective policy, and apply it to later operations.
@@ -130,12 +142,13 @@ describe the model currently running before a restart.
 ## 4. Validation & Error Matrix
 
 Every `config.set` refusal uses app error code `CONFIG_REFUSED` and a machine-readable `error.data.reason`.
+The legacy `env-locked` reason remains protocol-compatible but is not emitted for ordinary application saves.
 
 | Condition | Reason / behavior | Store and push |
 |-----------|-------------------|----------------|
 | Key is absent from the registry | `unknown-key` | unchanged; no push |
 | Primitive fails the row's zod schema | `invalid-value` | unchanged; no push |
-| Non-empty process env owns the key | `env-locked` | unchanged; no push |
+| Non-empty process env supplies an ordinary key | Application write/reset is allowed after validation | ordinary sparse write/delete and push |
 | Row is classified `secret` | `secret` | unchanged; no push |
 | Row is classified `env-only` | `env-only` | unchanged; no push |
 | Params contain an object/array or an empty key | shared schema rejects before the handler | unchanged; no push |
@@ -158,14 +171,15 @@ The supplementary `config.modelCapabilities` read never writes or publishes a co
 
 ## 5. Good / Base / Bad Cases
 
-- Good: the operator stores `TAKI_MAX_STEPS=12`; the environment is silent; `config.list` reports the stored value
+- Good: the operator stores `TAKI_MAX_STEPS=12` while the environment says `7`; `config.list` reports the stored value
   and the next boot's loader receives `"12"` through `ConfigSource.env()`.
-- Base: `TAKI_MAX_STEPS` is explicitly present in the process environment; the panel shows it env-locked and a set is
-  refused without writing a shadow row.
+- Base: `TAKI_MAX_STEPS` has only an environment value; the panel can replace it with an application-owned setting.
 - Base: reset sends `value: null`; the row is deleted, subscribers receive `{ key, value: null }`, and resolution
   falls back to environment/default.
 - Base: lowering `homeResultMs` to or below `petCostumeTotalMs` is refused atomically even though the submitted value is
   a positive integer; no inconsistent transient policy is published.
+- Base: resetting reconnect base would expose an environment duration above the active cap; refuse before deletion
+  even when the built-in default would have been safe. A valid environment reset is not refused because of that default.
 - Bad: copy all environment/default values into the table on first boot. Removing an environment override can then
   reveal a stale seed that the operator never chose.
 - Bad: store API keys in `config`. This surface reports presence only; moving secret input from bootstrap env to the
@@ -183,20 +197,21 @@ The supplementary `config.modelCapabilities` read never writes or publishes a co
 - `013-config.test.ts`: table creation, idempotent migration set, primary-key uniqueness, STRICT TEXT enforcement.
 - `config-repo.test.ts`: primitive round-trip, sparse miss, upsert/delete, full map, corrupt JSON/composite throws.
 - `knob-registry.test.ts`: exact unique key set, defaults validate, input metadata validates, secrets/env-only pinned.
-- `config-source.test.ts`: all precedence orders, empty env handling, env-only/secret exclusions, full masked list.
-- `config-writer.test.ts`: success, reset, all five refusal reasons, no mutation/no push on refusal.
+- `config-source.test.ts`: application-first precedence, explicit false/zero/empty values, invalid stored input,
+  bootstrap/secret exclusions, full masked list, and one storage snapshot without per-row reads.
+- `config-writer.test.ts`: success, reset to actual environment/default, four current refusal reasons, and no mutation/push on refusal.
 - `config-writer.test.ts` and `config-source.test.ts`: timing cross-field write/reset validation over effective
-  env/stored/default precedence.
+  stored/env/default precedence, including valid and invalid environment-backed resets.
 - `config-methods.test.ts`: operator-only methods, masked list, successful changed pushes, close cleanup, app-error data.
 - `timing-policy-schema.test.ts`: exact timing key set, development defaults, projection, and all three relationships.
-- A boot-path test must prove at least one stored restart knob reaches its real loader when the environment is absent.
+- A boot-path test must prove stored values reach their real loader and runtime tests must prove later application.
 - Model metadata tests cover the public provider/model shape, exact identity, arbitrary proxy/alias, explicit false,
   absent fields, network/schema/body/timeout failure, bounded cache demand, captured configuration changes and secret-free
   fetch/results. Settings tests cover safe identity mismatch, old-response retirement, hidden demand and source/activation
   wording. Public catalog parsing is metadata evidence; actual user-endpoint model acceptance remains separate validation.
 - Expanded metadata checks cover explicit aliases, old declarations, optional malformed fields, original-ID display,
   provider/generic icons and image error recovery. Real-browser evidence checks image loading against packaged CSP,
-  disclosure details, narrow layout and configuration changes while the running model remains the boot-captured model.
+  disclosure details, narrow layout and configuration changes against the actual active binding.
 
 ## 7. Wrong vs Correct
 
@@ -209,13 +224,11 @@ await client.configSet({ key, value });
 ```
 
 ```typescript
-// Wrong: an environment-owned write appears successful but can never take effect.
-repo.upsert(key, value);
+// Wrong: validate a reset against a default that the environment will replace after deletion.
+validateChange({ key, value: value ?? knob.default });
 
-// Correct: refuse before mutation and tell the operator why.
-if (env[key] !== undefined && env[key]!.length > 0) {
-  return { ok: false, reason: "env-locked", message: "..." };
-}
+// Correct: the source owns fallback resolution; deletion still publishes null rather than persisting the fallback.
+validateChange({ key, value: value ?? resolveConfigFallback(knob, env).value });
 ```
 
 ```typescript
@@ -223,5 +236,5 @@ if (env[key] !== undefined && env[key]!.length > 0) {
 return { imageInput: model.startsWith("gpt-"), nativeWebSearch: catalog.tool_call };
 
 // Correct: expose independent declaration/adapter evidence and keep unrecognized routes unknown.
-return { configured, apply: "restart", adapter, catalog: exactMatch ?? { status: "unknown", reason: "endpoint" } };
+return { configured: activeIdentity, apply: "live", adapter, catalog: exactMatch ?? { status: "unknown", reason: "endpoint" } };
 ```

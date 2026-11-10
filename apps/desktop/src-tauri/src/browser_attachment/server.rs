@@ -18,7 +18,7 @@ use crate::browser_playback_protocol::BrowserAttachmentFrame;
 struct Hello { kind: String, protocol: String, token: String }
 
 pub(super) async fn run(attachment: Arc<BrowserAttachment>) -> Result<(), String> {
-    let Some(port) = attachment.port else { return Ok(()); };
+    let Some(port) = attachment.port() else { return Ok(()); };
     let listener = TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, port)).await.map_err(|_| "Browser attachment port unavailable")?;
     let mut stop = attachment.stop.subscribe();
     let mut expiry = tokio::time::interval(Duration::from_millis(250));

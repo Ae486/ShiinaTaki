@@ -86,6 +86,35 @@ describe("createPerceptionLayer", () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 
+  it("replaces retention schedules without losing activity or duplicating timers", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "taki-ambient-reconfigure-"));
+    const { perception } = layerFor(sampleOf("Code.exe", "main.ts"), {
+      ambient: { enabled: false, retention: { mode: "keep" } }, dir,
+    });
+    try {
+      perception.start();
+      perception.start();
+      await vi.advanceTimersByTimeAsync(POLL_MS);
+      const activity = perception.activity.state.current();
+      expect(activity).toBeDefined();
+      expect(vi.getTimerCount()).toBe(1);
+      for (let i = 0; i < 5; i++) {
+        perception.reconfigureAmbient(AMBIENT_ON);
+        expect(vi.getTimerCount()).toBe(3);
+        perception.reconfigureAmbient({ enabled: false, retention: { mode: "keep" } });
+        expect(vi.getTimerCount()).toBe(1);
+        expect(perception.activity.state.current()).toEqual(activity);
+      }
+      perception.dispose();
+      perception.reconfigureAmbient(AMBIENT_ON);
+      perception.start();
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      perception.dispose();
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("threads the shared Privacy Pause into the foreground sampler (production wiring, not just the dep)", async () => {
     const { perception, route } = layerFor(sampleOf("Code.exe", "main.ts"));
     perception.start();

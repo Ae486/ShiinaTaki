@@ -18,7 +18,7 @@ export function useConfigRead(client: WsClient | null, visible: boolean) {
     client,
     visible: () => isPageActive("settings"),
     apply: (change) => listRef.current?.mutate((previous) => ({ ...previous, entries: applyChanged(previous.entries, change) })),
-    demand: () => listRef.current?.refresh() ?? Promise.resolve(),
+    demand: () => listRef.current?.invalidate() ?? Promise.resolve(),
     gap: setObservationGap,
   }) : null, [client]);
   // Register before any subscription/read effect so a baseline cannot miss an intervening notification.

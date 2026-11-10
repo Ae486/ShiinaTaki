@@ -24,9 +24,9 @@ interface Dependencies {
   nativeTarget(): { serverId: string; isCurrent(): boolean } | undefined;
   enabled(): boolean;
   perception: { pause: Pick<PerceptionLayer["pause"], "isPaused">; isSensitive: PerceptionLayer["isSensitive"];
-    evidence: Pick<PerceptionLayer["evidence"], "generation" | "isCurrent"> };
+    evidence: Pick<PerceptionLayer["evidence"], "generation" | "isCurrent">; ambientGeneration?: () => number };
   store: AmbientShotStore;
-  dropRawAfterConsumption: boolean;
+  dropRawAfterConsumption: boolean | (() => boolean);
 }
 
 export function createViewingInvitationEvidence(deps: Dependencies) {
@@ -34,8 +34,12 @@ export function createViewingInvitationEvidence(deps: Dependencies) {
     const target = deps.nativeTarget();
     if (!target || !turn.runContext || !turn.runId || !turn.attemptId || !deps.enabled()) return;
     const epoch = deps.perception.evidence.generation();
+    const ambientGeneration = deps.perception.ambientGeneration?.();
+    const dropRawAfterConsumption = typeof deps.dropRawAfterConsumption === "function"
+      ? deps.dropRawAfterConsumption() : deps.dropRawAfterConsumption;
     const isCurrent = () => deps.enabled() && !turn.signal?.aborted && input.isCurrent() && target.isCurrent()
-      && !deps.perception.pause.isPaused() && deps.perception.evidence.isCurrent(epoch) && Date.now() < input.expiresAt;
+      && !deps.perception.pause.isPaused() && deps.perception.evidence.isCurrent(epoch)
+      && deps.perception.ambientGeneration?.() === ambientGeneration && Date.now() < input.expiresAt;
     if (!isCurrent()) return;
     const media = input.source.source.media;
     const probe = await probeMediaAccess({ context: turn.runContext, ownerHostId: deps.ownerHostId, serverId: target.serverId,
@@ -51,7 +55,7 @@ export function createViewingInvitationEvidence(deps: Dependencies) {
     const output = await route("screenshot-ambient");
     if (!output.ok) return;
     const nativeImageContext = await acquireViewingFrame(deps, output,
-      { expiresAt: input.expiresAt, sourceRef: input.source.sourceRef, isCurrent });
+      { expiresAt: input.expiresAt, sourceRef: input.source.sourceRef, isCurrent, dropRawAfterConsumption });
     if (!nativeImageContext) return;
     const title = scrubPii(probe.title);
     return { title, isCurrent, nativeImageContext, text: fenceUntrusted({ source: "detected-viewing-evidence",
@@ -63,7 +67,7 @@ export function createViewingInvitationEvidence(deps: Dependencies) {
 interface CapturedEvidence { output: unknown; nativeImages?: NativeToolImages }
 
 async function acquireViewingFrame(deps: Dependencies, captured: CapturedEvidence,
-  observation: { expiresAt: number; sourceRef: string; isCurrent(): boolean }): Promise<NativeImageContext | undefined> {
+  observation: { expiresAt: number; sourceRef: string; isCurrent(): boolean; dropRawAfterConsumption: boolean }): Promise<NativeImageContext | undefined> {
   const native = captured.nativeImages;
   const isCurrent = () => observation.isCurrent() && (native?.isCurrent?.() ?? true);
   const context = createScreenContext({ staleAfterMs: Math.max(0, observation.expiresAt - Date.now()) });
@@ -76,7 +80,7 @@ async function acquireViewingFrame(deps: Dependencies, captured: CapturedEvidenc
       ? { ...captured.output, ...image } : captured.output);
     const observedAt = Date.now();
     transferred = true;
-    await observeAmbientFrame({ store: deps.store, context, dropRawAfterConsumption: deps.dropRawAfterConsumption },
+    await observeAmbientFrame({ store: deps.store, context, dropRawAfterConsumption: observation.dropRawAfterConsumption },
       frame, { observedAt, isCurrent, release: () => native?.release?.(),
         sourceContext: { materials: [{ label: "Detected viewing screen capture", reference: observation.sourceRef,
           time: new Date(observedAt).toISOString() }] } });

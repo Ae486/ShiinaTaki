@@ -51,26 +51,41 @@ Authentication and catalog presence never grant permission. Conversely, a Core `
 to execute when its local availability or stricter floor refuses. See `permission-authorization.md` for the complete
 projection/evidence contract.
 
-### Loopback auto-trust (P3) — the local-operator connection rule
+### Native local admission and explicit legacy loopback compatibility
 
-An operator on the trusted machine boundary needs no pairing ceremony (localhost is the security boundary; interactive pairing is a remote-device pattern — see D23). The rule, in `connect.ts` order:
+Ordinary same-user Desktop entry uses a dedicated profile credential in the native OS store. Loopback reachability,
+Origin, the public `local-core.json` descriptor and the renderer's labels never establish identity on their own.
 
-1. token branch (verify → authenticate, or fail-closed `AUTH_FAILED` + socket close),
-2. pairingCode branch,
-3. **auto-trust**: fires ONLY when `trustLoopbackOperator` (config, default on) AND `role === "operator"` AND `isLoopback(remoteAddress)` — then issue a token (the SAME `issueToken` pairing uses; reconnect works even if the flag later flips) + authenticate,
-4. else `beginPairing` / `PAIRING_REQUIRED`.
+- Core creates/reads `TakiAgent/local-bootstrap-<Core host UUID>` through the existing framed native helper. Read/create
+  is asynchronous, create-only and cached. Absent, inaccessible and invalid credential states do not overwrite an account
+  or block configuration/control RPCs. The catalog master key and local admission key remain different accounts.
+- `connect.localAuth.begin` contains a fresh client nonce and no reusable token. Core binds one random challenge to the
+  actual connection object, Core profile/instance/endpoint, device ID, role and expiry. Shared `localAuthTranscript`
+  defines the JSON tuple and separate server/client HMAC-SHA256 domains; Rust has a parity fixture.
+- Native verifies the server proof before producing the client proof or sending a reconnect token. The second `connect`
+  runs on the same socket, consumes the challenge once, and fails on expiry, changed identity or retired endpoint.
+  Publishing a new endpoint is atomic; failed descriptor writes retain the old endpoint and listener.
+- Home/Pet native commands check actual invoking window and exact app/dev origin. The native Shell profile owns a stable
+  `operator-device-id`; renderers cannot select an account, profile, device ID or Node role. Chat remains an independent
+  socket inside Home. Node proof is native-only and retains Host protocol/catalog/governance checks.
+- DeviceRegistry remains durable role/token authority. An existing presented token must verify; rejection never clears
+  it or re-enrolls that device. Concurrent authenticated native windows retain the same record/token hash. Failed device
+  persistence never publishes in-memory trust. There is no separate ticket registry or local-device database.
+- Bootstrap key bytes never enter renderer state, logs, URLs or ordinary config. Existing reconnect tokens remain in their
+  established native/browser stores and cross only a server-verified socket. Native operator adoption preserves the legacy
+  browser identity record. Existing timezone device authority is not silently reassigned; reporting uses the accepted
+  socket identity and the owner can explicitly select the current device.
+- `TAKI_TRUST_LOOPBACK_OPERATOR` defaults **false**. Explicit true retains legacy operator-only auto-trust, read at the
+  next authentication. False disables that unauthenticated compatibility path; it does not disable authenticated native
+  admission. Explicit remote/headless pairing and valid role-bound tokens remain supported.
+- Unknown/non-loopback peer addresses cannot use local proof. Operator capabilities/Host declarations remain schema-
+  forbidden, all token/proof refusals fail closed, and issuance audit excludes credentials.
 
-Non-negotiable safety properties (all enforced + tested; a change here is a security review):
+The trust boundary is the selected profile and logged-in OS user. Malicious native code already able to read that user's
+credential store is outside this boundary. Changing a native client device ID cannot claim a different role's existing record.
 
-- **Ordering is fail-closed**: a wrong token fails in branch 1 and NEVER reaches auto-trust, even on loopback+flag-on.
-- **Operators only**: nodes carry capabilities and final execution boundaries, so they must still pair. Auto-trusting a
-  node would let an unauthenticated process publish Host identity/catalog/classifier metadata and is a real escalation.
-- **`isLoopback(undefined) === false`**: an unknown/absent peer address falls to pairing (fail-closed). Address comes from the WS upgrade transport peer (`request.socket.remoteAddress`), never a spoofable header; exact-set membership {127.0.0.1, ::1, ::ffff:127.0.0.1}, not a loose prefix/CIDR that could over-match.
-- **The flag is an auth kill-switch → parse it fail-closed**: default on; disabling fully restores mandatory pairing for ALL peers (the VPS/public-Core posture). Accept only strict `true/1/false/0` (case-insensitive); garbage errors at boot, never silently means on.
-- **Audit every mint**: auto-trust persists a credential → log it (deviceId/deviceName/remoteAddress; never the token), same as pairing logs its code.
-- Operator capabilities are schema-forced empty (`connect-schema.ts`), parsed before the handler → an auto-trusted operator can't smuggle capabilities.
-
-Reference: `server/methods/connect.ts`, `devices/device-registry.ts` (`issueToken`/`trustDevice`), hardened by the fable5 security review (2026-07-14). Residual boundary notes (multi-user host, deviceId clobber) → deferred D25.
+References: `devices/local-connection-auth.ts`, `secrets/local-bootstrap-key.ts`, `server/methods/connect.ts`, native
+`local_auth.rs` / `local_auth_commands.rs` / `ws_local_auth.rs`, and `connect-local.test.ts`.
 
 ## Scenario: Core shutdown drains accepted connections before storage
 

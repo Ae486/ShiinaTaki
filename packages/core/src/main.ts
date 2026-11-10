@@ -7,6 +7,15 @@
  *         cooperative media preparation, Skill-disclosed recommendation controls, bounded Run-event backfill, and MCP names → WS
  */
 import { join } from "node:path";
+import { createModelProfileService } from "./config/model-profile-service.ts";
+import { observeModelProfileApplication } from "./config/model-profile-application.ts";
+import { createAgentRuntimeConfig } from "./config/agent-runtime-config.ts";
+import { loadAttachmentConfig } from "./config/attachment-config.ts";
+import { loadAmbientScreenshotConfig } from "./config/ambient-screenshot-config.ts";
+import { ServerConfigSchema } from "./config/server-config.ts";
+import { AMBIENT_CONFIG_KEYS, CONTEXT_CONFIG_KEYS } from "./boot/feature-configuration.ts";
+import { registerModelProfileMethods } from "./server/methods/model-profile-methods.ts";
+import { createLocalConnectionAuth } from "./devices/local-connection-auth.ts";
 import { randomUUID } from "node:crypto";
 import type { ToolSet } from "ai";
 import { BROWSER_PLAYBACK_ENABLED_KEY, CO_WATCHING_SKILL, MONITOR_MODE_CONFIG_KEY, MonitorModeSchema } from "@taki/shared";
@@ -76,6 +85,7 @@ import { startAttachmentGc } from "./media/attachment-gc.ts";
 import { createAttachmentStore } from "./media/attachment-store.ts";
 import { directoryByteSize } from "./media/directory-size.ts";
 import { composeMemoryRuntime } from "./memory/runtime-composition.ts";
+import { createIndexOperationAdapter } from "./memory/operations/index-operation-adapter.ts";
 import { readMemoryAuthorityStatus } from "./memory/operations/memory-authority-status.ts";
 import { createMemoryOperationService } from "./memory/operations/memory-operation-service.ts";
 import { createTidyOperationAdapter } from "./memory/operations/tidy-operation-adapter.ts";
@@ -133,7 +143,7 @@ import { bootSkillLifecycle } from "./skills/skill-boot.ts";
 import { createCurrentTimeTool } from "./time/current-time-tool.ts";
 import { createTimelineSubscriptions } from "./server/timeline-subscriptions.ts";
 import { createMemoryOperationSubscriptions } from "./server/memory-operation-subscriptions.ts";
-import { startWsServer } from "./server/ws-server.ts";
+import { startWsListener, wsEndpoint } from "./server/ws-listener.ts";
 import { createReadFileTool } from "./workspace/read-file-tool.ts";
 import { createWorkspacePaths } from "./workspace/workspace-paths.ts";
 import { createWriteFileTool } from "./workspace/write-file-tool.ts";
@@ -177,7 +187,9 @@ import { createMediaAnalysisRuntime, type MediaAnalysisRuntime } from "./co-watc
 import { validatePatternActor } from "./initiative/patterns/pattern-source.ts";
 
 // Boot phase (batch-1 #26): the data root comes from env alone, the DB opens on it, and every other knob is then
-// resolved as env > stored > built-in default — so a value the settings panel stored takes effect at THIS boot.
+// resolved as application > environment > built-in default; runtime owners publish their application outcomes.
+const modelConfigLifecycle: { changed?: (key: string) => void } = {};
+const listenerLifecycle: { current?: Awaited<ReturnType<typeof startWsListener>> } = {};
 const patternLifecycle: { current?: ReturnType<typeof composePatternRuntime> } = {};
 const browserPlaybackLifecycle: { current?: { refresh(): void; close(): void } } = {};
 const coWatchingLifecycle: { current?: CoWatchingRuntime } = {};
@@ -188,12 +200,14 @@ const cacheUsageLifecycle: { current?: ReturnType<typeof createCacheUsageService
 const maintenanceMonitorLifecycle: { current?: ReturnType<typeof createMaintenanceMonitorService> } = {};
 const coWatchingSubscriptions = createCoWatchingSubscriptions();
 const boot = bootstrapCore(process.env, { onConfigChanged: (key) => {
+  modelConfigLifecycle.changed?.(key);
   if (key.startsWith("TAKI_INITIATIVE_")) patternLifecycle.current?.policyChanged();
   if (key === BROWSER_PLAYBACK_ENABLED_KEY) browserPlaybackLifecycle.current?.refresh();
   if (key === MONITOR_MODE_CONFIG_KEY) cacheUsageLifecycle.current?.changed();
   if (key === MONITOR_MODE_CONFIG_KEY) maintenanceMonitorLifecycle.current?.changed();
 } });
-const { logger, db, serverConfig, contextConfig, model } = boot;
+const { logger, db, serverConfig, contextConfig } = boot;
+const livePolicies = { attachment: boot.attachmentConfig, ambient: boot.ambientConfig, trustLoopback: serverConfig.trustLoopbackOperator };
 const requestAttribution = createRequestAttributionRepo(db);
 const cacheUsage = createCacheUsageService({ read: createCacheUsageRepo(db).read,
   readLatestPrimaryRequest: (characterId) => requestAttribution.read(characterId),
@@ -215,6 +229,10 @@ const secretCatalog = await createSecretCatalogService({
   filePath: join(serverConfig.dataDir, "secret-catalog.bin"), storeId: coreHostId,
   keySource: resolveMasterKeySource(process.env), logger: secretLog,
 });
+const models = createModelProfileService({ db, source: boot.config.source, env: process.env, secrets: secretCatalog });
+const model = models.binding("main")?.model;
+const localAuth = createLocalConnectionAuth({ env: process.env, dataDir: serverConfig.dataDir, coreId: coreHostId,
+  endpoint: wsEndpoint(serverConfig), logger });
 const governance = createGovernancePolicyService(createGovernancePolicyRepo(db));
 const runEventRepo = createRunEventRepo(db);
 const runEventLive = createRunEventLiveBus((runId, afterSeq, limit) => runEventRepo.page({ runId, afterSeq, limit }),
@@ -235,17 +253,63 @@ const timelineRepo = createTimelineRepo(db);
 const primarySources = createPrimaryConversationSourceRepo({ db, timeline: timelineRepo });
 // Main request calibration owns the real input cap and its separate estimator budget. Utility remains uncalibrated.
 const windowStateRepo = createWindowStateRepo(db);
+const agentRuntime = createAgentRuntimeConfig({ models, source: boot.config.source, windows: windowStateRepo });
+modelConfigLifecycle.changed = (key) => {
+  const application = boot.config.application;
+  if (/^TAKI_(PROVIDER|UTILITY)_(BASE_URL|MODEL)$/.test(key)) {
+    application.apply([key], () => { models.legacyChanged(key); });
+    observeModelProfileApplication(models, application);
+  } else if (CONTEXT_CONFIG_KEYS.includes(key) || key === "TAKI_MAX_STEPS") {
+    void application.apply([key], () => {
+      if (key === "TAKI_UTILITY_CONTEXT_TOKENS" || key === "TAKI_COMPACT_KEEP_MESSAGES") return memoryRuntime.reconfigure(key);
+      if (key === "TAKI_PROVIDER_INCLUDE_USAGE") models.refresh();
+      agentRuntime.refresh();
+      if (agentRuntime.issue()) throw new Error(agentRuntime.issue());
+      return memoryRuntime.reconfigure(key);
+    });
+  } else if (/^TAKI_(MEMORY_|PROMPT_DIR$)/.test(key)) {
+    void application.apply([key], () => memoryRuntime.reconfigure(key));
+  } else if (["TAKI_HINDSIGHT_ENDPOINT", "TAKI_HINDSIGHT_REQUEST_TIMEOUT_MS"].includes(key)) {
+    application.mark([key], selectedMemory.canonical && memoryRuntime.snapshot().providerId === "hindsight" ? "restart-required" : "applied",
+      "Setup reads the saved setting. Selected Hindsight connection replacement remains owned by its dedicated task.");
+  } else if (key.startsWith("TAKI_ATTACHMENT_")) {
+    application.apply([key], () => { livePolicies.attachment = loadAttachmentConfig(boot.config.source.env()); });
+  } else if (key.startsWith("TAKI_AMBIENT_")) application.apply(AMBIENT_CONFIG_KEYS, () => {
+    livePolicies.ambient = loadAmbientScreenshotConfig(boot.config.source.env());
+    perception.reconfigureAmbient(livePolicies.ambient);
+    viewingLifecycle.current?.changed();
+  });
+  else if (key === "TAKI_LOG_LEVEL") application.apply([key], () => {
+    logger.level = ServerConfigSchema.shape.logLevel.parse(boot.config.source.resolve(key)?.value);
+  });
+  else if (key === "TAKI_TRUST_LOOPBACK_OPERATOR") application.apply([key], () => {
+    livePolicies.trustLoopback = ServerConfigSchema.shape.trustLoopbackOperator.parse(boot.config.source.resolve(key)?.value);
+  });
+  else if (key === "TAKI_WS_HOST" || key === "TAKI_WS_PORT") void application.apply(["TAKI_WS_HOST", "TAKI_WS_PORT"], () => {
+    if (!listenerLifecycle.current) throw new Error("LISTENER_UNAVAILABLE");
+    return listenerLifecycle.current.replace({ host: ServerConfigSchema.shape.host.parse(boot.config.source.resolve("TAKI_WS_HOST")?.value),
+      port: ServerConfigSchema.shape.port.parse(boot.config.source.resolve("TAKI_WS_PORT")?.value) });
+  });
+};
+observeModelProfileApplication(models, boot.config.application);
+models.subscribe(() => {
+  observeModelProfileApplication(models, boot.config.application);
+  agentRuntime.refresh(); scheduleLifecycle.engine?.rearm(); patternLifecycle.current?.sourceChanged();
+});
 const windowCalibrator = createWindowCalibrator({ repo: windowStateRepo, slot: "main", declared: contextConfig.contextTokens.main });
 const timelineSubscriptions = createTimelineSubscriptions();
 const chatActivity = createChatActivityProjection();
 const chatLog = logger.child({ mod: "chat" });
 // Replay View admission uses historyRatio × the calibrated window. Proactive compaction separately measures the
 // complete assembled request against effectiveWindow × compact.triggerRatio.
-const historyBudget = () => Math.floor(windowCalibrator.effectiveWindow() * contextConfig.historyRatio);
+const historyBudget = () => agentRuntime.capture()?.historyBudget() ?? Math.floor(windowCalibrator.effectiveWindow() * contextConfig.historyRatio);
 const summaryRepo = createSummaryRepo(db);
 // Both user attachments and captured tool images use this retained native replay store.
 const attachmentStore = createAttachmentStore({ attachmentsDir: join(serverConfig.dataDir, "workspace", "attachments"),
-  ttlMs: () => boot.attachmentConfig.ttlMs });
+  ttlMs: () => {
+    if (boot.config.application.read("TAKI_ATTACHMENT_TTL_DAYS")?.state === "unavailable") throw new Error("ATTACHMENT_POLICY_UNAVAILABLE");
+    return livePolicies.attachment.ttlMs;
+  } });
 const screenshotStore = createScreenshotStore({ screenshotsDir: join(serverConfig.dataDir, "workspace", "screenshots") });
 const latestRequestMeasurements = new Map<string, RequestMeasurement>();
 const presenceLifecycle: { current?: ReturnType<typeof composePresenceRuntime> } = {};
@@ -275,10 +339,13 @@ const avatarOutcomes = createAvatarOutcomes({ deadlineMs: avatarOutcomeDeadlineM
 
 // Marker-first composition owns every legacy/canonical reader, writer, prompt, scheduler, and migration cutover seam.
 const memoryRuntime = composeMemoryRuntime({ db, dataDir: serverConfig.dataDir, promptDir: serverConfig.promptDir, model,
+  configuration: boot.config.source, application: boot.config.application,
+  resolveUtilityModel: () => models.binding("utility")?.model,
+  utilityContextSlot: () => models.binding("utility")?.source === "inherited" ? "main" : "utility",
   timeline: timelineRepo, primarySources, windowStart: conversationStore.windowStart, summaries: summaryRepo,
   estimatedTokens: conversationStore.estimatedTokens, budget: historyBudget,
   measureRequest: (characterId) => latestRequestMeasurements.get(characterId),
-  effectiveWindowTokens: () => windowCalibrator.effectiveWindow(),
+  effectiveWindowTokens: () => agentRuntime.capture()?.contextWindowTokens() ?? windowCalibrator.effectiveWindow(),
   compact: contextConfig.compact, env: boot.env, logger, usageMeter: auxiliaryUsageMeter,
   onSummaryCommitted: cacheUsage.changed,
   onMaintenanceChanged: maintenanceMonitor.changed,
@@ -338,10 +405,12 @@ const hindsightSetup = composeHindsightSetup({ db, config: boot.config.source, s
 const memoryOperationSubscriptions = createMemoryOperationSubscriptions();
 const memoryOperations = createMemoryOperationService({
   db, live: memoryRuntime.operations, tidy: memoryRuntime.tidyOperations, setup: hindsightSetup, bootId: randomUUID(), logger,
+  searchIndex: memoryRuntime.searchIndex,
   onChanged: (operation) => { memoryOperationSubscriptions.publish(operation); if (operation.kind === "tidy") maintenanceMonitor.changed(); },
 });
 const tidyOperations = createTidyOperationAdapter(memoryOperations, () => memoryRuntime.tidyOperations().authorityEpochId);
 memoryRuntime.installTidySubmit(async (characterId) => { await tidyOperations.runNow(characterId); });
+memoryRuntime.installIndexSubmit(createIndexOperationAdapter(memoryOperations, memoryRuntime.searchIndex));
 registerMemoryOperationMethods(registry, { service: memoryOperations, subscriptions: memoryOperationSubscriptions, logger });
 registry.register(memoryAuthorityStatusMethod({ logger,
   read: () => readMemoryAuthorityStatus({ db, live: memoryRuntime.operations, setup: hindsightSetup, operations: memoryOperations }) }));
@@ -433,7 +502,9 @@ const extensions = createExtensionComposition({
   projectScreenshot: (result) => projectScreenshotRoute({ store: screenshotStore, attachments: attachmentStore }, result),
   projectAmbientScreenshot: (result) => {
     const epoch = perception.evidence.generation();
-    return projectAmbientScreenshotRoute(result, () => boot.ambientConfig.enabled && perception.evidence.isCurrent(epoch));
+    const generation = perception.ambientGeneration();
+    return projectAmbientScreenshotRoute(result, () => perception.ambientEnabled()
+      && perception.ambientGeneration() === generation && perception.evidence.isCurrent(epoch));
   },
   skills: { catalog: skillBoot.catalog, loader: skillsLoader, governance },
   mcp: mcpBoot.manager,
@@ -448,6 +519,7 @@ const runService = createRunService({
   provider: modelProvider,
   modelId,
   snapshot: createRunSnapshotCapture({
+    runtime: agentRuntime.capture,
     extensions,
     governance,
     approval,
@@ -492,10 +564,11 @@ registerUserTimezoneMethods(registry, { service: userTimezoneService, connection
 const pairingLog = logger.child({ mod: "pairing" });
 registry.register(
   connectMethod({
+    localAuth,
     deviceRegistry,
     connectionRegistry,
     // Localhost auto-trust (P3): default-on config so the local Pet UI connects without pairing; off for a public Core.
-    trustLoopbackOperator: serverConfig.trustLoopbackOperator,
+    trustLoopbackOperator: () => livePolicies.trustLoopback,
     onPairingCode: ({ deviceId, deviceName, code }) =>
       pairingLog.info({ deviceId, deviceName, code }, "pairing code issued"),
     // A credential minted with no human in the loop must leave an audit trail (the token itself is never logged).
@@ -641,7 +714,8 @@ registry.register(runStatusMethod(runService));
 registry.register(runQueueMethod(runService));
 // Settings store (#26 batch 1): read every knob with its provenance, store operator values, push config.changed.
 // Operator-only, NO Rust mirror; secrets are reported as set/not-set and refused on write (invariant 5).
-registerConfigMethods(registry, { ...boot.config, logger });
+registerModelProfileMethods(registry, models);
+registerConfigMethods(registry, { ...boot.config, logger, activeModel: () => models.binding("main") });
 registerObservabilityMethods(registry, { service: observability, live: runEventLive });
 registerCacheUsageMethods(registry, cacheUsage);
 registerMaintenanceMonitorMethods(registry, maintenanceMonitor);
@@ -672,7 +746,7 @@ const coWatchingRuntime = createCoWatchingRuntime({ catalog: coWatchingCatalog, 
     const tool = mcpBoot.manager.snapshot().find((entry) => entry.serverId === serverId && entry.ref.toolName === "bilinote_read_result");
     return tool ? { toolKey: tool.toolKey, isCurrent: tool.isCurrent } : undefined;
   },
-  targetReady: (id) => id === "taki" || characterStore.list().some((character) => character.characterId === id),
+  targetReady: (id) => agentRuntime.available() && (id === "taki" || characterStore.list().some((character) => character.characterId === id)),
   onChanged: coWatchingSubscriptions.publish });
 coWatchingLifecycle.current = coWatchingRuntime;
 const mediaAnalysisRuntime = createMediaAnalysisRuntime({ catalog: coWatchingCatalog, ownerHostId: coreHostId,
@@ -684,12 +758,12 @@ const mediaAnalysisRuntime = createMediaAnalysisRuntime({ catalog: coWatchingCat
     isCurrent: (source) => validatePatternActor(db, source.characterId, { kind: "agent", runId: source.runId,
       attemptId: source.attemptId, toolCallId: "media-recommendation-preparation" }) === null,
   },
-  targetReady: (id) => id === "taki" || characterStore.list().some((character) => character.characterId === id),
+  targetReady: (id) => agentRuntime.available() && (id === "taki" || characterStore.list().some((character) => character.characterId === id)),
   onChanged: coWatchingSubscriptions.publish, logger: logger.child({ mod: "media-analysis" }) });
 mediaAnalysisLifecycle.current = mediaAnalysisRuntime;
 const viewing = createViewingInvitationSource({ db, sources: browserPlayback,
   policy: () => readViewingInvitationPolicy(boot.config.source),
-  ready: () => boot.ambientConfig.enabled
+  ready: () => perception.ambientEnabled()
     && skillsLoader.describe(CO_WATCHING_SKILL) !== undefined
     && selectCoWatchingAnalysisTools(mcpBoot.manager.snapshot()).length === 1
     && mcpBoot.manager.snapshot().some((entry) => entry.ref.toolName === "bilinote_probe_media" && entry.isCurrent())
@@ -705,9 +779,9 @@ const viewing = createViewingInvitationSource({ db, sources: browserPlayback,
       const targets = selectCoWatchingAnalysisTools(mcpBoot.manager.snapshot());
       return targets.length === 1 ? targets[0] : undefined;
     },
-    enabled: () => boot.ambientConfig.enabled,
+    enabled: () => perception.ambientEnabled(),
     perception, store: createAmbientShotStore({ ambientDir: join(serverConfig.dataDir, "workspace", "ambient-screenshots") }),
-    dropRawAfterConsumption: boot.ambientConfig.retention.mode === "drop-after-consumption",
+    dropRawAfterConsumption: () => livePolicies.ambient.retention.mode === "drop-after-consumption",
   }),
   startAccepted: (input, interactive) => coWatchingRuntime.invite({ ...input, lifetimeMinutes: 120 }, interactive),
   onChanged: coWatchingSubscriptions.publish });
@@ -720,18 +794,19 @@ const patternRuntime = composePatternRuntime({ db, config: boot.config.source, t
   runtime: initiativeRuntime, logger, captureMemory: memoryRuntime.captureRun, avatarContext: avatarVocabulary.render, viewing,
   // The bundled single-Character frontend has a real built-in target. Other explicit targets require
   // a valid imported Character marker; neither imports nor avatar reports select the speaker.
-  targetReady: (id) => id === "taki" || characterStore.list().some((character) => character.characterId === id),
+  targetReady: (id) => agentRuntime.available() && (id === "taki" || characterStore.list().some((character) => character.characterId === id)),
   monitorEnabled: () => boot.config.source.resolve(MONITOR_MODE_CONFIG_KEY)?.value !== "DISABLED" });
 patternLifecycle.current = patternRuntime;
 const scheduledRuns = createScheduledRunAdapter({ repo: scheduleRepo, runs: runService, agent: chatAgent,
   queue: turnControls.queue, turns: turnControls.turns, logger: logger.child({ mod: "scheduled-run" }), deliver: finishScheduled });
 const scheduleEngine = createScheduleEngine({ repo: scheduleRepo, patterns: schedulePatterns, runs: scheduledRuns,
+  available: agentRuntime.available,
   userTimezone: userTimezoneService.timezone, logger: logger.child({ mod: "scheduler" }) });
 scheduleLifecycle.engine = scheduleEngine;
-await scheduleEngine.start();
+
 
 // Attachment GC (#17): a boot sweep + a 6h interval; only raw bytes expire, the description-memory is permanent.
-startAttachmentGc({ store: attachmentStore, ttlMs: boot.attachmentConfig.ttlMs, logger });
+const attachmentGc = startAttachmentGc({ store: attachmentStore, ttlMs: () => livePolicies.attachment.ttlMs, logger });
 
 // Dev-only L1 drive: env-gated, no LLM, and still uses the Agent's tools plus node-side authorization.
 if (devTriggerEnabled(process.env)) {
@@ -754,13 +829,17 @@ if (devTriggerEnabled(process.env)) {
   );
 }
 
-const server = await startWsServer({
+const server = await startWsListener({
   host: serverConfig.host,
   port: serverConfig.port,
   registry,
   connectionRegistry,
   logger,
+  publishEndpoint: localAuth.publishEndpoint,
 });
+listenerLifecycle.current = server;
+boot.config.application.mark(["TAKI_WS_HOST", "TAKI_WS_PORT"], "applied");
+void scheduleEngine.start();
 memoryRuntime.start();
 patternRuntime.start();
 
@@ -775,6 +854,7 @@ function shutdown(signal: string): void {
   const subagentsStopped = subagents?.close();
   viewing.close();
   browserPlaybackLifecycle.current?.close();
+  attachmentGc.stop();
   perception.dispose();
   presenceRuntime.close();
   const schedulerStopped = scheduleEngine.stop();
@@ -795,6 +875,7 @@ function shutdown(signal: string): void {
     // Stop MCP publication → cancel candidates → drain under one budget → force-close remaining clients
     // (each exactly once), before the db handle and process go away.
     await mcpBoot.manager.close();
+    localAuth.close();
     db.close(); // release the sqlite file handle (and checkpoint the WAL) before exit
     // Let pending native I/O retire after application teardown. Forced exit after fetch can abort Windows libuv
     // while its async handles are closing; natural exit also lets buffered diagnostics finish writing.

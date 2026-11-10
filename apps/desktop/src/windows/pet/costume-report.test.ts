@@ -6,16 +6,11 @@
  */
 
 import { describe, expect, it } from "vitest";
-import type { CostumeAvailability } from "@taki/shared";
 import { costumeTransitions, refusalFor, IDLE_OBSERVATION, type CostumeCommandView } from "./costume-report.ts";
 
-const renderable: CostumeAvailability = { renderable: true, missingMotions: 0, missingPacks: [] };
-const broken: CostumeAvailability = { renderable: false, missingMotions: 0, missingPacks: ["ksm"] };
 
 const view = (over: Partial<CostumeCommandView> = {}): CostumeCommandView => ({
   switchingId: null,
-  costumes: ["taki-default", "taki-summer"],
-  availability: { "taki-default": renderable, "taki-summer": renderable },
   ready: true,
   ...over,
 });
@@ -70,17 +65,15 @@ describe("costumeTransitions", () => {
 });
 
 describe("refusalFor", () => {
-  it("accepts a renderable costume while nothing is in flight", () => {
-    expect(refusalFor("taki-summer", view())).toBeNull();
+  it("admits metadata validation while nothing is in flight", () => {
+    expect(refusalFor(view())).toBeNull();
   });
 
   it("refuses a command that arrives mid-switch instead of returning silently", () => {
-    expect(refusalFor("taki-summer", view({ switchingId: "taki-default" }))).toBe("busy");
+    expect(refusalFor(view({ switchingId: "taki-default" }))).toBe("busy");
   });
 
-  it("names the other reasons the switch path would have dropped without a trace", () => {
-    expect(refusalFor("taki-summer", view({ ready: false }))).toBe("no-scene");
-    expect(refusalFor("taki-winter", view())).toBe("unknown-costume");
-    expect(refusalFor("taki-summer", view({ availability: { "taki-summer": broken } }))).toBe("not-renderable");
+  it("refuses an unavailable scene or client before metadata admission", () => {
+    expect(refusalFor(view({ ready: false }))).toBe("no-scene");
   });
 });

@@ -27,6 +27,7 @@ import { createPrimaryMemorySourceState } from "./primary-memory-source-state.ts
 import { patternDigest } from "../initiative/patterns/pattern-source.ts";
 import { createLocalRecallEvidence } from "./memory-recall-evidence.ts";
 import { readPrimaryMemorySource } from "../db/primary-memory-source-read.ts";
+import { loadMemoryConfig } from "../config/memory-config.ts";
 
 const AT = "2026-09-11T00:00:00.000Z";
 const cleanup: Array<() => void> = [];
@@ -42,7 +43,7 @@ function fact(layer = "episodes", content = "我记得他说「很烦」。", im
   return { layer, content, importance, disclosure: "很烦" };
 }
 
-function fixture(model: LanguageModel, path = ":memory:") {
+function fixture(model: LanguageModel, path = ":memory:", captureRetentionDays?: () => number) {
   const db = openDatabase({ path, migrations: MIGRATIONS });
   let closed = false;
   const close = () => { if (!closed) { db.close(); closed = true; } };
@@ -69,7 +70,8 @@ function fixture(model: LanguageModel, path = ":memory:") {
   const captured = createCaptureLogger();
   const slot = createUtilitySlot({ mainModel: model, logger: captured.logger });
   const ingestion = createCanonicalLocalIngestion({ provider, authority, maintenance, journal, timeline, autoState,
-    events, slot, now: () => AT, primarySources });
+    events, slot, now: () => AT, primarySources, captureRetentionDays,
+    config: captureRetentionDays ? loadMemoryConfig({}) : undefined });
   const scope = { epochId: epoch.epochId, characterId: "taki" };
   function primary(user = "我最近工作卡住了，真的很烦", assistant = "我会记得你说的「很烦」"): TimelineEntry[] {
     const entries = [timeline.append({ characterId: "taki", role: "user", content: user }),
@@ -86,6 +88,27 @@ function retirement(throughSeq: number) {
 }
 
 describe("canonical Local automatic ingestion", () => {
+  it("captures retention before the Character queue and never rereads it during extraction", async () => {
+    let days = 4;
+    const capture = vi.fn(() => days);
+    const model = script(keep("character"), [fact("intentions", "Remember to revisit the plan")],
+      keep("character", 3, 4), [fact("intentions", "Remember to revisit the next plan")]);
+    const f = fixture(model, ":memory:", capture);
+    f.ingestion.initializeBaseline("taki"); f.primary();
+    const first = f.ingestion.run({ characterId: "taki", throughSeq: 2 });
+    days = 9;
+    expect(capture).toHaveBeenCalledTimes(1);
+    await first;
+    f.primary("A different next intention", "I will keep the new plan");
+    const second = f.ingestion.run({ characterId: "taki", throughSeq: 4 });
+    days = 15;
+    await second;
+    expect(capture).toHaveBeenCalledTimes(2);
+    const expiries = f.maintenance.list(f.scope).map((record) => record.policy.retention.kind === "expiring"
+      ? (Date.parse(record.policy.retention.expiresAt!) - Date.parse(AT)) / 86_400_000 : null).sort();
+    expect(expiries).toEqual([4, 9]);
+  });
+
   it("imports retained source after SQLite reopen without a callback and preserves duplicate receipts", async () => {
     const root = mkdtempSync(join(tmpdir(), "taki-primary-import-")); cleanup.push(() => rmTempDir(root));
     const path = join(root, "memory.sqlite"); const initial = fixture(script(), path);

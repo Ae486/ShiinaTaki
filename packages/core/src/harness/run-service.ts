@@ -37,6 +37,7 @@ export interface CapturedRunSnapshot {
 }
 
 export interface RunExecutionContext {
+  readonly runtime?: import("../agents/agent-runtime-binding.ts").AgentRuntimeBinding;
   /** Trusted linked identity; both roles use initiator=subagent but have different Memory authority. */
   readonly workScope?: SubagentWorkScope;
   readonly toolDisclosure?: ToolDisclosureSnapshot;
@@ -117,7 +118,7 @@ export function createRunService<TAdmission = unknown>(deps: {
     try {
       validateWorkAdmission(request, captured.context);
       result = deps.repo.admit({ runId: proposedRunId, request, snapshot: captured.snapshot,
-        provider: deps.provider, modelId: deps.modelId, linked: options.linked } satisfies RunAdmissionInput);
+        provider: captured.snapshot.modelProvider, modelId: captured.snapshot.modelId, linked: options.linked } satisfies RunAdmissionInput);
     } catch (error) {
       captured.context?.dispose?.(); throw error;
     }

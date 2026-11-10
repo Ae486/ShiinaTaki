@@ -16,10 +16,11 @@ export function createCanonicalLocalRetention(input: {
   repo: CanonicalMemoryMaintenanceRepo;
   authority: CanonicalMemoryAuthorityRepo;
   epochId: string;
-  intentionsDefaultDays: number;
+  intentionsDefaultDays: number | (() => number);
   now?: () => number;
 }): { ops: MemoryRetentionOps; sweep(): SweepCounts | undefined } {
   const now = input.now ?? Date.now;
+  const captureDays = () => typeof input.intentionsDefaultDays === "function" ? input.intentionsDefaultDays() : input.intentionsDefaultDays;
   const apply = (row: CanonicalMaintenanceRetentionRow, verdict: "archive" | "delete", at: number): void => {
     const common = { epochId: row.epochId, bankId: row.bankId, characterId: row.characterId, memoryId: row.memoryId,
       expectedRevision: row.revision, requestId: `retention:${stableRequestHash({ epochId: row.epochId,
@@ -34,7 +35,7 @@ export function createCanonicalLocalRetention(input: {
       && candidate.memoryId === target.memoryId && candidate.revision === target.expectedRevision);
     if (!row) throw new Error("MEMORY_REVISION_MISMATCH");
     const at = now();
-    if (verdictFor(row, at, input.intentionsDefaultDays) !== expected) throw new Error("MEMORY_CAPABILITY_UNSUPPORTED");
+    if (verdictFor(row, at, captureDays()) !== expected) throw new Error("MEMORY_CAPABILITY_UNSUPPORTED");
     apply(row, expected, at);
   };
   return {
@@ -46,9 +47,10 @@ export function createCanonicalLocalRetention(input: {
     },
     sweep: () => {
       input.authority.activeEpoch(input.epochId);
+      const intentionsDefaultDays = captureDays();
       const at = now(); let archived = 0; let deleted = 0; let failed = 0;
       for (const row of input.repo.listRetention({ epochId: input.epochId })) {
-        const verdict = verdictFor(row, at, input.intentionsDefaultDays);
+        const verdict = verdictFor(row, at, intentionsDefaultDays);
         if (verdict === "keep") continue;
         try { apply(row, verdict, at); if (verdict === "delete") deleted += 1; else archived += 1; }
         catch { failed += 1; }

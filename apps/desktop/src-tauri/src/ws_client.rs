@@ -31,12 +31,13 @@ use crate::protocol::{
 use crate::secrets::SecretStore;
 use crate::status::StatusEmitter;
 
-const TOKEN_KEY: &str = "node-token";
+pub(crate) const TOKEN_KEY: &str = "node-token";
 const RECONNECT_MIN: Duration = Duration::from_millis(500);
 const RECONNECT_MAX: Duration = Duration::from_secs(30);
 
 /// Everything the WS task needs; assembled by node::build_node (fields are crate-internal wiring).
 pub struct WsClient {
+    pub(crate) local_auth: bool,
     pub(crate) browser_attachment: Arc<crate::browser_attachment::BrowserAttachment>,
     pub(crate) url: String,
     pub(crate) device_id: String,
@@ -71,10 +72,16 @@ impl WsClient {
     }
 
     async fn connect_and_run(&self, pairing_rx: &mut Receiver<String>) -> Result<(), String> {
-        let (mut socket, _response) = connect_async(&self.url)
-            .await
+        let descriptor = if self.local_auth { Some(crate::local_auth::descriptor()?) } else { None };
+        let url = descriptor.as_ref().map_or(self.url.as_str(), |local| local.endpoint.as_str());
+        let (mut socket, _response) = tokio::time::timeout(Duration::from_secs(15), connect_async(url))
+            .await.map_err(|_| "Core socket open timed out")?
             .map_err(|error| error.to_string())?;
-        let Some(negotiation) = self.perform_handshake(&mut socket, pairing_rx).await? else {
+        let negotiation = match descriptor {
+            Some(descriptor) => Some(self.local_handshake(&mut socket, &descriptor).await?),
+            None => self.perform_handshake(&mut socket, pairing_rx).await?,
+        };
+        let Some(negotiation) = negotiation else {
             return Ok(()); // auth failed / pairing abandoned — the loop reconnects fresh
         };
         let catalog_generation = 1;
@@ -90,6 +97,7 @@ impl WsClient {
         let (write, mut read) = socket.split();
         let write = Arc::new(Mutex::new(write));
         let mut browser = self.browser_attachment.subscribe();
+        let mut browser_configuration = self.browser_attachment.configuration_changes();
         let mut forwarder = crate::browser_attachment::forwarder::Forwarder::default();
         let mut browser_revision = 0;
         if self.browser_attachment.configured() {
@@ -112,7 +120,15 @@ impl WsClient {
                         _ => {},
                     }
                 },
-                changed = browser.changed(), if self.browser_attachment.configured() => {
+                changed = browser_configuration.changed() => {
+                    if changed.is_err() { break; }
+                    if self.browser_attachment.configured() {
+                        write.lock().await.send(Message::text(json!({ "jsonrpc": "2.0", "id": "browser-playback-ready",
+                            "method": "browser.playback.ready", "params": { "schemaVersion": "taki.browser-playback.v1" } }).to_string()))
+                            .await.map_err(|_| "Browser attachment readiness send failed")?;
+                    }
+                },
+                changed = browser.changed() => {
                     if changed.is_err() { break; }
                     let mut writer = write.lock().await;
                     let observation = browser.borrow_and_update().clone();
@@ -159,8 +175,7 @@ impl WsClient {
                     pairing_code = Some(pairing_rx.recv().await.ok_or("pairing channel closed")?);
                 }
                 ConnectStep::AuthFailed => {
-                    self.secrets.delete(TOKEN_KEY)?; // a stale token is worthless — drop it and re-pair next round
-                    return Ok(None);
+                    return Err("Core refused the existing Node identity; credential preserved".into());
                 }
             }
         }
@@ -466,7 +481,7 @@ impl WsClient {
         });
     }
 
-    fn connect_params(&self, token: Option<String>, pairing_code: Option<String>) -> ConnectParams {
+    pub(crate) fn connect_params(&self, token: Option<String>, pairing_code: Option<String>) -> ConnectParams {
         ConnectParams {
             device_id: self.device_id.clone(),
             device_name: self.device_name.clone(),
@@ -510,7 +525,7 @@ impl WsClient {
         }
     }
 
-    fn validate_negotiation(&self, host: &HostNegotiation) -> Result<(), String> {
+    pub(crate) fn validate_negotiation(&self, host: &HostNegotiation) -> Result<(), String> {
         if host.host_id != self.device_id
             || host.protocol_version != HOST_CONTROL_PROTOCOL_VERSION
             || host.catalog_schema_version != HOST_CATALOG_SCHEMA_VERSION
@@ -526,7 +541,7 @@ impl WsClient {
     }
 }
 
-type WsStream =
+pub(crate) type WsStream =
     tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>;
 type SharedWrite = Arc<Mutex<futures_util::stream::SplitSink<WsStream, Message>>>;
 type SharedSession = Arc<Mutex<HostSession>>;
@@ -544,7 +559,7 @@ fn classify_error(error: &Value) -> ConnectStep {
     let code = error.get("data").and_then(|data| data.get("code")).cloned();
     match code.and_then(|value| serde_json::from_value::<ErrorCode>(value).ok()) {
         Some(ErrorCode::PairingRequired) => ConnectStep::PairingRequired,
-        _ => ConnectStep::AuthFailed, // AUTH_FAILED and anything else -> drop the token, re-pair
+        _ => ConnectStep::AuthFailed, // Refusal never destroys a durable identity or silently re-enrolls it.
     }
 }
 
@@ -1033,7 +1048,7 @@ mod tests {
             registry.register(handler.clone());
             let secrets = Arc::new(crate::secrets::InMemoryStore::new());
             secrets.set(TOKEN_KEY, "existing-test-token").unwrap();
-            let client = WsClient { browser_attachment: crate::browser_attachment::BrowserAttachment::disabled(), url, device_id: host_id.clone(), device_name: "Disclosure test".into(),
+            let client = WsClient { local_auth: false, browser_attachment: crate::browser_attachment::BrowserAttachment::disabled(), url, device_id: host_id.clone(), device_name: "Disclosure test".into(),
                 capabilities: vec!["exec".into()], secrets: secrets.clone(), gate: Arc::new(gate),
                 handlers: Arc::new(registry), status: Arc::new(crate::status::TracingStatusEmitter), exec_policy: Arc::new(policy) };
             let server = tokio::spawn(async move {
@@ -1075,7 +1090,7 @@ mod tests {
             registry.register(handler.clone());
             let secrets = Arc::new(crate::secrets::InMemoryStore::new());
             secrets.set(TOKEN_KEY, "existing-test-token").unwrap();
-            let client = WsClient { browser_attachment: crate::browser_attachment::BrowserAttachment::disabled(), url, device_id: host_id.clone(), device_name: "Resume test".into(),
+            let client = WsClient { local_auth: false, browser_attachment: crate::browser_attachment::BrowserAttachment::disabled(), url, device_id: host_id.clone(), device_name: "Resume test".into(),
                 capabilities: vec!["exec".into()], secrets: secrets.clone(), gate: Arc::new(gate),
                 handlers: Arc::new(registry), status: Arc::new(crate::status::TracingStatusEmitter), exec_policy: Arc::new(policy) };
             let server = tokio::spawn(async move {

@@ -40,7 +40,8 @@ Before writing backend code:
 | [Command Approval Disclosure](./command-approval-disclosure.md) | Complete masked exec command, typed chunk reconstruction, operator offer/echo, credential-preserving Host-v3 ACK refusal and unchanged one-shot execution/audit binding |
 | [Server-Push & Connection Auth](./server-push-and-connection-auth.md) | Fan-out, opt-in Perception/extension invalidations, pause deadline observation, generation restoration, auth and shutdown cleanup |
 | [Host-Bound Operation Lifecycle](./host-operation-lifecycle.md) | Implemented Host-control wire/generation/routing foundation plus shared offline, unknown-outcome, explicit-resume, and Run Receipt rules |
-| [Operator Config Store](./config-store.md) | Sparse Core-owned settings overlay; env > stored > default; config.* operator protocol, secret masking, typed refusals, live timing-policy validation and apply truthfulness |
+| [Operator Config Store](./config-store.md) | Core-owned application > environment > default settings, secret masking, validation and source truth |
+| [Live Configuration](./live-configuration.md) | Grouped model revisions, immutable Run/operation policy, dependency-scoped availability and atomic Local/Legacy index application |
 | [Agent Runtime](./agent-runtime.md) | Complete turn/tool fidelity, primary native image input, truthful prompts, late transient context and provider-neutral dispatch |
 | [Native Image Input](./native-image-input.md) | Single main model, native screenshot projection, retained refs/pressure and bounded ambient lifetimes without translators |
 | [Shared Agent Delegation](./shared-agent-delegation.md) | Private reusable child context, exact input Effect receipts, independent controls, read-only child Memory, completion inference and original-request publication |

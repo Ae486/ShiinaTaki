@@ -7,7 +7,6 @@
  *         guard; this only classifies what that guard did so the home page never waits on silence.
  */
 
-import type { CostumeAvailability } from "@taki/shared";
 import type { CostumeResultPayload } from "@/lib/costume-switch-event.js";
 
 export interface CostumeObservation {
@@ -20,13 +19,11 @@ export const IDLE_OBSERVATION: CostumeObservation = { switchingId: null, error: 
 
 export interface CostumeCommandView {
   switchingId: string | null;
-  costumes: string[];
-  availability: Record<string, CostumeAvailability>;
   /** false = the scene or authenticated Pet client is unavailable; the locked no-scene refusal covers both. */
   ready: boolean;
 }
 
-export type CostumeRefusal = "busy" | "no-scene" | "unknown-costume" | "not-renderable";
+export type CostumeRefusal = "busy" | "no-scene";
 
 /** The hook stamps its error as "<costume>: <cause>"; the page names the costume itself, so hand it the cause only. */
 function reasonOf(costumeId: string, error: string): string {
@@ -51,10 +48,8 @@ export function costumeTransitions(prev: CostumeObservation, next: CostumeObserv
 }
 
 /** Mirrors the switch path's own guards so a command it would drop is answered with a reason instead of silence. */
-export function refusalFor(costumeId: string, view: CostumeCommandView): CostumeRefusal | null {
+export function refusalFor(view: CostumeCommandView): CostumeRefusal | null {
   if (view.switchingId !== null) return "busy";
   if (!view.ready) return "no-scene";
-  if (!view.costumes.includes(costumeId)) return "unknown-costume";
-  if (view.availability[costumeId]?.renderable === false) return "not-renderable";
   return null;
 }

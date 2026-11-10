@@ -1,10 +1,10 @@
 /**
- * INPUT:  current Home client, Settings visibility and the configured MAIN model/base URL.
+ * INPUT:  current Home client, Settings visibility and the active MAIN model/base URL.
  * OUTPUT: useModelCapabilities() — demand reads fenced by both physical client and safe configuration identity.
  * POS:    Home Settings metadata seam — uses existing disposable reads; no polling or persistent capability authority.
  */
 import { useLayoutEffect, useMemo, useState } from "react";
-import type { ConfigEntry, ModelCapabilitiesResult } from "@taki/shared";
+import type { ConfigEntry, ModelCapabilitiesResult, ModelProfileStatus } from "@taki/shared";
 import type { WsClient } from "@/lib/ws-client.js";
 import { createReadCoordinator } from "@/lib/read-coordinator.js";
 import { useHomeClient } from "../../home-client-context.ts";
@@ -31,11 +31,11 @@ export function createModelCapabilitiesLoad(input: {
   };
 }
 
-export function useModelCapabilities(entries: ConfigEntry[]) {
+export function useModelCapabilities(entries: ConfigEntry[], activeProfile?: ModelProfileStatus["active"]) {
   const { client, status } = useHomeClient();
   const active = usePageActive("settings");
-  const modelValue = entries.find((entry) => entry.key === "TAKI_PROVIDER_MODEL")?.value;
-  const baseValue = entries.find((entry) => entry.key === "TAKI_PROVIDER_BASE_URL")?.value;
+  const modelValue = activeProfile === undefined ? entries.find((entry) => entry.key === "TAKI_PROVIDER_MODEL")?.value : activeProfile?.model;
+  const baseValue = activeProfile === undefined ? entries.find((entry) => entry.key === "TAKI_PROVIDER_BASE_URL")?.value : activeProfile?.baseUrl;
   const model = typeof modelValue === "string" && modelValue.length > 0 ? modelValue : null;
   const baseURL = typeof baseValue === "string" ? baseValue : "";
   const ready = client && status.kind === "connected" ? client : null;

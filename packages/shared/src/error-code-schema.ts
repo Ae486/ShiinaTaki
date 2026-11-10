@@ -10,6 +10,9 @@ export const ErrorCodeSchema = z.enum([
   // Auth/dispatch failures (ADR 0004): ride error.data.code on a JSON_RPC_APP_ERROR response.
   "PAIRING_REQUIRED",
   "AUTH_FAILED",
+  "LOCAL_AUTH_REQUIRED",
+  "LOCAL_AUTH_UNAVAILABLE",
+  "LOCAL_AUTH_FAILED",
   "NOT_AUTHENTICATED",
   "ALREADY_CONNECTED",
   "FORBIDDEN",

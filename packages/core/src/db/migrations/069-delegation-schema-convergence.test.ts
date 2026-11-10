@@ -14,6 +14,13 @@ import { rmTempDir } from "../../testing/rm-temp.ts";
 import { createRecoveryCoordinator } from "../../harness/recovery-coordinator.ts";
 import { createSubagentService } from "../../harness/subagent-service.ts";
 
+// This recovery fixture models the schema immediately after 069. Later migrations must not
+// make removing its receipt leave a higher max-version that skips the repair under test.
+vi.mock("./index-list.ts", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./index-list.ts")>();
+  return { ...actual, MIGRATIONS: actual.MIGRATIONS.filter(({ version }) => version <= 69) };
+});
+
 const databases: Database[] = [];
 const directories: string[] = [];
 const fixtures: Awaited<ReturnType<typeof subagentFixture>>[] = [];

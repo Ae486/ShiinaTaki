@@ -8,7 +8,7 @@ retention/screenshot policy remains knob material linked to Settings.
 - use-perception.ts — current-client/effective-visibility React adapter over the memory-only Perception controller
 - perception-view.ts — truthful pause/scheduling wording, stable sampled-entry identities and the local-midnight input shortcut
 - browser-attachment-card.tsx — explicit local pairing/Core receive controls, user-revealed copyable credentials and last-read source feedback
-- use-browser-attachment.ts — serialized local setup and Core observation actions; component-local credentials cleared on connection/lifetime change
+- use-browser-attachment.ts — live local setup and separate Core observation actions; local failure/restart feedback follows native results and credentials remain component-local
 - co-watching-card.tsx — matching video/analysis selection, visible finite lifetime, real preparation/sent/paused-child state, explicit start/stop and exact private-child navigation
 - co-watching-controller.ts — subscribe-before-read observation, retired-result guards and command ownership preserved through hidden/replaced read lifetimes
 - use-co-watching.ts — ordinary active Character and Home visibility/connection binding for the disposable control card

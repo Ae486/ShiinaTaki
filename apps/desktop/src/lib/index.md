@@ -1,6 +1,7 @@
 # lib/
 - ws-client-cache-usage.ts — Shared-validated whole-window cache subscription methods; no execution or reset authority
 - ws-client-maintenance-monitor.ts — Shared-validated background Monitor subscriptions, separate from normal Run and cache memberships
+- ws-client-model-profiles.ts — Shared-validated profile read/save/explicit test methods and retryable physical-client subscription; credentials are write-only
 - ws-client-subagents.ts — Shared-validated child read/control RPCs and retryable physical-client subscription; no mutation replay
 - ws-client-subagent-inbox.ts — Shared-validated bounded attention, explicit parent-event recovery/idempotent continuation and deliberate pre-intent retry RPCs
 - ws-client-initiative.ts — Shared-validated Pattern review/lifecycle, explicit setup, same-Monitor policy and separate backoff read/reset facade
@@ -25,16 +26,18 @@ icons/ (the shared glyph set) and the two window-shared React hooks below.
 - ws-read-subscriptions.ts — shared physical-client Perception/Extension subscriptions, strict acknowledgements, explicit unsupported-Core outcome and deliberate retry after setup failure
 - connection-status.ts — discriminated operator connection states plus the one semantic notice-copy mapping shared by every surface
 - connection-generation-controller.ts — framework-free fresh-client generation lifecycle: auth/restore promotion, full-jitter retry, stability reset, stale guards, disposal
-- operator-auth.ts — shared Pet/Home/Chat authentication with per-generation display support and credential-preserving compatibility refusal
+- operator-auth.ts — shared Pet/Home/Chat admission; native same-socket server proof precedes saved tokens and accepted client identity drives reporting
+- native-local-auth.ts — finite Tauri identity/proof boundary and per-generation native endpoint discovery transport
 - ws-transport.ts — browser-WebSocket wrapper with non-open send rejection before native dispatch; keeps ws-client node-testable and retired-socket RPCs bounded
 - device-identity.ts — the operator device identity (deviceId + reconnect token) persisted in localStorage
 - presentation-gate.ts — the ONE presentation gate (D21/TTS seam): reply text + avatar command surface together
 - active-character.ts — the pet window's active character id (data; M5 #24 makes it selectable)
 - last-costume.ts — the last-worn costume per character (localStorage) so restarts re-wear it, not the default (M5 #24 moves this into real config)
 - costume-report-sync.ts — window-local synchronization health for committed costume reports; newer tickets prevent stale report outcomes from overwriting the current costume
-- costume-switch-attempt.ts — D61's cancellable whole-attempt controller: resolution/Tauri stage admission, renderer attachment commit, and bounded recoverable avatar.report
+- costume-switch-attempt.ts — D61's cancellable whole-attempt controller: fresh costume metadata, resolution/Tauri stage admission, renderer attachment commit, and bounded recoverable avatar.report
 - promise-timeout.ts — withTimeout(promise, ms, label): labeled rejection for loads that can wedge (costume switches / boot promotion)
-- character-asset-url.ts — costume identity + settings/per-resource asset URLs (convertFileSrc per file); unresolvable/`..` refs are stripped before the engine (#18)
+- character-asset-url.ts — settings/per-resource asset URLs rooted in the finite native-selected characters directory; unresolvable/`..` refs are stripped before the engine (#18)
+- costume-scene-event.ts — correlated Home reads of Pet's nullable live costume plus data-free scene invalidation; no persisted selection authority
 - open-home-window.ts — pet→home window opener: creates home.html at the requested page or restores, navigates and focuses the open one (single instance by label); also owns the home:navigate event name
 - costume-switch-event.ts — the BIDIRECTIONAL home↔pet costume seam: the three pet-scoped event names (switch / cancel / result), their emit helpers and the payload gates each side reads through (the live PetScene exists only in the pet window, so the page commands and the pet reports back)
 - use-tauri-event.ts — the shared window-event plumbing: one stable listener per event name, handler read through a ref, unlisten on unmount

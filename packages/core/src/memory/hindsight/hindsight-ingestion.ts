@@ -16,7 +16,7 @@ import { sanitizeCommittedPrimarySpan, retainedIngestionSource, importRetainedPr
   type ProvenPrimaryEntry, type IngestionCoverageGap, type PrimarySourceImportResult } from "../canonical-ingestion-source.ts";
 import type { MemoryFlushPort, MemoryFlushRequest } from "../memory-flush-port.ts";
 import type { MemoryProvider } from "../memory-provider.ts";
-import type { UtilitySlot } from "../utility-slot.ts";
+import { captureUtilitySlot, type UtilitySlot } from "../utility-slot.ts";
 import type { HindsightIngestionCoverage, HindsightIngestionState } from "./hindsight-ingestion-contract.ts";
 import { assertHindsightIngestionAlive, createHindsightIngestionLifetime } from "./hindsight-ingestion-lifetime.ts";
 
@@ -56,19 +56,25 @@ export function createHindsightIngestion(deps: HindsightIngestionDeps): Hindsigh
   const ctx: Context = { ...deps, epochId: epoch.epochId, providerLineageId: epoch.providerLineageId,
     signal: lifetime.signal, provider: { retain: deps.provider.retain.bind(deps.provider) },
     model: createCanonicalIngestionModel(lifetime.slot) };
+  const capture = (): Context => ({ ...ctx, model: createCanonicalIngestionModel(captureUtilitySlot(lifetime.slot)) });
   const run: HindsightIngestion["run"] = (input) => {
-    const captured = { ...input }; return lifetime.enqueue(captured.characterId, () => runRange(ctx, captured));
+    const captured = { ...input }; const operation = capture();
+    return lifetime.enqueue(captured.characterId, () => runRange(operation, captured));
   };
   return { run, stop: lifetime.stop, settle: lifetime.settle,
     importPrimarySources: (characterId) => importPrimarySources(ctx, characterId),
     flushPort: { prepareRetirement: (request) => flush(ctx, run, request) },
-    maybeRun: ({ characterId }) => lifetime.enqueue(characterId, () => {
+    maybeRun: ({ characterId }) => {
+      if (deps.slot.available?.() === false) return Promise.resolve(null);
+      const operation = capture();
+      return lifetime.enqueue(characterId, () => {
       assertAuthority(ctx);
       const sourceImport = importPrimarySources(ctx, characterId);
       const scope = { epochId: ctx.epochId, characterId };
       return ctx.journal.pending(scope) || ctx.journal.unprocessedCount(scope) >= EPISODIC_EVERY_N
-        ? runRange(ctx, { characterId }, sourceImport) : Promise.resolve(null);
-    }),
+        ? runRange(operation, { characterId }, sourceImport) : Promise.resolve(null);
+      });
+    },
     initializeBaseline: (characterId) => {
       assertAuthority(ctx);
       ctx.journal.initializeBaseline({ epochId: ctx.epochId, characterId, throughSeq: deps.timeline.latestSeq(characterId), now: now(ctx) });

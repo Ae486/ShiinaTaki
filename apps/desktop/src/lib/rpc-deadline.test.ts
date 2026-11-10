@@ -4,6 +4,7 @@ import {
   CHARACTER_METHODS,
   CHAT_METHODS,
   CONFIG_METHODS,
+  MODEL_PROFILE_METHODS,
   EXTENSION_METHODS,
   MEMORY_AUTHORITY_METHODS,
   MEMORY_METHODS,
@@ -36,6 +37,9 @@ describe("RPC deadline method policy", () => {
     expect(rpcMethodPolicy(CHARACTER_METHODS.import)).toEqual({ class: "long", timing: "longRpcMs", timeoutOutcome: "unknown" });
     expect(rpcMethodPolicy(MEMORY_METHODS.status)).toEqual({ class: "interactive", timing: "interactiveRpcMs", timeoutOutcome: "read-only" });
     expect(rpcMethodPolicy(CONFIG_METHODS.set).timeoutOutcome).toBe("unknown");
+    expect(rpcMethodPolicy(MODEL_PROFILE_METHODS.list).timeoutOutcome).toBe("read-only");
+    expect(rpcMethodPolicy(MODEL_PROFILE_METHODS.save).timeoutOutcome).toBe("unknown");
+    expect(rpcMethodPolicy(MODEL_PROFILE_METHODS.test)).toEqual({ class: "long", timing: "longRpcMs", timeoutOutcome: "unknown" });
     expect(rpcMethodPolicy(SUBAGENT_METHODS.attention).timeoutOutcome).toBe("read-only");
     expect(rpcMethodPolicy(PERMISSION_METHODS.levelGet).timeoutOutcome).toBe("read-only");
     expect(rpcMethodPolicy(PERMISSION_METHODS.cellsGet).timeoutOutcome).toBe("read-only");

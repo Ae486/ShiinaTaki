@@ -2,12 +2,12 @@
  * INPUT:  a knob key + a JSON-primitive value (or null to reset), from an operator surface
  * OUTPUT: createConfigWriter({env, repo, onChanged}) -> { set } returning ok | a typed refusal
  * POS:    core/config — the settings store's ONLY write path (invariant 2 single writer). Fail-closed: an unknown
- *         key, a schema-rejected value, an env-shadowed knob, a bootstrap knob and a secret each refuse DISTINCTLY
+ *         key, a schema-rejected value, a bootstrap knob and a secret each refuse DISTINCTLY
  *         and leave the store untouched; secrets belong to the credential manager (invariant 5)
  */
-import type { ConfigChanged, ConfigRefusalReason, ConfigValue } from "@taki/shared";
+import type { ConfigApplication, ConfigChanged, ConfigRefusalReason, ConfigValue } from "@taki/shared";
 import type { ConfigRepo } from "../db/config-repo.ts";
-import { createConfigSource } from "./config-source.ts";
+import { createConfigSource, resolveConfigFallback } from "./config-source.ts";
 import { findKnob, type KnobApply } from "./knob-registry.ts";
 import { validateTimingConfigChange } from "./timing-config-validation.ts";
 import { validateInitiativeConfigChange } from "./initiative-policy-config.ts";
@@ -20,7 +20,8 @@ export interface ConfigWriteInput {
 }
 
 export type ConfigWriteOutcome =
-  | { ok: true; key: string; value: ConfigValue | null; apply: KnobApply }
+  | { ok: true; key: string; value: ConfigValue | null; apply: KnobApply;
+      effectiveValue: ConfigValue | null; origin: "stored" | "env" | "default"; application?: ConfigApplication }
   | { ok: false; reason: ConfigRefusalReason; message: string };
 
 export interface ConfigWriterDeps {
@@ -28,6 +29,7 @@ export interface ConfigWriterDeps {
   repo: ConfigRepo;
   /** Fired only after a successful write — the config.changed fan-out. */
   onChanged?: (change: ConfigChanged) => void;
+  application?: (key: string) => ConfigApplication | undefined;
 }
 
 function refuse(reason: ConfigRefusalReason, message: string): ConfigWriteOutcome {
@@ -44,22 +46,20 @@ export function createConfigWriter(deps: ConfigWriterDeps) {
         return refuse("secret", `${key} is a secret; it lives in the OS credential store, not the config table`);
       }
       if (knob.apply === "env-only") return refuse("env-only", `${key} is a bootstrap value and can only be set via env`);
-      const fromEnv = deps.env[key];
-      if (fromEnv !== undefined && fromEnv.length > 0) {
-        return refuse("env-locked", `${key} is set in the environment, which shadows any stored value`);
-      }
-
       let accepted = value;
-      if (value !== null) {
-        const parsed = knob.schema.safeParse(value);
+      const candidate = value ?? resolveConfigFallback(knob, deps.env).value;
+      if (candidate !== null) {
+        const parsed = knob.schema.safeParse(candidate);
         if (!parsed.success) return refuse("invalid-value", `${key}: ${parsed.error.issues[0]?.message ?? "invalid value"}`);
-        accepted = parsed.data;
+        if (value !== null) accepted = parsed.data;
       }
-      const timingIssue = validateTimingConfigChange(source, { key, value: accepted });
+      // A reset validates the actual environment/default fallback, but still persists deletion and publishes null.
+      const change = { key, value: accepted ?? candidate };
+      const timingIssue = validateTimingConfigChange(source, change);
       if (timingIssue) return refuse("invalid-value", `${key}: timing policy is inconsistent (${timingIssue})`);
-      const initiativeIssue = validateInitiativeConfigChange(source, { key, value: accepted });
+      const initiativeIssue = validateInitiativeConfigChange(source, change);
       if (initiativeIssue) return refuse("invalid-value", `${key}: ${initiativeIssue}`);
-      const wakeIssue = validateInitiativeWakeChange(source, { key, value: accepted });
+      const wakeIssue = validateInitiativeWakeChange(source, change);
       if (wakeIssue) return refuse("invalid-value", `${key}: ${wakeIssue}`);
 
       if (accepted === null) {
@@ -68,7 +68,9 @@ export function createConfigWriter(deps: ConfigWriterDeps) {
         deps.repo.upsert(key, accepted);
       }
       deps.onChanged?.({ key, value: accepted });
-      return { ok: true, key, value: accepted, apply: knob.apply };
+      const effective = source.resolve(key)!;
+      return { ok: true, key, value: accepted, apply: knob.apply, effectiveValue: effective.value, origin: effective.origin,
+        ...(deps.application ? { application: deps.application(key) } : {}) };
     },
   };
 }

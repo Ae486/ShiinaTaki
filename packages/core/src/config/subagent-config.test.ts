@@ -14,7 +14,9 @@ it("validates live registry policy with stored and environment precedence and tr
   repo.upsert("TAKI_SUBAGENT_CHECKIN_STEPS", 70); repo.upsert("TAKI_SUBAGENT_CHECKIN_PARENT_APPROVALS", 0);
   expect(readSubagentCheckInPolicy(source)).toEqual({ steps: 70, parentApprovals: 0 });
   const env = createConfigSource({ repo, env: { TAKI_SUBAGENT_CHECKIN_STEPS: "5" } });
-  expect(readSubagentCheckInPolicy(env)).toEqual({ steps: 5, parentApprovals: 0 });
+  expect(readSubagentCheckInPolicy(env)).toEqual({ steps: 70, parentApprovals: 0 });
   expect(source.effectiveAll().find((row) => row.key === "TAKI_SUBAGENT_CHECKIN_STEPS")).toMatchObject({ apply: "live", description: expect.stringContaining("next") });
+  repo.delete("TAKI_SUBAGENT_CHECKIN_STEPS");
+  expect(readSubagentCheckInPolicy(env)).toEqual({ steps: 5, parentApprovals: 0 });
   expect(() => readSubagentCheckInPolicy(createConfigSource({ repo, env: { TAKI_SUBAGENT_CHECKIN_STEPS: "0" } }))).toThrow();
 });

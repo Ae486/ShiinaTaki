@@ -24,7 +24,7 @@ const { idleDisposers, lifecycle, tickerHooks, maskHooks } = vi.hoisted(() => ({
 
 vi.mock("./stage.ts", () => ({
   createStage: vi.fn(async () => ({
-    ticker: { ...tickerHooks, start: vi.fn(), stop: vi.fn(), maxFPS: 0, started: false },
+    ticker: { ...tickerHooks, start() { this.started = true; }, stop() { this.started = false; }, maxFPS: 0, started: false },
     screen: { width: 400, height: 600 },
     renderer: {},
     stage: { removeChild: lifecycle.removeModel },
@@ -48,7 +48,7 @@ vi.mock("./live2d/avatar-controller.ts", () => ({
   }),
 }));
 vi.mock("./live2d/costume-switch.ts", () => ({
-  reloadModel: vi.fn(async () => ({ model: { tag: "next" }, vocabulary: { motions: ["idle01"], expressions: [] } })),
+  reloadModel: vi.fn(async () => ({ model: { tag: "next", destroy: lifecycle.destroyModel }, vocabulary: { motions: ["idle01"], expressions: [] } })),
 }));
 vi.mock("./live2d/idle-motion.ts", () => ({
   createIdleMotionScheduler: vi.fn(() => {
@@ -60,6 +60,8 @@ vi.mock("./live2d/idle-motion.ts", () => ({
 
 import { createPetScene } from "./pet-scene.ts";
 import { reloadModel } from "./live2d/costume-switch.ts";
+import { loadCharacterModel } from "./live2d/load-character-model.ts";
+import { createStage } from "./stage.ts";
 
 const host = {} as unknown as HTMLElement;
 
@@ -84,6 +86,24 @@ beforeEach(() => {
 });
 
 describe("createPetScene idle scheduler lifecycle", () => {
+  it("pauses a model-less scene through flag changes and resumes only after successful attachment", async () => {
+    vi.mocked(loadCharacterModel).mockRejectedValueOnce(new Error("missing model"));
+    const warning = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const scene = await createPetScene(host);
+    warning.mockRestore();
+    const app = await vi.mocked(createStage).mock.results.at(-1)!.value;
+    expect(app.ticker.started).toBe(false);
+    scene.governor.setThrottling(false); scene.governor.setFocused(false);
+    scene.governor.setHidden(true); scene.governor.setHidden(false); scene.setAvatarState("thinking");
+    expect(app.ticker.started).toBe(false);
+    expect(scene.reportSnapshot()).toEqual({ motions: [], expressions: [] });
+    scene.governor.setThrottling(true);
+    await scene.switchCostume({ settingsUrl: "asset://first", resolve: () => null });
+    expect(app.ticker.started).toBe(true); expect(app.ticker.maxFPS).toBe(15);
+    expect(maskHooks.refresh).toHaveBeenCalledTimes(2);
+    scene.dispose(); expect(app.ticker.started).toBe(false);
+  });
+
   it("creates one scheduler on the initial attach", async () => {
     await createPetScene(host, { renderThrottling: false });
     expect(idleDisposers).toHaveLength(1);

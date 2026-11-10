@@ -152,15 +152,20 @@ describe("provider-independent Compaction composition", () => {
     seed(fixture, 1, 20);
     let release!: () => void;
     const delayed = new Promise<void>((resolve) => { release = resolve; });
-    const run = fixture.runtime.utility.run.bind(fixture.runtime.utility);
-    const scheduling = vi.spyOn(fixture.runtime.utility, "run").mockImplementation(async <T>(label: string, task: () => Promise<T>) => {
-      if (label === "canonical-write-gate") await delayed;
-      return run(label, task);
+    const capture = fixture.runtime.utility.capture!.bind(fixture.runtime.utility);
+    const scheduling: string[] = [];
+    vi.spyOn(fixture.runtime.utility, "capture").mockImplementation(() => {
+      const slot = capture();
+      return { ...slot, run: async <T>(label: string, task: () => Promise<T>) => {
+        scheduling.push(label);
+        if (label === "canonical-write-gate") await delayed;
+        return slot.run(label, task);
+      } };
     });
     const active = fixture.runtime.autoMemory.onTurnCompleted("taki");
     try {
       await vi.waitFor(() => expect(fixture.summaries.get("taki")?.text).toBe("canonical rolling summary"));
-      expect(scheduling.mock.calls.map(([label]) => label)).toEqual(["canonical-write-gate", "compact"]);
+      expect(scheduling).toEqual(["canonical-write-gate", "compact"]);
       expect(fixture.model.doGenerateCalls).toHaveLength(1);
       expect(fixture.db.prepare("SELECT state FROM canonical_memory_ingestion_spans").get()?.state).toBe("pending");
       expect(createCanonicalIngestionSourceRepo(fixture.db).cursor({ epochId: fixture.epochId, characterId: "taki" })).toBe(0);

@@ -147,3 +147,4 @@
 - primary-ingestion-progress.ts — shared Local/Hindsight gap-separated source groups and truthful continuous-coverage queries
 - auxiliary-usage-repo.ts — auxiliary call lifecycle, optional durable operation association, bounded whole-filter usage and post-commit start/settlement hints
 - request-attribution-repo.ts — latest terminal primary request ordered by input/dispatch and joined by Effect lineage; preserves distinct requested/response model names, usage and bounded composition facts
+- search-projection-policy-repo.ts — Local/Legacy applied tokenizer policies scoped by index and authority epoch; unknown versions require rebuilding

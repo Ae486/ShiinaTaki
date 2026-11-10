@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-local-operator-proof"
+description = "Enables the local_operator_proof command without any pre-configured scope."
+commands.allow = ["local_operator_proof"]
+
+[[permission]]
+identifier = "deny-local-operator-proof"
+description = "Denies the local_operator_proof command without any pre-configured scope."
+commands.deny = ["local_operator_proof"]

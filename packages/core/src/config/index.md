@@ -1,4 +1,11 @@
 # core/config/
+- memory-runtime-policy.ts — cached accepted Local/Legacy assembly/search/ranking/retention/Tidy policies with independent availability
+- config-application.ts — actual consumer boundary, desired/active state and revision-fenced completion observations
+- model-profile-service.ts — durable Main/Utility drafts, explicit activation/testing and revision-checked changes
+- model-profile-resolution.ts — coherent legacy fallback, no-auth/disable/inheritance and private prepared bindings
+- model-profile-secrets.ts — staged profile-secret ownership and bounded orphan recovery without touching unrelated secrets
+- model-profile-application.ts — grouped active-model identity projected into scalar application observations
+- agent-runtime-config.ts — cached Main policy, immutable admitted bindings and per-revision calibration
 - model-capabilities.ts — settings-demand models.dev names, explicit canonical identity, provider logos and capability/limit declarations for exact MAIN identities; one bounded TTL cache and separate adapter evidence; no native-input gate or model probes
 - initiative-wake-config.ts / initiative-wake-knobs.ts — shared finite-source cadence policy, explicit target and live registry validation
 - provider-config.ts — TAKI_PROVIDER_* env → { baseUrl, apiKey, model }; fatal-fast, names missing var
@@ -6,14 +13,14 @@
 - utility-config.ts — TAKI_UTILITY_* env → { baseUrl, apiKey, model } | null (no separate slot); the optional BACKGROUND model slot (T5-R11), partial = fatal; absent means background work rides the main model
 - attachment-config.ts — TAKI_ATTACHMENT_TTL_DAYS env → { ttlDays, ttlMs }; image-retention TTL (default 14; fail-closed parse)
 - context-config.ts — primary/utility windows, history ratio, streaming usage and compaction settings; images share the primary window
-- memory-config.ts — validated pinned/search/retention settings and tidy batch defaults: threshold 40, stale 45 days, 100 candidates, 24,000 initial input tokens, 48 steps and 600,000 ms per batch; all knobs use the existing restart-applied config registry
+- memory-config.ts — validated pinned/search/retention settings and Tidy defaults, applied by independent runtime policy consumers
 - server-config.ts — TAKI_WS_* / TAKI_LOG_LEVEL / TAKI_DATA_DIR / TAKI_PROMPT_DIR / TAKI_TRUST_LOOPBACK_OPERATOR env → { host, port, logLevel, dataDir, promptDir, trustLoopbackOperator } with defaults
 - agent-config.ts — TAKI_MAX_STEPS env → { maxSteps } per-turn tool-loop cap (default 10; D11 config-ization)
 - avatar-config.ts — TAKI_AVATAR_OUTCOME_DEADLINE_MS live reader over ConfigSource → () => number (default 1000, 100..10000; garbage falls back to the default); consumed per open by the avatar outcomes registry (D80)
 - ambient-screenshot-config.ts — opt-in native ambient sampling and drop-after-consumption / keep / days retention
 - knob-registry.ts — CONFIG_KNOBS: one declarative row per operator-visible env knob (key/value schema/default/apply class/secret/input hint/description) + findKnob; the SINGLE source config.list renders from (#26 batch 1)
-- config-source.ts — createConfigSource({env, repo}) → { env(), resolve(key), effectiveAll() }; the ONE place precedence lives: env (explicitly set) > stored > built-in default; secrets masked to presence only
-- config-writer.ts — createConfigWriter({env, repo, onChanged}) → { set }; the store's only write path, with five distinct fail-closed refusals (unknown key / invalid value / env-locked / secret / env-only)
+- config-source.ts — application > environment fallback > default resolution; masked secrets and actual application observations
+- config-writer.ts — validated sparse writes/reset to actual fallback; committed storage plus separate consumer outcomes; unknown/invalid/secret/bootstrap refusals
 - timing-config-validation.ts — validates a proposed timing-row set/reset against the shared full-policy relationships before config-writer mutates the sparse store
 - config-subscriptions.ts — createConfigSubscriptions() → { subscribe, unsubscribe, publish, count }; the config.changed fan-out registry (global, not character-scoped)
 - hindsight-config.ts — sparse non-secret TAKI_HINDSIGHT_* projection; disabled/unconfigured/ready states with fixed Secret Catalog reference

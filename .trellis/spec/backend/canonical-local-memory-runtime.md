@@ -46,6 +46,21 @@ captureRun(characterId: string): Promise<CapturedMemoryRun>;
 - Canonical and Legacy vocabularies are not advertised together. Admission also freezes row/Block/persona projection.
   Preserve non-truncatable relationship content, eligible profile promotion, intention triggers/expiry and observed fences.
   Explicit hidden/mood visibility is honored; Blocks stay outside FTS.
+- Local intention retention captures a numeric default at Run/tool admission before asynchronous coordinator work.
+  The same number reaches new `retain` requests and a Local provider `captureRetention(days)` facade for layer
+  reclassification. That facade shares repositories, retrieval methods and vector-health ownership; it does not
+  replace the runtime or reread mutable settings from an admitted Run. Ingestion captures before its Character queue,
+  and observed writes receive an operation-local number. Existing persisted explicit expiries are never recalculated.
+- Tidy keeps its admitted `MemoryConfig` before entering the Utility queue. Each later revision-fresh review receives
+  that captured `intentionsDefaultDays` in `TidyReviewOptions`; it never rereads the setting when a queued review starts.
+  Refile and supersede use the numeric option and preserve an existing expiring policy. Review options are copied so
+  caller mutation cannot change already-created tools. Hindsight review adapters ignore this additive optional field.
+- Legacy no-expiry intentions use the configured fallback captured once at each future retention sweep, so changing
+  the setting can affect existing implicit-expiry rows at the next pass. Canonical intentions require explicit expiry;
+  their stored deadline stays authoritative. Changing this setting does not restore already archived/invalidated rows.
+- Shared `createCanonicalMemoryRun` / canonical tool inputs accept an additive optional `intentionsDefaultDays`.
+  Omission preserves the established built-in default. Hindsight callers do not pass a Local override; no Hindsight
+  retention, connection, synchronization, recovery or authority behavior is changed by this seam.
 
 ### Selected initiative assembly
 

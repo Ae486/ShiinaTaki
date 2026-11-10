@@ -25,7 +25,7 @@
 - memory-engine.ts — the memory subsystem composition root (store+repo+tokenizer+indexer+retriever+assembler+tools; the retriever serves memory_search only, T5-R6; exposes writeEntry, createTools, createBackgroundTools, retention's narrow list/archive/hard-delete seam, and the tidy view — report reads + the maintenance toolset)
 - bootstrap.ts — Legacy subsystem wiring, automatic tidy admission through the durable owner, shared Utility Slot and watermark-guarded flush; Compaction is Core-owned
 - utility-slot.ts — T5-R11's background model slot: the utility provider when configured else the MAIN model, one GLOBAL serial task chain, immutable auxiliary usage task ownership, sanitized diagnostics, and cumulative token spend since boot
-- retention-sweeper.ts — shared registry retention verdict plus the legacy sweeper: rolling machine deletion, recoverable archival elsewhere, and reinforcement-aware age; canonical adapters reuse the verdict with authoritative writes
+- retention-sweeper.ts — shared registry retention verdict plus Legacy sweeper; captures configured fallback once per future sweep, preserves explicit expiry and reinforcement-aware age
 - render-transcript.ts — shared helper: a timeline segment -> "role: text" transcript for the auto-write prompts
 - write-convention.ts — the ONE shared write-side prompt wording: WRITE_GATE_RULE (T5-R15 behaviour-change test) + MEMORY_VOICE_RULE (T5-R10 first person, user's words); episodic + flush import it so the voices cannot diverge
 - episodic-writer.ts — auto-write path 2: segment -> 0..3 entries in the layer the model chooses, write-gated (silence is the normal outcome), importance clamped below the pin line
@@ -34,26 +34,26 @@
 - memory-flush-port.ts — typed pre-retirement Memory Provider boundary: fenced Legacy watermark and actual Canonical Local ingestion receipts, unavailable Hindsight failure, and switchable activation binding
 - tidy-report.ts — the tidy pass's deterministic health report (rc five-class contract): facts flat (missing trigger, over-budget incl. block used/limit beside full content), hypotheses as questions (stale, near-duplicate) + the new-writes slice carrying the misfiled question; per-class caps with dropped counts stated; observed content fenced; never prescribes an action
 - tidy-tools.ts — the maintenance verbs the foreground agent never gets: memory_reinforce / memory_archive_supersede (the sanctioned promotion route) / memory_set_disclosure / memory_refile / block_rethink (background blocks only) / memory_finish_edits (the structural terminal); never-throw envelopes
-- tidy-pass.ts — finite admitted-backlog draining, independent batch budgets, fair Utility dispatch, shutdown cancellation and exact accepted checkpoints; Legacy remains a single bounded pass
+- tidy-pass.ts — admitted config/retention capture, finite backlog draining, independent batch budgets, fair Utility dispatch and exact accepted checkpoints; Legacy remains a single bounded pass
 - tidy-agent-runner.ts — sequential SDK tools, per-batch timeout/shutdown cancellation and accepted-finish/blocked-error termination
 - tidy-prompt.ts — shared maintenance instructions and report framing
 - tidy-issues.ts — safe no-write issue acknowledgements, exact prior CAS correction and unresolved-effect blockers
 - tidy-coverage.ts — exact revision/time eligibility, visible-batch checkpointing and automatic continuation policy
 - memory-provider.ts — async provider and optional vector projection interfaces
-- local-memory-provider.ts — structured Local provider with completed-only retain, applied/unchanged CAS mutations, and sparse recall
+- local-memory-provider.ts — structured Local retain/CAS/recall plus immutable retention facades sharing repositories and vector-health ownership
 - canonical-local-runtime.ts — canonical Local engine with real maintenance, observed writes and admission-bound tools/recall/prompt capture
 - canonical-local-banks.ts — preserves existing Local Bank identities and initializes scopes for a new Character
 - canonical-local-subsystem.ts — Local ingestion, precise source witnesses, tidy, retention and pre-retirement flush on the shared Utility Slot
 - canonical-ingestion-source.ts — bounded retained-source import into existing provider witnesses, exact original conversational spans, unchanged text offsets and reversible metadata
 - canonical-ingestion-model.ts — one Write Gate and source-grounded Local extraction through the process Utility Slot
 - canonical-ingestion-plan.ts — durable gate/extraction plan and stable routed write identities
-- canonical-local-ingestion.ts — local source import, gap-isolated pending groups, truthful continuous coverage, 20-message cadence and durable receipt retries
+- canonical-local-ingestion.ts — local source import, prequeue Utility/retention capture, gap-isolated coverage, 20-message cadence and durable receipt retries
 - canonical-local-ingestion-batch.ts — canonical original-source/fact batches and lexical duplicate evidence
 - canonical-layer-policy.ts — registry ownership and automatic policy projection shared by Local provider writes
-- canonical-local-tidy.ts — scoped maintenance verbs, visible references, Block no-op handling and explicit finish acknowledgements
+- canonical-local-tidy.ts — scoped maintenance verbs with copied numeric retention policy, explicit-expiry preservation, visible references and truthful finish acknowledgements
 - canonical-tidy-review.ts — captured Local review, short model handles, disclosed conflict refresh and transactional operation progress
-- canonical-local-retention.ts — canonical registry retention with revision-bearing targets and actual persisted-effect counts
-- canonical-observed-write.ts — trusted image-description writes via the Local provider with observed provenance and automatic visibility limits
+- canonical-local-retention.ts — canonical registry retention with revision-bearing targets, one captured policy per sweep, unchanged explicit expiries and durable-effect counts
+- canonical-observed-write.ts — trusted image-description writes with captured retention, observed provenance and automatic visibility limits
 - canonical-memory-view.ts — revision-bearing opaque references and canonical row projection for reused T5 policy/report code
 - canonical-memory-assembly.ts — admission-frozen canonical prompt data, complete pinned relationships, deliberate profile promotion, intention selection and observed fences
 - runtime-selector.ts — marker-first Legacy/Local/Hindsight routing; committed canonical selection retires Legacy before construction and remains unavailable on failure
@@ -61,7 +61,7 @@
 - authority-aware-legacy-surfaces.ts — mutable authority wrappers that retire legacy auto-memory, tidy, and direct writes after canonical activation
 - memory-coordinator.ts — provider-neutral authority dispatch and immutable Run capture; rejects registry/operation/stable-capability drift while allowing honest recall vector-health changes
 - memory-capability-snapshot.ts — detached immutable capabilities and one canonical Run/tool/coordinator digest; keeps dynamic vector health separate from stable operation identity
-- canonical-memory-run.ts — one provider-neutral admission bundle for canonical tools, authority/capabilities, automatic recall, primary assembly and selected initiative Blocks
+- canonical-memory-run.ts — immutable admission bundle for canonical tools, optional numeric retention capture, authority/capabilities, recall and prompt assembly
 - initiative-memory-assembly.ts — immutable Persona plus selected Global/Character Block/index fragments, bounded text and current selected-source digest checks
 - initiative-memory-recall.ts — one attempted selected-topic read per Bank, four-record/final-512-token fenced model projection and retained source evidence
 - memory-recall-evidence.ts — bounded provider-selection evidence registry and exact Local source/unit/policy lifetime checks
@@ -73,3 +73,10 @@
 - operations/ — the durable memory operation owner (Stage 1): kind registry over the B3 setup service and B5 scheduler, restart reconciliation, and the composite memory.authority.status read
 - canonical-tools/ — admission-bound capability-filtered canonical tool adapters and non-advertised compatibility aliases
 - memory-recall-selection.ts — policy-filtered Canonical hits and separate unconfirmed source/mutation intents
+- live-search-tokenizer.ts — stable retained-tool tokenizer facade with explicit unknown-policy refusal and atomic candidate publication
+- search-projection-rebuild.ts — bounded Local/Legacy FTS staging, concurrent-write reconciliation, transactional policy publication and abandoned-candidate cleanup
+- canonical-search-projection.ts — active-epoch authoritative Local rows with preserved other-epoch sparse terms
+- legacy-search-projection.ts — authoritative Markdown scanning with current-file reconciliation and malformed-file publication refusal
+- memory-search-application.ts — selected Local/Legacy readiness, durable operation submission and superseded/shutdown cancellation
+- runtime-configuration.test.ts — real runtime/operation application and invalid-policy isolation
+- runtime-configuration-race.test.ts — concurrent ranking, unknown-index admission and cold active-value truth

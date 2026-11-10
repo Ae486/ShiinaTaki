@@ -66,6 +66,15 @@ impl Default for KeyringStore {
     }
 }
 
+/// Preserve the literal-path namespace used by existing explicit Shell profiles (T4-D83).
+pub(crate) fn shell_store(data_dir: &std::path::Path) -> KeyringStore {
+    if std::env::var_os("TAKI_SHELL_DATA_DIR").is_some() {
+        use sha2::{Digest, Sha256};
+        let suffix = format!("{:x}", Sha256::digest(data_dir.to_string_lossy().as_bytes()));
+        KeyringStore::with_service(format!("TakiAgent-{}", &suffix[..24]))
+    } else { KeyringStore::new() }
+}
+
 impl SecretStore for KeyringStore {
     fn get(&self, key: &str) -> Result<Option<String>, String> {
         match self.entry(key)?.get_password() {

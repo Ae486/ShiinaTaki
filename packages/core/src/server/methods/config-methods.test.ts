@@ -75,8 +75,8 @@ describe("config methods", () => {
     const entries = entriesOf(await call(registry, { method: CONFIG_METHODS.list, params: {} }));
 
     expect(entries.length).toBeGreaterThan(30);
-    expect(entries.find((row) => row.key === "TAKI_WS_PORT")).toMatchObject({ value: 9100, envLocked: true });
-    expect(entries.find((row) => row.key === "TAKI_MAX_STEPS")).toMatchObject({ value: 10, apply: "restart" });
+    expect(entries.find((row) => row.key === "TAKI_WS_PORT")).toMatchObject({ value: 9100, envLocked: false, origin: "env" });
+    expect(entries.find((row) => row.key === "TAKI_MAX_STEPS")).toMatchObject({ value: 10, apply: "live" });
     expect(entries.find((row) => row.key === "TAKI_RPC_INTERACTIVE_TIMEOUT_MS")).toMatchObject({
       value: 15_000,
       apply: "live",
@@ -108,7 +108,7 @@ describe("config methods", () => {
   it("config.set persists, and config.list then reports the stored value", async () => {
     const registry = build();
     expect(await call(registry, { method: CONFIG_METHODS.set, params: { key: "TAKI_MAX_STEPS", value: 22 } })).toMatchObject({
-      result: { status: "ok", key: "TAKI_MAX_STEPS", value: 22, apply: "restart" },
+      result: { status: "ok", key: "TAKI_MAX_STEPS", value: 22, apply: "live" },
     });
 
     expect(entriesOf(await call(registry, { method: CONFIG_METHODS.list, params: {} })).find((row) => row.key === "TAKI_MAX_STEPS")).toMatchObject({
@@ -149,7 +149,6 @@ describe("config methods", () => {
     ["invalid-value", {}, { key: "TAKI_WS_PORT", value: 0 }],
     ["secret", {}, { key: "TAKI_PROVIDER_API_KEY", value: "sk-x" }],
     ["env-only", {}, { key: "TAKI_DATA_DIR", value: "C:/x" }],
-    ["env-locked", { TAKI_MAX_STEPS: "7" }, { key: "TAKI_MAX_STEPS", value: 22 }],
   ] as const)("config.set refuses %s as a distinct app error", async (reason, env, params) => {
     const registry = build(env);
     const response = (await call(registry, { method: CONFIG_METHODS.set, params })) as {
@@ -161,6 +160,14 @@ describe("config methods", () => {
 
     const stored = entriesOf(await call(registry, { method: CONFIG_METHODS.list, params: {} })).filter((row) => row.stored);
     expect(stored).toEqual([]);
+  });
+
+  it("saves over an environment fallback and echoes the real fallback on reset", async () => {
+    const registry = build({ TAKI_MAX_STEPS: "7" });
+    expect(await call(registry, { method: CONFIG_METHODS.set, params: { key: "TAKI_MAX_STEPS", value: 22 } }))
+      .toMatchObject({ result: { value: 22, effectiveValue: 22, origin: "stored" } });
+    expect(await call(registry, { method: CONFIG_METHODS.set, params: { key: "TAKI_MAX_STEPS", value: null } }))
+      .toMatchObject({ result: { value: null, effectiveValue: 7, origin: "env" } });
   });
 
   it("config.set rejects a composite value before the handler runs", async () => {

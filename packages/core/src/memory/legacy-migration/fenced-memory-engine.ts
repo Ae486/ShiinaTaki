@@ -13,8 +13,16 @@ export function fenceMemoryEngine(engine: MemoryEngine, fence: MemoryAuthorityFe
   const assemble: MemoryEngine["assemble"] = (input) => fence.admitSync(() =>
     forwardRenderedContextText(assemble, engine.assemble, engine.assemble(input)));
   return {
+    searchStatus: engine.searchStatus ? () => fence.admitSync(engine.searchStatus!) : undefined,
+    reconfigureRanking: engine.reconfigureRanking ? (weights) => fence.admitSync(() => engine.reconfigureRanking!(weights)) : undefined,
+    reconfigureSearch: engine.reconfigureSearch ? (config, signal) => fence.admit(async () => engine.reconfigureSearch!(config, signal)) : undefined,
     reconcile: () => fence.admitSync(engine.reconcile),
     assemble,
+    captureAssembly: engine.captureAssembly ? (characterId) => {
+      const capture = fence.admitSync(() => engine.captureAssembly!(characterId));
+      const render = (message: string) => fence.admitSync(() => forwardRenderedContextText(render, capture, capture(message)));
+      return render;
+    } : undefined,
     captureInitiative: engine.captureInitiative ? (characterId) => {
       const capture = engine.captureInitiative;
       if (!capture) throw new Error("MEMORY_CAPABILITY_UNSUPPORTED");

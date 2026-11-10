@@ -3,7 +3,7 @@
  * OUTPUT: owner cancellation, serial ingestion chains and a drain that waits for every underlying operation
  * POS:    core/memory/hindsight — lifecycle only; never stops the shared slot or races model/retain work into detachment
  */
-import type { UtilitySlot } from "../utility-slot.ts";
+import { captureUtilitySlot, type UtilitySlot } from "../utility-slot.ts";
 
 export interface HindsightIngestionLifetime {
   readonly signal: AbortSignal;
@@ -26,7 +26,8 @@ export function createHindsightIngestionLifetime(slot: UtilitySlot): HindsightIn
     const release = () => { if (chains.get(characterId) === next) chains.delete(characterId); };
     void next.then(release, release); return next;
   };
-  const guardedSlot: UtilitySlot = { model: slot.model, usage: () => slot.usage(),
+  const guarded = (slot: UtilitySlot): UtilitySlot => ({ get model() { return slot.model; }, usage: () => slot.usage(),
+    available: () => slot.available?.() !== false, capture: () => guarded(captureUtilitySlot(slot)),
     run: (label, task) => {
       alive();
       return slot.run(label, async () => {
@@ -34,9 +35,9 @@ export function createHindsightIngestionLifetime(slot: UtilitySlot): HindsightIn
         // the actual model promise; stopping must not leave an unobserved late task behind SQLite shutdown.
         alive(); const result = await task(); alive(); return result;
       });
-    } };
+    } });
   const settle = async () => { while (chains.size) await Promise.allSettled([...chains.values()]); };
-  return { signal: controller.signal, slot: guardedSlot, enqueue, settle,
+  return { signal: controller.signal, slot: guarded(slot), enqueue, settle,
     stop: () => { controller.abort(); return settle(); } };
 }
 

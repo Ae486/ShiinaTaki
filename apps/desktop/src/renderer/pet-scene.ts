@@ -5,7 +5,7 @@
  *         returns its re-read vocabulary), reportSnapshot (truthful live vocabulary/costume identity),
  *         abortSwitch (mark an in-flight switch stale so a late model self-discards),
  *         and idempotent dispose (Live2D child before Pixi ticker). The scene may boot MODEL-LESS (initial source unreachable —
- *         normal in a packaged build, where the dev route does not exist): the stage runs empty, avatar methods no-op,
+ *         normal in a packaged build, where the dev route does not exist): its ticker pauses, avatar methods no-op,
  *         and the first switchCostume (initial-costume promotion) attaches a model. The click-through alpha mask
  *         refreshes every MASK_REFRESH_FRAME_INTERVAL-th governed frame and is forced at silhouette jumps
  *         (attach/switch, rebuild, canvas resize) — see the P1c staleness note below.
@@ -88,6 +88,7 @@ interface SceneModel {
 
 interface SwitchContext {
   app: Application;
+  governor: RenderGovernor;
   center: { x: number; y: number };
   characterId: string;
   slot: { current: SceneModel | null }; // mutated in place so the scene's delegating methods see the new costume
@@ -100,7 +101,7 @@ export async function createPetScene(host: HTMLElement, options: PetSceneOptions
   const characterId = options.characterId ?? "taki";
   const app = await createStage(host);
 
-  const governor = new RenderGovernor(app.ticker);
+  const governor = new RenderGovernor(app.ticker, undefined, false);
   governor.setThrottling(options.renderThrottling ?? true);
 
   // Stable across costume swaps (the pet window is fixed-size); the avatar controller needs it for gaze + click math.
@@ -116,7 +117,7 @@ export async function createPetScene(host: HTMLElement, options: PetSceneOptions
   const maskRefresher = createFrameGatedRefresher(() => mask.refresh(), MASK_REFRESH_FRAME_INTERVAL);
   app.ticker.add(maskRefresher.tick);
 
-  const ctx: SwitchContext = { app, center, characterId, slot, seq: { current: 0 }, forceMaskRefresh: () => maskRefresher.force() };
+  const ctx: SwitchContext = { app, governor, center, characterId, slot, seq: { current: 0 }, forceMaskRefresh: () => maskRefresher.force() };
 
   // Prime the bitmap at scene (re)build so samples never wait N frames for the first gated refresh. The initial
   // attach below (when the model loads) forces again with the model on stage — one extra boot readback, negligible.
@@ -146,7 +147,7 @@ export async function createPetScene(host: HTMLElement, options: PetSceneOptions
   try {
     attachModel(ctx, await loadCharacterModel(app, options.modelSource ?? DEV_MODEL_SOURCE), null);
   } catch (error) {
-    console.warn("[pet-scene] initial model unavailable; stage runs model-less until a costume attaches", error);
+    console.warn("[pet-scene] initial model unavailable; rendering paused until a costume attaches", error);
   }
 
   return {
@@ -181,6 +182,7 @@ function createSceneDisposer(ctx: SwitchContext, teardownMask: () => void): () =
   return () => {
     if (disposed) return;
     disposed = true;
+    ctx.governor.setRenderable(false);
     abortSwitch(ctx);
     ctx.slot.current?.idle.dispose();
     teardownMask();
@@ -229,4 +231,5 @@ function attachModel(ctx: SwitchContext, model: Live2DModel, costume: string | n
     costume,
   };
   ctx.forceMaskRefresh();
+  ctx.governor.setRenderable(true);
 }

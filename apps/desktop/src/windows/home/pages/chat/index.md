@@ -2,7 +2,8 @@
 The home window's chat page (#17, migrated out of the retired standalone chat window): the depth view of the same
 per-character timeline the bubble glances at. Markdown text, tool cards, image thumbnails; streaming replies; image
 attachments. One continuous timeline, NO session list.
-- chat-page.tsx — page root: own WS connection, route-aware presence, committed-exposure context, Pattern/Co-Watching adjuncts and that socket's Approval modal owner
+- chat-page.tsx — page root: independent WS/presence/Approval lifetime, retained Timeline and Main availability scoped only to new-message admission
+- chat-model-availability.tsx — actionable model setup/read-recovery feedback while navigation and history remain available
 - chat-client-context.ts — React context exposing the WsClient to deep image parts (no prop-drilling)
 - use-chat-connection.ts — the page's independent fresh-generation owner; authentication plus timeline restoration completes before connected
 - restore-chat-timeline.ts — guarded activity/append/commit channels and subscribe/read restoration with pending-turn anchors and prior-tail gap coverage

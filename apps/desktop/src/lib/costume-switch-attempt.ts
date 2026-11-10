@@ -50,10 +50,9 @@ export interface CostumeAttemptHandle {
 }
 
 export interface CostumeSwitchAttemptDeps {
-  client: Pick<WsClient, "costumeResolution" | "reportAvatar" | "currentTimingPolicy">;
+  client: Pick<WsClient, "characterCostumes" | "costumeResolution" | "reportAvatar" | "currentTimingPolicy">;
   scene: Pick<PetScene, "switchCostume" | "abortSwitch">;
   costume: string;
-  settingsFile: string;
   onCommit: (commit: CostumeCommit) => void;
   resolveAsset?: (deps: Parameters<typeof costumeAssetResolver>[0]) => Promise<CostumeAssetResolver>;
   reportSync?: CostumeReportSyncTracker;
@@ -178,6 +177,12 @@ class AttemptGate {
 }
 
 async function resolveSource(deps: CostumeSwitchAttemptDeps, gate: AttemptGate): Promise<CostumeAssetResolver> {
+  // Import/reimport may happen after Pet mounted. Only this attempt's covering read may refuse a costume or choose
+  // its manifest; metadata errors remain read errors, and the same deadline/cancellation gate owns this stage.
+  const costumes = await gate.stage(() => deps.client.characterCostumes(ACTIVE_CHARACTER_ID));
+  const settingsFile = costumes.settingsFilesByCostume[deps.costume];
+  if (!costumes.costumes.includes(deps.costume) || !settingsFile) throw new Error("unknown-costume");
+  if (costumes.availability?.[deps.costume]?.renderable === false) throw new Error("not-renderable");
   const { resolution } = await gate.stage(() =>
     deps.client.costumeResolution(ACTIVE_CHARACTER_ID, deps.costume),
   );
@@ -186,7 +191,7 @@ async function resolveSource(deps: CostumeSwitchAttemptDeps, gate: AttemptGate):
     resolveAsset({
       characterId: ACTIVE_CHARACTER_ID,
       costume: deps.costume,
-      settingsFile: deps.settingsFile,
+      settingsFile,
       resolution,
     }),
   );

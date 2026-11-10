@@ -16,11 +16,14 @@ function fixture(env: Record<string, string> = {}) {
 }
 
 describe("effective initiative policy", () => {
-  it("registers each independent limit and TTL with env > stored > default precedence", () => {
+  it("registers each independent limit and TTL with stored > env > default precedence", () => {
     const f = fixture({ TAKI_INITIATIVE_MODEL_HOUR_LIMIT: "7" });
     expect(readInitiativePolicy(f.source)).toEqual({ modelHourLimit: 7, utteranceHourLimit: 2, utteranceDayLimit: 8,
       utteranceGapMs: 600_000, busyMaxWaitMs: 90_000, outputTtlMs: 600_000, scheduledOutputTtlMs: 86_400_000 });
-    expect(f.writer.set({ key: "TAKI_INITIATIVE_MODEL_HOUR_LIMIT", value: 8 })).toMatchObject({ ok: false, reason: "env-locked" });
+    expect(f.writer.set({ key: "TAKI_INITIATIVE_MODEL_HOUR_LIMIT", value: 8 })).toMatchObject({ ok: true, apply: "live" });
+    expect(readInitiativePolicy(f.source).modelHourLimit).toBe(8);
+    expect(f.writer.set({ key: "TAKI_INITIATIVE_MODEL_HOUR_LIMIT", value: null }).ok).toBe(true);
+    expect(readInitiativePolicy(f.source).modelHourLimit).toBe(7);
     for (const entry of Object.values(INITIATIVE_POLICY_FIELDS)) {
       expect(f.source.effectiveAll().find((value) => value.key === entry.key)).toMatchObject({ apply: "live" });
     }

@@ -9,7 +9,7 @@ import { z } from "zod";
 export const ProviderConfigSchema = z
   .object({
     TAKI_PROVIDER_BASE_URL: z.string().min(1),
-    TAKI_PROVIDER_API_KEY: z.string().min(1),
+    TAKI_PROVIDER_API_KEY: z.string().min(1).optional(),
     TAKI_PROVIDER_MODEL: z.string().min(1),
   })
   .transform((env) => ({

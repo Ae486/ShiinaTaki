@@ -43,13 +43,15 @@ describe("initiative wake config authority", () => {
     expect(f.repo.all().size).toBe(0); expect(f.onChanged).not.toHaveBeenCalled();
   });
 
-  it("resolves env/stored/default precedence and applies resets without changing aggregate quotas", () => {
+  it("resolves stored/env/default precedence and applies resets without changing aggregate quotas", () => {
     const f = setup({ TAKI_INITIATIVE_MODEL_CADENCE_MS: "1200000" });
     const policy = readInitiativePolicy(f.source);
-    expect(f.writer.set({ key: "TAKI_INITIATIVE_MODEL_CADENCE_MS", value: 900000 })).toMatchObject({ ok: false, reason: "env-locked" });
+    expect(f.writer.set({ key: "TAKI_INITIATIVE_MODEL_CADENCE_MS", value: 900000 })).toMatchObject({ ok: true, apply: "live" });
     expect(f.writer.set({ key: "TAKI_INITIATIVE_EVENTS_ENABLED", value: false }).ok).toBe(true);
     expect(f.writer.set({ key: INITIATIVE_TARGET_KEY, value: " taki " })).toMatchObject({ ok: true, value: "taki", apply: "live" });
-    expect(readInitiativeWakePolicy(f.source)).toMatchObject({ modelCadenceMs: 1200000, eventsEnabled: false });
+    expect(readInitiativeWakePolicy(f.source)).toMatchObject({ modelCadenceMs: 900000, eventsEnabled: false });
+    expect(f.writer.set({ key: "TAKI_INITIATIVE_MODEL_CADENCE_MS", value: null }).ok).toBe(true);
+    expect(readInitiativeWakePolicy(f.source).modelCadenceMs).toBe(1200000);
     expect(f.writer.set({ key: "TAKI_INITIATIVE_EVENTS_ENABLED", value: null }).ok).toBe(true);
     expect(readInitiativeWakePolicy(f.source).eventsEnabled).toBe(true);
     expect(f.repo.get("TAKI_INITIATIVE_EVENTS_ENABLED")).toBeNull();

@@ -194,7 +194,7 @@ describe("migration 066 historical baseline", () => {
     primary(old, { input: Number.MAX_SAFE_INTEGER, cache: 80, at: BEFORE, old: true });
     primary(old, { input: Number.MAX_SAFE_INTEGER, cache: 80, at: BEFORE, old: true });
     begin(old).commit(); old.close(); const db = open(path);
-    expect(db.prepare("SELECT max(version) AS v FROM migrations").get()?.v).toBe(69);
+    expect(db.prepare("SELECT max(version) AS v FROM migrations").get()?.v).toBe(72);
     expect(createCacheUsageRepo(db).read("taki", AFTER)).toMatchObject({ status: "unavailable", reason: "boundary-unknown" });
   });
 

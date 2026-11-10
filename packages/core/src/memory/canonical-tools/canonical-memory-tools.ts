@@ -1,16 +1,16 @@
 /**
- * INPUT:  async MemoryCoordinator, trusted scope-to-Bank router, and current layer registry
+ * INPUT:  async MemoryCoordinator, trusted Bank router, layer registry and optional captured retention policy
  * OUTPUT: capability-filtered Hindsight-aligned canonical ToolSet
  * POS:    core/memory/canonical-tools — marker-selected canonical runtime; never assembled beside legacy tools
  */
 import { randomUUID } from "node:crypto";
 import { HindsightMemoryRecallEnvelopeV1Schema, MemoryErrorEnvelopeSchema, RecallEnvelopeSchema,
-  type EditableMemoryPatch, type MemoryProviderCapabilities, type MemoryResult, type RecallResult, type TakiMemoryPolicyProjection } from "@taki/shared";
+  type EditableMemoryPatch, type MemoryProviderCapabilities, type MemoryResult, type RecallResult } from "@taki/shared";
 import type { ToolSet } from "ai";
 import type { MemoryAuthorityEpoch } from "@taki/shared";
-import { DEFAULT_INTENTIONS_DAYS } from "../../config/memory-config.ts";
+import { canonicalLayerRetention } from "../canonical-layer-policy.ts";
 import type { MemoryCoordinator } from "../memory-coordinator.ts";
-import { WRITABLE_LAYER_IDS, getLayer, type MemoryLayerDefinition } from "../layer-registry.ts";
+import { WRITABLE_LAYER_IDS, getLayer } from "../layer-registry.ts";
 import { createInvalidateMemoryTool, type InvalidateMemoryToolInput } from "./invalidate-memory-tool.ts";
 import { createRecallTool } from "./recall-tool.ts";
 import { createReflectTool } from "./reflect-tool.ts";
@@ -24,13 +24,14 @@ import { recallMatchesNamespace, selectMemoryRecall } from "../memory-recall-sel
 import { memoryToolModelOutput } from "./memory-tool-model-output.ts";
 
 export interface MemoryToolBankRouter { globalBankId(): string; characterBankId(): string; characterId(): string; }
-interface ToolDeps { coordinator: MemoryCoordinator; router: MemoryToolBankRouter; authority?: MemoryAuthorityEpoch; capabilityDigest?: string }
+interface ToolDeps { coordinator: MemoryCoordinator; router: MemoryToolBankRouter; authority?: MemoryAuthorityEpoch; capabilityDigest?: string; intentionsDefaultDays?: number }
 interface CapturedToolDeps extends ToolDeps { capabilities: MemoryProviderCapabilities }
 type RecallToolInput = { query: string; scope: "global" | "character" | "both"; limit: number; maxTokens: number };
 interface RecallBranch { scope: "global" | "character"; bankId: string; result: MemoryResult<RecallResult> }
 
 export async function createCanonicalMemoryTools(deps: ToolDeps): Promise<ToolSet> {
-  return createCanonicalMemoryToolsWithCapabilities(deps, await deps.coordinator.capabilities());
+  const captured = { ...deps };
+  return createCanonicalMemoryToolsWithCapabilities(captured, await captured.coordinator.capabilities());
 }
 
 export function createCanonicalMemoryToolsWithCapabilities(input: ToolDeps, capabilities: Awaited<ReturnType<MemoryCoordinator["capabilities"]>>): ToolSet {
@@ -75,7 +76,8 @@ async function retain(deps: ToolDeps, input: { content: string; layer: string; c
     bankId, content: input.content, context: input.context, timestamp: null, tags: [], entities: [], metadata: {},
     observationScopes: null, documentId: null, strategy: null, updateMode: "replace",
     provenance: { actor: "agent", origin: "explicit-agent", characterId: deps.router.characterId(), timelineFromSeq: null, timelineToSeq: null, capturedAt, sanitized: true, sourceRef: null },
-    policy: { layerId: input.layer, importance: 5, visibility: layer.recallPolicy, disclosure: null, origin: "self", emotionalWeight: null, retention: retentionFor(layer, capturedAt), policyVersion: 1 },
+    policy: { layerId: input.layer, importance: 5, visibility: layer.recallPolicy, disclosure: null, origin: "self", emotionalWeight: null,
+      retention: canonicalLayerRetention({ layer, at: capturedAt, intentionsDefaultDays: deps.intentionsDefaultDays }), policyVersion: 1 },
   }, callOptions(deps, options));
 }
 
@@ -141,13 +143,6 @@ function updateMemory(deps: ToolDeps, input: UpdateMemoryToolInput & { patch: Ed
 function invalidateMemory(deps: ToolDeps, input: InvalidateMemoryToolInput, options?: unknown) { return deps.coordinator.mutate({ kind: "invalidate", bankId: bank(deps.router, input.scope), memoryId: input.memoryId, expectedRevision: input.expectedRevision, reason: input.reason }, callOptions(deps, options)); }
 function restoreMemory(deps: ToolDeps, input: RestoreMemoryToolInput, options?: unknown) { return deps.coordinator.mutate({ kind: "restore", bankId: bank(deps.router, input.scope), memoryId: input.memoryId, expectedRevision: input.expectedRevision }, callOptions(deps, options)); }
 function bank(router: MemoryToolBankRouter, scope: "global" | "character"): string { return scope === "global" ? router.globalBankId() : router.characterBankId(); }
-
-function retentionFor(layer: MemoryLayerDefinition, capturedAt: string): TakiMemoryPolicyProjection["retention"] {
-  if (layer.retention === "permanent") return { kind: "permanent" };
-  if (layer.retention === "expiring") return { kind: "expiring", expiresAt: new Date(Date.parse(capturedAt) + DEFAULT_INTENTIONS_DAYS * 86_400_000).toISOString() };
-  if ("rollingDays" in layer.retention) return { kind: "rolling-window", days: layer.retention.rollingDays };
-  return { kind: "importance-decay", archiveBelowImportance: layer.retention.archiveBelowImportance, afterDays: layer.retention.afterDays };
-}
 
 function combineVectorState(left: RecallResult["vectorState"], right: RecallResult["vectorState"]): RecallResult["vectorState"] {
   if (left === "degraded" || right === "degraded") return "degraded";

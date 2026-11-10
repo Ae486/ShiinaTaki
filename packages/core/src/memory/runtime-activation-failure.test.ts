@@ -25,7 +25,7 @@ afterEach(() => {
   }
 });
 
-function setup(steps: ScriptStep[] = []) {
+async function setup(steps: ScriptStep[] = []) {
   const dataDir = mkdtempSync(join(tmpdir(), "taki-activation-failure-"));
   const dbPath = join(dataDir, "state.db");
   const db = openDatabase({ path: dbPath, migrations: MIGRATIONS });
@@ -36,6 +36,7 @@ function setup(steps: ScriptStep[] = []) {
   const runtime = composeMemoryRuntime({ db, dataDir, promptDir: join(dataDir, "prompt"), model, timeline,
     windowStart: () => 1, summaries: createSummaryRepo(db), estimatedTokens: () => 90, budget: () => 100,
     compact: { triggerRatio: 0.8, keepMessages: 3 }, env: {}, logger });
+  await runtime.captureRun("taki");
   const legacy = runtime.selected.legacy!;
   const entry = runtime.writeMemory({ characterId: "taki", layer: "profile", content: "Synthetic source before cutover", importance: 6 });
   if (entry instanceof Promise) throw new Error("Legacy fixture write unexpectedly became asynchronous");
@@ -52,7 +53,7 @@ function setup(steps: ScriptStep[] = []) {
   return { db, dbPath, dataDir, runtime, legacy, heldTools, entry, path, before, model, timeline };
 }
 
-type Fixture = ReturnType<typeof setup>;
+type Fixture = Awaited<ReturnType<typeof setup>>;
 const options: ToolExecutionOptions<unknown> = { toolCallId: "held-tool", messages: [], context: undefined };
 async function execute(tool: Tool, input: unknown) {
   if (!tool.execute) throw new Error("Expected executable legacy tool");
@@ -90,7 +91,7 @@ async function assertRetired(fixture: Fixture) {
 
 describe("durable activation cannot restore legacy on runtime failure", () => {
   it("retires old references and exposes unavailable canonical runtime when construction fails after commit", async () => {
-    const fixture = setup([{ kind: "text", deltas: ["I kept the earlier synthetic conversation."] }]);
+    const fixture = await setup([{ kind: "text", deltas: ["I kept the earlier synthetic conversation."] }]);
     const runner = await fixture.runtime.migrationRunner();
     const staged = runner.stage({ workspaceRoot: join(fixture.dataDir, "workspace"), owner: "test" });
     expect(runner.verify(staged.runId).verified).toBe(true);
@@ -131,7 +132,7 @@ describe("durable activation cannot restore legacy on runtime failure", () => {
   });
 
   it.each(["synchronous", "asynchronous"])("preserves committed marker and permanently fences tools after %s onActivated failure", async (mode) => {
-    const fixture = setup();
+    const fixture = await setup();
     const failure = new Error("synthetic activation callback failure");
     const runner = createLegacyMigrationRunner({ db: fixture.db,
       destinationRoot: join(fixture.dataDir, "snapshots"), fence: fixture.runtime.fence,
@@ -147,7 +148,7 @@ describe("durable activation cannot restore legacy on runtime failure", () => {
   });
 
   it.each([1, 2])("retires after committed marker read failure even when %i read attempts fail", async (failures) => {
-    const fixture = setup();
+    const fixture = await setup();
     const runner = await fixture.runtime.migrationRunner();
     const staged = runner.stage({ workspaceRoot: join(fixture.dataDir, "workspace"), owner: "test" });
     expect(runner.verify(staged.runId).verified).toBe(true);
@@ -170,7 +171,7 @@ describe("durable activation cannot restore legacy on runtime failure", () => {
   });
 
   it("releases temporary quiescence when the activation transaction rolls back before commit", async () => {
-    const fixture = setup();
+    const fixture = await setup();
     const runner = await fixture.runtime.migrationRunner();
     const staged = runner.stage({ workspaceRoot: join(fixture.dataDir, "workspace"), owner: "test" });
     expect(runner.verify(staged.runId).verified).toBe(true);

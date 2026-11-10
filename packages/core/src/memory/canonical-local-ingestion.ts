@@ -1,5 +1,5 @@
 /**
- * INPUT:  exact primary commits, Local authority/provider, durable journal, and one Utility Slot
+ * INPUT:  exact primary commits, Local authority/provider, durable journal, Utility Slot and captured retention policy
  * OUTPUT: serialized automatic ingestion plus a real pre-retirement flush port sharing the same receipts
  * POS:    core/memory — canonical Local background ingestion; never blocks the foreground or calls native services
  */
@@ -18,7 +18,7 @@ import { sanitizeCommittedPrimarySpan, retainedIngestionSource, importRetainedPr
 import type { CanonicalIngestionState, PreparedLocalIngestion } from "./canonical-ingestion-plan.ts";
 import type { LocalMemoryProvider } from "./local-memory-provider.ts";
 import { canonicalLocalMemoryFlushPort, type MemoryFlushPort } from "./memory-flush-port.ts";
-import type { UtilitySlot } from "./utility-slot.ts";
+import { captureUtilitySlot, type UtilitySlot } from "./utility-slot.ts";
 import { EPISODIC_EVERY_N } from "./auto-memory.ts";
 import type { ProvenPrimaryEntry } from "./canonical-ingestion-source.ts";
 
@@ -42,6 +42,7 @@ export interface CanonicalLocalIngestionDeps {
   journal: CanonicalIngestionRepo; timeline: TimelineRepo; autoState: MemoryAutoRepo; slot: UtilitySlot;
   events?: MemoryEventsRepo; config?: MemoryConfig; now?: () => string;
   primarySources?: PrimaryConversationSourceRepo;
+  captureRetentionDays?: () => number;
 }
 interface IngestionContext extends CanonicalLocalIngestionDeps { epochId: string; model: CanonicalIngestionModel }
 
@@ -57,15 +58,27 @@ export function createCanonicalLocalIngestion(deps: CanonicalLocalIngestionDeps)
     void next.then(release, release);
     return next;
   };
-  const run: CanonicalLocalIngestion["run"] = (input) => enqueue(input.characterId, () => runRange(ctx, input));
+  const capture = (): IngestionContext => {
+    const intentionsDefaultDays = deps.captureRetentionDays?.() ?? deps.config?.intentionsDefaultDays;
+    return { ...ctx, model: createCanonicalIngestionModel(captureUtilitySlot(deps.slot)),
+      provider: intentionsDefaultDays === undefined ? deps.provider : deps.provider.captureRetention(intentionsDefaultDays) };
+  };
+  const run: CanonicalLocalIngestion["run"] = (input) => {
+    const operation = capture();
+    return enqueue(input.characterId, () => runRange(operation, input));
+  };
   return { run, flushPort: canonicalLocalMemoryFlushPort({ run }),
     importPrimarySources: (characterId) => importPrimarySources(ctx, characterId),
-    maybeRun: (input) => enqueue(input.characterId, async () => {
+    maybeRun: (input) => {
+      if (deps.slot.available?.() === false) return Promise.resolve(null);
+      const operation = capture();
+      return enqueue(input.characterId, async () => {
       const sourceImport = importPrimarySources(ctx, input.characterId);
       const scope = { epochId: ctx.epochId, characterId: input.characterId };
       return deps.journal.pending(scope) || deps.journal.unprocessedCount(scope) >= EPISODIC_EVERY_N
-        ? runRange(ctx, input, sourceImport) : null;
-    }),
+        ? runRange(operation, input, sourceImport) : null;
+      });
+    },
     initializeBaseline: (characterId) => {
       deps.journal.initializeBaseline({ epochId: ctx.epochId, characterId,
         throughSeq: deps.timeline.latestSeq(characterId), now: now(ctx) });

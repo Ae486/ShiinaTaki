@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "character-assets",
+  "description": "Native Home/Pet access to the captured selected-profile Character resource root only.",
+  "windows": ["home", "pet"],
+  "permissions": ["allow-local-characters-root"]
+}

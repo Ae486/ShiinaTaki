@@ -20,7 +20,7 @@
 - host-control-schema.ts — canonical Execution Host negotiation/catalog/control/cancel/settlement schemas, distinct DENIED vs APPROVAL_REQUIRED failures, exact acknowledgement union, and frozen method names
 - host-approval-schema.ts — protocol-v3 Host challenge/resume extension with redacted presentation, nested single-use authorization, and canonical digest payloads
 - host-control-api.ts — focused named public export surface for Host-control schemas and types
-- connect-schema.ts — role/handshake schemas with operator-only command-display offer/echo and separate Host negotiation
+- connect-schema.ts — role/handshake schemas, socket-bound local admission challenge/proof transcript, operator display echo and separate Host negotiation
 - chat-schema.ts — chat methods including ordered activity/read, accepted send identity, legacy cancellation/events, and in-flight image input
 - chat-activity-schema.ts — strict ordered language/tool events, real phase/outcome vocabulary, bounded recovery snapshots and incremental UTF-8 accounting
 - timeline-presentation-schema.ts — independently validated batch coverage and consistent canonical item references; corrupt references fall back without hiding history or losing handoff identity

@@ -4,6 +4,8 @@
  * POS:    core/harness — provider-neutral admission adapter; raw prompts, tools, secrets, and payloads never persist
  */
 import { createHash } from "node:crypto";
+import { appException } from "../server/app-error.ts";
+import type { AgentRuntimeBinding } from "../agents/agent-runtime-binding.ts";
 import type { ToolSet } from "ai";
 import { captureToolDisplayNames, InitiativeSelectedContextSchema, type InitiativeSelectedContext, type TriggerRequest, type SubagentWorkScope } from "@taki/shared";
 import type { ExtensionRunContext } from "../extensions/extension-run-context.ts";
@@ -23,6 +25,7 @@ interface CaptureDeps {
   governance: Pick<GovernancePolicyService, "level">;
   approval?: Pick<ApprovalInteractionService, "approvalGeneration">;
   memory: { captureRun(characterId: string, signal?: AbortSignal): Promise<CapturedMemoryRun> };
+  runtime?: () => AgentRuntimeBinding | undefined;
   provider: string;
   modelId: string;
   effects?: EffectLifecycleService;
@@ -53,10 +56,9 @@ async function captureWithLifetime(args: CaptureInput): Promise<CapturedRunSnaps
 /* eslint max-lines-per-function: ["error", { "max": 55, "skipBlankLines": true, "skipComments": true }] -- Admission seals authority, captured closures and their nonserialized descriptors together. */
 async function captureSnapshot(args: CaptureInput): Promise<CapturedRunSnapshot> {
   const { input, request } = args;
+  const runtime = captureModel(input, request);
   if (request.initiator === "heartbeat" && !args.selectedContext) throw new Error("INITIATIVE_CONTEXT_REQUIRED");
-  const selected = args.selectedContext ? InitiativeSelectedContextSchema.parse(args.selectedContext) : undefined;
-  const selectedDescriptor = args.selectedContext && attributedContextText(args.selectedContext);
-  if (selected && selectedDescriptor) retainContextText(selected, selectedDescriptor);
+  const selected = captureSelectedContext(args.selectedContext);
   if (args.interactive) {
     args.interactive.runId = args.runId;
     args.interactive.effects ??= input.effects;
@@ -75,6 +77,7 @@ async function captureSnapshot(args: CaptureInput): Promise<CapturedRunSnapshot>
     ? memory.snapshot : createMemoryRunReference(memory.snapshot);
   const selectedRecall = selected?.relatedMemory ? createInitiativeMemoryRecall(memory, selected.relatedMemory) : undefined;
   const executionContext = Object.freeze({
+    runtime,
     authorityCurrent: () => input.governance.level().policyGeneration === governance.policyGeneration
       && memory.isCurrent?.() !== false && selectedRecall?.isCurrent() !== false,
     selectedContext: selected ? freezeSelection(selected) : undefined,
@@ -91,7 +94,8 @@ async function captureSnapshot(args: CaptureInput): Promise<CapturedRunSnapshot>
   });
   return { context: executionContext, snapshot: { schemaVersion: "slice1.v1", characterId: request.characterId,
     initiator: request.initiator, provenance: request.provenance, deliveryClass: request.deliveryClass,
-    contextMode: request.contextMode, modelProvider: input.provider, modelId: input.modelId,
+    contextMode: request.contextMode, modelProvider: runtime?.provider ?? input.provider, modelId: runtime?.modelId ?? input.modelId,
+    ...(runtime ? { modelRevision: runtime.revision } : {}),
     primaryHostId: context.snapshot.primaryHostId, hosts, extensions,
     extensionSnapshotDigest: digest({ primaryHostId: context.snapshot.primaryHostId, hosts, extensions }),
     governance: { policyGeneration: governance.policyGeneration, registryRevision: governance.registryRevision,
@@ -103,6 +107,23 @@ async function captureSnapshot(args: CaptureInput): Promise<CapturedRunSnapshot>
     budget: { deadlineAt: request.deadlineAt, budgetHint: request.budgetHint },
     implementation: { runtimeVersion: "slice1", schemaVersion: "slice1.v1" },
     sourceRefs: [] } };
+}
+
+function captureSelectedContext(input?: InitiativeSelectedContext): InitiativeSelectedContext | undefined {
+  if (!input) return undefined;
+  const selected = InitiativeSelectedContextSchema.parse(input);
+  const descriptor = attributedContextText(input);
+  if (descriptor) retainContextText(selected, descriptor);
+  return selected;
+}
+
+function captureModel(input: CaptureDeps, request: TriggerRequest): AgentRuntimeBinding | undefined {
+  if (request.provenance.provider === "dev-trigger") return undefined;
+  const runtime = input.runtime?.();
+  if (input.runtime && !runtime) {
+    throw appException("CONFIG_REFUSED", "请先在设置中配置主模型。", { reason: "MODEL_UNAVAILABLE", slot: "main" });
+  }
+  return runtime;
 }
 
 function captureMemoryTools(tools: ToolSet, scope: SubagentWorkScope | undefined, selected: ToolSet | undefined) {

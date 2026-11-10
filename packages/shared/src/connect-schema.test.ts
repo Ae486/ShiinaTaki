@@ -3,9 +3,33 @@ import {
   HOST_CATALOG_SCHEMA_VERSION,
   HOST_CONTROL_PROTOCOL_VERSION,
 } from "./host-control-schema.ts";
-import { CONNECT_METHOD, ConnectParamsSchema, ConnectResultSchema, RoleSchema } from "./connect-schema.ts";
+import { CONNECT_METHOD, ConnectParamsSchema, ConnectResultSchema, RoleSchema, LocalAuthChallengeSchema, localAuthTranscript } from "./connect-schema.ts";
 
 const VALID_UUID = "550e8400-e29b-41d4-a716-446655440000";
+
+describe("native local connect contract", () => {
+  const base = { deviceId: VALID_UUID, deviceName: "Home", role: "operator" as const };
+  it("begin carries no reusable credentials and every proof has bounded canonical hex", () => {
+    const begin = { kind: "begin", clientNonce: "01".repeat(32) };
+    expect(ConnectParamsSchema.safeParse({ ...base, localAuth: begin }).success).toBe(true);
+    for (const extra of [{ token: "old" }, { pairingCode: "123456" }]) {
+      expect(ConnectParamsSchema.safeParse({ ...base, localAuth: begin, ...extra }).success).toBe(false);
+    }
+    const proof = { kind: "proof", nonce: "01".repeat(32), proof: "02".repeat(32) };
+    expect(ConnectParamsSchema.safeParse({ ...base, localAuth: proof, token: "old" }).success).toBe(true);
+    expect(ConnectParamsSchema.safeParse({ ...base, localAuth: { ...proof, proof: "FF".repeat(32) } }).success).toBe(false);
+    expect(ConnectParamsSchema.safeParse({ ...base, localAuth: { ...proof, arbitraryAccount: "secret" } }).success).toBe(false);
+  });
+  it("defines distinct purpose domains over the exact endpoint, instance and identity tuple", () => {
+    const value = LocalAuthChallengeSchema.parse({ version: 1, coreId: VALID_UUID, instanceId: VALID_UUID,
+      endpoint: "ws://127.0.0.1:8974", nonce: "01".repeat(32), clientNonce: "02".repeat(32), deviceId: VALID_UUID,
+      role: "operator", expiresAt: 30001, serverProof: "03".repeat(32) });
+    expect(localAuthTranscript("server", value)).toBe(`taki-local-auth-v1:server\n${JSON.stringify([1, VALID_UUID, VALID_UUID,
+      value.endpoint, value.nonce, value.clientNonce, VALID_UUID, "operator", 30001])}`);
+    expect(localAuthTranscript("client", value)).not.toBe(localAuthTranscript("server", value));
+    expect(LocalAuthChallengeSchema.safeParse({ ...value, key: "forbidden" }).success).toBe(false);
+  });
+});
 
 describe("CONNECT_METHOD", () => {
   it("is the connect method name", () => {

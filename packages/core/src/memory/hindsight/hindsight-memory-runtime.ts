@@ -11,17 +11,20 @@ import { captureCanonicalMemoryAssembly } from "../canonical-memory-assembly.ts"
 import { createCanonicalMemoryRun, type CapturedMemoryRun } from "../canonical-memory-run.ts";
 import type { MemoryToolBankRouter } from "../canonical-tools/canonical-memory-tools.ts";
 import { createMemoryRunReference } from "../memory-capability-snapshot.ts";
-import { createFallbackPersonaProvider, createPersonaProvider } from "../persona-provider.ts";
+import { capturePersona, createFallbackPersonaProvider, createPersonaProvider } from "../persona-provider.ts";
+import type { MemoryConfig } from "../../config/memory-config.ts";
 import { captureHindsightRuntimeRows, createHindsightRuntimeTidyView } from "./hindsight-runtime-view.ts";
 import { hindsightAvailabilityFailure } from "./hindsight-memory-provider-context.ts";
 import type { HindsightRuntimeState } from "./hindsight-runtime-state.ts";
 import { createHindsightRuntimeConsumers } from "./hindsight-runtime-consumers.ts";
 import { bindInitiativeAssembly, captureInitiativeMemoryAssembly, captureTrackedInitiativeAssembly } from "../initiative-memory-assembly.ts";
 
-export function createHindsightMemoryRuntime(input: { state: HindsightRuntimeState; promptDir?: string }) {
+export function createHindsightMemoryRuntime(input: { state: HindsightRuntimeState; promptDir?: string;
+  currentPromptDir?: () => string; captureConfig?: () => MemoryConfig }) {
   const { state } = input;
   const consumers = createHindsightRuntimeConsumers();
-  const persona = input.promptDir ? createPersonaProvider({ promptDir: input.promptDir }) : createFallbackPersonaProvider();
+  const persona = input.promptDir || input.currentPromptDir
+    ? createPersonaProvider({ promptDir: input.currentPromptDir ?? input.promptDir! }) : createFallbackPersonaProvider();
   const capabilities = () => {
     const value = state.provider.capabilitiesSnapshot();
     if (!value) throw new Error("HINDSIGHT_APPLICATION_ADMISSION_UNAVAILABLE"); return value;
@@ -31,8 +34,8 @@ export function createHindsightMemoryRuntime(input: { state: HindsightRuntimeSta
     const global = banks.find((bank) => bank.scope === "global")!; const character = banks.find((bank) => bank.scope === "character")!;
     return { globalBankId: () => global.bankId, characterBankId: () => character.bankId, characterId: () => characterId };
   };
-  const assemble = (characterId: string) => captureCanonicalMemoryAssembly({ characterId, persona,
-    rows: captureHindsightRuntimeRows(state, { characterId, intentions: true }), pinnedBudget: state.config.pinnedBudget,
+  const assemble = (characterId: string, selected = persona, config = input.captureConfig?.() ?? state.config) => captureCanonicalMemoryAssembly({ characterId, persona: selected,
+    rows: captureHindsightRuntimeRows(state, { characterId, intentions: true }), pinnedBudget: config.pinnedBudget,
     blocks: state.blocks.render([{ kind: "global", characterId: null }, { kind: "character", characterId }]),
     now: state.now ? Date.parse(state.now()) : undefined });
   const unsupported = (): never => { throw new Error("MEMORY_CAPABILITY_UNSUPPORTED"); };
@@ -54,16 +57,18 @@ export function createHindsightMemoryRuntime(input: { state: HindsightRuntimeSta
     providerLineageId: state.runtime.epoch.providerLineageId, authorityEpochId: state.runtime.epoch.epochId,
     contractVersion: 1, capabilities: capabilities() }),
     captureRun: (characterId: string, signal?: AbortSignal) => consumers.capture(async () => {
+      const selectedPersona = capturePersona(persona, characterId);
+      const selectedConfig = { ...(input.captureConfig?.() ?? state.config) };
       await synchronizeForCapture(state, { characterId, signal });
       // Both routes and the prompt projection are captured before the coordinator
       // seals capabilities. Later background changes cannot rewrite a queued Run.
       const capturedRouter = router(characterId);
-      const initiative = captureTrackedInitiativeAssembly(() => captureInitiativeMemoryAssembly({ characterId, persona,
+      const initiative = captureTrackedInitiativeAssembly(() => captureInitiativeMemoryAssembly({ characterId, persona: selectedPersona,
         global: { reference: capturedRouter.globalBankId(), content: state.blocks.render([{ kind: "global", characterId: null }]) },
         character: { reference: capturedRouter.characterBankId(), content: state.blocks.render([{ kind: "character", characterId }]) } }));
       const captured = await createCanonicalMemoryRun({ coordinator: state.coordinator, router: capturedRouter,
         captureRecallEvidence: state.recallEvidence.read,
-        assemble: assemble(characterId), prompt: CANONICAL_MEMORY_SYSTEM_PROMPT,
+        assemble: assemble(characterId, selectedPersona, selectedConfig), prompt: CANONICAL_MEMORY_SYSTEM_PROMPT,
         assembleInitiative: initiative.assemble, initiativeCurrent: initiative.isCurrent });
       if (signal?.aborted) throw new Error("MEMORY_OPERATION_CANCELLED");
       return withCurrentRuntimeBinding(captured, capturedRouter, () => router(characterId));

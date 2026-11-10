@@ -1,6 +1,6 @@
 /**
  * INPUT:  an AmbientShotStore, the configured AmbientRetention, a Logger, an optional injected clock
- * OUTPUT: startAmbientShotGc(deps) -> void; one boot sweep plus a 6h unref'd interval (nothing at all under `keep`)
+ * OUTPUT: startAmbientShotGc(deps) -> stop handle; one boot sweep plus a 6h unref'd interval (none under `keep`)
  * POS:    core/perception — the retention ENFORCEMENT arm of ambient capture. Retention that nobody sweeps is not
  *         retention: the inline drop-after-consumption covers the normal path, this covers the crash-interrupted one and
  *         the day-granularity policy. Runs independently of the enable flag, so frames captured before ambient
@@ -26,10 +26,10 @@ function cutoffFor(retention: AmbientRetention, at: number): number | null {
   return retention.mode === "delete-after-days" ? at - retention.ttlMs : Number.POSITIVE_INFINITY;
 }
 
-export function startAmbientShotGc(deps: AmbientShotGcDeps): void {
-  if (deps.retention.mode === "keep") return; // the user asked to keep every frame: no timer, no sweep, no surprise
+export function startAmbientShotGc(deps: AmbientShotGcDeps): { stop(): void } {
+  if (deps.retention.mode === "keep") return { stop() { /* No retention timer exists for this policy. */ } };
   const now = deps.now ?? Date.now;
-  startSweeper({
+  return startSweeper({
     name: "ambient-shots",
     message: "ambient frames swept",
     logger: deps.logger,

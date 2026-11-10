@@ -66,6 +66,7 @@ export interface RetentionRow {
 }
 
 export interface MemoryRepo {
+  reconfigureWeights?(weights: Bm25Weights): void;
   upsert(input: MemoryUpsert): void;
   deleteByPath(path: string): void;
   /** path -> content hash for every indexed row (reconciliation compares these to the files). */
@@ -135,7 +136,7 @@ const COUNT_SINCE_SQL =
 
 // Every statement this repo owns, prepared once. Separated from the method surface below so the weights (which are
 // baked into the MATCH statement) have exactly one place they can enter.
-function prepareStatements(db: Database, weights: Bm25Weights) {
+function prepareStatements(db: Database) {
   return {
     upsertMeta: db.prepare(UPSERT_META_SQL),
     ftsDelete: db.prepare("DELETE FROM memory_fts WHERE path = :path"),
@@ -144,7 +145,6 @@ function prepareStatements(db: Database, weights: Bm25Weights) {
     ),
     metaDelete: db.prepare("DELETE FROM memory_entries WHERE path = :path"),
     hashes: db.prepare("SELECT path, content_hash FROM memory_entries"),
-    searchMatch: db.prepare(searchMatchSql(weights)),
     searchLike: db.prepare(SEARCH_LIKE_SQL),
     resolve: db.prepare(RESOLVE_SQL),
     retentionRows: db.prepare(RETENTION_ROWS_SQL),
@@ -153,10 +153,12 @@ function prepareStatements(db: Database, weights: Bm25Weights) {
 }
 
 export function createMemoryRepo(db: Database, weights: Bm25Weights = DEFAULT_BM25_WEIGHTS): MemoryRepo {
-  const { upsertMeta, ftsDelete, ftsInsert, metaDelete, hashes, searchMatch, searchLike, resolve, retentionRows, countSince } =
-    prepareStatements(db, weights);
+  const { upsertMeta, ftsDelete, ftsInsert, metaDelete, hashes, searchLike, resolve, retentionRows, countSince } =
+    prepareStatements(db);
+  let searchMatch = db.prepare(searchMatchSql(weights));
 
   return {
+    reconfigureWeights: (next) => { searchMatch = db.prepare(searchMatchSql(next)); },
     upsert(input) {
       db.transaction(() => {
         upsertMeta.run(toMetaParams(input));

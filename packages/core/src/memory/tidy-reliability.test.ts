@@ -250,6 +250,30 @@ describe("Local tidy whole-chain reliability", () => {
     expect(f.checkpoints.read("taki").memories[0]?.revision).toBe(2);
   });
 
+  it("keeps admitted retention policy through the shared queue and updates the next tidy operation", async () => {
+    const config = { ...loadMemoryConfig({}), intentionsDefaultDays: 4 };
+    const f = await fixture([
+      { kind: "tool", toolCallId: "refile-old", toolName: "memory_refile", input: { id: "m1", layer: "intentions" } }, finish("old-done"),
+      { kind: "tool", toolCallId: "refile-new", toolName: "memory_refile", input: { id: "m1", layer: "intentions" } }, finish("new-done"),
+    ], { config, captureConfig: () => config });
+    await f.seed("First planned intention");
+    let release!: () => void;
+    const blocker = f.slot.run("retention-test-blocker", () => new Promise<void>((resolve) => { release = resolve; }));
+    await Promise.resolve();
+    const old = f.pass.runNow("taki");
+    config.intentionsDefaultDays = 9;
+    release(); await blocker;
+    expect(await old).toMatchObject({ status: "ran", edits: 1 });
+    await f.seed("Second planned intention");
+    expect(await f.pass.runNow("taki")).toMatchObject({ status: "ran", edits: 1 });
+    const intentions = f.engine.maintenanceStore.list({ epochId: f.epoch.epochId, characterId: "taki" })
+      .filter((record) => record.policy.layerId === "intentions");
+    expect(intentions).toHaveLength(2);
+    expect(intentions.map((record) => record.policy.retention.kind === "expiring"
+      ? (Date.parse(record.policy.retention.expiresAt) - Date.parse(record.policy.updatedAt)) / 86_400_000 : null).sort())
+      .toEqual([4, 9]);
+  });
+
   it("keeps a complete duplicate group visible and actionable even with a one-candidate cap", async () => {
     const f = await fixture([
       { kind: "tool", toolCallId: "archive", toolName: "memory_archive_supersede", input: { id: "m2" } }, finish("done"),

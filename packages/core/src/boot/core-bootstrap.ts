@@ -9,26 +9,29 @@
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import type { LanguageModel } from "ai";
-import { loadAgentConfig, type AgentConfig } from "../config/agent-config.ts";
-import { loadAmbientScreenshotConfig, type AmbientScreenshotConfig } from "../config/ambient-screenshot-config.ts";
-import { loadAttachmentConfig, type AttachmentConfig } from "../config/attachment-config.ts";
+import { type AgentConfig } from "../config/agent-config.ts";
+import { type AmbientScreenshotConfig } from "../config/ambient-screenshot-config.ts";
+import { type AttachmentConfig } from "../config/attachment-config.ts";
+import { createConfigApplication, type ConfigApplicationTracker } from "../config/config-application.ts";
 import { createConfigSource, type ConfigSource } from "../config/config-source.ts";
 import { createConfigSubscriptions, type ConfigSubscriptions } from "../config/config-subscriptions.ts";
 import { createConfigWriter, type ConfigWriter } from "../config/config-writer.ts";
-import { loadContextConfig, type ContextConfig } from "../config/context-config.ts";
-import { loadProviderConfig } from "../config/provider-config.ts";
+import { type ContextConfig } from "../config/context-config.ts";
+import { ProviderConfigSchema } from "../config/provider-config.ts";
 import { createModels } from "../config/provider-factory.ts";
-import { loadServerConfig, type ServerConfig } from "../config/server-config.ts";
+import { ServerConfigSchema, type ServerConfig } from "../config/server-config.ts";
 import { createConfigRepo, type ConfigRepo } from "../db/config-repo.ts";
 import { MIGRATIONS } from "../db/migrations/index-list.ts";
 import { openDatabase, type Database } from "../db/sqlite.ts";
 import { createLogger, type Logger } from "../logging/logger.ts";
+import { loadFeatureConfiguration } from "./feature-configuration.ts";
 
 export interface ConfigPlane {
   source: ConfigSource;
   repo: ConfigRepo;
   subscriptions: ConfigSubscriptions;
   writer: ConfigWriter;
+  application: ConfigApplicationTracker;
 }
 
 export interface CoreBootstrap {
@@ -42,12 +45,12 @@ export interface CoreBootstrap {
   attachmentConfig: AttachmentConfig;
   ambientConfig: AmbientScreenshotConfig;
   contextConfig: ContextConfig;
-  model: LanguageModel;
+  model?: LanguageModel;
 }
 
 /** The data root is read BEFORE the store exists, so it is the one knob env alone governs (registry: env-only). */
 function openStore(env: Record<string, string | undefined>, onAfterCommitError: () => void): { db: Database; applied: number[]; dataDir: string } {
-  const { dataDir } = loadServerConfig(env);
+  const dataDir = ServerConfigSchema.shape.dataDir.parse(env.TAKI_DATA_DIR);
   // The composition root ensures the app data root exists before opening the db (first-boot);
   // the db layer itself stays fs-free (invariant). Mirrors the paired-device-store sanctioned site.
   mkdirSync(dataDir, { recursive: true });
@@ -69,13 +72,20 @@ export function bootstrapCore(processEnv: Record<string, string | undefined>, op
   let reportCommitError = () => { pendingCommitErrors += 1; };
   const { db, applied, dataDir } = openStore(processEnv, () => reportCommitError());
   const repo = createConfigRepo(db);
-  const source = createConfigSource({ env: processEnv, repo });
   const subscriptions = createConfigSubscriptions();
+  const source = createConfigSource({ env: processEnv, repo, application: (key) => application.read(key) });
+  const application = createConfigApplication({ source, changed: (key) => subscriptions.publish({ key, value: repo.get(key) }) });
   const env = source.env();
-
-  // Config parse stays fatal-fast at boot; the values now come from env > store > default instead of env alone.
-  const serverConfig = { ...loadServerConfig(env), dataDir };
-  const contextConfig = loadContextConfig(env);
+  let host: string;
+  let port: number;
+  try {
+    host = ServerConfigSchema.shape.host.parse(env.TAKI_WS_HOST);
+    port = ServerConfigSchema.shape.port.parse(env.TAKI_WS_PORT);
+  } catch (error) { db.close(); throw error; }
+  const features = loadFeatureConfiguration(env, application);
+  const { contextConfig } = features;
+  const serverConfig = { host, port, dataDir, logLevel: features.logLevel, promptDir: features.promptDir,
+    trustLoopbackOperator: features.trustLoopbackOperator };
   const logger = createLogger(serverConfig.logLevel);
   reportCommitError = () => logger.warn({ code: "SQLITE_AFTER_COMMIT_FAILED" }, "Committed database callback failed");
   if (pendingCommitErrors > 0) logger.warn({ code: "SQLITE_AFTER_COMMIT_FAILED", count: pendingCommitErrors }, "Committed database callbacks failed during bootstrap");
@@ -84,26 +94,25 @@ export function bootstrapCore(processEnv: Record<string, string | undefined>, op
     .info({ applied }, applied.length > 0 ? "migrations applied" : "schema already up to date");
 
   // Native image input uses the primary model. Obsolete VLM settings do not affect startup.
-  const { model } = createModels({
-    provider: loadProviderConfig(env),
-    includeUsage: contextConfig.includeUsage,
-  });
+  const provider = ProviderConfigSchema.safeParse(env);
+  const model = provider.success ? createModels({ provider: provider.data, includeUsage: contextConfig.includeUsage }).model : undefined;
 
   return {
     env,
     logger,
     db,
-    config: { source, repo, subscriptions, writer: createConfigWriter({ env: processEnv, repo, onChanged: (change) => {
+    config: { source, repo, subscriptions, application, writer: createConfigWriter({ env: processEnv, repo,
+      application: application.read, onChanged: (change) => {
       try { subscriptions.publish(change); }
       catch { logger.warn({ code: "CONFIG_NOTIFICATION_FAILED" }, "Config notification failed"); }
       // A committed setting must remain successful even when a local consumer fails.
       try { options.onConfigChanged?.(change.key); } catch { logger.warn({ code: "CONFIG_OBSERVER_FAILED" }, "Config observer failed"); }
     } }) },
     serverConfig,
-    agentConfig: loadAgentConfig(env),
-    attachmentConfig: loadAttachmentConfig(env),
+    agentConfig: features.agentConfig,
+    attachmentConfig: features.attachmentConfig,
     // Ambient capture remains opt-in; its native frame lifetime is owned by Perception.
-    ambientConfig: loadAmbientScreenshotConfig(env),
+    ambientConfig: features.ambientConfig,
     contextConfig,
     model,
   };

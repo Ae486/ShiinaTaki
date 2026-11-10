@@ -17,6 +17,8 @@ export default tseslint.config(
       ".runtime/**",
       ".worktrees/**",
       ".backup-*/**",
+      // Captured source preimages and one-off evidence scripts are not the live application tree.
+      "artifacts/**",
       // Vendored proprietary Live2D runtimes (minified third-party; git-ignored, fetched by a script).
       "apps/desktop/public/vendor/**",
       ".trellis/**",

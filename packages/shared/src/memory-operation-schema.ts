@@ -22,7 +22,7 @@ const Id = z.string().min(1).max(256);
 const Timestamp = z.iso.datetime({ offset: true });
 const revision = z.number().int().nonnegative();
 
-export const MemoryOperationKindSchema = z.enum(["setup.validate", "setup.apply", "replica.sync", "tidy"]);
+export const MemoryOperationKindSchema = z.enum(["setup.validate", "setup.apply", "replica.sync", "tidy", "index.rebuild"]);
 export type MemoryOperationKind = z.infer<typeof MemoryOperationKindSchema>;
 export const MemoryOperationStateSchema = z.enum(["admitted", "running", "completed", "failed", "cancelled", "outcome_unknown"]);
 export type MemoryOperationState = z.infer<typeof MemoryOperationStateSchema>;
@@ -45,6 +45,7 @@ export const MemoryOperationRequestSchema = z.discriminatedUnion("kind", [
   }),
   z.strictObject({ kind: z.literal("replica.sync"), bankId: Id, syncKind: MemoryReplicaRunKindSchema }),
   z.strictObject({ kind: z.literal("tidy"), characterId: z.string().min(1).max(160) }),
+  z.strictObject({ kind: z.literal("index.rebuild"), stoplist: z.boolean() }),
 ]);
 export type MemoryOperationRequest = z.infer<typeof MemoryOperationRequestSchema>;
 
@@ -53,6 +54,7 @@ export const MemoryOperationProducerRefSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("replica"), bankId: Id, admittedAt: Timestamp }),
   z.strictObject({ kind: z.literal("tidy"), characterId: z.string().min(1).max(160),
     authorityEpochId: Id.nullable(), progress: MemoryTidyProgressSchema }),
+  z.strictObject({ kind: z.literal("index"), stoplist: z.boolean(), authorityEpochId: Id.nullable() }),
 ]);
 export type MemoryOperationProducerRef = z.infer<typeof MemoryOperationProducerRefSchema>;
 
@@ -64,6 +66,7 @@ export const MemoryOperationResultSchema = z.discriminatedUnion("kind", [
     nextAction: MemoryReplicaNextActionSchema.nullable(), lastSuccessAt: Timestamp.nullable(),
   }),
   z.strictObject({ kind: z.literal("tidy"), outcome: MemoryTidyOutcomeSchema }),
+  z.strictObject({ kind: z.literal("index"), indexed: z.int().nonnegative() }),
 ]);
 export type MemoryOperationResult = z.infer<typeof MemoryOperationResultSchema>;
 

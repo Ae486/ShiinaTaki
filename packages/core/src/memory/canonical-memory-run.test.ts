@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { MemoryAuthorityEpoch, MemoryProviderCapabilities, MemoryResult, RecallRequest } from "@taki/shared";
+import type { MemoryAuthorityEpoch, MemoryProviderCapabilities, MemoryResult, RecallRequest, RetainRequest } from "@taki/shared";
 import { createMemoryCoordinator } from "./memory-coordinator.ts";
 import { createCanonicalMemoryRun } from "./canonical-memory-run.ts";
 import type { MemoryProvider, MemoryProviderCallContext } from "./memory-provider.ts";
@@ -48,6 +48,24 @@ function fixture() {
 }
 
 describe("immutable memory Run binding", () => {
+  it("captures intentions policy before asynchronous admission and retains it for old tools", async () => {
+    const f = fixture();
+    const retained: RetainRequest[] = [];
+    const original = f.provider.retain;
+    f.provider.retain = async (context, request) => { retained.push(request); return original(context, request); };
+    const input = { coordinator: f.coordinator, router: f.router, intentionsDefaultDays: 4 };
+    const pending = createCanonicalMemoryRun(input);
+    input.intentionsDefaultDays = 9;
+    const old = await pending;
+    const next = await createCanonicalMemoryRun(input);
+    for (const run of [old, next, old]) await run.tools.retain!.execute!(
+      { content: "future plan", layer: "intentions", context: null }, toolOptions as never);
+    expect(retained).toHaveLength(3);
+    expect(retained.map((request) => request.policy.retention.kind === "expiring"
+      ? (Date.parse(request.policy.retention.expiresAt!) - Date.parse(request.provenance.capturedAt)) / 86_400_000 : null))
+      .toEqual([4, 9, 4]);
+  });
+
   it("uses one real capability snapshot for coordinator, tools, and Run evidence", async () => {
     const f = fixture();
     const run = await createCanonicalMemoryRun({ coordinator: f.coordinator, router: f.router });

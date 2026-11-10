@@ -4,7 +4,7 @@
  *         and the client-side search filter
  * POS:    ui/windows/home/pages/settings — client-side presentation map only (U7); Core stays the only authority and
  *         the server order inside a group is never re-sorted. Unknown keys fall back to the 高级 group; their label
- *         falls back to the raw key (KnobField renders the key primary again). No knob is removed or hidden.
+ *         falls back to the raw key. Settings presents the six model connection keys through grouped profile cards.
  */
 import type { ConfigEntry } from "@taki/shared";
 

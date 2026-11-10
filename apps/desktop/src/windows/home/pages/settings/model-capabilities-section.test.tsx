@@ -34,7 +34,8 @@ describe("model capability guidance", () => {
     expect(html).toContain("目录声明不支持");
     expect(html).toContain("models.dev");
     expect(html).toContain("未验证此连接");
-    expect(html).toContain("重启后生效");
+    expect(html).toContain("不影响保存或启用");
+    expect(html).not.toContain("重启后生效");
     expect(html).toContain("当前连接方式不支持");
     expect(html).toContain("应用搜索工具");
     expect(html).toContain('aria-label="主模型信息"');

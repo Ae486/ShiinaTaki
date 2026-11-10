@@ -15,7 +15,7 @@ const insert = `INSERT INTO memory_operations (operation_id,kind,family,state,re
 
 describe("migration 048 memory operations", () => {
   it("applies on a fresh database and on a database at 047", () => {
-    expect(open().prepare("SELECT max(version) AS v FROM migrations").get()?.v).toBe(69);
+    expect(open().prepare("SELECT max(version) AS v FROM migrations").get()?.v).toBe(72);
     const upgraded = open(MIGRATIONS.slice(0, 47));
     expect(upgraded.prepare("SELECT max(version) AS v FROM migrations").get()?.v).toBe(47);
     upgraded.exec(MIGRATIONS[47]!.sql);

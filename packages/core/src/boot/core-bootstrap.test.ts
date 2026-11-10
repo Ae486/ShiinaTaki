@@ -8,7 +8,7 @@ import { openDatabase } from "../db/sqlite.ts";
 import { rmTempDir } from "../testing/rm-temp.ts";
 import { bootstrapCore, type CoreBootstrap } from "./core-bootstrap.ts";
 
-// The provider slot is required at boot; these are construction-time values only (no request is ever made).
+// Construction-time values only; no request is made and missing model fields must preserve basic startup.
 const PROVIDER_ENV = {
   TAKI_PROVIDER_BASE_URL: "http://127.0.0.1:1/v1",
   TAKI_PROVIDER_API_KEY: "test-key",
@@ -97,11 +97,31 @@ describe("bootstrapCore", () => {
     expect(result.env.TAKI_MAX_STEPS).toBe("27");
   });
 
-  it("an env var still outranks the stored value", () => {
+  it("a stored value outranks the environment fallback", () => {
     const dataDir = tempDataDir();
     storeKnob(dataDir, "TAKI_MAX_STEPS", 27);
 
-    expect(boot({ TAKI_DATA_DIR: dataDir, TAKI_MAX_STEPS: "5" }).agentConfig.maxSteps).toBe(5);
+    expect(boot({ TAKI_DATA_DIR: dataDir, TAKI_MAX_STEPS: "5" }).agentConfig.maxSteps).toBe(27);
+  });
+
+  it("starts a usable configuration plane with no model fields", () => {
+    const result = boot({ TAKI_DATA_DIR: tempDataDir(), TAKI_PROVIDER_BASE_URL: undefined,
+      TAKI_PROVIDER_API_KEY: undefined, TAKI_PROVIDER_MODEL: undefined });
+    expect(result.model).toBeUndefined();
+    expect(result.config.source.effectiveAll().length).toBeGreaterThan(0);
+    expect(result.config.writer.set({ key: "TAKI_MAX_STEPS", value: 12 }).ok).toBe(true);
+  });
+
+  it("isolates invalid feature policy while preserving raw configuration for recovery", () => {
+    const result = boot({ TAKI_DATA_DIR: tempDataDir(), TAKI_MAX_STEPS: "broken",
+      TAKI_AMBIENT_SCREENSHOT: "yes", TAKI_ATTACHMENT_TTL_DAYS: "broken", TAKI_LOG_LEVEL: "verbose" });
+    expect(result.ambientConfig).toEqual({ enabled: false, retention: { mode: "keep" } });
+    expect(result.attachmentConfig.ttlMs).toBe(Number.POSITIVE_INFINITY);
+    expect(result.env.TAKI_ATTACHMENT_TTL_DAYS).toBe("broken");
+    for (const key of ["TAKI_MAX_STEPS", "TAKI_AMBIENT_SCREENSHOT", "TAKI_ATTACHMENT_TTL_DAYS", "TAKI_LOG_LEVEL"]) {
+      expect(result.config.application.read(key)).toMatchObject({ state: "unavailable" });
+    }
+    expect(result.config.writer.set({ key: "TAKI_AMBIENT_SCREENSHOT", value: false }).ok).toBe(true);
   });
 
   it("the data root itself is never taken from the store (env-only bootstrap knob)", () => {

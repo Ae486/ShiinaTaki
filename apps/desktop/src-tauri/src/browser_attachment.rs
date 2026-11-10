@@ -3,6 +3,7 @@
 //! POS: shell/browser_attachment — optional loopback sensor, never an operator/Node credential export or capability grant
 
 mod server;
+mod lifecycle;
 pub(crate) mod forwarder;
 #[cfg(test)]
 mod tests;
@@ -40,13 +41,19 @@ struct LocalState {
 }
 
 pub(crate) struct BrowserAttachment {
-    port: Option<u16>,
-    token: String,
+    binding: Mutex<Binding>,
+    loader: Mutex<Option<lifecycle::Loader>>,
+    unavailable: std::sync::atomic::AtomicBool,
+    reload: watch::Sender<()>,
+    configuration: watch::Sender<()>,
     state: Mutex<LocalState>,
     samples: watch::Sender<Option<Observation>>,
     permission: watch::Sender<bool>,
     stop: watch::Sender<bool>,
 }
+
+#[derive(Clone)]
+struct Binding { port: Option<u16>, token: String }
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -55,18 +62,16 @@ pub(crate) struct PairingDetails { pub endpoint: String, pub token: String }
 impl BrowserAttachment {
     pub(crate) fn spawn(self: &Arc<Self>) -> BrowserServerGuard {
         let attachment = self.clone();
-        let task = tokio::spawn(async move {
-            if attachment.clone().run().await.is_err() {
-                attachment.set_core_enabled(false);
-                tracing::warn!(code = "BROWSER_ATTACHMENT_UNAVAILABLE", "Browser attachment listener unavailable");
-            }
-        });
+        let task = tokio::spawn(async move { attachment.run_owned().await; });
         BrowserServerGuard { attachment: self.clone(), task }
     }
     pub(crate) fn load(data_dir: &Path, secrets: &dyn SecretStore) -> Result<Arc<Self>, String> {
         let path = data_dir.join("browser-attachment.json");
-        if !path.exists() { return Ok(Self::disabled()); }
-        let bytes = std::fs::read(path).map_err(|_| "Cannot read browser attachment config")?;
+        let bytes = match std::fs::read(path) {
+            Ok(bytes) => bytes,
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(Self::disabled()),
+            Err(_) => return Err("Cannot read browser attachment config".into()),
+        };
         if bytes.len() > 4096 { return Err("Browser attachment config is too large".into()); }
         let config: LocalConfig = serde_json::from_slice(&bytes).map_err(|_| "Invalid browser attachment config")?;
         if !config.enabled { return Ok(Self::disabled()); }
@@ -86,16 +91,19 @@ impl BrowserAttachment {
     }
 
     fn new(port: Option<u16>, token: String) -> Arc<Self> {
-        Arc::new(Self { port, token,
+        Arc::new(Self { binding: Mutex::new(Binding { port, token }), loader: Mutex::new(None),
+            unavailable: std::sync::atomic::AtomicBool::new(false), reload: watch::channel(()).0, configuration: watch::channel(()).0,
             state: Mutex::new(LocalState { active_client: None, sequence: 0, observation: None, core_enabled: false, closed: false }),
             samples: watch::channel(None).0, permission: watch::channel(false).0, stop: watch::channel(false).0 })
     }
     pub(crate) fn disabled() -> Arc<Self> { Self::new(None, String::new()) }
-    pub(crate) fn configured(&self) -> bool { self.port.is_some() }
+    pub(crate) fn configured(&self) -> bool { self.port().is_some() }
+    fn port(&self) -> Option<u16> { self.binding.lock().ok()?.port }
     pub(crate) fn subscribe(&self) -> watch::Receiver<Option<Observation>> { self.samples.subscribe() }
     pub(crate) fn pairing_details(&self) -> Option<PairingDetails> {
         if self.state.lock().ok()?.closed { return None; }
-        self.port.map(|port| PairingDetails { endpoint: format!("ws://127.0.0.1:{port}/taki-browser"), token: self.token.clone() })
+        let binding = self.binding.lock().ok()?;
+        binding.port.map(|port| PairingDetails { endpoint: format!("ws://127.0.0.1:{port}/taki-browser"), token: binding.token.clone() })
     }
     pub(crate) fn set_core_enabled(&self, enabled: bool) {
         let Ok(mut state) = self.state.lock() else { self.permission.send_replace(false); self.samples.send_replace(None); return; };
@@ -119,7 +127,10 @@ impl BrowserAttachment {
     pub(crate) async fn run(self: Arc<Self>) -> Result<(), String> { server::run(self).await }
 
     fn claim(&self, token: &str) -> Option<String> {
-        if !constant_time_equal(token.as_bytes(), self.token.as_bytes()) { return None; }
+        {
+            let binding = self.binding.lock().ok()?;
+            if !constant_time_equal(token.as_bytes(), binding.token.as_bytes()) { return None; }
+        }
         let mut state = self.state.lock().ok()?;
         if state.closed || state.active_client.is_some() || !self.configured() { return None; }
         let id = uuid::Uuid::new_v4().to_string();

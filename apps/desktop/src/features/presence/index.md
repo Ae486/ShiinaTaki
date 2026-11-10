@@ -10,4 +10,4 @@ Disposable Desktop evidence producers. Core owns identity validation, leases, in
 - use-committed-exposure.ts — rendered text observer ownership with stable committed coordinates and region cleanup
 - committed-exposure-context.ts — current surface owner supplied to actual Chat Markdown/Pet text renderers
 - user-timezone-controller.ts — Home-only designated reporter, Core read model, explicit CAS settings and stale-result fencing
-- use-home-timezone.ts — physical Home generation and device-zone visibility/focus revalidation
+- use-home-timezone.ts — accepted physical Home identity and device-zone visibility/focus revalidation; native adoption never silently reassigns an existing authority

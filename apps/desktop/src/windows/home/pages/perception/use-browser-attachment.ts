@@ -17,13 +17,14 @@ type Action = "setup" | "pair" | "allow" | "deny" | "read";
 
 async function perform(action: Action, client: WsClient | null): Promise<Result> {
   if (action === "setup") {
-    BrowserAttachmentSetupResultSchema.parse(await invoke("browser_attachment_setup", { enabled: true }));
-    return { message: "本机连接设置已保存。请退出并重新启动桌面端，再读取连接信息。", pair: null };
+    const result = BrowserAttachmentSetupResultSchema.parse(await invoke("browser_attachment_setup", { enabled: true }));
+    return { message: result.restartRequired ? "本机连接设置已保存。请重新启动桌面端，再读取连接信息。"
+      : "本机连接设置已保存，无需重启。读取连接信息即可继续扩展配对。", pair: null };
   }
   if (action === "pair") {
     const pair = BrowserAttachmentPairSchema.nullable().parse(await invoke("browser_attachment_pair"));
     return { pair, message: pair ? "将连接地址和凭据填入 OpenBili 扩展选项。请勿向网页或聊天发送凭据。"
-      : "本机连接尚未启用，或需要重新启动桌面端。" };
+      : "本机连接尚未启用。" };
   }
   if (!client) throw new Error("Core connection unavailable");
   if (action !== "read") await client.configSet({ key: BROWSER_PLAYBACK_ENABLED_KEY, value: action === "allow" });
@@ -47,7 +48,8 @@ export function useBrowserAttachment() {
       if (owner === epoch.current) setView((previous) => ({ ...previous, ...result }));
     } catch {
       if (owner === epoch.current) setView((previous) => ({ ...previous, pair: null,
-        message: "操作未完成。请确认当前使用桌面端、Core 已连接，然后手动重试。" }));
+        message: action === "setup" || action === "pair" ? "本机浏览器连接暂不可用，请检查桌面端连接设置后重试。"
+          : "操作未完成。请确认 Core 已连接后重试。" }));
     } finally {
       if (owner === epoch.current) { busy.current = false; setView((previous) => ({ ...previous, pending: false })); }
     }

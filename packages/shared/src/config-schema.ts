@@ -17,6 +17,15 @@ export const CONFIG_METHODS = {
 export const ConfigValueSchema = z.union([z.string(), z.number(), z.boolean()]);
 export type ConfigValue = z.infer<typeof ConfigValueSchema>;
 
+/** Consumer boundary and observed application state; a persisted value alone proves neither. */
+export const ConfigApplicationSchema = z.object({
+  boundary: z.enum(["immediate", "next-run", "next-operation", "component", "maintenance", "external", "bootstrap", "inapplicable"]),
+  state: z.enum(["applied", "applying", "draft", "failed", "unavailable", "external", "inapplicable", "restart-required"]),
+  activeValue: ConfigValueSchema.nullable(),
+  message: z.string().optional(),
+});
+export type ConfigApplication = z.infer<typeof ConfigApplicationSchema>;
+
 /**
  * When a stored change takes effect. `env-only` = a bootstrap knob the store cannot govern (read before the DB
  * opens); `restart` = stored now, honored at next boot; `live` = the consumption site re-reads per use.
@@ -35,11 +44,13 @@ export type ConfigInput = z.infer<typeof ConfigInputSchema>;
 
 export const ConfigEntrySchema = z.object({
   key: z.string().min(1),
-  /** Effective value (env > stored > default). ALWAYS null for a secret knob. */
+  /** Desired value (stored > env > default). ALWAYS null for a secret knob. */
   value: ConfigValueSchema.nullable(),
+  origin: z.enum(["stored", "env", "default"]).optional(),
+  application: ConfigApplicationSchema.optional(),
   /** A row exists in the config table (i.e. the operator set this). */
   stored: z.boolean(),
-  /** The env var is explicitly set, so it shadows the store and config.set refuses. */
+  /** Compatibility field: only bootstrap-only settings can be environment locked. */
   envLocked: z.boolean(),
   default: ConfigValueSchema.nullable(),
   apply: ConfigApplySchema,
@@ -67,6 +78,10 @@ export const ConfigSetResultSchema = z.object({
   status: z.literal("ok"),
   key: z.string().min(1),
   value: ConfigValueSchema.nullable(),
+  /** Resolved echo after the write, including environment fallback on reset. Secrets remain null. */
+  effectiveValue: ConfigValueSchema.nullable().optional(),
+  origin: z.enum(["stored", "env", "default"]).optional(),
+  application: ConfigApplicationSchema.optional(),
   /** What the operator must do for it to take effect — the panel states this truthfully. */
   apply: ConfigApplySchema,
 });

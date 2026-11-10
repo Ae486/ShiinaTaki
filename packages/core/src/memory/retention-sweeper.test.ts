@@ -86,6 +86,24 @@ describe("retention sweeper — rolling window (activity: the one sanctioned har
 });
 
 describe("retention sweeper — expiring (intentions)", () => {
+  it("captures the current fallback once per future sweep without replacing explicit expiries", () => {
+    const f = fresh();
+    const implicit = seed(f, { layer: "intentions" }, { created: daysAgo(20) });
+    const explicit = seed(f, { layer: "intentions", expires: new Date(NOW + DAY_MS).toISOString() }, { created: daysAgo(40) });
+    let days = 30;
+    const capture = vi.fn(() => days);
+    const timer = startRetentionSweeper({ ops: f.memory.retention, intentionsDefaultDays: capture,
+      logger: createCaptureLogger().logger, now: () => NOW });
+    expect(statusOf(implicit)).toBe("active");
+    expect(capture).toHaveBeenCalledTimes(1);
+    days = 10;
+    vi.advanceTimersByTime(6 * 60 * 60 * 1000);
+    expect(capture).toHaveBeenCalledTimes(2);
+    expect(statusOf(implicit)).toBe("archived");
+    expect(statusOf(explicit)).toBe("active");
+    timer.stop();
+  });
+
   it("archives an expired intention and KEEPS its file (R8: reversible)", () => {
     const f = fresh();
     const path = seed(f, { layer: "intentions", expires: daysAgo(1) }, { created: daysAgo(5) });

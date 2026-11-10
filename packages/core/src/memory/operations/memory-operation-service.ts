@@ -34,6 +34,7 @@ export interface MemoryOperationServiceInput {
   db: Database;
   live(): MemoryOperationsRuntime | null;
   tidy?: () => MemoryTidyRuntime | null;
+  searchIndex?: MemoryOperationContext["searchIndex"];
   setup: HindsightSetupService;
   bootId: string;
   onChanged(operation: MemoryOperation): void;
@@ -52,7 +53,7 @@ export function createMemoryOperationService(input: MemoryOperationServiceInput)
   const now = input.now ?? (() => new Date().toISOString());
   const owner: Owner = {
     repo: input.repo ?? createMemoryOperationRepo(input.db, now), kinds: input.kinds ?? MEMORY_OPERATION_KINDS,
-    ctx: { live: input.live, tidy: input.tidy, setup: input.setup, now }, input, inflight: new Map(),
+    ctx: { live: input.live, tidy: input.tidy, searchIndex: input.searchIndex, setup: input.setup, now }, input, inflight: new Map(),
   };
   // A previous process cannot report what happened to its open rows; unknown stays unknown (D-S1-3).
   for (const operation of owner.repo.reconcileForeign(input.bootId)) input.onChanged(operation);

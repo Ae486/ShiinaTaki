@@ -12,6 +12,36 @@ export const CONNECT_METHOD = "connect";
 export const RoleSchema = z.enum(["operator", "node"]);
 export type Role = z.infer<typeof RoleSchema>;
 
+const LocalAuthHexSchema = z.string().regex(/^[a-f0-9]{64}$/);
+
+/** One physical connect socket owns this challenge; it carries no reusable credential. */
+export const LocalAuthChallengeSchema = z.object({
+  version: z.literal(1),
+  coreId: z.uuid(),
+  instanceId: z.uuid(),
+  endpoint: z.string().url(),
+  nonce: LocalAuthHexSchema,
+  clientNonce: LocalAuthHexSchema,
+  deviceId: z.uuid(),
+  role: RoleSchema,
+  expiresAt: z.number().int().positive().safe(),
+  serverProof: LocalAuthHexSchema,
+}).strict();
+export type LocalAuthChallenge = z.infer<typeof LocalAuthChallengeSchema>;
+
+/** Canonical cross-language HMAC input; both domains bind the exact same physical-socket identity. */
+export function localAuthTranscript(side: "server" | "client", challenge: Omit<LocalAuthChallenge, "serverProof">): string {
+  const fields = JSON.stringify([challenge.version, challenge.coreId, challenge.instanceId, challenge.endpoint,
+    challenge.nonce, challenge.clientNonce, challenge.deviceId, challenge.role, challenge.expiresAt]);
+  return `taki-local-auth-v1:${side}\n${fields}`;
+}
+
+export const LocalAuthRequestSchema = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("begin"), clientNonce: LocalAuthHexSchema }).strict(),
+  z.object({ kind: z.literal("proof"), nonce: LocalAuthHexSchema, proof: LocalAuthHexSchema }).strict(),
+]);
+export type LocalAuthRequest = z.infer<typeof LocalAuthRequestSchema>;
+
 export const ConnectParamsSchema = z
   .object({
     deviceId: z.uuid(),
@@ -20,6 +50,7 @@ export const ConnectParamsSchema = z
     capabilities: z.array(z.string()).default([]),
     token: z.string().optional(),
     pairingCode: z.string().optional(),
+    localAuth: LocalAuthRequestSchema.optional(),
     host: HostDeclarationSchema.optional(),
     approvalCommandDisclosureRevision: z.literal(APPROVAL_COMMAND_DISCLOSURE_REVISION).optional(),
   })
@@ -39,6 +70,11 @@ export const ConnectParamsSchema = z
   .refine((params) => params.role === "operator" || params.approvalCommandDisclosureRevision === undefined, {
     message: "command display support is operator-only",
     path: ["approvalCommandDisclosureRevision"],
+  })
+  .refine((params) => params.localAuth === undefined || (params.pairingCode === undefined
+    && (params.localAuth.kind !== "begin" || params.token === undefined)), {
+    message: "local authentication begins without reusable credentials or pairing codes",
+    path: ["localAuth"],
   });
 export type ConnectParams = z.infer<typeof ConnectParamsSchema>;
 

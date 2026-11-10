@@ -18,7 +18,7 @@ import type { PersonaProvider } from "./persona-provider.ts";
 import { selectPinned } from "./pinned-block.ts";
 import { estimateTokens, fitToBudget } from "./token-estimator.ts";
 import { captureInitiativeMemoryAssembly, type InitiativeMemoryAssembler } from "./initiative-memory-assembly.ts";
-import { attributedRenderer, contextText, joinContextText } from "../agents/context-attribution.ts";
+import { attributedRenderer, contextText, joinContextText, forwardRenderedContextText } from "../agents/context-attribution.ts";
 
 // Emotion capsule is a static placeholder (D9, docs/deferred-decisions.md); the persona card now loads from disk (#16).
 export const EMOTION_CAPSULE = "Current mood: neutral.";
@@ -47,23 +47,34 @@ export interface AssemblerDeps {
   /** The always-visible Memory Blocks. Absent = no block sections at all (the same degradation as a missing file). */
   blocks?: BlockStore;
   /** Safety valve over the pinned ROW region (config, T5-R13); blocks carry their own budgets in the registry. */
-  pinnedBudget?: number;
+  pinnedBudget?: number | (() => number);
 }
 
 export interface Assembler {
   assemble(params: AssembleParams): string;
+  capture(characterId: string): (currentMessage: string) => string;
   captureInitiative(characterId: string): InitiativeMemoryAssembler;
 }
 
 export function createAssembler(deps: AssemblerDeps): Assembler {
-  const { repo, persona, blocks } = deps;
-  const pinnedBudget = deps.pinnedBudget ?? DEFAULT_PINNED_BUDGET;
+  const { persona, blocks } = deps;
+  const capture = (characterId: string) => capturePrimaryAssembly(deps, characterId);
+  const assemble = (params: AssembleParams) => {
+    const render = capture(params.characterId);
+    return forwardRenderedContextText(assemble, render, render(params.currentMessage));
+  };
 
   return {
     captureInitiative: (characterId) => captureInitiativeMemoryAssembly({ characterId, persona,
       global: { reference: "legacy:global-blocks", content: renderBlocks(blocks, characterId, "global").join("\n\n") },
       character: { reference: `legacy:character-blocks:${characterId}`, content: renderBlocks(blocks, characterId, "per-character").join("\n\n") } }),
-    assemble: attributedRenderer(({ characterId, currentMessage }: AssembleParams) => {
+    assemble, capture,
+  };
+}
+
+function capturePrimaryAssembly(deps: AssemblerDeps, characterId: string) {
+      const { persona, repo, blocks } = deps;
+      const pinnedBudget = (typeof deps.pinnedBudget === "function" ? deps.pinnedBudget() : deps.pinnedBudget) ?? DEFAULT_PINNED_BUDGET;
       const nowMs = Date.now();
       const now = new Date(nowMs).toISOString();
       // Injection order (prompt/README.md): global assistant layer FIRST, then the per-character persona, then emotion,
@@ -76,12 +87,13 @@ export function createAssembler(deps: AssemblerDeps): Assembler {
       const pinned = selectPinned(repo.listActiveByLayers({ characterId, layers: PINNED_LAYER_IDS, now }), pinnedBudget);
       if (pinned.length > 0) sections.push(contextText(renderBlock(PINNED_HEADER, pinned, nowMs), "injected_memory"));
 
-      const intention = pickIntention({ repo, characterId, currentMessage, now });
-      if (intention) sections.push(contextText(`A quiet thought you might share: ${rowContent(intention)}`, "injected_memory"));
-
-      return joinContextText(sections, "\n\n", true);
-    }),
-  };
+      const intentions = repo.listActiveByLayers({ characterId, layers: MOOD_GATED_LAYER_IDS, now })
+        .sort((a, b) => (a.createdAt < b.createdAt ? 1 : a.createdAt > b.createdAt ? -1 : 0));
+      return attributedRenderer((currentMessage: string) => {
+        const intention = intentions.find((entry) => disclosureMatches(entry.disclosure, currentMessage));
+        return joinContextText([...sections, ...(intention
+          ? [contextText(`A quiet thought you might share: ${rowContent(intention)}`, "injected_memory")] : [])], "\n\n", true);
+      });
 }
 
 /**
@@ -114,13 +126,6 @@ function fitBlockContent(content: string, budget: number): string {
 }
 
 // At most one intention: the newest active, unexpired one whose disclosure hint matches the current message (AC 9).
-function pickIntention(args: { repo: MemoryRepo; characterId: string; currentMessage: string; now: string }): MemoryEntryRow | undefined {
-  const candidates = args.repo
-    .listActiveByLayers({ characterId: args.characterId, layers: MOOD_GATED_LAYER_IDS, now: args.now })
-    .sort((a, b) => (a.createdAt < b.createdAt ? 1 : a.createdAt > b.createdAt ? -1 : 0));
-  return candidates.find((entry) => disclosureMatches(entry.disclosure, args.currentMessage));
-}
-
 interface RenderRow {
   content: string;
   createdAt: string;

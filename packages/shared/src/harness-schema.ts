@@ -136,6 +136,7 @@ export const RunSnapshotSchema = z.object({
   contextMode: ContextModeSchema,
   modelProvider: z.string().min(1).max(100),
   modelId: z.string().min(1).max(200),
+  modelRevision: z.number().int().nonnegative().optional(),
   primaryHostId: Id,
   hosts: z.array(RunHostReferenceSchema).max(64),
   extensions: z.array(RunExtensionReferenceSchema).max(512),

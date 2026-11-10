@@ -109,6 +109,62 @@ describe("createAmbientScreenshotSampler", () => {
   });
   afterEach(() => vi.useRealTimers());
 
+  it("enables and disables one existing timer and immediately withdraws an acquired frame", async () => {
+    const route = okRoute();
+    const { sampler, context, discarded } = harness(route, { config: { enabled: false } });
+    sampler.start();
+    expect(vi.getTimerCount()).toBe(0);
+    sampler.reconfigure(CONFIG);
+    sampler.reconfigure({ ...CONFIG });
+    expect(vi.getTimerCount()).toBe(1);
+    await step();
+    const frame = context.acquire()!;
+    expect(frame.images).toHaveLength(1);
+    sampler.reconfigure({ ...CONFIG, enabled: false });
+    expect(frame.images).toHaveLength(0);
+    expect(discarded).toHaveLength(1);
+    expect(vi.getTimerCount()).toBe(0);
+    sampler.reconfigure(CONFIG);
+    await step();
+    expect(route).toHaveBeenCalledTimes(2);
+    sampler.stop();
+    sampler.reconfigure({ ...CONFIG, pollMs: 1000 });
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("does not publish an old capture after disable and re-enable during its await", async () => {
+    let resolve!: (result: RouteResult) => void;
+    const pending = new Promise<RouteResult>((done) => { resolve = done; });
+    const route = vi.fn(() => pending);
+    const { sampler, context, saved } = harness(route);
+    sampler.start();
+    await step();
+    expect(route).toHaveBeenCalledOnce();
+    sampler.reconfigure({ ...CONFIG, enabled: false });
+    sampler.reconfigure(CONFIG);
+    resolve({ ok: true, output: SHOT });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(saved).toHaveLength(0);
+    expect(context.acquire()).toBeUndefined();
+    await step();
+    expect(saved).toHaveLength(1);
+    sampler.stop();
+  });
+
+  it("does not rearm a denied session when its stored enable flag changes", async () => {
+    const route = vi.fn(async (): Promise<RouteResult> => ({ ok: false, code: "DENIED", message: "denied" }));
+    const { sampler } = harness(route);
+    sampler.start();
+    await step();
+    sampler.reconfigure({ ...CONFIG, enabled: false });
+    sampler.reconfigure(CONFIG);
+    sampler.start();
+    await step();
+    expect(sampler.running()).toBe(false);
+    expect(route).toHaveBeenCalledOnce();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it("publishes only actual scheduling changes, including capture denial", async () => {
     const onChange = vi.fn();
     const route = vi.fn(async (): Promise<RouteResult> => ({ ok: false, code: "DENIED", message: "denied" }));

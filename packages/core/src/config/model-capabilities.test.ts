@@ -119,9 +119,9 @@ describe("configured MAIN catalog declarations", () => {
     expect(f.fetchCatalog).toHaveBeenCalledTimes(1);
   });
 
-  it("reads effective env precedence and sends no secrets or configured endpoint to the public catalog", async () => {
-    const f = fixture({ env: {
-      TAKI_PROVIDER_MODEL: "text-only", TAKI_PROVIDER_API_KEY: "sk-private-key",
+  it("reads effective application precedence and sends no secrets or configured endpoint to the public catalog", async () => {
+    const f = fixture({ model: "text-only", env: {
+      TAKI_PROVIDER_MODEL: "gpt-5.4-pro", TAKI_PROVIDER_API_KEY: "sk-private-key",
       TAKI_PROVIDER_BASE_URL: "https://api.openai.com/v1",
     } });
     const resolve = vi.spyOn(f.source, "resolve");

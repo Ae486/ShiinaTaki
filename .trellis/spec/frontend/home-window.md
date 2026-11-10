@@ -7,15 +7,20 @@
 | label | entry | declared | capability | role |
 |-------|-------|----------|-----------|------|
 | `pet` | `pet.html` | `tauri.conf.json` (transparent, undecorated, always-on-top, hidden until first paint) | `pet.json` | the overlay: Live2D scene, chat bubble, operation wheel |
-| `home` | `home.html?page=<id>` | **runtime** (`lib/open-home-window.ts`) | `home.json` | every page: chat / settings / operations / perception / costume |
-| `main` | `index.html` | `tauri.conf.json` | `default.json` (broadest) | LEGACY pairing panel, unrelated to the home surface — do not extend it; whether it is consolidated into home or retired is still an open decision (#26 close) |
+| `home` | `home.html?page=<id>` | initial `tauri.conf.json`; recreated by `lib/open-home-window.ts` after closing | `home.json` + `local-auth.json` | useful entry and every page: chat / settings / operations / perception / costume |
+| `main` | `index.html` | only when explicit remote Node endpoint needs pairing | retained compatibility permissions | LEGACY remote pairing panel; ordinary same-user entry uses native local admission |
 | `spike` | `spike.html` | Vite input only | — | the #13 renderer spike, dev-only |
 
 Window-state persistence is configured POSITION-only with `main` on the denylist (`src-tauri/src/lib.rs`): which labels persist is a plugin-side decision, not something a window's capability file grants (the `window-state:*` permissions only gate the JS save/restore calls).
 
 ## Runtime-created windows (NOT a tauri.conf.json entry)
 
-A secondary window is created at runtime, not declared in `tauri.conf.json`:
+Home opens before fallible execution Node initialization. Node identity failures retry independently; optional browser
+configuration failures remain scoped and retry until repaired. Missing models/avatars do not prevent Home navigation.
+Browser adapter setup replaces only its own listener and returns the actual `restartRequired` result; repaired/enabled
+listeners do not duplicate Node workers or connection owners. Unknown Core failures are not diagnosed from a timeout.
+
+A closed secondary Home may be recreated at runtime:
 
 - **Open-on-demand** via a `lib/open-<name>-window.ts` helper: `await WebviewWindow.getByLabel("<label>")` (async in `@tauri-apps/api` v2) → if it exists `unminimize()` + `show()` + push it to the right page + `setFocus()`; else `new WebviewWindow("<label>", { url: "<name>.html", ... })`. Fixed label, fixed url — never interpolate runtime data into either (the home page id rides a `?page=` query param, which is not the url). Single instance is BY CONSTRUCTION: the label is a constant and an existing window is reused, never re-created.
 - **Await the create race**: `tauri://created` resolves, `tauri://error` rejects, so a failed open reaches the caller. Packaged builds have no devtools and `window.alert` is a no-op — a rejected open MUST surface as a toast (`pushToast`), never console-only (D34; the dead opener defect).
@@ -32,13 +37,28 @@ A secondary window is created at runtime, not declared in `tauri.conf.json`:
 
 ## Own WS connection per window
 
-Each window opens its OWN operator socket via `lib/ws-client.ts` (concurrent same-device sockets are allowed by the Core's connection registry — verified). A window does NOT share JS memory or a socket with another window; cross-window liveness is the Core's `timeline.appended` / event fan-out, never shared memory (matches state-management.md). Loopback operators auto-trust (P3) — no pairing UI. Inside home there are exactly TWO sockets: `use-home-connection.ts` (shared with every settings-family page through `HomeClientContext`) and the chat page's own (`use-chat-connection.ts`) — the streaming turn state must not share a client with request/response pages.
+Each window opens its OWN operator socket via `lib/ws-client.ts` (concurrent same-device sockets are allowed by the Core's connection registry). A window does NOT share JS memory or a socket with another window; cross-window liveness is Core fan-out. Native same-user admission verifies server and client proofs on each socket without a pairing page. Inside Home there are exactly TWO sockets: `use-home-connection.ts` and the Chat page's own `use-chat-connection.ts`; streaming turn state does not share a client with request/response pages.
 
 Every owner replaces whole authenticated client generations after an observed close/failure; it never reuses a closed
 client, buffers offline commands, or replays mutations. Connected status is published only after that owner's required
 restoration. The complete lifecycle, deadline, timing-policy, timeline-reconciliation, and readiness contract lives in
 [`operator-connection-recovery.md`](./operator-connection-recovery.md); what each page updates from pushes, refetches per
 generation, and gates while hidden is codified in [`reactive-read-models.md`](./reactive-read-models.md).
+
+### Grouped model configuration
+
+Settings begins with Main and Utility cards using existing Field/Badge/ActionButton components. These replace the six
+legacy connection-field editors; context/limit controls remain in the scalar settings list. One ordinary Save persists
+incomplete drafts or applies complete profiles. A separate explicit test discloses possible cost and accepts unsaved
+input. Catalog metadata is optional guidance and never an activation prerequisite.
+
+Current active model/source, saved draft/application failure and actual test outcomes stay distinct. Authentication
+choices include keyless services and write-only key replacement/removal. Utility explicitly inherits Main, configures
+its own profile, or disables future dependent work; reset deliberately restores environment/default ownership.
+
+Chat reads Main availability on its own socket. Missing/disabled Main exposes a Settings action and disables new sends
+while history and other Home pages remain available. No avatar/resource prerequisite is added to text configuration.
+The concurrency, visibility, secret-input and unknown-acknowledgement rules live in `reactive-read-models.md`.
 
 ### Settings permission governance
 
@@ -193,7 +213,7 @@ publishCostumeResult(result: CostumeResultPayload): Promise<void>;
 ```
 
 The event names are `pet:costume-switch` (home -> pet), `pet:costume-cancel` (home -> pet), and
-`pet:costume-result` (pet -> home). The home reducer accepts `request`, `undeliverable`, `result`, `cancel`, and
+`pet:costume-result` (pet -> home). The home reducer accepts `request`, `undeliverable`, `result`, `observed`, `cancel`, and
 `timeout` actions. Each pending row captures `currentTimingPolicy().homeResultMs` once; a Home client replacement must
 not restart that timer. The validated relationship is `rendererLoadMs < petCostumeTotalMs < homeResultMs` (development
 profile: 30s < 40s < 45s). See [`costume-operation-lifecycle.md`](./costume-operation-lifecycle.md).
@@ -205,14 +225,17 @@ profile: 30s < 40s < 45s). See [`costume-operation-lifecycle.md`](./costume-oper
 - The executor reports every accepted lifecycle: `started` followed by exactly one of `succeeded`, `failed(reason)`,
   or `cancelled`. A guard rejection reports `failed` with a closed reason (`busy`, `no-scene`, `unknown-costume`, or
   `not-renderable`) instead of returning silently.
-- The initiating page marks only the commanded row pending. Selection follows `succeeded`, never the click. Failure,
+- The initiating page marks only the commanded row pending. Selection follows a correlated live Pet snapshot, never
+  the click, default or remembered costume. `succeeded` requests a new snapshot and retires prior responses. Failure,
   cancellation, undeliverable emit, and deadline all release pending so another command can be attempted.
 - Renderer attachment is the executor's success boundary. A later `avatar.report` failure is synchronization debt,
   not permission to report the visibly committed costume as failed.
 - Cancel releases the initiating UI before emitting the cancel command. A missing/dead executor therefore cannot wedge
   the page. The executor cancels only when `costumeId` matches its active switch.
-- A late `succeeded` result is still authoritative presentation truth: follow the costume the pet now wears and clear a
-  stale deadline error. Durable costume identity remains Core/pet-owned, not home-page-owned.
+- A late `succeeded` clears a stale deadline error and re-reads actual Pet presentation; it cannot directly assert a
+  costume after a scene replacement. `costume-scene-event.ts` owns finite request/snapshot and data-free changed events;
+  `costume-operation-lifecycle.md` defines ordering, retirement and native Pet-destroy observation. Core connectivity
+  does not gate this local presentation read. Durable costume identity remains Core/Pet-owned.
 
 ### 4. Validation & Error Matrix
 
@@ -225,12 +248,12 @@ profile: 30s < 40s < 45s). See [`costume-operation-lifecycle.md`](./costume-oper
 | Renderer attaches, then `avatar.report` fails or times out | Keep/publish `succeeded`; mark report recovery-needed and re-report the live snapshot on reconnect |
 | Operator cancels | Clear home pending immediately; executor reports `cancelled` when its hook settles |
 | Executor never answers | Home's captured `homeResultMs` deadline clears pending and shows a retryable error |
-| Result belongs to another costume | Ignore non-success endings; an observed `succeeded` follows the pet's actual state |
+| Result belongs to another costume | Ignore non-success endings; `succeeded` requests the pet's current scene |
 | Cancel id does not match active switch | Warn and do not cancel another command |
 
 ### 5. Good/Base/Bad Cases
 
-- Good: click -> pending row -> `started` -> `succeeded`; only then does the highlight move.
+- Good: click -> pending row -> `started` -> `succeeded` -> live scene observation; only actual attachment is highlighted.
 - Base: a refusal, renderer failure, Cancel, or deadline clears pending, leaves the old highlight, and permits retry.
 - Bad: fire-and-forget command + optimistic highlight + unbounded spinner. Delivery is not completion and the UI will
   lie or wedge when the other window is absent or half-alive.
@@ -241,7 +264,8 @@ profile: 30s < 40s < 45s). See [`costume-operation-lifecycle.md`](./costume-oper
 - `lib/costume-switch-attempt.test.ts` + `lib/costume-report-sync.test.ts`: total budget, stage cancellation, attachment
   commit, report recovery, exact-boundary races, and stale report tickets.
 - `windows/pet/costume-report.test.ts`: started/succeeded ordering, failed reason, cancelled settle, every guard refusal.
-- `windows/home/pages/costume/costume-select-state.test.ts`: selection moves only on success; failure, Cancel, deadline,
+- `windows/home/pages/costume/costume-select-state.test.ts` and scene-observer tests: selection moves only on a current
+  scene observation; failure, Cancel, deadline,
   and undeliverable emit release pending; stale/foreign results cannot corrupt the active row.
 - Component/manual: one row alone renders pending + Cancel, other rows remain clickable, and manual checks #74/#75 pass
   against the real pet renderer and Tauri event bridge.
@@ -253,7 +277,7 @@ profile: 30s < 40s < 45s). See [`costume-operation-lifecycle.md`](./costume-oper
 setSelected(costumeId);
 await emitTo("pet", "pet:costume-switch", { costumeId });
 
-// Correct: the request creates pending state; only the executor's result moves selection.
+// Correct: the request creates pending state; success prompts a correlated live scene observation.
 dispatch({ kind: "request", costumeId });
 await requestCostumeSwitch(costumeId);
 // Later: dispatch({ kind: "result", result }); with a local deadline running.

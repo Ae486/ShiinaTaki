@@ -1,6 +1,6 @@
 /**
  * INPUT:  governed routes, privacy/foreground facts, frame/context stores and change observer
- * OUTPUT: start/stop/running; screened ambient context and data-free scheduling transitions
+ * OUTPUT: start/stop/reconfigure/running; generation-fenced ambient context and scheduling transitions
  * POS:    core/perception — default-off high-sensitivity sampler; deterministic pre-capture privacy gate; no model work
  */
 import { ScreenshotOutputSchema } from "@taki/shared";
@@ -61,6 +61,10 @@ export interface AmbientScreenshotSamplerDeps {
 export interface AmbientScreenshotSampler {
   start(): void;
   stop(): void;
+  /** Replace configuration without reviving a session stopped by denial or shutdown. */
+  reconfigure(config: AmbientScreenshotSamplerConfig): void;
+  /** Capture leases use this generation in addition to their shared source/consent epoch. */
+  generation(): number;
   /** Consent/source retirement clears refresh suppression; it never restarts a stopped loop. */
   reset(): void;
   /** True while the loop is scheduled — false when never enabled, stopped or denied. */
@@ -74,6 +78,8 @@ interface AmbientRuntime {
   now: () => number;
   timer: ReturnType<typeof setInterval> | undefined;
   stopped: boolean;
+  started: boolean;
+  generation: number;
   inflight: boolean;
   consecutiveErrors: number;
   backoffUntil: number;
@@ -90,10 +96,12 @@ interface AmbientRuntime {
 interface CaptureAttempt {
   at: number;
   epoch: number | undefined;
+  generation: number;
 }
 
 function current(rt: AmbientRuntime, attempt: CaptureAttempt, source?: CapabilityRouteProvenance): boolean {
-  return !rt.stopped && !rt.deps.isPaused() && (source?.isCurrent() ?? true)
+  return !rt.stopped && rt.deps.config.enabled && rt.generation === attempt.generation
+    && !rt.deps.isPaused() && (source?.isCurrent() ?? true)
     && (attempt.epoch === undefined || rt.deps.evidence?.isCurrent(attempt.epoch, source) === true);
 }
 
@@ -133,6 +141,7 @@ function captureTarget(rt: AmbientRuntime, at: number): boolean {
 function stop(rt: AmbientRuntime): void {
   const wasRunning = rt.timer !== undefined && !rt.stopped;
   rt.stopped = true;
+  rt.generation += 1;
   if (rt.timer) {
     clearInterval(rt.timer);
     rt.timer = undefined;
@@ -239,7 +248,7 @@ async function tick(rt: AmbientRuntime): Promise<void> {
     return;
   }
   rt.pausedLogged = false;
-  const attempt = { at, epoch: rt.deps.evidence?.generation() };
+  const attempt = { at, epoch: rt.deps.evidence?.generation(), generation: rt.generation };
   if (!captureTarget(rt, at)) return;
   // Pre-flights (activity-sampler precedent): with no node providing a capability, routing would log a per-tick "tool
   // invoked" + NO_NODE pair. Skip it and take the same quiet once-per-streak arm — and no node for the final screen
@@ -268,11 +277,13 @@ async function tick(rt: AmbientRuntime): Promise<void> {
 
 export function createAmbientScreenshotSampler(deps: AmbientScreenshotSamplerDeps): AmbientScreenshotSampler {
   const rt: AmbientRuntime = {
-    deps,
+    deps: { ...deps, config: { ...deps.config } },
     log: deps.logger.child({ mod: "ambient-screen" }),
     now: deps.now ?? Date.now,
     timer: undefined,
     stopped: false,
+    started: false,
+    generation: 0,
     inflight: false,
     consecutiveErrors: 0,
     backoffUntil: 0,
@@ -288,17 +299,40 @@ export function createAmbientScreenshotSampler(deps: AmbientScreenshotSamplerDep
       // Gate 1 — DEFAULT OFF (prd ruling 1): not scheduled means no capture, no approval dialog and NO log line
       // either. An "ambient sampling disabled" line every boot would itself advertise a feature the user never
       // enabled; Recall's off-state is fully silent.
-      if (!deps.config.enabled) return;
+      rt.started = true;
+      if (!rt.deps.config.enabled) return;
       if (rt.timer || rt.stopped) return;
-      rt.timer = setInterval(() => void tick(rt), deps.config.pollMs);
+      rt.timer = setInterval(() => void tick(rt), rt.deps.config.pollMs);
       rt.timer.unref();
       notifyPerceptionChange(deps.onChange);
     },
     stop: () => stop(rt),
+    reconfigure: (config) => reconfigure(rt, config),
+    generation: () => rt.generation,
     reset() {
       rt.lastKey = undefined;
       rt.lastCaptureAt = Number.NEGATIVE_INFINITY;
     },
     running: () => rt.timer !== undefined && !rt.stopped,
   };
+}
+
+function reconfigure(rt: AmbientRuntime, config: AmbientScreenshotSamplerConfig): void {
+  const previous = rt.deps.config;
+  const keys: Array<keyof AmbientScreenshotSamplerConfig> = ["enabled", "pollMs", "refreshMs", "foregroundMaxAgeMs",
+    "dropRawAfterConsumption", "errorBackoffThreshold", "maxBackoffMs"];
+  if (keys.every((key) => previous[key] === config[key])) return;
+  const wasRunning = rt.timer !== undefined && !rt.stopped;
+  rt.generation += 1;
+  rt.deps.config = { ...config };
+  if (rt.timer) clearInterval(rt.timer);
+  rt.timer = undefined;
+  rt.lastKey = undefined;
+  rt.lastCaptureAt = Number.NEGATIVE_INFINITY;
+  rt.deps.context.clear();
+  if (rt.started && !rt.stopped && config.enabled) {
+    rt.timer = setInterval(() => void tick(rt), config.pollMs);
+    rt.timer.unref();
+  }
+  if (wasRunning !== (rt.timer !== undefined && !rt.stopped)) notifyPerceptionChange(rt.deps.onChange);
 }

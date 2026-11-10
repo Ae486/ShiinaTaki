@@ -19,6 +19,7 @@ import {
   INITIATIVE_BACKOFF_METHODS, InitiativeBackoffChangedSchema,
   CO_WATCHING_METHODS, CoWatchingChangedSchema, type CoWatchingChanged,
   CONFIG_METHODS,
+  MODEL_PROFILE_METHODS, ModelProfilesChangedSchema, type ModelProfilesChanged,
   MEMORY_OPERATION_METHODS,
   MemoryOperationChangedSchema,
   ChatCompleteSchema,
@@ -60,6 +61,7 @@ import { SUBAGENT_METHODS, SubagentChangedSchema, SubagentActivitySchema, type S
 import { abortPendingChatTurn, routeChatNotification, type PendingChatTurn } from "./ws-chat-turn.ts";
 
 interface PushSlots {
+  modelProfiles: Set<(change: ModelProfilesChanged) => void>;
   cacheUsage: Set<(update: CacheUsageUpdate) => void>;
   maintenanceMonitor: Set<(update: MaintenanceMonitorUpdate) => void>;
   subagentActivity: Set<(event: SubagentActivity) => void>;
@@ -92,7 +94,7 @@ export interface Routes {
 }
 
 export function createRoutes(): Routes {
-  return { current: null, push: { maintenanceMonitor: new Set(), cacheUsage: new Set(), subagentActivity: new Set(), subagents: new Set(), coWatching: new Set(), avatar: null, timeline: null, timelineRemoved: null, config: new Set(),
+  return { current: null, push: { modelProfiles: new Set(), maintenanceMonitor: new Set(), cacheUsage: new Set(), subagentActivity: new Set(), subagents: new Set(), coWatching: new Set(), avatar: null, timeline: null, timelineRemoved: null, config: new Set(),
     initiativePatterns: new Set(), initiativeSetup: new Set(), initiativePolicy: new Set(), initiativeBackoff: new Set(),
     approval: new Set(), monitor: new Set(), memoryOperation: new Set(), activity: new Set(), committed: new Set(), perception: new Set(), extension: new Set() } };
 }
@@ -154,14 +156,9 @@ export function addMemoryOperationHandler(state: Routes, handler: (operation: Me
   return () => state.push.memoryOperation.delete(handler);
 }
 
-function notifyMonitorHandlers(state: Routes, event: RunMonitorEvent): void {
-  for (const handler of [...state.push.monitor]) {
-    try { handler(event); } catch { console.warn("[ws-client] monitor handler failed"); }
-  }
-}
-
 /** Retires every connection-scoped push sink before queued notifications can dispatch on a closed transport. */
 function clearPushHandlers(state: Routes): void {
+  state.push.modelProfiles.clear();
   state.push.cacheUsage.clear();
   state.push.maintenanceMonitor.clear();
   state.push.subagentActivity.clear();
@@ -233,6 +230,9 @@ function installInitiativeRoutes(rpc: JSONRPCServerAndClient, state: Routes): vo
 
 /** Multi-handler pushes: one throwing handler never starves its siblings. */
 function installFanOutRoutes(rpc: JSONRPCServerAndClient, state: Routes): void {
+  rpc.addMethod(MODEL_PROFILE_METHODS.changed, (params: unknown) => {
+    publishHandlers(state.push.modelProfiles, ModelProfilesChangedSchema.parse(params));
+  });
   rpc.addMethod(CACHE_USAGE_METHODS.changed, (params: unknown) => {
     publishHandlers(state.push.cacheUsage, CacheUsageUpdateSchema.parse(params));
   });
@@ -259,7 +259,7 @@ function installFanOutRoutes(rpc: JSONRPCServerAndClient, state: Routes): void {
     }
   });
   rpc.addMethod(OBSERVABILITY_METHODS.event, (params: unknown) => {
-    notifyMonitorHandlers(state, RunMonitorEventSchema.parse(params));
+    publishHandlers(state.push.monitor, RunMonitorEventSchema.parse(params));
   });
   rpc.addMethod(PERCEPTION_METHODS.changed, (params: unknown) => {
     publishHandlers(state.push.perception, PerceptionChangedSchema.parse(params));

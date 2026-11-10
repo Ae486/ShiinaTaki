@@ -3,6 +3,8 @@ import { createMemoryRunReference } from "../memory/memory-capability-snapshot.t
 import type { TriggerRequest } from "@taki/shared";
 import type { ExtensionRunContext } from "../extensions/extension-run-context.ts";
 import { createRunSnapshotCapture } from "./run-snapshot-capture.ts";
+import type { AgentRuntimeBinding } from "../agents/agent-runtime-binding.ts";
+import { generatingModel } from "../testing/mock-language-model.ts";
 
 const hostId = "550e8400-e29b-41d4-a716-446655440000";
 const extensionId = "skill.test";
@@ -11,6 +13,30 @@ const memoryCapabilities = { providerId: "local", contractVersion: 1 as const, r
   idempotentWrites: true, sparseRetrieval: true, vectorRetrieval: "unavailable" as const, derivedMemoryRead: false };
 
 describe("createRunSnapshotCapture", () => {
+  it("captures Main before awaiting Memory and refuses unavailable Main before any Memory work", async () => {
+    const binding = (modelId: string): AgentRuntimeBinding => ({ modelId, model: generatingModel(modelId), provider: "test",
+      revision: 1, maxSteps: 2, historyBudget: () => 1000, contextWindowTokens: () => 2000,
+      requestWindowSnapshot: () => ({ declaredRealTokens: 2000, effectiveRealTokens: 2000, estimatorWindowUnits: 2000, factor: 1 }),
+      requestEnvelopeReserve: () => 1000, onUsage: () => {}, onOverflow: () => {}, requestReduction: () => undefined });
+    let current: AgentRuntimeBinding | undefined = binding("a"); const old = current;
+    let release!: () => void; const blocked = new Promise<void>((done) => { release = done; });
+    const memory = { captureRun: vi.fn(async () => { await blocked; return { snapshot: createMemoryRunReference({
+      providerId: "local", authorityEpochId: "epoch", contractVersion: 1, capabilities: memoryCapabilities }), tools: {} }; }) };
+    const capture = createRunSnapshotCapture({ runtime: () => current, memory,
+      extensions: { runContext: () => ({ tools: {}, toolDisclosure: { deferredToolNames: [], describedTools: {}, skills: {} }, instructions: "",
+        snapshot: { runId: "run", hosts: [], entries: [], primaryHostId: hostId, collisions: [],
+          budget: { maxEntries: 1, maxDescriptionChars: 1, maxSearchResults: 1, maxCalls: 1 } } }) },
+      governance: { level: () => ({ level: "standard", policyGeneration: 1, registryRevision: 1 }) },
+      provider: "legacy", modelId: "legacy" });
+    const request: TriggerRequest = { triggerRequestId: "trigger", idempotencyKey: "idem", characterId: "taki",
+      initiator: "primary", provenance: { provider: "chat" }, deliveryClass: "class_a", contextMode: "primary" };
+    const pending = capture.capture(request, "run"); current = binding("b"); release();
+    const result = await pending;
+    expect(result.context?.runtime).toBe(old); expect(result.snapshot.modelId).toBe("a");
+    current = undefined;
+    await expect(capture.capture(request, "next")).rejects.toThrow();
+    expect(memory.captureRun).toHaveBeenCalledTimes(1);
+  });
   it("persists only reduced authority references while returning the exact executable context", async () => {
     const memoryTools = { captured_memory_tool: {} as never };
     const names = { direct_mcp: "Actual server · operation" };

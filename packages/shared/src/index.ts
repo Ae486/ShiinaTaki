@@ -97,7 +97,7 @@ export { MEMORY_METHODS, MemoryAutoStatusSchema, MemoryStatusParamsSchema, Memor
 
 export { MODEL_CAPABILITIES_METHOD, ModelCapabilitiesParamsSchema, ModelCapabilitiesResultSchema,
   type ModelCapabilitiesParams, type ModelCapabilitiesResult } from "./model-capability-schema.ts";
-export { CONFIG_METHODS, ConfigApplySchema, ConfigChangedSchema, ConfigEntrySchema, ConfigInputSchema, ConfigListParamsSchema,
+export { CONFIG_METHODS, ConfigApplicationSchema, type ConfigApplication, ConfigApplySchema, ConfigChangedSchema, ConfigEntrySchema, ConfigInputSchema, ConfigListParamsSchema,
   ConfigListResultSchema, ConfigRefusalReasonSchema, ConfigSetParamsSchema, ConfigSetResultSchema, ConfigSubscribeParamsSchema,
   ConfigSubscribeResultSchema, ConfigValueSchema, type ConfigApply, type ConfigChanged, type ConfigEntry, type ConfigInput, type
   ConfigListParams, type ConfigListResult, type ConfigRefusalReason, type   ConfigSetParams, type ConfigSetResult, type
@@ -540,3 +540,7 @@ export { MAINTENANCE_MONITOR_METHODS, MaintenanceMonitorParamsSchema, Maintenanc
   MaintenanceMonitorUnsubscribeParamsSchema, MaintenanceMonitorUnsubscribeResultSchema,
   type MaintenanceMonitorParams, type MaintenanceMonitorSummary, type MaintenanceMonitorSnapshot,
   type MaintenanceMonitorUpdate } from "./maintenance-monitor-schema.ts";
+
+export { MODEL_PROFILE_METHODS, ModelSlotSchema, ModelProfileFormSchema, ModelProfileDraftSchema, ActiveModelProfileSchema, ModelProfileStatusSchema, ModelProfilesResultSchema, ModelProfilesParamsSchema, ModelProfileSaveParamsSchema, ModelProfileTestParamsSchema, ModelProfileTestResultSchema, ModelProfilesChangedSchema, type ModelSlot, type ModelProfileForm, type ModelProfileStatus, type ModelProfilesResult, type ModelProfileSaveParams, type ModelProfileTestParams, type ModelProfileTestResult, type ModelProfilesChanged } from "./model-profile-schema.ts";
+
+export { LocalAuthChallengeSchema, LocalAuthRequestSchema, localAuthTranscript, type LocalAuthChallenge, type LocalAuthRequest } from "./connect-schema.ts";

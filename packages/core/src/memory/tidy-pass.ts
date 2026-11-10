@@ -1,5 +1,5 @@
 /**
- * INPUT:  scoped memory views, review checkpoints, the Utility Slot and operation progress sink
+ * INPUT:  scoped views, checkpoints, Utility Slot, admission-captured configuration and operation progress
  * OUTPUT: finite backlog draining with fresh queued batches, independent limits and truthful recovery
  * POS:    core/memory — maintenance producer; durable operation ownership remains separate
  */
@@ -12,7 +12,7 @@ import type { TidyEngineView } from "./memory-engine.ts";
 import { buildTidyReport, type TidyReport } from "./tidy-report.ts";
 import { runTidyAgent, type TidyBatchRun } from "./tidy-agent-runner.ts";
 import { automaticTidyAllowed, canonicalTidyReport, checkpointTidyBatch, tidyMemoryKey } from "./tidy-coverage.ts";
-import type { UtilitySlot } from "./utility-slot.ts";
+import { captureUtilitySlot, type UtilitySlot } from "./utility-slot.ts";
 import { estimateToolSchemaTokens } from "../agents/request-measurement.ts";
 import { estimateTokens } from "./token-estimator.ts";
 import { TIDY_INPUT_FRAMING, TIDY_SYSTEM_PROMPT } from "./tidy-prompt.ts";
@@ -28,6 +28,7 @@ export interface TidyLogger { info(obj: object, msg: string): void; warn(obj: ob
 export interface TidyPassDeps {
   view: TidyEngineView; autoState: MemoryAutoRepo; events: MemoryEventsRepo;
   slot: UtilitySlot; config: MemoryConfig; logger: TidyLogger;
+  captureConfig?: () => MemoryConfig;
   checkpoints?: MemoryTidyReviewRepo;
   requestRun?: (characterId: string) => Promise<void>;
   /** Override the per-batch deadline for transport tests. Production uses the configured batch timeout. */
@@ -48,7 +49,10 @@ export function createTidyPass(deps: TidyPassDeps): TidyPass & { stop(): Promise
     if (shutdown.signal.aborted) return Promise.reject(new Error("MEMORY_PROVIDER_UNAVAILABLE"));
     const old = inflight.get(characterId);
     if (old) return old;
-    const task = execute(deps, { characterId, options, signal: shutdown.signal });
+    let config: MemoryConfig;
+    try { config = { ...(deps.captureConfig?.() ?? deps.config) }; }
+    catch (error) { return Promise.reject(error); }
+    const task = execute({ ...deps, config }, { characterId, options, signal: shutdown.signal });
     inflight.set(characterId, task);
     void task.finally(() => { if (inflight.get(characterId) === task) inflight.delete(characterId); }).catch(() => undefined);
     return task;
@@ -58,7 +62,8 @@ export function createTidyPass(deps: TidyPassDeps): TidyPass & { stop(): Promise
     await Promise.allSettled([...inflight.values()]);
   }, async maybeRun(characterId) {
     if (shutdown.signal.aborted) return;
-    if (!shouldRun(deps, characterId)) return;
+    if (deps.slot.available?.() === false) return;
+    if (!shouldRun({ ...deps, config: deps.captureConfig?.() ?? deps.config }, characterId)) return;
     if (deps.requestRun) await deps.requestRun(characterId);
     else await runNow(characterId);
   } };
@@ -96,6 +101,7 @@ async function execute(deps: TidyPassDeps, input: Omit<Work, "state">): Promise<
     deps.checkpoints?.succeeded(characterId);
     return { status: "clean", defects: preview.defects, edits: 0, steps: 0, usage: deps.slot.usage(), remaining: 0, reviewed: 0, nextAction: "none" };
   }
+  deps = { ...deps, slot: captureUtilitySlot(deps.slot) };
   const state: Execution = { progress: { edits: 0, steps: 0, reviewed: 0, remaining: null }, recovered: 0, skipped: 0, report: preview,
     startedAt: "", captured: false };
   const work: Work = { characterId, options, state, signal };
@@ -125,6 +131,7 @@ async function runQueued(deps: TidyPassDeps, work: Work): Promise<void> {
   const baseEdits = state.progress.edits;
   const baseSteps = state.progress.steps;
   const view = deps.view.captureReview?.(characterId, { modelReferences: true,
+    intentionsDefaultDays: deps.config.intentionsDefaultDays,
     onEdits: (edits) => options.onProgress?.({ ...state.progress, edits: baseEdits + edits }) }) ?? deps.view;
   const initial = reportFor(deps, view, { characterId });
   const continuing = state.pending !== undefined;
