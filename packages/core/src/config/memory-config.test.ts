@@ -4,6 +4,8 @@ import {
   DEFAULT_INTENTIONS_DAYS,
   DEFAULT_PINNED_BUDGET,
   DEFAULT_TIDY_MAX_STEPS,
+  DEFAULT_TIDY_BATCH_TIMEOUT_MS,
+  DEFAULT_TIDY_INPUT_TOKENS,
   DEFAULT_TIDY_REPORT_CAP,
   DEFAULT_TIDY_STALE_DAYS,
   DEFAULT_TIDY_WRITE_THRESHOLD,
@@ -19,6 +21,8 @@ const DEFAULTS = {
   tidyMaxSteps: DEFAULT_TIDY_MAX_STEPS,
   tidyStaleDays: DEFAULT_TIDY_STALE_DAYS,
   reportClassCap: DEFAULT_TIDY_REPORT_CAP,
+  tidyBatchTimeoutMs: DEFAULT_TIDY_BATCH_TIMEOUT_MS,
+  tidyInputTokens: DEFAULT_TIDY_INPUT_TOKENS,
 };
 
 describe("memory config (T5-R13: every number is configured, with a fail-closed default)", () => {
@@ -78,9 +82,11 @@ describe("memory config (T5-R13: every number is configured, with a fail-closed 
 
   it("ships the tidy numbers with their fail-closed defaults (batch 4b)", () => {
     expect(DEFAULT_TIDY_WRITE_THRESHOLD).toBe(40);
-    expect(DEFAULT_TIDY_MAX_STEPS).toBe(12);
+    expect(DEFAULT_TIDY_MAX_STEPS).toBe(48);
     expect(DEFAULT_TIDY_STALE_DAYS).toBe(45);
-    expect(DEFAULT_TIDY_REPORT_CAP).toBe(10);
+    expect(DEFAULT_TIDY_REPORT_CAP).toBe(100);
+    expect(DEFAULT_TIDY_BATCH_TIMEOUT_MS).toBe(600_000);
+    expect(DEFAULT_TIDY_INPUT_TOKENS).toBe(24_000);
   });
 
   it("takes each tidy override and fails the boot on a garbage one", () => {
@@ -90,13 +96,18 @@ describe("memory config (T5-R13: every number is configured, with a fail-closed 
         TAKI_MEMORY_TIDY_MAX_STEPS: "3",
         TAKI_MEMORY_TIDY_STALE_DAYS: "90",
         TAKI_MEMORY_TIDY_REPORT_CAP: "2",
+        TAKI_MEMORY_TIDY_BATCH_TIMEOUT_MS: "900000",
+        TAKI_MEMORY_TIDY_INPUT_TOKENS: "12000",
       }),
-    ).toMatchObject({ tidyWriteThreshold: 5, tidyMaxSteps: 3, tidyStaleDays: 90, reportClassCap: 2 });
+    ).toMatchObject({ tidyWriteThreshold: 5, tidyMaxSteps: 3, tidyStaleDays: 90, reportClassCap: 2,
+      tidyBatchTimeoutMs: 900000, tidyInputTokens: 12000 });
     for (const name of [
       "TAKI_MEMORY_TIDY_WRITE_THRESHOLD",
       "TAKI_MEMORY_TIDY_MAX_STEPS",
       "TAKI_MEMORY_TIDY_STALE_DAYS",
       "TAKI_MEMORY_TIDY_REPORT_CAP",
+      "TAKI_MEMORY_TIDY_BATCH_TIMEOUT_MS",
+      "TAKI_MEMORY_TIDY_INPUT_TOKENS",
     ]) {
       for (const value of ["abc", "0", "-1", "1.5", ""]) {
         expect(() => loadMemoryConfig({ [name]: value }), `${name}=${value}`).toThrow();

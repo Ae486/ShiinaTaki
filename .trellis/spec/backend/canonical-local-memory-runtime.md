@@ -142,25 +142,58 @@ captureRun(characterId: string): Promise<CapturedMemoryRun>;
 - Retention uses registry/per-record rules and reinforcement-aware time. Permanent records survive; permitted episode or
   intention expiry is recoverable invalidation. Only the machine rolling-window layer permits current-record hard deletion.
   Historic snapshots/receipts remain for exact retry; this is not a content-erasure API for historical evidence.
-- Tidy receives an immutable row/Block review with revision-bearing references. Reject stale references, cross-Character
-  access and background writes to the user card. Hidden records are excluded from the model's review; row tools accept only
-  captured references or new references returned by successful row operations in that pass. Block absence uses expected
-  revision 0; read/CAS/write is atomic.
+- Tidy captures a fresh row/Block review when its Utility Slot task starts, not when it queues. Canonical revision-bearing
+  identities stay internal; model-facing references may be short pass-local handles. Reject stale writes, cross-Character
+  access and background writes to the user card. Hidden records stay excluded. A conflict may return the current scoped
+  record for a new explicit model decision; it never silently retargets the failed write. Block absence uses revision 0.
 - Count only new committed effects: cached receipts and unchanged outcomes contribute zero. A clean store consumes no model
   call. Canonical completion requires an accepted `memory_finish_edits` and no unresolved errors; capped or abandoned passes
   keep committed work but do not advance `lastTidyAt`. Preserve the separately tested Legacy bounded-pass and Hindsight curator
   completion contracts.
-- A captured review can resolve only an admitted action's `MEMORY_REVISION_MISMATCH`, through a fresh successful execution
-  with the same verb, stable target and complete semantic payload (excluding only expected revision). Unrelated success or a
-  cached pre-error receipt cannot clear it. Authority, malformed, uncaptured-reference and internal errors remain unresolved;
-  never silently substitute the current revision or weaken CAS.
+- Exact fresh same-action revision repair remains supported. Other known no-write rejections use explicit finish
+  acknowledgements: `resolutions: [{ issueId, status: "corrected", correctedBy: laterSuccessfulCallId }]` or
+  `{ issueId, status: "not-needed", reason: "already-satisfied" | "mistaken-request" | "no-useful-change" }`.
+  A correctedBy success must be later, use the same tool, and match the same known stable target; its corrected payload
+  may differ. Malformed input does not fabricate a target. Unknown persistence, authority and request-identity failures
+  cannot be dismissed; subsequent new tool calls in that same SDK step are also blocked at the mutation boundary.
+  Cached/unrelated success alone is not completion. Only an accepted finish stops the Canonical loop; a refused finish permits correction.
+  Corrected and explicitly unnecessary calls are counted separately from applied edits.
+- Migration 067 stores per-Character/epoch reviewed memory revisions, Block revisions and retry eligibility. Checkpoint
+  only the visible accepted batch and its own resulting revisions; never substitute newer unseen revisions. Duplicate
+  groups retain their comparison evidence as a unit. The report cap limits seed candidates, not deletion of relevant
+  evidence. A remaining tail bypasses the ordinary write threshold. No historical timestamp fabricates per-record review.
+- Canonical tidy captures pending stable Bank/memory identities at its first Utility dispatch, then drains that finite
+  backlog inside the same durable operation. Each batch reads current revisions and removes departed/ineligible
+  identities from admission. New memories, Block changes and external changes after accepted review remain eligible:
+  return their actual remaining count and nextAction=continue, retaining pending retry state. Never falsely checkpoint
+  their newer versions or chase newly arriving data indefinitely.
+- Defaults are 100 candidate memories, 24,000 estimated initial input tokens (instructions, tool schemas and report),
+  48 model steps and 600,000 ms per batch. Initial input is also limited to half the configured selected Utility/main
+  model window to reserve tool-history/output space. Whole memories/duplicate groups are never truncated; an indivisible
+  input that exceeds the budget reports input-too-large/check-settings before any model call.
+- Each accepted batch releases and re-enters the existing Utility Slot, giving queued background work a turn. Queue
+  time consumes no batch deadline. Slot usage contains only that batch, never cumulative operation totals. Local and
+  Legacy shutdown abort active tidy requests and prevent further batches; Legacy still executes one bounded report.
+  The enlarged defaults also apply to Legacy, without claiming Canonical checkpoint/continuation semantics.
+- SDK tool execution is sequential, model retries
+  are owned here rather than stacked, and compatible HTTP abort is tested. Timeout is cooperative; arbitrary injected
+  providers that ignore cancellation are not supported as a hard-deadline guarantee. Automatic failure eligibility backs
+  off for one then five minutes and stops automatic retries after repeated failure; manual retry starts from current state.
+  A persisted exhausted budget reports nextAction=manual-retry and explicit automatic-retry-paused UI guidance. A
+  confirmed clean manual pass also clears retry stop, so future new memories can again trigger automatic maintenance.
+- The existing durable operation owner handles manual/automatic admission, Global single flight and reconnect status.
+  Local mutation and committed-edit progress share the same SQLite transaction; publish only after its outer commit.
+  Review checkpoints and reported progress also commit together. A retired operation's progress refusal rolls back the
+  affected new mutation. Missing candidate counts remain unknown rather than zero.
 - `TidyEngineView.reviewOutcome?(): TidyReviewOutcome` reports completion, actual edits and closed diagnostics. The existing
   `memory.tidy` clean/ran success shape is unchanged. Partial/failed calls return JSON-RPC INTERNAL_ERROR with
   `MemoryTidyFailureDetailsSchema` directly in `.data`: kind=memory-tidy, status=partial|failed, defects/edits/steps/usage,
-  reason=tool-errors|execution-failed|review-stale|unfinished, at most 20 closed tool/code pairs and the total issueCount.
+  reason=tool-errors|execution-failed|review-stale|unfinished|timeout|input-too-large, at most 20 closed tool/code observations and issueCount.
+  Observations may include issueId, stage=input|reference|write|completion and a closed field name. Durable operation
+  outcomes additionally retain reviewed/remaining, recoveredIssues/skippedIssues, nextAction and retryAt when known.
   Partial requires positive edits; failed requires zero. Diagnostics never contain raw arguments or exception text.
-  Regressions must cover exact corrected actions versus cached/unrelated success, sticky authority/unknown failures,
-  no-op counts, explicit finish, later model failure and the actual MethodRegistry error envelope.
+  Regressions must cover explicit corrected/not-needed acknowledgements, sticky authority/unknown failures, no-op counts,
+  rejected then accepted finish, later model failure, bounded multi-batch coverage, and the actual MethodRegistry envelope.
 - The durable authority marker is the retirement boundary. Once committed, retire the Legacy fence before constructing or
   publishing a replacement. Constructor, callback or marker-read failures cannot reopen old held tool/write/maintenance/flush
   references. Before-commit rollback may reopen them. Failed replacement binding leaves an unavailable memory facade;
@@ -179,6 +212,9 @@ captureRun(characterId: string): Promise<CapturedMemoryRun>;
 | Explicit hidden or invalidated memory | Excluded before ordinary recall limit; maintenance still has scoped historical access |
 | Cross-Bank correction has private supporting facts | Preserve copied support edges as hidden evidence; exclude them from other Characters' prompts, sparse recall and tidy model input |
 | Imported record receives an unchanged lifecycle operation | Persist the referenced snapshot with its receipt; return the same result on retry |
+| More pending tidy rows than one report batch | Preserve complete visible comparison groups; checkpoint only accepted visible work and continue the remaining tail |
+| Model corrects a known rejected/no-write call | Accept explicit correction evidence; do not keep an unresolvable historical failure flag |
+| Tidy operation retires during a later mutation | Preserve earlier committed edits; roll back the new mutation and its progress together |
 | Post-marker constructor/callback/read failure | Legacy stays retired; replacement is unavailable or correctly bound, never fallback |
 | No real provider flush installed | Explicit coverage fails; canonical Compaction remains independent |
 
@@ -201,6 +237,9 @@ captureRun(characterId: string): Promise<CapturedMemoryRun>;
 - Activation failure: held Legacy tool/write/retention/tidy/maintenance/flush references reject after a committed marker even
   when construction/callback/marker reread fails; pre-commit transaction failure retains usable Legacy authority.
 - Prompt/Block: complete relationships, promoted profile, observed fences, mood/hidden visibility, captured content and CAS.
+- Tidy: multiple batches and same-timestamp revisions; cap-one duplicate group; no-op review and fresh changes; invalid call
+  correction and not-needed accounting; failed/aborted later steps; actual stalled HTTP cancellation; manual/automatic
+  owner join, restart after a committed edit, no late write, and browser reconnect/remount without redispatch.
 - Run the workspace TypeScript checks and real Node strip-only boot with fresh isolated Legacy and Canonical Local fixtures.
   Do not load `.env.local`, real credentials, another worktree or private D78 acceptance data for this verification.
 

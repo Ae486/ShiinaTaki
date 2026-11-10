@@ -8,6 +8,7 @@ import type { PrimaryConversationSourceRepo } from "../db/primary-conversation-s
 import { createCanonicalIngestionRepo } from "../db/canonical-ingestion-repo.ts";
 import { createMemoryAutoRepo } from "../db/memory-auto-repo.ts";
 import { createMemoryEventsRepo } from "../db/memory-events-repo.ts";
+import { createMemoryTidyReviewRepo } from "../db/memory-tidy-review-repo.ts";
 import type { Database } from "../db/sqlite.ts";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
 import type { Logger } from "../logging/logger.ts";
@@ -24,6 +25,7 @@ export function createCanonicalLocalSubsystem(input: {
   db: Database; epochId: string; promptDir: string; timeline: TimelineRepo;
   utility: UtilitySlot; config: MemoryConfig; logger: Logger;
   primarySources?: PrimaryConversationSourceRepo;
+  requestRun?: (characterId: string) => Promise<void>;
 }) {
   const engine = createCanonicalLocalRuntime(input);
   const autoState = createMemoryAutoRepo(input.db);
@@ -33,7 +35,8 @@ export function createCanonicalLocalSubsystem(input: {
     maintenance: engine.maintenanceStore, journal, timeline: input.timeline, autoState, slot: input.utility, events, config: input.config,
     primarySources: input.primarySources });
   const tidy = createTidyPass({ view: engine.tidy, autoState, events, slot: input.utility,
-    config: input.config, logger: input.logger.child({ mod: "memory-tidy" }) });
+    config: input.config, logger: input.logger.child({ mod: "memory-tidy" }),
+    checkpoints: createMemoryTidyReviewRepo(input.db, input.epochId), requestRun: input.requestRun });
   for (const bank of engine.authority.listBanks(input.epochId)) {
     if (bank.scope.kind === "character") ingestion.initializeBaseline(bank.scope.characterId);
   }
@@ -48,7 +51,8 @@ export function createCanonicalLocalSubsystem(input: {
     await tidy.maybeRun(characterId);
   } };
   const writeMemory: MemoryWriteOp = ({ layer, ...request }) => engine.writeEntry({ ...request, type: layer });
-  return { engine, maintenance, memoryFlush: ingestion.flushPort, tidy, writeMemory, stop: retention.stop,
+  return { engine, maintenance, memoryFlush: ingestion.flushPort, tidy, writeMemory,
+    stop: async () => { retention.stop(); await tidy.stop(); },
     importPrimarySources: ingestion.importPrimarySources,
     captureRun: (characterId: string) => {
       engine.banks(characterId);

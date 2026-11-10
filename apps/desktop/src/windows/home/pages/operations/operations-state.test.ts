@@ -38,7 +38,7 @@ describe("operations view models", () => {
     const failure: MemoryTidyFailureDetails = { ...TIDY, kind: "memory-tidy", status: "partial", reason: "tool-errors",
       issues: Array.from({ length: 20 }, () => ({ toolName: "unknown", code: "MEMORY_INTERNAL_ERROR" })), issueCount: 23 };
     const view = tidyFailureView(failure);
-    expect(view.issueSummary).toBe("未解决工具操作：23 项（显示 20 项）");
+    expect(view.issueSummary).toBe("未完成的整理操作：23 项（显示 20 项）");
     expect(view.issues).toHaveLength(20);
     expect(view.issues[0]).toMatchObject({ label: "整理操作", value: "内部处理失败" });
   });

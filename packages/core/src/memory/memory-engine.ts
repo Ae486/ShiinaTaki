@@ -32,6 +32,7 @@ import { createTidyTools, type TidyToolOps } from "./tidy-tools.ts";
 import type { ToolSet } from "ai";
 import type { InitiativeMemoryAssembler } from "./initiative-memory-assembly.ts";
 import type { MemoryTidyFailureReason, MemoryTidyIssue } from "@taki/shared";
+import type { TidyIssueObservation } from "./tidy-issues.ts";
 
 // How many memories a single memory_search tool call returns to the model.
 const SEARCH_LIMIT = 8;
@@ -45,16 +46,30 @@ export interface TidyReviewOutcome {
   reason?: MemoryTidyFailureReason;
   issues: MemoryTidyIssue[];
   issueCount: number;
+  recoveredIssues?: number;
+  skippedIssues?: number;
+}
+
+export interface TidyReviewOptions {
+  onEdits?: (edits: number) => void;
+  modelReferences?: boolean;
 }
 
 /** The tidy pass's engine surface (batch 4b): deterministic report reads + the maintenance toolset. */
 export interface TidyEngineView {
-  /** Freeze canonical row and block revisions before the report can wait for the Utility Slot. */
-  captureReview?(characterId: string): TidyEngineView;
+  /** Freeze canonical row and block revisions when this work starts inside the Utility Slot. */
+  captureReview?(characterId: string, options?: TidyReviewOptions): TidyEngineView;
   /** Failed canonical CAS/authority work keeps the report eligible for retry. */
   reviewHealthy?(): boolean;
   /** Canonical completion requires explicit finish, current authority and no unresolved issue; edits exclude replays. */
   reviewOutcome?(): TidyReviewOutcome;
+  recordIssue?(issue: TidyIssueObservation): void;
+  reviewReminder?(): string;
+  reviewBlocked?(): boolean;
+  renderReference?(id: string): string;
+  setVisibleReferences?(ids: string[]): void;
+  resultingReferences?(): string[];
+  blockRevisions?(characterId?: string): Array<{ blockId: string; revision: number }>;
   /** Every active in-scope row across all layers — the report's raw material. */
   listActive(characterId: string): MemoryEntryRow[];
   /** Writes-since-mark for the trigger; updated_at counts — a reinforced store is a changed store. */

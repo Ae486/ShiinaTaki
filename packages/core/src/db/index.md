@@ -1,5 +1,7 @@
 # core/db/
-- cache-usage-repo.ts — global settled-request cache statistics against the exact durable primary-summary baseline
+- memory-tidy-review-repo.ts — exact Local reviewed memory/Block revisions and persistent bounded automatic retry eligibility; no attempt ownership
+- cache-usage-repo.ts — regular-call cache statistics excluding tidy/compact against a matching durable primary-summary baseline
+- maintenance-monitor-repo.ts — read-only Character-scoped tidy/compaction operation pages and explicitly associated auxiliary calls
 - subagent-repo.ts — immutable private continuity and exact child stop/control CAS
 - subagent-input-repo.ts — idempotent addressed acceptance, separate work sequence and user-only latch continuation
 - subagent-execution-repo.ts — trusted atomic child/parent Run links, immutable proposals and completion outbox reads
@@ -113,7 +115,7 @@
 - hindsight-ingestion-source-repo.ts — immutable source witnesses and baseline, gap-isolated claiming and truthful continuous coverage
 - hindsight-memory-write-contract.ts — lossless internal parent-intent state and an immutable operation identity
 - hindsight-memory-write-repo.ts — original target capture, independent child evidence, stable full-operation receipts and the count-only pending parent-write read
-- memory-operation-repo.ts — durable memory_operations ledger: admitted insert (partial-unique-index single flight), state-CAS transition, active/recent reads, restart reconciliation by owner boot id
+- memory-operation-repo.ts — durable memory_operations ledger: family single flight, state/progress CAS, kind/Character-filtered reads before limits, and restart reconciliation preserving confirmed progress
 - hindsight-memory-write-storage.ts — independently hashed byte-preserving state reads and CAS replacement
 - hindsight-policy-work-contract.ts — exact durable work identities, lease/result schemas and immutable proposal validation
 - hindsight-policy-work-repo.ts — durable claims, original prompt/results, explicit retry and terminal queue progress
@@ -124,7 +126,7 @@
 - run-delivery-repo.ts — immutable decision/source identity and held-slot lookup; final Attempt/Character/class/source guards, atomic speech/source/quota/evidence writes and civil-day-aware timezone charge carry
 - run-delivery-transition.ts — guarded Run/continuation hold/resume CAS preserving the original active Attempt and refusing unfinished Effects
 
-- subagent-context-summary-repo.ts — atomic private summary owner/source/revision CAS and separate model-intent witnesses
+- subagent-context-summary-repo.ts — atomic private summary advance/rewrite captures, exact previous-source/owner/revision CAS and separate model-intent witnesses
 - subagent-tool-result-repo.ts — immutable full raw tool results keyed by Run/Attempt/step/call, with durable material reads
 
 - subagent-event-repo.ts — immutable accepted child events and exact durable input dependencies
@@ -143,5 +145,5 @@
 - subagent-action-evidence.ts — useful action-result projection without internal receipts
 - primary-conversation-source-repo.ts — provider-independent atomic source lifecycle, exact Timeline membership, authority capture and boot recovery
 - primary-ingestion-progress.ts — shared Local/Hindsight gap-separated source groups and truthful continuous-coverage queries
-- auxiliary-usage-repo.ts — metadata-only auxiliary model-call lifecycle, interruption recovery, bounded usage aggregates and post-commit settlement notice
+- auxiliary-usage-repo.ts — auxiliary call lifecycle, optional durable operation association, bounded whole-filter usage and post-commit start/settlement hints
 - request-attribution-repo.ts — latest terminal primary request ordered by input/dispatch and joined by Effect lineage; preserves distinct requested/response model names, usage and bounded composition facts

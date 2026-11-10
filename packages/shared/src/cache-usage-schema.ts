@@ -17,7 +17,7 @@ export const CACHE_USAGE_METHODS = {
 } as const;
 
 export const CacheUsageWindowSnapshotSchema = z.strictObject({
-  scope: z.literal("all-observed-model-requests"),
+  scope: z.enum(["all-observed-model-requests", "regular-model-requests"]),
   characterId: CharacterIdSchema,
   summaryRevision: Count.nullable(),
   summaryCommittedAt: Timestamp.nullable(),

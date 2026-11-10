@@ -205,7 +205,7 @@ describe("Canonical Local tidy correction and truthful completion", () => {
     expect(await run.pass.runNow("taki")).toMatchObject({ status: "ran", edits: 1, steps: 3 });
   });
 
-  it("keeps a real conflicting call ID fatal even after a distinct request applies the same payload", async () => {
+  it("keeps a real conflicting call ID fatal and refuses a later distinct mutation", async () => {
     const fixture = fresh();
     await fixture.seed();
     const review = fixture.engine.tidy.captureReview!("taki");
@@ -214,23 +214,31 @@ describe("Canonical Local tidy correction and truthful completion", () => {
     const corrected = { id: updated.id, disclosure: "second" };
     expect(await call(review, { name: "memory_set_disclosure", callId: "reused", args: corrected }))
       .toMatchObject({ ok: false, code: "MEMORY_REQUEST_ID_CONFLICT" });
-    expect(await call(review, { name: "memory_set_disclosure", callId: "fresh", args: corrected })).toMatchObject({ ok: true });
+    expect(await call(review, { name: "memory_set_disclosure", callId: "fresh", args: corrected })).toMatchObject({ ok: false });
     await invoke(review, "memory_finish_edits", {});
-    expect(review.reviewOutcome?.()).toMatchObject({ complete: false, edits: 2, issueCount: 1,
+    expect(review.reviewOutcome?.()).toMatchObject({ complete: false, edits: 1, issueCount: 1,
       issues: [{ toolName: "memory_set_disclosure", code: "MEMORY_REQUEST_ID_CONFLICT" }] });
+    const ref = parseCanonicalMemoryReference(updated.id!);
+    expect(fixture.records.record(ref.epochId, ref.bankId, ref.memoryId)?.policy.disclosure).toBe("first");
   });
 
-  it.each(["MEMORY_INTERNAL_ERROR", "MEMORY_AUTHORITY_MISMATCH", "MEMORY_REQUEST_ID_CONFLICT", "MEMORY_INVALID_REQUEST"] as const)(
-    "never clears %s when the same action later succeeds", async (code) => {
+  it.each([
+    { code: "MEMORY_INTERNAL_ERROR", allowsCorrection: false },
+    { code: "MEMORY_AUTHORITY_MISMATCH", allowsCorrection: false },
+    { code: "MEMORY_REQUEST_ID_CONFLICT", allowsCorrection: false },
+    { code: "MEMORY_INVALID_REQUEST", allowsCorrection: true },
+  ] as const)("keeps $code pending and bounds subsequent mutations", async ({ code, allowsCorrection }) => {
       const fixture = fresh();
       await fixture.seed();
       const review = fixture.engine.tidy.captureReview!("taki");
       const id = review.listActive("taki")[0]!.id;
-      vi.spyOn(fixture.engine.maintenanceStore, "reinforce").mockImplementationOnce(() => { throw new Error(`${code}: PRIVATE_ERROR_TEXT`); });
+      const reinforce = vi.spyOn(fixture.engine.maintenanceStore, "reinforce")
+        .mockImplementationOnce(() => { throw new Error(`${code}: PRIVATE_ERROR_TEXT`); });
       expect(await call(review, { name: "memory_reinforce", callId: "failed", args: { id } })).toMatchObject({ ok: false, code });
-      expect(await call(review, { name: "memory_reinforce", callId: "fresh", args: { id } })).toMatchObject({ ok: true });
+      expect(await call(review, { name: "memory_reinforce", callId: "fresh", args: { id } })).toMatchObject({ ok: allowsCorrection });
+      expect(reinforce).toHaveBeenCalledTimes(allowsCorrection ? 2 : 1);
       await invoke(review, "memory_finish_edits", {});
-      expect(review.reviewOutcome?.()).toMatchObject({ complete: false, edits: 1, issueCount: 1,
+      expect(review.reviewOutcome?.()).toMatchObject({ complete: false, edits: allowsCorrection ? 1 : 0, issueCount: 1,
         issues: [{ toolName: "memory_reinforce", code }] });
       expect(JSON.stringify(review.reviewOutcome?.())).not.toContain("PRIVATE_ERROR_TEXT");
     });
@@ -259,7 +267,28 @@ describe("Canonical Local tidy correction and truthful completion", () => {
     expect(review.reviewOutcome?.()).toMatchObject({ complete: false, edits: 1, issueCount: 1 });
   });
 
-  it("unknown repository exceptions stay unresolved and expose no error text", async () => {
+  it("requires the same known target for explicit correction while allowing a revised payload", async () => {
+    const fixture = fresh();
+    const blocks = createStructuredMemoryBlockRepo(fixture.db);
+    const review = fixture.engine.tidy.captureReview!("taki");
+    blocks.replace({ blockId: "user-model", scope: { kind: "global", characterId: null },
+      actor: "background", content: "concurrent value" });
+    expect(await call(review, { name: "block_rethink", callId: "stale", args: { id: "user-model", content: "intended" } }))
+      .toMatchObject({ ok: false, code: "MEMORY_REVISION_MISMATCH" });
+    const issueId = review.reviewOutcome!().issues[0]!.issueId;
+    await call(review, { name: "block_rethink", callId: "other", args: { id: "memory-index", content: "other change" } });
+    expect(await call(review, { name: "memory_finish_edits", callId: "wrong-finish",
+      args: { resolutions: [{ issueId, status: "corrected", correctedBy: "other" }] } })).toMatchObject({ ok: false });
+    expect(review.reviewOutcome!()).toMatchObject({ complete: false, edits: 1, issueCount: 1, recoveredIssues: 0 });
+    expect(blocks.read("user-model", { kind: "global", characterId: null })?.content).toBe("concurrent value");
+
+    await call(review, { name: "block_rethink", callId: "corrected", args: { id: "user-model", content: "revised intended change" } });
+    expect(await call(review, { name: "memory_finish_edits", callId: "right-finish",
+      args: { resolutions: [{ issueId, status: "corrected", correctedBy: "corrected" }] } })).toMatchObject({ ok: true });
+    expect(review.reviewOutcome!()).toMatchObject({ complete: true, edits: 2, issueCount: 0, recoveredIssues: 1 });
+  });
+
+  it("unknown repository exceptions stop further model mutations and expose no error text", async () => {
     const fixture = fresh();
     await fixture.seed();
     const review = fixture.engine.tidy.captureReview!("taki");
@@ -270,9 +299,27 @@ describe("Canonical Local tidy correction and truthful completion", () => {
       { kind: "tool", toolCallId: "success", toolName: "memory_reinforce", input: { id } }, FINISH,
     ] });
     const outcome = await run.pass.runNow("taki");
-    expect(outcome).toMatchObject({ status: "partial", edits: 1, issueCount: 1,
+    expect(outcome).toMatchObject({ status: "failed", edits: 0, steps: 1, issueCount: 1,
       issues: [{ toolName: "memory_reinforce", code: "MEMORY_INTERNAL_ERROR" }] });
+    expect(run.model.doGenerateCalls).toHaveLength(1);
     expect(JSON.stringify({ outcome, logs: run.records })).not.toContain("PRIVATE_DATABASE_ERROR");
+    expectUnfinished(run);
+  });
+
+  it("blocks remaining tools in the same SDK step after an unknown failure", async () => {
+    const fixture = fresh();
+    await fixture.seed();
+    const review = fixture.engine.tidy.captureReview!("taki");
+    const id = review.listActive("taki")[0]!.id;
+    const reinforce = vi.spyOn(fixture.engine.maintenanceStore, "reinforce")
+      .mockImplementationOnce(() => { throw new Error("PRIVATE_DATABASE_ERROR"); });
+    const run = makePass(fixture, { review, script: [{ kind: "tools", calls: [
+      { toolCallId: "failure", toolName: "memory_reinforce", input: { id } },
+      { toolCallId: "later", toolName: "memory_reinforce", input: { id } },
+    ] }] });
+    expect(await run.pass.runNow("taki")).toMatchObject({ status: "failed", edits: 0, steps: 1, issueCount: 1 });
+    expect(reinforce).toHaveBeenCalledTimes(1);
+    expect(run.model.doGenerateCalls).toHaveLength(1);
     expectUnfinished(run);
   });
 

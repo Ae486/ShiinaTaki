@@ -5,6 +5,7 @@
  */
 import { createHash, randomUUID } from "node:crypto";
 import { generateText } from "ai";
+import { withMaintenanceUsageOwner } from "../observability/model-usage-context.ts";
 import type { TimelineEntry } from "@taki/shared";
 import type {
   CompactionFailureCode,
@@ -180,7 +181,8 @@ async function execute(input: {
       return Promise.resolve(undefined);
     }
     lease = renewed;
-    return generateText({ model: deps.slot.model, prompt, abortSignal: controller.signal });
+    return withMaintenanceUsageOwner({ kind: "compact", operationId: lease.operationId, characterId: lease.characterId },
+      () => generateText({ model: deps.slot.model, prompt, abortSignal: controller.signal }));
   });
   if (controller.signal.aborted || dispatchSkipped) return;
   if (result === undefined) {

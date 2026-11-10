@@ -4,7 +4,8 @@ import { describe, expect, it, vi } from "vitest";
 import type { AuxiliaryUsageRepo } from "../db/auxiliary-usage-repo.ts";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
 import { createAuxiliaryUsageMeter } from "./auxiliary-usage-meter.ts";
-import { withAuxiliaryUsageTask, withRunUsageOwner } from "./model-usage-context.ts";
+import { withAuxiliaryUsageTask, withRunUsageOwner, withMaintenanceUsageOwner } from "./model-usage-context.ts";
+import { createUtilitySlot } from "../memory/utility-slot.ts";
 
 const USAGE = {
   inputTokens: { total: 6, noCache: 2, cacheRead: 4, cacheWrite: undefined },
@@ -38,6 +39,21 @@ function fixture(repoOverrides: Partial<AuxiliaryUsageRepo> = {}) {
 }
 
 describe("auxiliary usage generate observation", () => {
+  it("captures each queued task owner without leaking a maintenance association to intervening work", async () => {
+    const f = fixture(); const { logger } = createCaptureLogger();
+    const slot = createUtilitySlot({ mainModel: new MockLanguageModelV4({ doGenerate: async () => result() }),
+      logger, usageMeter: f.meter });
+    const operation = { kind: "tidy", operationId: "tidy-operation", characterId: "taki" } as const;
+    const run = () => generateText({ model: slot.model, prompt: "test" });
+    const first = withMaintenanceUsageOwner(operation, () => slot.run("tidy", run));
+    const independent = slot.run("episodic", run);
+    const second = withMaintenanceUsageOwner(operation, () => slot.run("tidy", run));
+    await Promise.all([first, independent, second]);
+    expect(f.starts.map((entry) => entry.operation)).toEqual([operation, undefined, operation]);
+    expect(new Set(f.starts.map((entry) => entry.taskId)).size).toBe(3);
+    await slot.stop();
+  });
+
   it("records each actual SDK invocation even when a Utility task discards both results", async () => {
     const f = fixture();
     const provider = new MockLanguageModelV4({ doGenerate: async () => result() });

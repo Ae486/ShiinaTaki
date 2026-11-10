@@ -4,6 +4,7 @@
  * POS:    core/memory/operations — the single operation owner (D-S1-1); every state change is a repo CAS, then onChanged
  */
 import { randomUUID } from "node:crypto";
+import { withMaintenanceUsageOwner } from "../../observability/model-usage-context.ts";
 import type { MemoryOperation, MemoryOperationListParams, MemoryOperationProducerRef, MemoryOperationRequest } from "@taki/shared";
 import { createMemoryOperationRepo, type MemoryOperationRepo } from "../../db/memory-operation-repo.ts";
 import type { Database } from "../../db/sqlite.ts";
@@ -12,7 +13,7 @@ import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activat
 import type { HindsightSetupService } from "../hindsight/hindsight-setup-service.ts";
 import {
   MemoryOperationRefusal, type MemoryOperationContext, type MemoryOperationKindHandler, type MemoryOperationSettlement,
-  type MemoryOperationsRuntime,
+  type MemoryOperationsRuntime, type MemoryTidyRuntime,
 } from "./memory-operation-contract.ts";
 import { MEMORY_OPERATION_KINDS, memoryOperationHandler, type MemoryOperationKindRegistry } from "./memory-operation-kinds.ts";
 
@@ -23,6 +24,8 @@ export interface MemoryOperationService {
   /** Terminal rows, newest settlement first, for the composite status read. */
   recent(limit: number): MemoryOperation[];
   cancel(operationId: string): MemoryOperation;
+  /** Compatibility callers await the same admitted work; waiting never redispatches it. */
+  wait(operationId: string): Promise<MemoryOperation>;
   /** Awaits in-flight settlements; producers are stopped by their own owners (memory runtime, setup deadlines). */
   stop(): Promise<void>;
 }
@@ -30,6 +33,7 @@ export interface MemoryOperationService {
 export interface MemoryOperationServiceInput {
   db: Database;
   live(): MemoryOperationsRuntime | null;
+  tidy?: () => MemoryTidyRuntime | null;
   setup: HindsightSetupService;
   bootId: string;
   onChanged(operation: MemoryOperation): void;
@@ -41,14 +45,14 @@ export interface MemoryOperationServiceInput {
 
 interface Owner {
   repo: MemoryOperationRepo; kinds: MemoryOperationKindRegistry; ctx: MemoryOperationContext; input: MemoryOperationServiceInput;
-  inflight: Set<Promise<void>>;
+  inflight: Map<string, Promise<void>>;
 }
 
 export function createMemoryOperationService(input: MemoryOperationServiceInput): MemoryOperationService {
   const now = input.now ?? (() => new Date().toISOString());
   const owner: Owner = {
     repo: input.repo ?? createMemoryOperationRepo(input.db, now), kinds: input.kinds ?? MEMORY_OPERATION_KINDS,
-    ctx: { live: input.live, setup: input.setup, now }, input, inflight: new Set(),
+    ctx: { live: input.live, tidy: input.tidy, setup: input.setup, now }, input, inflight: new Map(),
   };
   // A previous process cannot report what happened to its open rows; unknown stays unknown (D-S1-3).
   for (const operation of owner.repo.reconcileForeign(input.bootId)) input.onChanged(operation);
@@ -58,7 +62,8 @@ export function createMemoryOperationService(input: MemoryOperationServiceInput)
     list: (params) => list(owner, params),
     recent: (limit) => owner.repo.listRecent(limit),
     cancel: (operationId) => cancel(owner, operationId),
-    stop: async () => { while (owner.inflight.size > 0) await Promise.allSettled([...owner.inflight]); },
+    wait: async (operationId) => { requireOperation(owner, operationId); await owner.inflight.get(operationId); return refresh(owner, requireOperation(owner, operationId)); },
+    stop: async () => { while (owner.inflight.size > 0) await Promise.allSettled([...owner.inflight.values()]); },
   };
 }
 
@@ -75,18 +80,26 @@ function submit(owner: Owner, request: MemoryOperationRequest): MemoryOperation 
     if (!(error instanceof Error) || error.message !== "MEMORY_OPERATION_BUSY") throw error;
     throw new MemoryOperationRefusal("MEMORY_OPERATION_BUSY", owner.repo.activeInFamily(family)?.operationId ?? null);
   }
-  owner.input.onChanged(admitted);
+  publish(owner, admitted);
   const execution = execute(owner, handler, { operationId, request, producer });
-  owner.inflight.add(execution);
-  void execution.finally(() => owner.inflight.delete(execution));
+  owner.inflight.set(operationId, execution);
+  void execution.finally(() => owner.inflight.delete(operationId));
   return requireOperation(owner, operationId);
 }
 
 async function execute(owner: Owner, handler: MemoryOperationKindHandler, input: { operationId: string; request: MemoryOperationRequest; producer: MemoryOperationProducerRef }): Promise<void> {
   const { operationId } = input;
   const running = () => transition(owner, operationId, (current) => current.state === "admitted" ? { state: "running" } : null);
+  const updateProducer = (producer: MemoryOperationProducerRef) => {
+    const current = requireOperation(owner, operationId);
+    if (current.terminalAt !== null) throw new MemoryOperationRefusal("MEMORY_OPERATION_SETTLED");
+    const next = transition(owner, operationId, () => ({ state: "running", producer }));
+    if (!next || next.terminalAt !== null) throw new MemoryOperationRefusal("MEMORY_OPERATION_SETTLED");
+  };
   try {
-    const settlement = await handler.execute({ request: input.request, producer: input.producer, ctx: owner.ctx, running });
+    const invoke = () => handler.execute({ request: input.request, producer: input.producer, ctx: owner.ctx, running, updateProducer });
+    const settlement = await (input.request.kind === "tidy"
+      ? withMaintenanceUsageOwner({ kind: "tidy", operationId, characterId: input.request.characterId }, invoke) : invoke());
     if (settlement) settle(owner, operationId, settlement);
   } catch (error) {
     owner.input.logger.child({ mod: "memory-operations" }).error({ operationId, err: error instanceof Error ? error.name : "unknown" }, "memory operation execution threw");
@@ -110,7 +123,7 @@ function transition(owner: Owner, operationId: string, patch: (current: MemoryOp
   if (!change) return current;
   try {
     const next = owner.repo.transition({ operationId, expectedState: current.state, patch: change });
-    owner.input.onChanged(next);
+    publish(owner, next);
     return next;
   } catch (error) {
     if (error instanceof Error && error.message === "MEMORY_OPERATION_STATE_CONFLICT") return owner.repo.get(operationId);
@@ -130,9 +143,17 @@ function refresh(owner: Owner, operation: MemoryOperation): MemoryOperation {
 }
 
 function list(owner: Owner, params: MemoryOperationListParams): MemoryOperation[] {
-  const active = owner.repo.listActive().map((operation) => refresh(owner, operation)).filter((operation) => operation.terminalAt === null);
-  const recent = params.includeTerminal ? owner.repo.listRecent(params.limit) : [];
+  const active = owner.repo.listActive(params).map((operation) => refresh(owner, operation)).filter((operation) => operation.terminalAt === null);
+  const recent = params.includeTerminal ? owner.repo.listRecent(params.limit, params) : [];
   return [...active, ...recent].slice(0, params.limit);
+}
+
+function publish(owner: Owner, operation: MemoryOperation): void {
+  // A Local mutation can contain this transition. Publish only after its outer transaction commits.
+  owner.input.db.afterCommit(() => {
+    try { owner.input.onChanged(operation); }
+    catch { owner.input.logger.warn({ operationId: operation.operationId }, "memory operation observer failed"); }
+  });
 }
 
 function cancel(owner: Owner, operationId: string): MemoryOperation {

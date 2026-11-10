@@ -22,8 +22,8 @@ vi.mock("@/features/character-import/use-character-import.js", () => ({ useChara
 const read = async () => undefined;
 const ops: OperationsView = {
   status: null, usage: null, statusLoading: false, usageLoading: false, statusError: null, usageError: null,
-  refreshStatus: read, refreshUsage: read, connectionReady: true, tidy: null, tidyFailure: null, tidying: false, refreshError: null, refreshing: false,
-  clear: { phase: "idle", error: null, onEvent: () => undefined }, error: null, refresh: read, runTidy: read,
+  refreshStatus: read, refreshUsage: read, connectionReady: true, refreshing: false,
+  clear: { phase: "idle", error: null, onEvent: () => undefined }, refresh: read,
 };
 const costume: CostumePageView = {
   view: { rows: [], missingPacks: [], current: null }, hasSnapshot: false, connectionReady: true,
@@ -42,7 +42,7 @@ const mcp: McpServersView = {
 beforeEach(() => {
   hooks.operations.mockReturnValue(ops);
   hooks.memoryOperations.mockReturnValue({ status: localStatus(), loading: false, error: null, busyKey: null, feedback: null,
-    connectionReady: true, refresh: read, submitSync: read, cancel: read });
+    tidy: null, tidyLoading: false, tidyError: null, connectionReady: true, refresh: read, submitSync: read, submitTidy: read, cancel: read });
   hooks.costume.mockReturnValue(costume);
   hooks.perception.mockReturnValue(perception);
   hooks.mcp.mockReturnValue(mcp);

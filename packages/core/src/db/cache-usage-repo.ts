@@ -12,6 +12,7 @@ const Totals = z.object({ observedRequests: Count, pairedRequests: Count, inputT
 type UsageTotals = z.infer<typeof Totals>;
 const Summary = z.object({ revision: Count.positive(), last_operation_id: z.string().nullable(), updated_at: z.iso.datetime({ offset: true }) });
 const Baseline = z.object({ summary_revision: Count.positive(), operation_id: z.string(), summary_committed_at: z.string(),
+  population: z.literal("regular-model-requests"),
   boundary: z.enum(["captured", "historical"]), observed_requests: Count, paired_requests: Count,
   input_tokens: Count, cache_read_tokens: Count });
 const ZERO: UsageTotals = { observedRequests: 0, pairedRequests: 0, inputTokens: 0, cacheReadTokens: 0 };
@@ -22,7 +23,7 @@ export interface CacheUsageRepo {
 
 export function createCacheUsageRepo(db: Database): CacheUsageRepo {
   return { read(characterId, computedAt = new Date().toISOString()) {
-    const base = { scope: "all-observed-model-requests" as const, characterId: CharacterIdSchema.parse(characterId), computedAt,
+    const base = { scope: "regular-model-requests" as const, characterId: CharacterIdSchema.parse(characterId), computedAt,
       summaryRevision: null, summaryCommittedAt: null, boundary: null };
     let snapshot: CacheUsageWindowSnapshot = unavailable(base, "read-failed");
     try { db.transaction(() => { snapshot = readWindow(db, base); }); }
@@ -39,11 +40,12 @@ export function captureCacheUsageBaseline(db: Database, characterId: string): vo
     if (!summary.last_operation_id) throw new Error("CACHE_BASELINE_OPERATION_MISSING");
     const totals = readTotals(db);
     db.prepare(`INSERT INTO cache_usage_baselines
-      (character_id,summary_revision,operation_id,summary_committed_at,boundary,observed_requests,paired_requests,input_tokens,cache_read_tokens)
-      VALUES (:characterId,:revision,:operationId,:committedAt,'captured',:observedRequests,:pairedRequests,:inputTokens,:cacheReadTokens)
+      (character_id,summary_revision,operation_id,summary_committed_at,boundary,observed_requests,paired_requests,input_tokens,cache_read_tokens,population)
+      VALUES (:characterId,:revision,:operationId,:committedAt,'captured',:observedRequests,:pairedRequests,:inputTokens,:cacheReadTokens,'regular-model-requests')
       ON CONFLICT(character_id) DO UPDATE SET summary_revision=excluded.summary_revision,operation_id=excluded.operation_id,
       summary_committed_at=excluded.summary_committed_at,boundary=excluded.boundary,observed_requests=excluded.observed_requests,
-      paired_requests=excluded.paired_requests,input_tokens=excluded.input_tokens,cache_read_tokens=excluded.cache_read_tokens`).run({
+      paired_requests=excluded.paired_requests,input_tokens=excluded.input_tokens,cache_read_tokens=excluded.cache_read_tokens,
+      population=excluded.population`).run({
       characterId, revision: summary.revision, operationId: summary.last_operation_id, committedAt: summary.updated_at, ...totals,
     });
   });
@@ -98,6 +100,7 @@ function readTotals(db: Database): UsageTotals {
       (cache_read_observed=1 OR (cache_read_observed IS NULL AND cache_read_tokens>0)) AS observed
     FROM run_usage
     UNION ALL SELECT input_tokens,cache_read_tokens,1 FROM auxiliary_model_calls WHERE status<>'started'
+      AND NOT(source='utility' AND label IN ('tidy','compact'))
   ), pairs AS (SELECT *, CASE WHEN observed=1 AND typeof(input_tokens)='integer'
       AND input_tokens>0 AND input_tokens<=9007199254740991 AND typeof(cache_read_tokens)='integer'
       AND cache_read_tokens>=0 AND cache_read_tokens<=input_tokens THEN 1 ELSE 0 END AS paired FROM observations)

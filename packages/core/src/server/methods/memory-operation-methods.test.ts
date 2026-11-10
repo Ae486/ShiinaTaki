@@ -18,6 +18,7 @@ const operation: MemoryOperation = {
 function harness(service: Partial<MemoryOperationService> = {}) {
   const complete: MemoryOperationService = {
     submit: vi.fn(() => operation), status: vi.fn(() => operation), list: vi.fn(() => [operation]), recent: vi.fn(() => []),
+    wait: async () => operation,
     cancel: vi.fn((): MemoryOperation => ({ ...operation, state: "cancelled", reason: "cancelled_before_claim", terminalAt: AT })), stop: async () => undefined, ...service,
   };
   const registry = createMethodRegistry(); const subscriptions = createMemoryOperationSubscriptions();

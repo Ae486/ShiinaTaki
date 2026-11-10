@@ -16,14 +16,15 @@ interface AdmitInput {
 }
 type Patch = Partial<Pick<MemoryOperation, "state" | "reason" | "producer" | "result" | "errorCode">>;
 interface TransitionInput { operationId: string; expectedState: MemoryOperationState; patch: Patch }
+interface ListFilter { kind?: MemoryOperationKind; characterId?: string }
 
 export interface MemoryOperationRepo {
   insertAdmitted(input: AdmitInput): MemoryOperation;
   transition(input: TransitionInput): MemoryOperation;
   get(operationId: string): MemoryOperation | undefined;
   activeInFamily(family: string): MemoryOperation | undefined;
-  listActive(): MemoryOperation[];
-  listRecent(limit: number): MemoryOperation[];
+  listActive(filter?: ListFilter): MemoryOperation[];
+  listRecent(limit: number, filter?: ListFilter): MemoryOperation[];
   /** Rows a previous process left non-terminal become outcome_unknown/core_restart; returns the reconciled rows. */
   reconcileForeign(bootId: string): MemoryOperation[];
 }
@@ -37,9 +38,13 @@ export function createMemoryOperationRepo(db: Database, now: () => string = () =
     transition: (input) => transition(db, input, clock()),
     get: (operationId) => optional(db.prepare(`SELECT ${COLUMNS} FROM memory_operations WHERE operation_id=:id`).get({ id: operationId })),
     activeInFamily: (family) => optional(db.prepare(`SELECT ${COLUMNS} FROM memory_operations WHERE family=:family AND terminal_at IS NULL`).get({ family })),
-    listActive: () => db.prepare(`SELECT ${COLUMNS} FROM memory_operations WHERE terminal_at IS NULL ORDER BY created_at,operation_id`).all().map(parseRow),
-    listRecent: (limit) => db.prepare(`SELECT ${COLUMNS} FROM memory_operations WHERE terminal_at IS NOT NULL ORDER BY terminal_at DESC,operation_id LIMIT :limit`)
-      .all({ limit: z.int().min(1).max(50).parse(limit) }).map(parseRow),
+    listActive: (filter = {}) => db.prepare(`SELECT ${COLUMNS} FROM memory_operations WHERE terminal_at IS NULL
+      AND (:kind IS NULL OR kind=:kind) AND (:character IS NULL OR json_extract(request_json,'$.characterId')=:character)
+      ORDER BY created_at,operation_id`).all({ kind: filter.kind ?? null, character: filter.characterId ?? null }).map(parseRow),
+    listRecent: (limit, filter = {}) => db.prepare(`SELECT ${COLUMNS} FROM memory_operations WHERE terminal_at IS NOT NULL
+      AND (:kind IS NULL OR kind=:kind) AND (:character IS NULL OR json_extract(request_json,'$.characterId')=:character)
+      ORDER BY terminal_at DESC,operation_id LIMIT :limit`)
+      .all({ limit: z.int().min(1).max(50).parse(limit), kind: filter.kind ?? null, character: filter.characterId ?? null }).map(parseRow),
     reconcileForeign: (bootId) => reconcileForeign(db, bootId, clock()),
   };
 }

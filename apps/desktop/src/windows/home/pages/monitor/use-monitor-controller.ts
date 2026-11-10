@@ -8,9 +8,9 @@ import { useHomeClient } from "../../home-client-context.ts";
 import { usePageVisible } from "../../page-visibility-store.ts";
 import { createMonitorController, INITIAL_MONITOR_STATE, type MonitorViewState } from "./monitor-controller.ts";
 
-export function useMonitorController() {
+export function useMonitorController(active = true) {
   const { client, status } = useHomeClient();
-  const visible = usePageVisible("monitor");
+  const visible = usePageVisible("monitor") && active;
   const [view, setView] = useState<MonitorViewState>(INITIAL_MONITOR_STATE);
   const controller = useMemo(() => createMonitorController(setView), []);
   // Gate the first bind while hidden, and flush a returning controller's current authority before reveal paints.

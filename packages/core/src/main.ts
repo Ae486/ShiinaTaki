@@ -78,6 +78,7 @@ import { directoryByteSize } from "./media/directory-size.ts";
 import { composeMemoryRuntime } from "./memory/runtime-composition.ts";
 import { readMemoryAuthorityStatus } from "./memory/operations/memory-authority-status.ts";
 import { createMemoryOperationService } from "./memory/operations/memory-operation-service.ts";
+import { createTidyOperationAdapter } from "./memory/operations/tidy-operation-adapter.ts";
 import { createPerceptionLayer } from "./perception/perception-layer.ts";
 import { createBrowserPlaybackSources } from "./perception/browser-playback-sources.ts";
 import { registerBrowserPlaybackMethods } from "./server/methods/browser-playback-methods.ts";
@@ -145,6 +146,9 @@ import { createScheduleEngine } from "./scheduler/schedule-engine.ts";
 import { registerScheduledTaskMethods } from "./server/methods/scheduled-task-methods.ts";
 import { createObservabilityQueryService } from "./observability/observability-query-service.ts";
 import { createAuxiliaryUsageRepo } from "./db/auxiliary-usage-repo.ts";
+import { createMaintenanceMonitorRepo } from "./db/maintenance-monitor-repo.ts";
+import { createMaintenanceMonitorService } from "./observability/maintenance-monitor-service.ts";
+import { registerMaintenanceMonitorMethods } from "./server/methods/maintenance-monitor-methods.ts";
 import { createAuxiliaryUsageMeter } from "./observability/auxiliary-usage-meter.ts";
 import { registerAuxiliaryUsageMethod } from "./server/methods/auxiliary-usage-method.ts";
 import { registerObservabilityMethods } from "./server/methods/observability-methods.ts";
@@ -181,11 +185,13 @@ const viewingLifecycle: { current?: ViewingInvitationSource } = {};
 const mediaAnalysisLifecycle: { current?: MediaAnalysisRuntime } = {};
 const subagentLifecycle: { current?: ReturnType<typeof composeSubagents> } = {};
 const cacheUsageLifecycle: { current?: ReturnType<typeof createCacheUsageService> } = {};
+const maintenanceMonitorLifecycle: { current?: ReturnType<typeof createMaintenanceMonitorService> } = {};
 const coWatchingSubscriptions = createCoWatchingSubscriptions();
 const boot = bootstrapCore(process.env, { onConfigChanged: (key) => {
   if (key.startsWith("TAKI_INITIATIVE_")) patternLifecycle.current?.policyChanged();
   if (key === BROWSER_PLAYBACK_ENABLED_KEY) browserPlaybackLifecycle.current?.refresh();
   if (key === MONITOR_MODE_CONFIG_KEY) cacheUsageLifecycle.current?.changed();
+  if (key === MONITOR_MODE_CONFIG_KEY) maintenanceMonitorLifecycle.current?.changed();
 } });
 const { logger, db, serverConfig, contextConfig, model } = boot;
 const requestAttribution = createRequestAttributionRepo(db);
@@ -193,7 +199,10 @@ const cacheUsage = createCacheUsageService({ read: createCacheUsageRepo(db).read
   readLatestPrimaryRequest: (characterId) => requestAttribution.read(characterId),
   mode: () => MonitorModeSchema.parse(boot.config.source.resolve(MONITOR_MODE_CONFIG_KEY)?.value ?? "DISABLED"), logger });
 cacheUsageLifecycle.current = cacheUsage;
-const auxiliaryUsage = createAuxiliaryUsageRepo(db, { onSettled: cacheUsage.changed });
+const maintenanceMonitor = createMaintenanceMonitorService({ read: createMaintenanceMonitorRepo(db).read,
+  mode: () => MonitorModeSchema.parse(boot.config.source.resolve(MONITOR_MODE_CONFIG_KEY)?.value ?? "DISABLED") });
+maintenanceMonitorLifecycle.current = maintenanceMonitor;
+const auxiliaryUsage = createAuxiliaryUsageRepo(db, { onSettled: cacheUsage.changed, onChanged: maintenanceMonitor.changed });
 try { auxiliaryUsage.reconcileInterrupted(); }
 catch { logger.warn({ code: "AUXILIARY_USAGE_RECOVERY_FAILED" }, "auxiliary usage observation unavailable"); }
 const auxiliaryUsageMeter = createAuxiliaryUsageMeter({ repo: auxiliaryUsage, logger });
@@ -272,6 +281,7 @@ const memoryRuntime = composeMemoryRuntime({ db, dataDir: serverConfig.dataDir, 
   effectiveWindowTokens: () => windowCalibrator.effectiveWindow(),
   compact: contextConfig.compact, env: boot.env, logger, usageMeter: auxiliaryUsageMeter,
   onSummaryCommitted: cacheUsage.changed,
+  onMaintenanceChanged: maintenanceMonitor.changed,
   hindsight: { source: boot.config.source, secrets: secretCatalog } });
 const { selected: selectedMemory, memory, autoMemory, tidy, memoryRoot } = memoryRuntime;
 
@@ -327,9 +337,11 @@ const hindsightSetup = composeHindsightSetup({ db, config: boot.config.source, s
 // reconciles rows another boot left open (outcome_unknown); the per-process boot id is what tells those rows apart.
 const memoryOperationSubscriptions = createMemoryOperationSubscriptions();
 const memoryOperations = createMemoryOperationService({
-  db, live: memoryRuntime.operations, setup: hindsightSetup, bootId: randomUUID(), logger,
-  onChanged: memoryOperationSubscriptions.publish,
+  db, live: memoryRuntime.operations, tidy: memoryRuntime.tidyOperations, setup: hindsightSetup, bootId: randomUUID(), logger,
+  onChanged: (operation) => { memoryOperationSubscriptions.publish(operation); if (operation.kind === "tidy") maintenanceMonitor.changed(); },
 });
+const tidyOperations = createTidyOperationAdapter(memoryOperations, () => memoryRuntime.tidyOperations().authorityEpochId);
+memoryRuntime.installTidySubmit(async (characterId) => { await tidyOperations.runNow(characterId); });
 registerMemoryOperationMethods(registry, { service: memoryOperations, subscriptions: memoryOperationSubscriptions, logger });
 registry.register(memoryAuthorityStatusMethod({ logger,
   read: () => readMemoryAuthorityStatus({ db, live: memoryRuntime.operations, setup: hindsightSetup, operations: memoryOperations }) }));
@@ -620,7 +632,7 @@ registry.register(characterCostumesMethod({ store: characterStore, charactersDir
 registry.register(characterCostumeResolutionMethod({ store: characterStore, charactersDir }));
 // Perception and memory maintenance remain operator-only.
 registerPerceptionMethods(registry, perception);
-if (tidy) registry.register(memoryTidyMethod(tidy));
+if (tidy) registry.register(memoryTidyMethod(tidyOperations));
 for (const method of createAsyncOnDemandMemoryMigrationMethods(memoryRuntime.migrationRunner)) registry.register(method);
 registry.register(
   memoryStatusMethod({ windowState: windowStateRepo, summaries: summaryRepo, autoState: createMemoryAutoRepo(db) }),
@@ -632,6 +644,7 @@ registry.register(runQueueMethod(runService));
 registerConfigMethods(registry, { ...boot.config, logger });
 registerObservabilityMethods(registry, { service: observability, live: runEventLive });
 registerCacheUsageMethods(registry, cacheUsage);
+registerMaintenanceMonitorMethods(registry, maintenanceMonitor);
 registerAuxiliaryUsageMethod(registry, { repo: auxiliaryUsage, mode: observability.mode });
 registerScheduledTaskMethods(registry, scheduleService);
 
@@ -776,6 +789,7 @@ function shutdown(signal: string): void {
     chatActivity.dispose();
     extensionSubscriptions.dispose();
     cacheUsage.dispose();
+    maintenanceMonitor.dispose();
     coWatchingSubscriptions.close();
     skillBoot.catalog.close();
     // Stop MCP publication → cancel candidates → drain under one budget → force-close remaining clients

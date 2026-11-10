@@ -1,20 +1,18 @@
 /**
- * INPUT:  Home client, effective page visibility and the existing cached memory/storage read seam.
- * OUTPUT: independent resource states/retries plus tidy and attachment-clear controls.
+ * INPUT: Home client, page visibility, durable tidy settlement and cached memory/storage reads.
+ * OUTPUT: independent resource states/retries and attachment-clear controls.
  * POS:    Home Operations — demand coordination only; mutation hooks retain their own locks and outcomes while hidden.
  */
 
-import { useCallback, useMemo } from "react";
-import { MediaUsageResultSchema, MemoryStatusResultSchema, type MediaUsageResult, type MemoryStatusResult } from "@taki/shared";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import { MediaUsageResultSchema, MemoryStatusResultSchema, type MediaUsageResult, type MemoryOperation, type MemoryStatusResult } from "@taki/shared";
 import { ACTIVE_CHARACTER_ID } from "@/lib/active-character.js";
 import { useCachedFetch } from "@/lib/use-cached-fetch.js";
 import { useHomeClient } from "../../home-client-context.ts";
 import { usePageActive } from "../../page-visibility-store.ts";
 import { useMediaClear, type MediaClearControl } from "./use-media-clear.ts";
-import { useMemoryTidy } from "./use-memory-tidy.ts";
-import type { MemoryTidyState } from "./memory-tidy-controller.ts";
 
-export interface OperationsView extends MemoryTidyState {
+export interface OperationsView {
   status: MemoryStatusResult | null;
   usage: MediaUsageResult | null;
   statusLoading: boolean;
@@ -28,10 +26,9 @@ export interface OperationsView extends MemoryTidyState {
   clear: MediaClearControl;
   /** Re-reads both snapshots after a load failure (batch-2 U5: every failed read gets a retry). */
   refresh: () => Promise<void>;
-  runTidy: () => Promise<void>;
 }
 
-export function useOperations(): OperationsView {
+export function useOperations(tidy: MemoryOperation | null): OperationsView {
   const { client, status: connection } = useHomeClient();
   const ready = client && connection.kind === "connected" ? client : null;
   const visible = usePageActive("operations");
@@ -49,10 +46,12 @@ export function useOperations(): OperationsView {
 
   const invalidateStatus = status.invalidate;
   const invalidateUsage = usage.invalidate;
-  const afterTidy = useCallback(async () => {
-    await Promise.all([invalidateStatus(), invalidateUsage()]);
-  }, [invalidateStatus, invalidateUsage]);
-  const tidy = useMemoryTidy(ready, afterTidy);
+  const observed = useRef<string | null>(null);
+  useEffect(() => {
+    if (!tidy?.terminalAt || observed.current === tidy.operationId) return;
+    observed.current = tidy.operationId;
+    void Promise.all([invalidateStatus(), invalidateUsage()]);
+  }, [tidy, invalidateStatus, invalidateUsage]);
 
   // The purge accepts only the authenticated client. Its immediate ref guard starts one destructive request, while
   // a close/deadline rejection releases the phase and leaves an explicit retry to the operator.
@@ -65,7 +64,6 @@ export function useOperations(): OperationsView {
     statusError: status.error, usageError: usage.error,
     refreshStatus, refreshUsage,
     connectionReady: ready !== null,
-    ...tidy,
     refreshing: status.refreshing || usage.refreshing,
     clear,
     refresh,

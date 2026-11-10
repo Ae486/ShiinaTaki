@@ -33,10 +33,11 @@ import { LOCAL_MEMORY_CAPABILITIES } from "./local-memory-provider.ts";
 import { createMemoryRunReference } from "./memory-capability-snapshot.ts";
 import { createMemoryAuthorityFence } from "./legacy-migration/memory-authority-fence.ts";
 import { readMemoryAuthoritySelection } from "./legacy-migration/legacy-activation-repo.ts";
-import type { MemoryOperationsRuntime } from "./operations/memory-operation-contract.ts";
+import type { MemoryOperationsRuntime, MemoryTidyRuntime } from "./operations/memory-operation-contract.ts";
 import { selectMemoryRuntime } from "./runtime-selector.ts";
 import { createUtilitySlot, type UtilitySlot } from "./utility-slot.ts";
 import { MEMORY_VOICE_RULE } from "./write-convention.ts";
+import { loadContextConfig } from "../config/context-config.ts";
 import { bindInitiativeAssembly, captureTrackedInitiativeAssembly } from "./initiative-memory-assembly.ts";
 import { createPrimaryMemorySourceState } from "./primary-memory-source-state.ts";
 
@@ -49,16 +50,19 @@ interface MemoryRuntimeInput {
   primarySources?: PrimaryConversationSourceRepo;
   usageMeter?: AuxiliaryUsageMeter;
   onSummaryCommitted?: () => void;
+  onMaintenanceChanged?: () => void;
   hindsight?: { source: ConfigSource; secrets: SecretCatalogService; client?: HindsightClient };
 }
 type LocalSubsystem = ReturnType<typeof createCanonicalLocalSubsystem>;
 type HindsightSubsystem = ReturnType<typeof createHindsightMemorySubsystem>;
 type SelectedSubsystem = MemorySubsystem | LocalSubsystem | HindsightSubsystem;
+interface TidyDispatch { requestRun?: (characterId: string) => Promise<void> }
 
 export function composeMemoryRuntime(input: MemoryRuntimeInput) {
   const utility = createUtilitySlot({ mainModel: input.model, config: loadUtilityConfig(input.env), logger: input.logger,
     usageMeter: input.usageMeter });
-  const scope = createSelectedSubsystem(input, utility); const { selected, current, fence } = scope;
+  const tidyDispatch: TidyDispatch = {};
+  const scope = createSelectedSubsystem(input, utility, tidyDispatch); const { selected, current, fence } = scope;
   const compaction = createCompactionMaintenance(input, utility, scope);
   const lifecycle = createRuntimeLifetime({ scope, utility, autoMemory: compaction.autoMemory });
   const alive = lifecycle.alive;
@@ -68,6 +72,8 @@ export function composeMemoryRuntime(input: MemoryRuntimeInput) {
     snapshot: () => { alive(); return scope.hindsight ? scope.hindsight.snapshot() : diagnosticSnapshot(input.db); },
     // The ONE live accessor the memory operation owner uses (D-S1-1): resolved per call, never a captured subsystem.
     operations: (): MemoryOperationsRuntime | null => scope.hindsight ? operationsRuntime(scope.hindsight) : null,
+    tidyOperations: () => tidyOperationRuntime({ db: input.db, scope, alive }),
+    installTidySubmit: (requestRun: TidyDispatch["requestRun"]) => { alive(); tidyDispatch.requestRun = requestRun; },
     captureRun: async (characterId: string, signal?: AbortSignal): Promise<CapturedMemoryRun> => {
       alive(); if (signal?.aborted) throw new Error("MEMORY_OPERATION_CANCELLED");
       const captured = await (scope.hindsight ? scope.hindsight.captureRun(characterId, signal) : scope.canonical ? scope.canonical.captureRun(characterId)
@@ -89,7 +95,7 @@ export function composeMemoryRuntime(input: MemoryRuntimeInput) {
     tidy: { maybeRun: (characterId: string) => { alive(); return current().tidy.maybeRun(characterId); },
       runNow: (characterId: string) => { alive(); return current().tidy.runNow(characterId); } },
     writeMemory: ((request) => { alive(); return current().writeMemory(request); }) satisfies MemoryWriteOp,
-    start: () => { alive(); scope.hindsight?.start(); }, stop: lifecycle.stop,
+    start: () => { alive(); scope.hindsight?.start(); }, stop: () => { tidyDispatch.requestRun = undefined; return lifecycle.stop(); },
     memoryRoot: selected.legacy?.memoryRoot ?? join(input.dataDir, "workspace", "memory"),
     migrationRunner: async () => {
       alive();
@@ -99,14 +105,43 @@ export function composeMemoryRuntime(input: MemoryRuntimeInput) {
   };
 }
 
-function createSelectedSubsystem(input: MemoryRuntimeInput, utility: UtilitySlot) {
+function tidyOperationRuntime(input: {
+  db: Database; scope: ReturnType<typeof createSelectedSubsystem>; alive: () => void;
+}): MemoryTidyRuntime {
+  input.alive();
+  const authorityEpochId = readMemoryAuthoritySelection(input.db).epochId;
+  return { authorityEpochId, runNow: (characterId, options) => {
+    input.alive();
+    if (readMemoryAuthoritySelection(input.db).epochId !== authorityEpochId) throw new Error("MEMORY_AUTHORITY_MISMATCH");
+    return input.scope.canonical ? input.scope.canonical.tidy.runNow(characterId, options) : input.scope.current().tidy.runNow(characterId, options);
+  } };
+}
+
+function createSelectedSubsystem(input: MemoryRuntimeInput, utility: UtilitySlot, tidyDispatch: TidyDispatch) {
   const fence = createMemoryAuthorityFence(); let activated = false;
   let canonical: LocalSubsystem | undefined;
   let hindsight: HindsightSubsystem | undefined;
   const selected = selectMemoryRuntime({ db: input.db,
-    createLegacy: () => createMemorySubsystem({ ...input, utility, authorityFence: fence, isCanonical: () => activated }),
+    createLegacy: () => {
+      const legacy = createMemorySubsystem({ ...input, utility, authorityFence: fence, isCanonical: () => activated,
+        requestTidyRun: async (characterId) => {
+          if (tidyDispatch.requestRun) await tidyDispatch.requestRun(characterId);
+          else await legacy.tidy.runNow(characterId);
+        } });
+      return legacy;
+    },
     createCanonical: (epochId) => {
-      canonical = createCanonicalLocalSubsystem({ ...input, epochId, utility, config: loadMemoryConfig(input.env) });
+      const config = loadMemoryConfig(input.env);
+      const windows = loadContextConfig(input.env).contextTokens;
+      const window = loadUtilityConfig(input.env) ? windows.utility : windows.main;
+      // Reserve half the configured model window for tool results, correction turns and generated output.
+      config.tidyInputTokens = Math.min(config.tidyInputTokens, Math.floor(window / 2));
+      canonical = createCanonicalLocalSubsystem({ ...input, epochId, utility, config,
+        requestRun: async (characterId) => {
+          if (tidyDispatch.requestRun) await tidyDispatch.requestRun(characterId);
+          else if (canonical) await canonical.tidy.runNow(characterId);
+          else throw new Error("MEMORY_PROVIDER_UNAVAILABLE");
+        } });
       return canonical.engine;
     },
     createHindsight: input.hindsight ? (epochId) => {
@@ -146,7 +181,7 @@ function createCompactionMaintenance(input: MemoryRuntimeInput, utility: Utility
       measureRequest: input.measureRequest ? (characterId) => input.measureRequest?.(characterId) : undefined,
       effectiveWindowTokens: input.effectiveWindowTokens },
     timeline: input.timeline, summaries: input.summaries,
-    operations: createCompactionOperationRepo(input.db, { onSummaryCommitted: input.onSummaryCommitted }),
+    operations: createCompactionOperationRepo(input.db, { onSummaryCommitted: input.onSummaryCommitted, onChanged: input.onMaintenanceChanged }),
     legacyFlush: () => scope.selected.canonical ? undefined : scope.current().memoryFlush, slot: utility,
     config: { ...input.compact, summaryQuality: true, retryBudget: 3, retryCooldownMs: 30_000 },
     protectedContent: () => [MEMORY_VOICE_RULE],

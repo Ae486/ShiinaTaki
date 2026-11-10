@@ -1,5 +1,13 @@
 # Reactive Read-Models: Push, Generations, Visibility & Scroll Discipline
 
+Background Monitor subscriptions follow the same physical-client and visibility rules. The normal and background
+tabs have separate read demand. Normal cache/latest-primary panels never consume a selected maintenance record.
+`MaintenanceMonitorController` retains a coherent last-good query snapshot across failed replacement reads, rejects
+old query/generation/revision updates, installs notifications before subscribe, and withdraws data on mode disable.
+Closing/hiding the page stops background membership without stopping Core work. On return/reconnect, read durable
+state again; never replay tidy/compact commands. See backend/observability-projection.md for the exact population and
+nullable progress/usage contracts. Per-call usage must disclose missing coverage and opaque identities stay internal.
+
 > Home pages are disposable read-models over Core truth. These contracts include the event/demand refresh
 > work in 09-08-uiux-triggered-refresh and the visual-continuity follow-up, retaining the accepted Chat/Monitor lifecycle and reading behavior.
 > They create no second authority, polling loop or mutation replay (state-management.md).

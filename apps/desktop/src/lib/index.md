@@ -1,5 +1,6 @@
 # lib/
 - ws-client-cache-usage.ts — Shared-validated whole-window cache subscription methods; no execution or reset authority
+- ws-client-maintenance-monitor.ts — Shared-validated background Monitor subscriptions, separate from normal Run and cache memberships
 - ws-client-subagents.ts — Shared-validated child read/control RPCs and retryable physical-client subscription; no mutation replay
 - ws-client-subagent-inbox.ts — Shared-validated bounded attention, explicit parent-event recovery/idempotent continuation and deliberate pre-intent retry RPCs
 - ws-client-initiative.ts — Shared-validated Pattern review/lifecycle, explicit setup, same-Monitor policy and separate backoff read/reset facade

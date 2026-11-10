@@ -7,7 +7,8 @@ import type { MemoryOperationsView } from "./use-memory-operations.ts";
 const noop = async () => undefined;
 
 function view(overrides: Partial<MemoryOperationsView> = {}): MemoryOperationsView {
-  return { status: null, loading: false, error: null, busyKey: null, feedback: null, connectionReady: true, refresh: noop, submitSync: noop, cancel: noop, ...overrides };
+  return { status: null, loading: false, error: null, busyKey: null, feedback: null, connectionReady: true,
+    tidy: null, tidyLoading: false, tidyError: null, refresh: noop, submitSync: noop, submitTidy: noop, cancel: noop, ...overrides };
 }
 
 function card(overrides: Partial<MemoryOperationsView> = {}): string {

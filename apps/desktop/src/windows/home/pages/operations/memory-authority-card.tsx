@@ -22,7 +22,7 @@ export function MemoryAuthorityCard({ ops }: { ops: MemoryOperationsView }) {
       )}
       {view ? <CardBody view={view} ops={ops} /> : ops.connectionReady && ops.loading && !ops.error ? <Skeleton lines={4} />
         : !ops.error && <p className="text-xs text-text-secondary">{ops.connectionReady ? "等待状态读取。" : "等待连接以读取状态。"}</p>}
-      {ops.feedback && <div className="mt-3"><FeedbackLine tone={ops.feedback.tone}>{ops.feedback.message}</FeedbackLine></div>}
+      {ops.feedback && ops.feedback.scope !== "tidy" && <div className="mt-3"><FeedbackLine tone={ops.feedback.tone}>{ops.feedback.message}</FeedbackLine></div>}
     </PageCard>
   );
 }

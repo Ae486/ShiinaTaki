@@ -44,6 +44,19 @@ Parent: [Database Guidelines](./database-guidelines.md).
   tables are empty; it preserves original marker column bytes, adds NULL native fields and keeps Local authority.
   Already-current 023 is a no-op, including nonempty modern imports and active Hindsight markers. Unknown/partial
   schemas or nonempty early imports refuse atomically until an explicit, evidence-backed identity mapping exists.
+- Applied T4 058 and 060 also have independently early definitions. Append-only 069 recognizes four combinations of
+  the complete/absent 058 context group (five tables and four immutable guards) and 060 event-frontier group (one table
+  and its immutable guard). Match the frozen canonical definitions plus the complete attached indexes/triggers of the
+  input, execution, message, event and conversation-order anchors. Unknown declarations, partial groups and unknown
+  attached contracts refuse before any DDL; neither a version receipt nor a table-name probe establishes compatibility.
+- 069 uses CREATE-only frozen definitions and the existing `schemaBranches` transaction; it never replays 058's rebuild,
+  validity/outbox writes or 060's source-order backfill. Preserve every existing row, receipt, sequence and schema object.
+  Backfill frontiers only when their table is newly created. A terminal boundary requires a matching settled result's
+  Run/Attempt/child/work identity and positive safe-integer `throughWorkSeq`. A canonical `interaction:<step>:<call>` key
+  uses only same-Run/Attempt and same-work raw input receipts through that step. Check-in, malformed or otherwise unproved
+  boundaries stay NULL; never cast arbitrary keys to step zero, copy current work sequence or overwrite existing frontiers.
+  Migration emits no input, report, Effect or dispatch and never clears Stop. Ordinary post-migration recovery remains a
+  separate operation: it may settle orphan private Runs while retaining user Stop and unknown Effect outcomes.
 
 ## 4. Validation & Error Matrix
 
@@ -69,6 +82,10 @@ Parent: [Database Guidelines](./database-guidelines.md).
 
 - Focused tests for every renumbered migration and the convergence migration.
 - Temporary-file reopen tests for lineage A, lineage B, and a fresh install; assert final versions and required tables.
+- `069-delegation-schema-convergence.test.ts` covers all four 058/060 combinations, early 058 followed by canonical 060,
+  exact definitions, nonempty retained evidence/frontiers, unknown/partial refusal, receipt/SQL/COMMIT rollback, and reopen.
+  Its actual SDK/repository recovery fixture reproduces missing-table failure before repair, then verifies zero-dispatch
+  recovery, user-only same-work continuation in a new Run, unknown primary intents and normal new delegation/Stop.
 - Full Core tests plus a real Core boot against an isolated data directory after synchronization.
 - `git diff --check` and a registry review proving unique, ascending versions and matching module names/exports.
 

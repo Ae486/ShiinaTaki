@@ -103,16 +103,23 @@ const EventRowSchema = z.object({
   flush_status: z.enum(["success", "not_required"]).nullable(), writes: z.int().nonnegative().nullable(), output_chars: z.int().nonnegative().nullable(),
 });
 
-export function createCompactionOperationRepo(db: Database, options: { onSummaryCommitted?: () => void } = {}): CompactionOperationRepo {
+export function createCompactionOperationRepo(db: Database, options: { onSummaryCommitted?: () => void; onChanged?: () => void } = {}): CompactionOperationRepo {
+  const observe = <T>(write: () => T): T => {
+    const result = write();
+    if (options.onChanged) db.afterCommit(() => {
+      try { options.onChanged?.(); } catch { /* Monitor hints never alter compaction settlement. */ }
+    });
+    return result;
+  };
   return {
-    begin: (input) => begin(db, BeginSchema.parse(input)),
-    renewLease: (input) => renewLease(db, input),
-    recordFlush: (input) => recordFlush(db, input),
-    recordSummaryGenerated: (input) => recordGenerated(db, input),
-    fail: (input) => fail(db, input),
-    cancelActive: (input) => cancelActive(db, input),
-    commitSummary: (input) => commitSummary(db, input, options.onSummaryCommitted),
-    reconcileExpired: (now) => reconcileExpired(db, Timestamp.parse(now)),
+    begin: (input) => observe(() => begin(db, BeginSchema.parse(input))),
+    renewLease: (input) => observe(() => renewLease(db, input)),
+    recordFlush: (input) => observe(() => recordFlush(db, input)),
+    recordSummaryGenerated: (input) => observe(() => recordGenerated(db, input)),
+    fail: (input) => observe(() => fail(db, input)),
+    cancelActive: (input) => observe(() => cancelActive(db, input)),
+    commitSummary: (input) => observe(() => commitSummary(db, input, options.onSummaryCommitted)),
+    reconcileExpired: (now) => observe(() => reconcileExpired(db, Timestamp.parse(now))),
     get: (operationId) => readOperation(db, operationId),
     active: (characterId) => readActive(db, CharacterIdSchema.parse(characterId)),
     latestFailure: (characterId) => readLatestFailure(db, CharacterIdSchema.parse(characterId)),

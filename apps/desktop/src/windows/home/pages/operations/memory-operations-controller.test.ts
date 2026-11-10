@@ -17,6 +17,8 @@ function client(behavior: Partial<MemoryOperationsClient> = {}): FakeClient {
   const base: MemoryOperationsClient = {
     memoryAuthorityStatus: async () => { calls.push("status"); return hindsightStatus(); },
     memoryOperationSubmit: async () => { calls.push("submit"); return operation(); },
+    memoryOperationList: async () => [],
+    memoryOperationStatus: async () => operation(),
     memoryOperationCancel: async () => { calls.push("cancel"); return operation({ state: "cancelled", reason: "cancelled_before_claim", terminalAt: "2026-09-19T00:00:01.000Z" }); },
     subscribeMemoryOperations: async () => { calls.push("subscribe"); },
     onMemoryOperationChanged: (handler) => { handlers.add(handler); return () => handlers.delete(handler); },
@@ -26,7 +28,8 @@ function client(behavior: Partial<MemoryOperationsClient> = {}): FakeClient {
 }
 
 function sink() {
-  return { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationSettled: vi.fn() } satisfies MemoryOperationsSink;
+  return { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), tidyLoaded: vi.fn(), tidyLoadFailed: vi.fn(),
+    mutationStarted: vi.fn(), mutationSettled: vi.fn() } satisfies MemoryOperationsSink;
 }
 
 const settle = () => new Promise((resolve) => setImmediate(resolve));

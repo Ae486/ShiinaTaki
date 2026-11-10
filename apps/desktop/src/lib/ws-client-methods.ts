@@ -8,6 +8,7 @@
 import { JSONRPCErrorException, type JSONRPCParams, type JSONRPCServerAndClient } from "json-rpc-2.0";
 import { initiativeMethods } from "./ws-client-initiative.ts";
 import { cacheUsageMethods } from "./ws-client-cache-usage.ts";
+import { maintenanceMonitorMethods } from "./ws-client-maintenance-monitor.ts";
 import { coWatchingMethods } from "./ws-client-co-watching.ts";
 import { subagentMethods } from "./ws-client-subagents.ts";
 import {
@@ -243,6 +244,7 @@ export function requestMethods(rpc: JSONRPCServerAndClient, timing: () => Timing
     perceptionCard: async () => PerceptionCardSchema.parse(await request(PERCEPTION_METHODS.card, {})),
     ...monitorMethods(request),
     ...cacheUsageMethods(request),
+    ...maintenanceMonitorMethods(request),
     ...permissionMethods(request),
     ...approvalMethods(request),
     ...extensionMethods(request),

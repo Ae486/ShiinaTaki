@@ -103,7 +103,7 @@ function operator(connection: Connection): boolean {
 }
 
 function unavailable(characterId: string, reason: "read-failed" | "monitor-disabled"): CacheUsageWindowSnapshot {
-  return { scope: "all-observed-model-requests", characterId, summaryRevision: null, summaryCommittedAt: null,
+  return { scope: "regular-model-requests", characterId, summaryRevision: null, summaryCommittedAt: null,
     boundary: null, status: "unavailable", computedAt: new Date().toISOString(), observedRequests: null,
     pairedRequests: null, inputTokens: null, cacheReadTokens: null, ratio: null, reason };
 }

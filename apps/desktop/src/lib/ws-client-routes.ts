@@ -32,6 +32,7 @@ import {
   PerceptionChangedSchema,
   OBSERVABILITY_METHODS,
   CACHE_USAGE_METHODS, CacheUsageUpdateSchema, type CacheUsageUpdate,
+  MAINTENANCE_MONITOR_METHODS, MaintenanceMonitorUpdateSchema, type MaintenanceMonitorUpdate,
   RunMonitorEventSchema,
   JsonRpcClientFrameSchema,
   TIMELINE_METHODS,
@@ -60,6 +61,7 @@ import { abortPendingChatTurn, routeChatNotification, type PendingChatTurn } fro
 
 interface PushSlots {
   cacheUsage: Set<(update: CacheUsageUpdate) => void>;
+  maintenanceMonitor: Set<(update: MaintenanceMonitorUpdate) => void>;
   subagentActivity: Set<(event: SubagentActivity) => void>;
   subagents: Set<(change: SubagentChanged) => void>;
   coWatching: Set<(change: CoWatchingChanged) => void>;
@@ -90,7 +92,7 @@ export interface Routes {
 }
 
 export function createRoutes(): Routes {
-  return { current: null, push: { cacheUsage: new Set(), subagentActivity: new Set(), subagents: new Set(), coWatching: new Set(), avatar: null, timeline: null, timelineRemoved: null, config: new Set(),
+  return { current: null, push: { maintenanceMonitor: new Set(), cacheUsage: new Set(), subagentActivity: new Set(), subagents: new Set(), coWatching: new Set(), avatar: null, timeline: null, timelineRemoved: null, config: new Set(),
     initiativePatterns: new Set(), initiativeSetup: new Set(), initiativePolicy: new Set(), initiativeBackoff: new Set(),
     approval: new Set(), monitor: new Set(), memoryOperation: new Set(), activity: new Set(), committed: new Set(), perception: new Set(), extension: new Set() } };
 }
@@ -161,6 +163,7 @@ function notifyMonitorHandlers(state: Routes, event: RunMonitorEvent): void {
 /** Retires every connection-scoped push sink before queued notifications can dispatch on a closed transport. */
 function clearPushHandlers(state: Routes): void {
   state.push.cacheUsage.clear();
+  state.push.maintenanceMonitor.clear();
   state.push.subagentActivity.clear();
   state.push.subagents.clear();
   state.push.coWatching.clear();
@@ -232,6 +235,9 @@ function installInitiativeRoutes(rpc: JSONRPCServerAndClient, state: Routes): vo
 function installFanOutRoutes(rpc: JSONRPCServerAndClient, state: Routes): void {
   rpc.addMethod(CACHE_USAGE_METHODS.changed, (params: unknown) => {
     publishHandlers(state.push.cacheUsage, CacheUsageUpdateSchema.parse(params));
+  });
+  rpc.addMethod(MAINTENANCE_MONITOR_METHODS.changed, (params: unknown) => {
+    publishHandlers(state.push.maintenanceMonitor, MaintenanceMonitorUpdateSchema.parse(params));
   });
   rpc.addMethod(SUBAGENT_METHODS.activity, (params: unknown) => {
     publishHandlers(state.push.subagentActivity, SubagentActivitySchema.parse(params));

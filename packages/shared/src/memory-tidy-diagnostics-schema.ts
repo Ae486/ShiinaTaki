@@ -11,9 +11,15 @@ export const MemoryTidyToolNameSchema = z.enum([
   "memory_reinforce", "memory_archive_supersede", "memory_set_disclosure", "memory_refile",
   "block_rethink", "memory_finish_edits", "unknown",
 ]);
-export const MemoryTidyIssueSchema = z.strictObject({ toolName: MemoryTidyToolNameSchema, code: MemoryErrorCodeSchema });
+export const MemoryTidyIssueSchema = z.strictObject({
+  toolName: MemoryTidyToolNameSchema,
+  code: MemoryErrorCodeSchema,
+  issueId: z.string().min(1).max(96).optional(),
+  stage: z.enum(["input", "reference", "write", "completion"]).optional(),
+  field: z.enum(["id", "layer", "content", "disclosure", "replacement", "unknown"]).optional(),
+});
 export type MemoryTidyIssue = z.infer<typeof MemoryTidyIssueSchema>;
-export const MemoryTidyFailureReasonSchema = z.enum(["tool-errors", "execution-failed", "review-stale", "unfinished"]);
+export const MemoryTidyFailureReasonSchema = z.enum(["tool-errors", "execution-failed", "review-stale", "unfinished", "timeout", "input-too-large"]);
 export type MemoryTidyFailureReason = z.infer<typeof MemoryTidyFailureReasonSchema>;
 export const MemoryTidyFailureDetailsSchema = z.strictObject({
   ...MemoryTidyResultSchema.omit({ status: true }).shape,

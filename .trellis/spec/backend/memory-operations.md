@@ -2,7 +2,7 @@
 
 ## 1. Scope / Trigger
 
-Use this contract when an operator-initiated memory operation must outlive its Home reply: Hindsight setup
+Use this contract when a memory operation must outlive its Home reply: manual/automatic Local tidy, Hindsight setup
 validation/application, manual replica synchronization, and every later long-running memory operation (first
 activation, transitions, backup, upgrade). One Core-owned owner in `core/memory/operations/` admits, executes,
 observes and settles operations over the existing producers (B3 setup service, B5 scheduler, D77 writes). It never
@@ -17,14 +17,14 @@ MEMORY_OPERATION_METHODS = { submit: "memory.operations.submit", status: "memory
   list: "memory.operations.list", cancel: "memory.operations.cancel", subscribe: "memory.operations.subscribe",
   changed: "memory.operations.changed" };
 MEMORY_AUTHORITY_METHODS = { status: "memory.authority.status" };
-MemoryOperationKind = "setup.validate" | "setup.apply" | "replica.sync";
+MemoryOperationKind = "setup.validate" | "setup.apply" | "replica.sync" | "tidy";
 MemoryOperationState = "admitted" | "running" | "completed" | "failed" | "cancelled" | "outcome_unknown";
 MemoryOperationReason = "core_restart" | "producer_refused" | "producer_failed" | "cancelled_before_claim" | "runtime_unavailable";
 MemoryOperationRefusalReason = "MEMORY_OPERATION_NOT_FOUND" | "…_BUSY" | "…_RUNNING" | "…_SETTLED" | "…_UNSUPPORTED" | "…_BANK_UNKNOWN";
 ```
 
-Core: `createMemoryOperationService({ db, live, setup, bootId, onChanged, logger })` ->
-`{ submit, status, list, recent, cancel, stop }`; kind handlers implement
+Core: `createMemoryOperationService({ db, live, tidy?, setup, bootId, onChanged, logger })` ->
+`{ submit, status, list, recent, cancel, wait, stop }`; kind handlers implement
 `{ family(request), admit(request, ctx) -> producerRef, execute({ request, producer, ctx, running }) -> settlement | null,
 observe?(operation, ctx), cancel?(operation, ctx) }` and are registered once in `memory-operation-kinds.ts`.
 `composeMemoryRuntime(...).operations()` is the live accessor to the selected Hindsight subsystem
@@ -35,7 +35,12 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
 
 ## 3. Contracts
 
-- One operation family may have one non-terminal row: `setup` for both setup kinds, `replica:<bankId>` per Bank. A
+- A Local tidy operation remains running across its admitted backlog's batches. The producer owns per-batch limits
+  and Utility queue yielding; the operation owner only persists progress and final truth. Completing a batch is not
+  a terminal transition. Later arrivals can remain pending when the finite admitted backlog completes.
+
+- One operation family may have one non-terminal row: `setup` for both setup kinds, `replica:<bankId>` per Bank, and
+  global `tidy` because Characters share Global memory/Blocks. A
   conflicting `submit` is refused `MEMORY_OPERATION_BUSY` with the active `operationId`; nothing is queued silently.
 - Identity and producer references are Core-minted at admission (`operationId`, `authorityEpochId`, `admittedAt`,
   setup `attemptId`/`revisionBefore`). Clients never supply state; a lost reply, closed window or replacement client
@@ -58,6 +63,19 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
 - Every persisted transition is a repo CAS followed by exactly one `onChanged` publication; the server fan-out is
   connection-scoped and removed on close. The composite status is a read (no producer of its own); Home refetches it on
   every `memory.operations.changed` push, on reconnect and on remount — never by polling.
+- `tidy` requests carry a Character. Its producer reference holds the admitted authority and content-free progress
+  `{ edits, steps, reviewed, remaining: number | null }`; its result holds the complete validated tidy outcome.
+  Nonterminal result remains null. Publish progress via `Database.afterCommit` so a nested mutation rollback also
+  discards the notification. Restart retains known progress and classifies the operation outcome_unknown.
+- `composeMemoryRuntime().installTidySubmit()` binds automatic Local requests after owner construction, before serving
+  work. The kind calls raw runNow; raw execution never recurses through submission. Compatibility memory.tidy submits
+  or joins only the same Character and authority and awaits `wait(operationId)` without another execution.
+- `list({ kind?, characterId?, includeTerminal, limit })` filters in SQL before limiting. Home reads the latest matching
+  tidy even after unrelated operation history exceeds the global recent limit. Busy replies may identify another
+  Character's shared flight; they do not make that result belong to the requesting Character.
+- The operation owner's lifecycle is reused for Legacy/Hindsight manual tidy without changing their producer semantics.
+  Those producers may not provide intermediate progress; admitted does not prove execution has not started. Display
+  known counts as confirmations, and do not imply zero work from an absent/initial report.
 - `MemoryAuthorityStatus` separates authority (marker), runtime availability (closed reason), setup snapshot,
   per-Bank replica sync status, per-Bank Pending summary plus the count of unfinished D77 parent writes, and
   operations. `replica`/`pending` are `null` unless Hindsight is the authority and the runtime is available.
@@ -111,6 +129,9 @@ These UI rules do not change producer attribution, authority or the D84 precisio
 | subscription is rejected, has an invalid ACK, or reaches its request deadline | Read/setup failure; discard only the failed attempt; explicit demand can retry on the same connection; never settle or replay a mutation |
 | push, explicit refresh or hide/show occurs while subscription ACK is pending | Zero status reads before accepted membership; one covering baseline afterward; hidden pages retain only a dirty obligation |
 | an expired subscription attempt receives a late ACK after retry began | Native RPC identity discards the old reply; current subscription promise, status read ownership and mutation state remain unchanged |
+| tidy UI loses its submit response or is recreated | Query the existing operation; never resubmit automatically |
+| a known partial tidy result is returned | Outer failed retains the full partial outcome, committed counts and next action |
+| Local edit progress cannot persist or the operation is already terminal | Roll back the affected edit and publish nothing from that transaction |
 
 ## 5. Good / Base / Bad Cases
 
@@ -137,6 +158,9 @@ These UI rules do not change producer attribution, authority or the D84 precisio
 - Desktop ordering: pending ACK plus pushes, manual refresh and hide/show produces no early read and one later
   baseline; hidden/pre-hide reads cannot publish; setup failure neither loops nor settles a concurrent mutation.
 - Isolated Core boot on a non-default port through migration 048 with clean SIGINT exit whenever composition changes.
+- Tidy: real Local runtime plus owner/RPC/subscriptions, automatic and compatibility joins, fresh queued view,
+  transaction/notification rollback, restart after a committed edit, filtered latest result, and rendered recovery
+  after page recreation. Scripted models establish mechanics; real-model judgment and human acceptance are separate.
 
 ## 7. Wrong vs Correct
 

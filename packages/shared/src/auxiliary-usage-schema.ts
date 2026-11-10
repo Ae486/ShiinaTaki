@@ -4,6 +4,7 @@
  * POS:    shared/protocol — observed auxiliary accounting only; never Run billing authority
  */
 import { z } from "zod";
+import { MaintenanceOperationRefSchema } from "./maintenance-operation-ref-schema.ts";
 
 const Id = z.string().trim().min(1).max(200);
 const Label = z.string().trim().min(1).max(200);
@@ -44,6 +45,7 @@ export const AuxiliaryModelCallSchema = z.strictObject({
   status: AuxiliaryModelCallStatusSchema,
   responseId: Id.nullable(),
   usage: AuxiliaryUsageCountsSchema,
+  operation: MaintenanceOperationRefSchema.optional(),
 });
 export type AuxiliaryModelCall = z.infer<typeof AuxiliaryModelCallSchema>;
 
@@ -59,6 +61,7 @@ export const AuxiliaryUsageQuerySchema = z.strictObject({
   modelId: Id.optional(),
   limit: z.int().min(1).max(100).default(50),
   cursor: AuxiliaryUsageCursorSchema.optional(),
+  operation: MaintenanceOperationRefSchema.optional(),
 }).superRefine((value, context) => {
   if (Date.parse(value.from) > Date.parse(value.to)) {
     context.addIssue({ code: "custom", path: ["from"], message: "from must not be later than to" });

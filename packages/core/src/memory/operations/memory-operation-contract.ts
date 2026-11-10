@@ -6,6 +6,7 @@
 import type {
   MemoryOperation, MemoryOperationProducerRef, MemoryOperationReason, MemoryOperationRefusalReason,
   MemoryOperationRequest, MemoryOperationResult, MemoryReplicaBank, MemoryReplicaErrorCode, PendingMemorySummary,
+  MemoryTidyOutcome, MemoryTidyProgress,
 } from "@taki/shared";
 import type { HindsightReplicaScheduler } from "../hindsight/hindsight-replica-scheduler.ts";
 import type { HindsightSetupService } from "../hindsight/hindsight-setup-service.ts";
@@ -21,8 +22,15 @@ export interface MemoryOperationsRuntime {
 
 export interface MemoryOperationContext {
   live(): MemoryOperationsRuntime | null;
+  tidy?: () => MemoryTidyRuntime | null;
   setup: HindsightSetupService;
   now(): string;
+}
+
+/** Selected producer only; the operation owner never executes the model or selects candidates itself. */
+export interface MemoryTidyRuntime {
+  authorityEpochId: string | null;
+  runNow(characterId: string, options?: { onProgress?: (progress: MemoryTidyProgress) => void }): Promise<MemoryTidyOutcome>;
 }
 
 export interface MemoryOperationSettlement {
@@ -41,6 +49,8 @@ export interface MemoryOperationExecution<R extends MemoryOperationRequest> {
   ctx: MemoryOperationContext;
   /** Marks the row running; a kind calls it once its producer has actually started work on its behalf. */
   running(): void;
+  /** Required progress persistence; a refused update must abort the producer's surrounding mutation transaction. */
+  updateProducer?(producer: MemoryOperationProducerRef): void;
 }
 
 export interface MemoryOperationKindHandler<R extends MemoryOperationRequest = MemoryOperationRequest> {

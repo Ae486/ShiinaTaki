@@ -95,7 +95,8 @@ function beginCall(
   }
   try {
     const taskId = owner?.owner === "auxiliary" ? owner.taskId : null;
-    deps.repo.start({ callId, taskId, source: context.source, label, provider, modelId, startedAt });
+    deps.repo.start({ callId, taskId, source: context.source, label, provider, modelId, startedAt,
+      ...(owner?.operation ? { operation: owner.operation } : {}) });
   } catch {
     warn(deps.logger, { source: context.source, label }, "AUXILIARY_USAGE_START_FAILED");
     return undefined;

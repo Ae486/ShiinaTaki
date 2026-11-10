@@ -32,6 +32,10 @@
   overflow: hidden;
 }
 
+.sections { display: flex; flex: none; gap: 4px; padding: 5px 8px; border-bottom: 1px solid var(--trajectory-border); }
+.sections button { padding: 5px 12px; border: 0; border-radius: 4px; font: inherit; color: var(--trajectory-caption); background: transparent; cursor: pointer; }
+.sections button[aria-pressed='true'] { color: var(--trajectory-text); background: var(--trajectory-selected); font-weight: 600; }
+
 .browser {
   display: flex;
   flex: 0 0 208px;

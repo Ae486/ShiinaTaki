@@ -13,9 +13,11 @@ const FORMULA = "输入缓存命中率 = 有效请求的缓存读取令牌总数
 
 export function CacheUsageStrip({ view, connected, retry }: CacheUsageStripProps) {
   const snapshot = view.snapshot;
+  const regular = snapshot?.scope === "regular-model-requests";
   const stale = view.phase === "stale" || view.phase === "refreshing" || view.phase === "error";
   const retryable = view.phase === "error" || snapshot?.reason === "read-failed" || view.latestPrimaryRequest?.reason === "read-failed";
-  return <div className={css.group}><section className={css.strip} aria-label="整体输入缓存命中率" title={FORMULA}>
+  return <div className={css.group}><section className={css.strip} aria-label="整体输入缓存命中率"
+    title={regular ? "输入缓存命中率按有效请求的输入令牌加权；不含记忆整理与上下文压缩，其余统计口径不变。" : FORMULA}>
     <div className={css.metric}>
       <span className={css.label}>输入缓存命中率</span>
       <strong className={css.ratio}>{snapshot?.status === "ready" && snapshot.ratio !== null
@@ -23,7 +25,7 @@ export function CacheUsageStrip({ view, connected, retry }: CacheUsageStripProps
       <span>{snapshot?.summaryRevision === 0 ? "首次摘要前" : "本次摘要以来"}</span>
     </div>
     <div className={css.coverage}>
-      <span>包含对话与后台请求</span>
+      <span>{regular ? "不含记忆整理与上下文压缩" : "包含对话与后台请求"}</span>
       <span>{coverageLabel(snapshot)}</span>
     </div>
     <div className={css.status} role="status">

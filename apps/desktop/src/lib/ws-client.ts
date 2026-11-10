@@ -9,6 +9,8 @@ import { CHAT_METHODS, ChatSendResultSchema } from "@taki/shared";
 import type { SubagentActivity, SubagentChanged } from "@taki/shared";
 import type { SubagentMethods } from "./ws-client-subagents.ts";
 import type { CacheUsageMethods } from "./ws-client-cache-usage.ts";
+import type { MaintenanceMonitorMethods } from "./ws-client-maintenance-monitor.ts";
+import type { MaintenanceMonitorUpdate } from "@taki/shared";
 import type { CacheUsageUpdate } from "@taki/shared";
 import { addSubagentChangedHandler, addSubagentActivityHandler } from "./ws-client-routes.ts";
 import type {
@@ -123,7 +125,8 @@ import { sendChatTurn, type ChatHandlers } from "./ws-chat-turn.ts";
 
 export type { ChatHandlers, ConnectOutcome };
 
-export interface WsClient extends MemoryOperationMethods, UserTimezoneMethods, PresenceMethods, InitiativeMethods, CoWatchingMethods, SubagentMethods, CacheUsageMethods {
+export interface WsClient extends MemoryOperationMethods, UserTimezoneMethods, PresenceMethods, InitiativeMethods, CoWatchingMethods, SubagentMethods, CacheUsageMethods, MaintenanceMonitorMethods {
+  onMaintenanceMonitorChanged(handler: (update: MaintenanceMonitorUpdate) => void): () => void;
   onCacheUsageChanged(handler: (update: CacheUsageUpdate) => void): () => void;
   onSubagentChanged(handler: (change: SubagentChanged) => void): () => void;
   onSubagentActivity(handler: (event: SubagentActivity) => void): () => void;
@@ -335,6 +338,10 @@ export function createWsClient(deps: WsClientDeps): WsClient {
 
 function pushRegistrations(state: ReturnType<typeof createRoutes>) {
   return {
+    onMaintenanceMonitorChanged: (handler: (update: MaintenanceMonitorUpdate) => void) => {
+      state.push.maintenanceMonitor.add(handler);
+      return () => { state.push.maintenanceMonitor.delete(handler); };
+    },
     onCacheUsageChanged: (handler: (update: CacheUsageUpdate) => void) => {
       state.push.cacheUsage.add(handler);
       return () => { state.push.cacheUsage.delete(handler); };

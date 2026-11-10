@@ -4,6 +4,9 @@
  * POS:    core/db/migrations — the single registry of migrations; append each new NNN module here in version order
  */
 import type { Migration } from "../migration-runner.ts";
+import { memoryTidyReviewsMigration067 } from "./067-memory-tidy-reviews.ts";
+import { maintenanceMonitorMigration068 } from "./068-maintenance-monitor.ts";
+import { delegationSchemaConvergenceMigration069 } from "./069-delegation-schema-convergence.ts";
 import { cacheUsageWindowMigration066 } from "./066-cache-usage-window.ts";
 import { auxiliaryModelUsageMigration065 } from "./065-auxiliary-model-usage.ts";
 import { primaryConversationSourcesMigration064 } from "./064-primary-conversation-sources.ts";
@@ -138,4 +141,7 @@ export const MIGRATIONS: Migration[] = [
   primaryConversationSourcesMigration064,
   auxiliaryModelUsageMigration065,
   cacheUsageWindowMigration066,
+  memoryTidyReviewsMigration067,
+  maintenanceMonitorMigration068,
+  delegationSchemaConvergenceMigration069,
 ];

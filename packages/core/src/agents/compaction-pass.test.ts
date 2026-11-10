@@ -19,6 +19,9 @@ import { toModelMessage } from "./turn-mapping.ts";
 import { createConversationStore } from "./conversation-store.ts";
 import { buildCompactionPrompt, createCompactionPass, type CompactionPassDeps } from "./compaction-pass.ts";
 import { selectRetirementRange } from "./retirement-selector.ts";
+import { createAuxiliaryUsageMeter } from "../observability/auxiliary-usage-meter.ts";
+import { createAuxiliaryUsageRepo } from "../db/auxiliary-usage-repo.ts";
+import { createMaintenanceMonitorRepo } from "../db/maintenance-monitor-repo.ts";
 
 const dbs: Database[] = [];
 afterEach(() => {
@@ -175,6 +178,24 @@ function seedToolSource(f: ReturnType<typeof fixture>) {
 }
 
 describe("canonical compaction independent of memory extraction", () => {
+  it("links the real coordinator, Utility dispatch and SDK meter to its durable operation", async () => {
+    const f = fixture({ canonical: true }); const { logger } = createCaptureLogger();
+    const usage = createAuxiliaryUsageRepo(f.db);
+    const slot = createUtilitySlot({ mainModel: generatingModel("Retained conversation facts."), logger,
+      usageMeter: createAuxiliaryUsageMeter({ repo: usage, logger }) });
+    const pass = createCompactionPass({ timeline: f.timeline, summaries: f.summaries, operations: f.operations, slot,
+      view: { estimatedTokens: () => 90, budget: () => 100 }, config: { triggerRatio: 0.8, keepMessages: 3 }, logger });
+    seed(f.timeline, 10); await pass.maybeRun("taki");
+    const monitor = createMaintenanceMonitorRepo(f.db);
+    const row = monitor.read({ characterId: "taki" }).rows[0]!;
+    expect(row).toMatchObject({ status: "completed", ref: { kind: "compact", characterId: "taki" } });
+    const detail = monitor.read({ characterId: "taki", selected: row.ref }).detail!;
+    expect(detail.calls.totalCalls).toBe(1);
+    expect(detail.calls.rows[0]).toMatchObject({ operation: row.ref, source: "utility", label: "compact", status: "completed" });
+    expect(f.db.prepare("SELECT COUNT(*) AS n FROM run_usage").get()?.n).toBe(0);
+    await slot.stop();
+  });
+
   it.each(["failed", "blocked"])("summarizes salient facts with %s maintenance and keeps raw Timeline", async (mode) => {
     const recorder = recordingModel("I remember Lin's preference for tea and promise to avoid late calls.");
     const f = fixture({ canonical: true, model: recorder.model });

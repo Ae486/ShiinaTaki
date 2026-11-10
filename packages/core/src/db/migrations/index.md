@@ -70,3 +70,7 @@
 - 064-primary-conversation-sources.ts — additive primary source lifecycle and exact Timeline membership; historical proofs remain unchanged
 - 065-auxiliary-model-usage.ts — observed auxiliary provider-call lifecycle and nullable token counters, separate from Run usage
 - 066-cache-usage-window.ts — primary cache provenance and durable summary-window baselines with conservative historical initialization
+- 067-memory-tidy-reviews.ts — additive exact Local reviewed revisions, Block review evidence and automatic retry state without invented historical coverage
+- 068-maintenance-monitor.ts — optional operation-call association and conservative regular-call cache baseline convergence
+- 069-delegation-schema-convergence.ts — exact early/current 058/060 compatibility branches and conservative event-frontier backfill
+- 069-delegation-schema.ts — frozen canonical delegation signatures and CREATE-only definitions for migration 069

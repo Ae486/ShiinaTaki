@@ -71,6 +71,8 @@ const EXPECTED_KEYS = [
   "TAKI_MEMORY_TIDY_MAX_STEPS",
   "TAKI_MEMORY_TIDY_STALE_DAYS",
   "TAKI_MEMORY_TIDY_REPORT_CAP",
+  "TAKI_MEMORY_TIDY_BATCH_TIMEOUT_MS",
+  "TAKI_MEMORY_TIDY_INPUT_TOKENS",
   "TAKI_HINDSIGHT_ENABLED",
   "TAKI_HINDSIGHT_DEPLOYMENT_MODE",
   "TAKI_HINDSIGHT_ENDPOINT",
@@ -95,7 +97,7 @@ describe("CONFIG_KNOBS", () => {
     const keys = CONFIG_KNOBS.map((knob) => knob.key);
     expect(new Set(keys).size).toBe(keys.length);
     expect([...keys].sort()).toEqual([...EXPECTED_KEYS].sort());
-    expect(CONFIG_KNOBS).toHaveLength(82);
+    expect(CONFIG_KNOBS).toHaveLength(84);
   });
 
   it("flags exactly the three API keys as secrets", () => {

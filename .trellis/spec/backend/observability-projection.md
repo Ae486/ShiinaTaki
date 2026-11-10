@@ -4,7 +4,8 @@
 
 Use this contract when adding or changing Run monitoring, lifecycle event producers, trajectory projection, operator
 observability methods, monitor modes, metrics/totals, or post-commit Run Event subscriptions. `runs` and the immutable
-`run_events` ledger remain the only execution authorities. Every monitor response is a disposable read projection and
+`run_events` ledger remain the only Run execution authorities. Maintenance uses its existing operation ledgers below.
+Every monitor response is a disposable read projection and
 must never settle, retry, reopen, or otherwise mutate a Run.
 
 ## 2. Signatures
@@ -113,8 +114,10 @@ applied, and defaults to `DISABLED`.
 
 - `CACHE_USAGE_METHODS` defines operator-only cacheUsageSubscribe/cacheUsageUnsubscribe and cacheUsageChanged under
   observability. Subscribe returns `CacheUsageUpdate { revision, snapshot }`; changes deliver complete computed snapshots.
-  The selected Character identifies the primary-summary boundary; the population is all observed Core model calls,
-  including auxiliary calls. Run selection/list filters do not change it. Do not invent per-Character auxiliary ownership.
+  The selected Character identifies the primary-summary boundary. The current `regular-model-requests` population
+  includes observed Core calls except auxiliary rows with `source='utility' AND label IN ('tidy','compact')`.
+  Other auxiliary producers retain their prior treatment. Run selection/list filters do not change it. Do not invent
+  per-Character auxiliary ownership. The old `all-observed-model-requests` wire scope remains readable with its old caption.
 - `run_usage.cache_read_observed` preserves new provider field presence. Reuse raw-aware normalization; explicit zero
   counts, absent/invalid/conflicting cache is unknown. The verified old adapter's positive cache values remain usable;
   ambiguous legacy zero is unpaired. Ratio is sum(cache-read)/sum(input) over identical valid pairs, with positive input,
@@ -127,6 +130,10 @@ applied, and defaults to `DISABLED`.
   baseline, malformed totals or unsupported ledger rewriting yields unavailable, never plausible zeroes. Historical
   initialization uses original recorded_at/finished_at, never auxiliary updated_at; unassignable ties/nulls are unavailable.
   Any future explicit usage import/retention must preserve or rebase this meaning; normal terminal ledgers are immutable.
+- Migration068 adds a nullable baseline `population` and reconstructs only provable regular-call historical boundaries.
+  It preserves explicit-zero provenance and original usage bytes; excluded maintenance timestamp ties do not invalidate
+  a normal baseline. Included ties/unknown times remain unavailable until a natural successful summary captures a new
+  exact baseline. Never subtract an old all-call baseline from regular-call totals.
 - Primary usage, auxiliary settlement and summary-baseline notifications wait for the outermost commit. Rollback and
   duplicate settlement cannot publish a fresh observation. The service computes SQL aggregates only for subscribers,
   coalesces synchronous hints by microtask and isolates reader/logger/socket failures. No polling or UI running counters.
@@ -136,6 +143,37 @@ applied, and defaults to `DISABLED`.
 - Required regressions: explicit zero/missing/conflicting raw fields; unequal-size request weighting; same-ms/cross-reset
   completion; outer rollback/duplicate commit; failed baseline save; historical bootstrap/import timestamps; SQLite reopen;
   actual Core main/WS production wiring and rendered client refresh/reconnect behavior.
+
+### Background maintenance Monitor
+
+1. **Scope / trigger:** Memory tidy and conversation compaction use their existing durable operation ledgers, alongside
+   ordinary Runs. Do not create synthetic Runs, copy execution state, or perform reconciliation from a Monitor read.
+2. **Signatures:** `observability.maintenanceSubscribe(MaintenanceMonitorParams)` returns `{revision,snapshot}`;
+   `maintenanceUnsubscribe({})` returns `{status:'ok'}`; `maintenanceChanged` carries the same update shape.
+   Params contain `characterId`, optional operation cursor, `selected:{kind,operationId,characterId}`, and optional call
+   cursor. Snapshot echoes the query, has `ready|unavailable|disabled`, up to 25 operations and a selected call page of 100.
+   Migration068 adds nullable `auxiliary_model_calls.operation_json` with an association index.
+3. **Contracts:** The durable tidy owner covers manual and automatic Local/Legacy triggers. Utility task UUIDs remain
+   distinct from the operation reference; the SDK meter captures association at actual dispatch. Compaction supplies
+   its captured lease identity around summary generation. Legacy pre-summary `flush` remains a separate auxiliary call.
+   Aggregate only explicitly associated calls. Never use tidy outcome's process-wide Utility usage as operation usage.
+   Missing historical association or token fields remains unknown; show known-count coverage. Legacy checked-memory
+   counts remain nullable. Normal cache excludes only the two labels; latest-primary attribution stays on primary
+   request receipts. A successful primary summary still resets the normal cache window.
+4. **Validation / errors:** Character mismatch and foreign selected operations are refused. Operation cursors must match
+   an existing scoped immutable anchor; compaction uses its first event (`operation_seq=1`), since retry rewrites the
+   attempt start. A reader failure returns unavailable, never empty success. Mode disable withdraws all data. Every
+   start/progress/failure/cancel/recovery hint follows the outermost commit, is coalesced, and cannot affect execution.
+5. **Good / base / bad cases:** A multi-batch tidy has one operation and several proved calls; an old completed tidy
+   can have unknown usage; guessing links by timestamps or reporting a Legacy unknown count as zero is invalid.
+   Total elapsed time spans first admission to terminal, including waits/retries. No measured token compression ratio
+   exists here; do not divide `beforeTokens` by `outputChars` or fabricate input occupancy.
+6. **Required tests:** Actual owner/Utility/SDK/SQLite associations, unrelated queued tasks, cross-Character selection,
+   operation/call paging, stable retry ordering, rollback, start and failed settlement pushes, disabled/hidden/closed
+   subscriptions, old generation/query replies, normal-metric invariance, and actual Core/WS/MonitorPage rendering.
+7. **Wrong vs correct:** `operationUsage = tidy.outcome.usage` is wrong; aggregate the operation-filtered auxiliary ledger.
+   A captured compaction retry timestamp is not the operation cursor; the immutable first event is. A UI subscription
+   must install its handler before the initial request and reject updates for a different echoed query or generation.
 
 ## 4. Validation & Error Matrix
 

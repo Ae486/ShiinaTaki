@@ -7,15 +7,18 @@
  *         replays a timed-out mutation and never derives an operation outcome locally.
  */
 import type { WsClient } from "@/lib/ws-client.js";
-import type { MemoryAuthorityStatus, MemoryReplicaRunKind } from "@taki/shared";
+import type { MemoryAuthorityStatus, MemoryOperation, MemoryReplicaRunKind } from "@taki/shared";
+import { ACTIVE_CHARACTER_ID } from "@/lib/active-character.js";
 import { memoryOperationAppError } from "./memory-authority-state.ts";
 
-export interface MemoryOperationsFeedback { tone: "ok" | "warn" | "danger"; message: string }
+export interface MemoryOperationsFeedback { tone: "ok" | "warn" | "danger"; message: string; scope?: "tidy"; operationId?: string }
 
 export interface MemoryOperationsSink {
   loading(): void;
   loaded(status: MemoryAuthorityStatus): void;
   loadFailed(cause: unknown): void;
+  tidyLoaded(operation: MemoryOperation | null): void;
+  tidyLoadFailed(cause: unknown): void;
   mutationStarted(key: string): void;
   mutationSettled(feedback: MemoryOperationsFeedback | null): void;
 }
@@ -25,13 +28,15 @@ export interface MemoryOperationsController {
   setVisible(visible: boolean): void;
   refresh(): Promise<void>;
   submitSync(bankId: string, syncKind: MemoryReplicaRunKind): Promise<void>;
+  submitTidy(): Promise<void>;
   cancel(operationId: string): Promise<void>;
   dispose(): void;
 }
 
 export type MemoryOperationsClient = Pick<
   WsClient,
-  "memoryAuthorityStatus" | "memoryOperationSubmit" | "memoryOperationCancel" | "subscribeMemoryOperations" | "onMemoryOperationChanged"
+  "memoryAuthorityStatus" | "memoryOperationSubmit" | "memoryOperationCancel" | "memoryOperationList" | "memoryOperationStatus"
+  | "subscribeMemoryOperations" | "onMemoryOperationChanged"
 >;
 
 interface ControllerState {
@@ -69,11 +74,19 @@ async function refreshController(state: ControllerState, sink: MemoryOperationsS
     if (isCurrent(state, candidate, token) && state.visible && state.readEpoch === readEpoch) {
       // This baseline covers hints received before setup completed. Later hints retain one trailing read.
       state.dirty = false;
-      const status = await candidate.memoryAuthorityStatus();
-      if (isCurrent(state, candidate, token) && state.visible && state.readEpoch === readEpoch) sink.loaded(status);
+      const current = () => isCurrent(state, candidate, token) && state.visible && state.readEpoch === readEpoch;
+      await Promise.all([
+        candidate.memoryAuthorityStatus().then((status) => { if (current()) sink.loaded(status); },
+          (cause: unknown) => { if (current()) sink.loadFailed(cause); }),
+        candidate.memoryOperationList({ kind: "tidy", characterId: ACTIVE_CHARACTER_ID, includeTerminal: true, limit: 1 })
+          .then((operations) => { if (current()) sink.tidyLoaded(operations[0] ?? null); },
+            (cause: unknown) => { if (current()) sink.tidyLoadFailed(cause); }),
+      ]);
     }
   } catch (cause) {
-    if (isCurrent(state, candidate, token) && state.visible && state.readEpoch === readEpoch) sink.loadFailed(cause);
+    if (isCurrent(state, candidate, token) && state.visible && state.readEpoch === readEpoch) {
+      sink.loadFailed(cause); sink.tidyLoadFailed(cause);
+    }
   } finally {
     if (state.epoch === token) state.refreshing = false;
   }
@@ -94,6 +107,8 @@ async function mutateController(state: ControllerState, sink: MemoryOperationsSi
   if (!candidate || state.mutating) return;
   const token = state.epoch;
   state.mutating = true;
+  if (state.subscribed) state.readEpoch += 1;
+  state.dirty = true;
   publishMutation(state, () => sink.mutationStarted(spec.key));
   try {
     const feedback = await spec.operation(candidate);
@@ -101,7 +116,7 @@ async function mutateController(state: ControllerState, sink: MemoryOperationsSi
     publishMutation(state, () => sink.mutationSettled(feedback));
   } catch (cause) {
     if (!isCurrent(state, candidate, token)) return;
-    publishMutation(state, () => sink.mutationSettled(refusalFeedback(cause)));
+    publishMutation(state, () => sink.mutationSettled(spec.key === "tidy" ? tidyRefusal(cause) : refusalFeedback(cause)));
   } finally {
     if (state.epoch === token) state.mutating = false;
   }
@@ -166,6 +181,10 @@ export function createMemoryOperationsController(sink: MemoryOperationsSink): Me
         return { tone: "ok", message: syncKind === "full" ? "已受理完整对账。" : "已受理增量同步。" };
       },
     }),
+    submitTidy: () => mutateController(state, sink, {
+      key: "tidy",
+      operation: submitTidy,
+    }),
     cancel: (operationId) => mutateController(state, sink, {
       key: `cancel:${operationId}`,
       operation: async (candidate) => {
@@ -180,4 +199,26 @@ export function createMemoryOperationsController(sink: MemoryOperationsSink): Me
 // Visibility retires read authority only: the mutation lock and terminal outcome survive a hidden page.
 function publishMutation(state: ControllerState, publish: () => void): void {
   if (state.visible) publish(); else state.pendingMutation = publish;
+}
+
+async function submitTidy(candidate: MemoryOperationsClient): Promise<MemoryOperationsFeedback> {
+  try {
+    const operation = await candidate.memoryOperationSubmit({ kind: "tidy", characterId: ACTIVE_CHARACTER_ID });
+    return { scope: "tidy", tone: "ok", operationId: operation.operationId, message: "整理已受理，关闭此页面不会中断执行。" };
+  } catch (cause) {
+    const error = memoryOperationAppError(cause);
+    if (error.reason !== "MEMORY_OPERATION_BUSY" || !error.activeOperationId) throw cause;
+    await candidate.subscribeMemoryOperations();
+    const operation = await candidate.memoryOperationStatus(error.activeOperationId);
+    return { scope: "tidy", tone: "warn", operationId: operation.operationId, message: operation.terminalAt === null
+      ? "已有记忆整理正在执行，正在读取进度。"
+      : "此前的整理已结束，正在读取结果；如需继续，请再次操作。" };
+  }
+}
+
+function tidyRefusal(cause: unknown): MemoryOperationsFeedback {
+  const error = memoryOperationAppError(cause);
+  return { scope: "tidy", tone: "warn", message: error.code === "MEMORY_OPERATION_REFUSED"
+    ? "当前无法开始整理，请刷新状态；若记忆服务不可用，请先检查配置与连接。"
+    : "尚未确认整理是否受理，请先刷新状态核对；系统不会自动重复提交。" };
 }

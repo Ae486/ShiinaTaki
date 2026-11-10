@@ -56,3 +56,4 @@
 - co-watching-methods.ts — live operator-only acceptance/configuration/control, contextual invitation read/respond and versioned Character invalidation subscriptions
 - subagent-methods.ts — live operator-only private conversation reads/subscriptions and exact CAS send/stop/continue controls, durable attention and explicit pre-intent inbox retry
 - auxiliary-usage-method.ts — operator-only, monitor-mode-gated auxiliary usage query without Run mutations
+- maintenance-monitor-methods.ts — operator-only background maintenance membership and committed snapshots, closed with the connection

@@ -7,6 +7,7 @@ import { z } from "zod";
 import { HindsightSetupErrorSchema } from "./hindsight-connection-schema.ts";
 import { HindsightManagedDeploymentReceiptSchema, HindsightSetupPhaseSchema } from "./hindsight-setup-schema.ts";
 import { MemoryReplicaErrorCodeSchema, MemoryReplicaRunKindSchema } from "./memory-replica-schedule-schema.ts";
+import { MemoryTidyOutcomeSchema, MemoryTidyProgressSchema } from "./memory-tidy-outcome-schema.ts";
 
 export const MEMORY_OPERATION_METHODS = {
   submit: "memory.operations.submit",
@@ -21,7 +22,7 @@ const Id = z.string().min(1).max(256);
 const Timestamp = z.iso.datetime({ offset: true });
 const revision = z.number().int().nonnegative();
 
-export const MemoryOperationKindSchema = z.enum(["setup.validate", "setup.apply", "replica.sync"]);
+export const MemoryOperationKindSchema = z.enum(["setup.validate", "setup.apply", "replica.sync", "tidy"]);
 export type MemoryOperationKind = z.infer<typeof MemoryOperationKindSchema>;
 export const MemoryOperationStateSchema = z.enum(["admitted", "running", "completed", "failed", "cancelled", "outcome_unknown"]);
 export type MemoryOperationState = z.infer<typeof MemoryOperationStateSchema>;
@@ -43,12 +44,15 @@ export const MemoryOperationRequestSchema = z.discriminatedUnion("kind", [
     managedReceipt: HindsightManagedDeploymentReceiptSchema.optional(),
   }),
   z.strictObject({ kind: z.literal("replica.sync"), bankId: Id, syncKind: MemoryReplicaRunKindSchema }),
+  z.strictObject({ kind: z.literal("tidy"), characterId: z.string().min(1).max(160) }),
 ]);
 export type MemoryOperationRequest = z.infer<typeof MemoryOperationRequestSchema>;
 
 export const MemoryOperationProducerRefSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("setup"), attemptId: Id.nullable(), revisionBefore: revision, revisionAfter: revision.nullable() }),
   z.strictObject({ kind: z.literal("replica"), bankId: Id, admittedAt: Timestamp }),
+  z.strictObject({ kind: z.literal("tidy"), characterId: z.string().min(1).max(160),
+    authorityEpochId: Id.nullable(), progress: MemoryTidyProgressSchema }),
 ]);
 export type MemoryOperationProducerRef = z.infer<typeof MemoryOperationProducerRefSchema>;
 
@@ -59,6 +63,7 @@ export const MemoryOperationResultSchema = z.discriminatedUnion("kind", [
     kind: z.literal("replica"), errorCode: MemoryReplicaErrorCodeSchema.nullable(),
     nextAction: MemoryReplicaNextActionSchema.nullable(), lastSuccessAt: Timestamp.nullable(),
   }),
+  z.strictObject({ kind: z.literal("tidy"), outcome: MemoryTidyOutcomeSchema }),
 ]);
 export type MemoryOperationResult = z.infer<typeof MemoryOperationResultSchema>;
 
@@ -95,6 +100,8 @@ export const MemoryOperationStatusResultSchema = z.strictObject({ operation: Mem
 export const MemoryOperationListParamsSchema = z.strictObject({
   includeTerminal: z.boolean().default(false),
   limit: z.int().min(1).max(50).default(20),
+  kind: MemoryOperationKindSchema.optional(),
+  characterId: z.string().min(1).max(160).optional(),
 });
 export const MemoryOperationListResultSchema = z.strictObject({ operations: z.array(MemoryOperationSchema).max(50) });
 export const MemoryOperationCancelParamsSchema = z.strictObject({ operationId: z.uuid() });

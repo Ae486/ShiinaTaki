@@ -19,8 +19,8 @@ const BEFORE = "2026-11-01T11:00:00.000Z";
 const AFTER = "2026-11-01T13:00:00.000Z";
 const DIGEST = "a".repeat(64);
 
-function open(path = ":memory:", old = false) {
-  const db = openDatabase({ path, migrations: old ? MIGRATIONS.filter((m) => m.version < 66) : MIGRATIONS });
+function open(path = ":memory:", old: boolean | number = false) {
+  const db = openDatabase({ path, migrations: old ? MIGRATIONS.filter((m) => m.version < (typeof old === "number" ? old : 66)) : MIGRATIONS });
   cleanup.push(() => db.close());
   return db;
 }
@@ -50,9 +50,19 @@ function primary(db: Database, input: { input?: number; cache?: number; observed
       ...(input.old ? {} : { observed: input.observed === undefined ? null : Number(input.observed) }) });
   return id;
 }
-function auxiliary(db: Database, values: { input?: number; cache?: number; status?: "completed" | "failed" | "cancelled"; at?: string | null } = {}) {
+function auxiliary(db: Database, values: { input?: number; cache?: number; label?: string; status?: "completed" | "failed" | "cancelled"; at?: string | null } = {}) {
   const repo = createAuxiliaryUsageRepo(db); const callId = randomUUID();
-  repo.start({ callId, taskId: null, source: "utility", label: "compact", provider: "custom-alias", modelId: "m", startedAt: BEFORE });
+  const label = values.label ?? "episodic";
+  // Historical fixtures emulate their original writer, without requiring future columns.
+  if (!db.prepare("PRAGMA table_info(auxiliary_model_calls)").all().some((column) => column.name === "operation_json")) {
+    db.prepare(`INSERT INTO auxiliary_model_calls (call_id,source,label,provider,model_id,started_at,updated_at,status)
+      VALUES (:callId,'utility',:label,'custom-alias','m',:at,:at,'started')`).run({ callId, label, at: BEFORE });
+    return { callId, settle: () => db.prepare(`UPDATE auxiliary_model_calls SET status=:status,finished_at=:at,
+      input_tokens=:input,cache_read_tokens=:cache WHERE call_id=:callId`).run({ callId,
+      status: values.status ?? "completed", at: values.at === undefined ? NOW : values.at,
+      input: values.input ?? null, cache: values.cache ?? null }) };
+  }
+  repo.start({ callId, taskId: null, source: "utility", label, provider: "custom-alias", modelId: "m", startedAt: BEFORE });
   const settle = () => repo.settle({ callId, status: values.status ?? "completed", finishedAt: values.at === undefined ? NOW : values.at,
     responseId: null, usage: { ...unknownAuxiliaryUsage(), inputTokens: values.input ?? null, cacheReadTokens: values.cache ?? null } });
   return { callId, settle };
@@ -68,6 +78,22 @@ function begin(db: Database, revision = 0, notify?: () => void) {
 }
 
 describe("global primary-summary cache window", () => {
+  it("excludes only tidy and compact calls while retaining their ledger and the successful summary boundary", () => {
+    const db = open(); seedRun(db);
+    primary(db, { input: 100, cache: 80, observed: true });
+    auxiliary(db, { input: 100, cache: 20 }).settle();
+    const repo = createCacheUsageRepo(db);
+    const before = repo.read("taki", NOW);
+    expect(before).toMatchObject({ scope: "regular-model-requests", inputTokens: 200, cacheReadTokens: 100,
+      observedRequests: 2, ratio: 0.5 });
+    auxiliary(db, { label: "tidy", input: 100_000, cache: 90_000 }).settle();
+    auxiliary(db, { label: "compact", input: 100_000, cache: 0, status: "failed" }).settle();
+    expect(repo.read("taki", NOW)).toEqual(before);
+    expect(db.prepare("SELECT COUNT(*) AS n FROM auxiliary_model_calls").get()?.n).toBe(3);
+    begin(db).commit();
+    expect(repo.read("taki", NOW)).toMatchObject({ status: "empty", summaryRevision: 1, boundary: "captured" });
+  });
+
   it("weights the same eligible pairs, includes explicit zero and failed calls, and discloses unknown/legacy zero", () => {
     const db = open(); seedRun(db);
     primary(db, { input: 100, cache: 90 });
@@ -88,7 +114,7 @@ describe("global primary-summary cache window", () => {
   it("captures exact commit order with equal timestamps, crossing calls, duplicate settlement and duplicate summary", () => {
     const db = open(); seedRun(db); const repo = createCacheUsageRepo(db); const notify = vi.fn();
     primary(db, { input: 100, cache: 80, observed: true });
-    auxiliary(db, { input: 500, cache: 400 }).settle(); // The summarization request settles before its commit.
+    auxiliary(db, { input: 500, cache: 400 }).settle(); // Regular auxiliary work settles before the summary commit.
     const crossing = auxiliary(db, { input: 100, cache: 10 });
     const summary = begin(db, 0, notify);
     expect(summary.commit()).toBe("committed");
@@ -168,7 +194,7 @@ describe("migration 066 historical baseline", () => {
     primary(old, { input: Number.MAX_SAFE_INTEGER, cache: 80, at: BEFORE, old: true });
     primary(old, { input: Number.MAX_SAFE_INTEGER, cache: 80, at: BEFORE, old: true });
     begin(old).commit(); old.close(); const db = open(path);
-    expect(db.prepare("SELECT max(version) AS v FROM migrations").get()?.v).toBe(66);
+    expect(db.prepare("SELECT max(version) AS v FROM migrations").get()?.v).toBe(69);
     expect(createCacheUsageRepo(db).read("taki", AFTER)).toMatchObject({ status: "unavailable", reason: "boundary-unknown" });
   });
 
@@ -196,5 +222,35 @@ describe("migration 066 historical baseline", () => {
     expect(createCacheUsageRepo(db).read("taki", AFTER)).toMatchObject({ status: "unavailable", reason: "boundary-unknown" });
     begin(db, 1).commit();
     expect(createCacheUsageRepo(db).read("taki", AFTER)).toMatchObject({ status: "empty", boundary: "captured", summaryRevision: 2 });
+  });
+});
+
+describe("migration 068 regular-call baseline", () => {
+  it("rebases an old all-call window, preserves observed zero, and ignores excluded timestamp ties", () => {
+    const path = file(); const old = open(path, 68); seedRun(old);
+    primary(old, { input: 100, cache: 80, observed: true, at: BEFORE });
+    primary(old, { input: 100, cache: 0, observed: true, at: AFTER });
+    auxiliary(old, { label: "tidy", input: 90_000, cache: 80_000, at: NOW }).settle();
+    auxiliary(old, { label: "compact", input: 90_000, cache: 0, at: null }).settle();
+    begin(old).commit();
+    old.prepare(`UPDATE cache_usage_baselines SET observed_requests=4,paired_requests=4,input_tokens=180200,cache_read_tokens=80080`).run();
+    const previous = old.prepare("SELECT * FROM auxiliary_model_calls ORDER BY call_id").all(); old.close();
+    const migrated = open(path);
+    expect(migrated.prepare("SELECT * FROM auxiliary_model_calls ORDER BY call_id").all())
+      .toEqual(previous.map((row) => ({ ...row, operation_json: null })));
+    const snapshot = createCacheUsageRepo(migrated).read("taki", AFTER);
+    expect(snapshot).toMatchObject({ status: "ready", boundary: "historical", observedRequests: 1,
+      pairedRequests: 1, inputTokens: 100, cacheReadTokens: 0, ratio: 0, scope: "regular-model-requests" });
+    migrated.close();
+    expect(createCacheUsageRepo(open(path)).read("taki", AFTER)).toEqual(snapshot);
+  });
+
+  it.each([NOW, null])("refuses ambiguous included completion %s until a new summary captures exact order", (at) => {
+    const path = file(); const old = open(path, 68);
+    auxiliary(old, { input: 100, cache: 20, at }).settle(); begin(old).commit(); old.close();
+    const db = open(path); const repo = createCacheUsageRepo(db);
+    expect(repo.read("taki", AFTER)).toMatchObject({ status: "unavailable", reason: "boundary-unknown" });
+    begin(db, 1).commit();
+    expect(repo.read("taki", AFTER)).toMatchObject({ status: "empty", boundary: "captured", summaryRevision: 2 });
   });
 });

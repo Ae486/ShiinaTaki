@@ -23,7 +23,7 @@
 - persona-provider.ts — reads prompt/ cards (assistant layer + per-character persona), strips the `>` editor note, sync + cached + safe fallback; injected into the assembler (#16)
 - memory-tools.ts — the first agent tools (memory_write/search/archive); thin, characterId-bound, never throw; search hits carry disclosure + origin (observed content fenced) and record a search event; descriptions carry the per-call R18 prefer-correcting and R19 experience-shape hints (prompt surface — the decision flow lives in base-prompt.ts); plus the BACKGROUND set whose memory_write is schema-restricted to the auto layers + importance ceiling (Q11-1 covers every automatic path)
 - memory-engine.ts — the memory subsystem composition root (store+repo+tokenizer+indexer+retriever+assembler+tools; the retriever serves memory_search only, T5-R6; exposes writeEntry, createTools, createBackgroundTools, retention's narrow list/archive/hard-delete seam, and the tidy view — report reads + the maintenance toolset)
-- bootstrap.ts — Legacy Markdown subsystem wiring: engine/reconcile, shared Utility Slot model, provider maintenance, tidy/retention, and one watermark-guarded FlushWriter exposed through MemoryFlushPort; Compaction is Core-owned
+- bootstrap.ts — Legacy subsystem wiring, automatic tidy admission through the durable owner, shared Utility Slot and watermark-guarded flush; Compaction is Core-owned
 - utility-slot.ts — T5-R11's background model slot: the utility provider when configured else the MAIN model, one GLOBAL serial task chain, immutable auxiliary usage task ownership, sanitized diagnostics, and cumulative token spend since boot
 - retention-sweeper.ts — shared registry retention verdict plus the legacy sweeper: rolling machine deletion, recoverable archival elsewhere, and reinforcement-aware age; canonical adapters reuse the verdict with authoritative writes
 - render-transcript.ts — shared helper: a timeline segment -> "role: text" transcript for the auto-write prompts
@@ -34,7 +34,11 @@
 - memory-flush-port.ts — typed pre-retirement Memory Provider boundary: fenced Legacy watermark and actual Canonical Local ingestion receipts, unavailable Hindsight failure, and switchable activation binding
 - tidy-report.ts — the tidy pass's deterministic health report (rc five-class contract): facts flat (missing trigger, over-budget incl. block used/limit beside full content), hypotheses as questions (stale, near-duplicate) + the new-writes slice carrying the misfiled question; per-class caps with dropped counts stated; observed content fenced; never prescribes an action
 - tidy-tools.ts — the maintenance verbs the foreground agent never gets: memory_reinforce / memory_archive_supersede (the sanctioned promotion route) / memory_set_disclosure / memory_refile / block_rethink (background blocks only) / memory_finish_edits (the structural terminal); never-throw envelopes
-- tidy-pass.ts — model-led maintenance with zero-cost clean exit; canonical explicit completion and safe partial/failure diagnostics, real committed counts and success-only watermark; Legacy bounded-pass compatibility
+- tidy-pass.ts — finite admitted-backlog draining, independent batch budgets, fair Utility dispatch, shutdown cancellation and exact accepted checkpoints; Legacy remains a single bounded pass
+- tidy-agent-runner.ts — sequential SDK tools, per-batch timeout/shutdown cancellation and accepted-finish/blocked-error termination
+- tidy-prompt.ts — shared maintenance instructions and report framing
+- tidy-issues.ts — safe no-write issue acknowledgements, exact prior CAS correction and unresolved-effect blockers
+- tidy-coverage.ts — exact revision/time eligibility, visible-batch checkpointing and automatic continuation policy
 - memory-provider.ts — async provider and optional vector projection interfaces
 - local-memory-provider.ts — structured Local provider with completed-only retain, applied/unchanged CAS mutations, and sparse recall
 - canonical-local-runtime.ts — canonical Local engine with real maintenance, observed writes and admission-bound tools/recall/prompt capture
@@ -46,7 +50,8 @@
 - canonical-local-ingestion.ts — local source import, gap-isolated pending groups, truthful continuous coverage, 20-message cadence and durable receipt retries
 - canonical-local-ingestion-batch.ts — canonical original-source/fact batches and lexical duplicate evidence
 - canonical-layer-policy.ts — registry ownership and automatic policy projection shared by Local provider writes
-- canonical-local-tidy.ts — captured-reference/CAS-bound maintenance; exact revision-conflict correction, replay-safe edit counts, explicit finish and unresolved-issue evidence
+- canonical-local-tidy.ts — scoped maintenance verbs, visible references, Block no-op handling and explicit finish acknowledgements
+- canonical-tidy-review.ts — captured Local review, short model handles, disclosed conflict refresh and transactional operation progress
 - canonical-local-retention.ts — canonical registry retention with revision-bearing targets and actual persisted-effect counts
 - canonical-observed-write.ts — trusted image-description writes via the Local provider with observed provenance and automatic visibility limits
 - canonical-memory-view.ts — revision-bearing opaque references and canonical row projection for reused T5 policy/report code

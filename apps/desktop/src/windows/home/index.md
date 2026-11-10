@@ -24,5 +24,5 @@ in pages.ts. Holds no state of record (invariant 4); Core pages use the window's
 - extension-convergence-resource.ts — one ephemeral extension-status owner per physical client, effect-bound only while consumers exist and shared by visible copies
 - extension-convergence.tsx — visibility-aware resource adapter, retained availability/count band and stable pending slot; list-key invalidation is restricted to recognized older-Core support
 - read-observation-notice.tsx — explicit older-Core manual-refresh feedback over existing domain refresh actions
-- pages/ — one directory per page (see each page's own index.md)
+- pages/ — one directory per page; Operations recovers durable tidy results independently of its memory/storage counters (see each page's own index.md)
 - Skills is registered in pages.ts and uses the same disposable Home-client state boundary as MCP.

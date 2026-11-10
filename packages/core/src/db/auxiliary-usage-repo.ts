@@ -1,6 +1,6 @@
 /**
  * INPUT:  observed auxiliary provider-call starts, terminal outcomes, and bounded history filters
- * OUTPUT: idempotent call rows, boot interruption recovery, whole-filter aggregates and post-commit settlement notices
+ * OUTPUT: idempotent call rows with proved operation links, interruption recovery, filtered aggregates and committed change hints
  * POS:    core/db — metadata-only auxiliary accounting; independent from canonical Run/Effect usage
  */
 import { z } from "zod";
@@ -15,6 +15,7 @@ import {
   type AuxiliaryUsageCounts,
   type AuxiliaryUsageQuery,
   type AuxiliaryUsageResult,
+  type MaintenanceOperationRef,
 } from "@taki/shared";
 import { toSafeInteger, type Database, type SqlRow, type SqlValue } from "./sqlite.ts";
 
@@ -26,6 +27,7 @@ export interface AuxiliaryUsageStart {
   provider: string;
   modelId: string;
   startedAt: string;
+  operation?: MaintenanceOperationRef;
 }
 
 export interface AuxiliaryUsageSettlement {
@@ -59,11 +61,14 @@ const COUNT_COLUMNS = {
   totalTokens: "total_tokens",
 } as const;
 
-export function createAuxiliaryUsageRepo(db: Database, options: { onSettled?: () => void } = {}): AuxiliaryUsageRepo {
+export function createAuxiliaryUsageRepo(db: Database, options: { onSettled?: () => void; onChanged?: () => void } = {}): AuxiliaryUsageRepo {
   return {
-    start(input) { startCall(db, input); },
+    start(input) { db.transaction(() => { startCall(db, input); notifyChanged(db, options.onChanged); }); },
     settle(input) {
-      db.transaction(() => { if (settleCall(db, input) && options.onSettled) db.afterCommit(options.onSettled); });
+      db.transaction(() => { if (settleCall(db, input)) {
+        if (options.onSettled) db.afterCommit(options.onSettled);
+        notifyChanged(db, options.onChanged);
+      } });
     },
     reconcileInterrupted() {
       let changed = 0;
@@ -71,6 +76,7 @@ export function createAuxiliaryUsageRepo(db: Database, options: { onSettled?: ()
         changed = db.prepare(`UPDATE auxiliary_model_calls SET status='interrupted',updated_at=:updatedAt
           WHERE status='started'`).run({ updatedAt: new Date().toISOString() }).changes;
         if (changed > 0 && options.onSettled) db.afterCommit(options.onSettled);
+        if (changed > 0) notifyChanged(db, options.onChanged);
       });
       return changed;
     },
@@ -90,10 +96,11 @@ function startCall(db: Database, input: AuxiliaryUsageStart): void {
     throw new Error("AUXILIARY_USAGE_START_CONFLICT");
   }
   db.prepare(`INSERT INTO auxiliary_model_calls
-    (call_id,task_id,source,label,provider,model_id,started_at,updated_at,status)
-    VALUES (:callId,:taskId,:source,:label,:provider,:modelId,:startedAt,:updatedAt,'started')`).run({
+    (call_id,task_id,source,label,provider,model_id,started_at,updated_at,status,operation_json)
+    VALUES (:callId,:taskId,:source,:label,:provider,:modelId,:startedAt,:updatedAt,'started',:operation)`).run({
     callId: call.callId, taskId: call.taskId, source: call.source, label: call.label, provider: call.provider,
     modelId: call.modelId, startedAt: call.startedAt, updatedAt: call.updatedAt,
+    operation: call.operation ? JSON.stringify(call.operation) : null,
   });
 }
 
@@ -142,6 +149,12 @@ function queryCalls(db: Database, candidate: AuxiliaryUsageQuery): AuxiliaryUsag
 function buildFilter(query: AuxiliaryUsageQuery): { predicates: string[]; params: Record<string, SqlValue> } {
   const predicates = ["started_at>=:from", "started_at<:to"];
   const params: Record<string, SqlValue> = { from: query.from, to: query.to };
+  if (query.operation) {
+    for (const [field, value] of Object.entries(query.operation)) {
+      predicates.push(`json_extract(operation_json,'$.${field}')=:operation_${field}`);
+      params[`operation_${field}`] = value;
+    }
+  }
   for (const [field, column] of [["source", "source"], ["label", "label"], ["provider", "provider"], ["modelId", "model_id"]] as const) {
     const value = query[field];
     if (value !== undefined) { predicates.push(`${column}=:${field}`); params[field] = value; }
@@ -191,13 +204,19 @@ function readCall(row: SqlRow): AuxiliaryModelCall {
     modelId: row.model_id, startedAt: row.started_at, finishedAt: row.finished_at, updatedAt: row.updated_at,
     status: row.status, responseId: row.response_id,
     usage: Object.fromEntries(Object.entries(COUNT_COLUMNS).map(([field, column]) => [field, nullableInteger(row[column])])),
+    ...(row.operation_json == null ? {} : { operation: JSON.parse(String(row.operation_json)) }),
   });
 }
 
 function sameStart(left: AuxiliaryModelCall, right: AuxiliaryModelCall): boolean {
   return left.callId === right.callId && left.taskId === right.taskId && left.source === right.source &&
     left.label === right.label && left.provider === right.provider && left.modelId === right.modelId &&
-    left.startedAt === right.startedAt;
+    left.startedAt === right.startedAt && JSON.stringify(left.operation) === JSON.stringify(right.operation);
+}
+
+function notifyChanged(db: Database, changed?: () => void): void {
+  if (!changed) return;
+  db.afterCommit(() => { try { changed(); } catch { /* Optional Monitor publication cannot change observed calls. */ } });
 }
 
 function sameSettlement(call: AuxiliaryModelCall, input: z.infer<typeof SettlementSchema>): boolean {

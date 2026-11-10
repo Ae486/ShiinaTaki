@@ -169,7 +169,7 @@ describe("Pending Memory repository", () => {
   it("applies the current migration tail after a populated version-34 database and reopens without changes", () => {
     const f = fixture(true, 34); const records = f.db.prepare("SELECT * FROM hindsight_replica_sync_records").all();
     const checkpoints = f.db.prepare("SELECT * FROM hindsight_replica_sync_checkpoints").all();
-    const applied = f.reopen(); expect(applied).toEqual([35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 60, 61, 62, 63, 64, 65, 66]);
+    const applied = f.reopen(); expect(applied).toEqual([35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69]);
     const row = f.repo.enqueue(intent()); expect(f.reopen()).toEqual([]);
     expect(f.repo.get(pendingMemoryRef(row))).toEqual(row);
     expect(f.db.prepare("SELECT * FROM hindsight_replica_sync_records").all()).toEqual(records);

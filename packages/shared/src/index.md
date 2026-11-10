@@ -117,6 +117,9 @@
 
 - subagent-progress-schema.ts — captured work intervals, runtime check-in sidecars and complete/partial child token usage
 - subagent-attention-schema.ts — bounded durable operator attention and explicit pre-intent retry contracts
-- auxiliary-usage-schema.ts — nullable observed auxiliary call counters, state, keyset query and aggregate contracts
+- auxiliary-usage-schema.ts — nullable observed auxiliary calls, optional explicit operation link, keyset query and whole-filter aggregates
+- maintenance-operation-ref-schema.ts — strict tidy/compact identity and Character correlation; independent of Utility task IDs
+- maintenance-monitor-schema.ts — bounded query-echoing background Monitor snapshots, independent subscription and honest progress coverage
 - request-attribution-schema.ts — bounded category/origin conservation, per-Effect dispatch measurements, real-window snapshots and latest-primary observation with distinct optional response model identity
-- memory-tidy-diagnostics-schema.ts — safe bounded partial/failed maintenance details on the existing JSON-RPC error path
+- memory-tidy-diagnostics-schema.ts — safe bounded partial/failed maintenance details, including an actionable indivisible-input budget failure, on the existing JSON-RPC error path
+- memory-tidy-outcome-schema.ts — full durable tidy outcomes and content-free committed/review progress on the existing operation channel

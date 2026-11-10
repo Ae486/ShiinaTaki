@@ -6,49 +6,20 @@
 import { randomUUID } from "node:crypto";
 import { tool, type ToolSet } from "ai";
 import { z } from "zod";
-import { MemoryErrorCodeSchema, TakiMemoryPolicyProjectionSchema, type MemoryTidyIssue } from "@taki/shared";
-import type { CanonicalMemoryAuthorityRepo } from "../db/canonical-memory-authority-repo.ts";
-import type { CanonicalMaintenanceResult, CanonicalMemoryMaintenanceRepo } from "../db/canonical-memory-maintenance-contract.ts";
-import { stableRequestHash, type CanonicalMemoryRepo } from "../db/canonical-memory-repo.ts";
-import type { MemoryEntryRow } from "../db/memory-repo.ts";
-import type { BlockScope, StructuredMemoryBlock, StructuredMemoryBlockRepo } from "../db/structured-memory-block-repo.ts";
-import { V1_BLOCKS, getBlock } from "./block-registry.ts";
-import { canonicalMemoryRow, parseCanonicalMemoryReference } from "./canonical-memory-view.ts";
+import { TakiMemoryPolicyProjectionSchema } from "@taki/shared";
+import type { CanonicalMaintenanceResult } from "../db/canonical-memory-maintenance-contract.ts";
+import { stableRequestHash } from "../db/canonical-memory-repo.ts";
+import { V1_BLOCKS } from "./block-registry.ts";
+import { canonicalMemoryRow } from "./canonical-memory-view.ts";
 import { getLayer, WRITABLE_LAYER_IDS } from "./layer-registry.ts";
 import { projectRetention } from "./local-memory-provider.ts";
-import type { TidyEngineView, TidyReviewOutcome } from "./memory-engine.ts";
-import type { SearchTokenizer } from "./search-tokenizer.ts";
+import type { TidyEngineView, TidyReviewOptions } from "./memory-engine.ts";
+import { createTidyIssueLedger, TidyFinishSchema } from "./tidy-issues.ts";
+import { guardedTidy as guarded, tidyTarget as target, tidyBlockScope as blockScope, tidyReviewOutcome,
+  reviewReference, tidyReviewReminder, finishTidyReview, type CanonicalTidyInput as TidyInput,
+  type CanonicalTidyReview as Review, type TidyToolOutput as ToolOutput } from "./canonical-tidy-review.ts";
 import { FINISH_TOOL_NAME } from "./tidy-tools.ts";
 
-interface TidyInput {
-  repo: CanonicalMemoryMaintenanceRepo;
-  records: CanonicalMemoryRepo;
-  authority: CanonicalMemoryAuthorityRepo;
-  blocks: StructuredMemoryBlockRepo;
-  tokenizer: SearchTokenizer;
-  epochId: string;
-  now?: () => string;
-}
-interface Review {
-  input: TidyInput;
-  characterId: string;
-  passId: string;
-  at: string;
-  rows: MemoryEntryRow[];
-  references: Set<string>;
-  blocks: Map<string, StructuredMemoryBlock | undefined>;
-  bankIds: { global?: string; character?: string };
-  finished: boolean;
-  edits: number;
-  issues: Map<string, MemoryTidyIssue>;
-  receipts: Map<string, { hash: string; output: ToolOutput }>;
-}
-type ToolOutput = { ok: true; [key: string]: unknown } | { ok: false; code: string; message: string };
-const TOOL_NAMES = {
-  reinforce: "memory_reinforce", disclosure: "memory_set_disclosure", refile: "memory_refile",
-  supersede: "memory_archive_supersede", block: "block_rethink", finish: FINISH_TOOL_NAME,
-} as const satisfies Record<string, MemoryTidyIssue["toolName"]>;
-interface GuardedInput { tool: keyof typeof TOOL_NAMES; callId: string; args: Record<string, unknown>; }
 const RowInput = z.object({ id: z.string().min(1).max(8192) });
 const Layer = z.enum(WRITABLE_LAYER_IDS as [string, ...string[]]);
 const BackgroundBlock = z.enum(V1_BLOCKS.filter((block) => block.writer === "background").map((block) => block.id) as [string, ...string[]]);
@@ -57,18 +28,21 @@ const Replacement = z.object({ layer: Layer, content: z.string().min(1).max(100_
 type ReplacementInput = z.infer<typeof Replacement>;
 
 export function createCanonicalLocalTidyView(input: TidyInput): TidyEngineView {
-  const capture = (characterId: string) => captureReview(input, characterId);
+  const capture = (characterId: string, options?: TidyReviewOptions) => captureReview(input, characterId, options);
   return {
     captureReview: capture,
     listActive: (characterId) => capture(characterId).listActive(characterId),
     countSince: (characterId, since) => capture(characterId).listActive(characterId)
       .filter((row) => (row.updatedAt ?? row.createdAt) > (since ?? "")).length,
     readBlock: (ref) => input.blocks.read(ref.id, blockScope(ref.id, ref.characterId))?.content,
+    blockRevisions: (characterId) => V1_BLOCKS.filter((block) => block.ownership === "global" || characterId !== undefined).map((block) => ({
+      blockId: block.id, revision: input.blocks.read(block.id, blockScope(block.id, characterId))?.revision ?? 0,
+    })),
     createTools: (characterId) => capture(characterId).createTools(characterId),
   };
 }
 
-function captureReview(input: TidyInput, characterId: string): TidyEngineView {
+function captureReview(input: TidyInput, characterId: string, options: TidyReviewOptions = {}): TidyEngineView {
   input.authority.activeEpoch(input.epochId);
   const banks = input.authority.listBanks(input.epochId).filter((bank) => bank.scope.kind === "global" || bank.scope.characterId === characterId);
   const scopes = new Map(banks.map((bank) => [bank.bankId, bank.scope.characterId]));
@@ -78,19 +52,26 @@ function captureReview(input: TidyInput, characterId: string): TidyEngineView {
     .filter((record) => record.policy.visibility !== "hidden")
     .map((record) => canonicalMemoryRow(record, scopes.get(record.unit.bankId) ?? null));
   const review: Review = { input, characterId, passId: randomUUID(), at: input.now?.() ?? new Date().toISOString(),
-    rows, references: new Set(rows.map((row) => row.id)),
+    rows, references: new Set(rows.map((row) => row.id)), results: new Set(), handles: new Map(), options,
     blocks: new Map(V1_BLOCKS.map((block) => [block.id, input.blocks.read(block.id, blockScope(block.id, characterId))])),
     bankIds: { global: banks.find((bank) => bank.scope.kind === "global")?.bankId,
       character: banks.find((bank) => bank.scope.kind === "character")?.bankId },
-    finished: false, edits: 0, issues: new Map(), receipts: new Map() };
+    finished: false, edits: 0, issues: createTidyIssueLedger(), receipts: new Map() };
   const requireCharacter = (id: string) => { if (id !== characterId) throw new Error("MEMORY_INVALID_REQUEST"); };
   return {
     listActive: (id) => { requireCharacter(id); return review.rows.map((row) => ({ ...row })); },
     countSince: (id, since) => { requireCharacter(id); return review.rows.filter((row) => (row.updatedAt ?? row.createdAt) > (since ?? "")).length; },
     readBlock: (ref) => ref.characterId !== undefined && ref.characterId !== characterId ? undefined : review.blocks.get(ref.id)?.content,
     createTools: (id) => { requireCharacter(id); return reviewTools(review); },
-    reviewHealthy: () => reviewHealthy(review),
-    reviewOutcome: () => reviewOutcome(review),
+    reviewHealthy: () => tidyReviewOutcome(review).issueCount === 0,
+    reviewOutcome: () => tidyReviewOutcome(review),
+    recordIssue: (issue) => { review.issues.reject(issue); review.finished = false; },
+    reviewReminder: () => tidyReviewReminder(review),
+    reviewBlocked: () => review.issues.blocked(),
+    renderReference: (id) => reviewReference(review, id),
+    setVisibleReferences: (ids) => { review.references = new Set(ids); },
+    resultingReferences: () => [...review.results],
+    blockRevisions: () => [...review.blocks].map(([blockId, block]) => ({ blockId, revision: block?.revision ?? 0 })),
   };
 }
 
@@ -98,7 +79,7 @@ function reviewTools(review: Review): ToolSet {
   return {
     ...rowTools(review),
     memory_archive_supersede: tool({
-      description: "Reversibly archive a memory, optionally replacing it with a corrected fact. The original source remains preserved. Use the returned canonical reference for later edits.",
+      description: "Reversibly archive a memory, optionally replacing it with a corrected fact. The original source remains preserved. Use the returned id reference for later edits.",
       inputSchema: RowInput.extend({ replacement: Replacement.optional() }),
       execute: (args, options) => guarded(review, { tool: "supersede", callId: options.toolCallId, args }, (requestId) => supersede(review, { ...args, requestId })),
     }),
@@ -107,8 +88,8 @@ function reviewTools(review: Review): ToolSet {
       inputSchema: z.object({ id: BackgroundBlock, content: z.string().min(1).max(100_000) }),
       execute: (args, options) => guarded(review, { tool: "block", callId: options.toolCallId, args }, () => rethinkBlock(review, args)),
     }),
-    [FINISH_TOOL_NAME]: tool({ description: "Finish the review when all useful edits are complete, including when no edit is needed.",
-      inputSchema: z.object({}), execute: (args, options) => guarded(review, { tool: "finish", callId: options.toolCallId, args }, () => ({ ok: true })) }),
+    [FINISH_TOOL_NAME]: tool({ description: "Finish this visible batch after useful edits are complete. Explicitly acknowledge unresolved no-write calls with resolutions; correctedBy must name a later successful callId. Unknown failures cannot be dismissed.",
+      inputSchema: TidyFinishSchema, execute: (args, options) => guarded(review, { tool: "finish", callId: options.toolCallId, args }, () => finishTidyReview(review, args)) }),
   };
 }
 
@@ -132,14 +113,6 @@ function rowTools(review: Review): ToolSet {
       execute: (args, options) => guarded(review, { tool: "refile", callId: options.toolCallId, args }, (requestId) => refile(review, { ...args, requestId })),
     }),
   };
-}
-
-function target(review: Review, id: string, requestId: string) {
-  const ref = parseCanonicalMemoryReference(id);
-  if (ref.epochId !== review.input.epochId) throw new Error("MEMORY_AUTHORITY_MISMATCH");
-  if (ref.bankId !== review.bankIds.global && ref.bankId !== review.bankIds.character) throw new Error("MEMORY_INVALID_REQUEST");
-  if (!review.references.has(id)) throw new Error("MEMORY_INVALID_REQUEST");
-  return { ...ref, characterId: review.characterId, requestId, now: review.at };
 }
 
 function destination(review: Review, layerId: string) {
@@ -186,90 +159,18 @@ function supersede(review: Review, input: { id: string; replacement?: Replacemen
 }
 
 function rethinkBlock(review: Review, input: { id: string; content: string }): ToolOutput {
+  const current = review.input.blocks.read(input.id, blockScope(input.id, review.characterId));
+  if (current?.content === input.content) {
+    if (current.revision !== (review.blocks.get(input.id)?.revision ?? 0)) throw new Error("MEMORY_REVISION_MISMATCH");
+    return { ok: true, applied: false, id: current.blockId, revision: current.revision };
+  }
   const block = review.input.blocks.replace({ blockId: input.id, scope: blockScope(input.id, review.characterId),
     expectedRevision: review.blocks.get(input.id)?.revision ?? 0, actor: "background", content: input.content, now: review.at });
   review.blocks.set(input.id, block);
   return { ok: true, id: input.id, revision: block.revision };
 }
-
-function blockScope(id: string, characterId?: string): BlockScope {
-  const definition = getBlock(id);
-  if (!definition) throw new Error("MEMORY_INVALID_REQUEST");
-  if (definition.ownership === "global") return { kind: "global", characterId: null };
-  if (!characterId) throw new Error("MEMORY_INVALID_REQUEST");
-  return { kind: "character", characterId };
-}
-
 function referenceResult(result: CanonicalMaintenanceResult): ToolOutput {
   const { record } = result;
   return { ok: true, applied: result.outcome === "applied", id: canonicalMemoryRow(record, record.provenance.characterId).id,
     bankId: record.unit.bankId, memoryId: record.unit.memoryId, revision: record.unit.revision, layer: record.policy.layerId };
-}
-
-function reviewHealthy(review: Review): boolean {
-  return currentAuthority(review) && review.issues.size === 0;
-}
-
-function currentAuthority(review: Review): boolean {
-  try { review.input.authority.activeEpoch(review.input.epochId); return true; }
-  catch (error) {
-    review.issues.set("authority", { toolName: "unknown", code: failureCode(error) });
-    return false;
-  }
-}
-
-function reviewOutcome(review: Review): TidyReviewOutcome {
-  const current = currentAuthority(review);
-  const reason = !current ? "review-stale" : review.issues.size > 0 ? "tool-errors" : !review.finished ? "unfinished" : undefined;
-  return { complete: reason === undefined, edits: review.edits, reason,
-    issues: [...review.issues.values()].slice(0, 20), issueCount: review.issues.size };
-}
-
-function guarded(review: Review, input: GuardedInput, run: (requestId: string) => ToolOutput): ToolOutput {
-  const requestId = `tidy:${stableRequestHash({ pass: review.passId, tool: input.tool, call: input.callId })}`;
-  const hash = stableRequestHash(input.args);
-  let action: string | undefined;
-  try {
-    review.input.authority.activeEpoch(review.input.epochId);
-    const old = review.receipts.get(requestId);
-    if (old && old.hash !== hash) throw new Error("MEMORY_REQUEST_ID_CONFLICT");
-    if (old) return old.output;
-    action = actionIdentity(review, input);
-    const output = run(requestId);
-    // Only successful row operations can extend the captured review. Never
-    // trust a supplied/archived reference or a Block ID as a new row admission.
-    if (output.ok && typeof output.id === "string" && typeof output.memoryId === "string") review.references.add(output.id);
-    review.receipts.set(requestId, { hash, output });
-    if (output.ok) {
-      if (input.tool === "finish") review.finished = true;
-      else if (output.applied !== false) review.edits += 1;
-      // The cached return above cannot prove a later conflict was corrected.
-      // Only this fresh execution can settle the exact admitted action.
-      if (action) review.issues.delete(`revision:${action}`);
-    }
-    return output;
-  } catch (error) {
-    const code = failureCode(error);
-    const key = code === "MEMORY_REVISION_MISMATCH" && action ? `revision:${action}` : `fatal:${requestId}:${code}`;
-    review.issues.set(key, { toolName: TOOL_NAMES[input.tool], code });
-    return { ok: false, code, message: "Memory maintenance was not applied." };
-  }
-}
-
-function actionIdentity(review: Review, input: GuardedInput): string | undefined {
-  if (input.tool === "finish") return undefined;
-  const { id, ...payload } = input.args;
-  if (typeof id !== "string") throw new Error("MEMORY_INVALID_REQUEST");
-  if (input.tool === "block") {
-    return stableRequestHash({ tool: input.tool, id, scope: blockScope(id, review.characterId), payload });
-  }
-  // Reuse admission before classifying an error as recoverable. Revision is
-  // omitted only from matching identity, never from the write's captured-ref/CAS fence.
-  const { epochId, bankId, memoryId } = target(review, id, "action-identity");
-  return stableRequestHash({ tool: input.tool, epochId, bankId, memoryId, payload });
-}
-
-function failureCode(error: unknown): MemoryTidyIssue["code"] {
-  const parsed = MemoryErrorCodeSchema.safeParse(error instanceof Error ? error.message.split(":")[0] : "");
-  return parsed.success ? parsed.data : "MEMORY_INTERNAL_ERROR";
 }

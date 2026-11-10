@@ -1,9 +1,9 @@
 /**
  * INPUT:  process env (TAKI_MEMORY_PINNED_BUDGET, TAKI_MEMORY_BM25_WEIGHTS, TAKI_MEMORY_STOPLIST,
  *         TAKI_MEMORY_INTENTIONS_DEFAULT_DAYS, TAKI_MEMORY_TIDY_* — write threshold / max steps / stale days /
- *         report cap)
+ *         report cap / initial input tokens / batch timeout)
  * OUTPUT: loadMemoryConfig(env) -> { pinnedBudget, bm25Weights, stoplist, intentionsDefaultDays, tidyWriteThreshold,
- *         tidyMaxSteps, tidyStaleDays, reportClassCap }; the fail-closed defaults; Bm25Weights
+ *         tidyMaxSteps, tidyStaleDays, reportClassCap, tidyBatchTimeoutMs, tidyInputTokens }; fail-closed defaults
  * POS:    core/config — the memory subsystem's tunable numbers (T5-R13); garbage values are fatal at boot, never
  *         silently defaulted. The panel surfaces for these are #26's
  */
@@ -22,17 +22,20 @@ export const DEFAULT_INTENTIONS_DAYS = 30;
 // (rc §OMITTED), so 40 is a TUNABLE default, not a sourced constant.
 export const DEFAULT_TIDY_WRITE_THRESHOLD = 40;
 
-// Step ceiling for one tidy pass — a structural exit alongside the finish tool, deliberately far below Letta's
-// DEFAULT_MAX_STEPS = 50 (rc A2): our input is a bounded defect report, not an open transcript.
-export const DEFAULT_TIDY_MAX_STEPS = 12;
+// Each batch can correct many short facts. The durable backlog operation continues with a fresh step budget.
+export const DEFAULT_TIDY_MAX_STEPS = 48;
 
 // Age past which a searchable row becomes a "why was this never recalled?" candidate. A LOCAL choice with no external
 // source (Nocturne tiers stale per priority; a flat window is the v1 seam — batch-4 design §5).
 export const DEFAULT_TIDY_STALE_DAYS = 45;
 
-// Per-class candidate cap in the tidy report, so a degraded store cannot blow the pass's context. A LOCAL choice
-// with no external source; dropped counts are stated in the report itself.
-export const DEFAULT_TIDY_REPORT_CAP = 10;
+// Short facts amortize fixed prompt cost in larger batches; Canonical also prices the complete initial input.
+export const DEFAULT_TIDY_REPORT_CAP = 100;
+
+// Each admitted batch gets its own budget; waiting for the Utility Slot costs no execution time.
+export const DEFAULT_TIDY_BATCH_TIMEOUT_MS = 600_000;
+// Initial instructions, tool schemas and report. Tool-loop replies need additional context headroom.
+export const DEFAULT_TIDY_INPUT_TOKENS = 24_000;
 
 /**
  * bm25 column weights for `memory_fts(path UNINDEXED, disclosure, content, search_terms)`.
@@ -75,6 +78,8 @@ export const MemoryConfigSchema = z
     TAKI_MEMORY_TIDY_MAX_STEPS: z.coerce.number().int().positive().default(DEFAULT_TIDY_MAX_STEPS),
     TAKI_MEMORY_TIDY_STALE_DAYS: z.coerce.number().int().positive().default(DEFAULT_TIDY_STALE_DAYS),
     TAKI_MEMORY_TIDY_REPORT_CAP: z.coerce.number().int().positive().default(DEFAULT_TIDY_REPORT_CAP),
+    TAKI_MEMORY_TIDY_BATCH_TIMEOUT_MS: z.coerce.number().int().positive().default(DEFAULT_TIDY_BATCH_TIMEOUT_MS),
+    TAKI_MEMORY_TIDY_INPUT_TOKENS: z.coerce.number().int().positive().default(DEFAULT_TIDY_INPUT_TOKENS),
   })
   .transform((env) => ({
     pinnedBudget: env.TAKI_MEMORY_PINNED_BUDGET,
@@ -85,6 +90,8 @@ export const MemoryConfigSchema = z
     tidyMaxSteps: env.TAKI_MEMORY_TIDY_MAX_STEPS,
     tidyStaleDays: env.TAKI_MEMORY_TIDY_STALE_DAYS,
     reportClassCap: env.TAKI_MEMORY_TIDY_REPORT_CAP,
+    tidyBatchTimeoutMs: env.TAKI_MEMORY_TIDY_BATCH_TIMEOUT_MS,
+    tidyInputTokens: env.TAKI_MEMORY_TIDY_INPUT_TOKENS,
   }));
 
 export type MemoryConfig = z.infer<typeof MemoryConfigSchema>;
@@ -99,6 +106,8 @@ export function loadMemoryConfig(env: Record<string, string | undefined>): Memor
     TAKI_MEMORY_TIDY_MAX_STEPS: env.TAKI_MEMORY_TIDY_MAX_STEPS,
     TAKI_MEMORY_TIDY_STALE_DAYS: env.TAKI_MEMORY_TIDY_STALE_DAYS,
     TAKI_MEMORY_TIDY_REPORT_CAP: env.TAKI_MEMORY_TIDY_REPORT_CAP,
+    TAKI_MEMORY_TIDY_BATCH_TIMEOUT_MS: env.TAKI_MEMORY_TIDY_BATCH_TIMEOUT_MS,
+    TAKI_MEMORY_TIDY_INPUT_TOKENS: env.TAKI_MEMORY_TIDY_INPUT_TOKENS,
   });
 }
 

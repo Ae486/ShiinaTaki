@@ -35,6 +35,8 @@ import {
   DEFAULT_INTENTIONS_DAYS,
   DEFAULT_PINNED_BUDGET,
   DEFAULT_TIDY_MAX_STEPS,
+  DEFAULT_TIDY_BATCH_TIMEOUT_MS,
+  DEFAULT_TIDY_INPUT_TOKENS,
   DEFAULT_TIDY_REPORT_CAP,
   DEFAULT_TIDY_STALE_DAYS,
   DEFAULT_TIDY_WRITE_THRESHOLD,
@@ -193,9 +195,11 @@ export const CONFIG_KNOBS: Knob[] = [
   { key: "TAKI_MEMORY_STOPLIST", ...choice(["on", "off"]), default: "on", apply: "restart", description: "Stop-word filtering in the memory segmenter." },
   { key: "TAKI_MEMORY_INTENTIONS_DEFAULT_DAYS", ...int({ min: 1 }), default: DEFAULT_INTENTIONS_DAYS, apply: "restart", description: "Fallback lifetime of an intention with no explicit expiry." },
   { key: "TAKI_MEMORY_TIDY_WRITE_THRESHOLD", ...int({ min: 1 }), default: DEFAULT_TIDY_WRITE_THRESHOLD, apply: "restart", description: "New memory writes that trigger a tidy pass." },
-  { key: "TAKI_MEMORY_TIDY_MAX_STEPS", ...int({ min: 1 }), default: DEFAULT_TIDY_MAX_STEPS, apply: "restart", description: "Step ceiling for one tidy pass." },
+  { key: "TAKI_MEMORY_TIDY_MAX_STEPS", ...int({ min: 1 }), default: DEFAULT_TIDY_MAX_STEPS, apply: "restart", description: "Model-step ceiling for each memory tidy batch." },
   { key: "TAKI_MEMORY_TIDY_STALE_DAYS", ...int({ min: 1 }), default: DEFAULT_TIDY_STALE_DAYS, apply: "restart", description: "Age at which a never-recalled memory becomes a tidy candidate." },
-  { key: "TAKI_MEMORY_TIDY_REPORT_CAP", ...int({ min: 1 }), default: DEFAULT_TIDY_REPORT_CAP, apply: "restart", description: "Per-class candidate cap in the tidy report." },
+  { key: "TAKI_MEMORY_TIDY_REPORT_CAP", ...int({ min: 1 }), default: DEFAULT_TIDY_REPORT_CAP, apply: "restart", description: "Memory candidates per tidy batch; complete duplicate groups stay together." },
+  { key: "TAKI_MEMORY_TIDY_BATCH_TIMEOUT_MS", ...int({ min: 1 }), default: DEFAULT_TIDY_BATCH_TIMEOUT_MS, apply: "restart", description: "Execution timeout for each memory tidy batch, excluding queue time (ms)." },
+  { key: "TAKI_MEMORY_TIDY_INPUT_TOKENS", ...int({ min: 1 }), default: DEFAULT_TIDY_INPUT_TOKENS, apply: "restart", description: "Estimated initial tidy input budget, including instructions, tools and the review report." },
 
   // --- inactive Hindsight setup plane (B3; does not select Memory Authority) ---
   { key: "TAKI_HINDSIGHT_ENABLED", ...bool(), default: false, apply: "live", description: "Allow explicit Hindsight validation and setup actions." },

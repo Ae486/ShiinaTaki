@@ -44,6 +44,8 @@ export interface MemorySubsystemDeps {
   authorityFence?: MemoryAuthorityFence;
   /** Runtime authority state used to retire the legacy retention arm after canonical activation. */
   isCanonical?: () => boolean;
+  /** Automatic tidy keeps its trigger but admits work through the same durable operation owner. */
+  requestTidyRun?: (characterId: string) => Promise<void>;
 }
 
 export interface MemorySubsystem {
@@ -60,7 +62,7 @@ export interface MemorySubsystem {
   memoryRoot: string;
   /** The bound write op the image-description bridge reuses (#17 decision 6). */
   writeMemory(input: Parameters<MemoryWriteOp>[0]): { id: string };
-  stop?(): void;
+  stop?(): void | Promise<void>;
 }
 
 export function createMemorySubsystem(deps: MemorySubsystemDeps): MemorySubsystem {
@@ -82,6 +84,7 @@ export function createMemorySubsystem(deps: MemorySubsystemDeps): MemorySubsyste
     slot: utility,
     config,
     logger: logger.child({ mod: "memory-tidy" }),
+    requestRun: deps.requestTidyRun,
   });
 
   // Automatic memory writes (#7): episodic summaries + pre-compaction flush, fired detached after each chat turn.
@@ -122,7 +125,8 @@ export function createMemorySubsystem(deps: MemorySubsystemDeps): MemorySubsyste
     enabled: () => !(deps.isCanonical?.() ?? false),
   });
 
-  return { engine, maintenance, memoryFlush, utility, tidy, memoryRoot: memoryRootOf(deps.dataDir), writeMemory, stop: retention.stop };
+  return { engine, maintenance, memoryFlush, utility, tidy, memoryRoot: memoryRootOf(deps.dataDir), writeMemory,
+    stop: async () => { retention.stop(); await tidy.stop(); } };
 }
 
 // The Workspace's memory tree: markdown files under the app data root (beside the db, NOT in it — invariant 1).

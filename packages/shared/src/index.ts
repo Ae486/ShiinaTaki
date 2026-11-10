@@ -524,6 +524,7 @@ export { SUBAGENT_METHODS, SubagentSummarySchema, SubagentListParamsSchema, Suba
   type SubagentStopParams, type SubagentContinueParams, type SubagentListResult, type SubagentHistoryResult } from "./subagent-api-schema.ts";
 export { MemoryTidyToolNameSchema, MemoryTidyIssueSchema, MemoryTidyFailureReasonSchema, MemoryTidyFailureDetailsSchema,
   type MemoryTidyIssue, type MemoryTidyFailureReason, type MemoryTidyFailureDetails } from "./memory-tidy-diagnostics-schema.ts";
+export { MemoryTidyProgressSchema, MemoryTidyOutcomeSchema, type MemoryTidyProgress, type MemoryTidyOutcome } from "./memory-tidy-outcome-schema.ts";
 export { CACHE_USAGE_METHODS, CacheUsageWindowSnapshotSchema, CacheUsageUpdateSchema,
   CacheUsageSubscribeParamsSchema, CacheUsageUnsubscribeParamsSchema, CacheUsageUnsubscribeResultSchema,
   type CacheUsageWindowSnapshot, type CacheUsageUpdate, type CacheUsageSubscribeParams } from "./cache-usage-schema.ts";
@@ -533,3 +534,9 @@ export { CONTEXT_CATEGORIES, CONTEXT_CONTENT_ORIGINS, CONTEXT_REQUEST_SCHEMA_VER
   type ContextCategory, type ContextContentOrigin, type ContextWindowSnapshot, type RequestComposition,
   type ContextRequestMeasuredPayload, type ContextRequestMeasuredEvent, type LatestPrimaryRequestSnapshot,
 } from "./request-attribution-schema.ts";
+export { MaintenanceKindSchema, MaintenanceOperationRefSchema, type MaintenanceOperationRef } from "./maintenance-operation-ref-schema.ts";
+export { MAINTENANCE_MONITOR_METHODS, MaintenanceMonitorParamsSchema, MaintenanceMonitorSummarySchema,
+  MaintenanceMonitorSnapshotSchema, MaintenanceMonitorUpdateSchema,
+  MaintenanceMonitorUnsubscribeParamsSchema, MaintenanceMonitorUnsubscribeResultSchema,
+  type MaintenanceMonitorParams, type MaintenanceMonitorSummary, type MaintenanceMonitorSnapshot,
+  type MaintenanceMonitorUpdate } from "./maintenance-monitor-schema.ts";

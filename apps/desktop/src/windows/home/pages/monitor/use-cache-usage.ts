@@ -10,9 +10,9 @@ import { useHomeClient } from "../../home-client-context.ts";
 import { usePageActive } from "../../page-visibility-store.ts";
 import { CacheUsageController, INITIAL_CACHE_USAGE_VIEW } from "./cache-usage-controller.ts";
 
-export function useCacheUsage(mode: MonitorMode) {
+export function useCacheUsage(mode: MonitorMode, active = true) {
   const { client } = useHomeClient();
-  const visible = usePageActive("monitor");
+  const visible = usePageActive("monitor") && active;
   const [view, setView] = useState(INITIAL_CACHE_USAGE_VIEW);
   const controller = useMemo(() => new CacheUsageController(setView, ACTIVE_CHARACTER_ID), []);
   useLayoutEffect(() => { controller.setVisible(visible); }, [controller, visible]);
