@@ -2,6 +2,7 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import * as replicaQueries from "../../db/hindsight-application-replica-query.ts";
 import { rmTempDir } from "../../testing/rm-temp.ts";
 import { failingGenerateModel, scriptedGenerateModel } from "../../testing/mock-language-model.ts";
 import { APPLICATION_TEST_AT, applicationTestArtifact, applicationTestBody } from "../../testing/hindsight-application-fixtures.ts";
@@ -32,7 +33,7 @@ describe("Hindsight policy curator through durable application state", () => {
       for (const row of report.policies) {
         results.push(await curatorTestTool(input, "memory_policy_assess", curatorTestAssessment(row.policy, row.workId)));
       }
-      checkedIds = headReads.mock.calls.map(([request]) => request.objectId);
+      checkedIds = headReads.mock.calls.map(([, request]) => request.object_id);
       results.push(await curatorTestTool(input, "block_read", { id: "user-card" }));
       results.push(await curatorTestTool(input, "policy_review_finish"));
       readsAfterFinish = headReads.mock.calls.length;
@@ -40,7 +41,7 @@ describe("Hindsight policy curator through durable application state", () => {
       input.onStepEnd(); return { steps: 1, usage: { inputTokens: 11, outputTokens: 7 } };
     } });
     f.config.memory.reportClassCap = 15;
-    const headReads = vi.spyOn(f.replica, "nativeHead");
+    const headReads = vi.spyOn(replicaQueries, "readApplicationNativeHead");
     const running = f.curator.runNow("taki");
     await measured;
     // The cost boundary ends before publication, which has independent correctness coverage below.

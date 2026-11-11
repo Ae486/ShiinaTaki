@@ -73,6 +73,12 @@ function seed(fixture: Awaited<ReturnType<typeof boot>>, from: number, through: 
 }
 
 function activateMarker(db: Database, epochId: string): void {
+  const at = "2026-08-29T00:00:00.000Z";
+  db.prepare(`INSERT INTO memory_migration_runs(run_id,snapshot_id,epoch_id,phase,status,requested_at,updated_at,lease_fence,activation_transaction_id)
+    VALUES ('local-run','snapshot',:epoch,'activated','completed',:at,:at,1,'activation')`).run({ epoch: epochId, at });
+  db.prepare(`INSERT INTO memory_migration_activation_receipts(run_id,transaction_id,snapshot_id,manifest_digest,readiness_digest,epoch_id,lease_fence,committed_at,marker_mode)
+    VALUES ('local-run','activation','snapshot',:digest,:digest,:epoch,1,:at,'canonical-local')`)
+    .run({ digest: "a".repeat(64), epoch: epochId, at });
   db.prepare(`UPDATE memory_authority_selection SET mode='canonical-local',active_epoch_id=:epoch,
     verified_snapshot_id='snapshot',activation_transaction_id='activation' WHERE singleton=1`).run({ epoch: epochId });
 }
@@ -178,7 +184,9 @@ describe("provider-independent Compaction composition", () => {
     await fixture.runtime.compaction.maybeRun("taki");
     expect(fixture.db.prepare("SELECT failure_code FROM conversation_compaction_operations").get()?.failure_code).toBe("MEMORY_FLUSH_FAILED");
     expect(fixture.model.doGenerateCalls).toHaveLength(0);
+    expect(canonicalSubsystem.createCanonicalLocalSubsystem).toHaveBeenCalledOnce();
     // A marker without its joined activation receipt is corrupt state: recovery fails closed and never constructs.
+    fixture.db.exec("DELETE FROM memory_migration_activation_receipts WHERE transaction_id='activation'");
     expect(() => fixture.runtime.recoverLocalBinding(fixture.epochId)).toThrow("MEMORY_INTEGRITY_ERROR");
     expect(fixture.runtime.bindingSnapshot().binding.kind).toBe("unavailable");
     await expect(fixture.runtime.stop()).resolves.toBeUndefined();

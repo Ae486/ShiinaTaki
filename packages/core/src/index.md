@@ -1,8 +1,8 @@
 # core/src/
 - harness/ — Core-owned Trigger admission and Run/Attempt lifecycle service above the existing ToolLoopAgent
-- scheduler/ — durable Scheduled Task definitions, calendar evaluation, occurrence outbox, and canonical Run adapter
+- scheduler/ — the shared sweep runner every retention arm rides (boot sweep + unref'd interval + count-only log); D108: durable Scheduled Task definitions, calendar evaluation, occurrence outbox, and canonical Run adapter
 - index.ts — package public entry; empty until an external consumer exists (core runs as a process)
-- main.ts — process entry: secret/config context and selected memory runtime → Replay View/request measurement → operator/template/custody/deployment registries, shared status observation and live replica configuration → ws-server; closes observers after draining services and clients
+- main.ts — process entry: secret/config context and selected memory runtime → Replay View/request measurement → operator/template/custody/deployment registries, shared status observation and live replica configuration → ws-server; closes observers after draining services and clients; D108: Core composition and shutdown, wiring the live turn/config owners into memory maintenance; committed review hints reuse the existing replica subscription
 - config/ — env → validated boot config; plus the operator-facing settings store (knob registry, precedence source, writer, change fan-out)
 - boot/ — the composition root's config+storage phase: open the DB on the env-only data root, then resolve every other knob (env > stored > default) for the loaders
 - logging/ — pino root logger factory

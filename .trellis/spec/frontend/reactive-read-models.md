@@ -102,6 +102,22 @@ Each page declares how a fresh generation becomes trustworthy; there is no globa
 - If a signal does not exist, the UI shows nothing rather than a plausible lie (batch-2 §9 ruling; the
   same honesty rule as costume phases and test-result truth in home-window.md).
 
+## Memory review facts and invalidation
+
+Home memory review uses `MemoryAuthorityStatus.review` and the existing
+`memory.operations.subscribe` membership for `memory.replica.changed` hints. A hint
+requests a fresh authority read through `createMemoryOperationsController`; it is
+not a progress value. Keep its generation guard and in-flight dirty-read coalescing.
+Missing review rows/counts stay unknown, measured zero remains zero, and unavailable
+replica evidence must not erase independently supplied review rows or enable sync
+controls. Refreshing, failed reads and disconnected retained frames identify the
+last read and its observation time. `catchUpOccurrenceId` persists after completion:
+display a historical inline record, without inferring that a later occurrence is
+currently catching up. No notice ledger, polling, timer or frontend authority is
+needed. Verify browser reconnect/remount and mid-read pushes separately from the
+Core producer/WS test; neither substitutes for real concurrent review or owner UX
+acceptance.
+
 ## Wrong vs Correct
 
 ```tsx

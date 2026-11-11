@@ -10,6 +10,12 @@ transaction-ending conflict actions must preserve failure atomicity through the 
 `Database.transaction(fn: () => void): void` in `packages/core/src/db/sqlite.ts`; all `exec`, prepared statement
 `run/get/all` and nested transaction entry points use the same wrapper. No async work belongs in the callback.
 
+`Database.isTransaction` is a read-only getter over SQLite's actual state, including direct SQL BEGIN/SAVEPOINT.
+It does not mutate or replace wrapper depth. Database decorators must delegate the getter; object spread alone
+captures a stale boolean. Evidence memo owners may reuse committed evidence inside a transaction after a fresh
+token check, but must not publish newly read evidence until no enclosing transaction remains. A pure reader
+already inside a transaction uses that snapshot directly rather than starting another top-level BEGIN.
+
 ## 3. Contracts
 
 Keep the entry `parentDepth` until COMMIT or savepoint RELEASE succeeds or rollback finishes; restore depth in

@@ -1,6 +1,6 @@
 /**
  * INPUT:  Core-owned Bank configuration, one clock, and per-Bank run/lease tokens
- * OUTPUT: atomic claims, retry requests, earliest active-epoch Pending retry, fenced settlement and restart recovery
+ * OUTPUT: atomic claims, retry requests, Bank-wide accepted waiting, fenced settlement and restart recovery
  * POS:    core/db — scheduler state is separate from replica payloads, Pending Memory, and Memory Authority
  */
 import { z } from "zod";
@@ -14,8 +14,9 @@ import type { Database } from "./sqlite.ts";
 import { canonicalJson } from "../memory/legacy-migration/legacy-identities.ts";
 import { createHindsightReplicaLeaseRepo, type HindsightReplicaLeaseRepo } from "./hindsight-replica-lease-repo.ts";
 import { readReplicaCheckpoint } from "./hindsight-replica-checkpoint-store.ts";
+import { readPendingRecoveryState } from "./hindsight-pending-recovery-state.ts";
 import { claimReplicaRequest, insertReplicaRequest, readReplicaRequest, settleReplicaRequest, updateReplicaRequest } from "./hindsight-replica-request-repo.ts";
-import { after, configureReplicaSchedule, failedReplicaSchedule, initialReplicaSchedule, replicaScheduleDue, requestReplicaRetry } from "./hindsight-replica-schedule-state.ts";
+import { after, configureReplicaSchedule, failedReplicaSchedule, initialReplicaSchedule, pendingReplicaSchedule, replicaScheduleDue, requestReplicaRetry } from "./hindsight-replica-schedule-state.ts";
 
 interface Stored { version: number; state: MemoryReplicaSyncState }
 interface Context { db: Database; leases: HindsightReplicaLeaseRepo; now: () => string }
@@ -34,7 +35,6 @@ export interface HindsightReplicaSchedulerRepo {
   failManual(input: { bankId: string; requestId: string; errorCode: MemoryReplicaErrorCode }): MemoryReplicaSyncState;
   requestCatchUp(bankId: string): MemoryReplicaSyncState;
   requestRetry(bankId: string, dueAt: string): MemoryReplicaSyncState;
-  nextPendingRetryAt(bankId: string): string | null;
   recover(bankId: string): MemoryReplicaSyncState;
   claim(input: ClaimInput): MemoryReplicaScheduledRun | undefined;
   promoteToFull(run: MemoryReplicaScheduledRun): MemoryReplicaScheduledRun;
@@ -72,12 +72,13 @@ export function createHindsightReplicaSchedulerRepo(db: Database, now: () => str
         || replicaScheduleDue(state, clock()) !== undefined) })),
     requestRetry: (bankId, dueAt) => mutate(context, bankId, (state) =>
       requestReplicaRetry(state, z.iso.datetime({ offset: true }).parse(dueAt), clock())),
-    nextPendingRetryAt: (bankId) => nextPendingRetryAt(db, bankId),
     recover: (bankId) => recover(context, bankId),
     claim: (input) => claim(context, input),
     promoteToFull: (run) => promoteToFull(context, run),
     succeed: (input) => succeed(context, input),
-    fail: (input) => settle(context, input.run, (state) => failedReplicaSchedule(state, MemoryReplicaErrorCodeSchema.parse(input.errorCode), clock())),
+    fail: (input) => settle(context, input.run, (state) => input.errorCode === "HINDSIGHT_PENDING_REMAINS"
+      ? pendingReplicaSchedule(state, readPendingRecoveryState(db, state.bankId), clock())
+      : failedReplicaSchedule(state, MemoryReplicaErrorCodeSchema.parse(input.errorCode), clock())),
   };
 }
 
@@ -95,15 +96,6 @@ function requestManual(context: Context, input: Parameters<HindsightReplicaSched
       state: "queued", claim: null, createdAt: now(), settledAt: null, errorCode: null, nextAction: null, lastSuccessAt: null });
     return { ...state, pendingManualKind: state.pendingManualKind === "full" ? "full" : kind, pendingManualRequestId: input.requestId ?? null };
   });
-}
-
-function nextPendingRetryAt(db: Database, bankId: string): string | null {
-  const row = db.prepare(`SELECT min(json_extract(pending.state_json,'$.nextRetryAt')) AS due_at
-    FROM pending_memory AS pending JOIN canonical_memory_authority_state AS authority
-      ON authority.active_epoch_id=pending.authority_epoch_id AND authority.singleton=1
-    WHERE pending.bank_id=:bank AND pending.phase IN ('queued','submitted','awaiting_derived','awaiting_pull')`)
-    .get({ bank: z.string().min(1).max(256).parse(bankId) });
-  return z.iso.datetime({ offset: true }).nullable().parse(row?.due_at ?? null);
 }
 
 function ensureBank(context: Context, input: BankInput): MemoryReplicaSyncState {

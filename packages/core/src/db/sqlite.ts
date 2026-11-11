@@ -1,6 +1,6 @@
 /**
  * INPUT:  a db file path (or ':memory:') + an ordered migration list
- * OUTPUT: openDatabase({path, migrations}) -> Database (exec/prepare/transaction/backupTo/close); toSafeInteger helper
+ * OUTPUT: Database with SQL/transaction/backup operations and read-only actual transaction state; toSafeInteger helper
  * POS:    core/db — the ONLY module importing node:sqlite; repos receive this wrapper, never DatabaseSync; no fs here
  *         (backupTo writes only the path its caller owns)
  */
@@ -24,6 +24,8 @@ export interface SqlStatement {
 }
 
 export interface Database {
+  /** Actual SQLite state, including transactions entered through exec(); false after close. */
+  readonly isTransaction: boolean;
   exec(sql: string): void;
   prepare(sql: string): SqlStatement;
   /** BEGIN/COMMIT around fn, ROLLBACK on throw. Synchronous only — never await inside fn. */
@@ -68,6 +70,7 @@ function wrap(raw: DatabaseSync): Database {
   const transactionState = { depth: 0 };
   const assertActive = () => assertActiveTransaction(raw, transactionState.depth);
   return {
+    get isTransaction() { return raw.isOpen && raw.isTransaction; },
     exec(sql) {
       assertActive();
       raw.exec(sql);

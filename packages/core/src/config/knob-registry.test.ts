@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { ConfigEntrySchema } from "@taki/shared";
 import { CONFIG_KNOBS, findKnob } from "./knob-registry.ts";
 
-// The scoping research's env-knob table (rs-panel-scoping.md §7), expanded: its VLM and UTILITY rows each name
-// three variables. TAKI_DEV_TRIGGER is deliberately absent (dev-only, not a panel knob), as are the two test
+// The scoping research's env-knob table (rs-panel-scoping.md §7), expanded with later operator knobs;
+// its VLM and UTILITY rows each name three variables. TAKI_DEV_TRIGGER is deliberately absent (dev-only, not a panel knob), as are the two test
 // fixtures the same grep found.
 const EXPECTED_KEYS = [
   "TAKI_WS_HOST",
@@ -66,6 +66,10 @@ const EXPECTED_KEYS = [
   "TAKI_HINDSIGHT_EMBEDDING_MODEL",
   "TAKI_HINDSIGHT_RERANKER_PROVIDER",
   "TAKI_HINDSIGHT_RERANKER_MODEL",
+  "TAKI_HINDSIGHT_POLICY_REVIEW_MODE",
+  "TAKI_HINDSIGHT_POLICY_REVIEW_TIME",
+  "TAKI_HINDSIGHT_POLICY_REVIEW_INTERVAL_MS",
+  "TAKI_HINDSIGHT_POLICY_REVIEW_THRESHOLD",
   "TAKI_HINDSIGHT_POLICY_TIMEOUT_MS",
   "TAKI_HINDSIGHT_POLICY_PROMPT",
 ];
@@ -75,7 +79,7 @@ describe("CONFIG_KNOBS", () => {
     const keys = CONFIG_KNOBS.map((knob) => knob.key);
     expect(new Set(keys).size).toBe(keys.length);
     expect([...keys].sort()).toEqual([...EXPECTED_KEYS].sort());
-    expect(CONFIG_KNOBS).toHaveLength(62);
+    expect(CONFIG_KNOBS).toHaveLength(EXPECTED_KEYS.length);
   });
 
   it("flags exactly the three API keys as secrets", () => {
@@ -115,6 +119,10 @@ describe("CONFIG_KNOBS", () => {
       "TAKI_HINDSIGHT_EMBEDDING_MODEL",
       "TAKI_HINDSIGHT_RERANKER_PROVIDER",
       "TAKI_HINDSIGHT_RERANKER_MODEL",
+      "TAKI_HINDSIGHT_POLICY_REVIEW_MODE",
+      "TAKI_HINDSIGHT_POLICY_REVIEW_TIME",
+      "TAKI_HINDSIGHT_POLICY_REVIEW_INTERVAL_MS",
+      "TAKI_HINDSIGHT_POLICY_REVIEW_THRESHOLD",
       "TAKI_HINDSIGHT_POLICY_TIMEOUT_MS",
       "TAKI_HINDSIGHT_POLICY_PROMPT",
     ]);

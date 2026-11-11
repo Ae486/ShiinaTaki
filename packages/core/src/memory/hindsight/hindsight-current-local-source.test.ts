@@ -153,7 +153,7 @@ describe("current Local coverage to Hindsight source preparation", () => {
     let blockedAttempts = 0;
     const update = () => other.prepare("UPDATE canonical_memory_sources SET revision=revision+1 WHERE document_id=:document")
       .run({ document: fixture.input.documentId });
-    const observed: Database = { ...db, prepare: (sql) => {
+    const observed: Database = { ...db, get isTransaction() { return db.isTransaction; }, prepare: (sql) => {
       if (sql.includes("INSERT INTO hindsight_source_evidence")) {
         expect(update).toThrow(/locked|busy/i);
         blockedAttempts += 1;

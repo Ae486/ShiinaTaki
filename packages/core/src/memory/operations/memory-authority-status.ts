@@ -1,12 +1,13 @@
 /**
  * INPUT:  authority/binding snapshots, connection, setup/lifecycle owners, operation journal and backup inventory
- * OUTPUT: strict composite status with runtime/hold reasons, lifecycle actions, backup evidence and source intervals
+ * OUTPUT: composite runtime/lifecycle/backup evidence and durable policy review progress with truthful unknown counts
  * POS:    read-only Core projection — no network probes; unavailable connections and unknown freshness stay explicit
  */
 import {
   MemoryAuthorityStatusSchema, type HindsightBackupStatusSection, type MemoryAuthorityStatus, type MemoryOperation, type MemoryRuntimeUnavailableReason,
 } from "@taki/shared";
 import { countPendingHindsightMemoryWrites } from "../../db/hindsight-memory-write-repo.ts";
+import { readHindsightPolicyReviewStatus } from "../../db/hindsight-policy-review-repo.ts";
 import type { Database } from "../../db/sqlite.ts";
 import { readCurrentMemoryAuthorityIdentity, type MemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
 import type { HindsightBackupService } from "../hindsight-backup/hindsight-backup-service.ts";
@@ -84,8 +85,14 @@ export function readMemoryAuthorityStatus(input: MemoryAuthorityStatusInput,
         revalidateBlocked: revalidateBlocked(input, selection.epochId), backup: backupStatus(input, { epochId: selection.epochId, now: observedAt }) })
       : null,
     derivedFreshness: "unknown",
+    review: hindsight && selection.epochId ? reviewStatus(input.db, selection.epochId, unavailableReason === null) : null,
     observedAt,
   });
+}
+
+function reviewStatus(db: Database, epochId: string, available: boolean) {
+  try { return readHindsightPolicyReviewStatus(db, { epochId, available }); }
+  catch { return null; }
 }
 
 /** An unreadable config or Secret Catalog reads as unconfigured; the read itself never fails on it. */

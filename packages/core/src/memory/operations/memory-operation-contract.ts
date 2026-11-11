@@ -82,7 +82,7 @@ export function refuseWhileExclusiveFamilyBusy(ctx: Pick<MemoryOperationContext,
 }
 
 export interface MemoryOperationSettlement {
-  state: "completed" | "failed" | "cancelled" | "outcome_unknown";
+  state: "waiting" | "completed" | "failed" | "cancelled" | "outcome_unknown";
   reason: MemoryOperationReason | null;
   errorCode: MemoryOperationErrorCode | null;
   result: MemoryOperationResult | null;

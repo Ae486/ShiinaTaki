@@ -159,7 +159,7 @@ async function corePreflight(plan) {
     let migrationHead; let candidateRows;
     try {
       migrationHead = db.prepare("SELECT max(version) AS head FROM migrations").get().head;
-      assert.equal(migrationHead, 60, "PAIRED_RESTORE_HEAD060_REQUIRED");
+      assert.equal(migrationHead, 63, "PAIRED_RESTORE_HEAD063_REQUIRED");
       assert.equal(manifest.core.migrationHead, migrationHead, "PAIRED_RESTORE_HEAD_MISMATCH");
       const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'hindsight_candidate_%' ORDER BY name").all();
       assert.equal(tables.length, 5, "PAIRED_RESTORE_CANDIDATE_TABLES_MISSING");

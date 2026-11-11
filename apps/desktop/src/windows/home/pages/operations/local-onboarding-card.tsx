@@ -15,7 +15,7 @@ import type { LocalOnboardingView } from "./use-local-onboarding.ts";
 import { MEMORY_RUNTIME_UNAVAILABLE_LABEL } from "./memory-authority-state.ts";
 
 const OPERATION_STATE: Record<MemoryOperation["state"], string> = {
-  admitted: "已受理，尚未开始", running: "执行中", completed: "已完成", failed: "失败", cancelled: "已取消", outcome_unknown: "结果未知",
+  admitted: "已受理，尚未开始", running: "执行中", waiting: "等待处理", completed: "已完成", failed: "失败", cancelled: "已取消", outcome_unknown: "结果未知",
 };
 const RUNTIME_REASON = MEMORY_RUNTIME_UNAVAILABLE_LABEL;
 const ACTIONS = Object.keys(ONBOARDING_ACTION_LABEL) as OnboardingAction[];

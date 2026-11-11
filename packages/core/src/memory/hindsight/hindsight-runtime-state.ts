@@ -1,6 +1,6 @@
 /**
  * INPUT:  active Hindsight connection, Core SQLite and immutable provider-specific configuration
- * OUTPUT: replica, binding, keyed live-checked admission reuse, Pending recovery, writes and real provider
+ * OUTPUT: replica/binding, committed-application notifications, guarded admission, Pending recovery and real provider
  * POS:    core/memory/hindsight — storage/transport composition; constructors never dispatch work or change Authority
  */
 import type { MemoryBankScope, TakiApplicationBlockBody } from "@taki/shared";
@@ -37,7 +37,8 @@ import { transitionQueuedProvider } from "../transitions/transition-queued-provi
 import type { CanonicalLocalWriteFence } from "../canonical-local-write-fence.ts";
 import { readSelectedTemplateLabelGroup } from "./template-lifecycle/template-runtime-selection.ts";
 
-interface Input { db: Database; runtime: HindsightRuntimeConnection; config: MemoryConfig; now?: () => string; workFence?: CanonicalLocalWriteFence }
+interface Input { db: Database; runtime: HindsightRuntimeConnection; config: MemoryConfig; now?: () => string; workFence?: CanonicalLocalWriteFence;
+  onReplicaApplied?: (bankId: string) => void }
 export type HindsightRuntimeState = ReturnType<typeof createHindsightRuntimeState>;
 
 export function createHindsightRuntimeState(input: Input) {
@@ -49,7 +50,8 @@ export function createHindsightRuntimeState(input: Input) {
     templateLabelGroup: (scope) => runtime.templateExecution ? runtime.templateExecution.labelGroup(scope) : readSelectedTemplateLabelGroup(db, scope),
     blocks: (scope) => readBlocks(blocks, scope.bankScope) });
   const sync = createHindsightApplicationSyncRunner({ client: runtime.client, repo: replica, authority: runtime.authority,
-    bankScope, requestTimeoutMs: runtime.connection.requestTimeoutMs, bind, now: input.now, resolveAdmission: admitted.resolve });
+    bankScope, requestTimeoutMs: runtime.connection.requestTimeoutMs, bind, now: input.now, resolveAdmission: admitted.resolve,
+    onApplied: input.onReplicaApplied });
   const unsupported = (): never => { throw new Error("HINDSIGHT_APPLICATION_NATIVE_PUBLICATION_REFUSED"); };
   const recovery = createHindsightPendingRecoveryRunner({ client: runtime.client, replica: nativeReplica, pending,
     authority: runtime.authority, projection: { bankScope, source: unsupported, memory: unsupported },

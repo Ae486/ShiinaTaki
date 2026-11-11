@@ -1,11 +1,16 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { MemoryOperation, MemoryReplicaBank } from "@taki/shared";
+import { randomUUID } from "node:crypto";
+import { MemoryOperationSchema, MemoryReplicaScheduleConfigSchema, type MemoryOperation, type MemoryReplicaBank, type MemoryReplicaErrorCode } from "@taki/shared";
+import { createMemoryOperationRepo } from "../../db/memory-operation-repo.ts";
 import { createHindsightReplicaLeaseRepo } from "../../db/hindsight-replica-lease-repo.ts";
 import { publishReplicaCheckpoint, readReplicaCheckpoint } from "../../db/hindsight-replica-checkpoint-store.ts";
 import { createHindsightReplicaSchedulerRepo, type HindsightReplicaSchedulerRepo } from "../../db/hindsight-replica-scheduler-repo.ts";
 import { MIGRATIONS } from "../../db/migrations/index-list.ts";
 import { openDatabase, type Database } from "../../db/sqlite.ts";
 import { createLogger } from "../../logging/logger.ts";
+import { createMethodRegistry, type MethodContext } from "../../server/method-registry.ts";
+import { registerMemoryOperationMethods } from "../../server/methods/memory-operation-methods.ts";
+import { createMemoryOperationSubscriptions } from "../../server/memory-operation-subscriptions.ts";
 import { createCanonicalLocalWriteFence } from "../canonical-local-write-fence.ts";
 import { createHindsightReplicaScheduler, type HindsightReplicaScheduler } from "../hindsight/hindsight-replica-scheduler.ts";
 import type { HindsightReplicaRunInput } from "../hindsight/hindsight-replica-sync-runner.ts";
@@ -25,6 +30,9 @@ const sync = (bankId = "global") => ({ kind: "replica.sync" as const, bankId, sy
 /** Real B5 scheduler + repos on a temporary SQLite; only the data-plane runner is injected. */
 function fixture(banks: MemoryReplicaBank[] = [GLOBAL]) {
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS }); dbs.push(db);
+  db.prepare(`INSERT INTO canonical_memory_authority_epochs(epoch_id,provider_id,provider_lineage_id,status,started_at,reason)
+    VALUES ('epoch','local','local-lineage','active',:now,'initial-local')`).run({ now: AT });
+  db.prepare("INSERT INTO canonical_memory_authority_state VALUES (1,'epoch',:now)").run({ now: AT });
   db.prepare("UPDATE memory_authority_selection SET mode='canonical-local',active_epoch_id='epoch',verified_snapshot_id='snapshot',activation_transaction_id='tx' WHERE singleton=1").run();
   let now = AT; const clock = () => now;
   const repo = createHindsightReplicaSchedulerRepo(db, clock);
@@ -35,11 +43,11 @@ function fixture(banks: MemoryReplicaBank[] = [GLOBAL]) {
       replicaEpochId: UUID, endCursor: 8, snapshotId: UUID, snapshotCursor: 8, snapshotManifestDigest: "a".repeat(64), manifestDigest: "b".repeat(64), verifiedAt: AT } });
   }
   const calls: HindsightReplicaRunInput[] = []; const gates: Array<() => void> = [];
-  let holding = false; let failManual = false;
+  let holding = false; let manualError: MemoryReplicaErrorCode | null = null;
   const run = async (input: HindsightReplicaRunInput) => {
     calls.push(input);
     if (holding) await new Promise<void>((resolve) => gates.push(resolve));
-    if (failManual && input.run.trigger === "manual") throw new Error("HINDSIGHT_UNREACHABLE");
+    if (manualError && input.run.trigger === "manual") throw new Error(manualError);
     const checkpoint = readReplicaCheckpoint(db, input.bank.bankId);
     if (!checkpoint) throw new Error("fixture missing checkpoint");
     return { checkpoint, observedCursor: checkpoint.endCursor };
@@ -59,11 +67,60 @@ function fixture(banks: MemoryReplicaBank[] = [GLOBAL]) {
   };
   const untilCalls = async (count: number) => { while (calls.length < count) await new Promise((resolve) => setImmediate(resolve)); };
   return { db, repo, calls, build, untilCalls, hold: () => { holding = true; }, release: () => { holding = false; gates.splice(0).forEach((open) => open()); },
-    failManual: () => { failManual = true; },
+    failManual: (code: MemoryReplicaErrorCode | null = "HINDSIGHT_UNREACHABLE") => { manualError = code; },
     advance: (ms: number) => { now = new Date(Date.parse(now) + ms).toISOString(); } };
 }
 
+function acceptedPending(db: Database) {
+  db.prepare(`INSERT INTO pending_memory(authority_epoch_id,bank_id,operation_id,operation_kind,intent_hash,phase,version,state_json)
+    VALUES ('epoch','global','accepted','retain',:hash,'submitted',1,:json)`).run({ hash: "a".repeat(64),
+    json: JSON.stringify({ acceptedAt: AT, nextRetryAt: "2026-09-19T00:05:00.000Z", diagnosticCode: "HINDSIGHT_PENDING_REMAINS",
+      dispatch: { protocol: "tracked_native_v1" }, nativeStatus: { status: "processing" } }) });
+}
+
 describe("replica.sync against the real B5 scheduler", () => {
+  it("returns terminal waiting through registered submit/status/list and releases the family for an independent check", async () => {
+    const f = fixture(); acceptedPending(f.db); f.failManual("HINDSIGHT_PENDING_REMAINS");
+    f.repo.ensureBank({ bank: GLOBAL, config: MemoryReplicaScheduleConfigSchema.parse({ automatic: false }) });
+    const { scheduler, service, changes } = f.build(); scheduler.start();
+    const registry = createMethodRegistry(); registerMemoryOperationMethods(registry, { service,
+      subscriptions: createMemoryOperationSubscriptions(), logger: createLogger("fatal") });
+    const ctx: MethodContext = { connection: { state: { status: "authenticated", deviceId: "home", role: "operator", capabilities: [] } },
+      notify: () => undefined, close: () => undefined, onClose: () => undefined };
+    const call = (method: string, params: unknown) => registry.dispatch({ jsonrpc: "2.0", id: 1, method, params }, ctx);
+    expect(await call("memory.operations.submit", { request: sync() })).toMatchObject({ result: { operation: { state: "admitted" } } });
+    await service.stop(); const waiting = MemoryOperationSchema.parse(changes.at(-1));
+    expect(waiting).toMatchObject({ state: "waiting", reason: null, errorCode: null, terminalAt: AT,
+      result: { kind: "replica", errorCode: null, nextAction: "explicit_retry_required", lastSuccessAt: null } });
+    expect(changes.map((row) => row.state)).toEqual(["admitted", "waiting"]);
+    expect(await call("memory.operations.status", { operationId: waiting.operationId })).toMatchObject({ result: { operation: waiting } });
+    expect(await call("memory.operations.list", {})).toMatchObject({ result: { operations: [] } });
+    expect(await call("memory.operations.list", { includeTerminal: true })).toMatchObject({ result: { operations: [waiting] } });
+    const requests = f.db.prepare("SELECT * FROM hindsight_replica_manual_requests").all();
+    f.failManual(null); f.advance(1_000);
+    expect(await call("memory.operations.submit", { request: sync() })).toMatchObject({ result: { operation: { state: "admitted" } } });
+    await service.stop();
+    expect(changes.at(-1)?.state).toBe("completed"); expect(service.status(waiting.operationId)).toEqual(waiting);
+    expect(f.db.prepare("SELECT * FROM hindsight_replica_manual_requests ORDER BY rowid LIMIT 1").all()).toEqual(requests);
+    expect(f.calls.map((call) => call.run.trigger)).toEqual(["manual", "manual"]);
+  });
+
+  it("boot observes the exact waiting request before generic unknown fallback without redispatch", () => {
+    const f = fixture(); acceptedPending(f.db); const requestId = randomUUID(); const operationId = randomUUID();
+    const operations = createMemoryOperationRepo(f.db, () => AT);
+    operations.insertAdmitted({ operationId, kind: "replica.sync", family: "replica:global", authorityEpochId: "epoch",
+      request: sync(), producer: { kind: "replica", bankId: "global", admittedAt: AT, requestId }, bootId: "previous" });
+    f.repo.requestManual({ bankId: "global", kind: "incremental", requestId });
+    const run = f.repo.claim({ bankId: "global", ownerId: "previous", leaseDurationMs: 60_000 })!;
+    f.repo.fail({ run, errorCode: "HINDSIGHT_PENDING_REMAINS" });
+    const { service, changes } = f.build();
+    expect(service.status(operationId)).toMatchObject({ state: "waiting", errorCode: null, reason: null,
+      result: { nextAction: "automatic_retry_scheduled", lastSuccessAt: null } });
+    expect(operations.activeInFamily("replica:global")).toBeUndefined();
+    expect(f.repo.request(requestId)).toMatchObject({ state: "waiting", claim: run.lease });
+    expect(f.calls).toEqual([]); expect(changes.map((row) => row.state)).toEqual(["waiting"]);
+  });
+
   it("settles through the changed push right after submit + one awaited tick, with no later status read", async () => {
     const f = fixture(); const { scheduler, service, changes } = f.build();
     scheduler.start(); await scheduler.tick(); f.calls.length = 0; f.advance(1_000);

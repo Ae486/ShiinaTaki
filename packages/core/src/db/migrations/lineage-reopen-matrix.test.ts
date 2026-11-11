@@ -8,47 +8,7 @@ import { runMigrations } from "../migration-runner.ts";
 import { MIGRATIONS } from "./index-list.ts";
 import { mcpDesiredServersMigration018 } from "./018-mcp-desired-servers.ts";
 import { skillPackagesMigration019 } from "./019-skill-packages.ts";
-import { parallelFoundationConvergenceMigration020 } from "./020-parallel-foundation-convergence.ts";
-import { memoryLegacyMigration021 } from "./021-memory-legacy-migration.ts";
-import { hindsightConnectionSetupMigration022 } from "./022-hindsight-connection-setup.ts";
-import { hindsightInitialCutoverMigration023 } from "./023-hindsight-initial-cutover.ts";
-import { harnessRunsMigration024 } from "./024-harness-runs.ts";
-import { runEventsMigration025 } from "./025-run-events.ts";
-import { runEffectsMigration026 } from "./026-run-effects.ts";
-import { effectApprovalRefMigration027 } from "./027-effect-approval-ref.ts";
-import { recoveryAdmissionMigration028 } from "./028-recovery-admission.ts";
-import { scheduledTasksMigration029 } from "./029-scheduled-tasks.ts";
-import { scheduledOccurrenceCharacterMigration030 } from "./030-scheduled-occurrence-character.ts";
-import { runUsageDetailsMigration031 } from "./031-run-usage-details.ts";
-import { conversationCompactionLifecycleMigration032 } from "./032-conversation-compaction-lifecycle.ts";
-import { hindsightReplicaSyncMigration033 } from "./033-hindsight-replica-sync.ts";
-import { hindsightReplicaSchedulerMigration034 } from "./034-hindsight-replica-scheduler.ts";
 import { pendingMemoryMigration035 } from "./035-pending-memory.ts";
-import { memoryTimelineConvergenceMigration036 } from "./036-memory-timeline-convergence.ts";
-import { hindsightLocalCoverageMigration037 } from "./037-hindsight-local-coverage.ts";
-import { hindsightSourceEvidenceMigration038 } from "./038-hindsight-source-evidence.ts";
-import { hindsightCurrentStateMigration039 } from "./039-hindsight-current-state.ts";
-import { hindsightCutoverConvergenceMigration040 } from "./040-hindsight-cutover-convergence.ts";
-import { canonicalMemoryMaintenanceMigration041 } from "./041-canonical-memory-maintenance.ts";
-import { hindsightApplicationStateMigration042 } from "./042-hindsight-application-state.ts";
-import { hindsightIngestionMigration043 } from "./043-hindsight-ingestion.ts";
-import { hindsightApplicationCommandsMigration044 } from "./044-hindsight-application-commands.ts";
-import { hindsightPolicyWorkMigration045 } from "./045-hindsight-policy-work.ts";
-import { hindsightRuntimeAdmissionMigration046 } from "./046-hindsight-runtime-admission.ts";
-import { hindsightMemoryWritesMigration047 } from "./047-hindsight-memory-writes.ts";
-import { memoryOperationsMigration048 } from "./048-memory-operations.ts";
-import { localOnboardingMigration049 } from "./049-local-onboarding.ts";
-import { hindsightReviewedDeploymentModeMigration050 } from "./050-hindsight-reviewed-deployment-mode.ts";
-import { memoryTransitionsMigration052 } from "./052-memory-transitions.ts";
-import { memoryTransitionCandidatesMigration053 } from "./053-memory-transition-candidates.ts";
-import { memoryTransitionPublicationMigration054 } from "./054-memory-transition-publication.ts";
-import { memoryTransitionDriversMigration055 } from "./055-memory-transition-drivers.ts";
-import { memoryTransitionVerificationDispatchMigration056 } from "./056-memory-transition-verification-dispatch.ts";
-import { memoryTransitionEmergencyMigration057 } from "./057-memory-transition-emergency.ts";
-import { hindsightTemplateOverlaysMigration058 } from "./058-hindsight-template-overlays.ts";
-import { hindsightTemplateExecutionMigration059 } from "./059-hindsight-template-execution.ts";
-import { hindsightCandidatesMigration060 } from "./060-hindsight-candidates.ts";
-import { hindsightReplicaRequestsMigration051 } from "./051-hindsight-replica-requests.ts";
 import { canonicalPayloadHash } from "../../memory/legacy-migration/legacy-identities.ts";
 import { createIntlSegmenterTokenizer } from "../../memory/search-tokenizer.ts";
 import { createReplicaRecordStore } from "../hindsight-replica-record-store.ts";
@@ -85,7 +45,7 @@ function close(db: Database): void {
 }
 
 function expectFinalSchema(db: Database): void {
-  expect(db.prepare("SELECT max(version) AS version FROM migrations").get()?.version).toBe(60);
+  expect(db.prepare("SELECT max(version) AS version FROM migrations").get()?.version).toBe(MIGRATIONS.at(-1)?.version);
   const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map((row) => row.name);
   expect(tables).toEqual(expect.arrayContaining([
     "canonical_memory_units",
@@ -98,6 +58,7 @@ function expectFinalSchema(db: Database): void {
     "hindsight_application_replica_projections",
     "hindsight_application_command_jobs",
     "hindsight_policy_work",
+    "hindsight_policy_review_schedule",
     "hindsight_application_runtime_admission",
     "hindsight_memory_write_intents",
     "memory_operations",
@@ -215,10 +176,10 @@ describe("migration lineage reopen matrix", () => {
     const firstApplied: number[][] = [];
     const first = open(path, MIGRATIONS, (applied) => firstApplied.push(applied));
     expectFinalSchema(first);
-    expect(firstApplied).toEqual([Array.from({ length: 60 }, (_, index) => index + 1)]);
+    expect(firstApplied).toEqual([MIGRATIONS.map(({ version }) => version)]);
     close(first);
     const reopened = expectReopenNoOp(path);
-    expect(reopened.prepare("SELECT count(*) AS count FROM migrations").get()?.count).toBe(60);
+    expect(reopened.prepare("SELECT count(*) AS count FROM migrations").get()?.count).toBe(MIGRATIONS.length);
   });
 
   it("converges the historical T4 17/18 MCP-Skill lineage through 024", () => {
@@ -230,54 +191,11 @@ describe("migration lineage reopen matrix", () => {
     ])).toEqual([17, 18]);
     close(first);
     const tailApplied: number[][] = [];
-    const reopened = open(path, [
-      skillPackagesMigration019,
-      parallelFoundationConvergenceMigration020,
-      memoryLegacyMigration021,
-      hindsightConnectionSetupMigration022,
-      hindsightInitialCutoverMigration023,
-      harnessRunsMigration024,
-      runEventsMigration025,
-      runEffectsMigration026,
-      effectApprovalRefMigration027,
-      recoveryAdmissionMigration028,
-      scheduledTasksMigration029,
-      scheduledOccurrenceCharacterMigration030,
-      runUsageDetailsMigration031,
-      conversationCompactionLifecycleMigration032,
-      hindsightReplicaSyncMigration033,
-      hindsightReplicaSchedulerMigration034,
-      pendingMemoryMigration035,
-      memoryTimelineConvergenceMigration036,
-      hindsightLocalCoverageMigration037,
-      hindsightSourceEvidenceMigration038,
-      hindsightCurrentStateMigration039,
-      hindsightCutoverConvergenceMigration040,
-      canonicalMemoryMaintenanceMigration041,
-      hindsightApplicationStateMigration042,
-      hindsightIngestionMigration043,
-      hindsightApplicationCommandsMigration044,
-      hindsightPolicyWorkMigration045,
-      hindsightRuntimeAdmissionMigration046,
-      hindsightMemoryWritesMigration047,
-      memoryOperationsMigration048,
-      localOnboardingMigration049,
-      hindsightReviewedDeploymentModeMigration050,
-      hindsightReplicaRequestsMigration051,
-      memoryTransitionsMigration052,
-      memoryTransitionCandidatesMigration053,
-      memoryTransitionPublicationMigration054,
-      memoryTransitionDriversMigration055,
-      memoryTransitionVerificationDispatchMigration056,
-      memoryTransitionEmergencyMigration057,
-      hindsightTemplateOverlaysMigration058,
-      hindsightTemplateExecutionMigration059,
-      hindsightCandidatesMigration060,
-    ], (applied) => tailApplied.push(applied));
-    expect(tailApplied).toEqual([[19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60]]);
+    const reopened = open(path, MIGRATIONS.filter(({ version }) => version > 18), (applied) => tailApplied.push(applied));
+    expect(tailApplied).toEqual([MIGRATIONS.filter(({ version }) => version > 18).map(({ version }) => version)]);
     expectFinalSchema(reopened);
     expect(reopened.prepare("SELECT version FROM migrations ORDER BY version").all().map((row) => row.version)).toEqual(
-      Array.from({ length: 60 }, (_, index) => index + 1),
+      MIGRATIONS.map(({ version }) => version),
     );
     close(reopened);
     expectReopenNoOp(path);
@@ -290,7 +208,7 @@ describe("migration lineage reopen matrix", () => {
     close(first);
     const tailApplied: number[][] = [];
     const reopened = open(path, MIGRATIONS, (applied) => tailApplied.push(applied));
-    expect(tailApplied).toEqual([[21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60]]);
+    expect(tailApplied).toEqual([MIGRATIONS.filter(({ version }) => version > 20).map(({ version }) => version)]);
     expectFinalSchema(reopened);
     expect(reopened.prepare("SELECT mode FROM memory_authority_selection WHERE singleton=1").get()?.mode)
       .toBe("legacy-markdown");
@@ -307,7 +225,7 @@ describe("migration lineage reopen matrix", () => {
 
     const applied: number[][] = [];
     const upgraded = open(path, MIGRATIONS, (versions) => applied.push(versions));
-    expect(applied).toEqual([[32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60]]);
+    expect(applied).toEqual([MIGRATIONS.filter(({ version }) => version > 31).map(({ version }) => version)]);
     expect(upgraded.prepare(`SELECT through_seq,text,revision,last_operation_id,source_from_seq,source_through_seq,
       source_digest,captured_tail_seq FROM conversation_summary WHERE character_id='taki'`).get()).toEqual({
       through_seq: 12,
@@ -371,7 +289,7 @@ describe("migration lineage reopen matrix", () => {
     const leases = first.prepare("SELECT * FROM hindsight_replica_sync_leases").all();
     close(first); const applied: number[][] = [];
     const upgraded = open(path, MIGRATIONS, (versions) => applied.push(versions));
-    expect(applied).toEqual([[34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60]]);
+    expect(applied).toEqual([MIGRATIONS.filter(({ version }) => version > 33).map(({ version }) => version)]);
     expectFinalSchema(upgraded);
     expect(upgraded.prepare("SELECT * FROM hindsight_replica_sync_records").all()).toEqual(records);
     expect(createReplicaRecordStore(upgraded, createIntlSegmenterTokenizer({ stoplist: true })).get({
@@ -402,7 +320,7 @@ describe("migration lineage reopen matrix", () => {
 
     const applied: number[][] = [];
     const upgraded = open(path, MIGRATIONS, (versions) => applied.push(versions));
-    expect(applied).toEqual([history === "034" ? [35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60] : [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60]]);
+    expect(applied).toEqual([MIGRATIONS.filter(({ version }) => version > (history === "034" ? 34 : 35)).map(({ version }) => version)]);
     expectFinalSchema(upgraded);
     expect(upgraded.prepare("SELECT version,applied_at FROM migrations WHERE version<=:version ORDER BY version")
       .all({ version: history === "034" ? 34 : 35 })).toEqual(receipts);

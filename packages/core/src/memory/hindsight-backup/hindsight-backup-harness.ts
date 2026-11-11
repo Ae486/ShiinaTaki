@@ -57,7 +57,7 @@ export function backupHarness(cleanup: { dirs: string[]; dbs: Database[] }, opti
   const service = createHindsightBackupService({ db, store: options.wrapStore?.(store) ?? store, route, logger, now: () => AT,
     custody: options.custody ?? (() => backupManifest({ sha256: hex("0"), bytes: 1, pages: 1 }).custody),
     missingCredentials: options.missingCredentials ?? (() => []),
-    quiesceTimeoutMs: options.quiesceTimeoutMs ?? 1_000, nativeTimeoutMs: options.nativeTimeoutMs ?? 5_000 });
+    quiesceTimeoutMs: options.quiesceTimeoutMs, nativeTimeoutMs: options.nativeTimeoutMs ?? 5_000 });
   const phases: string[] = [];
   const capture = (route: HindsightBackupRoute = "native-endpoint") => service.capture({ operationId: HARNESS_OPERATION_ID, backupId: BACKUP_ID,
     route, runtime, checkpoint: (phase) => { phases.push(phase); } });

@@ -1,6 +1,6 @@
 /**
  * INPUT:  a claimed saved policy/Block result and the common durable application writer
- * OUTPUT: original-command recovery, verified replica refresh and truthful committed-effect counts
+ * OUTPUT: original-command recovery, receipt-targeted complete-page catch-up and exact applied-effect counts
  * POS:    core/memory/hindsight — no model call or direct Block/replica write; delayed publication preserves proposals
  */
 import type { TakiApplicationCommand } from "@taki/shared";
@@ -12,6 +12,10 @@ import { assertCuratorWorkCurrent } from "./hindsight-policy-curator-targets.ts"
 import { awaitCuratorWork } from "./hindsight-policy-curator-lifetime.ts";
 
 export async function publishCuratorWork(run: HindsightPolicyCuratorRun, record: HindsightPolicyWorkRecord): Promise<void> {
+  return run.deps.publish ? run.deps.publish(() => publish(run, record)) : publish(run, record);
+}
+
+async function publish(run: HindsightPolicyCuratorRun, record: HindsightPolicyWorkRecord): Promise<void> {
   run.alive(); const result = record.result;
   if (!result) throw new Error("MEMORY_INTEGRITY_ERROR");
   const claim = policyWorkClaim(record);
@@ -28,15 +32,21 @@ export async function publishCuratorWork(run: HindsightPolicyCuratorRun, record:
     job ??= run.deps.writer.prepare({ key, namespace: record.key.namespace,
       intent: { kind: "hindsight-policy-work", workId: record.key.workId, resultHash: policyWorkValueHash(result) },
       create: () => commandPlan(record) });
-    const remote = await awaitCuratorWork(run, () => run.deps.writer.run({ key, context: run.call() }));
-    run.alive();
-    if (remote.status === "pending") { deferPublication(run, record); return; }
-    if (remote.status === "refused") {
-      run.deps.work.supersede(claim); run.outcome.status = "failed"; return;
+    // Completed recovery can already have exact local history; new publications pay only the terminal proof.
+    if (job.state !== "completed" || !run.deps.writer.applied(job)) {
+      const remote = await awaitCuratorWork(run, () => run.deps.writer.run({ key, context: run.call() }));
+      run.alive();
+      if (remote.status === "pending") { deferPublication(run, record); return; }
+      if (remote.status === "refused") {
+        run.deps.work.supersede(claim); run.outcome.status = "failed"; return;
+      }
+      const checkpoint = remote.job.receipt?.checkpoint;
+      if (!checkpoint) throw new Error("MEMORY_INTEGRITY_ERROR");
+      await awaitCuratorWork(run, () => run.deps.refreshBank(record.key.bankId, run.call(), {
+        authorityEpochId: remote.job.key.authorityEpochId, namespace: remote.job.namespace, checkpoint }));
+      run.alive();
+      if (!run.deps.writer.applied(remote.job)) { deferPublication(run, record); return; }
     }
-    await awaitCuratorWork(run, () => run.deps.refreshBank(record.key.bankId, run.call()));
-    run.alive();
-    if (!run.deps.writer.applied(remote.job)) { deferPublication(run, record); return; }
     run.deps.work.complete(claim);
     if (result.kind === "assessment") { run.outcome.assessed++; run.outcome.edits++; }
     else if (result.kind === "block-update") { run.outcome.blocks++; run.outcome.edits++; }

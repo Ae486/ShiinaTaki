@@ -1,13 +1,16 @@
 /**
- * INPUT:  active Hindsight configuration/Bank bindings, SQLite, Timeline and the shared Utility Slot
- * OUTPUT: provider/ingestion/curator/flush plus the existing scheduler, distinct backup/write and transition/work fences,
+ * INPUT:  active Hindsight bindings, SQLite, Timeline, Utility Slot and Core activity/config notifications
+ * OUTPUT: batched ingestion/flush, scheduled policy review/committed hints and the scheduler with backup/write and transition/work fences,
  *         truthful unavailable captures, primary witnesses, per-Bank sync diagnostics and complete settled shutdown
  * POS:    core/memory/hindsight — selected draft; unresolved source/native activation refuses construction; Core owns Compaction
  */
 import { TIMING_CONFIG_KEYS, TIMING_POLICY_DEVELOPMENT_DEFAULTS, TimingDurationMsSchema } from "@taki/shared";
 import type { ConfigSource } from "../../config/config-source.ts";
 import type { MemoryConfig } from "../../config/memory-config.ts";
-import { loadHindsightPolicyConfig } from "../../config/hindsight-policy-config.ts";
+import { loadHindsightPolicyConfig, loadHindsightPolicyReviewConfig } from "../../config/hindsight-policy-config.ts";
+import type { ConfigSubscriptions } from "../../config/config-subscriptions.ts";
+import type { TurnRegistry } from "../../agents/turn-registry.ts";
+import { createScheduledTaskRepo } from "../../db/scheduled-task-repo.ts";
 import { createHindsightIngestionRepo } from "../../db/hindsight-ingestion-repo.ts";
 import { createHindsightPolicyWorkRepo } from "../../db/hindsight-policy-work-repo.ts";
 import { createHindsightReplicaSchedulerRepo } from "../../db/hindsight-replica-scheduler-repo.ts";
@@ -37,20 +40,27 @@ import { createHindsightPolicyCurator, type HindsightPolicyCurator } from "./hin
 import { createHindsightReplicaScheduler, type HindsightReplicaScheduler } from "./hindsight-replica-scheduler.ts";
 import { fenceHindsightWriters } from "./hindsight-writer-fence.ts";
 import { sourceTransition } from "../transitions/transition-queued-provider.ts";
+import { createHindsightPolicySchedule } from "./hindsight-policy-schedule.ts";
+import type { HindsightPolicyCuratorDeps } from "./hindsight-policy-curator-context.ts";
 
 interface Input {
   db: Database; epochId: string; config: MemoryConfig; source: ConfigSource; secrets: SecretCatalogService;
   timeline: TimelineRepo; utility: UtilitySlot; logger: Logger; promptDir?: string; now?: () => string; client?: HindsightClient;
   /** Core's automatic lifecycle trigger; it must never fail the capture. */
   onUnavailable?: (event: HindsightUnavailableRunEvent) => void;
+  reviewActivity?: Pick<TurnRegistry, "idleSince" | "observe">;
+  configChanges?: Pick<ConfigSubscriptions, "observe">;
+  onPolicyReviewChanged?: (bankId: string) => void;
 }
 
 export function createHindsightMemorySubsystem(input: Input) {
   if (sourceTransition(input.db, input.epochId)) throw new Error("MEMORY_TRANSITION_OUTCOME_UNKNOWN");
   const writeFence = createCanonicalLocalWriteFence();
   const workFence = createCanonicalLocalWriteFence();
+  let reviewChanged = input.onPolicyReviewChanged;
   const runtime = createHindsightRuntimeConnection({ ...input, config: input.source });
-  const state = createHindsightRuntimeState({ db: input.db, runtime, config: input.config, now: input.now, workFence });
+  const state = createHindsightRuntimeState({ db: input.db, runtime, config: input.config, now: input.now, workFence,
+    onReplicaApplied: (bankId) => scheduler.rearmPolicy("replica", bankId) });
   const foreground = createHindsightMemoryRuntime({ state, promptDir: input.promptDir,
     admissionBudgetMs: () => admissionBudgetMs(input.source, runtime.connection.requestTimeoutMs),
     onUnavailable: (event) => {
@@ -62,15 +72,13 @@ export function createHindsightMemorySubsystem(input: Input) {
     readVerifiedBank: (bankId) => state.replica.bankBinding(bankId)?.bank });
   const ingestion = createHindsightIngestion({ authority: runtime.authority, journal, timeline: input.timeline,
     slot: input.utility, provider: state.provider, resolveBanks: runtime.resolveBanks, config: input.config, now: input.now });
-  const work = createHindsightPolicyWorkRepo({ db: input.db, now: input.now, assertActive: (scope) => state.assertActive({
-    key: { authorityEpochId: scope.authorityEpochId, bankId: scope.bankId, requestId: "policy-work" }, namespace: scope.namespace }) });
-  const curator = createHindsightPolicyCurator({ authority: runtime.authority, replica: state.replica, work, writer: state.writer,
-    slot: input.utility, resolveBanks: runtime.resolveBanks, readBlock: state.blocks.read, now: input.now,
-    refreshBank: (bankId, context) => state.service.synchronize({ bankId, context }),
-    config: () => ({ memory: input.config, policy: loadHindsightPolicyConfig(input.source.env()) }) });
+  const { curator, policy } = policyMaintenance({ ...input, onPolicyReviewChanged: (bankId) => reviewChanged?.(bankId) },
+    { state, writeFence, workFence });
   const scheduleRepo = createHindsightReplicaSchedulerRepo(input.db, input.now);
   const scheduler = createHindsightReplicaScheduler({ repo: scheduleRepo, replica: state.nativeReplica,
-    banks: runtime.banks, runner: state.service.runner, ownerId: `hindsight:${input.epochId}`, logger: input.logger });
+    banks: runtime.banks, runner: state.service.runner, ownerId: `hindsight:${input.epochId}`, logger: input.logger, policy });
+  const subscriptions = [input.reviewActivity?.observe(() => scheduler.rearmPolicy("activity")),
+    input.configChanges?.observe(() => scheduler.rearmPolicy("config"))];
   state.writes.setRetryScheduler(scheduler);
   const tidy = createTidyAdapter({ state, curator, view: foreground.tidy, logger: input.logger });
   const maintenance: AutoMemoryMaintenance = { run: async (characterId, origin) => {
@@ -82,7 +90,6 @@ export function createHindsightMemorySubsystem(input: Input) {
       try { await ingestion.maybeRun({ characterId }); }
       catch { input.logger.warn({ characterId, code: "MEMORY_INGESTION_FAILED" }, "Hindsight source ingestion will retry"); }
     }
-    runtime.assertConnection(); await tidy.maybeRun(characterId);
   } };
   const memoryFlush = routedFlushPort(runtime, ingestion);
   const writers = fenceHindsightWriters({ engine: foreground.engine, maintenance, memoryFlush, tidy,
@@ -95,7 +102,8 @@ export function createHindsightMemorySubsystem(input: Input) {
     } }, writeFence, () => sourceTransition(input.db, input.epochId) !== undefined);
   return { ...writers, snapshot: foreground.snapshot, state, ingestion, curator, scheduler, writeFence, workFence,
     start: () => { runtime.assertConnection(); scheduler.start(); },
-    stop: () => { writeFence.retire(); workFence.retire(); return stopSubsystem({ state, ingestion, curator, scheduler, foreground }); },
+    stop: () => { reviewChanged = undefined; for (const unsubscribe of subscriptions) unsubscribe?.();
+      writeFence.retire(); workFence.retire(); return stopSubsystem({ state, ingestion, curator, scheduler, foreground }); },
     recordPrimaryCommitted: (commit: PrimaryConversationCommit) => recordWitness(input, { runtime, ingestion }, commit) };
 }
 
@@ -161,7 +169,8 @@ function createTidyAdapter(input: {
       pending: result.pending, edits: result.edits, steps: result.steps }, "Hindsight policy review settled");
     return { status: result.status, defects: report.defects, edits: result.edits, steps: result.steps, usage: result.usage };
   };
-  return { runNow, maybeRun: async (characterId) => { await runNow(characterId); } };
+  // The report above belongs only to explicit operator tidy. Chat never enumerates tidy diagnostics or reviews policy.
+  return { runNow, maybeRun: async () => undefined };
 }
 
 async function stopSubsystem(input: {
@@ -173,4 +182,24 @@ async function stopSubsystem(input: {
   const results = await Promise.allSettled([input.foreground.stop(), input.scheduler.stop(), input.curator.stop(), input.ingestion.stop(),
     input.state.provider.stop(), input.state.writes.stop(), input.state.writer.stop(), input.state.service.stop(), input.state.sync.settle()]);
   if (results.some((result) => result.status === "rejected")) throw new Error("MEMORY_SHUTDOWN_FAILED");
+}
+
+function policyMaintenance(input: Input, owners: { state: HindsightRuntimeState;
+  writeFence: ReturnType<typeof createCanonicalLocalWriteFence>; workFence: ReturnType<typeof createCanonicalLocalWriteFence> }) {
+  const { state, writeFence, workFence } = owners; const { runtime } = state;
+  const work = createHindsightPolicyWorkRepo({ db: input.db, now: input.now, onPolicyReviewChanged: input.onPolicyReviewChanged,
+    admitMutation: writeFence.admitSync, assertActive: (scope) => state.assertActive({
+    key: { authorityEpochId: scope.authorityEpochId, bankId: scope.bankId, requestId: "policy-work" }, namespace: scope.namespace }) });
+  const curatorDeps: HindsightPolicyCuratorDeps = { authority: runtime.authority, replica: state.replica, work, writer: state.writer,
+    slot: input.utility, resolveBanks: (id) => id === null ? runtime.banks().filter((bank) => bank.scope === "global") : runtime.resolveBanks(id),
+    publish: writeFence.admit, readBlock: state.blocks.read, now: input.now,
+    refreshBank: (bankId, context, receiptTarget) => state.service.synchronize({ bankId, context, receiptTarget }),
+    config: () => ({ memory: input.config, policy: loadHindsightPolicyConfig(input.source.env()) }) };
+  const curator = createHindsightPolicyCurator(curatorDeps);
+  const policy = createHindsightPolicySchedule({ db: input.db, deps: curatorDeps, curator,
+    config: () => loadHindsightPolicyReviewConfig(input.source.env()), timezone: createScheduledTaskRepo(input.db).userTimezone,
+    writable: () => writeFence.writable() && workFence.writable(), activity: input.reviewActivity,
+    onPolicyReviewChanged: input.onPolicyReviewChanged,
+    now: input.now ?? (() => new Date().toISOString()) });
+  return { curator, policy };
 }

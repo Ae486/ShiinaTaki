@@ -192,7 +192,7 @@ describe("Pending Memory repository", () => {
 
   it("rolls back a progress write when the absolute deadline passes inside its transaction", () => {
     const f = fixture(); const claim = f.claim(f.repo.enqueue(intent()));
-    const guarded: Database = { ...f.db, prepare(sql) {
+    const guarded: Database = { ...f.db, get isTransaction() { return f.db.isTransaction; }, prepare(sql) {
       const statement = f.db.prepare(sql);
       return { ...statement, run: (params) => {
         const result = statement.run(params);
@@ -225,7 +225,7 @@ describe("Pending Memory repository", () => {
   it("applies the current migration tail after a populated version-34 database and reopens without changes", () => {
     const f = fixture(true, 34); const records = f.db.prepare("SELECT * FROM hindsight_replica_sync_records").all();
     const checkpoints = f.db.prepare("SELECT * FROM hindsight_replica_sync_checkpoints").all();
-    const applied = f.reopen(); expect(applied).toEqual([35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60]);
+    const applied = f.reopen(); expect(applied).toEqual(MIGRATIONS.filter(({ version }) => version > 34).map(({ version }) => version));
     const row = f.repo.enqueue(intent()); expect(f.reopen()).toEqual([]);
     expect(f.repo.get(pendingMemoryRef(row))).toEqual(row);
     expect(f.db.prepare("SELECT * FROM hindsight_replica_sync_records").all()).toEqual(records);

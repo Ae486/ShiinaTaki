@@ -2,11 +2,11 @@
  * INPUT:  none — hand-built MemoryAuthorityStatus / MemoryOperation values.
  * OUTPUT: localStatus() / hindsightStatus() / bankStatus() / operation() fixtures shared by the memory authority tests, plus
  *         lifecycleBank() / lifecycleSection() and the provisioning / changed / unreviewed / disabled sections (each shaped as
- *         Core derives it) plus degradedStatus() for the Hindsight connection + Bank readiness block.
+ *         Core derives it), degradedStatus() and policyReview() for durable per-Bank review evidence.
  * POS:    ui/windows/home/pages/operations — test support only; not in the production path.
  */
 import type { HindsightBankReadiness, HindsightErrorCode, MemoryAuthorityStatus, MemoryHindsightStatusSection, MemoryOperation,
-  MemoryReplicaSyncStatus, MemoryRuntimeUnavailableReason } from "@taki/shared";
+  MemoryPolicyReviewStatus, MemoryReplicaSyncStatus, MemoryRuntimeUnavailableReason } from "@taki/shared";
 
 export const AT = "2026-09-19T00:00:00.000Z";
 export const OPERATION_ID = "22222222-2222-4222-8222-222222222222";
@@ -49,6 +49,11 @@ export function hindsightStatus(patch: Partial<MemoryAuthorityStatus> = {}): Mem
       banks: [{ scope: "global", characterId: null, nativeBankId: "global", readiness: "ready", errorCode: null }], actions: { revalidate: false, provision: [] }, backup: null },
     ...patch,
   };
+}
+
+export function policyReview(patch: Partial<MemoryPolicyReviewStatus> = {}): MemoryPolicyReviewStatus {
+  return { bankId: "global", state: "pending", dueSince: AT, eligibleRemaining: 3, savedAwaitingPublication: 1,
+    lastCompletedAt: null, catchUpOccurrenceId: "policy-review:catch-up-1", ...patch };
 }
 
 export function operation(patch: Partial<MemoryOperation> = {}): MemoryOperation {

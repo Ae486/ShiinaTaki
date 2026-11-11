@@ -28,6 +28,7 @@ authority integrity are not waived. A direct-unit eligibility result is not a co
 | SQLite publication | `hindsight-application-replica-repo.ts`; verified bodies/artifacts/heads, projection, FTS, Blocks and paired checkpoints |
 | Source and first policy | `hindsight-application-{source-write,source-binding,binding-context,binding-collector,binding-runner}.ts` |
 | Application commands | `hindsight-application-command-repo.ts`, command runner and `hindsight-application-writer.ts` |
+| Publication convergence | Internal `HindsightApplicationReceiptTarget { authorityEpochId, namespace, checkpoint }` on Bank synchronization and `HindsightReplicaRunInput`; no wire or storage schema |
 | Whole foreground writes | `hindsight-memory-write-repo.ts`, `hindsight-memory-writes.ts` and its admission/recovery/result helpers |
 | Ingestion and policy work | `hindsight-ingestion.ts`, `hindsight-policy-curator.ts` and their durable repositories |
 | Selected runtime | `hindsight-runtime-{connection,state,bank-service,view,consumers}.ts`, `hindsight-memory-{provider,runtime,subsystem}.ts` |
@@ -98,7 +99,7 @@ B5 native projection hashes and JSON1 limits must not be silently reinterpreted.
 - The same guarded cache read may reuse immutable bodies already persisted in the command outbox (migration 044),
   including after a commit-before-pull interruption and SQLite reopen. Require the same Bank/namespace and complete ref;
   a mismatched command-body ref is a cache miss and downloads normally. Keep existing replica corruption refusals.
-  The loader still verifies the reused bytes and complete event; local bytes never replace remote receipts, affected
+  The immutable store verifies reused bytes, and the loader still verifies the complete event; local bytes never replace remote receipts, affected
   version proof or paired publication. No extra cache, copied body store or readable state is created by this reuse.
 - Source-candidate queries filter their verified artifact envelopes by document/binding kind before loading body
   closure. Exact source association still validates every selected body/reference. Unrelated Source bodies must not
@@ -174,19 +175,36 @@ match setup. See [Current Authority and Full Validation](./memory-authority-vali
 `captureHindsightRuntimeRows(state, { characterId, intentions })` reads one coherent SQLite snapshot. Inside
 `state.db.transaction`, `runtime.resolveBanks(characterId)` performs the complete current connection/publication,
 configuration/secret and template guards and captures the exact Global/Character routes. A function-local
-`createHindsightApplicationReplicaRepo` then uses only those routes for scope resolution. Its existing checkpoint,
-namespace, body/artifact/head, projection, policy, pinned and ingress validators still run for every relevant record.
+`createHindsightApplicationReplicaRepo` then uses only those routes for scope resolution. Its `readSnapshot` checks
+each consumed Bank's checkpoint/hash/authority/native pairing once and shares the existing evidence reader across
+the callback. Exact immutable body/artifact reads are deduplicated; namespace, deletion, head, projection, policy,
+pinned and ingress validators still run for every relevant record.
 An unknown Bank refuses with the existing route error. Only the final rows leave the synchronous callback; no local
 replica, route closure or selected/ready verdict may escape or cross an await. A later capture validates afresh.
 
-This avoids multiplying a full transition publication read by every body/head/record in a prompt. The repository
-factory only creates closures; this local use performs no writes. The shared `state.replica` and `createStores`
-Bank-scope callback remain unchanged: sync, cache, command and publication boundaries depend on their full current
-connection guard. The replica's own active epoch/provider/lineage checks do not replace that guard.
+The same lexical read API is used by curator collection, prompt preparation and each model-input validation.
+It exposes no mutation/lease/cache-write methods, closes on callback return/throw, and refuses a Promise result.
+Nested synchronous validation shares that reader; nothing retains authority across model/Utility/HTTP waits.
+The factory only creates closures; these callbacks perform no writes. The `createStores` Bank-scope callback remains
+unchanged: independent reads, sync, cache, command and publication still depend on its full current connection guard.
+The replica's own active epoch/provider/lineage checks do not replace that guard.
+
+Byte-verifying replica readers and fully verified bundle owners supply the optional `decodedBody(ref, scope)`
+projection port, checking exact descriptor and Bank/namespace before reuse. The independent native reader still
+decodes unowned bytes. Full bundle/publication/recovery/backup proof is not replaced by a stored boolean.
+
+The loader resolves each synchronous body-reference frontier through one `cachedBodies` lookup. The existing
+replica/prepared-command stores retain entry/exit publication checks and final lease/deadline validation. Cache
+misses keep the bounded eight-body download group, first-error cancellation/drain, per-request guards and durable
+partial-byte progress. Independent `cachedBody` calls retain their guards. No new body store or migration is added.
+Recall hydration may reuse exact published replica bodies through a fresh read snapshot; current authenticated
+Native manifests/pages and complete bundle verification still decide the selected heads/artifacts. Availability
+fallback and corruption refusal remain distinct. The original single-body callback still verifies arbitrary supplied
+bytes; the batch callback is an explicit byte-verifying owner port.
 
 Wrong: replace the shared Bank-scope callback with unguarded routing, or reuse a captured route for later I/O.
 Correct: validate routes once inside one runtime-row read transaction, use the original integrity readers locally,
-and discard that reader when the callback returns or throws. No global cache, invalidation state or bypass flag.
+and discard that reader when the callback returns or throws. No TTL or process-wide permission cache.
 
 ### Durable foreground writes and degraded reads
 
@@ -224,6 +242,10 @@ and discard that reader when the callback returns or throws. No global cache, in
 - The curator is limited to Taki policy and authorized Block work, with separate Global/Character model inputs. Keep
   user-card ownership, filter hidden/expired/ineligible-mood input before each submission, and persist claims, prompts,
   results, command identities and retries. Restart resumes saved proposals without rerunning a completed model call.
+  Private journal reads inside one synchronous `atomic()` operation reuse its entry/exit admission; they retain
+  the original byte/hash validation. Public reads stay independently guarded. Claim token/revision checks, expiry
+  checks before and after mutation, COMMIT failure rollback and exact original command identities are unchanged.
+  This admission cannot escape the callback, cross an await or admit a later Native dispatch.
 - Every curator tool checks run liveness and refuses a closed/finished review. `block_read` and finish do not reverify
   review inputs; assessment and Block update recheck only the resolved work record before saving its proposal, including
   a Block target's source/context dependencies. The full review check remains before each model submission, so changed
@@ -269,6 +291,78 @@ and discard that reader when the callback returns or throws. No global cache, in
 - Legacy/Local selection does not construct or contact Hindsight. Hindsight selection cannot fall back to Legacy.
   Main builds the secret/config context before memory construction and waits for memory stop before closing SQLite.
 
+### D105 receipt-targeted publication convergence
+
+- A curator publication supplies the already accepted command's epoch, namespace and paired checkpoint to the
+  existing bounded Bank service. The target only decides when to stop pulling; it never publishes an artifact or
+  advances a cursor. Compare its identity once using captured authority and the checkpoint already read at admission.
+- Apply every event in the current change page and retain the existing page-end checks. Only then may a cheap
+  native/state cursor comparison stop another page request. Receipt-targeted calls skip unrelated binding passes;
+  ordinary foreground, scheduled and no-target recovery calls keep their complete synchronization behavior.
+  A reset keeps the accepted namespace and existing full snapshot, rollback, lease and publication proof.
+- Complete the work item only after the existing exact `writer.applied` artifact-history proof. Missing targets,
+  invalid pages or cursor coverage without that history remain unconfirmed. A job already completed before recovery
+  can use that exact proof to skip both remote execution and refresh; newly published jobs keep one terminal proof.
+- No per-event `writer.applied`, extra body validation, cache, persisted cursor or generic stopping framework is needed.
+  The rest of a current page (up to 128 manifests) may be applied beyond the target to preserve full-page semantics.
+  Large events and earlier queued Bank owners can still delay this path. Publication completion does not claim that
+  unrelated Bank enrichment finished or that real concurrent-use latency has been measured.
+
+### D108 scheduled curator review and durable resume
+
+- Ordinary post-turn maintenance performs ingestion only. The unchanged ingestion owner batches 20 messages or
+  flushes before compaction. `tidy.maybeRun` is inert under Hindsight; the full tidy diagnostic report is reserved for
+  explicit operator `runNow`, which retains its existing response contract. Neither automatic chat path enumerates it.
+- `hindsight-policy-config.ts` and the existing config registry own live `TAKI_HINDSIGHT_POLICY_REVIEW_MODE`
+  (`daily`/`interval`), `_TIME` (`03:00`), `_INTERVAL_MS` (`86400000`) and `_THRESHOLD` (`100`). Daily time uses
+  `createScheduledTaskRepo(db).userTimezone()`. Only `createSchedulePatternAdapter` performs calendar math; policy
+  maintenance never enters Scheduled Task Run admission. A persisted interval anchor survives restart and zone changes.
+- Migration 062 adds `hindsight_policy_review_schedule`, keyed by authority epoch and exact Bank namespace. Its
+  validated progress records effective schedule revision/anchor, next due, one pending occurrence/reason, last attempt,
+  last completion, catch-up notice identity, retry and measured progress. Existing migrations are unchanged.
+  An overdue obligation is retained before recomputing the future schedule. Missed slots coalesce; a later distinct
+  catch-up receives a new notice identity. Completion advances only after an actual successful empty inventory and
+  zero nonterminal item work, including claims/results waiting on future retries.
+- The replica scheduler supplies the only wake and lifetime. It dispatches the policy lane after its Bank drain without
+  awaiting model work or keeping a replica lease. Bank-scoped curator entry prevents Global rediscovery per Character.
+  The common full/incremental application owner notifies after COMMIT, including partial progress before later failure.
+  Such notifications invalidate only their Bank. Activity notifications rearm paused obligations and do not scan idle
+  below-threshold Banks. Configuration/startup reconciliation examines all configured Banks.
+- Threshold inventory pages through the existing `duePolicyWork` eligibility reader, including deferred `due`/`failed`
+  assessments, and excludes journaled saved results. Hidden, expired, invalidated and ineligible mood inputs remain
+  filtered before the accepted-page limit. A changed checkpoint during the complete scan yields UNKNOWN/retry, never
+  empty. This is replica-local inventory; manual-only synchronization remains manual-only and remotely unpublished or
+  unpulled facts do not count as locally bound work.
+- Discovery advances a local keyset cursor only after an item's admission commits. It deliberately restarts discovery
+  from the beginning after interruption instead of persisting a second reviewed watermark. Deterministic journal IDs
+  prevent duplicate admission and saved results bypass the model. This costs rereading earlier candidates on resume;
+  each bounded report continues under the same pending occurrence until the actual backlog drains.
+- Recovery first processes the existing item journal within the coalesced Bank pass. Saved results retain their original
+  command IDs through dispatch, receipt and local application. An admitted prompt without a result publishes its existing
+  truthful interrupted-assessment failure; the new failed policy revision remains retryable. Results lost before durable
+  save may require another model call. Future claim expiry and failed-policy retry are unfinished work, not successful emptiness.
+- The actual `TurnRegistry` supplies activity and idle timestamps. A Bank pass starts after five idle seconds for its
+  Character; Global requires all turns idle. A cancelled but unsettled turn remains busy. Subsequent chat can proceed
+  while an already admitted pass runs; concurrent-use invisibility still requires measurement.
+- Model computation owns no backup write admission. Journal mutations enter `writeFence.admitSync`, and individual
+  publications enter `writeFence.admit` through the required local application. Existing transition work fences remain
+  active. A closed fence preserves the pending occurrence and saved result; scheduler stop/pause aborts and settles the
+  accepted lane, without waiting for fence reopening. Existing retry delays rearm through the same scheduler timer.
+- Shared defines `MemoryPolicyReviewStatusSchema` once. Core emits `review` in authority status, scoped to current
+  checkpoint namespaces even during disconnects. State is pending/running/paused/error, or null when idle. It includes
+  due-since, eligible remaining or UNKNOWN, live journal saved-awaiting-publication count, last completion and catch-up ID.
+  Running/invalidated/unavailable eligibility is UNKNOWN. The optional wire field allows older status producers; current
+  Core emits null outside Hindsight or for unreadable review evidence. Home joins these rows by Bank id, keeps
+  unknown counts distinct from measured zero, and treats the retained catch-up ID as historical evidence rather
+  than proof that a later running occurrence is itself catch-up.
+- `onPolicyReviewChanged(bankId)` carries a thin invalidation from schedule saves and the first saved result or
+  terminal work transition through runtime composition to the existing `memory.replica.changed` channel.
+  Producers call it only after their existing successful persistence boundary; failed writes and idempotent result
+  replay do not notify. Prepare/claim/prompt changes do not add notifications, queries, decoding or validation.
+  The subsystem clears its callback at stop entry. The server's existing connection fan-out isolates failed sinks;
+  Home's existing generation guard and dirty-read coalescing reread current authority status. Notification code
+  never reconstructs status or rearms the policy scheduler, and no polling or generic database observer is added.
+
 ## 4. Validation / Error Matrix
 
 | Condition | Required behavior |
@@ -304,6 +398,14 @@ and discard that reader when the callback returns or throws. No global cache, in
 
 ## 6. Required Tests and Operational Checks
 
+- Receipt convergence through the real curator, Bank service and sync runner with controlled Native transport:
+  complete the target page without waiting for a later page/bind; reject malformed remainder and cursor-only proof;
+  preserve target identity/budget through reset, cancellation and lease failures; recover already applied work without
+  another remote pull. Keep the existing no-target integration and exact-body-cache reuse regressions.
+- Policy-review persistence notifications through actual registered operator WebSockets and current authority reads:
+  first saved results remain visible while a later model call is held, terminal completion updates the count,
+  failed journal/schedule writes do not notify, and retired runtime callbacks stay silent. Use controlled providers
+  explicitly; this does not establish real Native crash recovery or concurrent-model responsiveness.
 - SQLite transactions, commit failure, CAS, reopen, old migration lineage, namespace changes and paired publication.
 - Full source/record/metadata body round-trip, cross-language hashes, parts, corruption, limits and original closure.
 - Actual native HTTP/PostgreSQL through the assembled Core provider: neutral/hidden admission, guarded reflection,

@@ -19,6 +19,19 @@ function runningRetry(): MemoryReplicaSyncState {
 }
 
 describe("Memory Replica scheduling contracts", () => {
+  it("permits accepted waiting with zero failure backoff and preserves it during the next claim", () => {
+    const state = { ...runningRetry(), mode: "waiting", run: null, fullReconciliationState: "waiting",
+      retryAttempt: 0, retryDueAt: at, errorCode: null, consecutiveFailures: 0 };
+    expect(MemoryReplicaSyncStateSchema.safeParse(state).success).toBe(true);
+    expect(MemoryReplicaSyncStateSchema.safeParse({ ...state, mode: "running", run: runningRetry().run,
+      fullReconciliationState: "waiting", retryDueAt: null }).success).toBe(true);
+    for (const patch of [{ errorCode: "HINDSIGHT_UNREACHABLE" }, { nextAction: null }, { retryDueAt: null }]) {
+      expect(MemoryReplicaSyncStateSchema.safeParse({ ...state, ...patch }).success).toBe(false);
+    }
+    expect(MemoryReplicaSyncStateSchema.safeParse({ ...state, automatic: false, nextDueAt: null, nextFullDueAt: null,
+      retryDueAt: null, retryKind: null, nextAction: "explicit_retry_required" }).success).toBe(true);
+  });
+
   it.each([null, at])("accepts active retry backoff with due time %s in durable state and status", (retryDueAt) => {
     const state = { ...runningRetry(), retryDueAt };
     expect(MemoryReplicaSyncStateSchema.parse(state)).toEqual(state);

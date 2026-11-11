@@ -28,6 +28,15 @@ function render(entry_: ConfigEntry, chineseLabel?: string): string {
 }
 
 describe("KnobField label hierarchy (U7)", () => {
+  it("renders a live review default without a stored/customized claim and recognizes a Core-stored value", () => {
+    const review = entry({ key: "TAKI_HINDSIGHT_POLICY_REVIEW_MODE", value: "daily", default: "daily", stored: false,
+      apply: "live", input: { kind: "enum", options: ["daily", "interval"] } });
+    const defaults = render(review, "策略巡检计划模式");
+    expect(defaults).toContain('value="daily" selected=""');
+    expect(defaults).not.toContain("已自定义"); expect(defaults).not.toContain("重启生效");
+    expect(render({ ...review, value: "interval", stored: true })).toContain("已自定义");
+  });
+
   it("shows the Chinese label primary with the raw key as a secondary code line when mapped", () => {
     const html = render(entry(), "主模型 ID");
     expect(html).toContain("主模型 ID");

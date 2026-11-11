@@ -1,6 +1,6 @@
 /**
  * INPUT:  authenticated D77 manifests/events and one captured Bank namespace/deadline
- * OUTPUT: complete verified descriptor/body closures and a genuine native snapshot baseline when requested
+ * OUTPUT: complete verified body closures with synchronous batch cache reads and bounded concurrent downloads
  * POS:    core/memory/hindsight — network staging only; no downloaded partial page advances a replica checkpoint
  */
 import { randomUUID } from "node:crypto";
@@ -29,6 +29,8 @@ export interface HindsightApplicationLoadInput extends HindsightApplicationScope
   /** Recheck the containing operation's deadline, cancellation and Bank lease before every HTTP request. */
   request?: () => HindsightCallContext;
   cachedBody?: (ref: TakiApplicationBodyRef) => HindsightApplicationBody | undefined;
+  /** Byte-verifying owner; one synchronous lookup over the existing immutable store. Complete bundle proof still runs. */
+  cachedBodies?: (refs: readonly TakiApplicationBodyRef[]) => Map<string, HindsightApplicationBody>;
   /** Save only complete verified bytes; this callback must never advance readable state or a checkpoint. */
   cacheBodies?: (bodies: readonly HindsightApplicationBody[]) => void;
 }
@@ -95,20 +97,40 @@ export async function loadBodies(input: HindsightApplicationLoadInput, pages: Ta
       if (record.kind === "native" && record.head.body_ref) enqueue(record.head.body_ref);
     }
   }
+  const collect = (body: HindsightApplicationBody) => {
+    bodies.set(body.ref.body_id, body);
+    if (body.content.body_schema === "application-native-record.v1" && body.content.value.source_evidence_ref) enqueue(body.content.value.source_evidence_ref);
+    if (body.content.body_schema === "application-source-evidence.v1") enqueue(body.content.value.source_ref);
+  };
   while (queue.length) {
-    const batch = await loadBodyBatch({ ...input, request: call }, queue.splice(-BODY_READ_CONCURRENCY));
     call();
-    const downloaded = batch.filter((entry) => entry.downloaded).map((entry) => entry.body);
-    if (downloaded.length) input.cacheBodies?.(downloaded);
-    for (const { body } of batch) {
-      bodies.set(body.ref.body_id, body);
-      if (body.content.body_schema === "application-native-record.v1" && body.content.value.source_evidence_ref) {
-        enqueue(body.content.value.source_evidence_ref);
-      }
-      if (body.content.body_schema === "application-source-evidence.v1") enqueue(body.content.value.source_ref);
+    const refs = queue.splice(0); const cached = cachedBodies(input, refs);
+    const missing = refs.filter((ref) => {
+      const body = cached.get(ref.body_id);
+      if (body) collect(body);
+      return !body;
+    });
+    for (let offset = 0; offset < missing.length; offset += BODY_READ_CONCURRENCY) {
+      const downloaded = await loadBodyBatch({ ...input, request: call }, missing.slice(offset, offset + BODY_READ_CONCURRENCY));
+      call();
+      input.cacheBodies?.(downloaded);
+      for (const body of downloaded) collect(body);
     }
   }
   call(); return bodies;
+}
+
+function cachedBodies(input: HindsightApplicationLoadInput, refs: TakiApplicationBodyRef[]): Map<string, HindsightApplicationBody> {
+  const bodies = input.cachedBodies?.(refs) ?? new Map(refs.flatMap((ref) => {
+    const body = input.cachedBody?.(ref);
+    return body ? [[ref.body_id, body] as const] : [];
+  }));
+  for (const ref of refs) {
+    const body = bodies.get(ref.body_id);
+    if (body && !sameApplicationValue(body.ref, ref)) throw new Error("HINDSIGHT_APPLICATION_BODY_INTEGRITY_ERROR");
+    if (body && !input.cachedBodies) verifyHindsightApplicationBody(body, input);
+  }
+  return bodies;
 }
 
 async function loadBodyBatch(input: HindsightApplicationLoadInput & { request: () => HindsightCallContext }, refs: TakiApplicationBodyRef[]) {
@@ -120,12 +142,10 @@ async function loadBodyBatch(input: HindsightApplicationLoadInput & { request: (
   };
   const results = await Promise.allSettled(refs.map(async (ref) => {
     try {
-      const context = request();
-      const cached = input.cachedBody?.(ref);
-      const body = cached ?? await loadHindsightApplicationBody({ ...input, ref, context, request });
-      request(); verifyHindsightApplicationBody(body, input);
+      const body = await loadHindsightApplicationBody({ ...input, ref, request });
+      request();
       if (!sameApplicationValue(body.ref, ref)) throw new Error("HINDSIGHT_APPLICATION_BODY_INTEGRITY_ERROR");
-      return { body, downloaded: cached === undefined };
+      return body;
     } catch (error) {
       // Cancel siblings on the first failure, then drain every launched read.
       // Returning early would let their owner callbacks run after lease release

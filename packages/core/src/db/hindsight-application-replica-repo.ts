@@ -1,6 +1,6 @@
 /**
  * INPUT:  one Core SQLite writer, trusted Bank routing and verified native/application publications
- * OUTPUT: createHindsightApplicationReplicaRepo — durable paired checkpoints, exact reads and policy work
+ * OUTPUT: durable paired publication and lexical read snapshots over the same independently guarded readers
  * POS:    core/db — application-aware B5 composition; never activates authority or creates a native policy
  */
 import { TakiApplicationTimeSchema } from "@taki/shared";
@@ -9,10 +9,11 @@ import { createHindsightReplicaLeaseRepo } from "./hindsight-replica-lease-repo.
 import { createReplicaRecordStore } from "./hindsight-replica-record-store.ts";
 import { readApplicationCheckpoint, requireApplicationReadCheckpoint } from "./hindsight-application-replica-checkpoint.ts";
 import type { HindsightApplicationReplicaDeps, HindsightApplicationReplicaRepo,
-  HindsightApplicationReplicaState } from "./hindsight-application-replica-contract.ts";
-import { latestApplicationArtifact, readApplicationArtifact, readApplicationBody } from "./hindsight-application-replica-evidence.ts";
+  HindsightApplicationReplicaReader, HindsightApplicationReplicaState } from "./hindsight-application-replica-contract.ts";
+import { applicationEvidenceAccess, latestApplicationArtifact, readApplicationArtifact, readApplicationBody } from "./hindsight-application-replica-evidence.ts";
+import { readApplicationReplicaSnapshot } from "./hindsight-application-replica-read-snapshot.ts";
 import { publishApplicationEvent, publishApplicationSnapshot } from "./hindsight-application-replica-publication.ts";
-import { readApplicationCachedBody, saveApplicationCachedBodies } from "./hindsight-application-replica-cache.ts";
+import { readApplicationCachedBodies, readApplicationCachedBody, saveApplicationCachedBodies } from "./hindsight-application-replica-cache.ts";
 import { readApplicationBankBinding, readApplicationBindingWork, readApplicationBlockArtifacts, readApplicationLogicalRecord,
   readApplicationMemoryRecord, readApplicationNativeHead, readApplicationPinnedRecords,
   readApplicationSourceArtifacts, searchApplicationMemories } from "./hindsight-application-replica-query.ts";
@@ -22,6 +23,7 @@ export function createHindsightApplicationReplicaRepo(input: HindsightApplicatio
   const state: HindsightApplicationReplicaState = { ...input, now,
     records: createReplicaRecordStore(input.db, input.tokenizer), leases: createHindsightReplicaLeaseRepo(input.db, now) };
   return {
+    ...createReader(state),
     leases: state.leases,
     seedVerifiedSnapshot: (value) => {
       if (value.expectedCheckpoint !== null) throw new Error("HINDSIGHT_APPLICATION_ALREADY_SEEDED");
@@ -32,25 +34,32 @@ export function createHindsightApplicationReplicaRepo(input: HindsightApplicatio
       return publishApplicationSnapshot(state, value);
     },
     applyEvent: (value) => publishApplicationEvent(state, value),
-    checkpoint: (bankId) => readApplicationCheckpoint(input.db, bankId),
-    nativeCheckpoint: (bankId) => readReplicaCheckpoint(input.db, bankId),
+    cachedBody: (value) => readApplicationCachedBody(state, value),
+    cachedBodies: (value) => readApplicationCachedBodies(state, value),
+    cacheBodies: (value) => saveApplicationCachedBodies(state, value),
+  };
+}
+
+function createReader(state: HindsightApplicationReplicaState): HindsightApplicationReplicaReader {
+  return {
+    readSnapshot: (read) => readApplicationReplicaSnapshot(state, createReader, read),
+    checkpoint: (bankId) => state.read ? state.read.checkpoint(bankId) : readApplicationCheckpoint(state.db, bankId),
+    nativeCheckpoint: (bankId) => state.read ? state.read.checkpoint(bankId)?.native : readReplicaCheckpoint(state.db, bankId),
     nativeHead: (value) => readApplicationNativeHead(state, { ...value, object_kind: value.objectKind, object_id: value.objectId }),
     artifact: (value) => {
       requireApplicationReadCheckpoint(state, value, true);
-      return readApplicationArtifact(input.db, value);
+      return state.read ? applicationEvidenceAccess(state, value).artifactOrUndefined(value.version) : readApplicationArtifact(state.db, value);
     },
     latestArtifact: (value) => {
       requireApplicationReadCheckpoint(state, value, true);
-      return latestApplicationArtifact(input.db, value);
+      return latestApplicationArtifact(state.db, value);
     },
     sourceArtifacts: (value) => readApplicationSourceArtifacts(state, value),
     blockArtifacts: (value) => readApplicationBlockArtifacts(state, value),
     body: (value) => {
       requireApplicationReadCheckpoint(state, value, true);
-      return readApplicationBody(input.db, value);
+      return state.read ? applicationEvidenceAccess(state, value).bodyId(value.bodyId) : readApplicationBody(state.db, value);
     },
-    cachedBody: (value) => readApplicationCachedBody(state, value),
-    cacheBodies: (value) => saveApplicationCachedBodies(state, value),
     bankBinding: (bankId) => readApplicationBankBinding(state, bankId),
     logicalRecord: (value) => readApplicationLogicalRecord(state, value),
     record: (value) => readApplicationMemoryRecord(state, value),

@@ -1,25 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { MemoryReplicaRequestSchema } from "./memory-replica-request-schema.ts";
-import { MemoryOperationProducerRefSchema } from "./memory-operation-schema.ts";
 
-const AT = "2026-09-29T00:00:00.000Z";
-const ID = "11111111-1111-4111-8111-111111111111";
-const queued = { requestId: ID, bankId: "bank", kind: "full", state: "queued", claim: null,
-  createdAt: AT, settledAt: null, errorCode: null, nextAction: null, lastSuccessAt: null };
-const claim = { bankId: "bank", runId: ID, ownerId: "owner", fence: 1, expiresAt: AT };
+const at = "2026-11-11T00:00:00.000Z";
+const waiting = { requestId: "11111111-1111-4111-8111-111111111111", bankId: "global", kind: "full", state: "waiting",
+  claim: { bankId: "global", ownerId: "process", runId: "22222222-2222-4222-8222-222222222222", fence: 1, expiresAt: at },
+  createdAt: at, settledAt: at, errorCode: null, nextAction: "explicit_retry_required", lastSuccessAt: null };
 
-describe("exact replica request contract", () => {
-  it("requires claim and settlement evidence instead of successful-looking timestamps", () => {
-    expect(MemoryReplicaRequestSchema.parse(queued)).toEqual(queued);
-    expect(MemoryReplicaRequestSchema.safeParse({ ...queued, state: "succeeded", settledAt: AT, lastSuccessAt: AT }).success).toBe(false);
-    expect(MemoryReplicaRequestSchema.safeParse({ ...queued, state: "claimed", claim: { ...claim, bankId: "other" } }).success).toBe(false);
-    expect(MemoryReplicaRequestSchema.safeParse({ ...queued, state: "succeeded", claim, settledAt: AT, lastSuccessAt: AT }).success).toBe(true);
-    expect(MemoryReplicaRequestSchema.safeParse({ ...queued, state: "failed", settledAt: AT }).success).toBe(false);
-  });
-
-  it("preserves legacy producer references without inventing a request identity", () => {
-    const old = { kind: "replica", bankId: "bank", admittedAt: AT };
-    expect(MemoryOperationProducerRefSchema.parse(old)).toEqual(old);
-    expect(MemoryOperationProducerRefSchema.parse({ ...old, requestId: ID })).toEqual({ ...old, requestId: ID });
+describe("exact replica waiting requests", () => {
+  it("requires a terminal claimed attempt and its next action without inventing success", () => {
+    expect(MemoryReplicaRequestSchema.parse(waiting)).toEqual(waiting);
+    for (const patch of [{ claim: null }, { settledAt: null }, { nextAction: null }, { errorCode: "HINDSIGHT_TIMEOUT" },
+      { state: "succeeded" }, { state: "queued" }, { state: "failed" }]) {
+      expect(MemoryReplicaRequestSchema.safeParse({ ...waiting, ...patch }).success).toBe(false);
+    }
+    expect(MemoryReplicaRequestSchema.safeParse({ ...waiting, lastSuccessAt: "2026-11-10T00:00:00.000Z" }).success).toBe(true);
   });
 });

@@ -45,6 +45,8 @@ quarantine, returnInbox, stop }` (the operation owner is its only caller); `crea
 `verifyHindsightBackupPair(core, native)`; `createHindsightNativeBackupRoute(deps)` / `createUnavailableHindsightBackupRoute()`;
 `readHindsightBackupStatus(db, input)`; `sealEmergencyEvidence(input)`; `readHindsightBackupCustody` /
 `missingHindsightCredentials`; `HINDSIGHT_BACKUP_RECEIPT_MAP`. Composition: `boot/hindsight-backup-boot.ts`.
+Capture admission calls `writeFence.quiesce({ timeoutMs: quiesceTimeoutMs ?? 120_000, signal })` once;
+the service owns the cancellation signal. The existing explicit timeout override remains supported.
 
 ## 3. Contracts
 
@@ -70,7 +72,8 @@ point). Owner-only modes where the OS has them. Nothing is deleted automatically
 - Order (§5.2), all in one paused window:
   1. route c only: `route.available()` (a ready live connection), else `ROUTE_UNAVAILABLE` before anything pauses. A
      ready connection whose endpoint is off is found only by the native call in step 6 and fails the same code;
-  2. `writeFence.quiesce` (30 s; timeout -> `QUIESCENCE_TIMEOUT`, and the fence reopens itself);
+  2. one abortable `writeFence.quiesce` (120 s by default; timeout -> `QUIESCENCE_TIMEOUT`, and the
+     non-retired fence reopens itself); admitted owners and their children may finish while new writes are refused;
   3. scheduler `stop()`, which cancels and awaits the active run;
   4. one-transaction Core identity read (authority, per-Bank replica/application checkpoints, terminal-operation ids,
      migration head) and the custody record;
@@ -84,11 +87,15 @@ point). Owner-only modes where the OS has them. Nothing is deleted automatically
 - Engine and Run write tools, observed `writeMemory`, `maintenance.run`, `memoryFlush` and `tidy` pass one write fence
   (`hindsight-writer-fence.ts`). While it is closed, tools return a retryable `MEMORY_AUTHORITY_FENCED` result and flush
   its retryable outcome. Recall/reflect, Run capture and the primary witness stay open. The fence is in-memory.
-- Chat completion and a drained Pending ledger do not mean detached post-turn maintenance has settled. That admitted
-  owner can legitimately outlive the 30-second capture pause. A `QUIESCENCE_TIMEOUT` at `quiescing` creates no backup
-  artifact and releases the fence; the operator can create a new capture after the existing work settles. Home must
-  explain this retry path. This is distinct from retrying an unknown Native outcome or claiming the failed attempt
-  succeeded. Connected acceptance records busy refusals and public button retries, then requires a real verified pair.
+- Chat completion and a drained Pending ledger do not mean detached post-turn maintenance has settled. The same
+  capture waits up to 120 seconds for admitted work without reopening/retrying admission, rereading capture identity
+  or starting a Core copy/Native snapshot. This increases waiting tolerance from 30 seconds; it does not speed up
+  maintenance or bound the complete write-refusal window, which also includes subsequent copy and Native capture.
+  Timeout at `quiescing` creates no artifact; Home explains that the operator can retry after existing work settles.
+- Service stop during admission settles `NATIVE_FAILED`; epoch retirement settles `MEMORY_AUTHORITY_MISMATCH`.
+  Neither starts capture or stops/restarts the scheduler. The fence owns admission cleanup, and a retired fence
+  stays closed. Home distinguishes `NATIVE_FAILED` at `quiescing` as an interrupted wait with no backup created;
+  at the Native capture phase the existing Native-failure wording remains. No new protocol or polling is needed.
 - A mismatched pair fails `PAIR_MISMATCH` and carries `{ reason, bankId }` in the result.
 - After the claim, a vanished runtime settles `MEMORY_RUNTIME_UNAVAILABLE` and a moved epoch `MEMORY_AUTHORITY_MISMATCH`.
 - Boot: an open capture row becomes `outcome_unknown` / `producer_incomplete` and its partial dir moves to
@@ -286,6 +293,8 @@ whole-template/default/history/hold read-back separate; do not weaken either gua
 | route c without a ready connection | `failed` / `ROUTE_UNAVAILABLE` (`producer_refused`) before any pause; nothing listed |
 | route c with the endpoint off (native 404) | `ROUTE_UNAVAILABLE` after the pause; partial dir removed; fence released; scheduler restarted |
 | quiesce timeout | `QUIESCENCE_TIMEOUT`; fence reopened; scheduler never stopped |
+| stop during quiesce | `NATIVE_FAILED`; no identity read, Core copy or Native call; no later capture after work drains |
+| epoch retirement during quiesce | `MEMORY_AUTHORITY_MISMATCH`; no capture or scheduler restart; retired fence stays closed |
 | native refusal, failure or deadline | `NATIVE_FAILED`; partial dir removed; fence released; scheduler restarted |
 | pair mismatch at capture or admit | `PAIR_MISMATCH` + `{ reason, bankId }` in the result; nothing listed |
 | admit: unknown staged id, bad inbox entry, no `taki`, bad ZIP, other echoed id | `ARTIFACT_INVALID` / `PROOF_MISSING`; ZIP back in the inbox; staged capture kept |
@@ -299,6 +308,8 @@ whole-template/default/history/hold read-back separate; do not weaken either gua
 
 - Good: a route-c capture seals a verified pair in one paused window; chat keeps committing; Run write tools refuse
   retryably while paused, then work again; `lastVerified` moves.
+- Good: an admitted parent and its child drain after the old 30-second limit but within 120 seconds; one capture
+  seals under the original operation/backup ids with one admission identity snapshot, Core copy and Native request.
 - Base: the native endpoint is off, so a route-c capture pauses, gets the native 404 and fails `ROUTE_UNAVAILABLE` with
   nothing listed. The operator then uses route b: capture stages, the CLI writes the ZIP, the ZIP goes in the inbox, and
   admit seals it verified.
@@ -319,12 +330,18 @@ whole-template/default/history/hold read-back separate; do not weaken either gua
   - `hindsight-replica-scheduler-repo.test.ts`: the hold;
   - the `memory-operation-kind-backup*.test.ts` journeys.
 - Desktop: `memory-hindsight-backup-state.test.ts`, `memory-hindsight-backup-block.test.tsx`.
+- Admission regressions: held parent/child finish after 30 seconds; default timeout at 120 seconds leaves no artifact;
+  existing short override still works; stop and epoch retirement prevent late capture. Observe the actual fence,
+  SQLite copy and controlled Native route. Assert Home waiting/timeout/interruption and preserved Native-stage labels.
 - Native fork: `tests/test_taki_admin_backup.py`.
 - Isolated Core boot (task `research/isolated-process-check.mjs`): on Legacy/Local every backup kind is refused
   `MEMORY_OPERATION_UNSUPPORTED` with no row and no `backups/` dir; 0 fetches.
 - Rerun the restore drill whenever capture, a route or restore semantics change.
 
 ## 7. Wrong vs Correct
+
+Wrong: retry/reopen the complete capture to wait for maintenance, repeating identity/copy/Native work.
+Correct: one abortable admission wait using the existing fence; only a successful drain starts capture.
 
 Wrong: rebuild on every reset refusal.
 

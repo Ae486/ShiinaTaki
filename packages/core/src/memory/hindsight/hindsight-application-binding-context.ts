@@ -1,6 +1,6 @@
 /**
  * INPUT:  verified replica evidence, trusted Bank routing, original artifacts and preloaded first-policy labels
- * OUTPUT: restriction-preserving Bank/source/memory bodies for exact native binding commands
+ * OUTPUT: restriction-preserving binding bodies and exact decoded evidence from the byte-verifying replica
  * POS:    core/memory/hindsight — deterministic policy initialization/rebinding; no model call or speculative source matching
  */
 import {
@@ -19,7 +19,7 @@ import { requirePersistedHindsightPolicy, requireHindsightPolicyOwnership,
 import { projectHindsightApplicationNativeUnit, readHindsightApplicationNative,
   type HindsightApplicationEvidenceReader } from "./hindsight-application-projection.ts";
 import { createHindsightApplicationProviderSource, readHindsightApplicationSourceEvidence } from "./hindsight-application-source-binding.ts";
-import { sameApplicationValue, type HindsightApplicationScope } from "./hindsight-application-integrity.ts";
+import { requireApplicationScope, sameApplicationValue, type HindsightApplicationScope } from "./hindsight-application-integrity.ts";
 
 export interface HindsightApplicationBindingContext extends HindsightApplicationScope {
   authorityEpochId: string; bankScope: MemoryBankScope; bank: CanonicalMemoryBank;
@@ -31,12 +31,16 @@ interface Work {
   at: string; label?: HindsightTrustedUnitLabel;
 }
 
-export function hindsightApplicationEvidenceReader(repo: HindsightApplicationReplicaRepo, scope: HindsightApplicationScope): HindsightApplicationEvidenceReader {
+export function hindsightApplicationEvidenceReader(repo: Pick<HindsightApplicationReplicaRepo, "body" | "artifact">, scope: HindsightApplicationScope): HindsightApplicationEvidenceReader {
+  const body: HindsightApplicationEvidenceReader["body"] = (ref) => {
+    const value = repo.body({ ...scope, bodyId: ref.body_id });
+    if (!value || !sameApplicationValue(value.ref, ref)) invalid();
+    return value;
+  };
   return {
-    body: (ref) => {
-      const body = repo.body({ ...scope, bodyId: ref.body_id });
-      if (!body || !sameApplicationValue(body.ref, ref)) invalid();
-      return body;
+    body, decodedBody: (ref, current) => {
+      requireApplicationScope({ namespace: scope.namespace, bank_id: scope.bankId }, current);
+      return body(ref);
     },
     artifact: (version) => {
       const artifact = repo.artifact({ ...scope, version });

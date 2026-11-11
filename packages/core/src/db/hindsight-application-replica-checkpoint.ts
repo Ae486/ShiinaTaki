@@ -1,6 +1,6 @@
 /**
  * INPUT:  expected app/native checkpoint pairs, current Hindsight authority and captured Bank/lease/deadline
- * OUTPUT: transaction-local publication guards and checkpoint-last paired CAS
+ * OUTPUT: lexical read pairing checks, live publication guards and checkpoint-last paired CAS
  * POS:    core/db — D77 checkpoint identity never reuses an application snapshot as a native V1 baseline
  */
 import { randomUUID } from "node:crypto";
@@ -55,13 +55,19 @@ export function assertApplicationAuthority(state: HindsightApplicationReplicaSta
 
 export function requireApplicationReadCheckpoint(state: HindsightApplicationReplicaState, scope: HindsightApplicationScope,
   allowDeleted = false): HindsightApplicationReplicaCheckpoint {
-  const value = readApplicationCheckpoint(state.db, scope.bankId);
+  const value = state.read ? state.read.checkpoint(scope.bankId) : readApplicationCheckpoint(state.db, scope.bankId);
   if (!value) throw new Error("HINDSIGHT_APPLICATION_CHECKPOINT_MISSING");
   if (!sameApplicationValue(value.namespace, scope.namespace)) throw new Error("HINDSIGHT_APPLICATION_NAMESPACE_MISMATCH");
-  assertApplicationAuthority(state, { ...scope, authorityEpochId: value.authorityEpochId, bankScope: value.bankScope });
-  if (!sameApplicationValue(readReplicaCheckpoint(state.db, scope.bankId) ?? null, value.native)) throw new Error("HINDSIGHT_APPLICATION_CHECKPOINT_UNPAIRED");
+  if (!state.read) assertApplicationReadCheckpoint(state, value);
   if (value.bankDeleted && !allowDeleted) throw new Error("HINDSIGHT_APPLICATION_BANK_DELETED");
   return value;
+}
+
+/** Shared admission proof; a lexical snapshot calls this once per consumed Bank. */
+export function assertApplicationReadCheckpoint(state: HindsightApplicationReplicaState, value: HindsightApplicationReplicaCheckpoint): void {
+  assertApplicationAuthority(state, { bankId: value.bankId, namespace: value.namespace,
+    authorityEpochId: value.authorityEpochId, bankScope: value.bankScope });
+  if (!sameApplicationValue(readReplicaCheckpoint(state.db, value.bankId) ?? null, value.native)) throw new Error("HINDSIGHT_APPLICATION_CHECKPOINT_UNPAIRED");
 }
 
 export function buildApplicationSnapshotCheckpoint(state: HindsightApplicationReplicaState, input: HindsightApplicationSnapshotInput): HindsightApplicationReplicaCheckpoint {

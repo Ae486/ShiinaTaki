@@ -41,7 +41,7 @@ import {usePageVisibilityStore} from '/src/windows/home/page-visibility-store.ts
 import {OperationsPage} from '/src/windows/home/pages/operations/operations-page.tsx';
 import {SettingsPage} from '/src/windows/home/pages/settings/settings-page.tsx';
 import {createWsClient} from '/src/lib/ws-client.ts';import {createBrowserTransport} from '/src/lib/ws-transport.ts';
-import {createTimingPolicyStore} from '/src/lib/timing-policy.ts';import {TIMING_POLICY_DEVELOPMENT_DEFAULTS} from '@taki/shared';
+import {createTimingPolicyStore} from '/src/lib/timing-policy.ts';import {TIMING_POLICY_DEVELOPMENT_DEFAULTS,MEMORY_OPERATION_TERMINAL_STATES} from '@taki/shared';
 const timing=createTimingPolicyStore(TIMING_POLICY_DEVELOPMENT_DEFAULTS);
 const operationChanges=[];
 async function open(){const c=createWsClient({transport:createBrowserTransport('ws://127.0.0.1:${port}'),timingPolicy:timing,onTimingPolicyDiagnostic:()=>{}});
@@ -52,7 +52,7 @@ function App(){const [client,setClient]=useState(initial);const [page,setPage]=u
 const navigate=(page)=>{usePageVisibilityStore.getState().setActivePage(page);setPage(page);};
 window.__reconnect=async()=>{client.close();setClient(null);setClient(await open());};
 window.__status=()=>client.memoryAuthorityStatus();
-window.__operation=(kind,previous)=>operationChanges.findLast(row=>row.kind===kind&&!previous.includes(row.operationId)&&['completed','failed','cancelled','outcome_unknown'].includes(row.state));
+ window.__operation=(kind,previous)=>operationChanges.findLast(row=>row.kind===kind&&!previous.includes(row.operationId)&&MEMORY_OPERATION_TERMINAL_STATES.includes(row.state));
 return <HomeClientContext.Provider value={{client,status:client?{kind:'connected'}:{kind:'connecting'},currentTimingPolicy:()=>timing.current()}}>
 <main className="mx-auto max-w-5xl p-6"><nav className="mb-4 flex gap-4"><button onClick={()=>navigate('settings')}>设置页</button><button onClick={()=>navigate('operations')}>运维页</button></nav>
 {page==='settings'?<SettingsPage/>:<OperationsPage/>}</main></HomeClientContext.Provider>;}

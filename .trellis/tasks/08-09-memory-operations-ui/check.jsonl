@@ -17,3 +17,9 @@
 {"file": ".trellis/spec/backend/memory-authority-validation.md", "reason": "Check current guard scope, known-invalid withdrawal and usable diagnostics"}
 {"file": ".trellis/tasks/08-09-memory-operations-ui/research/real-admission-review-20261106.md", "reason": "Verify initial readiness without new caches or false completion after COMMIT"}
 {"file": ".trellis/tasks/08-09-memory-operations-ui/research/foreground-grounding-followup-20261106.md", "reason": "Real conversation source grounding and two unchanged-slice acceptance"}
+{"file": ".trellis/tasks/08-09-memory-operations-ui/research/phase2-wave2b-plan-20261111.md", "reason": "Check current wave 2b requirements and preserve inherited work; distinguish deterministic, browser and real-provider evidence."}
+{"file": ".trellis/tasks/08-09-memory-operations-ui/research/phase2-wave3-plan-20261111.md", "reason": "Check truthful waiting and bounded backup admission without redundant validation; heavy tests wait for owner memory readiness."}
+{"file": ".trellis/spec/backend/memory-replica-sync.md", "reason": "Check accepted-only waits, true failures and migration history without duplicate validation."}
+{"file": ".trellis/spec/backend/memory-operations.md", "reason": "Verify terminal waiting is replica-only and backed by exact durable evidence."}
+{"file": ".trellis/spec/backend/memory-hindsight-backup.md", "reason": "Verify bounded admission, cancellation and separate Native capture budget."}
+{"file": ".trellis/tasks/08-09-memory-operations-ui/research/phase2-validation-20261111.md", "reason": "Verify actual connected results, scale correction, preserved failures and checkpoint/integration limits"}

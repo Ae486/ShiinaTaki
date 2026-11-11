@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { MemoryAuthorityStatus, MemoryOperation, MemoryReplicaChanged } from "@taki/shared";
 import { activationStatus } from "./hindsight-activation-fixtures.ts";
-import { bankStatus, hindsightStatus, operation } from "./memory-authority-fixtures.ts";
+import { AT, bankStatus, hindsightStatus, operation, policyReview } from "./memory-authority-fixtures.ts";
 import { createMemoryOperationsController, type MemoryOperationsClient, type MemoryOperationsSink } from "./memory-operations-controller.ts";
 
 type Handler = (operation: MemoryOperation) => void;
@@ -42,6 +42,27 @@ const readAuthority = (target: MemoryOperationsClient) => target.memoryAuthority
 const settle = () => new Promise((resolve) => setImmediate(resolve));
 
 describe("memory operations controller", () => {
+  it("refetches review transitions on the existing replica push and restores the retained catch-up identity after reopening", async () => {
+    const review = policyReview();
+    const target = client({ memoryAuthorityStatus: async () => hindsightStatus({ review: [review] }) });
+    const s = sink(); const controller = createMemoryOperationsController(s, readAuthority);
+    controller.replace(target); await settle();
+    expect(s.loaded.mock.lastCall?.[0].review?.[0].state).toBe("pending");
+    for (const state of ["running", "paused", "error"] as const) {
+      review.state = state; target.pushReplica({ bankId: "global" }); await settle();
+      expect(s.loaded.mock.lastCall?.[0].review?.[0].state).toBe(state);
+    }
+    review.state = null; review.dueSince = null; review.eligibleRemaining = 0; review.savedAwaitingPublication = 0; review.lastCompletedAt = AT;
+    target.pushReplica({ bankId: "global" }); await settle();
+    expect(s.loaded.mock.lastCall?.[0].review?.[0]).toEqual(review);
+    controller.dispose();
+    const reopened = sink(); const next = createMemoryOperationsController(reopened, readAuthority);
+    next.replace(target); await settle();
+    expect(reopened.loaded.mock.lastCall?.[0].review?.[0]).toMatchObject({ state: null, catchUpOccurrenceId: "policy-review:catch-up-1" });
+    expect(target.calls.filter((call) => call === "submit")).toHaveLength(0);
+    next.dispose();
+  });
+
   it("saves a complete schedule once, refetches after the result and invalidates on replica changes", async () => {
     const config = { automatic: false, autoIntervalMs: 120_000, fullReconciliationIntervalMs: 172_800_000 };
     const saved = vi.fn<MemoryOperationsClient["memoryReplicaConfigure"]>(async () => bankStatus("global", config));

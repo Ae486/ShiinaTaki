@@ -41,7 +41,7 @@
 - 022-hindsight-connection-setup.ts — additive sanitized Hindsight connection and per-Bank setup evidence; no authority mutation
 - 023-hindsight-initial-cutover.ts — B4 cutover lifecycle lease, import mappings, logical replica/checkpoints, Hindsight marker, and activation receipts
 - 024-harness-runs.ts — Slice 1 additive Run, Attempt, immutable snapshot, and bounded Receipt current-state tables
-- index-list.ts — the explicit ordered MIGRATIONS registry (no fs/glob discovery)
+- index-list.ts — the explicit ordered immutable MIGRATIONS registry through 063 (no fs/glob discovery)
 - 041-canonical-memory-maintenance.ts — deletion-independent canonical snapshots, shared maintenance request receipts, and durable ingestion plans
 - 042-hindsight-application-state.ts — immutable body/artifact/publication history, exact native heads and paired application checkpoint storage
 - 043-hindsight-ingestion.ts — independent Hindsight source witnesses, ingestion plans and source-coverage receipts
@@ -62,3 +62,6 @@
 - 058-hindsight-template-overlays.ts — immutable exact-incarnation overlay enrollment, before-images, user/catalog/history and CAS applied/default selection; no legacy ownership backfill or second operation journal.
 - 059-hindsight-template-execution.ts — original template plans/admissions, executor CAS, durable holds/receipts/publications, lost-create reservations and monotonic configuration revisions; no legacy ownership backfill.
 - 060-hindsight-candidates.ts — controlling-Core candidate evidence and original request/effect links; empty additive storage, with no archived-Core migration or runtime dispatch.
+- 061-hindsight-runtime-identity.ts — random current-identity change stamps across template/authority/checkpoint tables and exact trigger-verification SQL; no permission or historical-proof cache.
+- 062-hindsight-policy-review-schedule.ts — additive per-epoch/Bank-namespace D108 schedule progress; preserves migration 061 and the item journal
+- 063-hindsight-replica-waiting.ts — terminal manual waiting; preserves request/quarantine bytes, incoming FK, admission/immutability guards and old migration receipts

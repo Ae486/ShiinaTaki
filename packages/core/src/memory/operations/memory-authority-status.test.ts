@@ -18,6 +18,11 @@ function fixture(mode: "canonical-local" | "hindsight", runtime: FakeRuntime | n
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS }); dbs.push(db);
   db.prepare("UPDATE memory_authority_selection SET mode='canonical-local',active_epoch_id='epoch',verified_snapshot_id='snapshot',activation_transaction_id='tx' WHERE singleton=1").run();
   if (mode === "hindsight") seedHindsightAuthority(db);
+  else {
+    db.prepare(`INSERT INTO canonical_memory_authority_epochs(epoch_id,provider_id,provider_lineage_id,status,started_at,reason)
+      VALUES ('epoch','local','local-lineage','active',:now,'initial-local')`).run({ now: AT });
+    db.prepare("INSERT INTO canonical_memory_authority_state VALUES (1,'epoch',:now)").run({ now: AT });
+  }
   const setup = fakeSetup();
   const operations = createMemoryOperationService({ db, live: () => runtime, setup, bootId: "boot", now: () => AT, onChanged: () => undefined, logger: createLogger("fatal") });
   const connection = { live: READY };

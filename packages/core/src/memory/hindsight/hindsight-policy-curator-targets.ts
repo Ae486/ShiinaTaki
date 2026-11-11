@@ -1,6 +1,6 @@
 /**
  * INPUT:  application-verified due work and current Core-owned Block snapshots
- * OUTPUT: scoped exact targets and last-moment model/publication admission checks
+ * OUTPUT: lexical exact-target reads and fresh model/publication admission checks
  * POS:    core/memory/hindsight — no whole-source expansion or inferred cross-Bank ownership
  */
 import { TakiApplicationBlockBodySchema, type CanonicalMemoryBank, type MemoryReplicaBank,
@@ -12,8 +12,16 @@ import { HindsightPolicyTargetSchema, validateHindsightPolicyWorkTarget, policyA
   type HindsightPolicyBlockTarget, type HindsightPolicyBlockSnapshot, type HindsightPolicyWorkTarget } from "../../db/hindsight-policy-work-contract.ts";
 import { readHindsightApplicationNative } from "./hindsight-application-projection.ts";
 import { hindsightPolicyAdmission } from "./hindsight-policy-admission.ts";
-import { sameApplicationValue, verifyHindsightApplicationBody } from "./hindsight-application-integrity.ts";
+import { requireApplicationScope, sameApplicationValue, type HindsightApplicationScope } from "./hindsight-application-integrity.ts";
 import type { HindsightPolicyCuratorRun, HindsightPolicyCuratorReview } from "./hindsight-policy-curator-context.ts";
+
+export function readCuratorSnapshot<T>(run: HindsightPolicyCuratorRun, read: (current: HindsightPolicyCuratorRun) => T): T {
+  return run.deps.replica.readSnapshot((replica) => {
+    run.alive();
+    const banks = run.deps.resolveBanks(run.characterId);
+    return read({ ...run, deps: { ...run.deps, replica, resolveBanks: () => banks } });
+  });
+}
 
 export function requireCuratorBank(run: HindsightPolicyCuratorRun, bankId: string) {
   run.alive(); const epoch = run.deps.authority.authorityEpoch(run.epochId);
@@ -35,10 +43,15 @@ export function captureCuratorPolicyTarget(run: HindsightPolicyCuratorRun, input
   if (!head.bound_artifact || !head.version || head.binding_state !== "bound") invalid();
   const artifact = repo.artifact({ ...scope, version: head.bound_artifact });
   if (!artifact) invalid();
-  const access = { body: (ref: TakiApplicationArtifact["body_ref"]) => {
+  const readBody = (ref: TakiApplicationArtifact["body_ref"]) => {
     const body = repo.body({ ...scope, bodyId: ref.body_id });
     if (!body || !sameApplicationValue(body.ref, ref)) invalid();
-    verifyHindsightApplicationBody(body, scope); return body;
+    // The replica body reader already verifies descriptor, bytes and payload.
+    return body;
+  };
+  const access = { body: readBody, decodedBody: (ref: TakiApplicationArtifact["body_ref"], current: HindsightApplicationScope) => {
+    requireApplicationScope({ namespace: scope.namespace, bank_id: scope.bankId }, current);
+    return readBody(ref);
   }, artifact: (version: NonNullable<TakiApplicationNativeHead["bound_artifact"]>) => {
     const value = repo.artifact({ ...scope, version }); if (!value) invalid(); return value;
   } };
@@ -124,10 +137,17 @@ export function assertCuratorReviewOpen(review: HindsightPolicyCuratorReview): v
 }
 export function assertCuratorReviewInputs(review: HindsightPolicyCuratorReview): void {
   assertCuratorReviewOpen(review);
-  if (!sameApplicationValue(captureCuratorBlocks(review.run, review.bank), review.blocks)) revision();
-  for (const record of review.records.values()) assertCuratorWorkCurrent(review.run, { scope: record.key, target: record.target });
+  readCuratorSnapshot(review.run, (run) => {
+    if (!sameApplicationValue(captureCuratorBlocks(run, review.bank), review.blocks)) revision();
+    for (const record of review.records.values()) assertCuratorWorkCurrent(run, { scope: record.key, target: record.target });
+  });
 }
 export function assertCuratorWorkCurrent(run: HindsightPolicyCuratorRun, input: {
+  scope: HindsightPolicyWorkScope; target: HindsightPolicyWorkTarget; exactPolicy?: boolean;
+}): void {
+  readCuratorSnapshot(run, (current) => assertWorkCurrent(current, input));
+}
+function assertWorkCurrent(run: HindsightPolicyCuratorRun, input: {
   scope: HindsightPolicyWorkScope; target: HindsightPolicyWorkTarget; exactPolicy?: boolean;
 }): void {
   const { scope, target } = input;

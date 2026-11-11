@@ -1,23 +1,25 @@
 /**
  * INPUT:  verified due policy/Block work, durable claims and the common application writer/refresh path
- * OUTPUT: scoped production policy reviews, restart-safe publication and actual applied-effect outcomes
+ * OUTPUT: Bank-scoped paged policy collection, restart-safe publication and actual applied-effect outcomes
  * POS:    core/memory/hindsight — dedicated curator; no generic native maintenance or independent scheduler
  */
 import { z } from "zod";
-import { MemoryReplicaBankSchema } from "@taki/shared";
+import { MemoryReplicaBankSchema, type MemoryReplicaBank } from "@taki/shared";
+import type { HindsightApplicationWorkCursor } from "../../db/hindsight-application-replica-contract.ts";
 import { policyWorkClaim } from "../../db/hindsight-policy-work-repo.ts";
 import type { HindsightPolicyWorkRecord } from "../../db/hindsight-policy-work-contract.ts";
 import { createCuratorLifetime } from "./hindsight-policy-curator-lifetime.ts";
 import { executeCuratorModel, recoverCuratorPolicyAttempt } from "./hindsight-policy-curator-execution.ts";
 import { publishCuratorWork } from "./hindsight-policy-curator-publication.ts";
 import { assertCuratorWorkCurrent, assertCuratorPolicyReadable, captureCuratorPolicyTarget, captureCuratorBlocks,
-  captureCuratorBlockTarget, curatorWritableBlocks, policySourceRef, requireCuratorBank } from "./hindsight-policy-curator-targets.ts";
+  captureCuratorBlockTarget, curatorWritableBlocks, policySourceRef, requireCuratorBank, readCuratorSnapshot } from "./hindsight-policy-curator-targets.ts";
 import type { HindsightPolicyCuratorDeps, HindsightPolicyCuratorOutcome, HindsightPolicyCuratorRun } from "./hindsight-policy-curator-context.ts";
 
 export type { HindsightPolicyCuratorDeps, HindsightPolicyCuratorOutcome } from "./hindsight-policy-curator-context.ts";
 export interface HindsightPolicyCurator {
   maybeRun(characterId: string): Promise<void>;
   runNow(characterId: string): Promise<HindsightPolicyCuratorOutcome>;
+  runBank(bank: MemoryReplicaBank, signal?: AbortSignal): Promise<HindsightPolicyCuratorOutcome>;
   stop(): Promise<void>;
   settle(): Promise<void>;
 }
@@ -28,21 +30,24 @@ export function createHindsightPolicyCurator(deps: HindsightPolicyCuratorDeps): 
   const controller = new AbortController(); const active = new Set<Promise<HindsightPolicyCuratorOutcome>>();
   const chains = new Map<string, Promise<HindsightPolicyCuratorOutcome>>();
   const settle = async () => { while (active.size) await Promise.allSettled([...active]); };
-  const runNow = (characterId: string): Promise<HindsightPolicyCuratorOutcome> => {
+  const enqueue = (characterId: string | null, bank?: MemoryReplicaBank, signal?: AbortSignal): Promise<HindsightPolicyCuratorOutcome> => {
     if (controller.signal.aborted) return Promise.reject(new Error("MEMORY_OPERATION_CANCELLED"));
-    z.string().min(1).max(256).parse(characterId);
-    const task = (chains.get(characterId) ?? Promise.resolve()).catch(() => undefined)
-      .then(() => execute({ deps, characterId, epochId: epoch.epochId, lineage: epoch.providerLineageId, owner: controller.signal }));
-    active.add(task); chains.set(characterId, task);
-    const release = () => { active.delete(task); if (chains.get(characterId) === task) chains.delete(characterId); };
+    const key = bank ? `bank:${bank.bankId}` : `character:${characterId}`;
+    const owner = signal ? AbortSignal.any([controller.signal, signal]) : controller.signal;
+    const task = (chains.get(key) ?? Promise.resolve()).catch(() => undefined)
+      .then(() => execute({ deps, characterId, bank, epochId: epoch.epochId, lineage: epoch.providerLineageId, owner }));
+    active.add(task); chains.set(key, task);
+    const release = () => { active.delete(task); if (chains.get(key) === task) chains.delete(key); };
     void task.then(release, release); return task;
   };
-  return { runNow, maybeRun: async (characterId) => { await runNow(characterId); }, settle,
+  const runNow = (characterId: string) => enqueue(z.string().min(1).max(256).parse(characterId));
+  return { runNow, runBank: (bank, signal) => enqueue(bank.characterId, MemoryReplicaBankSchema.parse(bank), signal),
+    maybeRun: async (characterId) => { await runNow(characterId); }, settle,
     stop: () => { controller.abort(); return settle(); } };
 }
 
 async function execute(input: {
-  deps: HindsightPolicyCuratorDeps; characterId: string; epochId: string; lineage: string; owner: AbortSignal;
+  deps: HindsightPolicyCuratorDeps; characterId: string | null; bank?: MemoryReplicaBank; epochId: string; lineage: string; owner: AbortSignal;
 }): Promise<HindsightPolicyCuratorOutcome> {
   if (input.owner.aborted) throw new Error("MEMORY_OPERATION_CANCELLED");
   const read = input.deps.config();
@@ -56,6 +61,7 @@ async function execute(input: {
     run.alive();
     const banks = input.deps.resolveBanks(input.characterId).map((bank) => MemoryReplicaBankSchema.parse(bank))
       .filter((bank) => bank.scope === "global" || bank.characterId === input.characterId)
+      .filter((bank) => !input.bank || bank.bankId === input.bank.bankId)
       .sort((left, right) => left.scope === right.scope ? 0 : left.scope === "global" ? -1 : 1);
     if (new Set(banks.map((bank) => bank.bankId)).size !== banks.length || new Set(banks.map((bank) => bank.scope)).size !== banks.length) {
       throw new Error("MEMORY_AUTHORITY_MISMATCH");
@@ -80,17 +86,9 @@ async function processBank(run: HindsightPolicyCuratorRun, bankId: string): Prom
     if (claimed.target.kind === "block") await generateAndPublish(run, [claimed]);
     else model.set(claimed.target.native.version.object_id, claimed);
   }
-  const refreshed = requireCuratorBank(run, bankId);
-  const due = run.deps.replica.duePolicyWork({ ...refreshed.scope, limit,
-    at: run.deps.now?.() ?? new Date().toISOString(), eligibleForMaintenance: true });
-  for (const entry of due) {
-    if (model.size >= limit || model.has(entry.head.object_id)) continue;
-    const target = captureCuratorPolicyTarget(run, { ...refreshed, head: entry.head });
-    assertCuratorPolicyReadable(run, refreshed.scope, target);
-    const record = take(run, run.deps.work.prepare({ scope: refreshed.scope, target }));
-    if (record && !await recover(run, record) && currentTarget(run, record)) model.set(target.native.version.object_id, record);
-  }
+  await admitPolicyTargets(run, bankId, { model, limit });
   if (!model.size) return;
+  const refreshed = requireCuratorBank(run, bankId);
   const blocks = captureCuratorBlocks(run, refreshed.bank);
   const sources = [...model.values()].map((record) => {
     if (record.target.kind !== "policy") throw new Error("MEMORY_INTEGRITY_ERROR");
@@ -103,6 +101,36 @@ async function processBank(run: HindsightPolicyCuratorRun, bankId: string): Prom
     if (record && !await recover(run, record) && currentTarget(run, record)) records.push(record);
   }
   await generateAndPublish(run, records);
+}
+
+async function admitPolicyTargets(run: HindsightPolicyCuratorRun, bankId: string,
+  input: { model: Map<string, HindsightPolicyWorkRecord>; limit: number }) {
+  let after: HindsightApplicationWorkCursor | undefined;
+  while (input.model.size < input.limit) {
+    const { current, entries } = collectPolicyTargets(run, bankId, { limit: input.limit, after });
+    for (const { target, cursor } of entries) {
+      if (!input.model.has(target.native.version.object_id)) {
+        readCuratorSnapshot(run, (currentRun) => assertCuratorPolicyReadable(currentRun, current.scope, target));
+        const record = take(run, run.deps.work.prepare({ scope: current.scope, target }));
+        if (record && !await recover(run, record) && currentTarget(run, record)) input.model.set(target.native.version.object_id, record);
+      }
+      // Admission has committed before this local cursor moves. Restart deliberately scans from the beginning.
+      after = cursor;
+      if (input.model.size >= input.limit) return;
+    }
+    if (entries.length < input.limit) return;
+  }
+}
+
+function collectPolicyTargets(run: HindsightPolicyCuratorRun, bankId: string,
+  input: { limit: number; after?: HindsightApplicationWorkCursor }) {
+  return readCuratorSnapshot(run, (currentRun) => {
+    const current = requireCuratorBank(currentRun, bankId);
+    const due = currentRun.deps.replica.duePolicyWork({ ...current.scope, limit: input.limit, after: input.after,
+      at: run.deps.now?.() ?? new Date().toISOString(), eligibleForMaintenance: true });
+    const entries = due.map((entry) => ({ cursor: entry.cursor, target: captureCuratorPolicyTarget(currentRun, { ...current, head: entry.head }) }));
+    return { current, entries };
+  });
 }
 
 function take(run: HindsightPolicyCuratorRun, record: HindsightPolicyWorkRecord): HindsightPolicyWorkRecord | undefined {

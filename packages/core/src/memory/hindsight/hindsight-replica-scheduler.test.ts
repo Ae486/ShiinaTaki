@@ -119,12 +119,15 @@ describe("B5 asynchronous single-flight scheduler", () => {
     expect(scheduler.status()[0]).toMatchObject({ retryDueAt: null, consecutiveFailures: 0 });
   });
 
-  it("arms the Pending poll after failure without shortening it to the expired run's lease", async () => {
+  it("selects the Pending poll inside settlement without shortening it to the expired run's lease", async () => {
     const f = fixture(); const dueAt = "2026-09-06T00:11:00.000Z";
-    // The recovery integration tests supply real rows; this isolates automatic timer delivery.
-    vi.spyOn(f.repo, "nextPendingRetryAt").mockImplementation(() => {
-      expect(f.repo.get("global")?.run).toBeNull(); return dueAt;
-    });
+    // A queued, unaccepted row stays a failure; its retry still bounds the automatic wake.
+    f.db.prepare(`INSERT INTO canonical_memory_authority_epochs(epoch_id,provider_id,provider_lineage_id,status,started_at,reason)
+      VALUES ('epoch','hindsight','lineage','active',:at,'planned-switch')`).run({ at });
+    f.db.prepare("INSERT INTO canonical_memory_authority_state VALUES (1,'epoch',:at)").run({ at });
+    f.db.prepare(`INSERT INTO pending_memory(authority_epoch_id,bank_id,operation_id,operation_kind,intent_hash,phase,version,state_json)
+      VALUES ('epoch','global','queued','retain',:hash,'queued',1,:json)`)
+      .run({ hash: "a".repeat(64), json: JSON.stringify({ nextRetryAt: dueAt, acceptedAt: null }) });
     const run = vi.fn(async (input: HindsightReplicaRunInput) => f.result(input));
     run.mockRejectedValueOnce(new Error("HINDSIGHT_UNREACHABLE"))
       .mockRejectedValueOnce(new Error("HINDSIGHT_UNREACHABLE"))

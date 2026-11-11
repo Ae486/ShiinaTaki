@@ -1,11 +1,11 @@
 /**
  * INPUT:  verified scoped D77 bodies, artifact versions and complete publication descriptors
- * OUTPUT: immutable evidence persistence and exact-reference reconstruction across restart
+ * OUTPUT: immutable evidence persistence and exact-reference reconstruction, deduplicated within one reader
  * POS:    core/db — original bytes and historical associations survive native edits and Bank generation retirement
  */
 import { TakiApplicationArtifactSchema, TakiApplicationBodyRefSchema, TakiApplicationRecordPageSchema,
   TakiApplicationReadBundleManifestSchema, TakiApplicationStateChangeManifestSchema,
-  type TakiApplicationArtifact, type TakiApplicationArtifactKey, type TakiApplicationArtifactVersion,
+  type TakiApplicationArtifact, type TakiApplicationArtifactKey, type TakiApplicationArtifactVersion, type TakiApplicationBodyRef,
   type TakiApplicationRecordPage } from "@taki/shared";
 import { decodeHindsightApplicationBody, hindsightApplicationBytesHash, hindsightApplicationHash,
   requireApplicationScope, sameApplicationValue, withoutApplicationHash,
@@ -13,19 +13,41 @@ import { decodeHindsightApplicationBody, hindsightApplicationBytesHash, hindsigh
 import type { HindsightApplicationBundle, HindsightApplicationEvent } from "../memory/hindsight/hindsight-application-bundle.ts";
 import { APPLICATION_SCOPE_WHERE, applicationArtifactKey, applicationScopeParams,
   applicationStoredBytes, parseApplicationStoredBytes } from "./hindsight-application-replica-codec.ts";
-import type { HindsightApplicationEvidenceAccess } from "./hindsight-application-replica-contract.ts";
+import type { HindsightApplicationEvidenceAccess, HindsightApplicationReplicaState } from "./hindsight-application-replica-contract.ts";
 import type { Database, SqlRow } from "./sqlite.ts";
 import { readHindsightApplicationSourceArtifact } from "../memory/hindsight/hindsight-application-source-evidence.ts";
 
-export function createApplicationEvidenceAccess(db: Database, scope: HindsightApplicationScope): HindsightApplicationEvidenceAccess {
+export function applicationEvidenceAccess(state: HindsightApplicationReplicaState, scope: HindsightApplicationScope) {
+  return state.read ? state.read.evidence(scope) : createApplicationEvidenceAccess(state.db, scope);
+}
+
+export function createApplicationEvidenceAccess(db: Database, scope: HindsightApplicationScope) {
+  const bodies = new Map<string, HindsightApplicationBody>();
+  const artifacts = new Map<string, TakiApplicationArtifact>();
+  const bodyId = (id: string) => {
+    const body = bodies.get(id) ?? readApplicationBody(db, { ...scope, bodyId: id });
+    if (body) bodies.set(id, body);
+    return body;
+  };
+  const artifactOrUndefined = (version: TakiApplicationArtifactVersion) => {
+    const key = JSON.stringify(version);
+    const artifact = artifacts.get(key) ?? readApplicationArtifact(db, { ...scope, version });
+    if (artifact) artifacts.set(key, artifact);
+    return artifact;
+  };
+  const body = (ref: TakiApplicationBodyRef) => {
+    const value = bodyId(ref.body_id);
+    if (!value || !sameApplicationValue(value.ref, ref)) missing();
+    return value;
+  };
   return {
-    body: (ref) => {
-      const body = readApplicationBody(db, { ...scope, bodyId: ref.body_id });
-      if (!body || !sameApplicationValue(body.ref, ref)) missing();
-      return body;
+    bodyId, artifactOrUndefined, body,
+    decodedBody: (ref: TakiApplicationBodyRef, current: HindsightApplicationScope) => {
+      requireApplicationScope({ namespace: scope.namespace, bank_id: scope.bankId }, current);
+      return body(ref);
     },
-    artifact: (version) => {
-      const artifact = readApplicationArtifact(db, { ...scope, version });
+    artifact: (version: TakiApplicationArtifactVersion) => {
+      const artifact = artifactOrUndefined(version);
       if (!artifact) missing();
       return artifact;
     },

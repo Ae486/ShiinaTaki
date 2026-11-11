@@ -93,6 +93,7 @@ function classify(row: MemoryReplicaRequest | undefined): MemoryOperationSettlem
   if (!row || row.state === "queued" || row.state === "claimed") return null;
   if (row.state === "cancelled") return { state: "cancelled", reason: "cancelled_before_claim", errorCode: null, result: null };
   const result = { kind: "replica" as const, errorCode: row.errorCode, nextAction: row.nextAction, lastSuccessAt: row.lastSuccessAt };
+  if (row.state === "waiting") return { state: "waiting", reason: null, errorCode: null, result };
   return row.state === "succeeded" ? { state: "completed", reason: null, errorCode: null, result }
     : { state: "failed", reason: "producer_failed", errorCode: row.errorCode, result };
 }

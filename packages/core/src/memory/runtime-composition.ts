@@ -1,6 +1,6 @@
 /**
- * INPUT:  Core boot dependencies for Legacy, Local and explicitly selected Hindsight memory runtimes, plus the boot identity
- * OUTPUT: selected immutable Runs, trusted primary custody, truthful binding/status recovery, operation access and transitions
+ * INPUT:  Core boot dependencies, boot identity and live activity/config signals for selected memory runtimes
+ * OUTPUT: selected immutable Runs, trusted primary custody, binding/status recovery, review hints, operation access and transitions
  * POS:    core/memory — one Utility Slot/Compaction owner; symmetric epoch retirement, fresh binding and settled process shutdown;
  *         first activation and same-epoch connection replacement retain their independent receipt contracts
  */
@@ -10,6 +10,8 @@ import { BASE_SYSTEM_PROMPT } from "../agents/base-prompt.ts";
 import { createCompactionPass } from "../agents/compaction-pass.ts";
 import type { RequestMeasurement } from "../agents/request-measurement.ts";
 import type { ConfigSource } from "../config/config-source.ts";
+import type { ConfigSubscriptions } from "../config/config-subscriptions.ts";
+import type { TurnRegistry } from "../agents/turn-registry.ts";
 import { loadMemoryConfig } from "../config/memory-config.ts";
 import { loadUtilityConfig } from "../config/utility-config.ts";
 import { createCompactionOperationRepo } from "../db/compaction-operation-repo.ts";
@@ -56,6 +58,9 @@ interface MemoryRuntimeInput {
   measureRequest?: (characterId: string) => RequestMeasurement | undefined;
   effectiveWindowTokens?: () => number;
   hindsight?: { source: ConfigSource; secrets: SecretCatalogService; client?: HindsightClient };
+  reviewActivity?: Pick<TurnRegistry, "idleSince" | "observe">;
+  configChanges?: Pick<ConfigSubscriptions, "observe">;
+  onPolicyReviewChanged?: (bankId: string) => void;
   /** Core's automatic lifecycle trigger (late-bound); called for every memory-unavailable Hindsight Run. */
   onHindsightUnavailable?: (event: HindsightUnavailableRunEvent) => void;
 }

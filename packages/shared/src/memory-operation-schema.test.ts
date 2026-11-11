@@ -11,6 +11,19 @@ const base = {
 } as const;
 
 describe("memory operation contracts", () => {
+  it("restricts terminal waiting to exact replica evidence and preserves genuine prior success", () => {
+    const waiting = { ...base, state: "waiting", terminalAt: at,
+      producer: { kind: "replica", bankId: "global", admittedAt: at, requestId: base.operationId },
+      result: { kind: "replica", errorCode: null, nextAction: "explicit_retry_required", lastSuccessAt: null } };
+    expect(MemoryOperationSchema.safeParse(waiting).success).toBe(true);
+    for (const patch of [{ terminalAt: null }, { producer: null }, { result: null }, { errorCode: "HINDSIGHT_TIMEOUT" },
+      { reason: "producer_failed" }, { producer: { ...waiting.producer, requestId: undefined } },
+      { result: { ...waiting.result, nextAction: null } }, { result: { ...waiting.result, errorCode: "HINDSIGHT_TIMEOUT" } },
+      { kind: "setup.validate", request: { kind: "setup.validate", expectedRevision: 0 }, producer: null, result: null }]) {
+      expect(MemoryOperationSchema.safeParse({ ...waiting, ...patch }).success).toBe(false);
+    }
+  });
+
   it("round-trips an admitted replica operation and a settled setup operation", () => {
     expect(MemoryOperationSchema.parse(base)).toEqual(base);
     const setup = {

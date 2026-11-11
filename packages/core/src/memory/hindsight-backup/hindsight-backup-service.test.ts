@@ -6,6 +6,7 @@ import { openDatabase, type Database } from "../../db/sqlite.ts";
 import { rmTempDir } from "../../testing/rm-temp.ts";
 import { createMaintenanceAutoMemory } from "../auto-memory.ts";
 import { fenceHindsightWriters, type HindsightWriters } from "../hindsight/hindsight-writer-fence.ts";
+import * as captureState from "./hindsight-backup-capture-state.ts";
 import { AT, BACKUP_ID } from "./hindsight-backup-fixtures.ts";
 import {
   backupHarness, HARNESS_BANK as BANK, HARNESS_GENERATION as GENERATION, HARNESS_LINEAGE as LINEAGE, HARNESS_OPERATION_ID as OPERATION_ID, seedConfirmedRetain,
@@ -13,7 +14,7 @@ import {
 } from "./hindsight-backup-harness.ts";
 
 const dirs: string[] = []; const dbs: Database[] = [];
-afterEach(() => { vi.restoreAllMocks(); for (const db of dbs.splice(0)) db.close(); for (const dir of dirs.splice(0)) rmTempDir(dir); });
+afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); for (const db of dbs.splice(0)) db.close(); for (const dir of dirs.splice(0)) rmTempDir(dir); });
 
 const harness = (options?: HarnessOptions) => backupHarness({ dirs, dbs }, options);
 
@@ -21,9 +22,17 @@ function leftovers(h: Harness): string[] {
   return existsSync(h.store.root) ? readdirSync(h.store.root).filter((name) => name !== "quarantine") : [];
 }
 
+function heldWrite(h: Harness) {
+  let finish = (): void => undefined;
+  const done = h.fence.admit(() => new Promise<void>((resolve) => { finish = resolve; }));
+  return { done, finish: () => finish() };
+}
+
 describe("hindsight backup capture producer", () => {
   it("pauses writers and the scheduler, copies Core, pairs the native proof and seals a listed manifest", async () => {
     const h = harness();
+    const copy = vi.spyOn(h.db, "backupTo");
+    const identity = vi.spyOn(captureState, "readHindsightCaptureState");
     const terminal = seedConfirmedRetain(h.db, "remote-1"); h.route.state.receipts.add(terminal);
     let duringNative: unknown;
     h.route.onSnapshot = async () => {
@@ -35,6 +44,9 @@ describe("hindsight backup capture producer", () => {
     expect(duringNative).toEqual({ writable: false, stopped: 1, started: 0, write: "MEMORY_AUTHORITY_FENCED" });
     expect(h.phases).toEqual(["quiescing", "capturing-core", "capturing-native", "verifying", "sealing"]);
     expect(h.route.requests[0]).toMatchObject({ backupId: BACKUP_ID, providerLineageId: LINEAGE, nativeBankIds: [BANK.bankId], operationIds: [terminal] });
+    expect(h.route.requests).toHaveLength(1);
+    expect(copy).toHaveBeenCalledOnce();
+    expect(identity).toHaveBeenCalledOnce();
     const [listed] = await h.store.list();
     expect(listed).toMatchObject({ backupId: BACKUP_ID, operationId: OPERATION_ID, route: "native-endpoint", verifiedAt: AT,
       core: { migrationHead: Math.max(...MIGRATIONS.map((migration) => migration.version)) },
@@ -58,6 +70,75 @@ describe("hindsight backup capture producer", () => {
     h.scheduler.start.mockImplementation(() => { throw new Error("HINDSIGHT_REPLICA_BUSY"); });
     expect(await h.capture()).toMatchObject({ ok: true });
     expect(h.logs.some((log) => (log.obj as { code?: string } | undefined)?.code === "HINDSIGHT_REPLICA_SCHEDULE_STALE")).toBe(true);
+  });
+
+  it("waits past 30 seconds for the admitted owner and its child, then captures one pair under the original ids", async () => {
+    const h = harness();
+    const copy = vi.spyOn(h.db, "backupTo");
+    const identity = vi.spyOn(captureState, "readHindsightCaptureState");
+    let enterChild = (): void => undefined; let finishChild = (): void => undefined;
+    const child = vi.fn(() => new Promise<void>((resolve) => { finishChild = resolve; }));
+    const owner = vi.fn(async () => {
+      await new Promise<void>((resolve) => { enterChild = resolve; });
+      await h.fence.admit(child);
+    });
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    const admitted = h.fence.admit(owner);
+    const pending = h.capture();
+    try {
+      await vi.advanceTimersByTimeAsync(31_000);
+      expect(h.fence.writable()).toBe(false);
+      expect(h.phases).toEqual(["quiescing"]);
+      expect(copy).not.toHaveBeenCalled();
+      expect(identity).not.toHaveBeenCalled();
+      expect(leftovers(h)).toEqual([]);
+      await expect(h.fence.admit(() => "new write")).rejects.toThrow("MEMORY_AUTHORITY_FENCED");
+
+      enterChild();
+      await vi.advanceTimersByTimeAsync(14_000);
+      expect(child).toHaveBeenCalledOnce();
+      expect(h.route.requests).toEqual([]);
+      finishChild();
+      vi.useRealTimers();
+      await admitted;
+      expect(await pending).toEqual({ ok: true, verifiedAt: AT });
+      expect(owner).toHaveBeenCalledOnce();
+      expect(identity).toHaveBeenCalledOnce();
+      expect(copy).toHaveBeenCalledOnce();
+      expect(h.route.requests).toHaveLength(1);
+      expect(h.route.requests[0]).toMatchObject({ backupId: BACKUP_ID });
+      expect(await h.store.list()).toMatchObject([{ backupId: BACKUP_ID, operationId: OPERATION_ID, verifiedAt: AT }]);
+      expect(h.phases).toEqual(["quiescing", "capturing-core", "capturing-native", "verifying", "sealing"]);
+      expect(h.scheduler.stop).toHaveBeenCalledOnce();
+      expect(h.scheduler.start).toHaveBeenCalledOnce();
+      expect(h.fence.writable()).toBe(true);
+    } finally {
+      enterChild(); await Promise.resolve(); finishChild();
+      vi.useRealTimers(); await admitted; await h.service.stop(); await pending;
+    }
+  });
+
+  it("exhausts the 120-second default once without starting capture or leaving an artifact", async () => {
+    const h = harness(); const copy = vi.spyOn(h.db, "backupTo");
+    const identity = vi.spyOn(captureState, "readHindsightCaptureState");
+    const held = heldWrite(h);
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    const pending = h.capture();
+    try {
+      await vi.advanceTimersByTimeAsync(119_999);
+      expect(h.fence.writable()).toBe(false);
+      expect(h.phases).toEqual(["quiescing"]);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(await pending).toMatchObject({ ok: false, code: "HINDSIGHT_BACKUP_QUIESCENCE_TIMEOUT" });
+      expect(copy).not.toHaveBeenCalled();
+      expect(identity).not.toHaveBeenCalled();
+      expect(h.route.requests).toEqual([]);
+      expect(h.scheduler.stop).not.toHaveBeenCalled();
+      expect(h.scheduler.start).not.toHaveBeenCalled();
+      expect(await h.store.list()).toEqual([]);
+      expect(leftovers(h)).toEqual([]);
+      expect(h.fence.writable()).toBe(true);
+    } finally { held.finish(); await held.done; vi.useRealTimers(); await h.service.stop(); await pending; }
   });
 
   it("times out behind detached post-turn maintenance, then retries after the same owner settles without repeating work", async () => {
@@ -145,6 +226,54 @@ describe("hindsight backup capture failures (§4 Capture)", () => {
     expect(await pending).toMatchObject({ ok: false, code: "HINDSIGHT_BACKUP_NATIVE_FAILED" });
     expect(h.fence.writable()).toBe(true);
     expect(h.scheduler.start).toHaveBeenCalledTimes(1);
+  });
+
+  it("stop() interrupts admission while the existing write stays held, without starting capture", async () => {
+    const h = harness(); const copy = vi.spyOn(h.db, "backupTo");
+    const identity = vi.spyOn(captureState, "readHindsightCaptureState");
+    const held = heldWrite(h);
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    const pending = h.capture();
+    try {
+      await h.service.stop();
+      expect(await pending).toMatchObject({ ok: false, code: "HINDSIGHT_BACKUP_NATIVE_FAILED" });
+      expect(h.fence.writable()).toBe(true);
+      held.finish(); await held.done;
+      await vi.advanceTimersByTimeAsync(120_000);
+      expect(h.phases).toEqual(["quiescing"]);
+      expect(copy).not.toHaveBeenCalled();
+      expect(identity).not.toHaveBeenCalled();
+      expect(h.route.requests).toEqual([]);
+      expect(h.scheduler.stop).not.toHaveBeenCalled();
+      expect(h.scheduler.start).not.toHaveBeenCalled();
+      expect(leftovers(h)).toEqual([]);
+    } finally { held.finish(); await held.done; vi.useRealTimers(); await h.service.stop(); await pending; }
+  });
+
+  it("retiring the waiting epoch prevents late capture, reuse and reopening of its retired fence", async () => {
+    const h = harness(); const copy = vi.spyOn(h.db, "backupTo");
+    const identity = vi.spyOn(captureState, "readHindsightCaptureState");
+    const held = heldWrite(h);
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    const pending = h.capture();
+    try {
+      h.fence.retire(); h.service.retireEpoch!("epoch");
+      await h.service.stop();
+      expect(await pending).toMatchObject({ ok: false, code: "MEMORY_AUTHORITY_MISMATCH" });
+      held.finish(); await held.done;
+      await vi.advanceTimersByTimeAsync(120_000);
+      expect(await h.capture()).toMatchObject({ ok: false, code: "MEMORY_AUTHORITY_MISMATCH" });
+      expect(h.phases).toEqual(["quiescing"]);
+      expect(copy).not.toHaveBeenCalled();
+      expect(identity).not.toHaveBeenCalled();
+      expect(h.route.requests).toEqual([]);
+      expect(h.scheduler.stop).not.toHaveBeenCalled();
+      expect(h.scheduler.start).not.toHaveBeenCalled();
+      expect(leftovers(h)).toEqual([]);
+      h.fence.release();
+      expect(h.fence.writable()).toBe(false);
+      await expect(h.fence.admit(() => "retired write")).rejects.toThrow("MEMORY_AUTHORITY_FENCED");
+    } finally { held.finish(); await held.done; vi.useRealTimers(); await h.service.stop(); await pending; }
   });
 
   it("stop() during the Core copy resolves only after the capture released its pause and restarted the scheduler", async () => {

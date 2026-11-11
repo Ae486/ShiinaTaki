@@ -1,15 +1,17 @@
 /**
  * INPUT:  a schema-validated MemoryAuthorityStatus (and the operations it embeds) from memory.authority.status.
- * OUTPUT: pure view models for the Memory authority card — headline, setup line, per-Bank rows, Pending rows and the
+ * OUTPUT: pure view models for the Memory authority card — headline, setup line, per-Bank replica/review rows, Pending rows and the
  *         active-operation rows — plus the Bank scope / operation-kind labels and the app-error reader for MEMORY_OPERATION_REFUSED rejections.
  * POS:    ui/windows/home/pages/operations — node-testable; no DOM, no socket. Unknown stays "unknown", never "0".
  */
 
 import { ErrorCodeSchema, type MemoryAuthorityStatus, type MemoryOperation, type MemoryReplicaRunKind, type MemoryReplicaScheduleConfig } from "@taki/shared";
+import { memoryPolicyReviewView, type MemoryPolicyReviewView } from "./memory-policy-review-state.ts";
 
 export interface BankRow {
   bankId: string;
   label: string;
+  state: string;
   lastSuccess: string;
   lastAttempt: string;
   nextDue: string;
@@ -17,7 +19,8 @@ export interface BankRow {
   nextAction: string;
   /** Set only when the Bank reports explicit_retry_required: the Retry action submits this kind. */
   retryKind: MemoryReplicaRunKind | null;
-  schedule: MemoryReplicaScheduleConfig;
+  schedule: MemoryReplicaScheduleConfig | null;
+  review: MemoryPolicyReviewView;
 }
 
 export interface PendingRow { bankId: string; pending: number; failed: number; unknown: number; parentWrites: number }
@@ -51,7 +54,7 @@ export const MEMORY_RUNTIME_UNAVAILABLE_LABEL: Record<NonNullable<MemoryAuthorit
   evidence_invalid: "本地记忆证据校验失败，需要检查证据并选择相应的校验或恢复操作",
 };
 export const MEMORY_OPERATION_STATE_LABEL: Record<MemoryOperation["state"], string> = {
-  admitted: "已受理（未认领）", running: "执行中", completed: "已完成", failed: "失败", cancelled: "已取消", outcome_unknown: "结果未知",
+  admitted: "已受理（未认领）", running: "执行中", waiting: "已受理，等待 Hindsight 处理", completed: "已完成", failed: "失败", cancelled: "已取消", outcome_unknown: "结果未知",
 };
 export const MEMORY_OPERATION_KIND_LABEL: Record<MemoryOperation["kind"], string> = {
   "setup.validate": "校验连接", "setup.apply": "应用配置", "replica.sync": "同步副本",
@@ -71,7 +74,7 @@ export function memoryAuthorityView(status: MemoryAuthorityStatus): MemoryAuthor
     runtimeLine: status.runtime.available ? "运行时可用" : `运行时不可用：${MEMORY_RUNTIME_UNAVAILABLE_LABEL[status.runtime.unavailableReason ?? "connection_unavailable"]}`,
     setupLine: `${status.setup.phase}${status.setup.latestError ? ` · ${status.setup.latestError.code}` : ""}`,
     hindsight,
-    banks: (status.replica ?? []).map(bankRow),
+    banks: authorityBanks(status),
     pending: (status.pending ?? []).map((entry) => ({ bankId: entry.bankId, pending: entry.summary.pendingCount,
       failed: entry.summary.failedCount, unknown: entry.summary.unknownCount, parentWrites: entry.parentWritesPending })),
     active: status.operations.active.map(activeRow),
@@ -82,17 +85,34 @@ export function bankScopeLabel(scope: "global" | "character", characterId: strin
   return scope === "global" ? "Global" : `Character · ${characterId}`;
 }
 
-function bankRow(bank: NonNullable<MemoryAuthorityStatus["replica"]>[number]): BankRow {
+function authorityBanks(status: MemoryAuthorityStatus): BankRow[] {
+  const reviews = new Map((status.review ?? []).map((review) => [review.bankId, review]));
+  const banks: BankRow[] = (status.replica ?? []).map((bank) => ({ ...bankRow(bank), review: memoryPolicyReviewView(reviews.get(bank.bankId)) }));
+  if (status.authority.mode !== "hindsight") return banks;
+  for (const review of reviews.values()) {
+    if (banks.some((bank) => bank.bankId === review.bankId)) continue;
+    const scope = status.hindsight?.banks.find((bank) => bank.nativeBankId === review.bankId);
+    banks.push({ bankId: review.bankId, label: scope ? bankScopeLabel(scope.scope, scope.characterId) : review.bankId,
+      state: UNKNOWN, lastSuccess: UNKNOWN, lastAttempt: UNKNOWN, nextDue: UNKNOWN, error: UNKNOWN, nextAction: UNKNOWN, retryKind: null,
+      schedule: null, review: memoryPolicyReviewView(review) });
+  }
+  return banks;
+}
+
+function bankRow(bank: NonNullable<MemoryAuthorityStatus["replica"]>[number]): Omit<BankRow, "review"> {
   const explicit = bank.nextAction === "explicit_retry_required";
+  const waiting = bank.mode === "waiting";
   return {
     bankId: bank.bankId,
     label: bankScopeLabel(bank.scope, bank.characterId),
+    state: waiting ? "已受理，等待 Hindsight 处理" : bank.mode === "running" ? "执行中" : bank.mode === "failed" ? "失败" : "空闲",
     lastSuccess: bank.lastSuccessAt ?? UNKNOWN,
     lastAttempt: bank.lastAttemptAt ?? UNKNOWN,
     nextDue: bank.run ? "执行中" : bank.pendingManualKind ? `手动 ${bank.pendingManualKind} 待认领` : bank.retryDueAt ?? bank.nextDueAt ?? (bank.automatic ? UNKNOWN : "手动模式"),
     error: bank.errorCode ?? "无",
-    nextAction: bank.nextAction === null ? "无" : explicit ? "需要显式重试" : "已排定自动重试",
-    retryKind: explicit ? bank.retryKind ?? "incremental" : null,
+    nextAction: waiting ? explicit ? "稍后手动同步以检查处理结果" : "已排定自动检查处理结果"
+      : bank.nextAction === null ? "无" : explicit ? "需要显式重试" : "已排定自动重试",
+    retryKind: explicit ? bank.retryKind ?? (bank.fullReconciliationState === "waiting" ? "full" : "incremental") : null,
     schedule: { automatic: bank.automatic, autoIntervalMs: bank.autoIntervalMs, fullReconciliationIntervalMs: bank.fullReconciliationIntervalMs },
   };
 }

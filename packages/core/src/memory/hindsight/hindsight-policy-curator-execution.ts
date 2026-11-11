@@ -1,5 +1,5 @@
 /**
- * INPUT:  claimed exact targets, one admitted Bank report and the existing shared Utility Slot
+ * INPUT:  claimed exact targets, lexical report evidence and the existing shared Utility Slot
  * OUTPUT: durable model proposals/failures with single-attempt evidence and no remote writes during generation
  * POS:    core/memory/hindsight — publication is a later phase; queued/late model callbacks cannot touch retired work
  */
@@ -9,7 +9,7 @@ import { policyAssessmentTarget, type HindsightPolicyWorkRecord } from "../../db
 import { proposeHindsightPolicyFailure } from "./hindsight-policy-assessment.ts";
 import { buildHindsightPolicyCuratorPrompt } from "./hindsight-policy-curator-prompt.ts";
 import { createHindsightPolicyCuratorTools } from "./hindsight-policy-curator-tools.ts";
-import { assertCuratorReviewInputs, assertCuratorWorkCurrent, captureCuratorBlocks, requireCuratorBank } from "./hindsight-policy-curator-targets.ts";
+import { assertCuratorReviewInputs, assertCuratorWorkCurrent, captureCuratorBlocks, requireCuratorBank, readCuratorSnapshot } from "./hindsight-policy-curator-targets.ts";
 import { runHindsightPolicyCuratorModel } from "./hindsight-policy-curator-model.ts";
 import { awaitCuratorWork } from "./hindsight-policy-curator-lifetime.ts";
 import type { HindsightPolicyCuratorRun, HindsightPolicyCuratorReview } from "./hindsight-policy-curator-context.ts";
@@ -18,7 +18,7 @@ export async function executeCuratorModel(run: HindsightPolicyCuratorRun, record
   if (!records.length) return [];
   const current = requireCuratorBank(run, records[0]!.key.bankId);
   const report = { run, ...current, records: new Map(records.map((record) => [record.key.workId, record])), blocks: captureCuratorBlocks(run, current.bank) };
-  const prompt = buildHindsightPolicyCuratorPrompt(report);
+  const prompt = readCuratorSnapshot(run, (currentRun) => buildHindsightPolicyCuratorPrompt({ ...report, run: currentRun }));
   const review: HindsightPolicyCuratorReview = { ...report, prompt: prompt.evidence, finished: false, closed: false };
   const before = run.outcome.steps; const maxSteps = run.config.memory.tidyMaxSteps - before;
   if (maxSteps < 1) return deferUnstarted(run, records);

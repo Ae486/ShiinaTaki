@@ -52,6 +52,14 @@ describe("config groups", () => {
     expect(groupConfigEntries([entry("TAKI_WS_PORT")]).map((view) => view.group.id)).toEqual(["advanced"]);
   });
 
+  it("exposes all four review settings through the existing advanced group and Chinese search", () => {
+    const entries = ["MODE", "TIME", "INTERVAL_MS", "THRESHOLD"].map((suffix) => entry(`TAKI_HINDSIGHT_POLICY_REVIEW_${suffix}`));
+    const grouped = groupConfigEntries(entries);
+    expect(grouped).toHaveLength(1); expect(grouped[0]?.group.id).toBe("advanced");
+    expect(grouped[0]?.entries).toEqual(entries);
+    expect(filterConfigEntries(entries, "策略巡检")).toEqual(entries);
+  });
+
   it("filters by key, mapped Chinese label and description, case-insensitively", () => {
     const entries = KEYS.map((key) => entry(key, key === "TAKI_WS_PORT" ? "WS listen port." : "descriptor"));
     expect(filterConfigEntries(entries, "").map((row) => row.key)).toHaveLength(KEYS.length);

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import { bankStatus, degradedStatus, disabledSection, hindsightStatus, localStatus, operation, provisioningSection, unreviewedSection } from "./memory-authority-fixtures.ts";
+import { AT, bankStatus, degradedStatus, disabledSection, hindsightStatus, localStatus, operation, policyReview, provisioningSection, unreviewedSection } from "./memory-authority-fixtures.ts";
 import { MemoryAuthorityCard } from "./memory-authority-card.tsx";
 import type { MemoryOperationsView } from "./use-memory-operations.ts";
 
@@ -19,8 +19,74 @@ const LIFECYCLE_BUTTONS = ["重新校验连接", "创建 Bank（nana）", "创�
 /** The lifecycle block's own markup up to its diagnostics, so replica Bank controls below it are not counted. */
 const lifecycleBlock = (markup: string) => markup.split("Hindsight 连接与 Bank")[1]!.split("技术诊断")[0]!;
 const unreviewed = hindsightStatus({ hindsight: unreviewedSection() });
+const reviewBlock = (markup: string) => markup.split("策略巡检")[1]!;
 
 describe("memory authority card", () => {
+  it.each([true, false])("renders waiting separately from failure and keeps a new check available (automatic=%s)", (automatic) => {
+    const markup = card({ status: hindsightStatus({ replica: [bankStatus("global", { mode: "waiting", automatic,
+      retryDueAt: automatic ? AT : null, retryKind: automatic ? "incremental" : null,
+      nextAction: automatic ? "automatic_retry_scheduled" : "explicit_retry_required" })] }) });
+    expect(markup).toContain("已受理，等待 Hindsight 处理");
+    expect(markup).toContain(automatic ? "已排定自动检查处理结果" : "稍后手动同步以检查处理结果");
+    expect(markup).toContain("1 待写 / 0 失败 / 1 未知 / 2 父写");
+    expect(markup).toMatch(/<button(?![^>]* disabled="")[^>]*>立即同步<\/button>/);
+    expect(markup).not.toContain("HINDSIGHT_PENDING_REMAINS");
+  });
+
+  it.each([
+    { state: "pending", label: "待处理" }, { state: "running", label: "执行中" },
+    { state: "paused", label: "已暂停" }, { state: "error", label: "错误" }, { state: null, label: "空闲" },
+  ] as const)("renders the actual $state policy review state", ({ state, label }) => {
+    const markup = reviewBlock(card({ status: hindsightStatus({ review: [policyReview({ state })] }) }));
+    expect(markup).toContain(`>${label}</dd>`);
+    expect(markup).toContain("待巡检数量"); expect(markup).toContain("已保存待发布");
+  });
+
+  it.each([undefined, null, [], [policyReview({ bankId: "different-bank" })]])("keeps absent Bank review evidence unknown: %j", (review) => {
+    const markup = reviewBlock(card({ status: hindsightStatus({ review }) }));
+    expect(markup).toContain("未知");
+    expect(markup).not.toContain(">空闲</dd>");
+    expect(markup.split("策略巡检")[0]).not.toContain(">0</dd>");
+  });
+
+  it("preserves measured zeros and distinguishes saved awaiting publication from completion", () => {
+    const saved = reviewBlock(card({ status: hindsightStatus({ review: [policyReview({ eligibleRemaining: 0, savedAwaitingPublication: 2 })] }) }));
+    expect(saved).toMatch(/待巡检数量<\/dt><dd[^>]*>0<\/dd>/);
+    expect(saved).toMatch(/已保存待发布<\/dt><dd[^>]*>2<\/dd>/);
+    expect(saved).toMatch(/上次巡检完成<\/dt><dd[^>]*>未知<\/dd>/);
+    const zero = reviewBlock(card({ status: hindsightStatus({ review: [policyReview({ state: "running", eligibleRemaining: null, savedAwaitingPublication: 0 })] }) }));
+    expect(zero).toMatch(/待巡检数量<\/dt><dd[^>]*>未知<\/dd>/);
+    expect(zero).toMatch(/已保存待发布<\/dt><dd[^>]*>0<\/dd>/);
+  });
+
+  it("keeps the historical catch-up record after completion and never calls later work current catch-up", () => {
+    const completed = policyReview({ state: null, dueSince: null, eligibleRemaining: 0, savedAwaitingPublication: 0, lastCompletedAt: AT });
+    const fresh = reviewBlock(card({ status: hindsightStatus({ review: [completed] }) }));
+    expect(fresh).toContain(">空闲</dd>"); expect(fresh).toContain(AT);
+    expect(fresh).toContain('data-catch-up-occurrence="policy-review:catch-up-1"');
+    expect(fresh).toContain("当前进度以上方巡检状态为准");
+    const later = reviewBlock(card({ status: hindsightStatus({ review: [{ ...completed, state: "pending", eligibleRemaining: 1 }] }) }));
+    expect(later).toContain(">待处理</dd>"); expect(later).not.toContain("正在补跑");
+  });
+
+  it("renders durable review during runtime loss without replica controls or fabricated counts", () => {
+    const status = degradedStatus(); status.review = [policyReview({ state: "paused", eligibleRemaining: null, savedAwaitingPublication: 1 })];
+    const markup = card({ status });
+    expect(markup).toContain("策略巡检"); expect(markup).toContain(">已暂停</dd>");
+    expect(markup).not.toContain("立即同步"); expect(markup).not.toContain("保存同步设置");
+    expect(markup).toMatch(/待巡检数量<\/dt><dd[^>]*>未知<\/dd>/);
+  });
+
+  it.each([
+    { overrides: { loading: true }, label: "正在刷新" },
+    { overrides: { error: "read rejected" }, label: "读取失败" },
+    { overrides: { connectionReady: false }, label: "连接已断开" },
+  ])("identifies retained review frames during $label", ({ overrides, label }) => {
+    const markup = card({ status: hindsightStatus({ review: [policyReview()] }), ...overrides });
+    expect(markup).toContain(`${label}；以下为上次读取的状态（${AT}）`);
+    expect(markup).toContain("策略巡检");
+  });
+
   it("renders persisted mode, interval units and bounds in each Bank's sync form", () => {
     const markup = card({ status: hindsightStatus() });
     for (const text of ["后台同步模式", "已保存：自动", "增量同步间隔", "完整对账间隔", "1 分钟至 31 天", "1 分钟至 90 天", "保存同步设置", "仅手动关闭后台同步"]) expect(markup).toContain(text);

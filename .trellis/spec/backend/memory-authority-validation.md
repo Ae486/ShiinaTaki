@@ -45,7 +45,53 @@ The 2026-11-08 template extension follows the same split. Construction captures 
 `readCurrentRuntimeTemplateIdentity` against that value. The current reader inspects eligible verified setup,
 paired checkpoint namespace/epoch/deletion, exact enrollment, applied selection and selected-lineage defaults.
 It preserves the existing aggregate hash and null/legacy semantics, omitting mutable cursors, legacy route inventory
-and unapplied user/catalog changes. No guard result is cached across calls and shared Bank-scope guards remain in place.
+and unapplied user/catalog changes. Shared Bank-scope guards remain in place. The approved 061 exception below
+permits reuse of current database evidence, never a remembered grant to write or dispatch.
+
+Migration061 tracks all thirteen template/authority/paired-checkpoint dependency tables with transactional random
+128-bit stamps on INSERT/UPDATE/DELETE. A runtime-owned memo must be confined to its Database, bound epoch and
+immutable checkpoint-floor set, keyed by that stamp and `PRAGMA schema_version`. Compare the current template
+identity with the immutable bound identity at every consuming boundary. Keep the small current marker/active-epoch
+reader live and independent so template/replica evidence failure does not obstruct control diagnosis.
+
+Before trusting a token, verify the exact required trigger names, tables, types and SQL. The verdict may be reused
+only for the same connection and an unchanged `PRAGMA schema_version`, and is never recorded inside a transaction:
+any trigger drop or replacement bumps the schema version, so the next read re-verifies. The schema cookie itself
+can repeat after rollback. Missing/altered triggers and missing or malformed stamp rows refuse access. Construction
+and independent full template checks verify the same declarations without using a runtime memo. Supported pre-061
+copies use the original uncached full readers; recorded 061 with missing objects is damage, not legacy absence.
+
+Read a miss and its dependencies from one synchronous SQLite snapshot. Only successful evidence derived outside
+an enclosing transaction may be published into the memo; already committed memo evidence may be reused within a
+transaction after a fresh matching token check. Actual SQLite transaction state must include direct SQL BEGIN and
+savepoints, not just wrapper depth. This prevents rollback/savepoint/failed-COMMIT publication and schema-cookie
+aliasing after a trigger drop/write/recreate interval. Do not infer transaction completion from a nested callback
+return or weaken this condition merely because the data stamp is random.
+
+Unrelated journal/body writes do not invalidate the token. Relevant writes, including legitimate checkpoint
+advancement, force revalidation rather than automatic refusal. Stop/config/secret/executor, lease/deadline, Bank,
+claim/revision/CAS and Native request guards stay live. Full construction/publication/recovery proof always remains
+independent. Stable-token hits have constant recomputation cost; invalidation misses still scale with the consumed
+Bank evidence. Report the 128-bit collision assumption, schema-query cost and transactional miss cost explicitly.
+
+The 2026-11-09 read contraction scopes those checks to synchronous admissions. The application replica's
+`readSnapshot` gives a read-only reader to one SQLite transaction callback. Its existing Bank routing callback
+still checks the current connection; checkpoint shape/hash, authority and native/application pairing are checked
+once per consumed Bank. Exact body/artifact evidence is decoded once in that lexical reader. Namespace, deletion,
+head/version, projection, policy, expiry and ingress checks remain at their consuming boundaries. The callback
+must not write, dispatch, yield or retain an active reader: return/throw closes it immediately, and a Promise
+result is refused. Nested synchronous reads share the same scope. A subsequent request/step obtains a new scope.
+
+Only byte-verifying evidence owners may supply `decodedBody(ref, scope)` to native projection. They check the
+captured namespace/Bank and complete descriptor before returning the decoded value. Independent callers retain
+the original byte-decoding path; full bundle, publication, recovery and copied-DB proof boundaries remain independent.
+This is reuse of verified immutable data, not a cached current-authority or policy verdict.
+
+Curator discovery, prompt preparation and each model-input validation use separate read scopes; target-specific
+proposal/publication checks remain fresh. All journal/claim/command mutation owners retain their original live
+guards and time/CAS checks, including after awaited recovery/model work. Batched immutable cache reads retain
+the original publication guard at entry and exit (lease/deadline time can advance during synchronous work).
+HTTP dispatch/completion and actual writes never inherit a read snapshot's captured authority.
 
 Template document-body corruption with unchanged current metadata is discovered by the next full validation:
 construction, publication, recovery or an actual template-consuming read. Ordinary guards do not revalidate stored

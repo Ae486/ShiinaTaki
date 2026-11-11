@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { TakiApplicationNamespace } from "@taki/shared";
 import { createHindsightBankSetupRepo } from "../../../db/hindsight-bank-setup-repo.ts";
 import { MIGRATIONS } from "../../../db/migrations/index-list.ts";
@@ -7,6 +7,7 @@ import { openDatabase } from "../../../db/sqlite.ts";
 import { applicationCheckpointHash, readApplicationCheckpoint } from "../../../db/hindsight-application-replica-checkpoint.ts";
 import { hindsightRuntimeFixture } from "../../../testing/hindsight-runtime-composition-fixtures.ts";
 import { createHindsightRuntimeConnection } from "../hindsight-runtime-connection.ts";
+import { applicationCommandTestInput } from "../../../db/hindsight-application-command-fixtures.ts";
 import { curatorTestBank } from "../hindsight-policy-curator-fixtures.ts";
 import { createTemplateOverlayStore } from "./template-overlay-store.ts";
 import { publishTemplateDefaults, readTemplateDefaults } from "./template-default-store.ts";
@@ -16,7 +17,7 @@ import { readCurrentRuntimeTemplateIdentity, readRuntimeTemplateSelection, readS
 import { FIXTURE_AT, fixtureCommit, templateFixture } from "./template-test-fixtures.ts";
 
 const cleanup: Array<() => void | Promise<void>> = [];
-afterEach(async () => { for (const close of cleanup.splice(0).reverse()) await close(); });
+afterEach(async () => { for (const close of cleanup.splice(0).reverse()) await close(); vi.restoreAllMocks(); });
 
 function managedFixture(publish = true) {
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS }); cleanup.push(() => db.close());
@@ -102,6 +103,7 @@ async function boundManagedFixture() {
   const connect = () => createHindsightRuntimeConnection({ db: f.db, epochId: "epoch", config: f.deps.config,
     secrets: f.deps.secrets, client: f.native.client });
   const runtime = connect(); cleanup.push(runtime.stop);
+  runtime.assertConnection();
   return { ...f, runtime, connect, plan: f.plan(operation) };
 }
 
@@ -177,11 +179,20 @@ describe("current template identity without historical reconstruction", () => {
     ["defaults lineage metadata", "hindsight_template_default_history_immutable_update", "UPDATE hindsight_template_default_history SET document_json=json_set(document_json,'$.providerLineage','99999999-9999-4999-8999-999999999999')"],
   ])("refuses out-of-band %s drift", async (_name, trigger, sql) => {
     const f = await boundManagedFixture();
+    const { state } = f.base.subsystem();
+    const command = applicationCommandTestInput({ scope: f.base.banks[0]!.scope }); command.key.authorityEpochId = "epoch";
+    state.commands.prepare(command);
+    const upload = vi.spyOn(f.base.remote.client, "uploadApplicationBody");
+    const commit = vi.spyOn(f.base.remote.client, "commitApplication");
     // Emulate offline edits; normal writes cannot bypass immutable evidence/FK protections.
     f.db.exec("PRAGMA foreign_keys=OFF");
     if (trigger) f.db.exec(`DROP TRIGGER ${trigger}`);
     f.db.exec(sql);
     expect(() => f.runtime.assertConnection()).toThrow();
+    expect(() => state.commands.prepare({ ...command, key: { ...command.key, requestId: "must-not-prepare" } })).toThrow();
+    await expect(state.writer.run({ key: command.key, context: { timeoutMs: 10_000 } })).rejects.toThrow();
+    expect(upload).not.toHaveBeenCalled(); expect(commit).not.toHaveBeenCalled();
+    expect(f.db.prepare("SELECT state FROM hindsight_application_command_jobs WHERE request_id=:id").all({ id: "must-not-prepare" })).toEqual([]);
     expect(() => {
       if (readTemplateSelectionIdentity(f.db, "epoch") !== f.runtime.templateSelectionIdentity) throw new Error("identity changed");
     }).toThrow();

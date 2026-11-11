@@ -1,12 +1,13 @@
 /**
  * INPUT:  current Hindsight epoch, exact paired Bank namespaces and committed overlay selections
- * OUTPUT: fully verified selections and a separate current-row identity, preserving untracked legacy Banks
+ * OUTPUT: fully verified selections with trigger integrity and a separate current-row identity, preserving legacy Banks
  * POS:    template owner — full proof at consuming/binding boundaries; ordinary guards inspect current metadata/projection
  */
 import { HindsightTemplateLabelsSchema, type HindsightBankSetupProjection, type TakiApplicationNamespace } from "@taki/shared";
 import { readApplicationCheckpoint } from "../../../db/hindsight-application-replica-checkpoint.ts";
 import { createHindsightBankSetupRepo } from "../../../db/hindsight-bank-setup-repo.ts";
 import type { Database, SqlRow } from "../../../db/sqlite.ts";
+import { HINDSIGHT_RUNTIME_IDENTITY_TOKEN_SQL } from "../../../db/migrations/061-hindsight-runtime-identity.ts";
 import { TemplateBankIdentitySchema } from "./template-overlay-schema.ts";
 import { readTemplateEnrollment } from "./template-overlay-history.ts";
 import { readAppliedTemplateSelection } from "./template-overlay-store.ts";
@@ -39,6 +40,11 @@ export function readRuntimeTemplateSelection(db: Database, input: { bankId: stri
 }
 
 export function readTemplateSelectionIdentity(db: Database, epochId: string): string | null {
+  if (db.prepare("SELECT 1 FROM migrations WHERE version=61").get()) {
+    if (db.prepare(HINDSIGHT_RUNTIME_IDENTITY_TOKEN_SQL).get()?.trusted !== 1) {
+      throw new Error("MEMORY_RUNTIME_IDENTITY_SCHEMA_INVALID");
+    }
+  }
   if (!hasTemplateExecutionStorage(db)) return null;
   const selections = [];
   let lineage: string | null = null;

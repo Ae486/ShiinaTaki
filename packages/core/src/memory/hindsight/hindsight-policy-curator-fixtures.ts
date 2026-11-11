@@ -136,7 +136,8 @@ function routedClient(banks: CuratorTestBank[]): HindsightApplicationClient {
 }
 
 export function curatorTestFixture(input: { path?: string; banks?: CuratorTestBank[]; clock?: { at: string };
-  driver?: HindsightPolicyCuratorDriver; model?: LanguageModel; slot?: UtilitySlot } = {}) {
+  driver?: HindsightPolicyCuratorDriver; model?: LanguageModel; slot?: UtilitySlot;
+  onPolicyReviewChanged?: (bankId: string) => void } = {}) {
   const banks = input.banks ?? [curatorTestBank()]; const clock = input.clock ?? { at: APPLICATION_TEST_AT }; const now = () => clock.at;
   const db = openCuratorTestDatabase(input.path ?? ":memory:", now());
   const authority = createCanonicalMemoryAuthorityRepo(db); const blocks = createStructuredMemoryBlockRepo(db);
@@ -160,7 +161,7 @@ export function curatorTestFixture(input: { path?: string; banks?: CuratorTestBa
     if (epoch.providerId !== "hindsight" || binding?.authorityEpochId !== scope.authorityEpochId
       || !sameApplicationValue(binding.namespace, scope.namespace) || binding.bankDeleted) throw new Error("MEMORY_AUTHORITY_MISMATCH");
   };
-  const work = createHindsightPolicyWorkRepo({ db, now, assertActive });
+  const work = createHindsightPolicyWorkRepo({ db, now, assertActive, onPolicyReviewChanged: input.onPolicyReviewChanged });
   const commands = createHindsightApplicationCommandRepo({ db, now,
     assertActive: (value) => assertActive({ authorityEpochId: value.key.authorityEpochId, bankId: value.key.bankId, namespace: value.namespace }) });
   const runner = createHindsightApplicationCommandRunner({ repo: commands, client: routedClient(banks) });

@@ -27,6 +27,33 @@ const INSERT_ONE =
   "VALUES ('11111111-1111-4111-8111-111111111111','taki','user','hi','2026-07-10T00:00:00.000Z')";
 
 describe("openDatabase", () => {
+  it("reports actual transaction state for wrapper nesting and direct SQL savepoints", () => {
+    const db = openDatabase({ path: ":memory:", migrations: [] }); dbs.push(db);
+    expect(db.isTransaction).toBe(false);
+    db.transaction(() => {
+      expect(db.isTransaction).toBe(true);
+      expect(() => db.transaction(() => { expect(db.isTransaction).toBe(true); throw new Error("inner"); })).toThrow("inner");
+      expect(db.isTransaction).toBe(true);
+    });
+    expect(db.isTransaction).toBe(false);
+    db.exec("BEGIN; SAVEPOINT direct"); expect(db.isTransaction).toBe(true);
+    db.exec("ROLLBACK TO direct; RELEASE direct"); expect(db.isTransaction).toBe(true);
+    db.exec("ROLLBACK"); expect(db.isTransaction).toBe(false);
+    expect(Object.getOwnPropertyDescriptor(db, "isTransaction")?.set).toBeUndefined();
+  });
+
+  it("reports ended transactions after deferred COMMIT failure and an implicit SQL rollback", () => {
+    const db = openDatabase({ path: ":memory:", migrations: [] }); dbs.push(db);
+    db.exec("CREATE TABLE parent(id INTEGER PRIMARY KEY); INSERT INTO parent VALUES(1); CREATE TABLE child(id INTEGER REFERENCES parent(id) DEFERRABLE INITIALLY DEFERRED)");
+    expect(() => db.transaction(() => { db.exec("INSERT INTO child VALUES(2)"); expect(db.isTransaction).toBe(true); })).toThrow();
+    expect(db.isTransaction).toBe(false);
+    expect(() => db.transaction(() => {
+      expect(() => db.exec("INSERT OR ROLLBACK INTO parent VALUES(1)")).toThrow();
+      expect(db.isTransaction).toBe(false);
+    })).toThrow("transaction was rolled back");
+    expect(db.isTransaction).toBe(false);
+  });
+
   it("opens :memory:, applies the schema, and records the migration", () => {
     const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
     dbs.push(db);

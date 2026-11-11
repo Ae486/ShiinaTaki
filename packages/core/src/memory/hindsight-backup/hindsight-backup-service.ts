@@ -2,7 +2,7 @@
  * INPUT:  the published Hindsight runtime (write fence, replica scheduler, identity), Core SQLite, the artifact store, the
  *         native backup route, the custody reader and the current catalog's credential read-back
  * OUTPUT: createHindsightBackupService() -> markerEpochId/capture/admit/verify/lastVerified/inventory/sealed/quarantine/returnInbox/stop;
- *         capture runs §5.2 exactly: quiesce -> scheduler stop -> one Core identity read -> Database.backupTo into the partial
+ *         capture runs §5.2 exactly: bounded abortable quiesce -> scheduler stop -> one Core identity read -> Database.backupTo into the partial
  *         dir -> native snapshot, pair check and seal (route c) or the staged native request awaiting backup.admit (route b),
  *         always releasing the fence and restarting a previously started scheduler; every failure is a closed
  *         MemoryBackupErrorCode with no listed artifact
@@ -30,7 +30,7 @@ import type { HindsightNativeBackupRoute, HindsightNativeBackupSnapshot } from "
 import type { HindsightBackupStagedRecord, HindsightBackupStagedSummary, HindsightBackupStore } from "./hindsight-backup-store.ts";
 import { verifyHindsightBackup, type HindsightBackupVerifyInput } from "./hindsight-backup-verify.ts";
 
-const QUIESCE_TIMEOUT_MS = 30_000;
+const QUIESCE_TIMEOUT_MS = 120_000;
 const NATIVE_TIMEOUT_MS = 600_000;
 
 export type HindsightBackupPhase = MemoryBackupProducerRef["phase"];
@@ -62,7 +62,7 @@ export interface HindsightBackupService {
   returnInbox(backupId: string, fileName: string): boolean;
   /** Emergency withdrawal preserves unknown work and never joins its unavailable remote producer. */
   retireEpoch?(epochId: string): void;
-  /** Aborts an in-flight native snapshot and resolves once the capture released its pause, so the runtime stops after it. */
+  /** Aborts admission or an in-flight native snapshot and awaits capture pause release before the runtime stops. */
   stop(): Promise<void>;
 }
 
@@ -138,9 +138,10 @@ async function paused(deps: Deps, capture: HindsightBackupCaptureInput, signal: 
   if (capture.route === "native-endpoint" && !deps.route.available()) return failedOutcome("HINDSIGHT_BACKUP_ROUTE_UNAVAILABLE");
   const { runtime } = capture;
   capture.checkpoint("quiescing");
-  try { await runtime.writeFence.quiesce({ timeoutMs: deps.quiesceTimeoutMs ?? QUIESCE_TIMEOUT_MS }); }
+  try { await runtime.writeFence.quiesce({ timeoutMs: deps.quiesceTimeoutMs ?? QUIESCE_TIMEOUT_MS, signal }); }
   catch (error) {
-    // A timed-out quiesce reopens the fence itself; nothing else was paused yet.
+    // Failed admission releases itself unless the fence retired; nothing else was paused yet.
+    if (signal.aborted) return failedOutcome(emergencyRetired(signal) ? "MEMORY_AUTHORITY_MISMATCH" : "HINDSIGHT_BACKUP_NATIVE_FAILED");
     return failedOutcome(errorMessage(error) === "MEMORY_QUIESCENCE_TIMEOUT" ? "HINDSIGHT_BACKUP_QUIESCENCE_TIMEOUT" : "HINDSIGHT_BACKUP_INTERNAL_ERROR");
   }
   const schedulerWasStarted = runtime.scheduler.started();

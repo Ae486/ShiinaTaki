@@ -1,6 +1,6 @@
 /**
  * INPUT:  captured provider/Bank identity and a canonical recall request
- * OUTPUT: native candidates with exact application hydration, or verified sparse replica plus truthful Pending overlays
+ * OUTPUT: native candidates with exact hydration and published-byte reuse, or verified replica/Pending fallback
  * POS:    core/memory/hindsight — Hindsight remains authoritative in both paths; bad policy evidence never becomes an availability fallback
  */
 import type { HindsightNativeRecallResponse, RecallRequest, RecallResult } from "@taki/shared";
@@ -62,6 +62,10 @@ async function hydrateCandidates(state: HindsightMemoryProviderState, input: Inp
   for (let offset = 0; offset < candidates.length; offset += 255) {
     const batch = candidates.slice(offset, offset + 255);
     const bundle = await hydrateHindsightApplication({ ...bound, client: state.client, context: input.call(), request: input.call,
+      cachedBodies: (refs) => state.deps.replica.readSnapshot((replica) => new Map(refs.flatMap((ref) => {
+        const body = replica.body({ ...bound, bodyId: ref.body_id });
+        return body ? [[ref.body_id, body] as const] : [];
+      }))),
       selectors: [{ object_kind: "bank", object_id: bound.bankId, expected_version: null },
         ...batch.map((candidate) => ({ object_kind: "memory_unit" as const, object_id: candidate.id, expected_version: null }))] });
     assertHindsightProviderScope(state, { context: input.context, scope: bound });

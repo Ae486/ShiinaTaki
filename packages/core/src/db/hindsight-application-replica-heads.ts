@@ -1,6 +1,6 @@
 /**
  * INPUT:  verified native heads and a transactionally available immutable artifact/body closure
- * OUTPUT: current exact bindings, monotonic native evolution and remote-assessment work indexes
+ * OUTPUT: exact bindings, native evolution and paged assessment indexes with explicit deferred-retry inclusion
  * POS:    core/db — native/application clocks remain separate; unresolved bindings never retain a consumer projection
  */
 import { TakiApplicationNativeHeadSchema, type TakiApplicationCheckpoint, type TakiApplicationNativeHead,
@@ -67,14 +67,14 @@ export function markApplicationProjection(db: Database, scope: HindsightApplicat
 
 export function applicationWorkHeads(db: Database, scope: HindsightApplicationScope, input: {
   kind: "binding" | "assessment"; limit: number; at: string; accept?: (entry: ApplicationHeadEntry) => boolean;
-  after?: { stateCursor: number; objectKey: string }; objectKind?: TakiApplicationNativeHead["object_kind"];
+  after?: { stateCursor: number; objectKey: string }; objectKind?: TakiApplicationNativeHead["object_kind"]; includeDeferred?: boolean;
 }): ApplicationHeadEntry[] {
   if (!Number.isSafeInteger(input.limit) || input.limit < 1 || input.limit > 1000) throw new Error("HINDSIGHT_APPLICATION_WORK_LIMIT_INVALID");
   const predicate = input.kind === "binding" ? "binding_state IN ('binding_missing','rebind_required')"
-    : "object_kind='memory_unit' AND binding_state='bound' AND assessment_state IN ('due','failed') AND (next_attempt_at IS NULL OR julianday(next_attempt_at)<=julianday(:at))";
+    : "object_kind='memory_unit' AND binding_state='bound' AND assessment_state IN ('due','failed') AND (:deferred=1 OR next_attempt_at IS NULL OR julianday(next_attempt_at)<=julianday(:at))";
   const pageSize = Math.min(256, Math.max(32, input.limit));
   const params = { ...applicationScopeParams(scope), limit: pageSize, objectKind: input.objectKind ?? null,
-    ...(input.kind === "assessment" ? { at: input.at } : {}) };
+    ...(input.kind === "assessment" ? { at: input.at, deferred: input.includeDeferred ? 1 : 0 } : {}) };
   const query = db.prepare(`SELECT * FROM hindsight_application_replica_heads WHERE ${APPLICATION_SCOPE_WHERE}
     AND ${predicate} AND (:objectKind IS NULL OR object_kind=:objectKind)
     AND (observed_state_cursor>:cursor OR (observed_state_cursor=:cursor AND object_key>:key))

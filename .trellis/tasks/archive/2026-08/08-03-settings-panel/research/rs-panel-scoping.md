@@ -203,10 +203,12 @@ methods does not itself require fixing it — the defect is in the streaming `ch
 
 ## Q7 — Core env-knob inventory (R13 page material)
 
-Every knob is parsed in `packages/core/src/config/*` and loaded **once at module scope in
-`packages/core/src/main.ts:92-103`** (memory's at `packages/core/src/memory/bootstrap.ts:67`). So today *nothing*
-is live-appliable; the "live-apply" column below says what a value's **consumption shape** would permit if it were
-read from a config store instead of a captured constant.
+At the original 2026-08-03 scoping snapshot, knobs were parsed in `packages/core/src/config/*` and loaded
+**once at module scope in `packages/core/src/main.ts:92-103`** (memory's at `packages/core/src/memory/bootstrap.ts:67`).
+The original rows below describe that snapshot's prospective consumption shapes, not current apply metadata.
+The 2026-11-09 policy-review additions are actually live: `hindsight-memory-subsystem.ts` supplies a fresh
+`loadHindsightPolicyReviewConfig(input.source.env())` getter and config notifications rearm the existing scheduler.
+Current operator apply metadata is authoritative in `packages/core/src/config/knob-registry.ts`.
 
 | Env var | Default | Zod shape | Consumed at | Live-apply call |
 |---|---|---|---|---|
@@ -240,6 +242,10 @@ read from a config store instead of a captured constant.
 | `TAKI_MEMORY_TIDY_MAX_STEPS` | 12 | coerce int positive | tidy pass loop cap | **live** |
 | `TAKI_MEMORY_TIDY_STALE_DAYS` | 45 | coerce int positive | tidy staleness | **live** |
 | `TAKI_MEMORY_TIDY_REPORT_CAP` | 10 | coerce int positive | tidy report cap | **live** |
+| `TAKI_HINDSIGHT_POLICY_REVIEW_MODE` | `daily` | enum daily/interval | `hindsight-memory-subsystem.ts` → `hindsight-policy-schedule-state.ts` | **live** (calendar reconciles current settings) |
+| `TAKI_HINDSIGHT_POLICY_REVIEW_TIME` | `03:00` | string HH:mm, 00:00-23:59 | same; interpreted in Core-owned User Timezone | **live** (daily calendar revision) |
+| `TAKI_HINDSIGHT_POLICY_REVIEW_INTERVAL_MS` | 86400000 | coerce int 60000-2147483647 | same; elapsed interval from persisted anchor | **live** (interval calendar revision) |
+| `TAKI_HINDSIGHT_POLICY_REVIEW_THRESHOLD` | 100 | coerce int 1-2147483647 | `hindsight-policy-schedule.ts` eligible-inventory check | **live** (threshold reread per Bank) |
 | `TAKI_DEV_TRIGGER` | unset | `=== "1"` check, `main.ts:386-391` | registers the DEV `capability.trigger` method | **restart** (registration-time); dev-only, not a panel knob |
 
 Non-knobs found by the same grep (do NOT put on the page): `TAKI_ZST_FIXTURE`

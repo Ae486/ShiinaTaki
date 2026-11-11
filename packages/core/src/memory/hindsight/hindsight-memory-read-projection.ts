@@ -1,6 +1,6 @@
 /**
  * INPUT:  native recall candidates and a complete authenticated joint hydration bundle
- * OUTPUT: exact current Canonical hits admitted by persisted Taki policy before result limits
+ * OUTPUT: exact Canonical hits, reusing fully verified bundle bodies before policy/result limits
  * POS:    core/memory/hindsight — candidate hydration never borrows an older replica revision or fabricates missing policy
  */
 import type { CanonicalMemoryUnit, HindsightNativeRecallResponse, MemoryBankScope, RecallRequest, RecallResult,
@@ -11,7 +11,7 @@ import { projectHindsightApplicationRecord, readHindsightApplicationNative,
   type HindsightApplicationEvidenceReader } from "./hindsight-application-projection.ts";
 import { hindsightApplicationPolicyContext } from "./hindsight-application-binding-context.ts";
 import { hindsightPolicyAdmission } from "./hindsight-policy-admission.ts";
-import { sameApplicationValue, type HindsightApplicationScope } from "./hindsight-application-integrity.ts";
+import { requireApplicationScope, sameApplicationValue, type HindsightApplicationScope } from "./hindsight-application-integrity.ts";
 
 type Candidate = HindsightNativeRecallResponse["results"][number];
 interface Input extends HindsightApplicationScope {
@@ -23,7 +23,11 @@ export function projectHindsightRecall(input: Input): { hits: RecallResult["hits
   verifyHindsightApplicationBundle(input.bundle, input);
   const descriptors = input.bundle.pages.flatMap((page) => page.records);
   const heads = new Map(descriptors.flatMap((entry) => entry.kind === "native" ? [[`${entry.head.object_kind}:${entry.head.object_id}`, entry.head] as const] : []));
-  const evidence = bundleEvidence(input.bundle);
+  const access = bundleEvidence(input.bundle);
+  const evidence: HindsightApplicationEvidenceReader = { ...access, decodedBody: (ref, current) => {
+    requireApplicationScope(input.bundle.manifest, current);
+    return access.body(ref);
+  } };
   const bankHead = heads.get(`bank:${input.bankId}`);
   if (!bankHead?.version || bankHead.binding_state === "tombstoned") invalid();
   if (bankHead.binding_state !== "bound") return { hits: [], needsBinding: true, stale: false };

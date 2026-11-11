@@ -1,9 +1,22 @@
 import { describe, expect, it } from "vitest";
 import { MemoryAuthorityStatusSchema, MemoryOperationSchema } from "@taki/shared";
-import { bankStatus, hindsightStatus, localStatus, operation } from "./memory-authority-fixtures.ts";
+import { bankStatus, hindsightStatus, localStatus, operation, policyReview } from "./memory-authority-fixtures.ts";
 import { MEMORY_OPERATION_KIND_LABEL, memoryAuthorityView, memoryOperationAppError } from "./memory-authority-state.ts";
 
 describe("memory authority view model", () => {
+  it.each([true, false])("projects accepted waiting and real Pending counts with automatic=%s", (automatic) => {
+    const due = "2026-09-19T02:00:00.000Z";
+    const bank = bankStatus("global", { mode: "waiting", fullReconciliationState: "waiting", automatic,
+      retryDueAt: automatic ? due : null, retryKind: automatic ? "full" : null,
+      nextAction: automatic ? "automatic_retry_scheduled" : "explicit_retry_required", consecutiveFailures: 2 });
+    const status = MemoryAuthorityStatusSchema.parse(hindsightStatus({ replica: [bank] }));
+    const view = memoryAuthorityView(status);
+    expect(view.banks[0]).toMatchObject({ state: "已受理，等待 Hindsight 处理", error: "无", lastSuccess: "未知",
+      nextDue: automatic ? due : "手动模式", retryKind: automatic ? null : "full",
+      nextAction: automatic ? "已排定自动检查处理结果" : "稍后手动同步以检查处理结果" });
+    expect(view.pending).toEqual([{ bankId: "global", pending: 1, failed: 0, unknown: 1, parentWrites: 2 }]);
+  });
+
   it("builds every fixture from the shared strict schemas", () => {
     const failed = bankStatus("character", { mode: "failed", automatic: false, errorCode: "HINDSIGHT_UNREACHABLE", nextAction: "explicit_retry_required" });
     for (const status of [localStatus(), hindsightStatus(), hindsightStatus({ replica: [bankStatus("global"), failed] }),
@@ -27,11 +40,25 @@ describe("memory authority view model", () => {
   it("keeps unknown timestamps as 未知 and maps Pending counts verbatim", () => {
     const view = memoryAuthorityView(hindsightStatus());
     expect(view.hindsight).toBe(true);
-    expect(view.banks).toEqual([{
+    expect(view.banks).toMatchObject([{
       bankId: "global", label: "Global", lastSuccess: "未知", lastAttempt: "未知", nextDue: "未知", error: "无", nextAction: "无", retryKind: null,
       schedule: { automatic: true, autoIntervalMs: 21_600_000, fullReconciliationIntervalMs: 604_800_000 },
     }]);
     expect(view.pending).toEqual([{ bankId: "global", pending: 1, failed: 0, unknown: 1, parentWrites: 2 }]);
+  });
+
+  it("joins review evidence by Bank identity and keeps review-only Banks when replica evidence is unavailable", () => {
+    const review = [policyReview({ bankId: "character-taki", state: "paused", eligibleRemaining: null }),
+      policyReview({ eligibleRemaining: 0, savedAwaitingPublication: 2 })];
+    const live = memoryAuthorityView(hindsightStatus({ replica: [bankStatus("global"), bankStatus("character-taki")], review }));
+    expect(live.banks[0]?.review.rows).toContainEqual({ label: "待巡检数量", value: "0" });
+    expect(live.banks[1]?.review.rows).toContainEqual({ label: "巡检状态", value: "已暂停" });
+    const unavailable = memoryAuthorityView(hindsightStatus({ review,
+      runtime: { providerId: "hindsight", available: false, unavailableReason: "connection_unavailable" }, replica: null, pending: null }));
+    expect(unavailable.banks.map((bank) => bank.bankId)).toEqual(["character-taki", "global"]);
+    expect(unavailable.banks.every((bank) => bank.schedule === null && bank.retryKind === null)).toBe(true);
+    expect(unavailable.banks[0]?.label).toBe("character-taki");
+    expect(unavailable.banks[1]?.label).toBe("Global");
   });
 
   it("offers Retry with the Bank's retryKind only for explicit_retry_required", () => {

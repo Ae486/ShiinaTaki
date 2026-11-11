@@ -1,7 +1,7 @@
 # shared/src/
 - hindsight-deployment-schema.ts — strict C2a plan, current inject checkpoint, fixed registration and value-free original-resource status.
-- hindsight-custody-schema.ts — finite C1 request/result, fixed slot selection and safe preparation status; no deployment evidence.
-- hindsight-installation-schema.ts — protected registration, compiled artifact manifests and separate Node enrollment credentials; platform adapters establish actual trust.
+- hindsight-custody-schema.ts — strict fixed-slot C1 prepare/invocation/result protocol and budgets; no values or deployment authority.; D108: finite C1 request/result, fixed slot selection and safe preparation status; no deployment evidence.
+- hindsight-installation-schema.ts — complete compiled artifact, external runtime/owner registration and separate Node enrollment/credential contracts.; D108: protected registration, compiled artifact manifests and separate Node enrollment credentials; platform adapters establish actual trust.
 - memory-transition-candidate-schema.ts — complete Local/native evidence, stable mappings and immutable candidate/common-baseline contracts
 - memory-transition-preparation-schema.ts — exact prepared delta/result and genuinely unused native scope inventory
 - memory-transition-source-schema.ts — explicit Source aliases, ordered version references, immutable upload attempts and current awaiting-source disposition evidence
@@ -11,7 +11,7 @@
 - observability-schema.ts — bounded monitor mode, real-field Run query, Chinese semantic trajectory, inspector, and live notification contracts
 - observability-presentation.ts — closed English-wire to Simplified-Chinese Monitor presentation mapper
 - scheduled-task-schema.ts — canonical durable schedule definitions and operator management protocol
-- index.ts — package public entry; named cross-package protocol exports, with D78 composition-only schemas kept in their defining modules
+- index.ts — package public entry; named cross-package protocol exports, with D78 composition-only schemas kept in their defining modules; D108: public named protocol exports, including policy-review status
 - ping-schema.ts — scaffold ping/pong smoke schema (desktop IPC smoke; untouched this slice)
 - json-rpc-schema.ts — JSON-RPC 2.0 envelope schemas + JSON_RPC_ERROR_CODES + JSON_RPC_APP_ERROR + client-frame union
 - error-code-schema.ts — closed cross-process ErrorCode union
@@ -49,8 +49,8 @@
 - memory-provider-operation-schema.ts — consistent retain pending/zero-result/per-Bank receipts and mutation supersession contracts alongside recall/reflect
 - memory-provider-envelope-schema.ts — validated success/error envelopes for canonical provider operations
 - memory-replica-schema.ts — bounded ordered journal upsert/tombstone and replica checkpoint contracts
-- memory-replica-request-schema.ts — durable per-request claim and terminal evidence independent of latest Bank status
-- memory-replica-schedule-schema.ts — durable Bank configuration, fenced run/result, exact manual identities, active consumed-retry backoff and truthful status contracts
+- memory-replica-request-schema.ts — durable exact claim and immutable success/failure/waiting evidence independent of latest Bank status
+- memory-replica-schedule-schema.ts — durable Bank configuration, fenced runs and accepted waiting with next action and preserved failure backoff
 - pending-memory-schema.ts — immutable write intents, legacy phases, versioned factual proof/dispatch state, and unconfirmed overlays
 - hindsight-native-result-schema.ts — tracked native commands, immutable paged full results, and compact G1 receipt contracts
 - hindsight-native-proof-encoding.ts — portable typed hash fields and UTF-8 serialization, independent of legacy local hashes
@@ -83,7 +83,7 @@
 - hindsight-memory-consumer-schema.ts — versioned consumer validators that preserve supported JSON and all factual result references
 - hindsight-native-runtime-schema.ts — validated native fields, preserving omitted values, nulls, and typed JSON
 - memory-policy-assessment-schema.ts — strict D77 memory-body and assessment contracts, plus the shared importance default
-- memory-operation-schema.ts — MEMORY_OPERATION_METHODS + Core-minted durable operation identity/state/request/result contracts and the operator submit/status/list/cancel/subscribe/changed schemas (operator-only, NO Rust mirror)
+- memory-operation-schema.ts — Core-minted durable operation and operator method contracts; terminal waiting requires exact replica.sync evidence and releases the operation family (NO Rust mirror)
 - memory-transition-schema.ts — strict transition directions, expected source/baseline identity, durable proof/receipt/result and explicit recovery contracts
 - memory-transition-template-schema.ts — optional versioned Core template/default/hold commitment and immutable W2 association with authenticated per-Bank backup observations.
 - memory-transition-queue-schema.ts — normalized queued write custody, bounded caller identity, fresh target request identity and separate queued/unknown/factual outcomes
@@ -96,7 +96,7 @@
 - memory-local-onboarding-schema.ts — operator preview/discovery, actionable runtime/custody status, exclusion and invalidation contracts
 - memory-hindsight-operation-schema.ts — hindsight.activate command (new/resume/recover), Core-minted producer identity + per-Bank progress, outcome and the closed activation error-code set
 - memory-activation-schema.ts — strict activation status/actions, including installed-runtime recovery only for matching terminal receipt/epoch/transaction and incomplete producer preparation
-- memory-authority-status-schema.ts — strict composite status with current authority identity, separate authority_invalid/evidence_invalid diagnostics, replica/Pending and lifecycle evidence
+- memory-authority-status-schema.ts — strict composite status with current authority identity, separate authority_invalid/evidence_invalid diagnostics, replica/Pending and lifecycle evidence; D108: composite authority/runtime/setup/replica/operations and optional policy-review contract
 - memory-hindsight-lifecycle-schema.ts — Hindsight Bank readiness (ready/syncing/provisioning/failed/not_provisioned) and the memory.authority.status `hindsight` section: live connection config/drift/admission time, per-scope readiness, Core-derived actions, the nullable `backup` block; bank.provision / connection.revalidate request, producer (Core-stamped operator/automatic origin), result and closed lifecycle error codes
 - hindsight-backup-schema.ts — explicit v1/v2 backup aggregates, closed pair failures, the `hindsight.backup` status block, backup.capture/admit/verify and emergency evidence
 - hindsight-backup-v1-schema.ts — unchanged strict historical request/proof/archive/manifest contracts, common custody and version-specific staged metadata bases
@@ -120,3 +120,4 @@
 - host-input-encoding.ts — boot-free canonical input serialization shared by Core, installed Host and Rust parity fixtures.
 - hindsight-candidate-domain-schema.ts — strict candidate request, original dispatch, restore receipt and durable evidence contracts; exported through the candidate-domain subpath.
 - memory-replica-rpc-schema.ts — complete per-Bank schedule configuration and thin configuration invalidation; no durable operation or scheduler-run push.
+- memory-policy-review-schema.ts — single zod review-status definition with unknown counts and durable catch-up notice identity

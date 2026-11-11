@@ -1,7 +1,7 @@
 /**
  * INPUT:  exact verified policy/Block targets, active namespace guard and bounded model/publication outcomes
- * OUTPUT: durable claims, original prompt/results, explicit retry and terminal queue progress
- * POS:    core/db — curator work only; completion is invoked after the writer proves actual application
+ * OUTPUT: fenced durable claims/results, original command identities, retry/terminal progress and committed review hints
+ * POS:    core/db — atomic entry/exit guard private reads; public reads and claim expiry stay independently guarded
  */
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
@@ -27,7 +27,8 @@ export interface HindsightPolicyWorkRepo {
   complete(claim: HindsightPolicyWorkClaim): HindsightPolicyWorkRecord;
   supersede(claim: HindsightPolicyWorkClaim): HindsightPolicyWorkRecord;
 }
-export interface HindsightPolicyWorkRepoDeps { db: Database; assertActive(scope: HindsightPolicyWorkScope): void; now?: () => string }
+export interface HindsightPolicyWorkRepoDeps { db: Database; assertActive(scope: HindsightPolicyWorkScope): void; now?: () => string;
+  admitMutation?<T>(action: () => T): T; onPolicyReviewChanged?: (bankId: string) => void }
 
 export function createHindsightPolicyWorkRepo(deps: HindsightPolicyWorkRepoDeps): HindsightPolicyWorkRepo {
   return { prepare: (input) => prepare(deps, input), get: (key) => get(deps, key),
@@ -53,7 +54,7 @@ function prepare(deps: HindsightPolicyWorkRepoDeps, input: { scope: HindsightPol
   validateHindsightPolicyWorkTarget(scope, target);
   const key = { ...scope, workId: hindsightPolicyWorkIdentity(scope, target) };
   return atomic(deps, scope, () => {
-    const prior = get(deps, key); if (prior) return prior;
+    const prior = readPolicyWork(deps.db, key); if (prior) return prior;
     const at = now(deps);
     insertPolicyWork(deps.db, { key, target, state: "ready", revision: 1, claims: 0,
       claimToken: null, claimUntil: null, nextAttemptAt: null, prompt: null, result: null,
@@ -65,7 +66,8 @@ function get(deps: HindsightPolicyWorkRepoDeps, key: HindsightPolicyWorkKey): Hi
   HindsightPolicyWorkKeySchema.parse(key); assertActive(deps, key); return readPolicyWork(deps.db, key);
 }
 function requireWork(deps: HindsightPolicyWorkRepoDeps, key: HindsightPolicyWorkKey): HindsightPolicyWorkRecord {
-  const work = get(deps, key); if (!work) throw new Error("MEMORY_NOT_FOUND"); return work;
+  // Every private caller is inside atomic(); the storage reader still verifies the original bytes and hashes.
+  const work = readPolicyWork(deps.db, key); if (!work) throw new Error("MEMORY_NOT_FOUND"); return work;
 }
 
 function claim(deps: HindsightPolicyWorkRepoDeps, input: { key: HindsightPolicyWorkKey; leaseMs: number }): HindsightPolicyWorkRecord | undefined {
@@ -90,26 +92,32 @@ function setPrompt(deps: HindsightPolicyWorkRepoDeps, input: { claim: HindsightP
   });
 }
 function saveResult(deps: HindsightPolicyWorkRepoDeps, input: { claim: HindsightPolicyWorkClaim; result: HindsightPolicyWorkResult }): HindsightPolicyWorkRecord {
-  return claimed(deps, input.claim, (previous) => {
+  let saved = false;
+  const record = claimed(deps, input.claim, (previous) => {
     const result = HindsightPolicyWorkResultSchema.parse(input.result);
     validateHindsightPolicyWorkResult(previous, result);
     if (previous.result) {
       if (!sameApplicationValue(previous.result, result)) throw new Error("MEMORY_REQUEST_ID_CONFLICT");
       return previous;
     }
+    saved = true;
     return update(deps, previous, { state: "saved", result, lastFailure: result.kind === "assessment-failure" ? result.failure : null });
   });
+  if (saved) deps.onPolicyReviewChanged?.(record.key.bankId);
+  return record;
 }
 function defer(deps: HindsightPolicyWorkRepoDeps, input: { claim: HindsightPolicyWorkClaim; failure: NonNullable<HindsightPolicyWorkRecord["lastFailure"]> }): HindsightPolicyWorkRecord {
   return claimed(deps, input.claim, (previous) => update(deps, previous, { state: previous.result ? "saved" : "ready",
     claimToken: null, claimUntil: null, nextAttemptAt: policyWorkRetryAt(now(deps), previous.claims), lastFailure: input.failure }));
 }
 function finish(deps: HindsightPolicyWorkRepoDeps, input: { claim: HindsightPolicyWorkClaim; state: "completed" | "superseded" }): HindsightPolicyWorkRecord {
-  return claimed(deps, input.claim, (previous) => {
+  const record = claimed(deps, input.claim, (previous) => {
     if (input.state === "completed" && previous.result === null) throw new Error("MEMORY_INTEGRITY_ERROR");
     return update(deps, previous, { state: input.state, claimToken: null, claimUntil: null, nextAttemptAt: null,
       finishedAt: now(deps), lastFailure: input.state === "superseded" ? "revision_conflict" : previous.lastFailure });
   });
+  deps.onPolicyReviewChanged?.(record.key.bankId);
+  return record;
 }
 
 function claimed<T>(deps: HindsightPolicyWorkRepoDeps, input: HindsightPolicyWorkClaim, action: (work: HindsightPolicyWorkRecord) => T): T {
@@ -135,6 +143,7 @@ function assertActive(deps: HindsightPolicyWorkRepoDeps, input: HindsightPolicyW
 }
 function atomic<T>(deps: HindsightPolicyWorkRepoDeps, scope: HindsightPolicyWorkScope, action: () => T): T {
   let result: { value: T } | undefined;
-  deps.db.transaction(() => { assertActive(deps, scope); result = { value: action() }; assertActive(deps, scope); });
+  const transaction = () => deps.db.transaction(() => { assertActive(deps, scope); result = { value: action() }; assertActive(deps, scope); });
+  if (deps.admitMutation) deps.admitMutation(transaction); else transaction();
   if (!result) throw new Error("MEMORY_INTERNAL_ERROR"); return result.value;
 }

@@ -20,7 +20,7 @@ MEMORY_AUTHORITY_METHODS = { status: "memory.authority.status" };
 MemoryOperationKind = "setup.validate" | "setup.apply" | "replica.sync" | "local.onboard.prepare" | "local.onboard.activate"
   | "hindsight.activate" | "bank.provision" | "connection.revalidate" | "backup.capture" | "backup.admit" | "backup.verify"
   | "transition.return-local" | "transition.reenter-hindsight" | "transition.emergency-local";
-MemoryOperationState = "admitted" | "running" | "completed" | "failed" | "cancelled" | "outcome_unknown";
+MemoryOperationState = "admitted" | "running" | "waiting" | "completed" | "failed" | "cancelled" | "outcome_unknown";
 MemoryOperationReason = "core_restart" | "producer_refused" | "producer_failed" | "cancelled_before_claim" | "runtime_unavailable"
   | "producer_incomplete" | "commitment_unknown";
 MemoryOperationRefusalReason = "MEMORY_OPERATION_NOT_FOUND" | "…_BUSY" | "…_RUNNING" | "…_SETTLED" | "…_UNSUPPORTED" | "…_BANK_UNKNOWN"
@@ -106,13 +106,18 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
 - Settlement is derived from what the producer persisted: a setup kind settles from the returned snapshot
   (`phase === "failed"` -> `failed` with `latestError.code`); `replica.sync` requests the manual run, awaits one
   scheduler `tick()`, then reads its exact durable manual request. Migration 051 stores request identity, captured
-  lease/run/fence and terminal diagnostics independently of the latest Bank status. Only that request's `succeeded`
-  or `failed` outcome settles the operation; timestamps and process-global supervisor errors never attribute work.
+  lease/run/fence and terminal diagnostics independently of the latest Bank status. That request's `succeeded`,
+  `failed` or `waiting` outcome settles the operation; timestamps and process-global supervisor errors never attribute work.
   An operation the producer has not settled stays open; `observe()` classifies it on the next read. Never fabricate
   success, `0 pending`, health or completion.
   A scheduler admission error can occur after its queue transaction commits (during status projection). Read the
   exact request before classifying refusal: an existing request keeps its factual state, and unreadable evidence
   stays unresolved. Likewise, receipt-read failure after execution is not a producer-failure receipt.
+- `waiting` is a terminal operation outcome permitted only for `replica.sync` with an exact producer `requestId`,
+  replica result, a next action and no failure reason/error. It ends this synchronization check and releases the
+  operation family while the accepted Native work remains unfinished. Preserve the previous `lastSuccessAt` as
+  history, never as evidence that the waiting attempt succeeded. Normal and boot observation read the same exact
+  request; later runs cannot update that immutable outcome. Home shows waiting and the automatic/manual next action.
 - Cancellation is stage-aware: `replica.sync` may be cancelled only before the scheduler claims it (repo
   `cancelManual(bankId, requestId)` atomically cancels the exact queued request and clears its pending pointer,
   including while a previous run holds the same Bank); a claimed request refuses
@@ -191,6 +196,8 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
 | Core restart with a busy setup phase | `failed` / `HINDSIGHT_SETUP_INTERRUPTED`; evidence preserved; Banks -> `pending` |
 | status read while the runtime throws | `runtime.available=false` with a closed reason; the read still succeeds |
 | scheduler drain threw before a manual claim | only an exact persisted request failure settles; otherwise unresolved |
+| exact replica request settled `waiting` | terminal waiting operation; family released; no fabricated Native completion |
+| waiting on another kind, or without exact replica evidence/next action | reject the contradictory operation state |
 | production `memory.migration.stage/resume/verify/exclude/activate` | `MEMORY_OPERATION_REFUSED` / `MEMORY_OPERATION_REQUIRED`; only dryRun/status/exceptions reads remain |
 | Core restart with a non-terminal `local.onboard.*` row | `observeBoot` classifies from the receipt; otherwise `outcome_unknown` / `commitment_unknown` or `producer_incomplete` |
 | submit any setup / Local / activation / lifecycle / backup kind while another of the five families is open | `MEMORY_OPERATION_BUSY` + that row's `activeOperationId` |
@@ -199,6 +206,8 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
 
 - Good: Home submits `replica.sync`, closes; a second client lists the operation, sees `completed` after the tick, and
   the Bank status shows the new `lastSuccessAt`.
+- Good: Native has accepted every outstanding write; this manual attempt ends `waiting`, survives reopen with its
+  original request, and a later sync may be admitted without rewriting that evidence.
 - Base: manual mode (`automatic=false`) fails a run; the operation ends `failed` / `explicit_retry_required`, the card
   offers Retry with the Bank's `retryKind`, and nothing retries by itself.
 - Bad: marking `completed` because `pendingManualKind` became null; polling `memory.authority.status`; caching authority
@@ -207,6 +216,8 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
 ## 6. Tests Required
 
 - Shared: state/terminal invariants, request/result unions, `replica`/`pending` null rule, refusal reasons.
+- Waiting: only replica operations may use the terminal state; exact request settlement, changed notification,
+  family release, later-run independence and restart observation agree through registered operation/status methods.
 - Core db: migration 048 fresh and from 047, lineage/reopen matrix, single-flight index conflict, `reconcileForeign`,
   `cancelManual` both branches.
 - Core service: real temporary SQLite with a fake scheduler; submit -> tick -> terminal push without a later read;

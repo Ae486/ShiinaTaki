@@ -33,6 +33,9 @@ describe("Hindsight backup block", () => {
     expect(block("verified")).toContain("2 小时前");
     expect(block("verified")).toContain("游标 40 → 52 · 未落定写入 1");
     expect(block("capturing")).toContain("进行中：创建备份 · 生成原生快照");
+    expect(block("quiescing")).toContain("进行中：创建备份 · 暂停新写入，限时等待已有记忆处理结束");
+    expect(block("quiescenceTimeout")).toContain("创建备份失败：等待已有记忆处理结束已超时，本次未创建备份；请稍后再次点击“创建备份”");
+    expect(block("quiescenceInterrupted")).toContain("创建备份失败：备份等待被中断，本次未创建备份");
     expect(block("failed")).toContain("创建备份失败：Core 与原生快照不一致");
     expect(block("routeUnavailable")).toContain("原生备份接口不可用");
     expect(block("staged")).toContain(`backups/${STAGED_ID}.staged/native-request.json`);
@@ -61,6 +64,8 @@ describe("Hindsight backup block", () => {
 
   it("disables every action while a backup operation is open, the card is locked, or offline", () => {
     expect(disabledCount(block("capturing"))).toBe(buttons(block("capturing")).length);
+    expect(disabledCount(block("quiescing"))).toBe(buttons(block("quiescing")).length);
+    expect(disabledCount(block("quiescenceTimeout"))).toBe(0);
     expect(disabledCount(block("verified", true, "backup:verify"))).toBe(2);
     expect([...block("verified", true, "backup:verify").matchAll(/<button[^>]*aria-busy="true"[^>]*>([^<]*)</g)].map((match) => match[1])).toEqual(["校验备份"]);
     expect(disabledCount(block("verified"))).toBe(0);

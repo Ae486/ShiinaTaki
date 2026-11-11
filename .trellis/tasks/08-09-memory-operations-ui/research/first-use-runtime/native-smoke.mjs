@@ -589,12 +589,22 @@ async function syncPendingBanks(ctx, banks) {
           await sleep(500);
         }
         const before = progress.get(bank.bankId) ?? null;
+        const beforeSchedule = (await authority(ctx.operator)).replica.find((row) => row.bankId === bank.bankId);
         operation = await submit(ctx.operator, { kind: "replica.sync", bankId: bank.bankId, syncKind: "incremental" });
         const after = progress.get(bank.bankId) ?? null;
-        attempts.push({ ...brief(operation), before, after });
+        let waitingSchedule = null;
+        if (operation.state === "waiting") {
+          waitingSchedule = (await authority(ctx.operator)).replica.find((row) => row.bankId === bank.bankId);
+          check(operation.errorCode === null && waitingSchedule.mode === "waiting"
+            && waitingSchedule.consecutiveFailures === beforeSchedule.consecutiveFailures
+            && waitingSchedule.lastSuccessAt === beforeSchedule.lastSuccessAt,
+          "waiting changed real failure history or invented success", { beforeSchedule, waitingSchedule, operation: brief(operation) });
+        }
+        attempts.push({ ...brief(operation), before, after, waitingSchedule });
         checkpointAdvanced = before !== null && after !== null
           && (after.native_cursor > before.native_cursor || after.state_cursor > before.state_cursor);
-      } while ((["HINDSIGHT_PENDING_REMAINS", "HINDSIGHT_REPLICA_BUSY", "HINDSIGHT_TIMEOUT"].includes(operation.errorCode)
+      } while ((operation.state === "waiting"
+        || ["HINDSIGHT_PENDING_REMAINS", "HINDSIGHT_REPLICA_BUSY", "HINDSIGHT_TIMEOUT"].includes(operation.errorCode)
         || (operation.errorCode === "HINDSIGHT_DEADLINE_EXCEEDED" && checkpointAdvanced)) && Date.now() < leaseDeadline);
       recovery.push({ ...brief(operation), elapsedMs: Date.now() - started, syncAttempts, attempts });
       check(operation.state === "completed", "pending recovery sync failed", brief(operation));
@@ -655,7 +665,7 @@ async function stepRestart(ctx, observed) {
   const changed = operations.filter((row) => JSON.stringify(row) !== JSON.stringify(before.operations.find((old) => old.operationId === row.operationId)));
   observed.operationRowsChanged = changed.map(brief);
   observed.bootNativeCalls = nativeCalls(ctx.native, offset);
-  check(observed.migrationHead === 60, "migrations are not at head 060", observed.migrationHead);
+  check(observed.migrationHead === 63, "migrations are not at the phase-2 checkpoint head 063", observed.migrationHead);
   check(JSON.stringify(status.authority) === JSON.stringify(before.authority.authority), "authority changed across restart", observed.authority);
   check(status.runtime.available, "runtime unavailable after restart", status.runtime);
   check(observed.banksStable, "Bank readiness changed across restart", bankView(status));
@@ -923,7 +933,7 @@ async function backupJourney(ctx, observed) {
   check(backup !== null, "Home backup has no verified pair");
   const pairDir = join(ctx.coreOptions.dataDir, "backups", backup.backupId);
   const manifest = shared.HindsightBackupManifestSchema.parse(JSON.parse(readFileSync(join(pairDir, "manifest.json"), "utf8")));
-  check(manifest.version === 2 && manifest.core.migrationHead === 60, "backup did not capture current template/Core build");
+  check(manifest.version === 2 && manifest.core.migrationHead === 63, "backup did not capture current template/Core build");
   check(manifest.authority.epochId === status.authority.epochId && manifest.verifiedAt, "backup authority or verification mismatch");
   observed.templates = manifest.templates.banks;
   check(observed.templates.length === status.hindsight.banks.length
@@ -962,7 +972,7 @@ async function transitionJourney(ctx) {
   const { step } = ctx.journey;
   const originalBanks = fixtureBanks(await authority(ctx.operator));
   const originalDefaults = (await ctx.operator.call(shared.MEMORY_TEMPLATE_METHODS.status, {})).defaults;
-  await step(11, `Home captures and verifies a backup-v2 pair with ${ctx.templateRevision} at Core head060`, (observed) => backupJourney(ctx, observed));
+  await step(11, `Home captures and verifies a backup-v2 pair with ${ctx.templateRevision} at Core head063`, (observed) => backupJourney(ctx, observed));
   await step(12, "Home healthy return; Local recall and a new retained memory", async (observed) => {
     await transitionHome(ctx, "return-local", observed);
     observed.recall = await memoryChat(ctx, "[recall] blue seashells", "local", "The user said: I collect blue seashells during the fixture outage.");

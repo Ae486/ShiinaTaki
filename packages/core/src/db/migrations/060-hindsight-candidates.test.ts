@@ -30,14 +30,14 @@ describe("060 controlling-Core candidate lineage", () => {
         expect(archived.prepare("SELECT name FROM sqlite_schema WHERE name LIKE 'hindsight_candidate_%'").all()).toEqual([]);
       } finally { archived.close(); }
       expect(digest()).toBe(before);
-      db = openDatabase({ path, migrations: MIGRATIONS });
+      db = openDatabase({ path, migrations: MIGRATIONS.filter((item) => item.version <= 60) });
       expect(db.prepare("SELECT * FROM config ORDER BY key").all()).toEqual(config);
       expect(db.prepare("SELECT * FROM migrations WHERE version<=59 ORDER BY version").all()).toEqual(receipts);
       for (const table of tables) expect(db.prepare(`SELECT * FROM hindsight_candidate_${table}`).all()).toEqual([]);
       expect(db.prepare("SELECT max(version) AS version FROM migrations").get()?.version).toBe(60);
       const upgraded = db.prepare("SELECT * FROM migrations ORDER BY version").all();
       db.close();
-      db = openDatabase({ path, migrations: MIGRATIONS });
+      db = openDatabase({ path, migrations: MIGRATIONS.filter((item) => item.version <= 60) });
       expect(db.prepare("SELECT * FROM migrations ORDER BY version").all()).toEqual(upgraded);
       expect(db.prepare("PRAGMA foreign_key_check").all()).toEqual([]);
       expect(db.prepare("PRAGMA quick_check").get()?.quick_check).toBe("ok");

@@ -1,6 +1,6 @@
 /**
  * INPUT:  Core-owned replica scheduler configuration and bounded diagnostic state
- * OUTPUT: validated scheduling/status contracts, including consumed retry backoff while a run is active
+ * OUTPUT: validated scheduling/status contracts, including accepted waiting without failure backoff
  * POS:    shared protocol — durable replica scheduling and recovery diagnostics; no provider payloads or secrets
  */
 import { z } from "zod";
@@ -76,9 +76,9 @@ export const MemoryReplicaSyncStateSchema = z.strictObject({
   automatic: z.boolean(),
   autoIntervalMs: AutoInterval,
   fullReconciliationIntervalMs: FullInterval,
-  mode: z.enum(["idle", "running", "failed"]),
+  mode: z.enum(["idle", "running", "waiting", "failed"]),
   run: MemoryReplicaScheduledRunSchema.nullable(),
-  fullReconciliationState: z.enum(["idle", "running", "succeeded", "failed"]),
+  fullReconciliationState: z.enum(["idle", "running", "waiting", "succeeded", "failed"]),
   nextDueAt: Timestamp.nullable(),
   nextFullDueAt: Timestamp.nullable(),
   retryAttempt: z.int().min(0).max(5),
@@ -104,10 +104,14 @@ export const MemoryReplicaSyncStateSchema = z.strictObject({
   if ((state.mode === "running") !== (state.run !== null)) fail("running state requires its lease-bound run");
   if (state.run && state.run.lease.bankId !== state.bankId) fail("run belongs to another Bank");
   if (state.pendingManualRequestId && state.pendingManualKind === null) fail("manual identity requires a queued request");
-  const consumedRetry = state.run !== null && state.retryDueAt === null && state.retryAttempt >= 1 && state.retryKind !== null;
+  const waiting = state.mode === "waiting" || state.run !== null && state.errorCode === null && state.nextAction !== null;
+  const consumedRetry = state.run !== null && state.retryDueAt === null && (waiting || state.retryAttempt >= 1) && state.retryKind !== null;
   if (!consumedRetry && (state.retryDueAt === null ? state.retryKind !== null || state.retryAttempt !== 0
-    : state.retryKind === null || state.retryAttempt === 0)) fail("retry fields disagree");
-  if ((state.errorCode === null) !== (state.nextAction === null)) fail("diagnostic fields disagree");
+    : state.retryKind === null || !waiting && state.retryAttempt === 0)) fail("retry fields disagree");
+  if (waiting) {
+    if (state.errorCode !== null || state.nextAction !== (state.automatic ? "automatic_retry_scheduled" : "explicit_retry_required")) fail("waiting requires an action without an error");
+    if (state.mode === "waiting" && state.automatic && state.retryDueAt === null) fail("automatic waiting requires its next check");
+  } else if ((state.errorCode === null) !== (state.nextAction === null)) fail("diagnostic fields disagree");
   if ((state.fullReconciliationState === "running") !== (state.run?.kind === "full")) fail("full reconciliation state requires its running claim");
   if (!state.automatic && (state.nextDueAt !== null || state.nextFullDueAt !== null || state.retryDueAt !== null || state.catchUpRequested)) {
     fail("manual mode cannot schedule background work");

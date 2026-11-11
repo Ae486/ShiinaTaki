@@ -2,7 +2,7 @@ param([string]$Log, [string]$Out, [int]$IntervalSec = 5, [int]$MaxMinutes = 110,
 # Leader-only measurement for one journey: system memory, per-process memory/CPU of the owned runtime, owned disk sizes.
 $start = Get-Date
 $filter = "Name='node.exe' OR Name='python.exe' OR Name='postgres.exe' OR Name='headless_shell.exe'"
-$keep = 'native-smoke|core-child|home-browser|home-check|native_launcher|vite|taki-first-use|taki-hindsight-first-use|post-reentry'
+$keep = 'native-smoke|core-child|home-browser|home-check|native_launcher|native-launcher|vite|taki-first-use|taki-hindsight-first-use|post-reentry'
 $i = 0
 while ($true) {
   $os = Get-CimInstance Win32_OperatingSystem

@@ -1,9 +1,9 @@
 /**
  * INPUT:  one durable scheduler claim, a replica runner, and a bounded cancellation budget
- * OUTPUT: fenced settlement, post-failure Pending retry wake, bounded deadline/diagnostics and immediate lease revocation
+ * OUTPUT: fenced failure/wait settlement with one Pending aggregate, bounded diagnostics and immediate lease revocation
  * POS:    core/memory/hindsight — execution lifetime; late/uncooperative adapters cannot publish after cancellation
  */
-import type { MemoryReplicaBank, MemoryReplicaErrorCode, MemoryReplicaRunResult, MemoryReplicaScheduledRun } from "@taki/shared";
+import type { MemoryReplicaBank, MemoryReplicaErrorCode, MemoryReplicaRunResult, MemoryReplicaScheduledRun, MemoryReplicaSyncState } from "@taki/shared";
 import type { HindsightReplicaSchedulerRepo } from "../../db/hindsight-replica-scheduler-repo.ts";
 import type { HindsightReplicaLeaseRepo } from "../../db/hindsight-replica-lease-repo.ts";
 import type { Logger } from "../../logging/logger.ts";
@@ -65,15 +65,12 @@ async function settleExecution(state: ExecutionState, result: Promise<MemoryRepl
       state.settled = true;
     }
   } catch (error) {
-    try {
-      state.input.logger?.warn({ bankId: state.input.bank.bankId, runId: state.run.lease.runId,
-        code: replicaErrorCode(error), cause: isCanonicalLocalFenced(error) ? "MEMORY_AUTHORITY_FENCED" : undefined },
-      "Hindsight scheduled synchronization failed");
-    } catch { /* Diagnostics cannot replace the original run failure or prevent durable settlement. */ }
+    let outcome: MemoryReplicaSyncState | undefined;
     if (!state.cancelled && !replicaOwnershipLost(error)) {
-      try { failRun(state, replicaErrorCode(error)); }
+      try { outcome = failRun(state, replicaErrorCode(error)); }
       catch (cause) { failure = cause; }
     }
+    if (outcome?.mode !== "waiting") logFailure(state, error, outcome?.errorCode ?? replicaErrorCode(error));
   }
   if (state.cancelled) failure = state.cancellationFailure;
   if (!state.settled) {
@@ -83,20 +80,23 @@ async function settleExecution(state: ExecutionState, result: Promise<MemoryRepl
   if (failure !== undefined) throw failure;
 }
 
-function failRun(state: ExecutionState, errorCode: MemoryReplicaErrorCode): void {
+function logFailure(state: ExecutionState, error: unknown, code: MemoryReplicaErrorCode): void {
   try {
-    state.input.repo.fail({ run: state.run, errorCode });
+    state.input.logger?.warn({ bankId: state.input.bank.bankId, runId: state.run.lease.runId,
+      code, cause: isCanonicalLocalFenced(error) ? "MEMORY_AUTHORITY_FENCED" : undefined }, "Hindsight scheduled synchronization failed");
+  } catch { /* Diagnostics cannot replace the original run failure or prevent durable settlement. */ }
+}
+
+function failRun(state: ExecutionState, errorCode: MemoryReplicaErrorCode): MemoryReplicaSyncState | undefined {
+  try {
+    const outcome = state.input.repo.fail({ run: state.run, errorCode });
     state.settled = true;
+    return outcome;
   } catch (error) {
     if (!replicaOwnershipLost(error)) {
       // A status-write failure must still retire this lease before cancellation returns to its caller.
       state.input.leases.release(state.run.lease);
       throw error;
     }
-  }
-  if (state.settled && errorCode === "HINDSIGHT_PENDING_REMAINS") {
-    // Failure replaces retryDueAt; requesting while run is active also caps it at lease expiry.
-    const dueAt = state.input.repo.nextPendingRetryAt(state.input.bank.bankId);
-    if (dueAt !== null) state.input.repo.requestRetry(state.input.bank.bankId, dueAt);
   }
 }

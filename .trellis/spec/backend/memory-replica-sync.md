@@ -94,11 +94,11 @@ repo.applyPage({ page: canonical, expectedCheckpoint, lease });
   verified startup/reconnection catch-up after an outage.
   A foreground Pending write arms the same Bank's existing automatic retry at its child's `nextRetryAt` (or the first
   retry delay when no child retry time exists), preserving any earlier wake and immediately recomputing the scheduler timer.
-  A run ending with `HINDSIGHT_PENDING_REMAINS` likewise requests the earliest non-null `nextRetryAt` among that Bank's
-  Pending rows in the active Authority Epoch. Request through `requestRetry` after `fail` has cleared `run`: failure
-  overwrites an earlier request, and requesting during a run can shorten the wake to its lease expiry. The Bank's
-  backoff may wake earlier, but never later than that row; a run before any row is due leaves those rows unclaimed
-  and schedules a future wake, without a tight loop. Manual-only mode still arms no background recovery.
+  A run ending with `HINDSIGHT_PENDING_REMAINS` classifies that Bank's unresolved Pending metadata in the active
+  Authority Epoch during its existing settlement transaction. One aggregate supplies waiting counts, the earliest
+  retry time and a blocking diagnostic; it replaces the separate post-failure retry query/mutation. Other failures
+  do not scan Pending. A future-row early wake leaves the row unclaimed and schedules a future wake without a tight
+  loop. Manual-only mode still arms no background recovery.
 - B5 owns deterministic synchronization execution. Heartbeat owns wake/budget policy; B6 owns runtime provider,
   recall, and tool wiring. This service neither changes Memory Authority nor replays Pending Memory.
 - A live run consumes a verified B4 checkpoint and trusted policy/provenance bindings. Offline fixtures and an
@@ -110,9 +110,11 @@ repo.applyPage({ page: canonical, expectedCheckpoint, lease });
   `MemoryReplicaSyncStateSchema`, and `MemoryReplicaSyncStatusSchema`.
 - A scheduled run binds `{ lease, kind, trigger, predecessor, manualRequestId? }`; a result binds `{ checkpoint, observedCursor }`.
   Bank identity is `{ bankId, scope, characterId }`, with a Character identity only for Character scope.
-- `createHindsightReplicaSchedulerRepo(db, now)` exposes `ensureBank`, `requestManual`, `requestCatchUp`, `requestRetry`, `nextPendingRetryAt`, `recover`,
+- `createHindsightReplicaSchedulerRepo(db, now)` exposes `ensureBank`, `requestManual`, `requestCatchUp`, `requestRetry`, `recover`,
   `claim`, `promoteToFull`, `succeed`, and `fail`. `ensureBank({ bank })` preserves existing configuration;
   an explicit `config` is required to change it.
+- `fail({ run, errorCode })` settles accepted-only Pending as `waiting`; it is not unconditionally a failure.
+  Internal `readPendingRecoveryState(db, bankId)` returns `{ unresolvedCount, waitingCount, nextRetryAt, blockingErrorCode }`.
 - `createHindsightReplicaScheduler(input)` exposes non-blocking `start()`, bounded `stop()`, `tick()`,
   `requestManual(bankId, kind, requestId?)`, `cancelManual(bankId, requestId?)`, `request(requestId)`,
   `requestRetry(bankId, dueAt)`, `verifiedReconnect()`, `status()`, and the closed supervisor `lastError()`.
@@ -133,11 +135,21 @@ repo.applyPage({ page: canonical, expectedCheckpoint, lease });
   same ladder at least as large as the elapsed time since acceptance, capped at six hours, and adds it to the current
   time. With a result read just after acceptance, polls land about 1, 6, 21 and 81 minutes after acceptance, then
   six hours apart. Exact equality still selects that rung. All other codes and unaccepted rows keep the claim-attempt
-  ladder. Claims/`forceRetry`, operation identity and terminal rules remain unchanged. Bank retry attempts and failed
-  run semantics (`mode`, `errorCode`, `consecutiveFailures`) remain unchanged; the post-failure request only bounds its wake.
+  ladder. Claims/`forceRetry`, operation identity and Pending terminal rules remain unchanged. Real Bank failures keep
+  their existing backoff/counters; accepted-only waits use the separate non-failure settlement below.
   An outstanding retry suppresses overdue interval wakes. Manual action and verified catch-up may bypass backoff.
   Success clears consecutive failures and schedules the next ordinary interval from success. Only a full success
   advances the full-reconciliation interval. Manual mode schedules no background due or retry wake.
+- A nonempty unresolved Bank becomes `mode: "waiting"` only when every row has accepted-write evidence, no diagnostic
+  other than absent/`HINDSIGHT_PENDING_REMAINS`, and a compatible phase. Tracked `submitted` requires saved Native
+  `pending`/`processing`/`partial`; legacy accepted `submitted` keeps its existing semantics. `awaiting_derived` and
+  `awaiting_pull` require the saved receipt. Queued/unaccepted, failed, unknown, unavailable and other-diagnostic rows
+  retain failure semantics. Do not infer a whole Bank's state from the recovery runner's first unresolved row.
+- Waiting clears the run/error, releases its lease, and sets full reconciliation to `waiting` for a full run. It
+  preserves actual prior failure counts, retry-attempt history, success/full-success timestamps and Native IDs.
+  Automatic Banks reuse the earliest future row retry; absent/already-due retry metadata uses the existing first
+  delay to avoid a tight loop. Manual-only Banks keep no automatic wake. `nextAction` tells the operator which applies.
+  A normal wait produces no synchronization-failure warning. No payload loading, extra Native probe or timer is added.
 - One asynchronous worker serves all configured Banks. A failure in one Bank does not discard another Bank's progress.
   Restart/reconnection performs one eligible catch-up; it does not replay every missed interval.
   Timer callbacks use the scheduler's construction async context, so foreground rearming cannot inherit a settled
@@ -147,6 +159,12 @@ repo.applyPage({ page: canonical, expectedCheckpoint, lease });
   evidence in the existing schedule transaction. Terminal request records cannot be updated or deleted. A queued
   request can be cancelled while a previous run owns the Bank; wrong IDs and claimed requests refuse. Pre-051 records
   remain readable without fabricated IDs. Process-global supervisor errors cannot settle another Bank's request.
+- Migration 063 extends the manual-request SQL CHECK and immutable-terminal trigger with `waiting`, preserving old
+  rowids, IDs, states and JSON verbatim. Schedule/operation JSON needs no rewrite. A waiting request is terminal for
+  this sync attempt, retains its claim and `settledAt`, has no error and records the automatic/manual next action.
+  Later runs are independent and cannot rewrite it. This does not claim that the underlying Native write completed.
+  Table replacement also preserves migration 057's populated `memory_transition_emergency_manual_quarantine`
+  references and both transition/manual admission triggers; test the actual populated lineage and foreign keys.
 - Claim, run state, lease owner/run/fence/expiry, and schedule version are checked transactionally. Settlement requires
   the same current run and lease plus a result matching the committed checkpoint. Configuration changes and manual
   requests arriving during a run remain intact; only claim consumes a queued request, and full requests are never
@@ -194,6 +212,25 @@ repo.applyPage({ page: canonical, expectedCheckpoint, lease });
   The existing Core logger additionally records Bank/run identity and the known `MEMORY_AUTHORITY_FENCED` cause
   for refused scheduled work; logging failure cannot change the original run outcome.
 
+### D108 policy review on the existing scheduler lifetime
+
+`HindsightPolicySchedule` is an optional internal concern of the B5 scheduler, not another polling loop or an Agent
+Scheduled Task. `armTimer` chooses the earliest replica, policy or retry wake; `drain` launches policy work after the
+replica Bank loop without awaiting it. Stop/pause await both owned lanes; retirement aborts policy dispatch. Existing
+sync settings, leases, manual requests and receipt semantics retain their meanings.
+
+Policy obligations remain independently scheduled when replica automatic synchronization is disabled. A policy pass
+uses the committed local replica and does not silently enable automatic pulls. Actual full/incremental application
+COMMITs rearm the relevant Bank's threshold scan. Verified reconnect coalesces existing obligations; it never creates
+another model pass for the same pending occurrence. Core activity only rearms paused obligations, and config changes
+reconcile future schedules without erasing pending work. The existing bounded timer wake also observes User Timezone
+changes; it does not acquire a new timezone authority.
+
+The policy lane reuses the existing retry-delay ladder for provider failure, unfinished journal claims, failed-policy
+revisions and temporary fences. All nonterminal saved work is counted even when it is not runnable yet. An empty
+runnable page cannot complete an occurrence. Detailed persistence/eligibility/fencing contracts and the known
+concurrent-use measurement boundary live in `hindsight-application-runtime.md` under D108.
+
 ### 4. Validation & Error Matrix
 
 | Condition | Required result |
@@ -222,6 +259,9 @@ repo.applyPage({ page: canonical, expectedCheckpoint, lease });
 ### 6. Tests Required
 
 - Shared state/result/diagnostic consistency and unknown-versus-known lag; persistent configuration and truthful counts.
+- D103: accepted-only versus mixed failure/unavailable/unaccepted/unknown; prior genuine failure counters; future-row
+  early wake and manual-only behavior; exact terminal waiting request after reopen; operation-family release and boot
+  observation; migration 063 byte-preserved history, queued uniqueness and immutable old/new terminal outcomes.
 - File-backed claim/CAS/lease/reopen, queued requests, independent intervals, retry precedence, supervisor failure,
   disable/reconfigure during a run, bounded ignored-abort stop, and late completion after lease replacement.
 - Actual injected-HTTP client tests for multi-page/two-Bank catch-up, partial-page reset success/failure, deadline and
@@ -235,6 +275,10 @@ repo.applyPage({ page: canonical, expectedCheckpoint, lease });
   prove graceful shutdown or real provider/Host acceptance.
 
 ### 7. Wrong vs Correct
+
+Wrong: treat any `HINDSIGHT_PENDING_REMAINS` as success or waiting, or keep a manual request claimed until Native finishes.
+Correct: classify the existing Bank-wide aggregate, end this attempt with its exact waiting evidence, and let the
+ordinary Pending recovery continue under the original Native identity.
 
 ```ts
 // Wrong: a late page may already have committed before this check.

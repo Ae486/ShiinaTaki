@@ -40,6 +40,6 @@ export function settleReplicaRequest(db: Database, run: MemoryReplicaScheduledRu
   if (!run.manualRequestId) return;
   const row = readReplicaRequest(db, run.manualRequestId);
   if (!row || row.state !== "claimed" || canonicalJson(row.claim) !== canonicalJson(run.lease)) throw new Error("HINDSIGHT_REPLICA_SCHEDULE_STALE");
-  updateReplicaRequest(db, row, { ...row, state: state.errorCode === null ? "succeeded" : "failed",
+  updateReplicaRequest(db, row, { ...row, state: state.mode === "waiting" ? "waiting" : state.errorCode === null ? "succeeded" : "failed",
     settledAt: state.updatedAt, errorCode: state.errorCode, nextAction: state.nextAction, lastSuccessAt: state.lastSuccessAt });
 }

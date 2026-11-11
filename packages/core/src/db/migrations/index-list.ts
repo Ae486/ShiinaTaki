@@ -65,6 +65,9 @@ import { memoryTransitionEmergencyMigration057 } from "./057-memory-transition-e
 import { hindsightTemplateOverlaysMigration058 } from "./058-hindsight-template-overlays.ts";
 import { hindsightTemplateExecutionMigration059 } from "./059-hindsight-template-execution.ts";
 import { hindsightCandidatesMigration060 } from "./060-hindsight-candidates.ts";
+import { hindsightRuntimeIdentityMigration061 } from "./061-hindsight-runtime-identity.ts";
+import { hindsightPolicyReviewScheduleMigration062 } from "./062-hindsight-policy-review-schedule.ts";
+import { hindsightReplicaWaitingMigration063 } from "./063-hindsight-replica-waiting.ts";
 
 export const MIGRATIONS: Migration[] = [
   timelineMigration001,
@@ -127,4 +130,7 @@ export const MIGRATIONS: Migration[] = [
   hindsightTemplateOverlaysMigration058,
   hindsightTemplateExecutionMigration059,
   hindsightCandidatesMigration060,
+  hindsightRuntimeIdentityMigration061,
+  hindsightPolicyReviewScheduleMigration062,
+  hindsightReplicaWaitingMigration063,
 ];

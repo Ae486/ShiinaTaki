@@ -52,7 +52,20 @@ Execution model:
 4. **Close phase 1.** Update the usable-delivery report with build identity, results and limits. Log deferrals in
    `docs/deferred-decisions.md`. Ask the owner about a baseline commit before phase 2 begins.
 
-## Later phases (planned, not started)
+## Later-phase roadmap
+
+Current continuation (2026-11-11): the owner freed memory and the selected
+[wave-3 verification](phase2-validation-20261111.md) is complete. Seven typechecks/root lint passed;
+6,131 tests passed with two known Core failures and two conditional skips. The connected journey passed
+24/24 steps, including real waiting/recovery, concurrent Home use, backup, switching and isolated restore.
+Both stopped-fixture replays passed. A main stage checkpoint is appropriate with the recorded limits;
+T4 alignment needs a separate isolated integration. No commit/merge/archive was performed.
+
+Scale correction: earlier dispatch rows calling this a “1,690-source/large-library” replay used
+1,690 **filesystem hashes** from the stopped source directory, not memory Source count. Current Core
+projections include 8 documents/68 memory units. Real large-memory-scale coarse/stress validation is
+unverified; the historical label does not prove it. Provider-process crash, long Native-maintenance
+contention, installed-build, real-model and owner/manual boundaries remain as recorded in the final report.
 
 - **Phase 2 — optimization with simplification:** F3-F9 in the performance report's order. Each change is
   verified on its own; redundant defensive checks are removed together with their cost. F9 moved into phase 1
@@ -65,10 +78,9 @@ Execution model:
   - After curator publications, Core re-downloads from Native (L4: 269 post-chat requests vs 52), and a
     publication reaches local application only at the next refresh boundary (29.8 s in L4, P1-AA).
 - **Phase 3 — user experience:** Home progress, error and recovery presentation. The owner's judgment is required.
-  - While Native is still working on an accepted write, Home shows the sync as failed with
-    `HINDSIGHT_PENDING_REMAINS` and a rising failure count (P1-Z).
-  - A backup started within about 75 s of a chat on a large library fails with an honest message and no
-    automatic retry (P1-AA option D: a bounded retry inside the backup).
+  - D103 waiting is implemented and has controlled/connected evidence; remaining Home UX judgment is manual.
+  - D104 uses one 120-second abortable admission wait, with controlled late-drain/timeout/retirement proof
+    and connected ordinary capture. Long Native-maintenance contention and owner observation remain open.
 - **Phase 4 — stress:** large library growth, long-running stability, repeated transitions, a remote HTTPS
   Hindsight endpoint, and Native stopped between an incremental pull and its binding pass (D98).
 
@@ -132,3 +144,21 @@ Execution model:
 | 2026-11-08 | leader | Journey 17 `2026-11-08T08-48-21.445Z` | — | **passed** all 24 steps on final source; pending-restart 383 s; steps 12/13 387/520 s (cause not established). |
 | 2026-11-08 | leader | Final R `G:/taki-real-memory-aKXack` | — | **passed** 6 turns; semantic review correct; two wording flaws left to the template owner. Replay 6 stands as final L (no production change after it). |
 | 2026-11-08 | codex gpt-6.1-sol (docs only) | Phase-1 docs closeout | — | `usable-delivery-20261108.md`, healthy-driver spec drift fixed (leader-verified against code), acceptance map contradictions resolved; C07/C08/C10 partial, parent closure UNDECIDED. |
+| 2026-11-09 | codex gpt-6-astra (read-only) | Phase 2 design `phase2-design-20261108.md` | — | three waves; owner ratified D108 defaults and the native-first rule. |
+| 2026-11-09 | codex gpt-6-astra (workspace-write) | P2 wave 1a: scoped read snapshots, guard/decode contraction `phase2-wave1a-20261109.md` | — | 550 focused tests pass (leader rerun outside sandbox), Core typecheck clean. |
+| 2026-11-09 | leader | Replay 7 `G:/taki-post-reentry-kIF8RJ` (`--observe-maintenance`, wave 1a source) | — | **passed**; chat 15.8 → 9.97 s (ack 2.7 → 2.2 s; 6.1 s of it is 4 Native recall calls); stalls >250 ms 17 → 9, longest 6.4 → 2.4 s, stall total 13.0 → 5.2 s; fence hold 30.6 → 27.3 s; backup 16.2 → 10.2 s. Remaining Core cost: current template identity still read per assertConnection (1.74 s in chat) and inside curator write transactions (2.4 s stall). |
+| 2026-11-09 | codex gpt-6-astra (two sessions; second after an Azure resource error) | P2 wave 1b: migration 061 trigger-maintained identity token (random stamp, schema_version and trigger verification), memo at the runtime connection owner, journal guard contraction, read-only `isTransaction` getter | — | Focused 852 + 131 tests pass. Leader full Core run found 29 failures: 2 pre-existing, 2 caused by 1b (closed-db getter, migration list), 25 already failing at the phase-1 commit (stale Local authority fixtures, confirmed on a HEAD worktree). Fixtures were fixed; the phase-1 commit had not run the full Core suite. Full rerun was stopped by the low-memory reaper with only the 2 pre-existing failures seen so far; awaiting owner go-ahead. |
+| 2026-11-09 | leader | Full Core suite in 8 shards (1 worker, 1.5 GB heap cap, owner-approved memory limit) | — | 4459 tests: only the 2 pre-existing failures (`hindsight-memory-consumer`, `hindsight-configuration-context`). |
+| 2026-11-09 | leader | Replay 8 `G:/taki-post-reentry-CBCFPr` (wave 1a+1b source, Core heap cap 2 GB) | — | **passed**; chat 9.97 → 8.73 s (ack 2.2 → 1.7 s; Native recall 6.0 s of it); stalls >250 ms 9 → 4, longest 2.38 → 2.02 s, total 5.2 → 3.0 s; fence hold 27.3 → 25.9 s; backup 10.2 → 9.9 s. Remaining: token read verifies every trigger definition per call (about 1 s in chat); curator read snapshot inside a transaction (1.7 s of the longest stall). |
+| 2026-11-09 | codex gpt-6-astra (p2w1c session) | P2 wave 1b follow-up: trigger verification cached per connection and schema_version, never inside a transaction; spec synchronized by leader | — | 97 focused pass; full Core suite in 8 shards: only the 2 pre-existing failures. |
+| 2026-11-09 | leader | Replay 9 `G:/taki-post-reentry-DWdOBg` (wave 1 final source) | — | **passed**; chat 8.73 → 7.89 s (Native recall 6.04 s; Core active about 1.4 s, was about 9 s in replay 6); ack 1.3 s; stalls >250 ms 4 → 2, longest 2.02 → 1.60 s (curator read pass); fence hold 25.9 → 22.8 s; backup 9.6 s. Worker isolation: no-go for now; the residual stall is the curator pass, handled by wave 2 scheduling. |
+| 2026-11-09 | codex gpt-6-astra (p2w2a session) | P2 wave 2a (D108): per-turn review removed (ingestion batching unchanged); durable daily 03:00 / 24 h interval + 100-item threshold review on the existing replica scheduler wake; migration 062 per-Bank progress; item resume on `hindsight_policy_work`; one catch-up per Bank with a 5 s idle wait; typed review status in Shared + authority status | — | 133 focused + 2 lifecycle + 4 Shared pass; typechecks and ESLint pass. Leader full Core run: 21 new failures, all stale migration-tail (61) and knob-set expectations; 2 pre-existing unchanged. |
+| 2026-11-09 | codex gpt-6.1-sol (p2w2a-fix session) | Wave 2a follow-up: migration tails derived from `MIGRATIONS`; new table and four live review knobs in expectations; knob table in `rs-panel-scoping.md` Q7 | — | Leader rerun of the 8 touched files: 72 pass. Production metadata was correct and unchanged. |
+| 2026-11-09 | leader | Replay 10 `G:/taki-post-reentry-Wjro0M` (wave 2a source) | — | **passed**; fence hold 22.8 → 1.6 s (ingestion only); the 1.6 s curator stall is gone; stalls >250 ms 2 (0.39 and 0.29 s, both in startup sync before ack); chat 7.89 → 8.23 s (Native recall 5.84 s, within noise); ack 1.3 → 1.9 s. Review stayed idle as designed: eligible 45/21/0 below 100, next due 03:00, no catch-up on first observation. Open: backup 9.6 → 14.0 s, all in the Core capture phase (Native backup POST at +9.3 s vs +7.0 s); the observation stops at fence-free, so the backup window is unprofiled. Variance check deferred: free memory 3.4 GB. |
+| 2026-11-11 | codex gpt-6.1-sol | Wave 2b Home review visibility and existing Settings labels | — | 57 Desktop tests, typecheck/lint and 13 controlled Chromium scenarios passed. Unknown/zero, last-read frames and historical catch-up remain distinct. See `phase2-wave2b-home-20261111.md`. |
+| 2026-11-11 | codex gpt-6.1-sol | Core review persistence invalidation through the existing replica channel | — | 33-test initial group and final 16-test schedule suite passed (overlapping counts), including actual loopback WS with controlled Native/model dependencies. No new producer query/validation/timer. Final combined Core typecheck passed; see `phase2-wave2b-notifications-20261111.md`. |
+| 2026-11-11 | codex gpt-6-astra | D105 complete-page receipt-target convergence and already-applied recovery reuse | — | Pre-change diagnostic verified unnecessary binding wait. Final 67 unique tests plus 3 focused return-boundary reruns, Core typecheck and scoped lint passed. Six production files net +30 lines versus inherited source. No per-event validation added and no real latency gain measured; see `phase2-wave2b-d105-20261111.md`. |
+| 2026-11-11 | leader + independent codex gpt-6.1-sol check | Current small-stage closeout; owner requested stop before completing all wave 2 | — | Read-only final review PASS, no confirmed blocker. Existing specs/indexes and D105 ledger synchronized. Stop with real concurrent/provider-crash/installed/manual gates and remaining wave-2/parent work open; no Git lifecycle operation. Resume from `phase2-wave2b-plan-20261111.md`. |
+| 2026-11-11 | codex gpt-6.1-sol (recovered worker) | D104 one abortable backup admission wait, 120-second default, truthful Home labels | `01a1c958-fb20-7703-beca-49092263d594` parent | Source retained; 25 service + 47 related Core + 21 Home tests passed. Integrated checks/review pending; see `phase2-wave3-d104-20261111.md`. |
+| 2026-11-11 | leader + codex gpt-6-astra | Recover predecessor, bind existing task and implement reviewed D103 waiting contract | `01a1c9cc-27b4-77e3-8c5f-24507fc8b376` parent | D103 in progress. Preserve inherited work, serialize bounded checks, then stop before full-stack runs and notify owner about memory. No Git lifecycle action. |
+| 2026-11-11 | leader + serial check + independent baseline advisor | Complete selected TS/connected/replay verification; assess stage checkpoint and T4 alignment | `01a1ca07-857f-7ec2-9adb-11c14229c334` | 6,131 passes, two known Core failures/two skips; connected 24/24 pass; both replays pass. Waiting harness and sampler corrected, original failures retained. Scale correction: 1,690 is file hashes, not memory Sources. See `phase2-validation-20261111.md`; true large-scale/manual/installed limits stay open. Additional final independent review hit provider 402; leader readback completed. No Git writes. |

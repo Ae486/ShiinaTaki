@@ -58,6 +58,9 @@ describe("Hindsight backup view model", () => {
   it("shows the running phase and marks every action pending while a backup operation is open", () => {
     const capturing = view(BACKUP_STATES.capturing);
     expect(capturing).toMatchObject({ inFlight: "创建备份 · 生成原生快照", failure: null, pending: true });
+    expect(view(BACKUP_STATES.quiescing)).toMatchObject({
+      inFlight: "创建备份 · 暂停新写入，限时等待已有记忆处理结束", failure: null, pending: true, actions: [CAPTURE],
+    });
     const admitted = view(backupStatus(backupSection(), [backupOperation({ kind: "backup.verify", state: "admitted", producer: null,
       request: { kind: "backup.verify", backupId: BACKUP_ID } }), failedCapture("HINDSIGHT_BACKUP_NATIVE_FAILED")]));
     expect(admitted).toMatchObject({ inFlight: "校验备份 · 已受理（未认领）", failure: null, pending: true });
@@ -69,6 +72,12 @@ describe("Hindsight backup view model", () => {
     expect(failed.diagnostics[1]).toEqual({ label: "最近备份操作",
       value: `77777777-7777-4777-8777-777777777777 · ${BACKUP_ID} · HINDSIGHT_BACKUP_PAIR_MISMATCH · receipt_missing@global` });
     expect(failed.actions).toEqual([CAPTURE, VERIFY]);
+    expect(view(BACKUP_STATES.quiescenceTimeout)).toMatchObject({
+      failure: "创建备份失败：等待已有记忆处理结束已超时，本次未创建备份；请稍后再次点击“创建备份”", pending: false, actions: [CAPTURE],
+    });
+    expect(view(BACKUP_STATES.quiescenceInterrupted)).toMatchObject({
+      failure: "创建备份失败：备份等待被中断，本次未创建备份", pending: false, actions: [CAPTURE],
+    });
     for (const [code, message] of Object.entries(BACKUP_ERROR_LABEL)) {
       const status = backupStatus(backupSection(), [failedCapture(code as keyof typeof BACKUP_ERROR_LABEL)]);
       expect(view(status).failure).toBe(`创建备份失败：${message}`);

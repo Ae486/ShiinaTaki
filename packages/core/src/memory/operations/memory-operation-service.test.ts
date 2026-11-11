@@ -19,6 +19,9 @@ function fixture(options: { runtime?: FakeRuntime | null; bootId?: string; db?: 
   const db = options.db ?? openDatabase({ path: ":memory:", migrations: MIGRATIONS });
   if (!options.db) {
     dbs.push(db);
+    db.prepare(`INSERT INTO canonical_memory_authority_epochs(epoch_id,provider_id,provider_lineage_id,status,started_at,reason)
+      VALUES ('epoch','local','local-lineage','active',:now,'initial-local')`).run({ now: AT });
+    db.prepare("INSERT INTO canonical_memory_authority_state VALUES (1,'epoch',:now)").run({ now: AT });
     db.prepare("UPDATE memory_authority_selection SET mode='canonical-local',active_epoch_id='epoch',verified_snapshot_id='snapshot',activation_transaction_id='tx' WHERE singleton=1").run();
   }
   let now = AT;

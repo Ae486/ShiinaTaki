@@ -291,7 +291,7 @@ function memory(): HindsightLogicalSnapshotRecord {
 
 function interceptReservation(db: Database, before: () => void, after: () => void): Database {
   let reserved = false;
-  return { ...db, prepare(sql) {
+  return { ...db, get isTransaction() { return db.isTransaction; }, prepare(sql) {
     if (!reserved && /^SELECT/i.test(sql) && sql.includes("canonical_memory_")) {
       throw new Error("TEST_LOCAL_READ_BEFORE_WRITER_RESERVATION");
     }

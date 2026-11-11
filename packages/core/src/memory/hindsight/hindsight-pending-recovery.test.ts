@@ -51,7 +51,7 @@ afterEach(async () => {
 });
 
 describe("Pending Memory recovery through the real client and SQLite repositories", () => {
-  it("settles the accepted tracked write on the first due poll after two failed deliveries", async () => {
+  it.each(["pending", "unavailable"] as const)("classifies accepted tracked %s after two failed deliveries and completes on the first due poll", async (status) => {
     vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(at);
     const bank = writeTestBank(); const f = hindsightRuntimeFixture({ banks: [bank] });
     try {
@@ -70,7 +70,7 @@ describe("Pending Memory recovery through the real client and SQLite repositorie
           status: "unavailable", reason: "receipt_not_found", progress: null, result: null,
         });
         const response = await native.client.nativeResult(input);
-        return ready ? response : { ...response, status: "pending", result: null };
+        return ready ? response : { ...response, status, reason: status === "unavailable" ? "result_not_found" : null, result: null };
       };
       await state.service.synchronize({ bankId, context: { timeoutMs: 30_000 } });
       const writer = createPendingMemoryWriter({ authority: f.authority, replica: state.nativeReplica, pending: state.pending });
@@ -88,8 +88,9 @@ describe("Pending Memory recovery through the real client and SQLite repositorie
       const acceptedAt = new Date().toISOString(); const dueAt = new Date(Date.now() + 60_000).toISOString();
       expect(current()).toMatchObject({ phase: "submitted", acceptedAt, attempts: 3, nextRetryAt: dueAt,
         remoteOperationId: row.remoteOperationId, diagnosticCode: "HINDSIGHT_PENDING_REMAINS" });
-      expect(scheduler.status(bankId)[0]).toMatchObject({ mode: "failed", run: null, retryAttempt: 3,
-        consecutiveFailures: 2, errorCode: "HINDSIGHT_PENDING_REMAINS", retryDueAt: dueAt });
+      expect(scheduler.status(bankId)[0]).toMatchObject({ mode: status === "pending" ? "waiting" : "failed", run: null,
+        retryAttempt: status === "pending" ? 2 : 3, consecutiveFailures: status === "pending" ? 1 : 2,
+        errorCode: status === "pending" ? null : "HINDSIGHT_NATIVE_RESULT_UNAVAILABLE", retryDueAt: dueAt });
       vi.setSystemTime(Date.now() + 900); ready = true;
       vi.setSystemTime(Date.now() + 59_099); await scheduler.tick(); expect(current().attempts).toBe(3);
       vi.setSystemTime(Date.now() + 1); await scheduler.tick();
@@ -100,6 +101,19 @@ describe("Pending Memory recovery through the real client and SQLite repositorie
       expect(scheduler.status(bankId)[0]).toMatchObject({ mode: "idle", retryDueAt: null, consecutiveFailures: 0 });
       expect(native.calls.filter((event) => event.startsWith("dispatch:"))).toEqual([`dispatch:${row.remoteOperationId}`]);
     } finally { await f.close(); vi.useRealTimers(); }
+  });
+
+  it("reports a later failed row instead of the first accepted wait in the real recovery path", async () => {
+    const f = fixture(); f.autoComplete = false;
+    const waiting = f.enqueue(retain("first accepted")); const failed = f.enqueue(retain("second failed"));
+    f.before = (url) => {
+      if (url.pathname.endsWith(`/operations/${failed.remoteOperationId}`)) f.operations.get(failed.remoteOperationId)!.status = "failed";
+    };
+    const scheduler = f.scheduler(); scheduler.start(); scheduler.requestManual("global", "incremental"); await scheduler.tick();
+    expect(f.row(waiting)).toMatchObject({ phase: "submitted", acceptedAt: at, diagnosticCode: "HINDSIGHT_PENDING_REMAINS" });
+    expect(f.row(failed)).toMatchObject({ phase: "failed", diagnosticCode: "HINDSIGHT_PENDING_OPERATION_FAILED" });
+    expect(scheduler.status("global")[0]).toMatchObject({ mode: "failed", errorCode: "HINDSIGHT_PENDING_OPERATION_FAILED",
+      nextAction: "explicit_retry_required", consecutiveFailures: 1 });
   });
 
   it("wakes for the earlier Pending row and leaves a future row alone on an early wake", async () => {
@@ -117,11 +131,11 @@ describe("Pending Memory recovery through the real client and SQLite repositorie
     expect(f.row(second).phase).toBe("completed"); expect(f.row(first).attempts).toBe(2);
     // The first row is four minutes away, beyond the completed run's 61-second lease.
     expect(scheduler.status("global")[0]).toMatchObject({ run: null, retryDueAt: firstDueAt,
-      errorCode: "HINDSIGHT_PENDING_REMAINS", consecutiveFailures: 3 });
+      mode: "waiting", errorCode: null, consecutiveFailures: 0, retryAttempt: 0 });
     scheduler.requestRetry("global", new Date(Date.parse(f.at) + 10_000).toISOString());
     f.advance(10_000); await scheduler.tick();
     expect(f.row(first)).toMatchObject({ attempts: 2, nextRetryAt: firstDueAt });
-    expect(scheduler.status("global")[0]).toMatchObject({ retryDueAt: firstDueAt, consecutiveFailures: 4 });
+    expect(scheduler.status("global")[0]).toMatchObject({ mode: "waiting", retryDueAt: firstDueAt, consecutiveFailures: 0 });
     const calls = f.logs.length;
     await scheduler.tick(); await scheduler.tick(); expect(f.logs).toHaveLength(calls);
     f.advance(Date.parse(firstDueAt) - Date.parse(f.at)); f.complete(first.remoteOperationId); await scheduler.tick();

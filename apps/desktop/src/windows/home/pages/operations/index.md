@@ -24,8 +24,10 @@ The transition browser's synthetic control HTTP requests close after each respon
 - use-operations.ts — the page's ws touchpoint: memory.tidy plus the cached memory.status / media.usage reads (a failed re-read keeps the last counters on screen; refresh() backs the retry)
 - use-media-clear.ts — destructive purge owner: immediate exact-once guard, media.clear call, terminal release, and refresh
 - operations-state.ts — pure view models + media.clear state machine; Cancel is valid only before destructive execution
-- memory-authority-card.tsx — memory.authority.status card: authority/runtime/setup, lifecycle/backup, per-Bank persisted mode/interval form and replica/Pending rows with Sync now / Full reconcile / Retry; active operations with Cancel (admitted replica.sync only)
-- memory-authority-state.ts — pure authority view models and shared Local/Hindsight reason labels, including authority/evidence invalidity; unknown stays unknown
+- memory-authority-card.tsx — memory.authority.status card: authority/runtime/setup, lifecycle/backup, per-Bank replica/Pending controls and policy review, persistent catch-up records and explicit last-read markers; active operations with Cancel (admitted replica.sync only)
+- memory-authority-state.ts — pure authority/review and accepted-waiting projections, automatic/manual next actions and operation labels; real Pending counts and unknown evidence stay distinct
+- memory-policy-review-state.ts — producer-backed policy review facts; null state is idle, null counts stay unknown and historical catch-up identity never implies current catch-up
+- memory-policy-review-block.tsx — per-Bank policy review rows and a persistent inline catch-up record, using existing presentation primitives
 - memory-hindsight-lifecycle-block.tsx — the card's Hindsight connection + Bank readiness block: 重新校验连接 / 创建 Bank buttons through the generic submit, collapsed diagnostics
 - memory-hindsight-lifecycle-state.ts — pure projection of the status `hindsight` section: connection rows, per-scope readiness rows, diagnostics (native ids, error codes) and action descriptors from Core `actions` only
 - memory-hindsight-backup-block.tsx — the card's Hindsight backup block: rollback warning, state / age / per-Bank missing interval, in-flight or failure line, route-b 导入备份 form, 创建备份 / 校验备份 through the generic submit, collapsed 备份诊断
@@ -43,7 +45,7 @@ The transition browser's synthetic control HTTP requests close after each respon
 - memory-transition-confirmation.tsx — healthy/emergency confirmation with explicit Chinese blocker labels, cancel focus and Escape restoration.
 - memory-transition-disclosure.tsx — nullable surviving Bank evidence, backup age and explicitly unknown remote loss.
 - memory-transition-progress.tsx — original operation facts, separate commit/runtime/queue outcomes, Core-permitted recovery/cancel and diagnostics.
-- memory-authority-fixtures.ts — test support (not in the production path): MemoryAuthorityStatus / Bank / MemoryOperation fixtures plus the Hindsight lifecycle section (every readiness state) shared by the card, view-model and controller tests
+- memory-authority-fixtures.ts — test support (not in the production path): authority, Bank, operation, lifecycle readiness and durable review fixtures shared by card/view-model/controller tests
 - local-onboarding-card.tsx — memory.onboarding.status card: authority/runtime facts including template holds, progress, Core-derived actions, exceptions and diagnostics
 - local-onboarding-exceptions.tsx — bounded source diagnostics with the per-source exclusion reason form and cursor paging
 - local-onboarding-actions.ts — action labels, Core-derived allow checks and the exact memory.operations.submit request per action

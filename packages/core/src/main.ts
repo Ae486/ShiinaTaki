@@ -3,7 +3,7 @@
  * INPUT:  process env (bootstrap) + the config store's resolved knobs, and OS signals
  * OUTPUT: a running headless Agent Core — WS server bound to loopback; exits 0 on SIGINT/SIGTERM
  * POS:    core — the process entry/composition root; wires boot (config store → logger → model(s) → db) →
- *         store/media/subscriptions → ws-server
+ *         store/media/subscriptions (including committed policy review hints) → ws-server
  */
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
@@ -197,7 +197,11 @@ const avatarVocabulary = createAvatarVocabulary();
 // Automatic lifecycle submits (R8) are late-bound: degraded Runs may report before the operation owner exists.
 const hindsightLifecycleTrigger = createHindsightLifecycleTrigger({ db, logger: logger.child({ mod: "hindsight-lifecycle" }) });
 // Marker-first composition owns every legacy/canonical reader, writer, prompt, scheduler, and migration cutover seam.
+const turnControls = { queue: createTurnQueue(), turns: createTurnRegistry() };
+const memoryReplicaSubscriptions = createConnectionSubscriptions<MemoryReplicaChanged>();
 const memoryRuntime = composeMemoryRuntime({ db, dataDir: serverConfig.dataDir, promptDir: serverConfig.promptDir, model, bootId,
+  reviewActivity: turnControls.turns, configChanges: boot.config.subscriptions,
+  onPolicyReviewChanged: (bankId) => memoryReplicaSubscriptions.publish({ bankId }),
   timeline: timelineRepo, windowStart: conversationStore.windowStart, summaries: summaryRepo,
   estimatedTokens: conversationStore.estimatedTokens, budget: historyBudget,
   measureRequest: (characterId) => latestRequestMeasurements.get(characterId),
@@ -265,7 +269,6 @@ const hindsightConfiguration = composeHindsightConfiguration({ db, config: boot.
 // reconciles rows another boot left open (outcome_unknown); the per-process boot id is what tells those rows apart.
 // Local onboarding (Stage 2a) is the only caller of the B2 producer; its kinds observe their own receipts at boot first.
 const memoryOperationSubscriptions = createMemoryOperationSubscriptions();
-const memoryReplicaSubscriptions = createConnectionSubscriptions<MemoryReplicaChanged>();
 const memoryOnboardingSubscriptions = createConnectionSubscriptions<MemoryOnboardingChanged>();
 const localOnboarding = createLocalOnboardingService({
   db, workspaceRoot: join(serverConfig.dataDir, "workspace"), runner: memoryRuntime.migrationRunner, runtime: memoryRuntime, owner: bootId,
@@ -413,7 +416,6 @@ const hindsightDeployment = composeHindsightDeployment({ dataDir: serverConfig.d
   runs: runService, custody: hindsightCustody, route: { ...ambientCapabilityDeps, effects: effectLifecycle }, methods: registry });
 
 // Turn lifecycle (D1 #3/#4): per-character serialization + the cancellable-turn registry shared by send/cancel.
-const turnControls = { queue: createTurnQueue(), turns: createTurnRegistry() };
 const scheduleRepo = createScheduledTaskRepo(db);
 const schedulePatterns = createSchedulePatternAdapter();
 const scheduleLifecycle: { engine?: ReturnType<typeof createScheduleEngine> } = {};

@@ -1,6 +1,6 @@
 /**
  * INPUT:  the active authority selection, selected runtime availability, B3 setup, B5 replica, Pending and operation rows and
- *         the Hindsight lifecycle section
+ *         the Hindsight lifecycle and durable policy-review sections
  * OUTPUT: MEMORY_AUTHORITY_METHODS plus one strict composite memory.authority.status read contract
  * POS:    shared/protocol — operator-only read; unknown stays unknown (no fabricated lag, health, freshness or zero counts)
  */
@@ -10,6 +10,7 @@ import { MemoryHindsightStatusSectionSchema } from "./memory-hindsight-lifecycle
 import { MemoryOperationSchema } from "./memory-operation-schema.ts";
 import { MemoryReplicaSyncStatusSchema } from "./memory-replica-schedule-schema.ts";
 import { PendingMemorySummarySchema } from "./pending-memory-schema.ts";
+import { MemoryPolicyReviewStatusSchema } from "./memory-policy-review-schema.ts";
 
 export const MEMORY_AUTHORITY_METHODS = { status: "memory.authority.status" } as const;
 
@@ -46,6 +47,8 @@ export const MemoryAuthorityStatusSchema = z.strictObject({
   }),
   /** Readable even while the runtime is unavailable; present exactly under Hindsight authority. */
   hindsight: MemoryHindsightStatusSectionSchema.nullable(),
+  /** Optional for older producers; Core supplies null outside Hindsight or when its journal cannot be read. */
+  review: z.array(MemoryPolicyReviewStatusSchema).max(256).nullable().optional(),
   derivedFreshness: z.literal("unknown"),
   observedAt: Timestamp,
 }).superRefine((status, context) => {

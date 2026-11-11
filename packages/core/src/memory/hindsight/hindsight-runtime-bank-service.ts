@@ -1,5 +1,5 @@
 /**
- * INPUT:  existing B5 leases/scheduler runners and the provider's on-demand pull/recovery requests
+ * INPUT:  existing B5 leases/scheduler runners and on-demand pulls with optional accepted-receipt goals
  * OUTPUT: serialized Bank work, whole multi-Bank capture ownership, renewable read leases and bounded write recovery
  * POS:    core/memory/hindsight — runtime lifetime adapter; existing B5 scheduling/backoff remains authoritative
  */
@@ -28,6 +28,7 @@ export interface HindsightRuntimeSynchronizeInput {
   context: HindsightCallContext;
   /** Foreground reads and receipt-Bank activation preparation wait for completion; other operations keep bounded mode. */
   mode?: "foreground";
+  receiptTarget?: HindsightReplicaRunInput["receiptTarget"];
 }
 interface OnDemandInput extends HindsightRuntimeSynchronizeInput {
   ownerId: string; signal: AbortSignal; previous?: Promise<unknown>; withPending: boolean;
@@ -84,7 +85,7 @@ async function runOnDemand(deps: Dependencies, input: OnDemandInput): Promise<vo
   let releaseFailure: unknown;
   try {
     foreground = bounded ? undefined : foregroundOwner(deps, { lease, context: request() });
-    const run: HindsightReplicaRunInput = { bank: deps.bank(input.bankId), signal: input.signal, foreground,
+    const run: HindsightReplicaRunInput = { bank: deps.bank(input.bankId), signal: input.signal, foreground, receiptTarget: input.receiptTarget,
       deadlineAt: bounded ? new Date(Date.parse(deps.now?.() ?? new Date().toISOString()) + remaining).toISOString() : undefined,
       run: { lease, kind: deps.replica.checkpoint(input.bankId) ? "incremental" : "full", trigger: "catch_up",
         predecessor: deps.replica.nativeCheckpoint(input.bankId) ?? null } };

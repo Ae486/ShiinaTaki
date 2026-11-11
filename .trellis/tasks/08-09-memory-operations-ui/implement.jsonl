@@ -16,3 +16,9 @@
 {"file": ".trellis/tasks/08-09-memory-operations-ui/research/validation-recovery-plan-2026-11-06.md", "reason": "Current owner-authorized validation boundary and practical recovery correction"}
 {"file": ".trellis/spec/backend/memory-authority-validation.md", "reason": "Current authority, proof ownership and recovery boundaries supersede repeated historical verification"}
 {"file": ".trellis/tasks/08-09-memory-operations-ui/research/real-admission-review-20261106.md", "reason": "Real-model first binding race and reviewed durable activation recovery correction"}
+{"file": ".trellis/tasks/08-09-memory-operations-ui/research/phase2-wave2b-plan-20261111.md", "reason": "Current owner-approved wave 2b scope, memory limits, ownership and validation gates; supersedes old phase proposals."}
+{"file": ".trellis/tasks/08-09-memory-operations-ui/research/phase2-wave3-plan-20261111.md", "reason": "Owner-approved D103/D104 scope, performance constraint, reviewed state semantics, and memory-gated full-stack verification."}
+{"file": ".trellis/spec/backend/memory-replica-sync.md", "reason": "D103 Bank-wide waiting classification, single settlement transaction and preserved retry semantics."}
+{"file": ".trellis/spec/backend/memory-operations.md", "reason": "Exact terminal waiting request, operation family release and restart observation."}
+{"file": ".trellis/spec/backend/memory-hindsight-backup.md", "reason": "D104 one abortable bounded admission wait without repeated capture work."}
+{"file": ".trellis/tasks/08-09-memory-operations-ui/research/phase2-validation-20261111.md", "reason": "Current completed verification, corrected fixture scale, stage checkpoint limits and separate T4 integration boundary"}

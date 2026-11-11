@@ -41,9 +41,9 @@ export const MemoryOperationKindSchema = z.enum([
   "candidate.prepare", "candidate.inspect", "candidate.resume",
 ]);
 export type MemoryOperationKind = z.infer<typeof MemoryOperationKindSchema>;
-export const MemoryOperationStateSchema = z.enum(["admitted", "running", "completed", "failed", "cancelled", "outcome_unknown"]);
+export const MemoryOperationStateSchema = z.enum(["admitted", "running", "waiting", "completed", "failed", "cancelled", "outcome_unknown"]);
 export type MemoryOperationState = z.infer<typeof MemoryOperationStateSchema>;
-export const MEMORY_OPERATION_TERMINAL_STATES: readonly MemoryOperationState[] = ["completed", "failed", "cancelled", "outcome_unknown"];
+export const MEMORY_OPERATION_TERMINAL_STATES: readonly MemoryOperationState[] = ["waiting", "completed", "failed", "cancelled", "outcome_unknown"];
 export const MemoryOperationReasonSchema = z.enum([
   "core_restart", "producer_refused", "producer_failed", "cancelled_before_claim", "runtime_unavailable", "producer_incomplete", "commitment_unknown",
 ]);
@@ -155,6 +155,9 @@ export const MemoryOperationSchema = MemoryOperationBase.superRefine((operation,
   if (!terminal && operation.result !== null) fail("a non-terminal operation has no result");
   if ((operation.state === "outcome_unknown" || operation.state === "cancelled") && operation.reason === null) fail("unknown/cancelled outcomes require a reason");
   if (operation.state === "completed" && (operation.reason !== null || operation.errorCode !== null)) fail("a completed operation carries no failure diagnostics");
+  if (operation.state === "waiting" && (operation.kind !== "replica.sync" || operation.reason !== null || operation.errorCode !== null
+    || operation.producer?.kind !== "replica" || !operation.producer.requestId || operation.result?.kind !== "replica"
+    || operation.result.errorCode !== null || operation.result.nextAction === null)) fail("waiting requires exact replica evidence and a next action without errors");
   if (operation.kind !== operation.request.kind) fail("operation kind and request disagree");
   const producerKind = PRODUCER_KIND[operation.kind];
   if (operation.producer !== null && operation.producer.kind !== producerKind) fail("producer and command disagree");

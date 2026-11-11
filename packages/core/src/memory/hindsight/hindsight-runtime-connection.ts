@@ -1,7 +1,7 @@
 /**
  * INPUT:  active Hindsight epoch, effective B3 configuration, verified Bank setup and the Secret Catalog
  * OUTPUT: fully verified binding with current authority/configuration/template identity guards and an operator projection
- * POS:    Core connection — full template proof at construction; ordinary guards compare current rows; private rollout checks its executor
+ * POS:    Core connection — full construction proof; ordinary guards compare token-verified evidence and live control/executor state
  */
 import { HindsightConnectionProjectionSchema, MemoryReplicaBankSchema, type HindsightConnectionProjection, type HindsightTemplateLabelGroup,
   type MemoryReplicaBank, type TakiApplicationNamespace } from "@taki/shared";
@@ -79,10 +79,8 @@ export function createHindsightRuntimeConnection(input: HindsightRuntimeConnecti
     const live = readHindsightLiveConnection(input);
     return live.state !== "ready" ? "connection_disabled" : live.fingerprint === configFingerprint ? "none" : "config_changed";
   };
-  const assertEvidence = () => {
-    if (readCurrentRuntimeTemplateIdentity(input.db, input.epochId) !== templateSelectionIdentity) throw new Error("MEMORY_TEMPLATE_IDENTITY_CHANGED");
-    boundAuthority.assertCheckpointFloors();
-  };
+  const assertEvidence = boundAuthority.bindTemplateEvidence({ identity: templateSelectionIdentity,
+    read: () => readCurrentRuntimeTemplateIdentity(input.db, input.epochId) });
   const driftReason = () => {
     const drift = checkIdentity();
     assertEvidence();

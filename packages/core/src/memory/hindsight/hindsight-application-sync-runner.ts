@@ -1,6 +1,6 @@
 /**
- * INPUT:  authenticated D77 state, optional admission resolver, authority/Bank leases and paired checkpoints
- * OUTPUT: atomic paired publication after binding batches, bounded CAS retries and rollback refusal before snapshots
+ * INPUT:  authenticated D77 state, admission resolver, authority/Bank leases, checkpoints and optional receipt goals
+ * OUTPUT: atomic paired publication/notifications, page-boundary receipt catch-up and ordinary full binding convergence
  * POS:    core/memory/hindsight — application-aware pull; policy binding runs between complete pulls, never in SQL transactions
  */
 import { z } from "zod";
@@ -38,6 +38,8 @@ interface Dependencies {
   /** True: a committed batch needs a complete pull. False: all eligible binding work has been exhausted. */
   bind?: (input: HindsightApplicationBindingPass) => Promise<boolean>;
   resolveAdmission?: typeof admitHindsightApplication;
+  /** Notification only after a complete local publication has committed; no model work in this lease. */
+  onApplied?: (bankId: string) => void;
 }
 interface Context {
   deps: Dependencies;
@@ -116,6 +118,12 @@ async function synchronize(context: Context, reset: boolean): Promise<MemoryRepl
     request: context.request, expectedLineage: context.authority.providerLineageId });
   context.request();
   let checkpoint = deps.repo.checkpoint(input.bank.bankId);
+  const target = input.receiptTarget;
+  if (target && (target.authorityEpochId !== context.authority.epochId
+    || target.namespace.provider_lineage !== context.authority.providerLineageId
+    || checkpoint && !sameApplicationValue(target.namespace, checkpoint.namespace))) {
+    throw new Error("HINDSIGHT_PENDING_AUTHORITY_MISMATCH");
+  }
   if (reset || input.run.kind === "full" || !checkpoint) checkpoint = await full(context, reset);
   else {
     try { checkpoint = await incremental(context, checkpoint); }
@@ -128,7 +136,7 @@ async function synchronize(context: Context, reset: boolean): Promise<MemoryRepl
       checkpoint = await full(context, true);
     }
   }
-  checkpoint = await bindPasses(context, checkpoint);
+  if (!input.receiptTarget) checkpoint = await bindPasses(context, checkpoint);
   context.request();
   return { checkpoint: checkpoint.native, observedCursor: checkpoint.checkpoint.native_cursor };
 }
@@ -187,11 +195,15 @@ async function full(context: Context, reset: boolean): Promise<HindsightApplicat
   const publication = { ...scope, ...captured, authorityEpochId: context.authority.epochId,
     expectedBank: input.bank, expectedCheckpoint: previous, expectedNativeCheckpoint: native,
     ...publicationGuard(context), reset: reset || previous !== null && !sameGeneration };
-  return previous ? deps.repo.reconcileVerifiedSnapshot(publication) : deps.repo.seedVerifiedSnapshot(publication);
+  const result = previous ? deps.repo.reconcileVerifiedSnapshot(publication) : deps.repo.seedVerifiedSnapshot(publication);
+  deps.onApplied?.(input.bank.bankId);
+  return result;
 }
 
 async function resolveSnapshotScope(context: Context, previous: HindsightApplicationReplicaCheckpoint | null): Promise<HindsightApplicationScope> {
   const bankId = context.input.bank.bankId;
+  // Reset must request the accepted namespace; native refuses a replacement generation instead of reinterpreting the goal.
+  if (context.input.receiptTarget) return { bankId, namespace: context.input.receiptTarget.namespace };
   if (previous) return { bankId, namespace: previous.namespace };
   const createNative = context.client.createLogicalSnapshot;
   if (!createNative) throw new Error("HINDSIGHT_SNAPSHOT_CLIENT_UNAVAILABLE");
@@ -222,11 +234,18 @@ async function incremental(context: Context, initial: HindsightApplicationReplic
       checkpoint = context.deps.repo.applyEvent({ ...scope, event, authorityEpochId: context.authority.epochId,
         expectedBank: context.input.bank, expectedCheckpoint: checkpoint, expectedNativeCheckpoint: checkpoint.native,
         ...publicationGuard(context) });
+      context.deps.onApplied?.(context.input.bank.bankId);
     }
     if (!sameApplicationValue(page.to_checkpoint, checkpoint.checkpoint) || page.has_more && page.changes.length === 0) invalidPage();
-    if (!page.has_more) return checkpoint;
+    if (!page.has_more || receiptCovered(context, checkpoint)) return checkpoint;
   }
   return checkpoint;
+}
+
+function receiptCovered(context: Context, checkpoint: HindsightApplicationReplicaCheckpoint): boolean {
+  const target = context.input.receiptTarget?.checkpoint;
+  return target !== undefined && checkpoint.checkpoint.native_cursor >= target.native_cursor
+    && checkpoint.checkpoint.state_cursor >= target.state_cursor;
 }
 
 function bodyCache(context: Context, scope: HindsightApplicationScope) {
@@ -236,7 +255,7 @@ function bodyCache(context: Context, scope: HindsightApplicationScope) {
   // Namespace and exact descriptor checks permit retrying a partially downloaded
   // cold snapshot, while a replacement generation cannot inherit former bytes.
   return {
-    cachedBody: (ref: Parameters<typeof repo.cachedBody>[0]["ref"]) => repo.cachedBody({ ...guard, ...publicationGuard(context), ref }),
+    cachedBodies: (refs: Parameters<typeof repo.cachedBodies>[0]["refs"]) => repo.cachedBodies({ ...guard, ...publicationGuard(context), refs }),
     cacheBodies: (bodies: Parameters<typeof repo.cacheBodies>[0]["bodies"]) => repo.cacheBodies({ ...guard, ...publicationGuard(context), bodies }),
   };
 }

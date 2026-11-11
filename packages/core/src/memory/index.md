@@ -60,7 +60,7 @@
 - local-runtime-binding.ts — one published Local state with bound identity, current-only snapshots, explicit unavailable withdrawal and joined retirement
 - hindsight-runtime-binding.ts — one Hindsight publication with bound identity, current-only unavailable/hold snapshots, retirement/quarantine and source witnessing
 - hindsight-unbound-run.ts — truthful memory-unavailable captures for connection/configuration/template holds while retaining the selected authority and primary-source path
-- runtime-composition.ts — one Utility/Compaction owner, selected binding/custody, awaited receipt-Bank activation preparation, explicit full verification ports, read-only observation and joined shutdown
+- runtime-composition.ts — one Utility/Compaction owner, selected binding/custody, awaited receipt-Bank activation preparation, explicit full verification ports, read-only observation and joined shutdown; D108: selected runtime/binding composition with shared Utility lifetime and Core activity/config signals; committed review hint port to the selected subsystem
 - authority-aware-legacy-surfaces.ts — mutable authority wrappers that retire legacy auto-memory, tidy, and direct writes after canonical activation
 - memory-coordinator.ts — provider-neutral authority/capability verification and immutable caller provenance across queued foreground writes
 - memory-capability-snapshot.ts — detached immutable capabilities and one canonical Run/tool/coordinator digest; keeps dynamic vector health separate from stable operation identity

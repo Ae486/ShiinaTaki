@@ -2,7 +2,7 @@
 The Settings page: Core-owned permission governance appears before generic config knobs. Permission state is fresh per
 authenticated Home client generation and window-memory-only; config remains the guarded cached metadata surface.
 - settings-page.tsx — permission governance, durable Approval, dedicated Hindsight key entry, then grouped generic knobs with search; Core order inside a group is preserved
-- config-groups.ts — client-side presentation map only (U7): exact key → group + Chinese primary label, key-prefix → group fallback, the 高级 fallback for unknown keys, fixed-order grouping (empty groups skipped) and the search filter
+- config-groups.ts — client-side presentation map only (U7): exact key → group + Chinese primary label (including four live policy-review knobs), key-prefix → group fallback, the 高级 fallback for unknown keys, fixed-order grouping (empty groups skipped) and the search filter
 - approval-decisions-section.tsx — fresh Core durable-allow list, optimistic revoke feedback, retry, and no-cache presentation
 - approval-decisions-controller.ts — current-Home-client-only Approval list/revoke guard with stale-result suppression
 - hindsight-key-section.tsx — dedicated write-only Hindsight API Key form; distinguishes storage presence from connection validation

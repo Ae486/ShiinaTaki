@@ -6,6 +6,7 @@
 import {
   MemoryReplicaBankSchema, type HindsightConnectionProjection, type MemoryReplicaBank,
   type MemoryAuthorityEpoch, type MemoryReplicaCheckpoint, type MemoryReplicaRunResult, type MemoryReplicaScheduledRun, type MemoryReplicaLease,
+  type TakiApplicationCheckpoint, type TakiApplicationNamespace,
 } from "@taki/shared";
 import { z } from "zod";
 import type { HindsightReplicaSyncRepo } from "../../db/hindsight-replica-sync-repo.ts";
@@ -21,11 +22,18 @@ export interface HindsightForegroundRunOwner {
   request(): HindsightCallContext;
   current(): MemoryReplicaLease;
 }
+/** Internal stopping goal; complete event publication and the writer's exact history proof remain authoritative. */
+export interface HindsightApplicationReceiptTarget {
+  authorityEpochId: string;
+  namespace: TakiApplicationNamespace;
+  checkpoint: TakiApplicationCheckpoint;
+}
 export interface HindsightReplicaRunInput {
   bank: MemoryReplicaBank; run: MemoryReplicaScheduledRun; signal: AbortSignal;
   deadlineAt?: string;
   expectedAuthority?: Pick<MemoryAuthorityEpoch, "epochId" | "providerLineageId">;
   foreground?: HindsightForegroundRunOwner;
+  receiptTarget?: HindsightApplicationReceiptTarget;
 }
 export interface HindsightReplicaSchedulerRunner {
   run(input: HindsightReplicaRunInput): Promise<MemoryReplicaRunResult>;

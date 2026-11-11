@@ -20,7 +20,7 @@
 - hindsight-application-fixtures.ts — complete hash-consistent D77 bundles/events and V1 baseline manifest fixtures
 - hindsight-application-runtime-fixtures.ts — bound native/artifact fixtures, an admitted capability manifest and an isolated SQLite authority
 
-- hindsight-runtime-composition-fixtures.ts — isolated Local/Hindsight construction with valid receipts, exact Native selectors, migration caps, D77 evidence and a reusable authenticated Native recall client
+- hindsight-runtime-composition-fixtures.ts — isolated Local/Hindsight construction with valid receipts, exact Native selectors, migration caps, D77 evidence and a reusable authenticated Native recall client; optional committed review hint capture
 - memory-chat-turn-fixture.ts — one chat.send-level primary turn through Harness admission and the chat agent with a streaming mock model; test-only
 - hindsight-fixture-routes.ts — the health/version/compatibility bodies shared by every in-memory Hindsight transport double
 - hindsight-activation-transport.ts — in-memory D78 transport double for activation tests: Bank setup, snapshots, current-state transfers, cutover verifications computed from the POSTed request (a changed request under a used verification id is a request_conflict, as native), Bank stats with occupy(), per-route counts, one-shot/persistent faults and a pre-answer hook; the opt-in native backup routes answer as absent

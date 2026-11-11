@@ -1,7 +1,7 @@
 /**
  * INPUT:  scoped application checkpoints, exact native/artifact evidence and bounded reader requests
  * OUTPUT: integrity-checked Canonical reads, policy-filtered search and durable binding/assessment work
- * POS:    core/db — a consumer projection is usable only while its exact evidence and checkpoint pair still agree
+ * POS:    core/db — lexical reads reuse paired checkpoint/evidence; consumed heads and projections still verify
  */
 import { TakiApplicationTimeSchema, type CanonicalMemoryBank, type CanonicalMemoryRecord, type TakiApplicationArtifact,
   type HindsightApplicationReplicaRecord, type TakiApplicationNativeHead } from "@taki/shared";
@@ -16,7 +16,7 @@ import { readApplicationCheckpoint, requireApplicationReadCheckpoint } from "./h
 import { HindsightApplicationWorkCursorSchema, type HindsightApplicationBankBinding, type HindsightApplicationBindingWork,
   type HindsightApplicationEvidenceAccess, type HindsightApplicationReplicaCheckpoint, type HindsightApplicationReplicaState,
   type HindsightApplicationWorkCursor } from "./hindsight-application-replica-contract.ts";
-import { createApplicationEvidenceAccess, latestApplicationArtifacts, requireApplicationArtifactClosure } from "./hindsight-application-replica-evidence.ts";
+import { applicationEvidenceAccess, latestApplicationArtifacts, requireApplicationArtifactClosure } from "./hindsight-application-replica-evidence.ts";
 import { applicationWorkHeads, listApplicationHeads, readApplicationHead, validateApplicationHead,
   type ApplicationHeadEntry } from "./hindsight-application-replica-heads.ts";
 import { getApplicationReplicaRecord } from "./hindsight-application-replica-records.ts";
@@ -33,16 +33,16 @@ interface ReadContext extends HindsightApplicationScope {
 export function readApplicationNativeHead(state: HindsightApplicationReplicaState, input: HindsightApplicationScope & ObjectKey):
 TakiApplicationNativeHead | undefined {
   const checkpoint = requireApplicationReadCheckpoint(state, input, true);
-  const context: ReadContext = { ...input, state, checkpoint, bank: undefined, access: createApplicationEvidenceAccess(state.db, input) };
+  const context: ReadContext = { ...input, state, checkpoint, bank: undefined, access: applicationEvidenceAccess(state, input) };
   return checkedHead(context, input)?.head;
 }
 
 export function readApplicationBankBinding(state: HindsightApplicationReplicaState, bankId: string): HindsightApplicationBankBinding | undefined {
-  const current = readApplicationCheckpoint(state.db, bankId);
+  const current = state.read ? state.read.checkpoint(bankId) : readApplicationCheckpoint(state.db, bankId);
   if (!current) return undefined;
   const scope = { bankId, namespace: current.namespace };
   const checkpoint = requireApplicationReadCheckpoint(state, scope, true);
-  const context: ReadContext = { ...scope, state, checkpoint, bank: undefined, access: createApplicationEvidenceAccess(state.db, scope) };
+  const context: ReadContext = { ...scope, state, checkpoint, bank: undefined, access: applicationEvidenceAccess(state, scope) };
   const entry = checkedHead(context, { object_kind: "bank", object_id: bankId });
   if (!entry || checkpoint.bankDeleted !== (entry.head.binding_state === "tombstoned")) invalid();
   const projected = checkedProjection(context, entry);
@@ -88,17 +88,17 @@ export function searchApplicationMemories(state: HindsightApplicationReplicaStat
 }
 
 export function readApplicationBindingWork(state: HindsightApplicationReplicaState, input: HindsightApplicationScope & {
-  kind: "binding" | "assessment"; limit: number; at?: string; eligibleForMaintenance?: boolean; after?: HindsightApplicationWorkCursor;
+  kind: "binding" | "assessment"; limit: number; at?: string; eligibleForMaintenance?: boolean; includeDeferred?: boolean; after?: HindsightApplicationWorkCursor;
   objectKind?: TakiApplicationNativeHead["object_kind"];
 }): HindsightApplicationBindingWork[] {
   const checkpoint = requireApplicationReadCheckpoint(state, input);
-  const access = createApplicationEvidenceAccess(state.db, input);
+  const access = applicationEvidenceAccess(state, input);
   const filter = input.kind === "assessment" && input.eligibleForMaintenance === true;
   const context: ReadContext = filter ? readContext(state, input) : { ...input, state, checkpoint, access, bank: undefined };
   const at = TakiApplicationTimeSchema.parse(input.at ?? state.now());
   const entries = applicationWorkHeads(state.db, input, { kind: input.kind, limit: input.limit, objectKind: input.objectKind,
     ...(input.after ? { after: workCursor(context, input.after) } : {}),
-    at, ...(filter ? { accept: (entry: ApplicationHeadEntry) => {
+    at, includeDeferred: input.includeDeferred, ...(filter ? { accept: (entry: ApplicationHeadEntry) => {
       assertHeadCheckpoint(context, entry); validateApplicationHead(access, entry.head);
       checkedProjection(context, entry);
       return memoryEligible(context, entry.head, { query: "", at });
@@ -125,7 +125,7 @@ export function readApplicationSourceArtifacts(state: HindsightApplicationReplic
   documentId?: string; bindingKind?: "awaiting_native" | "exact_native";
 }): TakiApplicationArtifact[] {
   requireApplicationReadCheckpoint(state, input);
-  const access = createApplicationEvidenceAccess(state.db, input);
+  const access = applicationEvidenceAccess(state, input);
   return latestApplicationArtifacts(state.db, input, "source").filter((artifact) => {
     if (artifact.tombstoned) return false;
     if (artifact.binding.kind === "core_block") invalid();
@@ -141,7 +141,7 @@ export function readApplicationSourceArtifacts(state: HindsightApplicationReplic
 
 export function readApplicationBlockArtifacts(state: HindsightApplicationReplicaState, scope: HindsightApplicationScope): TakiApplicationArtifact[] {
   requireApplicationReadCheckpoint(state, scope);
-  const access = createApplicationEvidenceAccess(state.db, scope);
+  const access = applicationEvidenceAccess(state, scope);
   return latestApplicationArtifacts(state.db, scope, "block").filter((artifact) => {
     requireApplicationArtifactClosure(access, artifact);
     return !artifact.tombstoned;
@@ -170,7 +170,7 @@ export function readApplicationPinnedRecords(state: HindsightApplicationReplicaS
 
 function readContext(state: HindsightApplicationReplicaState, scope: HindsightApplicationScope): ReadContext {
   const checkpoint = requireApplicationReadCheckpoint(state, scope);
-  const context: ReadContext = { ...scope, state, checkpoint, access: createApplicationEvidenceAccess(state.db, scope), bank: undefined };
+  const context: ReadContext = { ...scope, state, checkpoint, access: applicationEvidenceAccess(state, scope), bank: undefined };
   const bank = readProjectedRecord(context, { object_kind: "bank", object_id: scope.bankId });
   if (bank?.operation === "tombstone") invalid();
   context.bank = bank?.payload?.kind === "bank" ? bank.payload.value : undefined;

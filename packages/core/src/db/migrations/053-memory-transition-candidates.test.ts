@@ -31,11 +31,11 @@ describe("W3 additive 053 and writer reservation", () => {
     const before = db.prepare("SELECT * FROM migrations ORDER BY version").all(); db.close();
     const applied: number[][] = [];
     db = openFixture({ path, migrations: MIGRATIONS, onMigrated: (versions) => applied.push(versions) });
-    expect(applied).toEqual([[53, 54, 55, 56, 57, 58, 59, 60]]);
+    expect(applied).toEqual([MIGRATIONS.filter(({ version }) => version > 52).map(({ version }) => version)]);
     expect(db.prepare("SELECT * FROM migrations WHERE version<=52 ORDER BY version").all()).toEqual(before);
     expect(db.prepare("PRAGMA quick_check").get()?.quick_check).toBe("ok"); db.close();
     db = openFixture({ path, migrations: MIGRATIONS, onMigrated: (versions) => applied.push(versions) });
-    expect(applied).toEqual([[53, 54, 55, 56, 57, 58, 59, 60], []]); db.close();
+    expect(applied).toEqual([MIGRATIONS.filter(({ version }) => version > 52).map(({ version }) => version), []]); db.close();
   });
   it("holds a real writer reservation across complete discovery and rolls capture back on failure", () => {
     const path = fixturePath("writer");

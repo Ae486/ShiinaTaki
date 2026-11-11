@@ -33,7 +33,7 @@ type BackupSection = MemoryHindsightStatusSection["backup"];
 
 export const BACKUP_ERROR_LABEL: Record<MemoryBackupErrorCode, string> = {
   HINDSIGHT_BACKUP_ROUTE_UNAVAILABLE: "原生备份接口不可用，可改用手动导出原生数据",
-  HINDSIGHT_BACKUP_QUIESCENCE_TIMEOUT: "已有记忆处理尚未结束，本次未创建备份；请稍后再次点击“创建备份”",
+  HINDSIGHT_BACKUP_QUIESCENCE_TIMEOUT: "等待已有记忆处理结束已超时，本次未创建备份；请稍后再次点击“创建备份”",
   HINDSIGHT_BACKUP_CORE_CAPTURE_FAILED: "Core 数据复制失败",
   HINDSIGHT_BACKUP_NATIVE_FAILED: "原生快照失败",
   HINDSIGHT_BACKUP_PAIR_MISMATCH: "Core 与原生快照不一致",
@@ -52,7 +52,7 @@ export const BACKUP_ERROR_LABEL: Record<MemoryBackupErrorCode, string> = {
   MEMORY_RUNTIME_UNAVAILABLE: "Hindsight 运行时不可用",
 };
 const PHASE_LABEL: Record<MemoryBackupProducerRef["phase"], string> = {
-  reserved: "已预留", quiescing: "暂停写入中", "capturing-core": "复制 Core 数据", "capturing-native": "生成原生快照",
+  reserved: "已预留", quiescing: "暂停新写入，限时等待已有记忆处理结束", "capturing-core": "复制 Core 数据", "capturing-native": "生成原生快照",
   verifying: "校验中", sealing: "封存中", completed: "已完成",
 };
 export const ROLLBACK_WARNING = "检测到 Hindsight 数据回退：原生实例落后于 Core 已确认的进度。副本不会自动重建，请从已校验的备份恢复。";
@@ -146,6 +146,8 @@ function failureLine(operation: MemoryOperation): string | null {
   if (operation.state === "outcome_unknown") return `${label}结果未知（Core 重启），未完成的备份不会列出`;
   if (operation.state !== "failed") return null;
   const code = MemoryBackupErrorCodeSchema.safeParse(operation.errorCode);
+  if (code.success && code.data === "HINDSIGHT_BACKUP_NATIVE_FAILED" && operation.producer?.kind === "backup"
+    && operation.producer.phase === "quiescing") return `${label}失败：备份等待被中断，本次未创建备份`;
   return `${label}失败：${code.success ? BACKUP_ERROR_LABEL[code.data] : "未分类错误（见备份诊断）"}`;
 }
 

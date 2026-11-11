@@ -9,6 +9,7 @@ import {
   type MemoryReplicaBank, type MemoryReplicaErrorCode, type MemoryReplicaScheduleConfig,
   type MemoryReplicaScheduledRun, type MemoryReplicaSyncState,
 } from "@taki/shared";
+import type { PendingRecoveryState } from "./hindsight-pending-recovery-state.ts";
 
 type Due = Pick<MemoryReplicaScheduledRun, "kind" | "trigger">;
 
@@ -29,12 +30,14 @@ export function initialReplicaSchedule(input: { bank: MemoryReplicaBank; config:
 
 export function configureReplicaSchedule(state: MemoryReplicaSyncState, config: MemoryReplicaScheduleConfig, now: string): MemoryReplicaSyncState {
   const automatic = config.automatic;
+  const resumeWaiting = automatic && state.mode === "waiting" && state.retryDueAt === null;
   return { ...state, ...config,
     nextDueAt: automatic ? state.lastSuccessAt === null ? now : after(state.lastSuccessAt, config.autoIntervalMs) : null,
     nextFullDueAt: automatic ? after(state.lastFullReconciliationAt ?? state.createdAt, config.fullReconciliationIntervalMs) : null,
-    retryAttempt: automatic ? state.retryAttempt : 0, retryKind: automatic ? state.retryKind : null,
-    retryDueAt: automatic ? state.retryDueAt : null, catchUpRequested: automatic && state.catchUpRequested,
-    nextAction: state.errorCode === null ? null
+    retryAttempt: automatic ? state.retryAttempt : 0,
+    retryKind: !automatic ? null : resumeWaiting ? state.fullReconciliationState === "waiting" ? "full" : "incremental" : state.retryKind,
+    retryDueAt: !automatic ? null : resumeWaiting ? now : state.retryDueAt, catchUpRequested: automatic && state.catchUpRequested,
+    nextAction: state.errorCode === null && state.nextAction === null ? null
       : automatic && !heldForOperator(state.errorCode) ? "automatic_retry_scheduled" : "explicit_retry_required",
     updatedAt: now,
   };
@@ -72,7 +75,8 @@ export function requestReplicaRetry(state: MemoryReplicaSyncState, dueAt: string
   if (state.run !== null && state.retryDueAt !== null && Date.parse(state.retryDueAt) < Date.parse(retryDueAt)) {
     retryDueAt = state.retryDueAt;
   }
-  return { ...state, retryDueAt, retryAttempt: Math.max(1, state.retryAttempt),
+  const waiting = state.mode === "waiting" || state.run !== null && state.errorCode === null && state.nextAction !== null;
+  return { ...state, retryDueAt, retryAttempt: waiting ? state.retryAttempt : Math.max(1, state.retryAttempt),
     retryKind: state.retryKind ?? (isDue(state.nextFullDueAt, retryDueAt) ? "full" : "incremental") };
 }
 
@@ -86,6 +90,23 @@ export function failedReplicaSchedule(state: MemoryReplicaSyncState, code: Memor
     retryDueAt: delay === undefined ? null : after(now, delay),
     consecutiveFailures: Math.min(Number.MAX_SAFE_INTEGER, state.consecutiveFailures + 1), errorCode: code,
     nextAction: automatic ? "automatic_retry_scheduled" : "explicit_retry_required", updatedAt: now,
+  };
+}
+
+export function pendingReplicaSchedule(state: MemoryReplicaSyncState, pending: PendingRecoveryState, now: string): MemoryReplicaSyncState {
+  if (pending.unresolvedCount === 0 || pending.waitingCount !== pending.unresolvedCount) {
+    const failed = failedReplicaSchedule(state, pending.blockingErrorCode ?? "HINDSIGHT_PENDING_REMAINS", now);
+    return pending.nextRetryAt === null || Date.parse(pending.nextRetryAt) <= Date.parse(now)
+      ? failed : requestReplicaRetry(failed, pending.nextRetryAt, now);
+  }
+  // Already-due ordinary intervals and a consumed lease are not new Pending work. Only a future row owns this wake.
+  const retryDueAt = pending.nextRetryAt !== null && Date.parse(pending.nextRetryAt) > Date.parse(now)
+    ? pending.nextRetryAt : after(now, REPLICA_RETRY_DELAYS_MS[0]);
+  return { ...state, mode: "waiting", run: null,
+    fullReconciliationState: state.run?.kind === "full" ? "waiting" : state.fullReconciliationState,
+    retryDueAt: state.automatic ? retryDueAt : null,
+    retryKind: state.automatic ? state.run?.kind ?? "incremental" : null,
+    errorCode: null, nextAction: state.automatic ? "automatic_retry_scheduled" : "explicit_retry_required", updatedAt: now,
   };
 }
 

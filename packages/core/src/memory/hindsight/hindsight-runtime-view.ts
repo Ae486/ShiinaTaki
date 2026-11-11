@@ -1,7 +1,7 @@
 /**
  * INPUT:  exact current application records, structured Core Blocks and the active Character's Bank pair
  * OUTPUT: admitted prompt/T5 rows from one current SQLite snapshot; required pins refuse incomplete native-policy rebinding
- * POS:    core/memory/hindsight — synchronous staging with locally captured routing; shared replica guards remain independent
+ * POS:    core/memory/hindsight — lexical route/checkpoint/evidence staging; shared write guards remain independent
  */
 import type { MemoryBankScope } from "@taki/shared";
 import { createHindsightApplicationReplicaRepo } from "../../db/hindsight-application-replica-repo.ts";
@@ -9,7 +9,7 @@ import { readHindsightRuntimeMemoryRecords } from "../../db/hindsight-runtime-me
 import { canonicalMemoryRow, type CanonicalMemoryViewRow } from "../canonical-memory-view.ts";
 import { getBlock } from "../block-registry.ts";
 import { isPinnedEligible } from "../pinned-block.ts";
-import type { HindsightApplicationReplicaRepo, HindsightApplicationWorkCursor } from "../../db/hindsight-application-replica-contract.ts";
+import type { HindsightApplicationReplicaReader, HindsightApplicationWorkCursor } from "../../db/hindsight-application-replica-contract.ts";
 import type { TidyEngineView } from "../memory-engine.ts";
 import { hindsightApplicationEvidenceReader, hindsightApplicationPolicyContext } from "./hindsight-application-binding-context.ts";
 import { projectHindsightApplicationNativeUnit, readHindsightApplicationNative,
@@ -26,14 +26,14 @@ export function captureHindsightRuntimeRows(state: HindsightRuntimeState, input:
     const at = state.now?.() ?? new Date().toISOString();
     // The complete guard and all consumers share this synchronous snapshot. Only
     // these captured routes may bypass repeated connection checks; nothing escapes.
-    const replica = createHindsightApplicationReplicaRepo({ db: state.db, tokenizer: state.tokenizer, now: state.now,
+    const repository = createHindsightApplicationReplicaRepo({ db: state.db, tokenizer: state.tokenizer, now: state.now,
       bankScope: (bankId): MemoryBankScope => {
         const route = routes.find((candidate) => candidate.bankId === bankId);
         if (!route) throw new Error("HINDSIGHT_REPLICA_BANK_BINDING_MISMATCH");
         return route.scope === "global" ? { kind: "global", characterId: null }
           : { kind: "character", characterId: route.characterId as string };
       } });
-    rows = routes.flatMap((route) => {
+    rows = repository.readSnapshot((replica) => routes.flatMap((route) => {
       const binding = replica.bankBinding(route.bankId);
       if (!binding?.bank || binding.bankDeleted || binding.bindingState !== "bound") throw new Error("HINDSIGHT_APPLICATION_BANK_UNAVAILABLE");
       const scope = { bankId: route.bankId, namespace: binding.namespace };
@@ -56,13 +56,13 @@ export function captureHindsightRuntimeRows(state: HindsightRuntimeState, input:
         // fact's timestamp did not change; report counters use the actual later stamp.
         return [{ ...row, updatedAt: row.updatedAt !== null && row.updatedAt > record.policy.updatedAt ? row.updatedAt : record.policy.updatedAt }];
       });
-    });
+    }));
   });
   return rows;
 }
 
 function requirePinnedBindings(input: {
-  replica: HindsightApplicationReplicaRepo; authorityEpochId: string;
+  replica: HindsightApplicationReplicaReader; authorityEpochId: string;
   scope: HindsightApplicationScope; evidence: HindsightApplicationEvidenceReader; at: string;
 }): void {
   let after: HindsightApplicationWorkCursor | undefined;

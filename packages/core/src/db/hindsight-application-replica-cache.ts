@@ -1,6 +1,6 @@
 /**
  * INPUT:  verified replica/download bytes, durable prepared command bodies and the current Bank publication guard
- * OUTPUT: exact-ref cached bodies without native heads, artifacts, projections or checkpoint publication
+ * OUTPUT: independently guarded single/batched exact-ref reads and immutable-byte saves without publication
  * POS:    core/db — immutable byte reuse only; complete snapshot/event proof still owns readable state
  */
 import type { TakiApplicationBodyRef } from "@taki/shared";
@@ -13,13 +13,35 @@ import { readApplicationCommandBody } from "./hindsight-application-command-stor
 export function readApplicationCachedBody(state: HindsightApplicationReplicaState,
   input: HindsightApplicationPublicationInput & { ref: TakiApplicationBodyRef }): HindsightApplicationBody | undefined {
   assertApplicationPublication(state, input);
+  const body = readCachedBody(state, input);
+  assertApplicationPublication(state, input);
+  return body;
+}
+
+export function readApplicationCachedBodies(state: HindsightApplicationReplicaState,
+  input: HindsightApplicationPublicationInput & { refs: readonly TakiApplicationBodyRef[] }): Map<string, HindsightApplicationBody> {
+  const bodies = new Map<string, HindsightApplicationBody>();
+  state.db.transaction(() => {
+    assertApplicationPublication(state, input);
+    for (const ref of input.refs) {
+      const body = bodies.get(ref.body_id) ?? readCachedBody(state, { ...input, ref });
+      if (body && !sameApplicationValue(body.ref, ref)) throw new Error("HINDSIGHT_APPLICATION_BODY_INTEGRITY_ERROR");
+      if (body) bodies.set(ref.body_id, body);
+    }
+    // Lease/deadline time can expire during a large synchronous byte read.
+    assertApplicationPublication(state, input);
+  });
+  return bodies;
+}
+
+function readCachedBody(state: HindsightApplicationReplicaState,
+  input: HindsightApplicationPublicationInput & { ref: TakiApplicationBodyRef }): HindsightApplicationBody | undefined {
   let body = readApplicationBody(state.db, { ...input, bodyId: input.ref.body_id });
   if (body && !sameApplicationValue(body.ref, input.ref)) throw new Error("HINDSIGHT_APPLICATION_BODY_INTEGRITY_ERROR");
   if (!body) {
     const prepared = readApplicationCommandBody(state.db, { ...input, bodyId: input.ref.body_id });
     if (prepared && sameApplicationValue(prepared.ref, input.ref)) body = prepared;
   }
-  assertApplicationPublication(state, input);
   return body;
 }
 

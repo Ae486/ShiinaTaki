@@ -56,6 +56,15 @@ Parent: [Database Guidelines](./database-guidelines.md).
 
 ## 4. Validation & Error Matrix
 
+Migration061 adds a singleton random 128-bit stamp and INSERT/UPDATE/DELETE invalidation triggers on the thirteen
+current template, authority and paired-checkpoint dependency tables. It follows 059's SQLite-owned clock pattern;
+the separate config revision retains its old meaning. The new stamp and covered rows change in the same transaction.
+Rollback restores both; a different subsequent mutation generates a fresh stamp rather than reusing a counter value.
+This assumes the same negligible random-identifier collision risk as other 128-bit identities, not mathematical
+uniqueness. Existing receipts and current rows are unchanged by upgrade. SQL/receipt/COMMIT failure rolls back the
+whole new schema. Supported pre-061 copied databases retain independent full readers without a runtime memo.
+Exact current trigger definitions must be verified before using a stamp; the migration receipt alone is insufficient.
+
 Migration057 adds immutable emergency capture/incident/surviving-evidence/quarantine/foreign-branch rows and replaces
 only its named transition-admission triggers in the same transaction. Upgrade from056 and reopen preserve original
 operation/intents/attempts/receipt bytes. SQL, migration-receipt and actual COMMIT failures roll back both the new

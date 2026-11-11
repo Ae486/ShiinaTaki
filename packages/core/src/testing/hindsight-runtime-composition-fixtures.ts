@@ -1,6 +1,6 @@
 /**
  * INPUT:  synthetic B3 setup/secret projections, exact native/application bundles and an owned temporary directory
- * OUTPUT: real SQLite and production runtime/subsystem constructors with deterministic transport substitutes
+ * OUTPUT: real SQLite and runtime/subsystem constructors with deterministic transport and optional review hint capture
  * POS:    core/testing — synthetic setup only; native extraction/PG and real credentials are outside this fixture
  */
 import { mkdtempSync } from "node:fs";
@@ -39,7 +39,8 @@ import { curatorTestBank, type CuratorTestBank } from "../memory/hindsight/hinds
 export interface TransportControl { offline: boolean; beforeChanges?: (bankId: string) => Promise<void>; beforeRecall?: (bankId: string) => Promise<void> }
 export interface RuntimeCall { operation: string; bankId?: string }
 export function hindsightRuntimeFixture(input: { mode?: "hindsight" | "local" | "legacy"; seed?: boolean;
-  banks?: CuratorTestBank[]; model?: LanguageModel; coreMigrationHead?: number } = {}) {
+  banks?: CuratorTestBank[]; model?: LanguageModel; coreMigrationHead?: number;
+  onPolicyReviewChanged?: (bankId: string) => void } = {}) {
   const dataDir = mkdtempSync(join(tmpdir(), "taki-hindsight-runtime-"));
   const migrations = MIGRATIONS.filter((migration) => migration.version <= (input.coreMigrationHead ?? Infinity));
   const db = openDatabase({ path: join(dataDir, "memory.sqlite"), migrations });
@@ -65,7 +66,8 @@ export function hindsightRuntimeFixture(input: { mode?: "hindsight" | "local" | 
   if (mode === "hindsight" && input.seed !== false) for (const bank of banks) seedReplica(replica, bank);
   const timeline = createTimelineRepo(db); const summaries = createSummaryRepo(db); const owners: Array<() => Promise<void>> = [];
   const boot = { db, dataDir, promptDir: join(dataDir, "prompt"), model, timeline, summaries, env: {}, logger, bootId: "fixture-boot",
-    windowStart: () => 1, estimatedTokens: () => 0, budget: () => 100_000, compact: { triggerRatio: 0.8, keepMessages: 3 } };
+    windowStart: () => 1, estimatedTokens: () => 0, budget: () => 100_000, compact: { triggerRatio: 0.8, keepMessages: 3 },
+    onPolicyReviewChanged: input.onPolicyReviewChanged };
   let closed = false;
   return { ...boot, config, source, secrets, banks, replica, authority, setup, remote, logs, migrations,
     compose: (hindsight = true) => {

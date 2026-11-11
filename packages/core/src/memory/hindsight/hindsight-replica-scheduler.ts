@@ -1,6 +1,6 @@
 /**
  * INPUT:  configured Banks, foreground retry requests, durable schedule/checkpoints, and the bounded replica data-plane runner
- * OUTPUT: scheduler-owned async wakes, bounded retries/diagnostics, preserved manual outcomes and persisted per-Bank status
+ * OUTPUT: one sync/review/retry wake, supervised policy dispatch, bounded diagnostics and persisted per-Bank status
  * POS:    core/memory/hindsight — deterministic B5 scheduling; no chat, Heartbeat policy, Pending replay, or authority wiring
  */
 import { z } from "zod";
@@ -18,6 +18,7 @@ import { replicaNextWake } from "../../db/hindsight-replica-schedule-state.ts";
 import { executeHindsightReplicaRun } from "./hindsight-replica-run-execution.ts";
 import { replicaErrorCode } from "./hindsight-replica-errors.ts";
 import type { HindsightReplicaSchedulerRunner } from "./hindsight-replica-sync-runner.ts";
+import type { HindsightPolicySchedule } from "./hindsight-policy-schedule.ts";
 
 export interface HindsightReplicaScheduler {
   request: HindsightReplicaSchedulerRepo["request"];
@@ -38,6 +39,7 @@ export interface HindsightReplicaScheduler {
   lastError(): MemoryReplicaErrorCode | null;
   started(): boolean;
   configure(bankId: string, config: MemoryReplicaScheduleConfig): MemoryReplicaSyncStatus;
+  rearmPolicy(kind?: "replica" | "config" | "activity", bankId?: string): void;
 }
 interface SchedulerInput {
   repo: HindsightReplicaSchedulerRepo;
@@ -50,6 +52,7 @@ interface SchedulerInput {
   leaseDurationMs?: number;
   setTimer?: (callback: () => void, delayMs: number) => ReturnType<typeof setTimeout>;
   clearTimer?: (timer: ReturnType<typeof setTimeout>) => void;
+  policy?: HindsightPolicySchedule;
 }
 
 export function createHindsightReplicaScheduler(input: SchedulerInput): HindsightReplicaScheduler & {
@@ -92,6 +95,7 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
       if (state.automatic) this.supervisorRetries.delete(bank.bankId);
     }
     this.running = true;
+    this.input.policy?.start();
     this.armTimer();
   }
 
@@ -99,7 +103,7 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
     this.running = false;
     this.clearWake();
     this.cancel?.();
-    await this.active;
+    await Promise.all([this.active, this.input.policy?.stop()]);
   }
 
   async pause(): Promise<void> {
@@ -110,7 +114,7 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
       const requestId = this.input.repo.get(bank.bankId)?.pendingManualRequestId;
       if (requestId) this.input.repo.cancelManual(bank.bankId, requestId);
     }
-    await this.active;
+    await Promise.all([this.active, this.input.policy?.stop()]);
   }
 
   retire(): void {
@@ -118,6 +122,7 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
     this.running = false;
     this.clearWake();
     this.cancel?.();
+    this.input.policy?.retire();
   }
 
   tick(): Promise<void> {
@@ -154,7 +159,12 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
       if (state.automatic) this.supervisorRetries.delete(bank.bankId);
     }
     this.rerun = true;
+    this.input.policy?.changed();
     this.armTimer();
+  }
+
+  rearmPolicy(kind: "replica" | "config" | "activity" = "replica", bankId?: string): void {
+    this.input.policy?.changed(kind, bankId); this.armTimer();
   }
 
   requestRetry(bankId: string, dueAt: string): void {
@@ -227,6 +237,8 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
       }
     } while (this.rerun && this.running);
     if (this.supervisorRetries.size === 0) this.error = null;
+    // Model work never extends the serial Bank drain or the replica lease lifetime.
+    this.input.policy?.dispatch(this.banks(), () => this.armTimer());
   }
 
   private async runBank(bank: MemoryReplicaBank): Promise<void> {
@@ -262,6 +274,8 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
     try {
       now = this.input.repo.now();
       due = this.status().map((state) => this.nextWake(state, now)).filter((value): value is string => value !== null);
+      const policyWake = this.input.policy?.nextWake();
+      if (policyWake) due.push(policyWake);
     } catch (error) { this.error = replicaErrorCode(error); return; }
     if (due.length === 0) return;
     const delay = Math.max(0, Math.min(60 * 60_000, Math.min(...due.map(Date.parse)) - Date.parse(now)));

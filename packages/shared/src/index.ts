@@ -494,6 +494,7 @@ export {
   MEMORY_AUTHORITY_METHODS, MemoryRuntimeUnavailableReasonSchema, MemoryAuthorityStatusParamsSchema, MemoryAuthorityStatusSchema,
 } from "./memory-authority-status-schema.ts";
 export type { MemoryRuntimeUnavailableReason, MemoryAuthorityStatus, MemoryAuthorityStatusParams } from "./memory-authority-status-schema.ts";
+export { MemoryPolicyReviewStatusSchema, type MemoryPolicyReviewStatus } from "./memory-policy-review-schema.ts";
 export { MemoryLocalErrorCodeSchema, MemoryLocalPrepareSourceSchema, MemoryLocalPrepareRequestSchema, MemoryLocalActivateRequestSchema,
   MemoryLocalProgressSchema, MemoryLocalProducerRefSchema, MemoryLocalResultSchema } from "./memory-local-operation-schema.ts";
 export type { MemoryLocalErrorCode, MemoryLocalPrepareSource, MemoryLocalPrepareRequest, MemoryLocalActivateRequest,

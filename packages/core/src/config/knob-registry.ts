@@ -21,7 +21,10 @@ import {
   type TimingPolicyField,
 } from "@taki/shared";
 import { DEFAULT_MAX_STEPS } from "./agent-config.ts";
-import { DEFAULT_HINDSIGHT_POLICY_PROMPT, DEFAULT_HINDSIGHT_POLICY_TIMEOUT_MS } from "./hindsight-policy-config.ts";
+import { DEFAULT_HINDSIGHT_POLICY_PROMPT, DEFAULT_HINDSIGHT_POLICY_TIMEOUT_MS,
+  DEFAULT_HINDSIGHT_POLICY_REVIEW_MODE, DEFAULT_HINDSIGHT_POLICY_REVIEW_TIME,
+  DEFAULT_HINDSIGHT_POLICY_REVIEW_INTERVAL_MS, DEFAULT_HINDSIGHT_POLICY_REVIEW_THRESHOLD,
+  HINDSIGHT_POLICY_REVIEW_TIME_PATTERN } from "./hindsight-policy-config.ts";
 import { DEFAULT_TTL_DAYS } from "./attachment-config.ts";
 import { DEFAULT_COMPACT_KEEP_MESSAGES, DEFAULT_COMPACT_TRIGGER_RATIO, DEFAULT_CONTEXT_TOKENS, DEFAULT_HISTORY_RATIO } from "./context-config.ts";
 import { DEFAULT_LOG_LEVEL, DEFAULT_TRUST_LOOPBACK, LOG_LEVELS } from "./server-config.ts";
@@ -200,6 +203,14 @@ export const CONFIG_KNOBS: Knob[] = [
   { key: "TAKI_HINDSIGHT_EMBEDDING_MODEL", ...str(), default: null, apply: "live", description: "Desired managed-deployment embedding model identifier." },
   { key: "TAKI_HINDSIGHT_RERANKER_PROVIDER", ...str(), default: null, apply: "live", description: "Desired managed-deployment reranker provider identifier." },
   { key: "TAKI_HINDSIGHT_RERANKER_MODEL", ...str(), default: null, apply: "live", description: "Desired managed-deployment reranker model identifier." },
+  { key: "TAKI_HINDSIGHT_POLICY_REVIEW_MODE", ...choice(["daily", "interval"]), default: DEFAULT_HINDSIGHT_POLICY_REVIEW_MODE,
+    apply: "live", description: "Policy review schedule, independent of replica automatic synchronization." },
+  { key: "TAKI_HINDSIGHT_POLICY_REVIEW_TIME", ...pattern({ regex: HINDSIGHT_POLICY_REVIEW_TIME_PATTERN, message: "expected HH:mm" }), default: DEFAULT_HINDSIGHT_POLICY_REVIEW_TIME,
+    apply: "live", description: "Daily policy review time in the Core-owned User Timezone." },
+  { key: "TAKI_HINDSIGHT_POLICY_REVIEW_INTERVAL_MS", ...int({ min: 60_000, max: 2_147_483_647 }), default: DEFAULT_HINDSIGHT_POLICY_REVIEW_INTERVAL_MS,
+    apply: "live", description: "Elapsed policy review interval from its persisted anchor." },
+  { key: "TAKI_HINDSIGHT_POLICY_REVIEW_THRESHOLD", ...int({ min: 1, max: 2_147_483_647 }), default: DEFAULT_HINDSIGHT_POLICY_REVIEW_THRESHOLD,
+    apply: "live", description: "Eligible unreviewed Memory versions that trigger policy review." },
   { key: "TAKI_HINDSIGHT_POLICY_TIMEOUT_MS", ...int({ min: 1, max: 2_147_483_647 }), default: DEFAULT_HINDSIGHT_POLICY_TIMEOUT_MS,
     apply: "live", description: "Whole-pass deadline for the narrow Hindsight policy curator; captured at each pass." },
   { key: "TAKI_HINDSIGHT_POLICY_PROMPT", schema: z.string(), input: { kind: "string" }, default: DEFAULT_HINDSIGHT_POLICY_PROMPT,

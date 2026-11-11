@@ -1,6 +1,6 @@
 /**
  * INPUT:  captured authority/Bank leases, joint bundles/events and exact application evidence requests
- * OUTPUT: application replica publication, checkpoint and read contracts
+ * OUTPUT: application publication, lexical snapshots and paged eligible assessment/deferred-work contracts
  * POS:    core/db — internal D77 repository API; shared native wire shapes remain the only transport contract
  */
 import { z } from "zod";
@@ -17,6 +17,7 @@ import type { SearchTokenizer } from "../memory/search-tokenizer.ts";
 import type { Database } from "./sqlite.ts";
 import type { HindsightReplicaLeaseRepo } from "./hindsight-replica-lease-repo.ts";
 import type { ReplicaRecordRead, ReplicaRecordStore } from "./hindsight-replica-record-store.ts";
+import type { createApplicationEvidenceAccess } from "./hindsight-application-replica-evidence.ts";
 
 const Id = z.string().min(1).max(256); const Hash = z.string().regex(/^[a-f0-9]{64}$/);
 export const HindsightApplicationReplicaCheckpointSchema = z.strictObject({
@@ -79,6 +80,8 @@ export interface HindsightApplicationBankBinding {
 }
 
 export interface HindsightApplicationReplicaRepo {
+  /** Read-only synchronous callback; captured guards/evidence expire when it returns or throws. */
+  readSnapshot<T>(read: (replica: HindsightApplicationReplicaReader) => T): T;
   leases: HindsightReplicaLeaseRepo;
   seedVerifiedSnapshot(input: HindsightApplicationSnapshotInput): HindsightApplicationReplicaCheckpoint;
   reconcileVerifiedSnapshot(input: HindsightApplicationSnapshotInput): HindsightApplicationReplicaCheckpoint;
@@ -94,6 +97,8 @@ export interface HindsightApplicationReplicaRepo {
   body(input: HindsightApplicationScope & { bodyId: string }): HindsightApplicationBody | undefined;
   /** Immutable bytes may be resumed before publication; neither method publishes native heads or a checkpoint. */
   cachedBody(input: HindsightApplicationPublicationInput & { ref: TakiApplicationBodyRef }): HindsightApplicationBody | undefined;
+  /** One independently guarded synchronous lookup over the existing immutable stores. */
+  cachedBodies(input: HindsightApplicationPublicationInput & { refs: readonly TakiApplicationBodyRef[] }): Map<string, HindsightApplicationBody>;
   cacheBodies(input: HindsightApplicationPublicationInput & { bodies: readonly HindsightApplicationBody[] }): void;
   bankBinding(bankId: string): HindsightApplicationBankBinding | undefined;
   logicalRecord(input: HindsightApplicationScope & ReplicaRecordRead): HindsightApplicationReplicaRecord | undefined;
@@ -106,9 +111,14 @@ export interface HindsightApplicationReplicaRepo {
   bindingWork(input: HindsightApplicationScope & { limit: number; after?: HindsightApplicationWorkCursor;
     objectKind?: TakiApplicationNativeHead["object_kind"] }): HindsightApplicationBindingWork[];
   duePolicyWork(input: HindsightApplicationScope & {
-    limit: number; at?: string; eligibleForMaintenance?: boolean;
+    limit: number; at?: string; eligibleForMaintenance?: boolean; includeDeferred?: boolean; after?: HindsightApplicationWorkCursor;
   }): HindsightApplicationBindingWork[];
 }
+
+export type HindsightApplicationReplicaReader = Pick<HindsightApplicationReplicaRepo,
+  "readSnapshot" | "checkpoint" | "nativeCheckpoint" | "nativeHead" | "artifact" | "latestArtifact" |
+  "sourceArtifacts" | "blockArtifacts" | "body" | "bankBinding" | "logicalRecord" | "record" |
+  "search" | "pinned" | "bindingWork" | "duePolicyWork">;
 
 export interface HindsightApplicationReplicaDeps {
   db: Database;
@@ -121,6 +131,12 @@ export interface HindsightApplicationReplicaState extends Omit<HindsightApplicat
   now(): string;
   leases: HindsightReplicaLeaseRepo;
   records: ReplicaRecordStore;
+  /** Present only in a lexical read callback; never supplied to publication or command owners. */
+  read?: {
+    assertOpen(): void;
+    checkpoint(bankId: string): HindsightApplicationReplicaCheckpoint | undefined;
+    evidence(scope: HindsightApplicationScope): ReturnType<typeof createApplicationEvidenceAccess>;
+  };
 }
 
 export interface HindsightApplicationEvidenceAccess {

@@ -1,5 +1,5 @@
 /**
- * INPUT:  verified D77 native heads, exact artifact/body closure and trusted current Bank ownership
+ * INPUT:  D77 native heads, exact byte evidence (or its owner's decoded reader) and current Bank ownership
  * OUTPUT: complete Canonical consumer projections or explicit withheld binding state
  * POS:    core/memory/hindsight — originals stay immutable; native data and Taki policy keep separate authorities
  */
@@ -18,6 +18,8 @@ import { readHindsightApplicationSourceArtifact } from "./hindsight-application-
 export interface HindsightApplicationEvidenceReader {
   body(ref: TakiApplicationBodyRef): HindsightApplicationBody;
   artifact(version: TakiApplicationArtifactVersion): TakiApplicationArtifact;
+  /** Supplied only by a byte-verifying reader or a fully verified closure owner. No authority verdict is implied. */
+  decodedBody?(ref: TakiApplicationBodyRef, scope: HindsightApplicationScope): HindsightApplicationBody;
 }
 export interface HindsightApplicationProjectionInput extends HindsightApplicationScope {
   authorityEpochId: string;
@@ -126,15 +128,16 @@ function originalSourceStillExact(source: { native: TakiApplicationNativeRecord;
     && witness.source_revision === version.object_revision && witness.source_payload_hash === version.payload_hash;
 }
 
-/** Validates native bytes independently of policy readiness, including a Bank that still needs its first artifact. */
+/** Independent readers decode bytes; byte-verifying owners may supply the already decoded exact body. */
 export function readHindsightApplicationNative(input: HindsightApplicationScope & {
   head: TakiApplicationNativeHead; evidence: HindsightApplicationEvidenceReader;
 }): TakiApplicationNativeRecord {
   const { head } = input;
   if (!head.version || !head.body_ref || head.tombstone !== null) invalid();
-  const evidence = input.evidence.body(head.body_ref);
+  const evidence = input.evidence.decodedBody ? input.evidence.decodedBody(head.body_ref, input) : input.evidence.body(head.body_ref);
   if (!sameApplicationValue(evidence.ref, head.body_ref)) invalid();
-  const body = decodeHindsightApplicationBody({ ...input, ref: head.body_ref, bytes: evidence.bytes }).content;
+  const body = input.evidence.decodedBody ? evidence.content
+    : decodeHindsightApplicationBody({ ...input, ref: head.body_ref, bytes: evidence.bytes }).content;
   if (body.body_schema !== "application-native-record.v1" || !sameApplicationValue(body.value.version, head.version)
     || body.value.payload.bank_id !== input.bankId || head.version.object_kind !== head.object_kind
     || head.version.object_id !== head.object_id) invalid();

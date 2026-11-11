@@ -2,7 +2,7 @@
  * INPUT:  the useMemoryOperations() view (composite memory.authority.status + serialized actions).
  * OUTPUT: <MemoryAuthorityCard> — authority/runtime/setup lines, the Hindsight connection + Bank readiness block (创建 Bank /
  *         重新校验连接 from Core actions), the Hindsight backup block (创建备份 / 校验备份 / 导入备份), one block per Bank (replica status, Pending counts, Sync now / Full reconcile /
- *         Retry and persisted mode/interval settings), and active operations with Cancel for admitted replica.sync only.
+ *         Retry and persisted mode/interval settings, policy review facts and persistent catch-up records), and active operations.
  * POS:    ui/windows/home/pages/operations — presentational; every number is a Core read and unknown renders as
  *         "未知". Setup validate/apply stay on the Hindsight activation card.
  */
@@ -11,6 +11,7 @@ import { FeedbackLine } from "@/components/ui/feedback-line.js";
 import { Skeleton } from "@/components/ui/skeleton.js";
 import { ActionButton } from "../../action-button.tsx";
 import { MemoryReplicaSettingsForm } from "./memory-replica-settings-form.tsx";
+import { MemoryPolicyReviewBlock } from "./memory-policy-review-block.tsx";
 import { LabeledRows, PageCard } from "../../page-card.tsx";
 import { memoryAuthorityView, type ActiveOperationRow, type BankRow, type MemoryAuthorityView, type PendingRow } from "./memory-authority-state.ts";
 import { HindsightBackupBlock } from "./memory-hindsight-backup-block.tsx";
@@ -25,6 +26,11 @@ export function MemoryAuthorityCard({ ops }: { ops: MemoryOperationsView }) {
     <PageCard title="记忆权威 / Hindsight 运维">
       {ops.error && (
         <div className="mb-3"><FeedbackLine tone="danger" action={{ label: "重试", onClick: () => void ops.refresh() }}>{ops.error}</FeedbackLine></div>
+      )}
+      {view && (!ops.connectionReady || ops.loading || ops.error !== null) && (
+        <div className="mb-3"><FeedbackLine tone="warn">
+          {!ops.connectionReady ? "连接已断开" : ops.error ? "读取失败" : "正在刷新"}；以下为上次读取的状态（{ops.status?.observedAt}）。
+        </FeedbackLine></div>
       )}
       {view ? <CardBody view={view} ops={ops} /> : <Skeleton lines={4} />}
       {ops.feedback && <div className="mt-3"><FeedbackLine tone={ops.feedback.tone}>{ops.feedback.message}</FeedbackLine></div>}
@@ -51,12 +57,22 @@ function CardBody({ view, ops }: { view: MemoryAuthorityView; ops: MemoryOperati
 }
 
 function BankBlock({ bank, pending, ops, locked }: { bank: BankRow; pending: PendingRow | null; ops: MemoryOperationsView; locked: boolean }) {
-  const busy = ops.busyKey === `sync:${bank.bankId}`;
-  const settingsLocked = locked || ops.loading || ops.error !== null;
   return (
     <div className="rounded-lg border border-border-subtle p-3">
       <p className="mb-2 text-xs font-semibold text-text-strong">{bank.label}</p>
+      {bank.schedule && <ReplicaBankControls bank={{ ...bank, schedule: bank.schedule }} pending={pending} ops={ops} locked={locked} />}
+      <MemoryPolicyReviewBlock review={bank.review} />
+    </div>
+  );
+}
+
+function ReplicaBankControls({ bank, pending, ops, locked }: { bank: BankRow & { schedule: NonNullable<BankRow["schedule"]> }; pending: PendingRow | null; ops: MemoryOperationsView; locked: boolean }) {
+  const busy = ops.busyKey === `sync:${bank.bankId}`;
+  const settingsLocked = locked || ops.loading || ops.error !== null;
+  return (
+    <>
       <LabeledRows rows={[
+        { label: "同步状态", value: bank.state },
         { label: "上次成功", value: bank.lastSuccess },
         { label: "上次尝试", value: bank.lastAttempt },
         { label: "下次到期", value: bank.nextDue },
@@ -75,7 +91,7 @@ function BankBlock({ bank, pending, ops, locked }: { bank: BankRow; pending: Pen
         <ActionButton tone="secondary" busy={busy} disabled={locked} onClick={() => void ops.submitSync(bank.bankId, "incremental")}>立即同步</ActionButton>
         <ActionButton tone="secondary" busy={busy} disabled={locked} onClick={() => void ops.submitSync(bank.bankId, "full")}>完整对账</ActionButton>
       </div>
-    </div>
+    </>
   );
 }
 
